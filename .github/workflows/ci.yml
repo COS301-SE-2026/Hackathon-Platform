@@ -43,6 +43,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+      
+      - name: Check code formatting
+        working-directory: backend
+        run: mvn spotless:check
+
+      - name: Run Checkstyle
+        working-directory: backend
+        run: mvn checkstyle:check
 
       - name: Build and run tests
         working-directory: backend
@@ -82,6 +90,10 @@ jobs:
       - name: Install dependancies
         working-directory: frontend
         run: npm ci
+
+      - name: Run lint
+        working-directory: frontend
+        run: npm run lint
 
       - name: Run unit tests (headless)
         working-directory: frontend
