@@ -1,5 +1,3 @@
 package com.hackathon.platform.controller;
 
-public class AuthControllerTest {
-    
-}
+public class AuthControllerTest {}

@@ -1,5 +1,3 @@
 package com.hackathon.platform.repository;
 
-public class UserRepository {
-    
-}
+public class UserRepository {}

@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Based on Google Java Style Guide but less strict
+  Run manually: mvn checkstyle:check -->
+<module name="Checker">
+  <property name="severity" value="error"/>
+  <property name="fileExtensions" value="java"/>
+
+  <!-- No trailing whitespace -->
+  <module name="RegexpSingleline">
+    <property name="format" value="\s+$"/>
+    <property name="message" value="Line has trailing whitespace."/>
+  </module>
+
+  <!-- Max file length -->
+  <module name="FileLength">
+    <property name="max" value="500"/>
+  </module>
+
+  <module name="TreeWalker">
+
+    <!--Naming Conventions-->
+    <module name="TypeName"/>           <!-- for classes use PascalCase -->
+    <module name="MethodName"/>         <!-- for methods: camelCase -->
+    <module name="LocalVariableName"/>  <!-- for variables: camelCase -->
+    <module name="ConstantName"/>       <!-- for constants: UPPER_SNAKE_CASE -->
+    <module name="PackageName">
+      <property name="format" value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+    </module>
+
+    <!--Imports -->
+    <module name="AvoidStarImport"/>    <!-- No import com.example.* -->
+    <module name="UnusedImports"/>
+
+    <!--Whitespace & Formatting-->
+    <module name="WhitespaceAround"/>
+    <module name="NoWhitespaceBefore"/>
+    <module name="OperatorWrap"/>
+
+    <!--Block structure-->
+    <module name="NeedBraces"/>         <!-- Always use braces for if/for/while -->
+    <module name="LeftCurly"/>
+    <module name="RightCurly"/>
+    <module name="EmptyBlock">
+      <property name="option" value="text"/>
+    </module>
+
+    <!--Line length-->
+    <module name="LineLength">
+      <property name="max" value="120"/>
+    </module>
+
+    <!--Javadoc-->
+    <!-- Only require Javadoc on public methods, not all -->
+    <module name="MissingJavadocMethod">
+      <property name="scope" value="public"/>
+      <property name="allowMissingPropertyJavadoc" value="true"/>
+    </module>
+
+    <!--Code quality-->
+    <module name="SimplifyBooleanExpression"/>
+    <module name="SimplifyBooleanReturn"/>
+    <module name="StringLiteralEquality"/>  <!-- Use .equals() not == for strings -->
+    <module name="EqualsHashCode"/>          <!-- If you override equals, override hashCode I might take this out-->
+
+    <!--Complexity-->
+    <module name="CyclomaticComplexity">
+      <property name="max" value="15"/>
+    </module>
+
+  </module>
+</module>
