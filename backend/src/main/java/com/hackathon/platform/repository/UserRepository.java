@@ -1,4 +1,4 @@
-package java.com.hackathon.platform.repository;
+package com.hackathon.platform.repository;
 
 public class UserRepository {
     

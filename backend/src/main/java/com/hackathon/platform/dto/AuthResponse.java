@@ -1,4 +1,4 @@
-package java.com.hackathon.platform.dto;
+package com.hackathon.platform.dto;
 
 public class AuthResponse {
     
