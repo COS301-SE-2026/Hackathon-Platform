@@ -4,3 +4,10 @@
     <artifactId>azure-storage-blob</artifactId>
     <version>12.27.0</version>
 </dependency>
+
+<!-- Azure Spring Boot Starter (optional but recommended for auto-config) -->
+<dependency>
+    <groupId>com.azure.spring</groupId>
+    <artifactId>spring-cloud-azure-starter-storage-blob</artifactId>
+    <version>5.19.0</version>
+</dependency>
