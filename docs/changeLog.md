@@ -1,3 +1,6 @@
+# Heinrich - 13/05/2026
+- Wrote User Stories with acceptance criteria
+
 # Kwaku - 29/04/2026
 Completed use case diagrams for admin and participant
 
