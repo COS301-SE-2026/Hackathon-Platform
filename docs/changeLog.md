@@ -1,3 +1,7 @@
+# Rene - 13/05/2025
+- Added colour to the wireframe designs on Figma
+- Created group logos
+
 # Heinrich - 13/05/2026
 - Wrote User Stories with acceptance criteria
 
