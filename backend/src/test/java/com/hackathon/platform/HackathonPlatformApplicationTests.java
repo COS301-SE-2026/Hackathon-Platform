@@ -1,5 +1,3 @@
-package test.java.com.hackathon.platform;
+package com.hackathon.platform;
 
-public class HackathonPlatformApplicationTests {
-    
-}
+public class HackathonPlatformApplicationTests {}

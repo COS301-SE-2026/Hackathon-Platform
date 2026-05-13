@@ -1,0 +1,42 @@
+#This docker compose will be for local dev
+#run docker compose up
+# it runs a postgres and redis
+
+services:
+
+#postgres, flyway runs migrations to this when backend is started
+# connextion string: localhost:5432/hackathon_db
+
+  postgres:
+    image: postgres:16
+    container_name: hackathon-postgres
+    environment:
+      POSTGRES_DB: hackathon_db
+      POSTGRES_USER: hackathon_user
+      POSTGRES_PASSWORD: hackathon_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hackathon_user -d hackathon_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+#Redis just here for now, planned logic is in sprint 4
+# connection string: localhost:6379
+
+  redis:
+    image: redis:7-alpine
+    container_name: hackathon-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
+volumes:
+  postgres_data:

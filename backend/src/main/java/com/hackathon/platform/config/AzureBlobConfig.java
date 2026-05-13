@@ -1,5 +1,4 @@
-package java.com.hackathon.platform.config;
+package com.hackathon.platform.config;
 
 public class AzureBlobConfig {
-    
 }
