@@ -48,11 +48,7 @@ yarn-debug.log*
 yarn-error.log*
 
 docker-compose.override.yml
-
-# Local volumes (optional safety)
 *.volume
-
-*.sql
 pgdata/
 
 coverage/

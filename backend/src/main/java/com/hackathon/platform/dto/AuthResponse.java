@@ -1,3 +1,4 @@
 package com.hackathon.platform.dto;
 
-public class AuthResponse {}
+public class AuthResponse {
+}

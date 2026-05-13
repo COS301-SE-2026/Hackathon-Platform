@@ -1,3 +1,4 @@
 package com.hackathon.platform.config;
 
-public class SecurityConfig {}
+public class SecurityConfig {
+}
