@@ -1,13 +1,18 @@
 package com.hackathon.platform.service;
 
 import com.hackathon.platform.dto.CreateTeamRequest;
+import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.TeamMember;
+import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.repository.TeamMemberRepository;
+import com.hackathon.platform.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 @Service
@@ -15,11 +20,13 @@ public class TeamService {
 
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final UserRepository userRepository;
 
    
-    public TeamService(TeamRepository teamRepository, TeamMemberRepository teamMemberRepository) {
+    public TeamService(TeamRepository teamRepository, TeamMemberRepository teamMemberRepository, UserRepository userRepository) {
         this.teamRepository = teamRepository;
         this.teamMemberRepository = teamMemberRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -132,4 +139,27 @@ public class TeamService {
         }
 }
 
+    public List<TeamMemberResponse> viewTeamMembers(UUID teamId) {
+    
+        List<TeamMember> members = teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED");
+        
+    
+        Team team = teamRepository.findById(teamId)
+            .orElseThrow(() -> new RuntimeException("Team not found"));
+        UUID creatorId = team.getCreatedByUserId();
+        
+    
+        return members.stream().map(member -> {
+            User user = userRepository.findById(member.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            TeamMemberResponse response = new TeamMemberResponse();
+            response.setUserId(member.getUserId());
+            response.setFullName(user.getFirstName() + " " + user.getLastName());
+            response.setEmail(user.getEmail());
+            response.setJoinedAt(member.getJoinedAt());
+            response.setRole(member.getUserId().equals(creatorId) ? "LEADER" : "MEMBER");
+            return response;
+        }).collect(Collectors.toList());
+}
 }
