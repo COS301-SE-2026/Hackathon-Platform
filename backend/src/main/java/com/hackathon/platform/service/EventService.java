@@ -69,6 +69,10 @@ public class EventService {
             event.setRegistrationKey(registrationKey);
         }
 
+        if("PUBLIC".equals(event.getVisibility())) {
+            event.setRegistrationKey(null);
+        }
+
         return eventRepository.save(event);
     }
 
