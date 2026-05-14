@@ -7,6 +7,7 @@
   padding: 24px;
 }
 
+
 .auth-card {
   background-color: #6b6b7a;
   border-radius: 16px;
@@ -15,6 +16,7 @@
   max-width: 480px;
   text-align: center;
 }
+
 
 .brand {
   font-size: 2rem;
@@ -25,17 +27,21 @@
     color: #7c3aed;
   }
 
+
   .brand-platform {
     color: #4ade80;
     margin-left: 8px;
   }
+
 }
+
 
 .auth-subtitle {
   color: #e5e5e5;
   font-size: 1rem;
   margin-bottom: 32px;
 }
+
 
 .form-group {
   text-align: left;
@@ -49,17 +55,17 @@
   }
 
   input {
-    width: 100%;
-    padding: 12px 16px;
-    border: none;
+    width : 100%;
+    padding : 12px 16px;
+    border : none;
     border-radius: 8px;
     background-color: #ffffff;
     color: #1f1f1f;
-    font-size: 0.95rem;
+    font-size : 0.95rem;
     outline: none;
 
     &::placeholder {
-      color: #9ca3af;
+      color : #9ca3af;
     }
 
     &:focus {
@@ -69,7 +75,7 @@
 }
 
 .forgot-link-wrapper {
-  text-align: right;
+  text-align : right;
   margin-top: 8px;
 
   a {
@@ -95,11 +101,12 @@
   &:hover {
     background-color: #6d28d9;
   }
+
 }
 
 .btn-full {
-  width: 100%;
-  margin-top: 8px;
+  width : 100%;
+  margin-top : 8px;
 }
 
 .auth-footer {
@@ -115,4 +122,5 @@
       text-decoration: underline;
     }
   }
+  
 }

@@ -10,6 +10,7 @@ import { RouterModule, Router } from '@angular/router';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
+
 export class LoginComponent {
   email: string = '';
   password: string = '';
@@ -17,7 +18,10 @@ export class LoginComponent {
   constructor(private router: Router) {}
 
   onSignIn(): void {
+
     console.log('Sign in with:', this.email);
+
     this.router.navigate(['/admin/dashboard']);
+    
   }
 }
