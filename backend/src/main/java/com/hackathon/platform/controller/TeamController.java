@@ -1,6 +1,7 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.CreateTeamRequest;
+import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.dto.ApproveRequest;
 import com.hackathon.platform.service.TeamService;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
+import java.util.List; 
 import java.util.UUID;
 
 @RestController
@@ -51,6 +53,12 @@ public class TeamController {
         UUID currentUserId = UUID.fromString(principal.getName());
         teamService.leaveTeam(teamId, currentUserId);
         return ResponseEntity.noContent().build();
+}
+
+    @GetMapping("/{teamId}/members")
+    public ResponseEntity<List<TeamMemberResponse>> viewMembers(@PathVariable UUID teamId) {
+        List<TeamMemberResponse> members = teamService.viewTeamMembers(teamId);
+        return ResponseEntity.ok(members);
 }
 
 }
