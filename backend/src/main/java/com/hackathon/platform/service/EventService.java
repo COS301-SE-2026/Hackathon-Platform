@@ -5,6 +5,7 @@ import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.dto.EventRequest;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 public class EventService {
@@ -27,5 +28,9 @@ public class EventService {
         event.setStatus(req.getStatus());
 
         return eventRepository.save(event);
+    }
+
+    public List<Event> getEventByCreator(UUID userId) {
+        return eventRepository.fetchAllByAdmin(userId);
     }
 }
