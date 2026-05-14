@@ -45,4 +45,12 @@ public class TeamController {
         teamService.approveOrRejectJoinRequest(teamId, userId, currentUserId, request.isApprove());
         return ResponseEntity.ok().build();
 }
+
+    @DeleteMapping("/{teamId}/members")
+    public ResponseEntity<Void> leaveTeam(@PathVariable UUID teamId, Principal principal) {
+        UUID currentUserId = UUID.fromString(principal.getName());
+        teamService.leaveTeam(teamId, currentUserId);
+        return ResponseEntity.noContent().build();
+}
+
 }
