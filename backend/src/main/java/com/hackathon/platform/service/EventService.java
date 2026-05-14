@@ -2,6 +2,7 @@ package com.hackathon.platform.service;
 
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.dto.EventRequest;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
@@ -49,5 +50,15 @@ public class EventService {
         event.setStatus(req.getStatus());
 
         return eventRepository.save(event);
+    }
+
+    public EventStatusResponse getEventStatus(UUID eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+
+        return new EventStatusResponse(
+            event.getEventId(),
+            event.getStatus(),
+            event.getVisibility()
+        );
     }
 }

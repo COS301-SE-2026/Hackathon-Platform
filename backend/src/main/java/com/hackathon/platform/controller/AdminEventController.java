@@ -3,6 +3,8 @@ package com.hackathon.platform.controller;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.dto.EventRequest;
+import com.hackathon.platform.dto.EventStatusResponse;
+
 import java.util.UUID;
 import java.util.List;
 
@@ -44,5 +46,11 @@ public class AdminEventController {
     public ResponseEntity<Event> putUpdateEvent(@PathVariable("id") UUID eventId, @RequestBody EventRequest req) {
         Event updatedEvent = eventService.putUpdateEvent(eventId, req);
         return ResponseEntity.ok(updatedEvent);
+    }
+
+    @GetMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EventStatusResponse> getEventStatus(@PathVariable("id") UUID eventId) {
+        return ResponseEntity.ok(eventService.getEventStatus(eventId));
     }
 }
