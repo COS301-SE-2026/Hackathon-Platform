@@ -2,6 +2,7 @@ package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamResponse;
+import com.hackathon.platform.dto.ApproveRequest;
 import com.hackathon.platform.service.TeamService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -34,4 +35,14 @@ public class TeamController {
         teamService.requestToJoinTeam(teamId, currentUserId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+   @PutMapping("/{teamId}/join-requests/{userId}")
+    public ResponseEntity<Void> approveOrRejectJoinRequest(@PathVariable UUID teamId,
+                                                      @PathVariable UUID userId,
+                                                      @RequestBody ApproveRequest request,
+                                                      Principal principal) {
+        UUID currentUserId = UUID.fromString(principal.getName());
+        teamService.approveOrRejectJoinRequest(teamId, userId, currentUserId, request.isApprove());
+        return ResponseEntity.ok().build();
+}
 }
