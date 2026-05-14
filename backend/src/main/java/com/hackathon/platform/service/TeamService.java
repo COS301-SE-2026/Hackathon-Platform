@@ -74,5 +74,34 @@ public class TeamService {
         teamMemberRepository.save(member);
 }
 
+    @Transactional
+    public void approveOrRejectJoinRequest(UUID teamId, UUID userIdToApprove, UUID currentUserId, boolean approve) {
+    
+        TeamMember currentMember = teamMemberRepository.findByTeamIdAndUserId(teamId, currentUserId)
+            .orElseThrow(() -> new RuntimeException("Current user not in team"));
+        if (!"APPROVED".equals(currentMember.getStatus())) {
+            throw new RuntimeException("Only approved team members can approve/reject requests");
+        }
+
+    
+        TeamMember pendingRequest = teamMemberRepository.findByTeamIdAndUserId(teamId, userIdToApprove)
+            .orElseThrow(() -> new RuntimeException("Join request not found"));
+        if (!"PENDING".equals(pendingRequest.getStatus())) {
+            throw new RuntimeException("Request already processed");
+        }
+
+    
+        if (approve) {
+            long currentSize = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
+            int limit = 4; 
+            if (currentSize >= limit) {
+                throw new RuntimeException("Team is full");
+            }
+            pendingRequest.setStatus("APPROVED");
+        } else {
+            pendingRequest.setStatus("REJECTED");
+        }
+        teamMemberRepository.save(pendingRequest);
+}
 
 }
