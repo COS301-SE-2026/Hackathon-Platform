@@ -27,4 +27,11 @@ public class TeamController {
         TeamResponse response = teamService.createTeam(request, currentUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping("/{teamId}/join-requests")
+    public ResponseEntity<Void> requestToJoin(@PathVariable UUID teamId, Principal principal) {
+        UUID currentUserId = UUID.fromString(principal.getName());
+        teamService.requestToJoinTeam(teamId, currentUserId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
