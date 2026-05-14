@@ -10,6 +10,7 @@ import java.util.List;
 @Service
 public class EventService {
     private final EventRepository eventRepository;
+    public static final String CREATEDUSER = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 
     public EventService(EventRepository eventRepository) {
         this.eventRepository = eventRepository;
@@ -17,7 +18,7 @@ public class EventService {
 
     public Event createEvent(EventRequest req) {
         Event event = new Event();
-        event.setCreatedByUserId(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
+        event.setCreatedByUserId(UUID.fromString(CREATEDUSER));
         event.setName(req.getName());
         event.setRegistrationKey(req.getRegistrationKey());
         event.setTeamSizeLimit(req.getTeamSizeLimit());
@@ -32,5 +33,21 @@ public class EventService {
 
     public List<Event> getEventByCreator(UUID userId) {
         return eventRepository.fetchAllByAdmin(userId);
+    }
+
+    public Event putUpdateEvent (UUID eventId, EventRequest req) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+
+        event.setCreatedByUserId(UUID.fromString(CREATEDUSER));
+        event.setName(req.getName());
+        event.setRegistrationKey(req.getRegistrationKey());
+        event.setTeamSizeLimit(req.getTeamSizeLimit());
+        event.setStartDateTime(req.getStartDateTime());
+        event.setDuration(req.getDuration());
+        event.setDescription(req.getDescription());
+        event.setVisibility(req.getVisibility());
+        event.setStatus(req.getStatus());
+
+        return eventRepository.save(event);
     }
 }
