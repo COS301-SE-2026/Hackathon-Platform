@@ -99,6 +99,17 @@ public class TeamService {
 
     
         if (approve) {
+
+            Team team = teamRepository.findById(teamId)
+            .orElseThrow(() -> new RuntimeException("Team not found"));
+        
+            List<TeamMember> existingApproved = teamMemberRepository.findByUserIdAndStatus(userIdToApprove, "APPROVED");
+            for (TeamMember member : existingApproved) {
+                Team existingTeam = teamRepository.findById(member.getTeamId()).orElseThrow();
+                if (existingTeam.getEventId().equals(team.getEventId())) {
+                    throw new RuntimeException("User is already an approved member of another team in this event");
+                }
+            }
             long currentSize = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
             int limit = 4; 
             if (currentSize >= limit) {
