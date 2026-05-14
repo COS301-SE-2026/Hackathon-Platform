@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @RestController
 @RequestMapping("/api/admin/events")
@@ -48,9 +49,16 @@ public class AdminEventController {
         return ResponseEntity.ok(updatedEvent);
     }
 
+    @PatchMapping("/{id}/status")   
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Event> patchEventStatus(@PathVariable("id") UUID eventId, @RequestBody EventRequest req) {
+        return ResponseEntity.ok(eventService.patchEventStatus(eventId, req.getVisibility(), req.getStatus(), req.getRegistrationKey()));
+    }
+
     @GetMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventStatusResponse> getEventStatus(@PathVariable("id") UUID eventId) {
         return ResponseEntity.ok(eventService.getEventStatus(eventId));
     }
+ 
 }
