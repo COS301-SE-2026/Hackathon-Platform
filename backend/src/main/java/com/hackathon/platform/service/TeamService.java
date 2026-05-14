@@ -49,4 +49,30 @@ public class TeamService {
         response.setStatus(savedTeam.getStatus());
         return response;
     }
+
+
+    @Transactional
+    public void requestToJoinTeam(UUID teamId, UUID currentUserId) {
+
+        Team team = teamRepository.findById(teamId)
+        .orElseThrow(() -> new RuntimeException("Team not found"));
+
+        if (teamMemberRepository.findByTeamIdAndUserId(teamId, currentUserId).isPresent()) {
+        throw new RuntimeException("Already requested or member");
+        }
+
+        long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
+        int limit = 4; 
+        if (approvedCount >= limit) {
+            throw new RuntimeException("Team is full");
+        }
+
+        TeamMember member = new TeamMember();
+        member.setTeamId(teamId);
+        member.setUserId(currentUserId);
+        member.setStatus("PENDING");
+        teamMemberRepository.save(member);
+}
+
+
 }
