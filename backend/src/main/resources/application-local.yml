@@ -1,7 +1,0 @@
-# Prevents the Azure storage client failing when no connection string is set locally
-spring:
-  cloud:
-    azure:
-      storage:
-        blob:
-          enabled: false
