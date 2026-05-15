@@ -1,10 +1,10 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.AuthResponse;
-import com.hackathon.platform.dto.RegisterRequest;
 import com.hackathon.platform.dto.LoginRequest;
-import com.hackathon.platform.service.AuthService;
+import com.hackathon.platform.dto.RegisterRequest;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,8 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
- 
+
   private final AuthService authService;
+
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
     AuthResponse response = authService.register(request);
