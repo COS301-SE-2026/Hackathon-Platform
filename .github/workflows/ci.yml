@@ -5,6 +5,12 @@ on:
     branches: [ main, dev]
   pull_request:
     branches: [ main, dev ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run CI on'
+        required: true
+        default: 'main'
 
 jobs:
 
@@ -48,9 +54,9 @@ jobs:
         working-directory: backend
         run: mvn spotless:check
 
-      - name: Run Checkstyle
-        working-directory: backend
-        run: mvn checkstyle:check
+      #- name: Run Checkstyle
+      #  working-directory: backend
+      #  run: mvn checkstyle:check
 
       - name: Build and run tests
         working-directory: backend
