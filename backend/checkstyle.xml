@@ -42,9 +42,9 @@
     <module name="UnusedImports"/>
 
     <!--Whitespace & Formatting-->
-    <module name="WhitespaceAround"/>
+    <!-- <module name="WhitespaceAround"/>
     <module name="NoWhitespaceBefore"/>
-    <module name="OperatorWrap"/>
+    <module name="OperatorWrap"/> -->
 
     <!--Block structure-->
     <module name="NeedBraces"/>         <!-- Always use braces for if/for/while -->
