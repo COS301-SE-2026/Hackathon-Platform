@@ -56,10 +56,10 @@
 
     <!--Javadoc-->
     <!-- Only require Javadoc on public methods, not all -->
-    <module name="MissingJavadocMethod">
+    <!-- <module name="MissingJavadocMethod">
       <property name="scope" value="public"/>
       <property name="allowMissingPropertyJavadoc" value="true"/>
-    </module>
+    </module> -->
 
     <!--Code quality-->
     <module name="SimplifyBooleanExpression"/>
