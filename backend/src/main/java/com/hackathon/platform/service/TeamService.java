@@ -31,7 +31,21 @@ public class TeamService {
 
     @Transactional
     public TeamResponse createTeam(CreateTeamRequest request, UUID currentUserId) {
+    
         
+        if (teamRepository.existsByEventIdAndTeamName(request.getEventId(), request.getTeamName())) {
+            throw new RuntimeException("Team name already exists in this event");
+        }
+
+        
+        List<TeamMember> existingMemberships = teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED");
+        for (TeamMember tm : existingMemberships) {
+            Team existingTeam = teamRepository.findById(tm.getTeamId())
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+            if (existingTeam.getEventId().equals(request.getEventId())) {
+                throw new RuntimeException("You are already a member of a team in this event");
+            }
+        }
         Team team = new Team();
         team.setTeamName(request.getTeamName());
         team.setEventId(request.getEventId());
