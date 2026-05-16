@@ -25,6 +25,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/** Spring Security config Handles: JWTs, CORS, password hashing */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -33,6 +34,13 @@ public class SecurityConfig {
   private final JwtAuthFilter jwtAuthFilter;
   private final UserRepository userRepository;
 
+  /**
+   * Defines security fillters.
+   *
+   * @param http
+   * @return
+   * @throws Exception
+   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http.csrf(AbstractHttpConfigurer::disable)
@@ -55,6 +63,7 @@ public class SecurityConfig {
         .build();
   }
 
+  /** CORS allows the frontend to call the API */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
@@ -69,6 +78,7 @@ public class SecurityConfig {
     return source;
   }
 
+  /** Loads user by email. */
   @Bean
   public UserDetailsService userDetailsService() {
     return username ->
@@ -77,6 +87,7 @@ public class SecurityConfig {
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
   }
 
+  /** Integrates UserDetailsService and PasswordEncoder */
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -85,12 +96,20 @@ public class SecurityConfig {
     return provider;
   }
 
+  /**
+   * Authenticate login details.
+   *
+   * @param config
+   * @return
+   * @throws Exception
+   */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
       throws Exception {
     return config.getAuthenticationManager();
   }
 
+  /** Bcrypt hasher for passwords */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder(12);

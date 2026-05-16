@@ -17,6 +17,11 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Intercepts HTTP requests and checks for JWT tokens. It reads the Authorization header, if it
+ * starts with "Bearer " then extract and validate the token. If its valid then load the user if not
+ * return 401
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {

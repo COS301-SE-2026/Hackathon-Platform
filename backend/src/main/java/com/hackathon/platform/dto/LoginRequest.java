@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** Request body for POST /api/auth/login */
 @Getter
 @Setter
 @NoArgsConstructor

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+/** Response bodies from: POST /api/auth/register, POST /api/auth/login GET /api/auth/me */
 @Getter
 @Builder
 @AllArgsConstructor

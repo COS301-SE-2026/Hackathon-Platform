@@ -23,6 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+/** Represents a user */
 @Entity
 @Table(name = "users")
 @Getter
@@ -53,7 +54,7 @@ public class User implements UserDetails {
   @Builder.Default
   private String status = "ACTIVE";
 
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne(fetch = FetchType.EAGER) // eager cause we need role for loading a user for auth
   @JoinColumn(name = "role_id", nullable = false)
   private Role role;
 
@@ -65,36 +66,43 @@ public class User implements UserDetails {
     createdAt = LocalDateTime.now();
   }
 
+  /** Returns the role as spring security. It requires ROLE_ before hasRole() checks */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName()));
   }
 
+  /** Return bcrypt hash */
   @Override
   public String getPassword() {
     return passwordHash;
   }
 
+  /** This uses email as the unique identifier. */
   @Override
   public String getUsername() {
     return email;
   }
 
+  /** Account is never expired. */
   @Override
   public boolean isAccountNonExpired() {
     return true;
   }
 
+  /** Account is never locked we are using our own status field. */
   @Override
   public boolean isAccountNonLocked() {
     return "ACTIVE".equals(status);
   }
 
+  /** Credentials will never expire */
   @Override
   public boolean isCredentialsNonExpired() {
     return true;
   }
 
+  /** User will be enabled if their status is active. */
   @Override
   public boolean isEnabled() {
     return "ACTIVE".equals(status);

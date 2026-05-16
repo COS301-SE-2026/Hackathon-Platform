@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** Request body for POST /api/auth/register. */
 @Getter
 @Setter
 @NoArgsConstructor

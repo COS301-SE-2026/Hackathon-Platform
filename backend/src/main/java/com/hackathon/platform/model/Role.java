@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/*** Represents a user role, can be admin or participant.*/
 @Entity
 @Table(name = "roles")
 @Getter

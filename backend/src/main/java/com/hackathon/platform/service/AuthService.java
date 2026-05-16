@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** Handles registration, login and tokens */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -22,6 +23,12 @@ public class AuthService {
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
 
+  /**
+   * Registers a new account.
+   *
+   * @param request the registration details
+   * @return AuthReponse
+   */
   @Transactional
   public AuthResponse register(RegisterRequest request) {
     if (userRepository.existsByEmail(request.getEmail())) {
@@ -49,6 +56,12 @@ public class AuthService {
     return buildResponse(saved, token);
   }
 
+  /**
+   * Authenticates a user.
+   *
+   * @param request login details
+   * @return AuthResponse
+   */
   public AuthResponse login(LoginRequest request) {
     User user =
         userRepository
@@ -67,13 +80,24 @@ public class AuthService {
     return buildResponse(user, token);
   }
 
+  /**
+   * Returns profile of a user already logged in.
+   *
+   * @param user
+   * @return AuthResponse
+   */
   public AuthResponse getMe(User user) {
-    // Re-generate token so the response shape is consistent with login/register.
-    // The frontend can use this to refresh its stored token.
     String token = jwtService.generateToken(user);
     return buildResponse(user, token);
   }
 
+  /**
+   * Builds an AuthResponse from User and JWT.
+   *
+   * @param user
+   * @param token
+   * @return
+   */
   private AuthResponse buildResponse(User user, String token) {
     return AuthResponse.builder()
         .token(token)

@@ -12,8 +12,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/** Catches exceptions anywhere from the whole app and converts it into JSON errors. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  /**
+   * Validation failures on request
+   *
+   * @param ex
+   * @return { "status": 400, "error": "Validation failed", "errors": { "email": "Must be a valid
+   *     email address" }, "timestamp": "2026-05-15T10:00:00" }
+   */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Map<String, Object>> handleValidationErrors(
       MethodArgumentNotValidException ex) {
@@ -36,6 +45,12 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now().toString()));
   }
 
+  /**
+   * Hand;es login fails.
+   *
+   * @param ex
+   * @return 401
+   */
   @ExceptionHandler(BadCredentialsException.class)
   public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -46,6 +61,12 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now().toString()));
   }
 
+  /**
+   * User already registered
+   *
+   * @param ex
+   * @return 409
+   */
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -56,6 +77,12 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now().toString()));
   }
 
+  /**
+   * User not registered
+   *
+   * @param ex
+   * @return 404
+   */
   @ExceptionHandler(UsernameNotFoundException.class)
   public ResponseEntity<Map<String, Object>> handleUserNotFound(UsernameNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -66,6 +93,12 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now().toString()));
   }
 
+  /**
+   * Server erors
+   *
+   * @param ex
+   * @return 500
+   */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
 
