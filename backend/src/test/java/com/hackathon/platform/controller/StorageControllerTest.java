@@ -43,5 +43,58 @@ class StorageControllerTest {
       "https://hackathonplatform.blob.core.windows.net/test?sv=...";
   private static final String CONTAINER = "event-resources";
 
+
+
+  @Test
+  void uploadLevelFile_returns200WithStorageKeyAndBlobUrl() throws Exception {
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(config.getSasExpiryMinutes()).thenReturn(60);
+    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "test.txt", "text/plain", "hello".getBytes());
+
+    mockMvc
+        .perform(
+            multipart(
+                    "/api/storage/events/{eventId}/levels/{levelId}/files", EVENT_ID, LEVEL_ID)
+                .file(file))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.storageKey").exists())
+        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+
+
+  }
+
+  @Test
+  void uploadLevelFile_returns400WhenNoFileProvided() throws Exception {
+    mockMvc
+        .perform(
+            multipart(
+                "/api/storage/events/{eventId}/levels/{levelId}/files", EVENT_ID, LEVEL_ID))
+        .andExpect(status().isBadRequest());
+
+  }
+
+
+  @Test
+  void getLevelFileUrl_returns200WithPresignedUrl() throws Exception {
+
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(config.getSasExpiryMinutes()).thenReturn(60);
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+        .thenReturn(PRESIGNED_URL);
+
+    mockMvc
+        .perform(
+            get(
+                "/api/storage/events/{eventId}/levels/{levelId}/files/{filename}",
+                EVENT_ID,
+                LEVEL_ID,
+                "test.txt"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
+  }
+
   
 }
