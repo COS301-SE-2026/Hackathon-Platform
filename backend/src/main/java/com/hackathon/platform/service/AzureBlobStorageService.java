@@ -26,4 +26,29 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class AzureBlobStorageService implements StorageService {
+
+  private static final Logger LOG = LoggerFactory.getLogger(AzureBlobStorageService.class);
+ 
+  private final BlobServiceClient blobServiceClient;
+  private final AzureBlobConfig config;
+ 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String upload(String containerName, String storageKey, MultipartFile file) {
+    try {
+      BlobClient blobClient = getBlobClient(containerName, storageKey);
+      BlobHttpHeaders headers = new BlobHttpHeaders().setContentType(file.getContentType());
+      blobClient.upload(file.getInputStream(), file.getSize(), true);
+      blobClient.setHttpHeaders(headers);
+      LOG.info("Uploaded blob: container={} storageKey={} size={}",
+          containerName, storageKey, file.getSize());
+      return blobClient.getBlobUrl();
+    } catch (IOException e) {
+      LOG.error("Failed to upload blob: container={} storageKey={}", containerName, storageKey, e);
+      throw new StorageException("Failed to upload file: " + storageKey, e);
+    }
+  }
+
 }
