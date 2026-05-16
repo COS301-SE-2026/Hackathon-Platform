@@ -119,6 +119,15 @@ public class AzureBlobStorageService implements StorageService {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean exists(String containerName, String storageKey) {
+    return getBlobClient(containerName, storageKey).exists();
+  }
+
+
 
 
 
