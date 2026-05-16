@@ -44,117 +44,67 @@ public class User implements UserDetails {
   @Column(name = "last_name", nullable = false, length = 100)
   private String lastName;
 
-  @Column(name = "email", nullable = false, length = 255, unique = true)
+  @Column(name = "email", nullable = false, unique = true, length = 255)
   private String email;
 
-  @Column(name = "password_hash", nullable = false)
+  @Column(name = "password_hash", nullable = false, length = 255)
   private String passwordHash;
 
-  @Column(name = "role_id", nullable = false)
-  private Short roleId;
-
-  @Column(name = "created_at", nullable = false)
-  private Instant createdAt = Instant.now();
-
-  @Column(name = "status", nullable = false, length = 30)
+  @Column(name = "status", nullable = false, length = 20)
+  @Builder.Default
   private String status = "ACTIVE";
 
-  /** Default constructor. */
-  public User() { }
+  @ManyToOne(fetch = FetchType.EAGER) // eager cause we need role for loading a user for auth
+  @JoinColumn(name = "role_id", nullable = false)
+  private Role role;
 
-  /** Constructs a new User with the given basic information. */
-  public User(
-      UUID userId,
-      String firstName,
-      String lastName,
-      String email,
-      String passwordHash,
-      Short roleId) {
-    this.userId = userId;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.email = email;
-    this.passwordHash = passwordHash;
-    this.roleId = roleId;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private LocalDateTime createdAt;
+
+  @PrePersist
+  protected void onCreate() {
+    createdAt = LocalDateTime.now();
   }
 
-  /** Returns the user ID. */
-  public UUID getUserId() {
-    return userId;
+  /** Returns the role as spring security. It requires ROLE_ before hasRole() checks */
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName()));
   }
 
-  /** Sets the user ID. */
-  public void setUserId(UUID userId) {
-    this.userId = userId;
-  }
-
-  /** Returns the user's first name. */
-  public String getFirstName() {
-    return firstName;
-  }
-
-  /** Sets the user's first name. */
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
-  /** Returns the user's last name. */
-  public String getLastName() {
-    return lastName;
-  }
-
-  /** Sets the user's last name. */
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
-  }
-
-  /** Returns the user's email address. */
-  public String getEmail() {
-    return email;
-  }
-
-  /** Sets the user's email address. */
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  /** Returns the hashed password. */
-  public String getPasswordHash() {
+  /** Return bcrypt hash */
+  @Override
+  public String getPassword() {
     return passwordHash;
   }
 
-  /** Sets the hashed password. */
-  public void setPasswordHash(String passwordHash) {
-    this.passwordHash = passwordHash;
+  /** This uses email as the unique identifier. */
+  @Override
+  public String getUsername() {
+    return email;
   }
 
-  /** Returns the role ID (reference to roles table). */
-  public Short getRoleId() {
-    return roleId;
+  /** Account is never expired. */
+  @Override
+  public boolean isAccountNonExpired() {
+    return true;
   }
 
-  /** Sets the role ID. */
-  public void setRoleId(Short roleId) {
-    this.roleId = roleId;
+  /** Account is never locked we are using our own status field. */
+  @Override
+  public boolean isAccountNonLocked() {
+    return "ACTIVE".equals(status);
   }
 
-  /** Returns the creation timestamp. */
-  public Instant getCreatedAt() {
-    return createdAt;
+  /** Credentials will never expire */
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
   }
 
-  /** Sets the creation timestamp. */
-  public void setCreatedAt(Instant createdAt) {
-    this.createdAt = createdAt;
-  }
-
-  /** Returns the account status (ACTIVE, INACTIVE, SUSPENDED). */
-  public String getStatus() {
-    return status;
-  }
-
-  /** Sets the account status. */
-  public void setStatus(String status) {
-    this.status = status;
+  /** User will be enabled if their status is active. */
+  @Override
+  public boolean isEnabled() {
+    return "ACTIVE".equals(status);
   }
 }
