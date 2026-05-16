@@ -35,4 +35,27 @@ import org.springframework.mock.web.MockMultipartFile;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AzureBlobStorageServiceTest {
 
+  @Mock private BlobServiceClient blobServiceClient;
+  @Mock private BlobContainerClient containerClient;
+  @Mock private BlobClient blobClient;
+  @Mock private AzureBlobConfig config;
+
+  @InjectMocks private AzureBlobStorageService storageService;
+
+  private static final String CONTAINER = "event-resources";
+  private static final String STORAGE_KEY = "events/123/levels/1/test.txt";
+  private static final String BLOB_URL =
+      "https://hackathonplatform.blob.core.windows.net/event-resources/events/123/levels/1/test.txt";
+
+
+  @BeforeEach
+  void setUp() {
+    when(blobServiceClient.getBlobContainerClient(CONTAINER)).thenReturn(containerClient);
+    when(containerClient.getBlobClient(STORAGE_KEY)).thenReturn(blobClient);
+    when(blobClient.getBlobUrl()).thenReturn(BLOB_URL);
+  }
+
+  
+
+
 }
