@@ -65,13 +65,37 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String levelId,
       @PathVariable String filename) {
-        
+
     String storageKey = BlobPath.levelFile(eventId, levelId, filename);
     String url = storageService.generatePresignedUrl(
         config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
     return ResponseEntity.ok(Map.of("url", url));
 
   }
+
+  /**
+   * Uploads a solver file for a specific event and version.
+   * The returned storageKey maps to solverversion.storage_key in the database.
+   *
+   * @param eventId the event UUID
+   * @param version the solver version number
+   * @param file    the uploaded solver file
+   * @return storageKey, blobUrl, and version
+   */
+  @PostMapping("/events/{eventId}/solver")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, String>> uploadSolver(
+      @PathVariable String eventId,
+      @RequestParam("version") int version,
+      @RequestParam("file") MultipartFile file) {
+    String storageKey = BlobPath.solverFile(eventId, version, file.getOriginalFilename());
+    String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
+    return ResponseEntity.ok(Map.of(
+        "storageKey", storageKey,
+        "blobUrl", blobUrl,
+        "version", String.valueOf(version)));
+  }
+
 
 
 }
