@@ -14,7 +14,7 @@ public class CreateTeamRequest {
   private UUID eventId;
 
   /** Default constructor. */
-  public CreateTeamRequest() {}
+  public CreateTeamRequest() { }
 
   /** Constructor with required fields. */
   public CreateTeamRequest(String teamName, UUID eventId) {

@@ -32,7 +32,7 @@ public class TeamMember {
   private String status = "PENDING";
 
   /** Default constructor. */
-  public TeamMember() {}
+  public TeamMember() { }
 
   /** Constructs a new TeamMember with the given team and user IDs. */
   public TeamMember(UUID teamId, UUID userId) {

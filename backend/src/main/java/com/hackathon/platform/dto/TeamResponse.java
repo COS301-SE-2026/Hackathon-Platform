@@ -14,7 +14,7 @@ public class TeamResponse {
   private String status;
 
   /** Default constructor. */
-  public TeamResponse() {}
+  public TeamResponse() { }
 
   /** Constructor with all fields. */
   public TeamResponse(

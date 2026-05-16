@@ -12,7 +12,7 @@ public class TeamMemberResponse {
   private String role; // "LEADER" or "MEMBER"
 
   /** Default constructor. */
-  public TeamMemberResponse() {}
+  public TeamMemberResponse() { }
 
   /** Returns the user ID. */
   public UUID getUserId() {

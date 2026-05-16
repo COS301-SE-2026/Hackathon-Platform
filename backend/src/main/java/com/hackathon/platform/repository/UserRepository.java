@@ -5,4 +5,4 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Repository for User entities. */
-public interface UserRepository extends JpaRepository<User, UUID> {}
+public interface UserRepository extends JpaRepository<User, UUID> { }
