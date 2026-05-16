@@ -116,6 +116,33 @@ public class StorageController {
   }
 
 
+  //Submissions (Participant)
+
+  /**
+   * Uploads a submission output file for a specific team and level.
+   * The returned storageKey maps to submissions.output_storage_key in the database.
+   *
+   * @param eventId      the event UUID
+   * @param teamId       the team UUID
+   * @param submissionId the submission ID
+   * @param file         the solution output file
+   * @return storageKey and blobUrl
+   */
+  @PostMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output")
+  @PreAuthorize("hasRole('PARTICIPANT')")
+  public ResponseEntity<Map<String, String>> uploadSubmissionOutput(
+      @PathVariable String eventId,
+      @PathVariable String teamId,
+      @PathVariable String submissionId,
+      @RequestParam("file") MultipartFile file) {
+    String storageKey = BlobPath.submissionOutput(
+        eventId, teamId, submissionId, file.getOriginalFilename());
+    String blobUrl = storageService.upload(config.getSubmissionsContainer(), storageKey, file);
+    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+  }
+
+
+
 
 
 }
