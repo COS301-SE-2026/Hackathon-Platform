@@ -98,10 +98,10 @@ public class TeamService {
     @Transactional
     public void approveOrRejectJoinRequest(UUID teamId, UUID userIdToApprove, UUID currentUserId, boolean approve) {
     
-        TeamMember currentMember = teamMemberRepository.findByTeamIdAndUserId(teamId, currentUserId)
-            .orElseThrow(() -> new RuntimeException("Current user not in team"));
-        if (!"APPROVED".equals(currentMember.getStatus())) {
-            throw new RuntimeException("Only approved team members can approve/reject requests");
+        Team team = teamRepository.findById(teamId)
+        .orElseThrow(() -> new RuntimeException("Team not found"));
+        if (!team.getCreatedByUserId().equals(currentUserId)) {
+        throw new RuntimeException("Only the team creator can approve/reject requests");
         }
 
     
@@ -114,9 +114,7 @@ public class TeamService {
     
         if (approve) {
 
-            Team team = teamRepository.findById(teamId)
-            .orElseThrow(() -> new RuntimeException("Team not found"));
-        
+             
             List<TeamMember> existingApproved = teamMemberRepository.findByUserIdAndStatus(userIdToApprove, "APPROVED");
             for (TeamMember member : existingApproved) {
                 Team existingTeam = teamRepository.findById(member.getTeamId()).orElseThrow();
