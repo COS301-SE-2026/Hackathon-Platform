@@ -69,5 +69,11 @@ class BlobPathTest {
     assertFalse(result.contains("\\"));
   }
 
-  
+  @Test
+  void solverFile_versionNumberAppearsInPath() {
+    String resultV1 = BlobPath.solverFile(EVENT_ID, 1, "solver.py");
+    String resultV3 = BlobPath.solverFile(EVENT_ID, 3, "solver.py");
+    assertEquals("events/event-123/solver/v1/solver.py", resultV1);
+    assertEquals("events/event-123/solver/v3/solver.py", resultV3);
+  }
 }
