@@ -96,5 +96,64 @@ class StorageControllerTest {
         .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
   }
 
+  @Test
+  void uploadSolver_returns200WithStorageKeyAndVersion() throws Exception {
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "solver.py", "text/plain", "solver code".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/solver", EVENT_ID)
+                .file(file)
+                .param("version", "1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.storageKey").exists())
+        .andExpect(jsonPath("$.version").value("1"));
+
+  }
+
+  @Test
+  void uploadBrandingAsset_returns200WithStorageKey() throws Exception {
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "logo.png", "image/png", "imagedata".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/branding", EVENT_ID).file(file))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.storageKey").exists())
+        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+
+  }
+
+
+  @Test
+  void uploadSubmissionOutput_returns200WithStorageKey() throws Exception {
+    when(config.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "output.txt", "text/plain", "output data".getBytes());
+
+    mockMvc
+        .perform(
+            multipart(
+                    "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output",
+                    EVENT_ID,
+                    TEAM_ID,
+                    SUBMISSION_ID)
+                .file(file))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.storageKey").exists())
+        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+
+  }
+
   
 }
