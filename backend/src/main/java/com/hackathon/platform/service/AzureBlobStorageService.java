@@ -51,4 +51,25 @@ public class AzureBlobStorageService implements StorageService {
     }
   }
 
+    /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String uploadBytes(
+      String containerName, String storageKey, byte[] data, String contentType) {
+    try {
+      BlobClient blobClient = getBlobClient(containerName, storageKey);
+      BlobHttpHeaders headers = new BlobHttpHeaders().setContentType(contentType);
+      blobClient.upload(new ByteArrayInputStream(data), data.length, true);
+      blobClient.setHttpHeaders(headers);
+      LOG.info("Uploaded bytes blob: container={} storageKey={} size={}",
+          containerName, storageKey, data.length);
+      return blobClient.getBlobUrl();
+    } catch (Exception e) {
+      LOG.error("Failed to upload bytes: container={} storageKey={}", containerName, storageKey, e);
+      throw new StorageException("Failed to upload bytes: " + storageKey, e);
+    }
+  }
+
+
 }
