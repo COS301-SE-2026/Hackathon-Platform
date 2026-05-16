@@ -109,7 +109,10 @@ public final class BlobPath {
    * @return sanitised filename safe for use as a storage key segment
    */
   private static String sanitise(String filename) {
-    return filename.replaceAll("[/\\\\]", "_").trim();
+    return filename
+        .replaceAll("[/\\\\]", "_")
+        .replaceAll("\\.\\.", "_")
+        .trim();
   }
 
   
