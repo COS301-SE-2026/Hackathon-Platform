@@ -81,6 +81,28 @@ class AzureBlobStorageServiceTest {
     assertThrows(StorageException.class, () -> storageService.upload(CONTAINER, STORAGE_KEY, file));
   }
 
+
+  @Test
+  void uploadBytes_successfullyUploadsBytesAndReturnsBlobUrl() {
+    byte[] data = "log content".getBytes();
+
+    String result = storageService.uploadBytes(CONTAINER, STORAGE_KEY, data, "text/plain");
+
+    verify(blobClient).upload(any(ByteArrayInputStream.class), anyLong(), anyBoolean());
+    assertEquals(BLOB_URL, result);
+  }
+
+  @Test
+  void download_returnsInputStream() {
+    BlobInputStream mockStream = mock(BlobInputStream.class);
+    when(blobClient.openInputStream()).thenReturn(mockStream);
+
+    InputStream result = storageService.download(CONTAINER, STORAGE_KEY);
+
+    assertEquals(mockStream, result);
+  }
+
+  
   
 
 }
