@@ -38,7 +38,7 @@ public class User {
   private String status = "ACTIVE";
 
   /** Default constructor. */
-  public User() { }
+  public User() {}
 
   /** Constructs a new User with the given basic information. */
   public User(

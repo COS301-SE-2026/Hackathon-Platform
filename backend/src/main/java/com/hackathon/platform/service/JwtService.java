@@ -1,3 +1,3 @@
 package com.hackathon.platform.service;
 
-public class JwtService { }
+public class JwtService {}

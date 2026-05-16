@@ -5,7 +5,7 @@ public class ApproveRequest {
   private boolean approve;
 
   /** Default constructor. */
-  public ApproveRequest() { }
+  public ApproveRequest() {}
 
   /** Returns the approval flag. */
   public boolean isApprove() {

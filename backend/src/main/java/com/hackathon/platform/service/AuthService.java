@@ -1,3 +1,3 @@
 package com.hackathon.platform.service;
 
-public class AuthService { }
+public class AuthService {}

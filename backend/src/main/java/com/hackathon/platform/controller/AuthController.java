@@ -1,3 +1,3 @@
 package com.hackathon.platform.controller;
 
-public class AuthController { }
+public class AuthController {}
