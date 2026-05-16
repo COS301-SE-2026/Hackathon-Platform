@@ -23,6 +23,7 @@ public class TeamService {
   private final TeamMemberRepository teamMemberRepository;
   private final UserRepository userRepository;
 
+  /** Constructor for TeamService. */
   public TeamService(
       TeamRepository teamRepository,
       TeamMemberRepository teamMemberRepository,
