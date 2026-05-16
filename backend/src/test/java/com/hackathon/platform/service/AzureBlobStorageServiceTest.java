@@ -102,7 +102,35 @@ class AzureBlobStorageServiceTest {
     assertEquals(mockStream, result);
   }
 
-  
+  @Test
+  void download_throwsStorageExceptionOnFailure() {
+    when(blobClient.openInputStream()).thenThrow(new RuntimeException("Azure error"));
+
+    assertThrows(
+        StorageException.class, () -> storageService.download(CONTAINER, STORAGE_KEY));
+
+  }
+
+  @Test
+  void delete_callsDeleteIfExists() {
+    storageService.delete(CONTAINER, STORAGE_KEY);
+    verify(blobClient).deleteIfExists();
+  }
+
+  @Test
+  void delete_throwsStorageExceptionOnFailure() {
+    doThrow(new RuntimeException("Azure error")).when(blobClient).deleteIfExists();
+
+    assertThrows(
+        StorageException.class, () -> storageService.delete(CONTAINER, STORAGE_KEY));
+  }
+
+  @Test
+  void exists_returnsTrueWhenBlobExists() {
+    when(blobClient.exists()).thenReturn(true);
+    assertTrue(storageService.exists(CONTAINER, STORAGE_KEY));
+
+  }
   
 
 }
