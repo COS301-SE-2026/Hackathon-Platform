@@ -91,6 +91,36 @@ public class AzureBlobStorageService implements StorageService {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public InputStream download(String containerName, String storageKey) {
+    try {
+      LOG.info("Downloading blob: container={} storageKey={}", containerName, storageKey);
+      return getBlobClient(containerName, storageKey).openInputStream();
+    } catch (Exception e) {
+      LOG.error("Failed to download blob: container={} storageKey={}", containerName, storageKey, e);
+      throw new StorageException("Failed to download file: " + storageKey, e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void delete(String containerName, String storageKey) {
+    try {
+      getBlobClient(containerName, storageKey).deleteIfExists();
+      LOG.info("Deleted blob: container={} storageKey={}", containerName, storageKey);
+    } catch (Exception e) {
+      LOG.error("Failed to delete blob: container={} storageKey={}", containerName, storageKey, e);
+      throw new StorageException("Failed to delete file: " + storageKey, e);
+    }
+  }
+
+
+
 
 
 }
