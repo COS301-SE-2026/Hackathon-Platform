@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { AdminShellComponent } from './admin/admin-shell.component/admin-shell.component';
+import { ParticipantShellComponent } from './participant/participant-shell.component/participant-shell.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -39,6 +41,21 @@ export const routes: Routes = [
       }
     ]
   },
+  {
+    path: 'participant',
+    component: ParticipantShellComponent,
+    children: [
+      {
+        path: 'home',
+        loadComponent: () => import('./participant/home/home.component').then(m => m.HomeComponent),
+      },
+       {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full',
+      }
+    ]
+  },  
   {
     path: '**',
     redirectTo: 'login',
