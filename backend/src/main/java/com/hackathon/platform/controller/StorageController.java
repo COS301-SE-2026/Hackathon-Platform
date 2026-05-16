@@ -189,6 +189,32 @@ public class StorageController {
   }
 
 
+  /**
+   * Returns a presigned SAS URL for downloading a source code archive (Admin only for auditing).
+   *
+   * @param eventId      the event UUID
+   * @param teamId       the team UUID
+   * @param submissionId the submission ID
+   * @param filename     the blob filename
+   * @return presigned download URL
+   */
+  @GetMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
+      @PathVariable String eventId,
+      @PathVariable String teamId,
+      @PathVariable String submissionId,
+      @PathVariable String filename) {
+    String storageKey = BlobPath.submissionSourceArchive(eventId, teamId, submissionId, filename);
+    String url = storageService.generatePresignedUrl(
+        config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
+    return ResponseEntity.ok(Map.of("url", url));
+
+    
+  }
+
+
+
 
 
 
