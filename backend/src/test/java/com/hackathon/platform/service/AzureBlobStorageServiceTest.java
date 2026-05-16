@@ -55,7 +55,32 @@ class AzureBlobStorageServiceTest {
     when(blobClient.getBlobUrl()).thenReturn(BLOB_URL);
   }
 
-  
+  @Test
+  void upload_successfullyUploadsFileAndReturnsBlobUrl() throws IOException {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "test.txt", "text/plain", "hello world".getBytes());
 
+    String result = storageService.upload(CONTAINER, STORAGE_KEY, file);
+
+    verify(blobClient).upload(any(InputStream.class), anyLong(), anyBoolean());
+    assertEquals(BLOB_URL, result);
+
+  }
+
+
+  @Test
+  void upload_throwsStorageExceptionOnIoError() {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "test.txt", "text/plain", "hello".getBytes()) {
+          @Override
+          public InputStream getInputStream() throws IOException {
+            throw new IOException("Simulated IO error");
+          }
+        };
+
+    assertThrows(StorageException.class, () -> storageService.upload(CONTAINER, STORAGE_KEY, file));
+  }
+
+  
 
 }
