@@ -140,6 +140,31 @@ public class StorageController {
     String blobUrl = storageService.upload(config.getSubmissionsContainer(), storageKey, file);
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
   }
+  
+
+  /**
+   * Uploads a source code ZIP archive alongside a submission.
+   * The returned storageKey maps to submissions.source_code_storage_key in the database.
+   *
+   * @param eventId      the event UUID
+   * @param teamId       the team UUID
+   * @param submissionId the submission ID
+   * @param file         the zipped source code archive
+   * @return storageKey and blobUrl
+   */
+  @PostMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source")
+  @PreAuthorize("hasRole('PARTICIPANT')")
+  public ResponseEntity<Map<String, String>> uploadSourceArchive(
+      @PathVariable String eventId,
+      @PathVariable String teamId,
+      @PathVariable String submissionId,
+      @RequestParam("file") MultipartFile file) {
+    String storageKey = BlobPath.submissionSourceArchive(
+        eventId, teamId, submissionId, file.getOriginalFilename());
+    String blobUrl = storageService.upload(config.getSubmissionsContainer(), storageKey, file);
+    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+  }
+
 
 
 
