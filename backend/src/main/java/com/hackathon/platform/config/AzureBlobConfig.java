@@ -31,4 +31,18 @@ public class AzureBlobConfig {
   @Value("${azure.storage.sas-expiry-minutes:60}")
   private int sasExpiryMinutes;
 
+  /**
+   * Creates and registers the Azure BlobServiceClient as a Spring bean.
+   *
+   * @return configured BlobServiceClient
+   */
+  @Bean
+  public BlobServiceClient blobServiceClient() {
+    return new BlobServiceClientBuilder()
+        .connectionString(connectionString)
+        .buildClient();
+  }
+
+
+
 }
