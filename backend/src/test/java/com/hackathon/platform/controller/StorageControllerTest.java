@@ -199,5 +199,42 @@ class StorageControllerTest {
 
   }
 
+  @Test
+  void getSourceArchiveUrl_returns200WithPresignedUrl() throws Exception {
+    when(config.getSubmissionsContainer()).thenReturn("submissions");
+    when(config.getSasExpiryMinutes()).thenReturn(60);
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+        .thenReturn(PRESIGNED_URL);
+
+    mockMvc
+        .perform(
+            get(
+                "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}",
+                EVENT_ID,
+                TEAM_ID,
+                SUBMISSION_ID,
+                "source.zip"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
+  }
+
+
+  @Test
+  void getScoringLogUrl_returns200WithPresignedUrl() throws Exception {
+    when(config.getScoringLogsContainer()).thenReturn("scoring-logs");
+    when(config.getSasExpiryMinutes()).thenReturn(60);
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+        .thenReturn(PRESIGNED_URL);
+
+    mockMvc
+        .perform(
+            get(
+                "/api/storage/events/{eventId}/submissions/{submissionId}/logs/{filename}",
+                EVENT_ID,
+                SUBMISSION_ID,
+                "log.txt"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
+  }
   
 }
