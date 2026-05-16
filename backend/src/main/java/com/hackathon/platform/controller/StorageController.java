@@ -98,4 +98,24 @@ public class StorageController {
 
 
 
+  /**
+   * Uploads a branding asset (logo, banner) for a specific event.
+   *
+   * @param eventId the event UUID
+   * @param file    the uploaded image file
+   * @return storageKey and blobUrl
+   */
+  @PostMapping("/events/{eventId}/branding")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, String>> uploadBrandingAsset(
+      @PathVariable String eventId,
+      @RequestParam("file") MultipartFile file) {
+    String storageKey = BlobPath.brandingAsset(eventId, file.getOriginalFilename());
+    String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
+    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+  }
+
+
+
+
 }
