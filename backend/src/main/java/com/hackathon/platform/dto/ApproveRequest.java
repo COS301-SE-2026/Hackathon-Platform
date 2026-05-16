@@ -1,10 +1,15 @@
 package com.hackathon.platform.dto;
 
 public class ApproveRequest {
-    private boolean approve;
+  private boolean approve;
 
-    public ApproveRequest() {}
+  public ApproveRequest() {}
 
-    public boolean isApprove() { return approve; }
-    public void setApprove(boolean approve) { this.approve = approve; }
+  public boolean isApprove() {
+    return approve;
+  }
+
+  public void setApprove(boolean approve) {
+    this.approve = approve;
+  }
 }
