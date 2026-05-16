@@ -140,7 +140,7 @@ public class StorageController {
     String blobUrl = storageService.upload(config.getSubmissionsContainer(), storageKey, file);
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
   }
-  
+
 
   /**
    * Uploads a source code ZIP archive alongside a submission.
@@ -164,6 +164,30 @@ public class StorageController {
     String blobUrl = storageService.upload(config.getSubmissionsContainer(), storageKey, file);
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
   }
+
+
+  /**
+   * Returns a presigned SAS URL for downloading a submission output file.
+   *
+   * @param eventId      the event UUID
+   * @param teamId       the team UUID
+   * @param submissionId the submission ID
+   * @param filename     the blob filename
+   * @return presigned download URL
+   */
+  @GetMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  public ResponseEntity<Map<String, String>> getSubmissionOutputUrl(
+      @PathVariable String eventId,
+      @PathVariable String teamId,
+      @PathVariable String submissionId,
+      @PathVariable String filename) {
+    String storageKey = BlobPath.submissionOutput(eventId, teamId, submissionId, filename);
+    String url = storageService.generatePresignedUrl(
+        config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
+    return ResponseEntity.ok(Map.of("url", url));
+  }
+
 
 
 
