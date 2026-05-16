@@ -17,6 +17,9 @@ public class EventService {
     this.eventRepository = eventRepository;
   }
 
+  /**
+  * create event
+  */
   public Event createEvent(EventRequest req) {
     Event event = new Event();
     event.setCreatedByUserId(UUID.fromString(CREATEDUSER));
@@ -32,10 +35,14 @@ public class EventService {
     return eventRepository.save(event);
   }
 
+  /**
+  * return event by who created it
+  */
   public List<Event> getEventByCreator(UUID userId) {
     return eventRepository.fetchAllByAdmin(userId);
   }
 
+  //update Entire event based on new event information receieved in req
   public Event putUpdateEvent(UUID eventId, EventRequest req) {
     Event event =
         eventRepository
@@ -55,6 +62,9 @@ public class EventService {
     return eventRepository.save(event);
   }
 
+  /**
+  * Change event status/registration key/visibility
+  */
   public Event patchEventStatus(
       UUID eventId, String visibility, String status, String registrationKey) {
     Event event =
@@ -85,6 +95,9 @@ public class EventService {
     return eventRepository.save(event);
   }
 
+  /**
+  * Get the event status, this includes: Status and Visibility
+  */
   public EventStatusResponse getEventStatus(UUID eventId) {
     Event event =
         eventRepository
