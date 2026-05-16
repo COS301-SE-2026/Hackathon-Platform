@@ -56,5 +56,18 @@ class BlobPathTest {
     assertEquals("logs/event-123/sub-101/log.txt", result);
   }
 
+  @Test
+  void levelFile_sanitisesPathTraversal() {
+    String result = BlobPath.levelFile(EVENT_ID, LEVEL_ID, "../../../etc/passwd");
+    assertFalse(result.contains(".."));
+  }
+
+  @Test
+  void submissionOutput_sanitisesBackslash() {
+    String result =
+        BlobPath.submissionOutput(EVENT_ID, TEAM_ID, SUBMISSION_ID, "folder\\file.txt");
+    assertFalse(result.contains("\\"));
+  }
+
   
 }
