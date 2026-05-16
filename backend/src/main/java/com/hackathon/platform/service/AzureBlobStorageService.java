@@ -71,5 +71,26 @@ public class AzureBlobStorageService implements StorageService {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public String generatePresignedUrl(String containerName, String storageKey, int expiryMinutes) {
+    try {
+      BlobClient blobClient = getBlobClient(containerName, storageKey);
+      BlobSasPermission permission = new BlobSasPermission().setReadPermission(true);
+      BlobServiceSasSignatureValues sasValues = new BlobServiceSasSignatureValues(
+          OffsetDateTime.now().plusMinutes(expiryMinutes), permission);
+      String sasToken = blobClient.generateSas(sasValues);
+      LOG.debug("Generated presigned URL: container={} storageKey={}", containerName, storageKey);
+      return blobClient.getBlobUrl() + "?" + sasToken;
+    } catch (Exception e) {
+      LOG.error("Failed to generate presigned URL: container={} storageKey={}",
+          containerName, storageKey, e);
+      throw new StorageException("Failed to generate presigned URL: " + storageKey, e);
+    }
+  }
+
+
 
 }
