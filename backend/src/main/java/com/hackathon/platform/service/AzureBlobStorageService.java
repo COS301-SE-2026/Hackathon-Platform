@@ -127,6 +127,19 @@ public class AzureBlobStorageService implements StorageService {
     return getBlobClient(containerName, storageKey).exists();
   }
 
+  /**
+   * Internal helper to get a BlobClient for the given container and storage key.
+   *
+   * @param containerName the Azure blob container name
+   * @param storageKey    the full storage key path
+   * @return BlobClient instance
+   */
+  private BlobClient getBlobClient(String containerName, String storageKey) {
+    BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
+    return containerClient.getBlobClient(storageKey);
+  }
+
+
 
 
 
