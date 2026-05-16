@@ -51,4 +51,27 @@ public class StorageController {
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
   }
 
+  /**
+   * Returns a presigned SAS URL for downloading a level file.
+   *
+   * @param eventId  the event UUID
+   * @param levelId  the level ID
+   * @param filename the blob filename
+   * @return presigned download URL
+   */
+  @GetMapping("/events/{eventId}/levels/{levelId}/files/{filename}")
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  public ResponseEntity<Map<String, String>> getLevelFileUrl(
+      @PathVariable String eventId,
+      @PathVariable String levelId,
+      @PathVariable String filename) {
+        
+    String storageKey = BlobPath.levelFile(eventId, levelId, filename);
+    String url = storageService.generatePresignedUrl(
+        config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
+    return ResponseEntity.ok(Map.of("url", url));
+
+  }
+
+
 }
