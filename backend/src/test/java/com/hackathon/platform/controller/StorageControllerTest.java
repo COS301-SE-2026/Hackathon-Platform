@@ -28,4 +28,20 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc(addFilters = false)
 class StorageControllerTest {
 
+  @Autowired private MockMvc mockMvc;
+
+  @MockBean private StorageService storageService;
+  @MockBean private AzureBlobConfig config;
+
+  private static final String EVENT_ID = "11111111-1111-1111-1111-111111111111";
+  private static final String TEAM_ID = "22222222-2222-2222-2222-222222222222";
+  private static final String SUBMISSION_ID = "33333333-3333-3333-3333-333333333333";
+  private static final String LEVEL_ID = "1";
+  private static final String BLOB_URL =
+      "https://hackathonplatform.blob.core.windows.net/test";
+  private static final String PRESIGNED_URL =
+      "https://hackathonplatform.blob.core.windows.net/test?sv=...";
+  private static final String CONTAINER = "event-resources";
+
+  
 }
