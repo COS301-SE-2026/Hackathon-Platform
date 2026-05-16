@@ -26,9 +26,7 @@ public class AdminEventController {
     this.eventService = eventService;
   }
 
-  /**
-  * Create an event /api/admin/events
-  */
+  /** Create an event /api/admin/events */
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Event> createEvent(@RequestBody EventRequest req) {
@@ -36,9 +34,7 @@ public class AdminEventController {
     return ResponseEntity.ok(newEvent);
   }
 
-  /**
-  *Get all events created by admin /api/admin/events/{id}
-  */
+  /** Get all events created by admin /api/admin/events/{id} */
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<Event>> getEvents(@PathVariable("id") UUID createdByUserId) {
@@ -46,9 +42,7 @@ public class AdminEventController {
     return ResponseEntity.ok(events);
   }
 
-  /**
-  * Update existing event /api/admin/events/{id}
-  */
+  /** Update existing event /api/admin/events/{id} */
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Event> putUpdateEvent(
@@ -58,8 +52,9 @@ public class AdminEventController {
   }
 
   /**
-  * Update existing event status and visibility (also registration if need) /api/admin/events/{id}/status
-  */
+   * Update existing event status and visibility (also registration if need)
+   * /api/admin/events/{id}/status
+   */
   @PatchMapping("/{id}/status")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Event> patchEventStatus(
@@ -69,9 +64,7 @@ public class AdminEventController {
             eventId, req.getVisibility(), req.getStatus(), req.getRegistrationKey()));
   }
 
-  /**
-   * Retrieve event status and event visbility /api/admin/events/{id}/status
-   */
+  /** Retrieve event status and event visbility /api/admin/events/{id}/status */
   @GetMapping("/{id}/status")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<EventStatusResponse> getEventStatus(@PathVariable("id") UUID eventId) {
