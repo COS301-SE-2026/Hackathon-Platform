@@ -155,5 +155,49 @@ class StorageControllerTest {
 
   }
 
+  @Test
+  void uploadSourceArchive_returns200WithStorageKey() throws Exception {
+    when(config.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+    MockMultipartFile file =
+        new MockMultipartFile(
+            "file", "source.zip", "application/zip", "zipdata".getBytes());
+
+    mockMvc
+        .perform(
+            multipart(
+                    "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source",
+                    EVENT_ID,
+                    TEAM_ID,
+                    SUBMISSION_ID)
+                .file(file))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.storageKey").exists())
+        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+  }
+
+  @Test
+  void getSubmissionOutputUrl_returns200WithPresignedUrl() throws Exception {
+    when(config.getSubmissionsContainer()).thenReturn("submissions");
+    when(config.getSasExpiryMinutes()).thenReturn(60);
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+        .thenReturn(PRESIGNED_URL);
+
+    mockMvc
+        .perform(
+            get(
+                "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+                EVENT_ID,
+                TEAM_ID,
+                SUBMISSION_ID,
+                "output.txt"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
+
+
+
+  }
+
   
 }
