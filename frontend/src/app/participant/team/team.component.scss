@@ -1,162 +1,89 @@
-.team-page {
-  color: #fff;
-}
+.team-page { color: #ffffff; }
 
 .page-header {
-  margin-bottom: 22px;
-
-  h1 {
-    font-size: 1.4rem;
-    font-weight: 700;
-  }
-
-  .page-sub {
-    font-size: 0.875rem;
-    color: #b0b0c0;
-    margin-top: 3px;
-  }
+  margin-bottom: 20px;
+  h1 { font-size: 1.4rem; font-weight: 700; }
+  .page-sub { font-size: 0.875rem; color: #94a3b8; margin-top: 3px; }
 }
 
+.section-title { font-size: 0.95rem; font-weight: 600; color: #e2e8f0; margin-bottom: 12px; }
 
-.section-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #e5e5e5;
-  margin-bottom: 12px;
-}
-
-
-.members-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 28px;
-}
+.members-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
 
 .member-row {
-  background-color: #d8d8e0;
+  background-color: #dde3ee;
   border-radius: 10px;
-  padding: 14px 18px;
+  padding: 13px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.member-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
+.member-left { display: flex; align-items: center; gap: 13px; }
 
 .avatar {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background-color: #b0b0c0;
+  background-color: #94a3b8;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #444;
+  color: #1e293b;
   flex-shrink: 0;
 }
 
 .member-info {
-  .member-name {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #111;
-  }
-  .member-email {
-    font-size: 0.78rem;
-    color: #555;
-    margin-top: 2px;
-  }
+  .member-name { font-size: 0.875rem; font-weight: 500; color: #1e293b; }
+  .member-email { font-size: 0.77rem; color: #475569; margin-top: 2px; }
 }
 
-.member-status {
-  font-size: 0.85rem;
-  font-weight: 700;
+.member-status { font-size: 0.85rem; font-weight: 700; color: #1e293b; }
 
-  &.active  { color: #111; }
-  &.pending { color: #111; }
-}
-
-.team-actions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
+.team-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
 .action-card {
-  background-color: #6b6b7a;
+  background-color: #1e4a8a;
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 12px;
-  padding: 22px 20px;
+  padding: 20px 18px;
 
-  h3 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 8px;
-  }
-
-  .action-desc {
-    font-size: 0.78rem;
-    color: #c0c0d0;
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-
-  .field-label {
-    display: block;
-    font-size: 0.8rem;
-    color: #d1d1d1;
-    margin-bottom: 8px;
-  }
+  h3 { font-size: 0.9rem; font-weight: 600; color: #ffffff; margin-bottom: 8px; }
+  .action-desc { font-size: 0.77rem; color: #94a3b8; line-height: 1.5; margin-bottom: 14px; }
+  .field-label { display: block; font-size: 0.78rem; color: #cbd5e1; margin-bottom: 7px; }
 
   input[type="text"] {
     flex: 1;
     padding: 9px 12px;
     border: none;
     border-radius: 8px;
-    background-color: #d8d8e0;
-    color: #111;
+    background-color: #dde3ee;
+    color: #1e293b;
     font-size: 0.875rem;
     font-family: 'Inter', sans-serif;
     outline: none;
 
-    &::placeholder { color: #888; }
-    &:focus { box-shadow: 0 0 0 2px #7c3aed; }
+    &::placeholder { color: #64748b; }
+    &:focus { box-shadow: 0 0 0 2px #1da718; }
   }
 }
 
-.search-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.create-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
+.search-row, .create-row { display: flex; gap: 8px; align-items: center; }
 
 .btn-search {
-  background-color: #4ade80;
+  background-color: #5fae11;
   color: #111;
   border: none;
   border-radius: 8px;
-  padding: 9px 18px;
-  font-size: 0.85rem;
+  padding: 9px 16px;
+  font-size: 0.82rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.2s;
-
-  &:hover { background-color: #22c55e; }
+  &:hover { background-color: #5fae11; }
 }
 
 .btn-create {
@@ -164,13 +91,11 @@
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 9px 18px;
-  font-size: 0.85rem;
+  padding: 9px 16px;
+  font-size: 0.82rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.2s;
-
   &:hover { background-color: #ea6c0a; }
 }

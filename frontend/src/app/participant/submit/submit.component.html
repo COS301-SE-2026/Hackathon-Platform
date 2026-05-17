@@ -7,15 +7,17 @@
   <div class="content-card">
     <h2 class="card-title">Level resources</h2>
     <div class="resource-list">
-      <div class="resource-row" *ngFor="let res of resources">
-        <span class="resource-name">{{ res.name }}</span>
-        <button
-          class="btn-resource"
-          [ngClass]="res.action === 'View' ? 'green' : 'purple'"
-        >
-          {{ res.action }}
-        </button>
-      </div>
+      @for (res of resources; track res.name) {
+        <div class="resource-row">
+          <span class="resource-name">{{ res.name }}</span>
+          <button
+            class="btn-resource"
+            [ngClass]="res.action === 'View' ? 'green' : 'purple'"
+          >
+            {{ res.action }}
+          </button>
+        </div>
+      }
     </div>
   </div>
 
@@ -23,28 +25,34 @@
     <h2 class="card-title">New Submission</h2>
 
     <div class="form-group">
-      <label>Solution output file*</label>
+      <label for="outputFile">Solution output file*</label>
       <div
         class="drop-zone"
         (click)="outputInput.click()"
+        (keydown.enter)="outputInput.click()"
         (dragover)="$event.preventDefault()"
         (drop)="onDropOutput($event)"
+        tabindex="0"
       >
-        <input #outputInput type="file" style="display:none" (change)="onOutputSelected($event)" accept=".txt,.csv,.json" />
+        <input id="outputFile" #outputInput type="file" style="display:none" (change)="onOutputSelected($event)" accept=".txt,.csv,.json" />
         <span>{{ outputFileName || 'Drop output file here or browser' }}</span>
-        <span class="file-hint" *ngIf="!outputFileName">.txt &nbsp;.csv &nbsp;.json</span>
+        @if (!outputFileName) {
+          <span class="file-hint">.txt &nbsp;.csv &nbsp;.json</span>
+        }
       </div>
     </div>
 
     <div class="form-group">
-      <label>Source code archive (.zip)*</label>
+      <label for="zipFile">Source code archive (.zip)*</label>
       <div
         class="drop-zone"
         (click)="zipInput.click()"
+        (keydown.enter)="zipInput.click()"
         (dragover)="$event.preventDefault()"
         (drop)="onDropZip($event)"
+        tabindex="0"
       >
-        <input #zipInput type="file" style="display:none" (change)="onZipSelected($event)" accept=".zip" />
+        <input id="zipFile" #zipInput type="file" style="display:none" (change)="onZipSelected($event)" accept=".zip" />
         <span>{{ zipFileName || 'Drop .zip here or browse' }}</span>
       </div>
     </div>

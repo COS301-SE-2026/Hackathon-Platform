@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -20,9 +20,9 @@ interface HackathonEvent {
   styleUrls: ['./eventlist.component.scss']
 })
 export class EventlistComponent {
-  searchQuery: string = '';
-  statusFilter: string = '';
-  visibilityFilter: string = '';
+  searchQuery = '';
+  statusFilter = '';
+  visibilityFilter = '';
 
   events: HackathonEvent[] = [
     { name: 'Entelect Challenge', type: 'Optimization', dates: 'Apr 20 – Apr 26', teams: 342, visibility: 'Public',  status: 'Live'     },

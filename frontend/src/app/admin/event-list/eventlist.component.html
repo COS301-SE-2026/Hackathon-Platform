@@ -39,23 +39,25 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let event of filteredEvents">
-          <td>
-            <p class="event-name">{{ event.name }}</p>
-            <p class="event-type">{{ event.type }}</p>
-          </td>
-          <td>{{ event.dates }}</td>
-          <td>{{ event.teams }}</td>
-          <td>{{ event.visibility }}</td>
-          <td>
-            <span class="status-badge" [ngClass]="event.status.toLowerCase()">
-              {{ event.status }}
-            </span>
-          </td>
-          <td>
-            <button class="btn-manage">Manage &amp; Edit</button>
-          </td>
-        </tr>
+        @for (event of filteredEvents; track event.name) {
+          <tr>
+            <td>
+              <p class="event-name">{{ event.name }}</p>
+              <p class="event-type">{{ event.type }}</p>
+            </td>
+            <td>{{ event.dates }}</td>
+            <td>{{ event.teams }}</td>
+            <td>{{ event.visibility }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="event.status.toLowerCase()">
+                {{ event.status }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-manage">Manage &amp; Edit</button>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>

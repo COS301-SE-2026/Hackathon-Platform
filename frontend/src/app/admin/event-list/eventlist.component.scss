@@ -1,135 +1,96 @@
-.events-page {
-  color: #ffffff;
-}
+.events-page { color: #ffffff; }
 
 .page-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 
-  h1 {
-    font-size: 1.6rem;
-    font-weight: 700;
-  }
-
-  .page-subtitle {
-    color: #d1d1d1;
-    font-size: 0.875rem;
-    margin-top: 2px;
-  }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  .page-subtitle { color: #94a3b8; font-size: 0.875rem; margin-top: 2px; }
 }
 
 .btn-primary {
-  background-color: #7c3aed;
+  background-color: #2563eb;
   color: #ffffff;
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #6d28d9;
-  }
+  &:hover { background-color: #1d4ed8; }
 }
 
 
 .filters-bar {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
 }
 
 .search-input {
   flex: 1;
-  min-width: 200px;
-  padding: 10px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 180px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 8px;
-  background-color: #5a5a68;
-  color: #e5e5e5;
+  background-color: #ffffff;
+  color: #1e293b;
   font-size: 0.875rem;
   outline: none;
-
-  &::placeholder {
-    color: #9ca3af;
-  }
-
-  &:focus {
-    border-color: #7c3aed;
-  }
+  &::placeholder { color: #94a3b8; }
+  &:focus { border-color: #2563eb; }
 }
 
 .filter-select {
-  padding: 10px 36px 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 34px 10px 14px;
+  border: 1px solid rgba(255,255,255,0.25);
   border-radius: 8px;
-  background-color: #5a5a68;
-  color: #e5e5e5;
+  background-color: #1a3a6b;
+  color: #e2e8f0;
   font-size: 0.875rem;
-  outline: none;
   appearance: none;
+  outline: none;
+  cursor: pointer;
   background-repeat: no-repeat;
   background-position: right 10px center;
-  cursor: pointer;
-
-  &:focus {
-    border-color: #7c3aed;
-  }
+  &:focus { border-color: #2563eb; }
 }
 
-
 .table-card {
-  background-color: #6b6b7a;
+  background-color: #ffffff;
   border-radius: 12px;
   overflow: hidden;
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  thead tr {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 1px solid #e2e8f0; }
 
   th {
     text-align: left;
-    padding: 12px 16px;
-    font-size: 0.75rem;
+    padding: 11px 16px;
+    font-size: 0.72rem;
     font-weight: 600;
-    color: #d1d1d1;
+    color: #64748b;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   td {
-    padding: 16px;
+    padding: 15px 16px;
     font-size: 0.875rem;
-    color: #e5e5e5;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
   }
 
-  tbody tr:last-child td {
-    border-bottom: none;
-  }
+  tbody tr:last-child td { border-bottom: none; }
 }
 
-.event-name {
-  font-weight: 500;
-  color: #ffffff;
-}
-
-.event-type {
-  font-size: 0.78rem;
-  color: #b0b0c0;
-  margin-top: 2px;
-}
+.event-name { font-weight: 500; color: #1e293b; }
+.event-type { font-size: 0.77rem; color: #64748b; margin-top: 2px; }
 
 .status-badge {
   display: inline-block;
@@ -138,34 +99,20 @@
   font-size: 0.78rem;
   font-weight: 500;
 
-  &.live {
-    background-color: rgba(74, 222, 128, 0.2);
-    color: #4ade80;
-  }
-
-  &.upcoming {
-    background-color: rgba(124, 58, 237, 0.2);
-    color: #a78bfa;
-  }
-
-  &.ended {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #f87171;
-  }
+  &.live     { background: rgba(22,163,74,0.15);  color: #15803d; }
+  &.upcoming { background: rgba(37,99,235,0.12);  color: #1d4ed8; }
+  &.ended    { background: rgba(220,38,38,0.12);  color: #dc2626; }
 }
 
 .btn-manage {
-  background-color: #7c3aed;
+  background-color: #2563eb;
   color: #ffffff;
   border: none;
   border-radius: 6px;
   padding: 7px 14px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #6d28d9;
-  }
+  &:hover { background-color: #1d4ed8; }
 }
