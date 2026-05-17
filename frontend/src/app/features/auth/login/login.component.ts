@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -12,10 +12,10 @@ import { RouterModule, Router } from '@angular/router';
 })
 
 export class LoginComponent {
-  email: string = '';
-  password: string = '';
+  email = '';
+  password = '';
 
-  constructor(private router: Router) {}
+ private router = inject(Router);
 
   onSignIn(): void {
 

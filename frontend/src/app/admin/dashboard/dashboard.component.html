@@ -23,17 +23,17 @@
   <div class="section">
     <h2 class="section-title">All events</h2>
     <div class="events-list-card">
-      <div class="event-item" *ngFor="let event of allEvents">
-        <div>
-          <p class="event-name">{{ event.name }}</p>
-          <p class="event-meta">{{ event.teams }} teams · ends in {{ event.endsIn }}</p>
+      @for (event of allEvents; track event.name) {
+        <div class="event-item">
+          <div>
+            <p class="event-name">{{ event.name }}</p>
+            <p class="event-meta">{{ event.teams }} teams · ends in {{ event.endsIn }}</p>
+          </div>
         </div>
-      </div>
+      }
     </div>
   </div>
 
-
-  
   <div class="section">
     <h2 class="section-title">Recent submissions</h2>
     <div class="table-card">
@@ -49,18 +49,20 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let sub of recentSubmissions">
-            <td>{{ sub.team }}</td>
-            <td>{{ sub.event }}</td>
-            <td>{{ sub.level }}</td>
-            <td>{{ sub.score }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="sub.status.toLowerCase()">
-                {{ sub.status }}
-              </span>
-            </td>
-            <td>{{ sub.time }}</td>
-          </tr>
+          @for (sub of recentSubmissions; track sub.team) {
+            <tr>
+              <td>{{ sub.team }}</td>
+              <td>{{ sub.event }}</td>
+              <td>{{ sub.level }}</td>
+              <td>{{ sub.score }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="sub.status.toLowerCase()">
+                  {{ sub.status }}
+                </span>
+              </td>
+              <td>{{ sub.time }}</td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>

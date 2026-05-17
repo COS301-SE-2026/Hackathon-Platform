@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -27,7 +27,7 @@ export class CreateEventComponent {
     description: ''
   };
 
-  constructor(private router: Router) {}
+  private router = inject(Router);
 
   triggerFileInput(): void {
     this.fileInput.nativeElement.click();

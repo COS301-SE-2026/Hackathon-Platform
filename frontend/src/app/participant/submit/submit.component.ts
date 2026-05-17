@@ -10,8 +10,8 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./submit.component.scss']
 })
 export class SubmitComponent {
-  outputFileName: string = '';
-  zipFileName: string = '';
+  outputFileName = '';
+  zipFileName = '';
 
   resources = [
     { name: 'Level3_input.txt',       action: 'Download' },
