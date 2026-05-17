@@ -6,7 +6,8 @@
     </div>
     <div class="navbar-links">
       <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
-      <a routerLink="/admin/events" routerLinkActive="active">Events</a>
+      <a routerLink="/admin/events/create" routerLinkActive="active">Create Event</a>
+      <a routerLink="/admin/eventlist" routerLinkActive="active">Event List</a>
       <a routerLink="/admin/users" routerLinkActive="active">Users</a>
       <a routerLink="/admin/settings" routerLinkActive="active">Settings</a>
     </div>
@@ -14,7 +15,6 @@
       <span class="role-badge">Admin</span>
     </div>
   </nav>
-
 
   <div class="admin-body">
     <aside class="sidebar">
@@ -24,7 +24,10 @@
           <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
         </li>
         <li>
-          <a routerLink="/admin/events" routerLinkActive="active">Events</a>
+          <a routerLink="/admin/create-event" routerLinkActive="active">Create Events</a>
+        </li>
+        <li>
+          <a routerLink="/admin/event-list" routerLinkActive="active">Event List</a>
         </li>
         <li>
           <a routerLink="/admin/users" routerLinkActive="active">Users</a>
@@ -34,7 +37,6 @@
         </li>
       </ul>
     </aside>
-
 
     <main class="admin-content">
       <router-outlet></router-outlet>

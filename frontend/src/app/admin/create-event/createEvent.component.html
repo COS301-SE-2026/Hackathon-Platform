@@ -69,8 +69,7 @@
 
     <div class="form-section">
       <h2 class="section-heading">Visibility &amp; Access</h2>
-      <label class="field-label">Visibility</label>
-      <div class="toggle-group">
+      <div class="toggle-group" role="group" aria-label="Visibility selection">
         <button
           type="button"
           class="toggle-option"
@@ -92,14 +91,20 @@
       </div>
     </div>
 
-
     <div class="form-section">
       <h2 class="section-heading">Branding</h2>
-      <label class="field-label">Event banner/Logo</label>
-      <div class="drop-zone" (click)="triggerFileInput()" (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
-        <input type="file" #fileInput style="display:none" (change)="onFileSelected($event)" accept="image/*" />
-        <span>+ Drop image here or browse</span>
-        <span class="drop-hint" *ngIf="form.bannerFileName">{{ form.bannerFileName }}</span>
+      <label class="field-label" for="bannerInput">Event banner/Logo</label>
+      <div class="drop-zone" 
+         (click)="triggerFileInput()" 
+         (keydown.enter)="triggerFileInput()" 
+         (dragover)="$event.preventDefault()" 
+         (drop)="onDrop($event)"
+         tabindex="0">
+         <input id="bannerInput" type="file" #fileInput style="display:none" (change)="onFileSelected($event)" accept="image/*" />
+         <span>+ Drop image here or browse</span>
+         @if (form.bannerFileName) {
+         <span class="drop-hint">{{ form.bannerFileName }}</span>
+         }
       </div>
     </div>
 

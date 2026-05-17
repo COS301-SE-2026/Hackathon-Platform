@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -11,14 +11,14 @@ import { RouterModule, Router } from '@angular/router';
   styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
-  firstName: string = '';
-  lastName: string = '';
-  email: string = '';
-  username: string = '';
-  password: string = '';
-  confirmPassword: string = '';
+  firstName = '';
+  lastName = '';
+  email = '';
+  username = '';
+  password = '';
+  confirmPassword = '';
 
-  constructor(private router: Router) {}
+  private router = inject(Router);
 
   onCreateAccount(): void {
     if (this.password !== this.confirmPassword) {

@@ -69,7 +69,7 @@
 
     <div class="form-section">
       <h2 class="section-heading">Visibility &amp; Access</h2>
-      <label class="field-label">Visibility</label>
+      <label for="visibility" class="field-label">Visibility</label>
       <div class="toggle-group">
         <button
           type="button"
@@ -95,12 +95,30 @@
 
     <div class="form-section">
       <h2 class="section-heading">Branding</h2>
-      <label class="field-label">Event banner/Logo</label>
-      <div class="drop-zone" (click)="triggerFileInput()" (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
-        <input type="file" #fileInput style="display:none" (change)="onFileSelected($event)" accept="image/*" />
+      <label for="bannerFileInput" class="field-label">Event banner/Logo</label>
+
+      <button
+        type="button"
+        class="drop-zone"
+        (click)="triggerFileInput()"
+        (dragover)="$event.preventDefault()"
+        (drop)="onDrop($event)"
+      >
+        <input
+          id="bannerFileInput"
+          type="file"
+          #fileInput
+          style="display: none"
+          (change)="onFileSelected($event)"
+          accept="image/*"
+        />
+
         <span>+ Drop image here or browse</span>
-        <span class="drop-hint" *ngIf="form.bannerFileName">{{ form.bannerFileName }}</span>
-      </div>
+
+        @if (form.bannerFileName) {
+          <span class="drop-hint">{{ form.bannerFileName }}</span>
+        }
+      </button>
     </div>
 
     <div class="form-section">

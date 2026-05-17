@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -11,7 +11,7 @@ import { Router, RouterModule } from '@angular/router';
   styleUrls: ['./createEvent.component.scss']
 })
 export class CreateEventComponent {
-
+  private readonly router = inject(Router);
   @ViewChild('fileInput')
   fileInput!: ElementRef<HTMLInputElement>;
 
@@ -27,7 +27,6 @@ export class CreateEventComponent {
     description: ''
   };
 
-  constructor(private router: Router) {}
 
   triggerFileInput(): void {
     this.fileInput.nativeElement.click();
@@ -64,6 +63,7 @@ export class CreateEventComponent {
   }
 
   onNextStep(): void {
+    
     console.log('Proceeding to Levels & Files:', this.form);
 
     this.router.navigate(['/admin/events/create/levels']);

@@ -22,8 +22,8 @@ interface Submission {
 }
 )
 export class SubmissionHistoryComponent {
-  levelFilter: string = '';
-  statusFilter: string = '';
+  levelFilter = '';
+  statusFilter = '';
   selectedSubmission: Submission | null = null;
 
 

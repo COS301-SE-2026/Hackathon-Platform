@@ -2,6 +2,17 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
+
+interface OpenEvent {
+  name: string;
+  dates: string;
+  teams: number;
+  visibility: string;
+  levels: number;
+  status: string;
+  requiresKey: boolean;
+}
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -10,13 +21,12 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  timeDisplay: string = '02 : 04 : 18';
-  private timerInterval: any;
-
+  timeDisplay = '02 : 04 : 18';
+  private timerInterval: ReturnType<typeof setInterval> | undefined; 
 
   private endTime: Date = new Date(Date.now() + (2 * 86400 + 4 * 3600 + 18 * 60) * 1000);
 
-  openEvents = [
+  openEvents: OpenEvent[] = [ 
     {
       name: 'ML Hackathon Q2',
       dates: 'Apr 21 – Apr 28',

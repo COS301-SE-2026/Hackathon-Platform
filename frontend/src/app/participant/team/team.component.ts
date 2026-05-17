@@ -18,8 +18,8 @@ interface TeamMember {
   styleUrls: ['./team.component.scss']
 })
 export class TeamComponent {
-  teamSearch: string = '';
-  newTeamName: string = '';
+  teamSearch = '';
+  newTeamName = '';
 
   team = {
     name: 'ByteForce',

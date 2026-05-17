@@ -9,18 +9,20 @@
   
   <h2 class="section-title">Team members</h2>
   <div class="members-list">
-    <div class="member-row" *ngFor="let member of team.members">
-      <div class="member-left">
-        <div class="avatar">{{ getInitials(member.name) }}</div>
-        <div class="member-info">
-          <p class="member-name">{{ member.name }}{{ member.isLead ? ' (Team Lead)' : '' }}</p>
-          <p class="member-email">{{ member.email }}</p>
+    @for (member of team.members; track member.email) {
+      <div class="member-row">
+        <div class="member-left">
+          <div class="avatar">{{ getInitials(member.name) }}</div>
+          <div class="member-info">
+            <p class="member-name">{{ member.name }}{{ member.isLead ? ' (Team Lead)' : '' }}</p>
+            <p class="member-email">{{ member.email }}</p>
+          </div>
         </div>
+        <span class="member-status" [ngClass]="member.status.toLowerCase()">
+          {{ member.status }}
+        </span>
       </div>
-      <span class="member-status" [ngClass]="member.status.toLowerCase()">
-        {{ member.status }}
-      </span>
-    </div>
+    }
   </div>
 
   <div class="team-actions-grid">
@@ -35,9 +37,9 @@
 
     <div class="action-card">
       <h3>Create new team</h3>
-      <label class="field-label">Team name</label>
+      <label for="newTeamName" class="field-label">Team name</label>
       <div class="create-row">
-        <input type="text" [(ngModel)]="newTeamName" placeholder="e.g Byteforce" />
+        <input id="newTeamName" type="text" [(ngModel)]="newTeamName" placeholder="e.g Byteforce" />
         <button class="btn-create" (click)="onCreateTeam()">Create team</button>
       </div>
     </div>

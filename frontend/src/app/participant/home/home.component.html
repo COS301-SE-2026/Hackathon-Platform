@@ -21,20 +21,22 @@
 
   <h2 class="section-title">Open events</h2>
   <div class="events-list">
-    <div class="event-row" *ngFor="let event of openEvents">
-      <div class="event-info">
-        <p class="ev-name">{{ event.name }}</p>
-        <p class="ev-meta">{{ event.dates }} &nbsp;·&nbsp; {{ event.teams }} teams &nbsp;·&nbsp; {{ event.visibility }} &nbsp;·&nbsp; {{ event.levels }} levels</p>
+    @for (event of openEvents; track event.name) {
+      <div class="event-row">
+        <div class="event-info">
+          <p class="ev-name">{{ event.name }}</p>
+          <p class="ev-meta">{{ event.dates }} &nbsp;·&nbsp; {{ event.teams }} teams &nbsp;·&nbsp; {{ event.visibility }} &nbsp;·&nbsp; {{ event.levels }} levels</p>
+        </div>
+        <div class="event-actions">
+          <span class="status-badge" [ngClass]="event.status.toLowerCase()">{{ event.status }}</span>
+          <button
+            class="btn-register"
+            [class.key]="event.requiresKey"
+          >
+            {{ event.requiresKey ? 'Register with key' : 'Register' }}
+          </button>
+        </div>
       </div>
-      <div class="event-actions">
-        <span class="status-badge" [ngClass]="event.status.toLowerCase()">{{ event.status }}</span>
-        <button
-          class="btn-register"
-          [class.key]="event.requiresKey"
-        >
-          {{ event.requiresKey ? 'Register with key' : 'Register' }}
-        </button>
-      </div>
-    </div>
+    }
   </div>
 </div>
