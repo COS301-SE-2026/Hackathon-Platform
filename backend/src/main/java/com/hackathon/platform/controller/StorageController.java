@@ -17,9 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
  
 /**
  * REST controller for all file upload and presigned download URL operations.
- * Controllers only handle HTTP — all logic is delegated to {@link StorageService}.
- * Storage keys returned match the column names in the database schema:
- * storage_key, output_storage_key, source_code_storage_key.
+ * All logic is delegated to {@link StorageService}.
+ * Storage keys returned match the column names in the database schema (Storage of key in db not yet implemented):
+ * storage_key, output_storage_key, source_code_storage_key. 
  */
 @RestController
 @RequestMapping("/api/storage")
@@ -29,7 +29,7 @@ public class StorageController {
   private final StorageService storageService;
   private final AzureBlobConfig config;
 
-  //Event Resources (Admin only)
+  //Event Resources
 
   /**
    * Uploads a level input file for a specific event and level.
@@ -217,7 +217,7 @@ public class StorageController {
 
   /**
    * Returns a presigned SAS URL for downloading a scoring log.
-   * Note: scoringlogs table stores log_text directly in the DB for Demo 1.
+   * Note: scoringlogs table stores log_text directly in the DB unlike the other endpoints for now.
    * This endpoint is for any supplementary log files stored in blob storage.
    *
    * @param eventId      the event UUID

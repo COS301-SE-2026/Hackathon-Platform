@@ -1,4 +1,3 @@
-# Prevents the Azure storage client failing when no connection string is set locally
  
 spring:
   cloud:

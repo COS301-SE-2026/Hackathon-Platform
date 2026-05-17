@@ -6,7 +6,7 @@ import java.io.InputStream;
 /**
  * Abstraction layer for object storage operations.
  * Programming against this interface allows swapping the storage
- * provider without changing any controller or
+ * provider (if we need to) without changing any controller or
  * business logic code.
  */
 public interface StorageService {

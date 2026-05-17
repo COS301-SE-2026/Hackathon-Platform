@@ -15,8 +15,8 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
   /**
-   * Temporary security config for testing storage endpoints.
-   * Remove permitAll and add JWT filter before merging to dev.
+   * TEMPORARY security config for testing storage endpoints.
+   * Remove permitAll and add JWT filter in the future.
    *
    * @param http the HttpSecurity object
    * @return the configured SecurityFilterChain
