@@ -1,0 +1,128 @@
+.submit-page {
+  color: #fff;
+}
+
+
+.page-header {
+  margin-bottom: 24px;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .page-sub {
+    font-size: 0.875rem;
+    color: #b0b0c0;
+    margin-top: 4px;
+  }
+}
+
+.content-card {
+  background-color: #e8e8ec;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  color: #111;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin-bottom: 18px;
+}
+
+.resource-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.resource-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+
+  .resource-name {
+    font-size: 0.875rem;
+    color: #333;
+  }
+}
+
+.btn-resource {
+  border: none;
+  border-radius: 6px;
+  padding: 7px 20px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &.purple {
+    background-color: #7c3aed;
+    color: #fff;
+    &:hover { opacity: 0.85; }
+  }
+
+  &.green {
+    background-color: #4ade80;
+    color: #111;
+    &:hover { opacity: 0.85; }
+  }
+}
+
+.form-group {
+  margin-bottom: 18px;
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    color: #333;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+}
+
+.drop-zone {
+  border: 1.5px solid #aaa;
+  border-radius: 8px;
+  padding: 18px 16px;
+  text-align: center;
+  background-color: #d8d8e0;
+  color: #555;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #7c3aed;
+  }
+
+  .file-hint {
+    font-size: 0.78rem;
+    color: #888;
+  }
+}
+
+.btn-submit {
+  display: block;
+  margin: 8px auto 0;
+  background-color: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 48px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover { background-color: #333; }
+}

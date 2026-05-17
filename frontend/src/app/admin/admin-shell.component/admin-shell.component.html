@@ -1,0 +1,43 @@
+<div class="admin-shell">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span class="brand-hackathon">Hackathon</span>
+      <span class="brand-platform">Platform</span>
+    </div>
+    <div class="navbar-links">
+      <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/admin/events" routerLinkActive="active">Events</a>
+      <a routerLink="/admin/users" routerLinkActive="active">Users</a>
+      <a routerLink="/admin/settings" routerLinkActive="active">Settings</a>
+    </div>
+    <div class="navbar-role">
+      <span class="role-badge">Admin</span>
+    </div>
+  </nav>
+
+
+  <div class="admin-body">
+    <aside class="sidebar">
+      <p class="sidebar-label">Navigation</p>
+      <ul class="sidebar-nav">
+        <li>
+          <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+        </li>
+        <li>
+          <a routerLink="/admin/events" routerLinkActive="active">Events</a>
+        </li>
+        <li>
+          <a routerLink="/admin/users" routerLinkActive="active">Users</a>
+        </li>
+        <li>
+          <a routerLink="/admin/settings" routerLinkActive="active">Settings</a>
+        </li>
+      </ul>
+    </aside>
+
+
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

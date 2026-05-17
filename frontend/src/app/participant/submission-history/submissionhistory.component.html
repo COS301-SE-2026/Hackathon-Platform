@@ -1,0 +1,61 @@
+<div class="history-page">
+  <div class="page-header">
+    <h1>Submission history</h1>
+    <p class="page-sub">Team: Byteforce – Entelect Challenge 2025</p>
+  </div>
+
+  <div class="filters-bar">
+    <select class="filter-select" [(ngModel)]="levelFilter">
+      <option value="">All levels</option>
+      <option value="Level1">Level 1</option>
+      <option value="Level2">Level 2</option>
+      <option value="Level3">Level 3</option>
+    </select>
+    <select class="filter-select" [(ngModel)]="statusFilter">
+      <option value="">All statuses</option>
+      <option value="Scored">Scored</option>
+      <option value="Error">Error</option>
+      <option value="Pending">Pending</option>
+    </select>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>SUB</th>
+          <th>Level</th>
+          <th>Score</th>
+          <th>Status</th>
+          <th>Runtime</th>
+          <th>Submitted</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let sub of filteredSubmissions">
+          <td>{{ sub.id }}</td>
+          <td>{{ sub.level }}</td>
+          <td>{{ sub.score | number }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="sub.status.toLowerCase()">{{ sub.status }}</span>
+          </td>
+          <td>{{ sub.runtime }}</td>
+          <td>{{ sub.submitted }}</td>
+          <td class="actions-cell">
+            <button class="btn-action green" (click)="viewLogs(sub)">View Logs</button>
+            <button class="btn-action orange" (click)="downloadCode(sub)">Download code</button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredSubmissions.length === 0">
+          <td colspan="7" class="empty-row">No submissions found.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="error-log-panel" *ngIf="selectedSubmission">
+      <p class="error-log-title">Submission {{ selectedSubmission.id }} – Error Log</p>
+      <pre class="error-log-content">{{ selectedSubmission.errorLog || 'No errors logged.' }}</pre>
+    </div>
+  </div>
+</div>

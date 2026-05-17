@@ -1,0 +1,123 @@
+<div class="create-event-page">
+  <div class="page-header">
+    <h1>Create new event</h1>
+    <p class="page-subtitle">Configure all event parameters before publishing</p>
+  </div>
+
+  <form (ngSubmit)="onSaveDraft()" class="event-form">
+    <div class="form-section">
+      <h2 class="section-heading">Basic information :</h2>
+
+      <div class="form-group">
+        <label for="eventName">Event name</label>
+        <input
+          id="eventName"
+          type="text"
+          [(ngModel)]="form.eventName"
+          name="eventName"
+          placeholder="Entelect Challenge 2026"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startDate">Start date &amp; time</label>
+          <input
+            id="startDate"
+            type="datetime-local"
+            [(ngModel)]="form.startDate"
+            name="startDate"
+          />
+        </div>
+        <div class="form-group">
+          <label for="duration">Duration</label>
+          <input
+            id="duration"
+            type="text"
+            [(ngModel)]="form.duration"
+            name="duration"
+            placeholder="24 hours"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="minTeam">Min team size</label>
+          <input
+            id="minTeam"
+            type="number"
+            [(ngModel)]="form.minTeamSize"
+            name="minTeamSize"
+            placeholder="4"
+            min="1"
+          />
+        </div>
+        <div class="form-group">
+          <label for="maxTeam">Max team size</label>
+          <input
+            id="maxTeam"
+            type="number"
+            [(ngModel)]="form.maxTeamSize"
+            name="maxTeamSize"
+            placeholder="10"
+            min="1"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2 class="section-heading">Visibility &amp; Access</h2>
+      <label class="field-label">Visibility</label>
+      <div class="toggle-group">
+        <button
+          type="button"
+          class="toggle-option"
+          [class.selected]="form.visibility === 'public'"
+          (click)="form.visibility = 'public'"
+        >
+          <span class="toggle-title">Public</span>
+          <span class="toggle-desc">Anyone can Register</span>
+        </button>
+        <button
+          type="button"
+          class="toggle-option"
+          [class.selected]="form.visibility === 'private'"
+          (click)="form.visibility = 'private'"
+        >
+          <span class="toggle-title">Private</span>
+          <span class="toggle-desc">Registration key required</span>
+        </button>
+      </div>
+    </div>
+
+
+    <div class="form-section">
+      <h2 class="section-heading">Branding</h2>
+      <label class="field-label">Event banner/Logo</label>
+      <div class="drop-zone" (click)="triggerFileInput()" (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
+        <input type="file" #fileInput style="display:none" (change)="onFileSelected($event)" accept="image/*" />
+        <span>+ Drop image here or browse</span>
+        <span class="drop-hint" *ngIf="form.bannerFileName">{{ form.bannerFileName }}</span>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2 class="section-heading">Rules &amp; Description</h2>
+      <textarea
+        [(ngModel)]="form.description"
+        name="description"
+        rows="4"
+        placeholder="Enter event rules and description..."
+      ></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-secondary">Save draft</button>
+      <button type="button" class="btn-primary" (click)="onNextStep()">
+        Next: Levels &amp; Files
+      </button>
+    </div>
+  </form>
+</div>
