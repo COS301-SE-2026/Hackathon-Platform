@@ -49,13 +49,25 @@ export const routes: Routes = [
         path: 'home',
         loadComponent: () => import('./participant/home/home.component').then(m => m.HomeComponent),
       },
+         {
+        path: 'submissions',
+        loadComponent: () => import('./participant/submission-history/submissionhistory.component').then(m => m.SubmissionHistoryComponent),
+      },
+        {
+        path: 'team', 
+        loadComponent: () => import('./participant/team/team.component').then(m => m.TeamComponent),
+      },
+       {
+        path: 'submit',  
+        loadComponent: () => import('./participant/submit/submit.component').then(m => m.SubmitComponent),
+      }, 
        {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',
       }
     ]
-  },  
+  }, 
   {
     path: '**',
     redirectTo: 'login',
