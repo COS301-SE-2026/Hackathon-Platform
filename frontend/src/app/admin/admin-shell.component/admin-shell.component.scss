@@ -1,0 +1,114 @@
+.admin-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #2a2a3e;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  background-color: #4a4a58;
+  padding: 0 24px;
+  height: 60px;
+  gap: 32px;
+  flex-shrink: 0;
+}
+
+.navbar-brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .brand-hackathon {
+    color: #7c3aed;
+  }
+
+  .brand-platform {
+    color: #4ade80;
+  }
+}
+
+.navbar-links {
+  display: flex;
+  gap: 28px;
+  flex: 1;
+
+  a {
+    color: #e5e5e5;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+
+    &:hover,
+    &.active {
+      color: #ffffff;
+      border-bottom-color: #7c3aed;
+    }
+  }
+}
+
+.navbar-role {
+  .role-badge {
+    border: 1px solid #e5e5e5;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    color: #e5e5e5;
+  }
+}
+
+
+.admin-body {
+  display: flex;
+  flex: 1;
+}
+
+.sidebar {
+  width: 180px;
+  background-color: #5a5a68;
+  padding: 24px 20px;
+  flex-shrink: 0;
+
+  .sidebar-label {
+    color: #d1d1d1;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .sidebar-nav {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    li a {
+      display: block;
+      color: #e5e5e5;
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.15s;
+
+      &:hover,
+      &.active {
+        background-color: rgba(124, 58, 237, 0.25);
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.admin-content {
+  flex: 1;
+  padding: 28px 32px;
+  overflow-y: auto;
+}

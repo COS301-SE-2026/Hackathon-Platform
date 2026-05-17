@@ -1,0 +1,45 @@
+<div class="team-page">
+  <div class="page-header">
+    <div>
+      <h1>My team – {{ team.name }}</h1>
+      <p class="page-sub">{{ team.eventName }}</p>
+    </div>
+  </div>
+
+  
+  <h2 class="section-title">Team members</h2>
+  <div class="members-list">
+    <div class="member-row" *ngFor="let member of team.members">
+      <div class="member-left">
+        <div class="avatar">{{ getInitials(member.name) }}</div>
+        <div class="member-info">
+          <p class="member-name">{{ member.name }}{{ member.isLead ? ' (Team Lead)' : '' }}</p>
+          <p class="member-email">{{ member.email }}</p>
+        </div>
+      </div>
+      <span class="member-status" [ngClass]="member.status.toLowerCase()">
+        {{ member.status }}
+      </span>
+    </div>
+  </div>
+
+  <div class="team-actions-grid">
+    <div class="action-card">
+      <h3>Join an existing team</h3>
+      <p class="action-desc">Search for an open team and send a join request. The team lead must approve</p>
+      <div class="search-row">
+        <input type="text" [(ngModel)]="teamSearch" placeholder="Search teams.." />
+        <button class="btn-search" (click)="onSearchTeams()">Search</button>
+      </div>
+    </div>
+
+    <div class="action-card">
+      <h3>Create new team</h3>
+      <label class="field-label">Team name</label>
+      <div class="create-row">
+        <input type="text" [(ngModel)]="newTeamName" placeholder="e.g Byteforce" />
+        <button class="btn-create" (click)="onCreateTeam()">Create team</button>
+      </div>
+    </div>
+  </div>
+</div>
