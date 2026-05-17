@@ -1,0 +1,62 @@
+<div class="events-page">
+  <div class="page-header">
+    <div>
+      <h1>Events</h1>
+      <p class="page-subtitle">All hackathon events on this platform</p>
+    </div>
+    <button class="btn-primary" routerLink="/admin/events/create">+ New event</button>
+  </div>
+
+  <div class="filters-bar">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search events..."
+      [(ngModel)]="searchQuery"
+    />
+    <select class="filter-select" [(ngModel)]="statusFilter">
+      <option value="">All statuses</option>
+      <option value="live">Live</option>
+      <option value="upcoming">Upcoming</option>
+      <option value="ended">Ended</option>
+    </select>
+    <select class="filter-select" [(ngModel)]="visibilityFilter">
+      <option value="">All visibility</option>
+      <option value="public">Public</option>
+      <option value="private">Private</option>
+    </select>
+  </div>
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>EVENT</th>
+          <th>Dates</th>
+          <th>Teams</th>
+          <th>Visibility</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let event of filteredEvents">
+          <td>
+            <p class="event-name">{{ event.name }}</p>
+            <p class="event-type">{{ event.type }}</p>
+          </td>
+          <td>{{ event.dates }}</td>
+          <td>{{ event.teams }}</td>
+          <td>{{ event.visibility }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="event.status.toLowerCase()">
+              {{ event.status }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-manage">Manage &amp; Edit</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
