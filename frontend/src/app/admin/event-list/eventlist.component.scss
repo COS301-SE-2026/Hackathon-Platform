@@ -1,0 +1,171 @@
+.events-page {
+  color: #ffffff;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+
+  .page-subtitle {
+    color: #d1d1d1;
+    font-size: 0.875rem;
+    margin-top: 2px;
+  }
+}
+
+.btn-primary {
+  background-color: #7c3aed;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #6d28d9;
+  }
+}
+
+
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background-color: #5a5a68;
+  color: #e5e5e5;
+  font-size: 0.875rem;
+  outline: none;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: #7c3aed;
+  }
+}
+
+.filter-select {
+  padding: 10px 36px 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background-color: #5a5a68;
+  color: #e5e5e5;
+  font-size: 0.875rem;
+  outline: none;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+
+  &:focus {
+    border-color: #7c3aed;
+  }
+}
+
+
+.table-card {
+  background-color: #6b6b7a;
+  border-radius: 12px;
+  overflow: hidden;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #d1d1d1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 16px;
+    font-size: 0.875rem;
+    color: #e5e5e5;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.event-name {
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.event-type {
+  font-size: 0.78rem;
+  color: #b0b0c0;
+  margin-top: 2px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+
+  &.live {
+    background-color: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+  }
+
+  &.upcoming {
+    background-color: rgba(124, 58, 237, 0.2);
+    color: #a78bfa;
+  }
+
+  &.ended {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+  }
+}
+
+.btn-manage {
+  background-color: #7c3aed;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #6d28d9;
+  }
+}
