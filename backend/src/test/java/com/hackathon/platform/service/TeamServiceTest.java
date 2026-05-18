@@ -206,4 +206,19 @@ class TeamServiceTest {
 
         verify(teamMemberRepository, never()).save(any(TeamMember.class));
     }
+
+    @Test
+    void leaveTeam_shouldSetStatusToLeft_whenApprovedMember() {
+        UUID teamId = UUID.randomUUID();
+        TeamMember membership = new TeamMember();
+        membership.setStatus("APPROVED");
+        when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.of(membership));
+        when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(1L);
+
+        teamService.leaveTeam(teamId, userId);
+
+        assertThat(membership.getStatus()).isEqualTo("LEFT");
+        verify(teamMemberRepository).save(membership);
+        verify(teamRepository, never()).save(any());
+    }
 }
