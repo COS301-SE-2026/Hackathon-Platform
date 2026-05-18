@@ -133,4 +133,26 @@ class TeamServiceTest {
 
         verify(teamMemberRepository, never()).save(any(TeamMember.class));
     }
+
+
+    @Test
+    void approveOrRejectJoinRequest_shouldApprove_whenValid() {
+        UUID teamId = UUID.randomUUID();
+        UUID targetUserId = UUID.randomUUID();
+        Team team = new Team();
+        team.setEventId(eventId);
+        team.setCreatedByUserId(userId); 
+        TeamMember pending = new TeamMember();
+        pending.setStatus("PENDING");
+
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId)).thenReturn(Optional.of(pending));
+        when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED")).thenReturn(Collections.emptyList());
+        when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(1L); 
+
+        teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true);
+
+        assertThat(pending.getStatus()).isEqualTo("APPROVED");
+        verify(teamMemberRepository).save(pending);
+    }
 }
