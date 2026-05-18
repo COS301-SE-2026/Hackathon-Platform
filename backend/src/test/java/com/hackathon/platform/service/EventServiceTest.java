@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.dto.EventRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class EventServiceTest {
     @Mock private EventRepository eventRepository;
+    @Mock private EventRequest eventRequest;
     @InjectMocks EventService eventService;
 
     private UUID eventId;
@@ -61,5 +63,25 @@ class EventServiceTest {
 
         assertThat(results).isNotNull().isEmpty();
         verify(eventRepository).fetchAllByAdmin(invalid);
+    }
+
+    @Test
+    void createEvent_withValidPayload_returnsSavedEvent() {
+        EventRequest req = new EventRequest();
+        req.setName("My new name");
+        req.setVisibility("PUBLIC");
+        req.setStatus("ACTIVE");
+        req.setDescription("This is a test");
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Event result = eventService.createEvent(req);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("My new name");
+        assertThat(result.getVisibility()).isEqualTo("PUBLIC");
+        assertThat(result.getStatus()).isEqualTo("ACTIVE");
+        assertThat(result.getDescription()).isEqualTo("This is a test");
+        assertThat(result.getCreatedByUserId()).isEqualTo(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
+
+        verify(eventRepository).save(any(Event.class));
     }
 }
