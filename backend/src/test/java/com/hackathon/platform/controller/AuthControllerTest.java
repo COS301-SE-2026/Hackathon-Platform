@@ -92,4 +92,11 @@ class AuthControllerTest {
     assertThat(response).isNotNull();
     assertThat(response.getToken()).isNotBlank();
   }
+
+  @Test
+  void login_withWrongPassword_returns401Unauthorized() throws Exception {
+    mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(validRequest))).andExpect(status().isCreated());
+    LoginRequest loginReq = new LoginRequest("jane.doe@gmail.com", "TestPassworD");
+    mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(loginReq))).andExpect(status().isUnauthorized());
+  }
 }
