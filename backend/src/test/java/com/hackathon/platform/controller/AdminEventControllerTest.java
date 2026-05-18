@@ -57,6 +57,7 @@ class AdminEventControllerTest {
         event.setRegistrationKey(null);
         event.setDuration(400);
         event.setStartDateTime(OffsetDateTime.now().plusDays(7));
+        event.setTeamSizeLimit((short) 5);
 
         Role adminRole = Role.builder().roleId(1).name("ADMIN").build();
         User adminUser = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("janeAdmin@example.com").passwordHash("$2a$12$hashedpassword").role(adminRole).status("ACTIVE").build();
@@ -65,5 +66,10 @@ class AdminEventControllerTest {
         Role participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
         User participantUser = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("jane@example.com").passwordHash("$2a$12$hashedpassword").role(participantRole).status("ACTIVE").build();
         participantAuth = new UsernamePasswordAuthenticationToken(participantUser, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+    }
+
+    @Test
+    void createEvent_asAdmin_returns200Ok() throws Exception {
+        mockMvc.perform(post("/api/admin/events").with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(event))).andExpect(status().isOk());
     }
 }
