@@ -2,6 +2,8 @@ package com.hackathon.platform.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -9,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.RegisterRequest;
 import com.hackathon.platform.dto.LoginRequest;
+import com.hackathon.platform.model.User;
+import com.hackathon.platform.model.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import java.util.Collections;
+import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -98,5 +105,13 @@ class AuthControllerTest {
     mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(validRequest))).andExpect(status().isCreated());
     LoginRequest loginReq = new LoginRequest("jane.doe@gmail.com", "TestPassworD");
     mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(loginReq))).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void me_withAuthenticatedUser_returnsUserProfile() throws Exception {
+    Role participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
+    User user = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("jane@example.com").passwordHash("$2a$12$hashedpassword").role(participantRole).status("ACTIVE").build();
+
+    mockMvc.perform(get("/api/auth/me").with(authentication(new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList())))).andExpect(status().isOk());
   }
 }
