@@ -43,7 +43,7 @@
 
     <div class="form-group">
       <label for="zipFile">Source code archive (.zip)*</label>
-      <div
+      <button
         class="drop-zone"
         (click)="zipInput.click()"
         (keydown.enter)="zipInput.click()"
@@ -53,7 +53,7 @@
       >
         <input id="zipFile" #zipInput type="file" style="display:none" (change)="onZipSelected($event)" accept=".zip" />
         <span>{{ zipFileName || 'Drop .zip here or browse' }}</span>
-      </div>
+      </button>
     </div>
 
     <button class="btn-submit" (click)="onSubmit()">Submit</button>
