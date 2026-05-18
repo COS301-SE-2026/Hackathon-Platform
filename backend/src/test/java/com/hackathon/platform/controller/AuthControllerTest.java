@@ -22,36 +22,59 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @Transactional
 class AuthControllerTest {
-    @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objMapper;
+  @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objMapper;
 
-    private RegisterRequest validRequest;
+  private RegisterRequest validRequest;
 
-    @BeforeEach
-    void setUp() {
-        validRequest = new RegisterRequest("Jane", "Doe", "Jane.Doe@gmail.com", "TestPassword");
-    }
+  @BeforeEach
+  void setUp() {
+    validRequest = new RegisterRequest("Jane", "Doe", "Jane.Doe@gmail.com", "TestPassword");
+  }
 
-    @Test
-    void register_withValidPayload_returns201CreatedAndToken() throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(validRequest))).andExpect(status().isCreated()).andExpect(jsonPath("$.token").exists()).andReturn();
+  @Test
+  void register_withValidPayload_returns201CreatedAndToken() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(
+                post("/api/auth/register")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objMapper.writeValueAsString(validRequest)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.token").exists())
+            .andReturn();
 
-        String content = result.getResponse().getContentAsString();
-        AuthResponse response = objMapper.readValue(content, AuthResponse.class);
+    String content = result.getResponse().getContentAsString();
+    AuthResponse response = objMapper.readValue(content, AuthResponse.class);
 
-        assertThat(response).isNotNull();
-        assertThat(response.getToken()).isNotNull();
-    }
+    assertThat(response).isNotNull();
+    assertThat(response.getToken()).isNotNull();
+  }
 
-    @Test
-    void register_withMissingCredentials_returns400BadRequest() throws Exception {
-        validRequest.setFirstName(null);
-        mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(validRequest))).andExpect(status().isBadRequest());
-    }
+  @Test
+  void register_withMissingCredentials_returns400BadRequest() throws Exception {
+    validRequest.setFirstName(null);
+    mockMvc
+        .perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(validRequest)))
+        .andExpect(status().isBadRequest());
+  }
 
-    @Test
-    void register_withDuplicateEmail_isRejected() throws Exception {
-        mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(validRequest))).andExpect(status().isCreated());
-        mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(validRequest))).andExpect(status().isConflict());
-    }
+  @Test
+  void register_withDuplicateEmail_isRejected() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(validRequest)))
+        .andExpect(status().isCreated());
+    mockMvc
+        .perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(validRequest)))
+        .andExpect(status().isConflict());
+  }
 }
