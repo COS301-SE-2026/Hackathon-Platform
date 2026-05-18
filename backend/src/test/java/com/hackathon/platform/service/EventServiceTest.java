@@ -192,5 +192,15 @@ class EventServiceTest {
         assertThat(response.getVisibility()).isEqualTo("PUBLIC");
 
         verify(eventRepository).findById(eventId);
-    }        
+    }
+
+    @Test
+    void getEventStatus_withInvalidEventId_throwsRuntimeException() {
+        UUID randomEventId = UUID.randomUUID();
+        when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.getEventStatus(randomEventId)).isInstanceOf(RuntimeException.class).hasMessageContaining("Event not found");
+
+        verify(eventRepository).findById(randomEventId);
+    }
 }
