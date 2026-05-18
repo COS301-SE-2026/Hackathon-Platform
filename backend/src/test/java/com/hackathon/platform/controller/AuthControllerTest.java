@@ -41,7 +41,7 @@ class AuthControllerTest {
   }
 
   @Test
-  void register_withValidPayload_returns201CreatedAndToken() throws Exception {
+  void register_withValidPayload_returns201AndToken() throws Exception {
     MvcResult result =
         mockMvc
             .perform(
@@ -87,7 +87,7 @@ class AuthControllerTest {
   }
 
   @Test
-  void login_withCorrectCredentials_returns201CreatedAndToken() throws Exception {
+  void login_withCorrectCredentials_returns200CreatedAndToken() throws Exception {
     mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(validRequest))).andExpect(status().isCreated());
 
     LoginRequest loginReq = new LoginRequest("jane.doe@gmail.com", "TestPassword");
