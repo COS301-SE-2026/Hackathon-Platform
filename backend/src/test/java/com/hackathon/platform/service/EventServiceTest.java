@@ -149,4 +149,13 @@ class EventServiceTest {
         assertThat(updateEvent.getStatus()).isEqualTo("ACTIVE");
         verify(eventRepository).save(event);
     }
+
+    @Test
+    void patchEventStatus_toPrivateWithoutKey_throwsRuntimeException() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.patchEventStatus(eventId, "PRIVATE", "ACTIVE", null)).isInstanceOf(RuntimeException.class).hasMessageContaining("Registration key is required for private events");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
 }
