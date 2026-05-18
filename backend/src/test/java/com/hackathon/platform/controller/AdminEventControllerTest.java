@@ -2,6 +2,7 @@ package com.hackathon.platform.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -84,5 +85,17 @@ class AdminEventControllerTest {
     @Test
     void getEventByCreator_asParticipant_return403Forbidden() throws Exception {
         mockMvc.perform(get("/api/admin/events/{id}", creatorUserId).with(authentication(participantAuth))).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void putUpdateEvent_asAdmin_returns200Ok() throws Exception {
+        MvcResult newEvent = mockMvc.perform(post("/api/admin/events").with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isOk()).andReturn();
+
+        String content = newEvent.getResponse().getContentAsString();
+        Event exisitngEvent = objMapper.readValue(content, Event.class);
+        UUID exisitngEventId = exisitngEvent.getEventId();
+
+        eventRequest.setName("New name");
+        mockMvc.perform(put("/api/admin/events/{id}", exisitngEventId).with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isOk());
     }
 }
