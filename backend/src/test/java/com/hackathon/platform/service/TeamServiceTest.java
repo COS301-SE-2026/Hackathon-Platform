@@ -275,7 +275,17 @@ class TeamServiceTest {
         verify(teamRepository).save(team);
     }
 
-
+    @Test
+    void leaveTeam_shouldDelete_whenPendingMember() {
+        UUID teamId = UUID.randomUUID();
+        TeamMember membership = new TeamMember();
+        membership.setStatus("PENDING");
+        when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.of(membership));
+        teamService.leaveTeam(teamId, userId);
+        verify(teamMemberRepository).delete(membership);
+        verify(teamMemberRepository, never()).save(any());
+    }
+    
     @Test
     void viewTeamMembers_shouldReturnListOfMembers() {
     
