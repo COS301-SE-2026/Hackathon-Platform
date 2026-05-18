@@ -110,4 +110,13 @@ class TeamServiceTest {
         verify(teamMemberRepository).save(any(TeamMember.class));
     }
 
+    @Test
+    void requestToJoinTeam_shouldThrow_whenAlreadyRequested() {
+        UUID teamId = UUID.randomUUID();
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(new Team()));
+        when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.of(new TeamMember()));
+
+        assertThatThrownBy(() -> teamService.requestToJoinTeam(teamId, userId)).isInstanceOf(RuntimeException.class).hasMessageContaining("Already requested or member");
+        verify(teamMemberRepository, never()).save(any(TeamMember.class));
+    }
 }
