@@ -221,4 +221,23 @@ class TeamServiceTest {
         verify(teamMemberRepository).save(membership);
         verify(teamRepository, never()).save(any());
     }
+
+    @Test
+    void leaveTeam_shouldSetTeamInactive_whenLastMemberLeaves() {
+        UUID teamId = UUID.randomUUID();
+        TeamMember membership = new TeamMember();
+        membership.setStatus("APPROVED");
+        Team team = new Team();
+        team.setStatus("ACTIVE");
+        when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.of(membership));
+        when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(0L);
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(teamRepository.save(any(Team.class))).thenReturn(team);
+        teamService.leaveTeam(teamId, userId);
+        assertThat(membership.getStatus()).isEqualTo("LEFT");
+        assertThat(team.getStatus()).isEqualTo("INACTIVE");
+        verify(teamMemberRepository).save(membership);
+        verify(teamRepository).save(team);
+    }
+
 }
