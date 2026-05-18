@@ -42,4 +42,10 @@ class AuthControllerTest {
         assertThat(response).isNotNull();
         assertThat(response.getToken()).isNotNull();
     }
+
+    @Test
+    void register_withMissingCredentials_returns400BadRequest() throws Exception {
+        validRequest.setFirstName(null);
+        mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(validRequest))).andExpect(status().isBadRequest());
+    }
 }
