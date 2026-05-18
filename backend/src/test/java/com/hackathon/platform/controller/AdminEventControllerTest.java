@@ -72,4 +72,9 @@ class AdminEventControllerTest {
     void createEvent_asAdmin_returns200Ok() throws Exception {
         mockMvc.perform(post("/api/admin/events").with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(event))).andExpect(status().isOk());
     }
+
+    @Test
+    void createEvent_asParticipant_returns403Forbidden() throws Exception {
+        mockMvc.perform(post("/api/admin/events").with(authentication(participantAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(event))).andExpect(status().isForbidden());
+    }
 }
