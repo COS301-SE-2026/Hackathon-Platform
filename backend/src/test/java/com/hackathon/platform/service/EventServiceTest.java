@@ -29,24 +29,24 @@ class EventServiceTest {
 
     private UUID eventId;
     private UUID creatorUserId;
-    private Event previousEvent;
+    private Event event;
 
     @BeforeEach
     void setUp() {
         eventId = UUID.randomUUID();
         creatorUserId = UUID.randomUUID();
-        previousEvent = new Event();
-        previousEvent.setEventId(eventId);
-        previousEvent.setCreatedByUserId(creatorUserId);
-        previousEvent.setName("Test Hackathon");
-        previousEvent.setVisibility("PUBLIC");
-        previousEvent.setStatus("INACTIVE");
-        previousEvent.setRegistrationKey(null);
+        event = new Event();
+        event.setEventId(eventId);
+        event.setCreatedByUserId(creatorUserId);
+        event.setName("Test Hackathon");
+        event.setVisibility("PUBLIC");
+        event.setStatus("INACTIVE");
+        event.setRegistrationKey(null);
     }
 
     @Test
     void getEventByCreator_withValidCreatorId_returnsMatchingEvents() {
-        when(eventRepository.fetchAllByAdmin(creatorUserId)).thenReturn(Collections.singletonList(previousEvent));
+        when(eventRepository.fetchAllByAdmin(creatorUserId)).thenReturn(Collections.singletonList(event));
         List<Event> results = eventService.getEventByCreator(creatorUserId);
 
         assertThat(results).isNotEmpty().hasSize(1);
@@ -82,6 +82,32 @@ class EventServiceTest {
         assertThat(result.getDescription()).isEqualTo("This is a test");
         assertThat(result.getCreatedByUserId()).isEqualTo(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
 
+        verify(eventRepository).save(any(Event.class));
+    }
+
+    @Test
+    void putUpdateEvent_withValidId_returnsUpdatedEvent() {
+        EventRequest req = new EventRequest();
+        req.setName("My new name");
+        req.setVisibility("PRIVATE");
+        req.setStatus("ACTIVE");
+        req.setDescription("This is a test");
+        req.setRegistrationKey("THISISAKEY");
+
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Event result = eventService.putUpdateEvent(eventId, req);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("My new name");
+        assertThat(result.getVisibility()).isEqualTo("PRIVATE");
+        assertThat(result.getStatus()).isEqualTo("ACTIVE");
+        assertThat(result.getDescription()).isEqualTo("This is a test");
+        assertThat(result.getRegistrationKey()).isEqualTo("THISISAKEY");
+        assertThat(result.getCreatedByUserId()).isEqualTo(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
+
+        verify(eventRepository).findById(eventId);
         verify(eventRepository).save(any(Event.class));
     }
 }
