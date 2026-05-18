@@ -3,6 +3,7 @@ package com.hackathon.platform.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -97,5 +98,25 @@ class AdminEventControllerTest {
 
         eventRequest.setName("New name");
         mockMvc.perform(put("/api/admin/events/{id}", exisitngEventId).with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isOk());
+    }
+
+    @Test
+    void putUpdateEvent_asParticipant_returns403Forbidden() throws Exception {
+        mockMvc.perform(put("/api/admin/events/{id}", eventId).with(authentication(participantAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void patchEventStatus_asAdmin_returns200Ok() throws Exception {
+         MvcResult newEvent = mockMvc.perform(post("/api/admin/events").with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isOk()).andReturn();
+
+        String content = newEvent.getResponse().getContentAsString();
+        Event exisitngEvent = objMapper.readValue(content, Event.class);
+        UUID exisitngEventId = exisitngEvent.getEventId();
+
+        eventRequest.setVisibility("PRIVATE");
+        eventRequest.setStatus("ACTIVE");
+        eventRequest.setRegistrationKey("TESTPASSWORD");
+
+        mockMvc.perform(patch("/api/admin/events/{id}/status", exisitngEventId).with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isOk());
     }
 }
