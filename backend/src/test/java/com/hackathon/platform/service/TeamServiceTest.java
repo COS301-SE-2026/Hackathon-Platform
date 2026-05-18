@@ -119,4 +119,18 @@ class TeamServiceTest {
         assertThatThrownBy(() -> teamService.requestToJoinTeam(teamId, userId)).isInstanceOf(RuntimeException.class).hasMessageContaining("Already requested or member");
         verify(teamMemberRepository, never()).save(any(TeamMember.class));
     }
+
+    @Test
+    void requestToJoinTeam_shouldThrow_whenTeamFull() {
+        UUID teamId = UUID.randomUUID();
+        Team team = new Team();
+        team.setEventId(eventId);
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
+        when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(4L); 
+
+        assertThatThrownBy(() -> teamService.requestToJoinTeam(teamId, userId)).isInstanceOf(RuntimeException.class).hasMessageContaining("Team is full");
+
+        verify(teamMemberRepository, never()).save(any(TeamMember.class));
+    }
 }
