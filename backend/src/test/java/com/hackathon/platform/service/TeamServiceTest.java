@@ -17,6 +17,7 @@ import com.hackathon.platform.repository.UserRepository;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,6 +74,23 @@ class TeamServiceTest {
         
         when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(true);
         assertThatThrownBy(() -> teamService.createTeam(createRequest, userId)).isInstanceOf(RuntimeException.class).hasMessageContaining("Team name already exists in this event");
+        verify(teamRepository, never()).save(any(Team.class));
+        verify(teamMemberRepository, never()).save(any(TeamMember.class));
+    }
+
+    @Test
+    void createTeam_shouldThrow_whenUserAlreadyInTeamForEvent() {
+        
+        when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
+
+        Team existingTeam = new Team();
+        existingTeam.setEventId(eventId);
+        TeamMember existingMember = new TeamMember();
+        existingMember.setTeamId(UUID.randomUUID());
+        when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED")).thenReturn(List.of(existingMember));
+        when(teamRepository.findById(existingMember.getTeamId())).thenReturn(Optional.of(existingTeam));
+
+        assertThatThrownBy(() -> teamService.createTeam(createRequest, userId)).isInstanceOf(RuntimeException.class).hasMessageContaining("already a member of a team in this event");
         verify(teamRepository, never()).save(any(Team.class));
         verify(teamMemberRepository, never()).save(any(TeamMember.class));
     }
