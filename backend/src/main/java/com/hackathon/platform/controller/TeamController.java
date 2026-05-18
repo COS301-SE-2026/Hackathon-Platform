@@ -1,6 +1,7 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.ApproveRequest;
+import com.hackathon.platform.model.User;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,17 +37,19 @@ public class TeamController {
   /** create a new team */
   @PostMapping
   public ResponseEntity<TeamResponse> createTeam(
-      @Valid @RequestBody CreateTeamRequest request, Principal principal) {
-    UUID currentUserId = UUID.fromString(principal.getName());
-    TeamResponse response = teamService.createTeam(request, currentUserId);
+      @Valid @RequestBody CreateTeamRequest request,
+      @AuthenticationPrincipal User currentUser) {
+    //UUID currentUserId = UUID.fromString(principal.getName());
+    TeamResponse response = teamService.createTeam(request, currentUser.getUserId());
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   /** request to join a team */
   @PostMapping("/{teamId}/join-requests")
-  public ResponseEntity<Void> requestToJoin(@PathVariable UUID teamId, Principal principal) {
-    UUID currentUserId = UUID.fromString(principal.getName());
-    teamService.requestToJoinTeam(teamId, currentUserId);
+  public ResponseEntity<Void> requestToJoin(@PathVariable UUID teamId,
+    @AuthenticationPrincipal User currentUser) {
+    //UUID currentUserId = UUID.fromString(principal.getName());
+    teamService.requestToJoinTeam(teamId, currentUser.getUserId());
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
@@ -55,17 +59,18 @@ public class TeamController {
       @PathVariable UUID teamId,
       @PathVariable UUID userId,
       @RequestBody ApproveRequest request,
-      Principal principal) {
-    UUID currentUserId = UUID.fromString(principal.getName());
-    teamService.approveOrRejectJoinRequest(teamId, userId, currentUserId, request.isApprove());
+      @AuthenticationPrincipal User currentUser) {
+    //UUID currentUserId = UUID.fromString(principal.getName());
+    teamService.approveOrRejectJoinRequest(teamId, userId, currentUser.getUserId(), request.isApprove());
     return ResponseEntity.ok().build();
   }
 
   /** leave a team (current authenticated user) */
   @DeleteMapping("/{teamId}/members")
-  public ResponseEntity<Void> leaveTeam(@PathVariable UUID teamId, Principal principal) {
-    UUID currentUserId = UUID.fromString(principal.getName());
-    teamService.leaveTeam(teamId, currentUserId);
+  public ResponseEntity<Void> leaveTeam(@PathVariable UUID teamId,
+    @AuthenticationPrincipal User currentUser) {
+    //UUID currentUserId = UUID.fromString(principal.getName());
+    teamService.leaveTeam(teamId, currentUser.getUserId());
     return ResponseEntity.noContent().build();
   }
 
