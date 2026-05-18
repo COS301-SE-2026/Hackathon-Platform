@@ -272,4 +272,10 @@ class TeamServiceTest {
         assertThat(response.getRole()).isEqualTo("MEMBER");
     }
 
+    @Test
+    void viewTeamMembers_shouldThrow_whenTeamNotFound() {
+        UUID teamId = UUID.randomUUID();
+        when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> teamService.viewTeamMembers(teamId)).isInstanceOf(RuntimeException.class).hasMessageContaining("Team not found");
+    }
 }
