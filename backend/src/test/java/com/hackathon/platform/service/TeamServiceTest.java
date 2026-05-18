@@ -94,4 +94,20 @@ class TeamServiceTest {
         verify(teamRepository, never()).save(any(Team.class));
         verify(teamMemberRepository, never()).save(any(TeamMember.class));
     }
+
+    @Test
+    void requestToJoinTeam_shouldSucceed_whenValid() {
+        UUID teamId = UUID.randomUUID();
+        Team team = new Team();
+        team.setEventId(eventId);
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
+        when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(0L);
+        when(teamMemberRepository.save(any(TeamMember.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        teamService.requestToJoinTeam(teamId, userId);
+
+        verify(teamMemberRepository).save(any(TeamMember.class));
+    }
+
 }
