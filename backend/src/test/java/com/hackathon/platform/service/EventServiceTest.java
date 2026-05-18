@@ -169,4 +169,14 @@ class EventServiceTest {
 
         verify(eventRepository, never()).save(any(Event.class));
     }
+
+    @Test
+    void patchEventStatus_withInvalidId_throwsNotFoundException() {
+        UUID randomEventId = UUID.randomUUID();
+        when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.patchEventStatus(randomEventId, "PUBLIC", "ACTIVE", null)).isInstanceOf(RuntimeException.class).hasMessageContaining("Event not found");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
 }
