@@ -110,4 +110,18 @@ class EventServiceTest {
         verify(eventRepository).findById(eventId);
         verify(eventRepository).save(any(Event.class));
     }
+
+    @Test
+    void putUpdateEvent_withInvalidId_throwsRuntimeException() {
+        UUID invalidId = UUID.randomUUID();
+        EventRequest req = new EventRequest();
+        req.setName("Invalid");
+
+        when(eventRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.putUpdateEvent(invalidId, req)).isInstanceOf(RuntimeException.class).hasMessageContaining("Event not found");
+
+        verify(eventRepository).findById(invalidId);
+        verify(eventRepository, never()).save(any(Event.class));
+    }
 }
