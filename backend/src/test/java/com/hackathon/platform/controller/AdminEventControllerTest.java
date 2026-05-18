@@ -48,16 +48,14 @@ class AdminEventControllerTest {
     void setUp() {
         eventId = UUID.randomUUID();
         creatorUserId = UUID.randomUUID();
-        event = new Event();
-        event.setEventId(eventId);
-        event.setCreatedByUserId(creatorUserId);
-        event.setName("Test Hackathon");
-        event.setVisibility("PUBLIC");
-        event.setStatus("INACTIVE");
-        event.setRegistrationKey(null);
-        event.setDuration(400);
-        event.setStartDateTime(OffsetDateTime.now().plusDays(7));
-        event.setTeamSizeLimit((short) 5);
+        eventRequest = new EventRequest();
+        eventRequest.setName("Test Hackathon");
+        eventRequest.setVisibility("PUBLIC");
+        eventRequest.setStatus("INACTIVE");
+        eventRequest.setRegistrationKey(null);
+        eventRequest.setDuration(400);
+        eventRequest.setStartDateTime(OffsetDateTime.now().plusDays(7));
+        eventRequest.setTeamSizeLimit((short) 5);
 
         Role adminRole = Role.builder().roleId(1).name("ADMIN").build();
         User adminUser = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("janeAdmin@example.com").passwordHash("$2a$12$hashedpassword").role(adminRole).status("ACTIVE").build();
@@ -70,16 +68,21 @@ class AdminEventControllerTest {
 
     @Test
     void createEvent_asAdmin_returns200Ok() throws Exception {
-        mockMvc.perform(post("/api/admin/events").with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(event))).andExpect(status().isOk());
+        mockMvc.perform(post("/api/admin/events").with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isOk());
     }
 
     @Test
     void createEvent_asParticipant_returns403Forbidden() throws Exception {
-        mockMvc.perform(post("/api/admin/events").with(authentication(participantAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(event))).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/admin/events").with(authentication(participantAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isForbidden());
     }
 
     @Test
     void getEventByCreator_asAdmin_return200Ok() throws Exception {
         mockMvc.perform(get("/api/admin/events/{id}", creatorUserId).with(authentication(adminAuth))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getEventByCreator_asParticipant_return403Forbidden() throws Exception {
+        mockMvc.perform(get("/api/admin/events/{id}", creatorUserId).with(authentication(participantAuth))).andExpect(status().isForbidden());
     }
 }
