@@ -52,4 +52,14 @@ class EventServiceTest {
         assertThat(results.get(0).getCreatedByUserId()).isEqualTo(creatorUserId);
         verify(eventRepository).fetchAllByAdmin(creatorUserId);
     }
+
+    @Test
+    void getEventByCreator_withInvalidCreatorId_returnsEmptyList() {
+        UUID invalid = UUID.randomUUID();
+        when(eventRepository.fetchAllByAdmin(invalid)).thenReturn(Collections.emptyList());
+        List<Event> results = eventService.getEventByCreator(invalid);
+
+        assertThat(results).isNotNull().isEmpty();
+        verify(eventRepository).fetchAllByAdmin(invalid);
+    }
 }
