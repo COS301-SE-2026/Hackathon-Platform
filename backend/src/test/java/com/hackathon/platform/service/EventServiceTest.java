@@ -137,4 +137,16 @@ class EventServiceTest {
         assertThat(updateEvent.getRegistrationKey()).isEqualTo("KEY");
         verify(eventRepository).save(event);
     }
+
+    @Test
+    void patchEventStatus_toPublic_updatesAndSavesEvent() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        
+        Event updateEvent = eventService.patchEventStatus(eventId, "PUBLIC", "ACTIVE", null);
+
+        assertThat(updateEvent.getVisibility()).isEqualTo("PUBLIC");
+        assertThat(updateEvent.getStatus()).isEqualTo("ACTIVE");
+        verify(eventRepository).save(event);
+    }
 }
