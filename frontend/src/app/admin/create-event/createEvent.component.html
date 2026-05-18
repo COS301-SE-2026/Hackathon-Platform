@@ -99,6 +99,7 @@
          (keydown.enter)="triggerFileInput()" 
          (dragover)="$event.preventDefault()" 
          (drop)="onDrop($event)"
+         role="button"
          tabindex="0">
          <input id="bannerInput" type="file" #fileInput style="display:none" (change)="onFileSelected($event)" accept="image/*" />
          <span>+ Drop image here or browse</span>
