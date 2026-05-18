@@ -90,6 +90,13 @@ class EventServiceTest {
     }
 
     @Test
+    void createEvent_withNullRequest_throwsIllegalArgumentException() {
+        assertThatThrownBy(() -> eventService.createEvent(null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Event request body cannot be null");
+
+        verify(eventRepository,never()).save(any(Event.class));
+    }
+
+    @Test
     void putUpdateEvent_withValidId_returnsUpdatedEvent() {
         EventRequest req = new EventRequest();
         req.setName("My new name");
