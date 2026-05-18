@@ -58,3 +58,5 @@ coverage/
 *.tmp
 *.swp
 *.bak
+
+*.tsbuildinfo
