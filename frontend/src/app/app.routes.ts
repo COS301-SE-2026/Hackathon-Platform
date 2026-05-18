@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
-import { AdminShellComponent } from './admin/admin-shell.component/admin-shell.component';
+import { AdminShellComponent } from './admin/components/admin-shell.component/admin-shell.component';
 import { ParticipantShellComponent } from './participant/participant-shell.component/participant-shell.component';
+import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -21,18 +22,19 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminShellComponent,
+    canActivate: [AuthGuard],
     children: [
       {
         path: 'dashboard',
-        loadComponent: () => import('./admin/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        loadComponent: () => import('./admin/components/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
         path: 'create-event',
-        loadComponent: () => import('./admin/create-event/createEvent.component').then(m => m.CreateEventComponent),
+        loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
       },
       {
         path: 'event-list',
-        loadComponent: () => import('./admin/event-list/eventlist.component').then(m => m.EventlistComponent),
+        loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
       },
       {
         path: '',

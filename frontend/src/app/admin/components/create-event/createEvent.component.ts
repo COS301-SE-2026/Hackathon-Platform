@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { EventService, EventRequest } from '../../../services/event.service';
 
 @Component({
   selector: 'app-create-event',
@@ -15,19 +16,24 @@ export class CreateEventComponent {
   @ViewChild('fileInput')
   fileInput!: ElementRef<HTMLInputElement>;
 
+  private readonly eventService = inject(EventService);
+
   form = {
     eventName: '',
     startDate: '2026-04-20T09:00',
-    duration: '24 hours',
-    minTeamSize: 4,
-    maxTeamSize: 10,
-    visibility: 'public' as 'public' | 'private',
+    duration: 24,
+    teamSizeLimit: 4,
+    visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
     bannerFile: null as File | null,
     bannerFileName: '',
-    description: ''
+    description: '',
+    registrationKey: ''
   };
 
-  private router = inject(Router);
+  private readonly router = inject(Router);
+
+  isLoading = false;
+  errorMessage = '';
 
   triggerFileInput(): void {
     this.fileInput.nativeElement.click();
@@ -63,9 +69,38 @@ export class CreateEventComponent {
     console.log('Saving draft:', this.form);
   }
 
-  onNextStep(): void {
-    console.log('Proceeding to Levels & Files:', this.form);
+  createEvent(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
 
-    this.router.navigate(['/admin/events/create/levels']);
+    const eventData: EventRequest = {
+      name: this.form.eventName,
+      teamSizeLimit: this.form.teamSizeLimit,
+      startDateTime: new Date(this.form.startDate).toISOString(),
+      duration: this.form.duration,
+      description: this.form.description,
+      visibility: this.form.visibility,
+      status: 'UPCOMING',
+      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined
+    };
+
+    this.eventService.createEvent(eventData).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.router.navigate(['admin/event-list']);
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Failed to create event';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  onNextStep(): void {
+    if(!this.form.eventName){
+      this.errorMessage = 'Pleease fill event name';
+      return;
+    }
+    this.createEvent();
   }
 }

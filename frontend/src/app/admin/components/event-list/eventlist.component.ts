@@ -1,16 +1,17 @@
-import { Component} from '@angular/core';
+import { Component, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { EventService, EventResponse } from '../../../services/event.service';
 
-interface HackathonEvent {
+/* interface HackathonEvent {
   name: string;
   type: string;
   dates: string;
   teams: number;
   visibility: 'Public' | 'Private';
   status: 'Live' | 'Upcoming' | 'Ended';
-}
+} */
 
 @Component({
   selector: 'app-eventlist',
@@ -20,17 +21,33 @@ interface HackathonEvent {
   styleUrls: ['./eventlist.component.scss']
 })
 export class EventlistComponent {
+  private readonly eventService = inject(EventService);
   searchQuery = '';
   statusFilter = '';
   visibilityFilter = '';
 
-  events: HackathonEvent[] = [
-    { name: 'Entelect Challenge', type: 'Optimization', dates: 'Apr 20 – Apr 26', teams: 342, visibility: 'Public',  status: 'Live'     },
-    { name: 'ML Hackathon Q2',    type: 'Machine Learning', dates: 'Apr 21 – Apr 28', teams: 128, visibility: 'Private', status: 'Upcoming' },
-    { name: 'Internal Dev Challenge', type: 'Algorithms', dates: 'Apr 29 – May 2', teams: 12,  visibility: 'Public',  status: 'Upcoming' },
-  ];
+  events: EventResponse[] = [];
+  isLoading = true;
 
-  get filteredEvents(): HackathonEvent[] {
+  ngOnInit(): void{
+    this.loadEvents();
+  }
+
+  loadEvents(): void{
+    this.isLoading = true;
+    this.eventService.getMyEvents().subscribe({
+      next: (events) => {
+        this.events = events;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('not loading events', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  get filteredEvents(): EventResponse[] {
     return this.events.filter(e => {
       const matchSearch = !this.searchQuery ||
         e.name.toLowerCase().includes(this.searchQuery.toLowerCase());
@@ -40,5 +57,15 @@ export class EventlistComponent {
         e.visibility.toLowerCase() === this.visibilityFilter;
       return matchSearch && matchStatus && matchVisibility;
     });
+  }
+
+  getStatusClass(status: string): string{
+    switch(status.toLowerCase()){
+      case 'active': return 'live';
+      case 'upcoming': return 'upcoming';
+      case 'completed': return 'completed';
+      case 'cancelled': return 'ended';
+      default: return 'upcoming';
+    }
   }
 }

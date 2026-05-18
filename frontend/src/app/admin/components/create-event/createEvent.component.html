@@ -42,7 +42,7 @@
       </div>
 
       <div class="form-row">
-        <div class="form-group">
+        <!--<div class="form-group">
           <label for="minTeam">Min team size</label>
           <input
             id="minTeam"
@@ -52,14 +52,14 @@
             placeholder="4"
             min="1"
           />
-        </div>
+        </div> -->
         <div class="form-group">
-          <label for="maxTeam">Max team size</label>
+          <label for="teamSizeLimit">teamSizeLimit</label>
           <input
             id="maxTeam"
             type="number"
-            [(ngModel)]="form.maxTeamSize"
-            name="maxTeamSize"
+            [(ngModel)]="form.teamSizeLimit"
+            name="teamSizeLimit"
             placeholder="10"
             min="1"
           />
@@ -73,8 +73,8 @@
         <button
           type="button"
           class="toggle-option"
-          [class.selected]="form.visibility === 'public'"
-          (click)="form.visibility = 'public'"
+          [class.selected]="form.visibility === 'PUBLIC'"
+          (click)="form.visibility = 'PUBLIC'"
         >
           <span class="toggle-title">Public</span>
           <span class="toggle-desc">Anyone can Register</span>
@@ -82,8 +82,8 @@
         <button
           type="button"
           class="toggle-option"
-          [class.selected]="form.visibility === 'private'"
-          (click)="form.visibility = 'private'"
+          [class.selected]="form.visibility === 'PRIVATE'"
+          (click)="form.visibility = 'PRIVATE'"
         >
           <span class="toggle-title">Private</span>
           <span class="toggle-desc">Registration key required</span>
