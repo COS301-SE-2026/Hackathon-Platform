@@ -178,6 +178,37 @@ class TeamServiceTest {
         verify(teamMemberRepository).save(pending);
     }
 
+   @Test
+    void approveOrRejectJoinRequest_shouldThrow_whenUserAlreadyApprovedInAnotherTeam() {
+    
+    UUID targetTeamId = UUID.randomUUID();
+    UUID otherTeamId = UUID.randomUUID();
+    UUID targetUserId = UUID.randomUUID();
+    Team targetTeam = new Team();
+    targetTeam.setEventId(eventId);
+    targetTeam.setCreatedByUserId(userId);
+    Team otherTeam = new Team();
+    otherTeam.setEventId(eventId);  
+    TeamMember pendingMembership = new TeamMember();
+    pendingMembership.setStatus("PENDING");
+    TeamMember approvedMembershipInOtherTeam = new TeamMember();
+    approvedMembershipInOtherTeam.setTeamId(otherTeamId);
+    approvedMembershipInOtherTeam.setStatus("APPROVED"); 
+
+    when(teamRepository.findById(targetTeamId)).thenReturn(Optional.of(targetTeam));
+    when(teamMemberRepository.findByTeamIdAndUserId(targetTeamId, targetUserId))
+        .thenReturn(Optional.of(pendingMembership));
+    when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
+        .thenReturn(List.of(approvedMembershipInOtherTeam));
+    when(teamRepository.findById(otherTeamId)).thenReturn(Optional.of(otherTeam));
+
+    assertThatThrownBy(() -> teamService.approveOrRejectJoinRequest(targetTeamId, targetUserId, userId, true))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("already an approved member of another team in this event");
+
+    verify(teamMemberRepository, never()).save(pendingMembership);
+}
+
     @Test
     void approveOrRejectJoinRequest_shouldThrow_whenRequestAlreadyProcessed() {
         UUID teamId = UUID.randomUUID();
