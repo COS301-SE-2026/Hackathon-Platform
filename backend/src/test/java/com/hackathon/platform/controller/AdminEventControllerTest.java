@@ -119,4 +119,9 @@ class AdminEventControllerTest {
 
         mockMvc.perform(patch("/api/admin/events/{id}/status", exisitngEventId).with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isOk());
     }
+
+    @Test
+    void patchEventStatus_asParticipant_returns403Forbidden() throws Exception {
+        mockMvc.perform(patch("/api/admin/events/{id}/status", eventId).with(authentication(participantAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isForbidden());
+    }
 }
