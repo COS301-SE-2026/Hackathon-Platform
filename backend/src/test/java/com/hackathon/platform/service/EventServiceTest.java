@@ -124,4 +124,17 @@ class EventServiceTest {
         verify(eventRepository).findById(invalidId);
         verify(eventRepository, never()).save(any(Event.class));
     }
+
+    @Test
+    void patchEventStatus_toPrivateWithKey_updatesAndSavesEvent() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Event updateEvent = eventService.patchEventStatus(eventId, "PRIVATE", "ACTIVE", "KEY");
+
+        assertThat(updateEvent.getVisibility()).isEqualTo("PRIVATE");
+        assertThat(updateEvent.getStatus()).isEqualTo("ACTIVE");
+        assertThat(updateEvent.getRegistrationKey()).isEqualTo("KEY");
+        verify(eventRepository).save(event);
+    }
 }
