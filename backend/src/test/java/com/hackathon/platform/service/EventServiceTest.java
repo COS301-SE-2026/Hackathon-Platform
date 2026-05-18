@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.dto.EventRequest;
+import com.hackathon.platform.dto.EventStatusResponse;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -179,4 +180,17 @@ class EventServiceTest {
 
         verify(eventRepository, never()).save(any(Event.class));
     }
+
+    @Test
+    void getEventStatus_withValidEventId_returnsStatusSummaryDto() {
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));    
+        EventStatusResponse response = eventService.getEventStatus(eventId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getEventId()).isEqualTo(eventId);
+        assertThat(response.getStatus()).isEqualTo("INACTIVE");
+        assertThat(response.getVisibility()).isEqualTo("PUBLIC");
+
+        verify(eventRepository).findById(eventId);
+    }        
 }
