@@ -189,4 +189,21 @@ class TeamServiceTest {
         assertThatThrownBy(() -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true)).isInstanceOf(RuntimeException.class).hasMessageContaining("Request already processed");
         verify(teamMemberRepository, never()).save(pending);
     }
+
+    @Test
+    void approveOrRejectJoinRequest_shouldThrow_whenNotCreator() {
+        UUID teamId = UUID.randomUUID();
+        UUID targetUserId = UUID.randomUUID();
+        UUID nonCreator = UUID.randomUUID();
+        Team team = new Team();
+        team.setCreatedByUserId(UUID.randomUUID()); 
+
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+
+        assertThatThrownBy(() -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, nonCreator, true))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Only the team creator can approve/reject requests");
+
+        verify(teamMemberRepository, never()).save(any(TeamMember.class));
+    }
 }
