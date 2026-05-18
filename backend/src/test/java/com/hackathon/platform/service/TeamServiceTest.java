@@ -67,4 +67,13 @@ class TeamServiceTest {
         verify(teamRepository).save(any(Team.class));
         verify(teamMemberRepository).save(any(TeamMember.class));
     }
+
+    @Test
+    void createTeam_shouldThrow_whenDuplicateTeamName() {
+        
+        when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(true);
+        assertThatThrownBy(() -> teamService.createTeam(createRequest, userId)).isInstanceOf(RuntimeException.class).hasMessageContaining("Team name already exists in this event");
+        verify(teamRepository, never()).save(any(Team.class));
+        verify(teamMemberRepository, never()).save(any(TeamMember.class));
+    }
 }
