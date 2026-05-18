@@ -35,7 +35,7 @@ public class Team {
   private String status = "ACTIVE";
 
   /** Default constructor. */
-  public Team() { }
+  public Team() {}
 
   /** Constructs a new Team with the given name, creator and event. */
   public Team(String teamName, UUID createdByUserId, UUID eventId) {

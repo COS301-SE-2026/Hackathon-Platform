@@ -19,16 +19,55 @@ public class EventService {
 
   /** create event */
   public Event createEvent(EventRequest req) {
+
+    if (req == null) {
+      throw new IllegalArgumentException("Event request body cannot be null.");
+    }
+
+    if (req.getName() == null || req.getName().isBlank()) {
+      throw new IllegalArgumentException("Event name is required.");
+    }
+
+    if (req.getTeamSizeLimit() <= 0) {
+      throw new IllegalArgumentException("Team size must be greater than 0.");
+    }
+
+    if (req.getStartDateTime() == null) {
+      throw new IllegalArgumentException("Event start date is required.");
+    }
+
+    if (req.getDuration() <= 0) {
+      throw new IllegalArgumentException("Event duration must be greater than 0.");
+    }
+
+    if (req.getVisibility() == null || req.getVisibility().isBlank()) {
+      throw new IllegalArgumentException("Event visibility is required.");
+    }
+
+    if (req.getStatus() == null || req.getStatus().isBlank()) {
+      throw new IllegalArgumentException("Event status is required.");
+    }
+
+    if ("PRIVATE".equals(req.getVisibility())
+        && (req.getRegistrationKey() == null || req.getRegistrationKey().isBlank())) {
+      throw new IllegalArgumentException("Registration key is required for private events.");
+    }
+
     Event event = new Event();
     event.setCreatedByUserId(UUID.fromString(CREATEDUSER));
     event.setName(req.getName());
-    event.setRegistrationKey(req.getRegistrationKey());
     event.setTeamSizeLimit(req.getTeamSizeLimit());
     event.setStartDateTime(req.getStartDateTime());
     event.setDuration(req.getDuration());
     event.setDescription(req.getDescription());
     event.setVisibility(req.getVisibility());
     event.setStatus(req.getStatus());
+
+    if ("PRIVATE".equals(req.getVisibility())) {
+      event.setRegistrationKey(req.getRegistrationKey());
+    } else {
+      event.setRegistrationKey(null);
+    }
 
     return eventRepository.save(event);
   }
