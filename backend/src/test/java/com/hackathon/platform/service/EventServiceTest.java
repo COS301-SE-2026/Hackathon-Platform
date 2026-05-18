@@ -17,3 +17,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class EventServiceTest {
+    @Mock private EventRepository EventRepository;
+    @InjectMocks EventService EventService;
+
+    private UUID eventId;
+    private Event previousEvent;
+
+    @BeforeEach
+    void setUp() {
+        eventId = UUID.randomUUID();
+        previousEvent = new Event();
+        previousEvent.setEventId(eventId);
+        previousEvent.setName("Test Hackathon");
+        previousEvent.setVibility("PUBLIC");
+        previousEvent.setStatus("INACTIVE");
+        previousEvent.setRegistrationKey(null);
+    }
+}
