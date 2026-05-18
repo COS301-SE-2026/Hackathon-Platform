@@ -8,12 +8,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.hackathon.platform.dto.CreateTeamRequest;
+import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.TeamMember;
+import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.TeamMemberRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.repository.UserRepository;
+
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
@@ -238,6 +242,34 @@ class TeamServiceTest {
         assertThat(team.getStatus()).isEqualTo("INACTIVE");
         verify(teamMemberRepository).save(membership);
         verify(teamRepository).save(team);
+    }
+
+
+    @Test
+    void viewTeamMembers_shouldReturnListOfMembers() {
+    
+        UUID teamId = UUID.randomUUID();
+        UUID creatorId = userId;        
+        UUID memberId = UUID.randomUUID();
+        Team team = new Team();
+        team.setCreatedByUserId(creatorId);
+        TeamMember approvedMember = new TeamMember();
+        approvedMember.setUserId(memberId);
+        approvedMember.setStatus("APPROVED");
+        approvedMember.setJoinedAt(Instant.now());
+        User memberUser = new User();
+        memberUser.setFirstName("John");
+        memberUser.setLastName("Cena");
+        memberUser.setEmail("john@test.com");
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(List.of(approvedMember));
+        when(userRepository.findById(memberId)).thenReturn(Optional.of(memberUser));
+        List<TeamMemberResponse> members = teamService.viewTeamMembers(teamId);
+        assertThat(members).hasSize(1);
+        TeamMemberResponse response = members.get(0);
+        assertThat(response.getFullName()).isEqualTo("John Cena");
+        assertThat(response.getEmail()).isEqualTo("john@test.com");
+        assertThat(response.getRole()).isEqualTo("MEMBER");
     }
 
 }
