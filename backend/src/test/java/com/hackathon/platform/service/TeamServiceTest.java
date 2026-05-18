@@ -157,6 +157,24 @@ class TeamServiceTest {
     }
 
     @Test
+    void approveOrRejectJoinRequest_shouldReject_whenValid() {
+        UUID teamId = UUID.randomUUID();
+        UUID targetUserId = UUID.randomUUID();
+        Team team = new Team();
+        team.setCreatedByUserId(userId);
+        TeamMember pending = new TeamMember();
+        pending.setStatus("PENDING");
+
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId)).thenReturn(Optional.of(pending));
+
+        teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, false);
+
+        assertThat(pending.getStatus()).isEqualTo("REJECTED");
+        verify(teamMemberRepository).save(pending);
+    }
+
+    @Test
     void approveOrRejectJoinRequest_shouldThrow_whenRequestAlreadyProcessed() {
         UUID teamId = UUID.randomUUID();
         UUID targetUserId = UUID.randomUUID();
