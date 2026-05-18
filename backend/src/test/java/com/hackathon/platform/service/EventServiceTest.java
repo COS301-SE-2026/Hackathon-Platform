@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,6 +73,9 @@ class EventServiceTest {
         req.setVisibility("PUBLIC");
         req.setStatus("ACTIVE");
         req.setDescription("This is a test");
+        req.setTeamSizeLimit((short) 4);
+        req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+        req.setDuration(48);
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
         Event result = eventService.createEvent(req);
 
