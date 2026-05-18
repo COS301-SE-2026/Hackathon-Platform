@@ -114,4 +114,9 @@ class AuthControllerTest {
 
     mockMvc.perform(get("/api/auth/me").with(authentication(new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList())))).andExpect(status().isOk());
   }
+
+  @Test
+  void me_whenAnonymous_returnsAuthenticationFailureStatus() throws Exception {
+    mockMvc.perform(get("/api/auth/me")).andExpect(status().isForbidden());
+  }
 }
