@@ -155,4 +155,20 @@ class TeamServiceTest {
         assertThat(pending.getStatus()).isEqualTo("APPROVED");
         verify(teamMemberRepository).save(pending);
     }
+
+    @Test
+    void approveOrRejectJoinRequest_shouldThrow_whenRequestAlreadyProcessed() {
+        UUID teamId = UUID.randomUUID();
+        UUID targetUserId = UUID.randomUUID();
+        Team team = new Team();
+        team.setCreatedByUserId(userId);
+        TeamMember pending = new TeamMember();
+        pending.setStatus("APPROVED"); 
+
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+        when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId)).thenReturn(Optional.of(pending));
+
+        assertThatThrownBy(() -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true)).isInstanceOf(RuntimeException.class).hasMessageContaining("Request already processed");
+        verify(teamMemberRepository, never()).save(pending);
+    }
 }
