@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.RegisterRequest;
+import com.hackathon.platform.dto.LoginRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ class AuthControllerTest {
 
   @BeforeEach
   void setUp() {
-    validRequest = new RegisterRequest("Jane", "Doe", "Jane.Doe@gmail.com", "TestPassword");
+    validRequest = new RegisterRequest("Jane", "Doe", "jane.doe@gmail.com", "TestPassword");
   }
 
   @Test
@@ -76,5 +77,19 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(validRequest)))
         .andExpect(status().isConflict());
+  }
+
+  @Test
+  void login_withCorrectCredentials_returns201CreatedAndToken() throws Exception {
+    mockMvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(validRequest))).andExpect(status().isCreated());
+
+    LoginRequest loginReq = new LoginRequest("jane.doe@gmail.com", "TestPassword");
+
+    MvcResult result = mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(loginReq))).andExpect(status().isOk()).andExpect(jsonPath("$.token").exists()).andReturn();
+
+    AuthResponse response = objMapper.readValue(result.getResponse().getContentAsString(), AuthResponse.class);
+    
+    assertThat(response).isNotNull();
+    assertThat(response.getToken()).isNotBlank();
   }
 }
