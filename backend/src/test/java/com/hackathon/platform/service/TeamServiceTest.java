@@ -500,4 +500,28 @@ class TeamServiceTest {
     verify(teamRepository, never()).save(any());
   }
 
+  @Test
+  void viewTeamMembers_shouldReturnLeaderRole_whenMemberIsCreator() {
+    UUID teamId = UUID.randomUUID();
+    UUID creatorId = userId;
+    Team team = new Team();
+    team.setCreatedByUserId(creatorId);
+    TeamMember creatorMember = new TeamMember();
+    creatorMember.setUserId(creatorId);
+    creatorMember.setStatus("APPROVED");
+    creatorMember.setJoinedAt(Instant.now());
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED"))
+        .thenReturn(List.of(creatorMember));
+    User creatorUser = new User();
+    creatorUser.setFirstName("Jane");
+    creatorUser.setLastName("Creator");
+    creatorUser.setEmail("jane@example.com");
+    when(userRepository.findById(creatorId)).thenReturn(Optional.of(creatorUser));
+
+    List<TeamMemberResponse> members = teamService.viewTeamMembers(teamId);
+    assertThat(members).hasSize(1);
+    assertThat(members.get(0).getRole()).isEqualTo("LEADER");
+  }
+
 }
