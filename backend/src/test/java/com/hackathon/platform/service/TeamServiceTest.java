@@ -359,4 +359,16 @@ class TeamServiceTest {
     verify(teamRepository, never()).save(any(Team.class));
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
+
+
+  @Test
+  void requestToJoinTeam_shouldThrow_whenTeamNotFound() {
+    UUID teamId = UUID.randomUUID();
+    when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> teamService.requestToJoinTeam(teamId, userId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Team not found");
+    verify(teamMemberRepository, never()).save(any(TeamMember.class));
+  }
 }
