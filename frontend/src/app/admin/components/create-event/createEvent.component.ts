@@ -65,7 +65,6 @@ export class CreateEventComponent {
   }
 
   createEvent(): void {
-    // Validation
     if (!this.form.eventName) {
       this.errorMessage = 'Please enter an event name';
       return;
@@ -89,7 +88,6 @@ export class CreateEventComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Format the date correctly
     const startDateTime = new Date(this.form.startDate);
     
     const eventData: EventRequest = {
@@ -99,7 +97,7 @@ export class CreateEventComponent {
       duration: this.form.duration,
       description: this.form.description || undefined,
       visibility: this.form.visibility,
-      status: 'ACTIVE',  // Use ACTIVE for active events
+      status: 'ACTIVE',
       registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined
     };
 
