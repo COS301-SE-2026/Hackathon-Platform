@@ -77,14 +77,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   goToEvent(event: OpenEventView): void {
     this.saveCurrentEvent(event);
-    this.router.navigate(['/participant/events/overview'], {
+    this.router.navigate(['/participant/submit'], {
       queryParams: { eventId: event.eventId }
     });
   }
 
   createTeamForEvent(event: OpenEventView): void {
     this.saveCurrentEvent(event);
-    this.router.navigate(['/participant/events/team'], {
+    this.router.navigate(['/participant/team'], {
       queryParams: { eventId: event.eventId }
     });
   }
@@ -99,7 +99,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       eventId: event.eventId,
       name: event.name,
       dates: this.formatEventDates(event.startDateTime, event.duration),
-      teams: 0, // MVP: replace with backend team count later if available
+      teams: 0,
       visibility: event.visibility,
       status: event.status,
       requiresKey: !!event.registrationKey,

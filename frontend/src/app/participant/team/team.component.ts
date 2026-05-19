@@ -25,12 +25,9 @@ export class TeamComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
 
-
   teamIdToJoin = '';
-
   newTeamName = '';
 
-  
   isLoading = false;
   isLoadingTeam = true;
   errorMessage = '';
@@ -47,7 +44,6 @@ export class TeamComponent implements OnInit {
   };
 
   pendingRequests: DisplayTeamMember[] = [];
-  showPendingRequests = false;
 
   ngOnInit(): void {
     const user = this.authService.getUser();
@@ -67,6 +63,7 @@ export class TeamComponent implements OnInit {
           this.loadTeamMembers(response.teamId);
         } else {
           this.hasTeam = false;
+          this.resetTeamState();
         }
       },
       error: (error) => {
@@ -74,6 +71,7 @@ export class TeamComponent implements OnInit {
         console.error('Error loading team:', error);
         if (error.status === 204) {
           this.hasTeam = false;
+          this.resetTeamState();
         } else {
           this.errorMessage = 'Could not load your team. Please refresh.';
         }
@@ -94,6 +92,7 @@ export class TeamComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading team members:', error);
+        this.errorMessage = 'Failed to load team members.';
       }
     });
   }
@@ -119,29 +118,12 @@ export class TeamComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.teamService.createTeam({
-      teamName: this.newTeamName.trim(),
-      eventId: '' 
-    }).subscribe({
-      next: (response) => {
+    this.teamService.createTeam({ teamName: this.newTeamName.trim() }).subscribe({
+      next: () => {
         this.isLoading = false;
-        this.successMessage = `Team "${response.teamName}" created successfully!`;
-        this.hasTeam = true;
-        this.isTeamLead = true;
-        this.team.teamId = response.teamId;
-        this.team.name = response.teamName;
+        this.successMessage = `Team "${this.newTeamName.trim()}" created successfully!`;
         this.newTeamName = '';
-
-        const user = this.authService.getUser();
-        if (user) {
-          this.team.members = [{
-            name: `${user.firstName} ${user.lastName}`,
-            email: user.email,
-            isLead: true,
-            status: 'Active',
-            userId: user.userId
-          }];
-        }
+        this.loadUserTeam();
       },
       error: (error) => {
         this.isLoading = false;
@@ -201,12 +183,15 @@ export class TeamComponent implements OnInit {
 
   private processJoinRequest(userId: string, approve: boolean): void {
     this.clearMessages();
+    this.isLoading = true;
     this.teamService.approveOrRejectJoinRequest(this.team.teamId, userId, approve).subscribe({
       next: () => {
+        this.isLoading = false;
         this.successMessage = approve ? 'Member approved!' : 'Request rejected.';
         this.loadTeamMembers(this.team.teamId);
       },
       error: (error) => {
+        this.isLoading = false;
         console.error('Error processing join request:', error);
         this.errorMessage = error.error?.message || 'Failed to process request.';
       }
@@ -224,9 +209,7 @@ export class TeamComponent implements OnInit {
         this.isLoading = false;
         this.successMessage = 'You have left the team.';
         this.hasTeam = false;
-        this.isTeamLead = false;
-        this.team = { name: '', teamId: '', members: [] };
-        this.pendingRequests = [];
+        this.resetTeamState();
       },
       error: (error) => {
         this.isLoading = false;
@@ -238,6 +221,12 @@ export class TeamComponent implements OnInit {
 
   getInitials(name: string): string {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  private resetTeamState(): void {
+    this.team = { name: '', teamId: '', members: [] };
+    this.pendingRequests = [];
+    this.isTeamLead = false;
   }
 
   private toDisplayMember(m: TeamMemberResponse): DisplayTeamMember {

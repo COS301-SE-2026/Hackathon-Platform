@@ -4,13 +4,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
+import io.micrometer.common.lang.Nullable;
+
 /** DTO for team creation request payload. */
 public class CreateTeamRequest {
 
   @NotBlank(message = "Team name is required")
   private String teamName;
 
-  @NotNull(message = "Event ID is required")
+  @Nullable
   private UUID eventId;
 
   /** Default constructor. */

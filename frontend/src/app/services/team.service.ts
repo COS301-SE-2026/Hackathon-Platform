@@ -5,7 +5,7 @@ import { catchError } from 'rxjs/operators';
 
 export interface CreateTeamRequest {
   teamName: string;
-  eventId: string;
+  eventId?: string | null;
 }
 
 export interface TeamResponse {
