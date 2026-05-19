@@ -8,14 +8,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.ApproveRequest;
 import com.hackathon.platform.dto.CreateTeamRequest;
+import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.repository.RoleRepository;
+import com.hackathon.platform.repository.EventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +43,13 @@ import java.time.OffsetDateTime;
 class TeamControllerTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objMapper;
+    @Autowired private UserRepository userRepository;
+    @Autowired private RoleRepository roleRepository;
+    @Autowired private EventRepository eventRepository;
 
     private CreateTeamRequest createTeamRequest;
     private ApproveRequest approveRequest;
 
-    private UUID teamId;
     private UUID userId;
     private UUID eventId;
 
@@ -50,9 +57,25 @@ class TeamControllerTest {
 
     @BeforeEach
     void setUp() {
-        teamId = UUID.randomUUID();
-        userId = UUID.randomUUID();
-        eventId = UUID.randomUUID();
+        Role participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
+        Role savedParticipantRole = roleRepository.saveAndFlush(participantRole);
+
+        User user = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("jane@example.com").passwordHash("$2a$12$hashedpassword").role(savedParticipantRole).status("ACTIVE").build();
+
+        User savedUser = userRepository.saveAndFlush(user);
+        userId = savedUser.getUserId();
+
+        Event event = new Event();
+        event.setCreatedByUserId(userId);
+        event.setName("Test event");
+        event.setVisibility("PUBLIC");
+        event.setStatus("ACTIVE");
+        event.setDuration(4000);
+        event.setStartDateTime(OffsetDateTime.now().plusDays(7));
+        event.setTeamSizeLimit((short) 3);
+
+        Event savedEvent = eventRepository.saveAndFlush(event);
+        eventId = savedEvent.getEventId();
 
         createTeamRequest = new CreateTeamRequest();
         createTeamRequest.setTeamName("Test Team");
@@ -61,12 +84,71 @@ class TeamControllerTest {
         approveRequest = new ApproveRequest();
         approveRequest.setApprove(true);
 
-        Role participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
         userAuth = new UsernamePasswordAuthenticationToken(userId.toString(), null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
     }
 
     @Test 
     void createTeam_returns201Created() throws Exception {
         mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated()).andExpect(jsonPath("$.teamId").exists());
+    }
+
+    @Test
+    void requestToJoin_returns200Ok() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated()).andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+        TeamResponse response = objMapper.readValue(responseBody, TeamResponse.class);
+        UUID createdTeamId = response.getTeamId();
+
+        mockMvc.perform(get("/api/teams/{id}/members", createdTeamId).with(authentication(userAuth))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void viewTeam_returns200Ok() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated()).andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+        TeamResponse response = objMapper.readValue(responseBody, TeamResponse.class);
+        UUID createdTeamId = response.getTeamId();
+
+        mockMvc.perform(get("/api/teams/{id}/members", createdTeamId).with(authentication(userAuth))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void approveOrRejectJoinRequest_returns200Ok() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated()).andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+        TeamResponse response = objMapper.readValue(responseBody, TeamResponse.class);
+        UUID createdTeamId = response.getTeamId();
+
+        User member = User.builder().userId(UUID.randomUUID()).firstName("John").lastName("Smith").email("john@gmail.com").passwordHash("$2a$12$hashedpassword").role(roleRepository.findByName("PARTICIPANT").orElse(null)).status("ACTIVE").build();
+        User savedMember = userRepository.saveAndFlush(member);
+        UUID memberId = savedMember.getUserId();
+
+        UsernamePasswordAuthenticationToken memberAuth = new UsernamePasswordAuthenticationToken(memberId.toString(), null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+
+        mockMvc.perform(post("/api/teams/{id}/join-requests", createdTeamId).with(authentication(memberAuth))).andDo(print()).andExpect(status().isCreated());
+        mockMvc.perform(put("/api/teams/{teamId}/join-requests/{userId}", createdTeamId, memberId).with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(approveRequest))).andExpect(status().isOk());
+    }
+
+    @Test
+    void leaveTeam_returns204NoContent() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated()).andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+        TeamResponse response = objMapper.readValue(responseBody, TeamResponse.class);
+        UUID createdTeamId = response.getTeamId();
+
+        User member = User.builder().userId(UUID.randomUUID()).firstName("John").lastName("Smith").email("john@gmail.com").passwordHash("$2a$12$hashedpassword").role(roleRepository.findByName("PARTICIPANT").orElse(null)).status("ACTIVE").build();
+        User savedMember = userRepository.saveAndFlush(member);
+        UUID memberId = savedMember.getUserId();
+
+        UsernamePasswordAuthenticationToken memberAuth = new UsernamePasswordAuthenticationToken(memberId.toString(), null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+
+        mockMvc.perform(post("/api/teams/{id}/join-requests", createdTeamId).with(authentication(memberAuth))).andDo(print()).andExpect(status().isCreated());
+        mockMvc.perform(put("/api/teams/{teamId}/join-requests/{userId}", createdTeamId, memberId).with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(approveRequest))).andExpect(status().isOk());
+
+        mockMvc.perform(delete("/api/teams/{id}/members", createdTeamId).with(authentication(memberAuth))).andDo(print()).andExpect(status().isNoContent());
     }
 }
