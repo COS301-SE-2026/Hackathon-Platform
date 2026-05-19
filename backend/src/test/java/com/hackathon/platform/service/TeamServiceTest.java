@@ -360,7 +360,6 @@ class TeamServiceTest {
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
 
-
   @Test
   void requestToJoinTeam_shouldThrow_whenTeamNotFound() {
     UUID teamId = UUID.randomUUID();
@@ -378,12 +377,12 @@ class TeamServiceTest {
     UUID targetUserId = UUID.randomUUID();
     when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true))
+    assertThatThrownBy(
+            () -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true))
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("Team not found");
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
-
 
   @Test
   void viewTeamMembers_shouldThrow_whenMemberUserNotFound() {
@@ -405,7 +404,7 @@ class TeamServiceTest {
         .hasMessageContaining("User not found");
   }
 
-    @Test
+  @Test
   void leaveTeam_shouldThrow_whenMembershipStatusInvalid() {
     UUID teamId = UUID.randomUUID();
     TeamMember membership = new TeamMember();
@@ -413,12 +412,15 @@ class TeamServiceTest {
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId))
         .thenReturn(Optional.of(membership));
 
-    assertThatThrownBy(() -> teamService.leaveTeam(teamId, userId)).isInstanceOf(RuntimeException.class).hasMessageContaining("Cannot leave with current status: REJECTED");
+    assertThatThrownBy(() -> teamService.leaveTeam(teamId, userId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Cannot leave with current status: REJECTED");
     verify(teamMemberRepository, never()).save(any());
   }
 
   @Test
-  void approveOrRejectJoinRequest_shouldApprove_whenUserApprovedInAnotherEventButDifferentEventId() {
+  void
+      approveOrRejectJoinRequest_shouldApprove_whenUserApprovedInAnotherEventButDifferentEventId() {
     UUID teamId = UUID.randomUUID();
     UUID targetUserId = UUID.randomUUID();
     Team team = new Team();
@@ -437,7 +439,8 @@ class TeamServiceTest {
         .thenReturn(Optional.of(pending));
     when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
         .thenReturn(List.of(approvedInOtherTeam));
-    when(teamRepository.findById(approvedInOtherTeam.getTeamId())).thenReturn(Optional.of(otherTeam));
+    when(teamRepository.findById(approvedInOtherTeam.getTeamId()))
+        .thenReturn(Optional.of(otherTeam));
     when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(1L);
 
     teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true);
@@ -453,9 +456,10 @@ class TeamServiceTest {
     otherTeam.setEventId(otherEventId);
     TeamMember otherMember = new TeamMember();
     otherMember.setTeamId(UUID.randomUUID());
-    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED")).thenReturn(List.of(otherMember));
+    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
+        .thenReturn(List.of(otherMember));
     when(teamRepository.findById(otherMember.getTeamId())).thenReturn(Optional.of(otherTeam));
-    
+
     when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
     Team savedTeam = new Team();
     savedTeam.setTeamId(UUID.randomUUID());
@@ -482,7 +486,8 @@ class TeamServiceTest {
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
         .thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true))
+    assertThatThrownBy(
+            () -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true))
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("Join request not found");
     verify(teamMemberRepository, never()).save(any());
@@ -494,7 +499,7 @@ class TeamServiceTest {
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> teamService.leaveTeam(teamId, userId))
-    .isInstanceOf(RuntimeException.class)
+        .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("User not in team");
     verify(teamMemberRepository, never()).save(any());
     verify(teamRepository, never()).save(any());
@@ -523,5 +528,4 @@ class TeamServiceTest {
     assertThat(members).hasSize(1);
     assertThat(members.get(0).getRole()).isEqualTo("LEADER");
   }
-
 }
