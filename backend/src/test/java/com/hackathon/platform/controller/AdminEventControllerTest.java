@@ -124,4 +124,15 @@ class AdminEventControllerTest {
     void patchEventStatus_asParticipant_returns403Forbidden() throws Exception {
         mockMvc.perform(patch("/api/admin/events/{id}/status", eventId).with(authentication(participantAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isForbidden());
     }
+
+    @Test
+    void getEventStatus_asAdmin_returns200Ok() throws Exception {
+        MvcResult newEvent = mockMvc.perform(post("/api/admin/events").with(authentication(adminAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(eventRequest))).andExpect(status().isOk()).andReturn();
+
+        String content = newEvent.getResponse().getContentAsString();
+        Event exisitngEvent = objMapper.readValue(content, Event.class);
+        UUID exisitngEventId = exisitngEvent.getEventId();
+
+        mockMvc.perform(get("/api/admin/events/{id}/status", exisitngEventId).with(authentication(adminAuth))).andExpect(status().isOk());
+    }
 }
