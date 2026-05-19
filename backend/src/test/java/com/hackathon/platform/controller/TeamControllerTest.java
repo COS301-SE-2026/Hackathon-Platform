@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,5 +63,10 @@ class TeamControllerTest {
 
         Role participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
         userAuth = new UsernamePasswordAuthenticationToken(userId.toString(), null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+    }
+
+    @Test 
+    void createTeam_returns201Created() throws Exception {
+        mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated()).andExpect(jsonPath("$.teamId").exists());
     }
 }
