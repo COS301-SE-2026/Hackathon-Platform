@@ -41,7 +41,7 @@ public class StorageController {
    * @return storageKey and blobUrl
    */
   @PostMapping("/events/{eventId}/levels/{levelId}/files")
-  @PreAuthorize("hasRole('ADMIN')")
+  //@PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadLevelFile(
       @PathVariable String eventId,
       @PathVariable String levelId,
@@ -60,7 +60,7 @@ public class StorageController {
    * @return presigned download URL
    */
   @GetMapping("/events/{eventId}/levels/{levelId}/files/{filename}")
-  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  //@PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getLevelFileUrl(
       @PathVariable String eventId,
       @PathVariable String levelId,
@@ -83,7 +83,7 @@ public class StorageController {
    * @return storageKey, blobUrl, and version
    */
   @PostMapping("/events/{eventId}/solver")
-  @PreAuthorize("hasRole('ADMIN')")
+  //@PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadSolver(
       @PathVariable String eventId,
       @RequestParam("version") int version,
@@ -106,7 +106,7 @@ public class StorageController {
    * @return storageKey and blobUrl
    */
   @PostMapping("/events/{eventId}/branding")
-  @PreAuthorize("hasRole('ADMIN')")
+  //@PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadBrandingAsset(
       @PathVariable String eventId,
       @RequestParam("file") MultipartFile file) {
@@ -129,7 +129,7 @@ public class StorageController {
    * @return storageKey and blobUrl
    */
   @PostMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output")
-  @PreAuthorize("hasRole('PARTICIPANT')")
+  //@PreAuthorize("hasRole('PARTICIPANT')")
   public ResponseEntity<Map<String, String>> uploadSubmissionOutput(
       @PathVariable String eventId,
       @PathVariable String teamId,
@@ -153,7 +153,7 @@ public class StorageController {
    * @return storageKey and blobUrl
    */
   @PostMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source")
-  @PreAuthorize("hasRole('PARTICIPANT')")
+  //@PreAuthorize("hasRole('PARTICIPANT')")
   public ResponseEntity<Map<String, String>> uploadSourceArchive(
       @PathVariable String eventId,
       @PathVariable String teamId,
@@ -176,7 +176,7 @@ public class StorageController {
    * @return presigned download URL
    */
   @GetMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
-  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  //@PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getSubmissionOutputUrl(
       @PathVariable String eventId,
       @PathVariable String teamId,
@@ -199,7 +199,7 @@ public class StorageController {
    * @return presigned download URL
    */
   @GetMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
-  @PreAuthorize("hasRole('ADMIN')")
+  //@PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
       @PathVariable String eventId,
       @PathVariable String teamId,
@@ -226,7 +226,7 @@ public class StorageController {
    * @return presigned download URL
    */
   @GetMapping("/events/{eventId}/submissions/{submissionId}/logs/{filename}")
-  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  //@PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getScoringLogUrl(
       @PathVariable String eventId,
       @PathVariable String submissionId,
