@@ -5,11 +5,12 @@
         <span class="brand-h">Hackathon</span>
         <span class="brand-p">Platform</span>
       </div>
-      <span class="user-badge">Jane Smith</span>
+      <span class="user-badge">{{ userName }}</span>
     </div>
     <div class="navbar-links">
       <a routerLink="/participant/home">Home</a>
       <a routerLink="/participant/events" routerLinkActive="active">My Events</a>
+      <button class="logout-btn" (click)="logout()">Logout</button>
     </div>
   </nav>
 

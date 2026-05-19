@@ -17,11 +17,12 @@ export class CreateEventComponent {
   fileInput!: ElementRef<HTMLInputElement>;
 
   private readonly eventService = inject(EventService);
+  private readonly router = inject(Router);
 
   form = {
     eventName: '',
-    startDate: '2026-04-20T09:00',
-    duration: 24,
+    startDate: '2024-12-01T09:00',
+    duration: 48,
     teamSizeLimit: 4,
     visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
     bannerFile: null as File | null,
@@ -29,8 +30,6 @@ export class CreateEventComponent {
     description: '',
     registrationKey: ''
   };
-
-  private readonly router = inject(Router);
 
   isLoading = false;
   errorMessage = '';
@@ -41,10 +40,8 @@ export class CreateEventComponent {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-
       this.form.bannerFile = file;
       this.form.bannerFileName = file.name;
     }
@@ -52,9 +49,7 @@ export class CreateEventComponent {
 
   onDrop(event: DragEvent): void {
     event.preventDefault();
-
     const file = event.dataTransfer?.files?.[0];
-
     if (file) {
       this.form.bannerFile = file;
       this.form.bannerFileName = file.name;
@@ -66,39 +61,74 @@ export class CreateEventComponent {
   }
 
   onSaveDraft(): void {
-    console.log('Saving draft:', this.form);
+    this.createEvent();
   }
 
   createEvent(): void {
+    // Validation
+    if (!this.form.eventName) {
+      this.errorMessage = 'Please enter an event name';
+      return;
+    }
+
+    if (!this.form.startDate) {
+      this.errorMessage = 'Please select a start date';
+      return;
+    }
+
+    if (this.form.teamSizeLimit < 1) {
+      this.errorMessage = 'Team size limit must be at least 1';
+      return;
+    }
+
+    if (this.form.duration < 1) {
+      this.errorMessage = 'Duration must be at least 1 hour';
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
 
+    // Format the date correctly
+    const startDateTime = new Date(this.form.startDate);
+    
     const eventData: EventRequest = {
       name: this.form.eventName,
       teamSizeLimit: this.form.teamSizeLimit,
-      startDateTime: new Date(this.form.startDate).toISOString(),
+      startDateTime: startDateTime.toISOString(),
       duration: this.form.duration,
-      description: this.form.description,
+      description: this.form.description || undefined,
       visibility: this.form.visibility,
-      status: 'UPCOMING',
+      status: 'ACTIVE',  // Use ACTIVE for active events
       registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined
     };
 
+    console.log('Sending event data to backend:', eventData);
+
     this.eventService.createEvent(eventData).subscribe({
       next: (response) => {
+        console.log('Event created successfully:', response);
         this.isLoading = false;
-        this.router.navigate(['admin/event-list']);
+        this.router.navigate(['/admin/event-list']);
       },
       error: (error) => {
-        this.errorMessage = error.error?.message || 'Failed to create event';
+        console.error('Error creating event:', error);
         this.isLoading = false;
+        
+        if (error.status === 403) {
+          this.errorMessage = 'You are not authorized. Please login as admin.';
+        } else if (error.error?.message) {
+          this.errorMessage = error.error.message;
+        } else {
+          this.errorMessage = 'Failed to create event. Please try again.';
+        }
       }
     });
   }
 
   onNextStep(): void {
-    if(!this.form.eventName){
-      this.errorMessage = 'Pleease fill event name';
+    if (!this.form.eventName) {
+      this.errorMessage = 'Please fill in event name';
       return;
     }
     this.createEvent();

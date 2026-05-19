@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface EventRequest {
@@ -9,8 +9,8 @@ export interface EventRequest {
     startDateTime: string;
     duration: number;
     description?: string;
-    visibility: 'PUBLIC' |'PRIVATE';
-    status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED';
+    visibility: 'PUBLIC' | 'PRIVATE';
+    status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
 }
 
 export interface EventResponse {
@@ -34,15 +34,20 @@ export class EventService {
     private readonly baseUrl = 'http://localhost:8080/api';
 
     createEvent(eventData: EventRequest): Observable<EventResponse> {
+        console.log('Creating event with data:', eventData);
+        console.log('URL:', `${this.baseUrl}/admin/events`);
         return this.http.post<EventResponse>(`${this.baseUrl}/admin/events`, eventData);
     }
 
     getMyEvents(): Observable<EventResponse[]> {
+        console.log('Fetching events from:', `${this.baseUrl}/admin/events`);
         return this.http.get<EventResponse[]>(`${this.baseUrl}/admin/events`);
     }
 
     patchEventStatus(eventId: string, visibility?: string, status?: string, registrationKey?: string): Observable<EventResponse> {
-        return this.http.patch<EventResponse>(`${this.baseUrl}/admin/events/${eventId}/status`, { visibility, status, registrationKey});
+        return this.http.patch<EventResponse>(`${this.baseUrl}/admin/events/${eventId}/status`, 
+            { visibility, status, registrationKey }
+        );
     }
 
     updateEvent(eventId: string, eventData: EventRequest): Observable<EventResponse> {
