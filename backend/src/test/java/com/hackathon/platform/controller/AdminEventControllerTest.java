@@ -135,4 +135,9 @@ class AdminEventControllerTest {
 
         mockMvc.perform(get("/api/admin/events/{id}/status", exisitngEventId).with(authentication(adminAuth))).andExpect(status().isOk());
     }
+
+    @Test
+    void getEventStatus_asParticipant_returns403isForbidden() throws Exception {
+        mockMvc.perform(get("/api/admin/events/{id}/status", eventId).with(authentication(participantAuth))).andExpect(status().isForbidden());
+    }
 }
