@@ -1,11 +1,16 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.ApproveRequest;
+import com.hackathon.platform.model.Team;
+import com.hackathon.platform.model.TeamMember;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.service.TeamService;
+import com.hackathon.platform.repository.TeamMemberRepository;
+import com.hackathon.platform.repository.TeamRepository;
+
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -27,11 +32,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class TeamController {
 
   private final TeamService teamService;
+  private final TeamRepository teamRepository;
+  private final TeamMemberRepository teamMemberRepository;
 
   /** Constructor for TeamController. */
-  public TeamController(TeamService teamService) {
-    this.teamService = teamService;
-  }
+  public TeamController(
+          TeamService teamService,
+          TeamRepository teamRepository,
+          TeamMemberRepository teamMemberRepository) {
+      this.teamService = teamService;
+      this.teamRepository = teamRepository;
+      this.teamMemberRepository = teamMemberRepository;
+    }
 
   /** create a new team */
   @PostMapping
@@ -78,5 +90,28 @@ public class TeamController {
   public ResponseEntity<List<TeamMemberResponse>> viewMembers(@PathVariable UUID teamId) {
     List<TeamMemberResponse> members = teamService.viewTeamMembers(teamId);
     return ResponseEntity.ok(members);
+  }
+
+  @GetMapping("/my-team")
+  public ResponseEntity<TeamResponse> getMyTeam(@AuthenticationPrincipal User currentUser) {
+      // Find team where user is a member (APPROVED status)
+      List<TeamMember> members = teamMemberRepository.findByUserIdAndStatus(currentUser.getUserId(), "APPROVED");
+      
+      if (members.isEmpty()) {
+          return ResponseEntity.noContent().build();
+      }
+      
+      Team team = teamRepository.findById(members.get(0).getTeamId())
+          .orElseThrow(() -> new RuntimeException("Team not found"));
+      
+      TeamResponse response = new TeamResponse();
+      response.setTeamId(team.getTeamId());
+      response.setTeamName(team.getTeamName());
+      response.setEventId(team.getEventId());
+      response.setCreatedByUserId(team.getCreatedByUserId());
+      response.setCreatedAt(team.getCreatedAt());
+      response.setStatus(team.getStatus());
+      
+      return ResponseEntity.ok(response);
   }
 }
