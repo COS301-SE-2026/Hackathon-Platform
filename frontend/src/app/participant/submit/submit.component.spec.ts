@@ -52,4 +52,42 @@ describe('SubmitComponent', () => {
     component.onSubmit();
     expect(consoleSpy).toHaveBeenCalledWith('Submitting:', 'output.txt', 'code.zip');
   });
+
+  it('should set outputFileName on drop', () => {
+  const fakeFile = new File(['content'], 'dropped.csv', { type: 'text/csv' });
+  const dragEvent = {
+    preventDefault: () => {},
+    dataTransfer: { files: [fakeFile] }
+  } as any;
+  component.onDropOutput(dragEvent);
+  expect(component.outputFileName).toBe('dropped.csv');
+});
+
+it('should not set outputFileName when drop has no file', () => {
+  const dragEvent = {
+    preventDefault: () => {},
+    dataTransfer: { files: [] }
+  } as any;
+  component.onDropOutput(dragEvent);
+  expect(component.outputFileName).toBe('');
+});
+
+it('should set zipFileName on drop', () => {
+  const fakeFile = new File(['content'], 'archive.zip', { type: 'application/zip' });
+  const dragEvent = {
+    preventDefault: () => {},
+    dataTransfer: { files: [fakeFile] }
+  } as any;
+  component.onDropZip(dragEvent);
+  expect(component.zipFileName).toBe('archive.zip');
+});
+
+it('should not set zipFileName when drop has no file', () => {
+  const dragEvent = {
+    preventDefault: () => {},
+    dataTransfer: { files: [] }
+  } as any;
+  component.onDropZip(dragEvent);
+  expect(component.zipFileName).toBe('');
+});
 });
