@@ -75,4 +75,38 @@ describe('CreateEventComponent', () => {
     expect(consoleSpy).toHaveBeenCalledWith('Proceeding to Levels & Files:', component.form);
     expect(routerSpy).toHaveBeenCalledWith(['/admin/events/create/levels']);
   });
+
+  it('should trigger file input when triggerFileInput is called', () => {
+  const clickSpy = spyOn(component.fileInput.nativeElement, 'click');
+  component.triggerFileInput();
+  expect(clickSpy).toHaveBeenCalled();
+});
+
+   it('should set banner file on drop', () => {
+  const fakeFile = new File(['content'], 'dropped.png', { type: 'image/png' });
+  const dragEvent = {
+    preventDefault: () => {},
+    dataTransfer: { files: [fakeFile] }
+  } as any;
+  component.onDrop(dragEvent);
+  expect(component.form.bannerFileName).toBe('dropped.png');
+  expect(component.form.bannerFile).toBe(fakeFile);
+});
+
+    it('should not set banner file when drop has no file', () => {
+  const dragEvent = {
+    preventDefault: () => {},
+    dataTransfer: { files: [] }
+  } as any;
+  component.onDrop(dragEvent);
+  expect(component.form.bannerFileName).toBe('');
+  expect(component.form.bannerFile).toBeNull();
+});
+
+ it('should prevent default on drag over', () => {
+  const dragEvent = { preventDefault: jasmine.createSpy() } as any;
+  component.onDragOver(dragEvent);
+  expect(dragEvent.preventDefault).toHaveBeenCalled();
+ });
+
 });
