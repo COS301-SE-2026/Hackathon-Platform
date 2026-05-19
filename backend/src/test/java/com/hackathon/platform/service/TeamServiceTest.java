@@ -343,4 +343,20 @@ class TeamServiceTest {
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("Team not found");
   }
+
+  @Test
+  void createTeam_shouldThrow_whenExistingMembershipPointsToMissingTeam() {
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
+    TeamMember badMember = new TeamMember();
+    badMember.setTeamId(UUID.randomUUID());
+    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
+        .thenReturn(List.of(badMember));
+    when(teamRepository.findById(badMember.getTeamId())).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Team not found");
+    verify(teamRepository, never()).save(any(Team.class));
+    verify(teamMemberRepository, never()).save(any(TeamMember.class));
+  }
 }
