@@ -6,7 +6,8 @@
     </div>
     <p class="auth-subtitle">Create a new account</p>
 
-    <form (ngSubmit)="onCreateAccount()">
+    <form #registerForm="ngForm" (ngSubmit)="onCreateAccount(registerForm)">
+
       <div class="form-row">
         <div class="form-group">
           <label for="firstName">First name</label>
@@ -15,8 +16,14 @@
             type="text"
             [(ngModel)]="firstName"
             name="firstName"
+            required
+            #firstNameField="ngModel"
           />
+          <span class="field-error" *ngIf="firstNameField.invalid && firstNameField.touched">
+            First name is required
+          </span>
         </div>
+
         <div class="form-group">
           <label for="lastName">Last name</label>
           <input
@@ -24,7 +31,12 @@
             type="text"
             [(ngModel)]="lastName"
             name="lastName"
+            required
+            #lastNameField="ngModel"
           />
+          <span class="field-error" *ngIf="lastNameField.invalid && lastNameField.touched">
+            Last name is required
+          </span>
         </div>
       </div>
 
@@ -35,9 +47,15 @@
           type="email"
           [(ngModel)]="email"
           name="email"
-          placeholder="admin@example.com"
+          placeholder="you@example.com"
           autocomplete="email"
+          required
+          email
+          #emailField="ngModel"
         />
+        <span class="field-error" *ngIf="emailField.invalid && emailField.touched">
+          Please enter a valid email address
+        </span>
       </div>
 
       <div class="form-row">
@@ -50,8 +68,15 @@
             name="password"
             placeholder="••••••••"
             autocomplete="new-password"
+            required
+            minlength="8"
+            #passwordField="ngModel"
           />
+          <span class="field-error" *ngIf="passwordField.invalid && passwordField.touched">
+            Password must be at least 8 characters
+          </span>
         </div>
+
         <div class="form-group">
           <label for="confirmPassword">Confirm Password</label>
           <input
@@ -61,11 +86,28 @@
             name="confirmPassword"
             placeholder="••••••••"
             autocomplete="new-password"
+            required
+            #confirmPasswordField="ngModel"
           />
+          <span class="field-error" *ngIf="confirmPasswordField.touched && password !== confirmPassword">
+            Passwords do not match
+          </span>
         </div>
       </div>
 
-      <button type="submit" class="btn-primary btn-full">Create account</button>
+      <div class="error-banner" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button
+        type="submit"
+        class="btn-primary btn-full"
+        [disabled]="isLoading"
+      >
+        <span *ngIf="!isLoading">Create account</span>
+        <span *ngIf="isLoading">Creating account...</span>
+      </button>
+
     </form>
 
     <p class="auth-footer">

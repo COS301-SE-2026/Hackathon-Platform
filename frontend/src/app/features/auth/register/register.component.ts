@@ -1,9 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService, RegisterRequest } from '../../../services/auth.service';
-import { switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -25,30 +24,13 @@ export class RegisterComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
 
-  onCreateAccount(): void {
+  onCreateAccount(form: NgForm): void {
+    console.log('onCreateAccount called, form valid:', form.valid);
+
     this.errorMessage = '';
-    if (!this.firstName.trim() || !this.lastName.trim()) {
-      this.errorMessage = 'First and last name are required';
-      return;
-    }
-
-    if (!this.email.trim()) {
-      this.errorMessage = 'Email address is required';
-      return;
-    }
-
-    if (!this.email.includes('@')) {
-      this.errorMessage = 'Please enter a valid email address';
-      return;
-    }
-
-    if (!this.password) {
-      this.errorMessage = 'Password is required';
-      return;
-    }
-
-    if (this.password.length < 8) {
-      this.errorMessage = 'Password must be at least 8 characters';
+    Object.values(form.controls).forEach(control => control.markAsTouched());
+    if (form.invalid) {
+      this.errorMessage = 'Please fill in all required fields correctly';
       return;
     }
 
@@ -66,29 +48,27 @@ export class RegisterComponent {
       password: this.password
     };
 
-    this.authService.register(registerData).pipe(
-      switchMap(() =>
-        this.authService.login({ email: registerData.email, password: registerData.password })
-      )
-    ).subscribe({
-      next: (loginResponse) => {
+    console.log('Sending register request to backend...');
+
+    this.authService.register(registerData).subscribe({
+      next: (response) => {
+        console.log('Registration successful:', response);
         this.isLoading = false;
-        if (loginResponse.role === 'ADMIN') {
+        if (response.role === 'ADMIN') {
           this.router.navigate(['/admin/dashboard']);
         } else {
           this.router.navigate(['/participant/home']);
         }
       },
       error: (error) => {
+        console.error('Registration error — status:', error.status, 'body:', error.error);
         this.isLoading = false;
-        console.error('Registration error:', error);
-
         if (error.status === 409) {
           this.errorMessage = 'An account with this email already exists.';
         } else if (error.status === 0) {
-          this.errorMessage = 'Cannot connect to server. Please try again later.';
+          this.errorMessage = 'Cannot connect to server. Is the backend running on port 8080?';
         } else {
-          this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
+          this.errorMessage = error.error?.message || error.error?.error || 'Registration failed. Please try again.';
         }
       }
     });
