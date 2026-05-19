@@ -471,4 +471,21 @@ class TeamServiceTest {
     verify(teamRepository).save(any(Team.class));
     verify(teamMemberRepository).save(any(TeamMember.class));
   }
+
+  @Test
+  void approveOrRejectJoinRequest_shouldThrow_whenJoinRequestNotFound() {
+    UUID teamId = UUID.randomUUID();
+    UUID targetUserId = UUID.randomUUID();
+    Team team = new Team();
+    team.setCreatedByUserId(userId);
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
+        .thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Join request not found");
+    verify(teamMemberRepository, never()).save(any());
+  }
+
 }
