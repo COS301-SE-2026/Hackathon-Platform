@@ -383,5 +383,26 @@ class TeamServiceTest {
         .hasMessageContaining("Team not found");
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
-  
+
+
+  @Test
+  void viewTeamMembers_shouldThrow_whenMemberUserNotFound() {
+    UUID teamId = UUID.randomUUID();
+    UUID creatorId = userId;
+    UUID memberId = UUID.randomUUID();
+    Team team = new Team();
+    team.setCreatedByUserId(creatorId);
+    TeamMember member = new TeamMember();
+    member.setUserId(memberId);
+    member.setStatus("APPROVED");
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED"))
+        .thenReturn(List.of(member));
+    when(userRepository.findById(memberId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> teamService.viewTeamMembers(teamId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("User not found");
+  }
+
 }
