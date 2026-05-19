@@ -50,7 +50,7 @@
               <td>{{ event.teamSizeLimit }}</td>
               <td>{{ event.visibility }}</td>
               <td><span class="status-badge" [ngClass]="getStatusClass(event.status)">{{ event.status }}</span></td>
-              <td><button class="btn-manage" [routerLink]="['/admin/events/edit', event.eventId]">Manage</button></td>
+              <td><button class="btn-manage" [routerLink]="['/admin/events/edit', event.eventId]">Manage & Edit</button></td>
             </tr>
         }
       </tbody>

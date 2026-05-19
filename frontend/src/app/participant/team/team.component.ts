@@ -1,9 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { TeamService } from '../../services/team.service';
-import { EventService, EventResponse } from '../../services/event.service';
+import { RouterModule, ActivatedRoute } from '@angular/router';
+import { TeamService, TeamMemberResponse } from '../../services/team.service';
 import { AuthService } from '../../services/auth.service';
 
 interface DisplayTeamMember {
@@ -23,99 +22,116 @@ interface DisplayTeamMember {
 })
 export class TeamComponent implements OnInit {
   private readonly teamService = inject(TeamService);
-  private readonly eventService = inject(EventService);
   private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
 
-  teamSearch = '';
+
+  teamIdToJoin = '';
+
   newTeamName = '';
-  selectedEventId = '';
-  events: EventResponse[] = [];
+
   
   isLoading = false;
+  isLoadingTeam = true;
   errorMessage = '';
   successMessage = '';
 
+  hasTeam = false;
+  currentUserId = '';
+  isTeamLead = false;
+
   team = {
     name: '',
-    eventName: '',
     teamId: '',
     members: [] as DisplayTeamMember[]
   };
 
-  hasTeam = false;
-  currentUserId = '';
+  pendingRequests: DisplayTeamMember[] = [];
+  showPendingRequests = false;
 
   ngOnInit(): void {
     const user = this.authService.getUser();
     this.currentUserId = user?.userId || '';
-    this.loadEvents();
     this.loadUserTeam();
   }
 
-  loadEvents(): void {
-    this.eventService.getMyEvents().subscribe({
-      next: (events) => {
-        this.events = events;
+  loadUserTeam(): void {
+    this.isLoadingTeam = true;
+    this.teamService.getMyTeam().subscribe({
+      next: (response) => {
+        this.isLoadingTeam = false;
+        if (response) {
+          this.hasTeam = true;
+          this.team.teamId = response.teamId;
+          this.team.name = response.teamName;
+          this.loadTeamMembers(response.teamId);
+        } else {
+          this.hasTeam = false;
+        }
       },
       error: (error) => {
-        console.error('Error loading events:', error);
+        this.isLoadingTeam = false;
+        console.error('Error loading team:', error);
+        if (error.status === 204) {
+          this.hasTeam = false;
+        } else {
+          this.errorMessage = 'Could not load your team. Please refresh.';
+        }
       }
     });
   }
 
-  loadUserTeam(): void {
-    // Check if user has a team for any event
-    // This would need a backend endpoint to get users team
-    // For now, using mock data as placeholder
-    this.hasTeam = false;
+  loadTeamMembers(teamId: string): void {
+    this.teamService.getTeamMembers(teamId).subscribe({
+      next: (members) => {
+        this.team.members = members.map(m => this.toDisplayMember(m));
+        this.isTeamLead = members.some(
+          m => m.userId === this.currentUserId && m.role === 'LEADER'
+        );
+        if (this.isTeamLead) {
+          this.loadPendingRequests(teamId);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading team members:', error);
+      }
+    });
   }
 
-  getInitials(name: string): string {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  }
-
-  onSearchTeams(): void {
-    if (!this.teamSearch.trim()) {
-      this.errorMessage = 'Please enter a team name to search';
-      return;
-    }
-    console.log('Searching for team:', this.teamSearch);
-    // TODO: Implement team search endpoint
-    alert(`Searching for team: ${this.teamSearch}`);
+  loadPendingRequests(teamId: string): void {
+    this.teamService.getJoinRequests(teamId).subscribe({
+      next: (requests) => {
+        this.pendingRequests = requests.map(r => this.toDisplayMember(r));
+      },
+      error: (error) => {
+        console.error('Error loading join requests:', error);
+      }
+    });
   }
 
   onCreateTeam(): void {
+    this.clearMessages();
+
     if (!this.newTeamName.trim()) {
       this.errorMessage = 'Please enter a team name';
       return;
     }
 
-    if (!this.selectedEventId) {
-      this.errorMessage = 'Please select an event';
-      return;
-    }
-
     this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
 
     this.teamService.createTeam({
-      teamName: this.newTeamName,
-      eventId: this.selectedEventId
+      teamName: this.newTeamName.trim(),
+      eventId: '' 
     }).subscribe({
       next: (response) => {
-        console.log('Team created:', response);
         this.isLoading = false;
         this.successMessage = `Team "${response.teamName}" created successfully!`;
         this.hasTeam = true;
+        this.isTeamLead = true;
         this.team.teamId = response.teamId;
         this.team.name = response.teamName;
-        
-        // Find event name
-        const event = this.events.find(e => e.eventId === response.eventId);
-        this.team.eventName = event?.name || 'Unknown Event';
-        
-        // Add current user as team member
+        this.newTeamName = '';
+
         const user = this.authService.getUser();
         if (user) {
           this.team.members = [{
@@ -126,60 +142,116 @@ export class TeamComponent implements OnInit {
             userId: user.userId
           }];
         }
-        
-        this.newTeamName = '';
-        this.selectedEventId = '';
       },
       error: (error) => {
-        console.error('Error creating team:', error);
         this.isLoading = false;
-        this.errorMessage = error.error?.message || 'Failed to create team';
+        console.error('Error creating team:', error);
+        if (error.status === 409 || error.error?.message?.includes('already exists')) {
+          this.errorMessage = 'A team with that name already exists. Choose a different name.';
+        } else if (error.error?.message?.includes('already a member')) {
+          this.errorMessage = 'You are already a member of a team. Leave your current team first.';
+        } else {
+          this.errorMessage = error.error?.message || 'Failed to create team. Please try again.';
+        }
       }
     });
   }
 
   joinTeam(): void {
-    if (!this.teamSearch.trim()) {
-      this.errorMessage = 'Please enter a team ID to join';
+    this.clearMessages();
+
+    if (!this.teamIdToJoin.trim()) {
+      this.errorMessage = 'Please enter a team ID';
       return;
     }
 
     this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
 
-    this.teamService.requestToJoinTeam(this.teamSearch).subscribe({
+    this.teamService.requestToJoinTeam(this.teamIdToJoin.trim()).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = 'Join request sent successfully! Waiting for team lead approval.';
-        this.teamSearch = '';
+        this.successMessage = 'Join request sent! Waiting for the team lead to approve.';
+        this.teamIdToJoin = '';
       },
       error: (error) => {
-        console.error('Error joining team:', error);
         this.isLoading = false;
-        this.errorMessage = error.error?.message || 'Failed to send join request';
+        console.error('Error requesting to join team:', error);
+        if (error.error?.message?.includes('already a member')) {
+          this.errorMessage = 'You are already in a team.';
+        } else if (error.error?.message?.includes('already requested')) {
+          this.errorMessage = 'You have already sent a join request to this team.';
+        } else if (error.error?.message?.includes('full')) {
+          this.errorMessage = 'This team is full.';
+        } else if (error.status === 404) {
+          this.errorMessage = 'Team not found. Check the team ID and try again.';
+        } else {
+          this.errorMessage = error.error?.message || 'Failed to send join request.';
+        }
+      }
+    });
+  }
+
+  approveRequest(userId: string): void {
+    this.processJoinRequest(userId, true);
+  }
+
+  rejectRequest(userId: string): void {
+    this.processJoinRequest(userId, false);
+  }
+
+  private processJoinRequest(userId: string, approve: boolean): void {
+    this.clearMessages();
+    this.teamService.approveOrRejectJoinRequest(this.team.teamId, userId, approve).subscribe({
+      next: () => {
+        this.successMessage = approve ? 'Member approved!' : 'Request rejected.';
+        this.loadTeamMembers(this.team.teamId);
+      },
+      error: (error) => {
+        console.error('Error processing join request:', error);
+        this.errorMessage = error.error?.message || 'Failed to process request.';
       }
     });
   }
 
   leaveCurrentTeam(): void {
-    if (!confirm('Are you sure you want to leave this team?')) {
-      return;
-    }
+    if (!confirm('Are you sure you want to leave this team?')) return;
 
     this.isLoading = true;
+    this.clearMessages();
+
     this.teamService.leaveTeam(this.team.teamId).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = 'You have left the team';
+        this.successMessage = 'You have left the team.';
         this.hasTeam = false;
-        this.team = { name: '', eventName: '', teamId: '', members: [] };
+        this.isTeamLead = false;
+        this.team = { name: '', teamId: '', members: [] };
+        this.pendingRequests = [];
       },
       error: (error) => {
-        console.error('Error leaving team:', error);
         this.isLoading = false;
-        this.errorMessage = error.error?.message || 'Failed to leave team';
+        console.error('Error leaving team:', error);
+        this.errorMessage = error.error?.message || 'Failed to leave team.';
       }
     });
+  }
+
+  getInitials(name: string): string {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  private toDisplayMember(m: TeamMemberResponse): DisplayTeamMember {
+    return {
+      name: m.fullName,
+      email: m.email,
+      isLead: m.role === 'LEADER',
+      status: (m.status === 'APPROVED' || !m.status) ? 'Active' : 'Pending',
+      userId: m.userId
+    };
+  }
+
+  private clearMessages(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
   }
 }

@@ -115,4 +115,11 @@ public class EventService {
 
     return new EventStatusResponse(event.getEventId(), event.getStatus(), event.getVisibility());
   }
+
+  public List<Event> getOpenEventsForParticipants() {
+  return eventRepository.findByVisibilityAndStatusIn(
+      "PUBLIC",
+      List.of("UPCOMING", "ONGOING", "ACTIVE")
+  );
+}
 }

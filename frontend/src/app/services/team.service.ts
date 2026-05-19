@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 export interface CreateTeamRequest {
   teamName: string;
@@ -10,7 +11,7 @@ export interface CreateTeamRequest {
 export interface TeamResponse {
   teamId: string;
   teamName: string;
-  eventId: string;
+  eventId?: string;
   createdByUserId: string;
   createdAt: string;
   status: string;
@@ -22,15 +23,10 @@ export interface TeamMemberResponse {
   email: string;
   joinedAt: string;
   role: 'LEADER' | 'MEMBER';
+  status?: 'APPROVED' | 'PENDING' | 'REJECTED' | 'LEFT';
 }
 
-export interface ApproveRequest {
-  approve: boolean;
-}
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class TeamService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = 'http://localhost:8080/api/teams';
@@ -39,8 +35,22 @@ export class TeamService {
     return this.http.post<TeamResponse>(this.baseUrl, request);
   }
 
+
+  getMyTeam(): Observable<TeamResponse | null> {
+    return this.http.get<TeamResponse>(`${this.baseUrl}/my-team`).pipe(
+      catchError((error) => {
+        if (error.status === 204) return of(null);
+        throw error;
+      })
+    );
+  }
+
   requestToJoinTeam(teamId: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${teamId}/join-requests`, {});
+  }
+
+  getJoinRequests(teamId: string): Observable<TeamMemberResponse[]> {
+    return this.http.get<TeamMemberResponse[]>(`${this.baseUrl}/${teamId}/join-requests`);
   }
 
   approveOrRejectJoinRequest(teamId: string, userId: string, approve: boolean): Observable<void> {

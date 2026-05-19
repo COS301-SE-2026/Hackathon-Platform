@@ -10,20 +10,22 @@ import com.hackathon.platform.repository.TeamMemberRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.repository.UserRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Service for team management operations. */
+/** Service for standalone team management operations. */
 @Service
 public class TeamService {
+
+  private static final int TEAM_SIZE_LIMIT = 4;
 
   private final TeamRepository teamRepository;
   private final TeamMemberRepository teamMemberRepository;
   private final UserRepository userRepository;
 
-  /** Constructor for TeamService. */
   public TeamService(
       TeamRepository teamRepository,
       TeamMemberRepository teamMemberRepository,
@@ -33,30 +35,32 @@ public class TeamService {
     this.userRepository = userRepository;
   }
 
-  /** create a new team and add creator as approved member */
+  /** Create a new standalone team and add the creator as an approved leader. */
   @Transactional
   public TeamResponse createTeam(CreateTeamRequest request, UUID currentUserId) {
+    String teamName = request.getTeamName() == null ? "" : request.getTeamName().trim();
 
-    if (teamRepository.existsByEventIdAndTeamName(request.getEventId(), request.getTeamName())) {
-      throw new RuntimeException("Team name already exists in this event");
+    if (teamName.isBlank()) {
+      throw new RuntimeException("Team name is required");
     }
 
-    List<TeamMember> existingMemberships =
-        teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED");
-    for (TeamMember tm : existingMemberships) {
-      Team existingTeam =
-          teamRepository
-              .findById(tm.getTeamId())
-              .orElseThrow(() -> new RuntimeException("Team not found"));
-      if (existingTeam.getEventId().equals(request.getEventId())) {
-        throw new RuntimeException("You are already a member of a team in this event");
-      }
+    boolean nameExists =
+        teamRepository.findAll().stream()
+            .anyMatch(team -> teamName.equalsIgnoreCase(team.getTeamName()));
+
+    if (nameExists) {
+      throw new RuntimeException("Team name already exists");
     }
+
+    if (!teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED").isEmpty()) {
+      throw new RuntimeException("You are already a member of a team");
+    }
+
     Team team = new Team();
-    team.setTeamName(request.getTeamName());
-    team.setEventId(request.getEventId());
+    team.setTeamName(teamName);
     team.setCreatedByUserId(currentUserId);
     team.setStatus("ACTIVE");
+
     Team savedTeam = teamRepository.save(team);
 
     TeamMember member = new TeamMember();
@@ -65,30 +69,45 @@ public class TeamService {
     member.setStatus("APPROVED");
     teamMemberRepository.save(member);
 
-    TeamResponse response = new TeamResponse();
-    response.setTeamId(savedTeam.getTeamId());
-    response.setTeamName(savedTeam.getTeamName());
-    response.setEventId(savedTeam.getEventId());
-    response.setCreatedByUserId(savedTeam.getCreatedByUserId());
-    response.setCreatedAt(savedTeam.getCreatedAt());
-    response.setStatus(savedTeam.getStatus());
-    return response;
+    return toTeamResponse(savedTeam);
   }
 
-  /** request to join a team (creates a pending membership) */
-  @Transactional
-  public void requestToJoinTeam(UUID teamId, UUID currentUserId) {
+  /** Get the authenticated user's approved team, if they have one. */
+  public Optional<TeamResponse> getMyTeam(UUID currentUserId) {
+    List<TeamMember> members = teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED");
+
+    if (members.isEmpty()) {
+      return Optional.empty();
+    }
 
     Team team =
+        teamRepository
+            .findById(members.get(0).getTeamId())
+            .orElseThrow(() -> new RuntimeException("Team not found"));
+
+    return Optional.of(toTeamResponse(team));
+  }
+
+  /** Request to join a team by creating a pending membership. */
+  @Transactional
+  public void requestToJoinTeam(UUID teamId, UUID currentUserId) {
+    Team team =
         teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+
+    if (!"ACTIVE".equals(team.getStatus())) {
+      throw new RuntimeException("Team is not active");
+    }
 
     if (teamMemberRepository.findByTeamIdAndUserId(teamId, currentUserId).isPresent()) {
       throw new RuntimeException("Already requested or member");
     }
 
+    if (!teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED").isEmpty()) {
+      throw new RuntimeException("You are already a member of a team");
+    }
+
     long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
-    int limit = 4;
-    if (approvedCount >= limit) {
+    if (approvedCount >= TEAM_SIZE_LIMIT) {
       throw new RuntimeException("Team is full");
     }
 
@@ -99,13 +118,13 @@ public class TeamService {
     teamMemberRepository.save(member);
   }
 
-  /** approve or reject a pending join request (only team creator can do this) */
+  /** Approve or reject a pending join request. Only the team creator may do this. */
   @Transactional
   public void approveOrRejectJoinRequest(
       UUID teamId, UUID userIdToApprove, UUID currentUserId, boolean approve) {
-
     Team team =
         teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+
     if (!team.getCreatedByUserId().equals(currentUserId)) {
       throw new RuntimeException("Only the team creator can approve/reject requests");
     }
@@ -114,37 +133,32 @@ public class TeamService {
         teamMemberRepository
             .findByTeamIdAndUserId(teamId, userIdToApprove)
             .orElseThrow(() -> new RuntimeException("Join request not found"));
+
     if (!"PENDING".equals(pendingRequest.getStatus())) {
       throw new RuntimeException("Request already processed");
     }
 
     if (approve) {
-
-      List<TeamMember> existingApproved =
-          teamMemberRepository.findByUserIdAndStatus(userIdToApprove, "APPROVED");
-      for (TeamMember member : existingApproved) {
-        Team existingTeam = teamRepository.findById(member.getTeamId()).orElseThrow();
-        if (existingTeam.getEventId().equals(team.getEventId())) {
-          throw new RuntimeException(
-              "User is already an approved member of another team in this event");
-        }
+      if (!teamMemberRepository.findByUserIdAndStatus(userIdToApprove, "APPROVED").isEmpty()) {
+        throw new RuntimeException("User is already an approved member of another team");
       }
+
       long currentSize = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
-      int limit = 4;
-      if (currentSize >= limit) {
+      if (currentSize >= TEAM_SIZE_LIMIT) {
         throw new RuntimeException("Team is full");
       }
+
       pendingRequest.setStatus("APPROVED");
     } else {
       pendingRequest.setStatus("REJECTED");
     }
+
     teamMemberRepository.save(pendingRequest);
   }
 
-  /** leave a team (update status to LEFT or delete pending request) */
+  /** Leave a team. Approved members are marked LEFT; pending requests are deleted. */
   @Transactional
   public void leaveTeam(UUID teamId, UUID currentUserId) {
-
     TeamMember membership =
         teamMemberRepository
             .findByTeamIdAndUserId(teamId, currentUserId)
@@ -152,15 +166,13 @@ public class TeamService {
 
     if ("APPROVED".equals(membership.getStatus())) {
       membership.setStatus("LEFT");
+      teamMemberRepository.save(membership);
     } else if ("PENDING".equals(membership.getStatus())) {
-
       teamMemberRepository.delete(membership);
       return;
     } else {
       throw new RuntimeException("Cannot leave with current status: " + membership.getStatus());
     }
-
-    teamMemberRepository.save(membership);
 
     long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
     if (approvedCount == 0) {
@@ -170,16 +182,30 @@ public class TeamService {
     }
   }
 
-  /** view all approved members of a team */
+  /** View all approved members of a team. */
   public List<TeamMemberResponse> viewTeamMembers(UUID teamId) {
+    teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+    return toMemberResponses(teamId, "APPROVED");
+  }
 
-    List<TeamMember> members = teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED");
+  /** View pending join requests. Only the team creator may view them. */
+  public List<TeamMemberResponse> viewPendingJoinRequests(UUID teamId, UUID currentUserId) {
+    Team team =
+        teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
 
+    if (!team.getCreatedByUserId().equals(currentUserId)) {
+      throw new RuntimeException("Only the team creator can view join requests");
+    }
+
+    return toMemberResponses(teamId, "PENDING");
+  }
+
+  private List<TeamMemberResponse> toMemberResponses(UUID teamId, String status) {
     Team team =
         teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
     UUID creatorId = team.getCreatedByUserId();
 
-    return members.stream()
+    return teamMemberRepository.findByTeamIdAndStatus(teamId, status).stream()
         .map(
             member -> {
               User user =
@@ -196,5 +222,15 @@ public class TeamService {
               return response;
             })
         .collect(Collectors.toList());
+  }
+
+  private TeamResponse toTeamResponse(Team team) {
+    TeamResponse response = new TeamResponse();
+    response.setTeamId(team.getTeamId());
+    response.setTeamName(team.getTeamName());
+    response.setCreatedByUserId(team.getCreatedByUserId());
+    response.setCreatedAt(team.getCreatedAt());
+    response.setStatus(team.getStatus());
+    return response;
   }
 }
