@@ -405,4 +405,16 @@ class TeamServiceTest {
         .hasMessageContaining("User not found");
   }
 
+    @Test
+  void leaveTeam_shouldThrow_whenMembershipStatusInvalid() {
+    UUID teamId = UUID.randomUUID();
+    TeamMember membership = new TeamMember();
+    membership.setStatus("REJECTED");
+    when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId))
+        .thenReturn(Optional.of(membership));
+
+    assertThatThrownBy(() -> teamService.leaveTeam(teamId, userId)).isInstanceOf(RuntimeException.class).hasMessageContaining("Cannot leave with current status: REJECTED");
+    verify(teamMemberRepository, never()).save(any());
+  }
+
 }
