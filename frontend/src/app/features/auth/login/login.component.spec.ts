@@ -30,21 +30,18 @@ describe('LoginComponent', () => {
     expect(component.password).toBe('');
   });
 
-  it('typing in email field updates component.email', () => {
-    const input = fixture.debugElement.nativeElement.querySelector('#email');
-    input.value = 'test@example.com';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(component.email).toBe('test@example.com');
-  });
-
-  it('typing in password field updates component.password', () => {
-    const input = fixture.debugElement.nativeElement.querySelector('#password');
-    input.value = 'secret';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-    expect(component.password).toBe('secret');
-  });
+ it('updates email and password when user types', () => {
+  const emailInput = fixture.debugElement.nativeElement.querySelector('#email');
+  emailInput.value = 'test@example.com';
+  emailInput.dispatchEvent(new Event('input'));
+  fixture.detectChanges();
+  expect(component.email).toBe('test@example.com');
+  const passwordInput = fixture.debugElement.nativeElement.querySelector('#password');
+  passwordInput.value = 'secret';
+  passwordInput.dispatchEvent(new Event('input'));
+  fixture.detectChanges();
+  expect(component.password).toBe('secret');
+});
 
   describe('onSignIn', () => {
     let consoleSpy: jasmine.Spy;
