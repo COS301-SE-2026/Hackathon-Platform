@@ -488,4 +488,16 @@ class TeamServiceTest {
     verify(teamMemberRepository, never()).save(any());
   }
 
+  @Test
+  void leaveTeam_shouldThrow_whenUserNotInTeam() {
+    UUID teamId = UUID.randomUUID();
+    when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> teamService.leaveTeam(teamId, userId))
+    .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("User not in team");
+    verify(teamMemberRepository, never()).save(any());
+    verify(teamRepository, never()).save(any());
+  }
+
 }
