@@ -446,4 +446,29 @@ class TeamServiceTest {
     verify(teamMemberRepository).save(pending);
   }
 
+  @Test
+  void createTeam_shouldSucceed_whenUserInAnotherTeamButDifferentEvent() {
+    UUID otherEventId = UUID.randomUUID();
+    Team otherTeam = new Team();
+    otherTeam.setEventId(otherEventId);
+    TeamMember otherMember = new TeamMember();
+    otherMember.setTeamId(UUID.randomUUID());
+    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED")).thenReturn(List.of(otherMember));
+    when(teamRepository.findById(otherMember.getTeamId())).thenReturn(Optional.of(otherTeam));
+    
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
+    Team savedTeam = new Team();
+    savedTeam.setTeamId(UUID.randomUUID());
+    savedTeam.setTeamName("Test Team");
+    savedTeam.setEventId(eventId);
+    savedTeam.setCreatedByUserId(userId);
+    when(teamRepository.save(any(Team.class))).thenReturn(savedTeam);
+    when(teamMemberRepository.save(any(TeamMember.class))).thenAnswer(inv -> inv.getArgument(0));
+
+    TeamResponse response = teamService.createTeam(createRequest, userId);
+
+    assertThat(response.getTeamName()).isEqualTo("Test Team");
+    verify(teamRepository).save(any(Team.class));
+    verify(teamMemberRepository).save(any(TeamMember.class));
+  }
 }
