@@ -1,1 +1,38 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --navy-darkest:  #0d1b3e;
+  --navy-dark:     #132248;
+  --navy-mid:      #1a3a6b;
+  --navy-light:    #1e4080;
+  --navy-sidebar:  #16306a;
+  --navy-navbar:   #132248;
+  --navy-card:     #1e4a8a;
+  --navy-row:      #1a3a6b;
+
+  --purple:        #7c3aed;
+  --purple-hover:  #6d28d9;
+  --green:         #5fae11;
+  --green-dark:    #22c55e;
+  --orange:        #f97316;
+  --blue-btn:      #2563eb;
+  --blue-btn-hover:#1d4ed8;
+
+  --white:         #ffffff;
+  --text-light:    #e2e8f0;
+  --text-muted:    #94a3b8;
+  --text-dark:     #1e293b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--navy-darkest);
+  color: var(--white);
+  min-height: 100vh;
+}
+
+a { text-decoration: none; cursor: pointer; }
+button { cursor: pointer; font-family: 'Inter', sans-serif; }
+input, textarea, select { font-family: 'Inter', sans-serif; }

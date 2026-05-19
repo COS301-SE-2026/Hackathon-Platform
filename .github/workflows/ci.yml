@@ -55,10 +55,6 @@ jobs:
         working-directory: backend
         run: mvn spotless:check
 
-      #- name: Run Checkstyle
-      #  working-directory: backend
-      #  run: mvn checkstyle:check
-
       - name: Build and run tests
         working-directory: backend
         env:

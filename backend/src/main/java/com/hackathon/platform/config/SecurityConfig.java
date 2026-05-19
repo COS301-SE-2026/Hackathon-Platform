@@ -1,7 +1,7 @@
 package com.hackathon.platform.config;
 
-//import com.hackathon.platform.repository.UserRepository;
-//import com.hackathon.platform.shared.security.JwtAuthFilter;
+import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.shared.security.JwtAuthFilter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -31,8 +31,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  //private final JwtAuthFilter jwtAuthFilter;
-  //private final UserRepository userRepository;
+  private final JwtAuthFilter jwtAuthFilter;
+  private final UserRepository userRepository;
 
   /**
    * Defines security fillters.
@@ -61,7 +61,7 @@ public class SecurityConfig {
                     .hasRole("ADMIN")
                     .anyRequest()
                     .authenticated())
-        //.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }
 
@@ -80,7 +80,7 @@ public class SecurityConfig {
     return source;
   }
 
-/*
+  /** Loads user by email. */
   @Bean
   public UserDetailsService userDetailsService() {
     return username ->
@@ -89,6 +89,7 @@ public class SecurityConfig {
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
   }
 
+  /** Integrates UserDetailsService and PasswordEncoder */
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -97,16 +98,22 @@ public class SecurityConfig {
     return provider;
   }
 
-  
+  /**
+   * Authenticate login details.
+   *
+   * @param config
+   * @return
+   * @throws Exception
+   */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
       throws Exception {
     return config.getAuthenticationManager();
   }
 
+  /** Bcrypt hasher for passwords */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder(12);
   }
-  */
 }
