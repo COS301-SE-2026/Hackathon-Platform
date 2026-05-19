@@ -417,4 +417,33 @@ class TeamServiceTest {
     verify(teamMemberRepository, never()).save(any());
   }
 
+  @Test
+  void approveOrRejectJoinRequest_shouldApprove_whenUserApprovedInAnotherEventButDifferentEventId() {
+    UUID teamId = UUID.randomUUID();
+    UUID targetUserId = UUID.randomUUID();
+    Team team = new Team();
+    team.setEventId(eventId);
+    team.setCreatedByUserId(userId);
+    TeamMember pending = new TeamMember();
+    pending.setStatus("PENDING");
+    UUID otherEventId = UUID.randomUUID();
+    TeamMember approvedInOtherTeam = new TeamMember();
+    approvedInOtherTeam.setTeamId(UUID.randomUUID());
+    Team otherTeam = new Team();
+    otherTeam.setEventId(otherEventId);
+
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
+        .thenReturn(Optional.of(pending));
+    when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
+        .thenReturn(List.of(approvedInOtherTeam));
+    when(teamRepository.findById(approvedInOtherTeam.getTeamId())).thenReturn(Optional.of(otherTeam));
+    when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(1L);
+
+    teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true);
+
+    assertThat(pending.getStatus()).isEqualTo("APPROVED");
+    verify(teamMemberRepository).save(pending);
+  }
+
 }
