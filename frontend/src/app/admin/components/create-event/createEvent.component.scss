@@ -183,3 +183,13 @@ textarea {
   transition: background-color 0.2s;
   &:hover { background-color: #1d4ed8; }
 }
+
+.error-message {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.875rem;
+  text-align: center;
+}

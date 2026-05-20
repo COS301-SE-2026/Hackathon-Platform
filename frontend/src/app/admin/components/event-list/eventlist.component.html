@@ -26,6 +26,10 @@
       <option value="private">Private</option>
     </select>
   </div>
+
+  @if (isLoading){
+    <div class="loading">Loading events...</div>
+  } @else{
   <div class="table-card">
     <table>
       <thead>
@@ -40,25 +44,17 @@
       </thead>
       <tbody>
         @for (event of filteredEvents; track event.name) {
-          <tr>
-            <td>
-              <p class="event-name">{{ event.name }}</p>
-              <p class="event-type">{{ event.type }}</p>
-            </td>
-            <td>{{ event.dates }}</td>
-            <td>{{ event.teams }}</td>
-            <td>{{ event.visibility }}</td>
-            <td>
-              <span class="status-badge" [ngClass]="event.status.toLowerCase()">
-                {{ event.status }}
-              </span>
-            </td>
-            <td>
-              <button class="btn-manage">Manage &amp; Edit</button>
-            </td>
-          </tr>
+            <tr>
+              <td><p class="event-name">{{ event.name }}</p></td>
+              <td>{{ event.startDateTime | date:'MMM d' }} – {{ event.startDateTime | date:'MMM d, y' }}</td>
+              <td>{{ event.teamSizeLimit }}</td>
+              <td>{{ event.visibility }}</td>
+              <td><span class="status-badge" [ngClass]="getStatusClass(event.status)">{{ event.status }}</span></td>
+              <td><button class="btn-manage" [routerLink]="['/admin/events/edit', event.eventId]">Manage & Edit</button></td>
+            </tr>
         }
       </tbody>
     </table>
   </div>
+  }
 </div>

@@ -10,4 +10,6 @@ import org.springframework.data.repository.query.Param;
 public interface EventRepository extends JpaRepository<Event, UUID> {
   @Query("SELECT e FROM Event e WHERE e.createdByUserId = :userId")
   List<Event> fetchAllByAdmin(@Param("userId") UUID userId);
+
+  List<Event> findByVisibilityAndStatusIn(String visibility, List<String> statuses);
 }

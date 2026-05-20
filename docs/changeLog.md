@@ -16,6 +16,9 @@ Wrote Functional Requirements — SRS Doc
 -Designed the initial UI layout and page structure for the participant and admin portals.
 
 # Ayush
+-Created Architecture Diagram (30/04/2026)
+-Wrote Architectural Requirements section of SRS (14/05/2026)
 -Created Coding Standards (10/05/2026)
--Created Architecture Diagram
--Wrote Architectural Requirements section of SRS
+
+# Rene  - 17/05/2026
+-Created the Brand Style Guide document.

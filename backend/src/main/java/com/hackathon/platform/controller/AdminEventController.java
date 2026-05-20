@@ -3,11 +3,13 @@ package com.hackathon.platform.controller;
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.User;
 import com.hackathon.platform.service.EventService;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,10 +37,10 @@ public class AdminEventController {
   }
 
   /** Get all events created by admin /api/admin/events/{id} */
-  @GetMapping("/{id}")
+  @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<List<Event>> getEvents(@PathVariable("id") UUID createdByUserId) {
-    List<Event> events = eventService.getEventByCreator(createdByUserId);
+  public ResponseEntity<List<Event>> getEvents(@AuthenticationPrincipal User user) {
+    List<Event> events = eventService.getEventByCreator(user.getUserId());
     return ResponseEntity.ok(events);
   }
 

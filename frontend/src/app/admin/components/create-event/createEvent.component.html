@@ -4,66 +4,63 @@
     <p class="page-subtitle">Configure all event parameters before publishing</p>
   </div>
 
-  <form (ngSubmit)="onSaveDraft()" class="event-form">
+  <!-- Add error message display -->
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
+  <form (ngSubmit)="createEvent()" class="event-form">
     <div class="form-section">
       <h2 class="section-heading">Basic information :</h2>
 
       <div class="form-group">
-        <label for="eventName">Event name</label>
+        <label for="eventName">Event name *</label>
         <input
           id="eventName"
           type="text"
           [(ngModel)]="form.eventName"
           name="eventName"
-          placeholder="Entelect Challenge 2026"
+          placeholder="Hackathon 2024"
+          required
         />
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="startDate">Start date &amp; time</label>
+          <label for="startDate">Start date &amp; time *</label>
           <input
             id="startDate"
             type="datetime-local"
             [(ngModel)]="form.startDate"
             name="startDate"
+            required
           />
         </div>
         <div class="form-group">
-          <label for="duration">Duration</label>
+          <label for="duration">Duration (hours) *</label>
           <input
             id="duration"
-            type="text"
+            type="number"
             [(ngModel)]="form.duration"
             name="duration"
-            placeholder="24 hours"
+            placeholder="48"
+            min="1"
+            required
           />
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="minTeam">Min team size</label>
-          <input
-            id="minTeam"
-            type="number"
-            [(ngModel)]="form.minTeamSize"
-            name="minTeamSize"
-            placeholder="4"
-            min="1"
-          />
-        </div>
-        <div class="form-group">
-          <label for="maxTeam">Max team size</label>
-          <input
-            id="maxTeam"
-            type="number"
-            [(ngModel)]="form.maxTeamSize"
-            name="maxTeamSize"
-            placeholder="10"
-            min="1"
-          />
-        </div>
+      <div class="form-group">
+        <label for="teamSizeLimit">Team Size Limit *</label>
+        <input
+          id="teamSizeLimit"
+          type="number"
+          [(ngModel)]="form.teamSizeLimit"
+          name="teamSizeLimit"
+          placeholder="4"
+          min="1"
+          required
+        />
       </div>
     </div>
 
@@ -73,8 +70,8 @@
         <button
           type="button"
           class="toggle-option"
-          [class.selected]="form.visibility === 'public'"
-          (click)="form.visibility = 'public'"
+          [class.selected]="form.visibility === 'PUBLIC'"
+          (click)="form.visibility = 'PUBLIC'"
         >
           <span class="toggle-title">Public</span>
           <span class="toggle-desc">Anyone can Register</span>
@@ -82,31 +79,47 @@
         <button
           type="button"
           class="toggle-option"
-          [class.selected]="form.visibility === 'private'"
-          (click)="form.visibility = 'private'"
+          [class.selected]="form.visibility === 'PRIVATE'"
+          (click)="form.visibility = 'PRIVATE'"
         >
           <span class="toggle-title">Private</span>
           <span class="toggle-desc">Registration key required</span>
         </button>
       </div>
+
+      <!-- Show registration key field only for private events -->
+      @if (form.visibility === 'PRIVATE') {
+        <div class="form-group" style="margin-top: 16px;">
+          <label for="registrationKey">Registration Key *</label>
+          <input
+            id="registrationKey"
+            type="text"
+            [(ngModel)]="form.registrationKey"
+            name="registrationKey"
+            placeholder="Enter registration key"
+            required
+          />
+        </div>
+      }
     </div>
 
-    <div class="form-section">
+    <!--<div class="form-section">
       <h2 class="section-heading">Branding</h2>
       <label class="field-label" for="bannerInput">Event banner/Logo</label>
       <button type="button"
         class="drop-zone" 
          (click)="triggerFileInput()" 
          (keydown.enter)="triggerFileInput()" 
-         (dragover)="$event.preventDefault()" 
-         (drop)="onDrop($event)">
+         (dragover)="onDragOver($event)" 
+         (drop)="onDrop($event)"
+         tabindex="0">
          <input id="bannerInput" type="file" #fileInput style="display:none" (change)="onFileSelected($event)" accept="image/*" />
          <span>+ Drop image here or browse</span>
          @if (form.bannerFileName) {
          <span class="drop-hint">{{ form.bannerFileName }}</span>
          }
-      </button>
-    </div>
+      </div>
+    </div>-->
 
     <div class="form-section">
       <h2 class="section-heading">Rules &amp; Description</h2>
@@ -119,9 +132,19 @@
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn-secondary">Save draft</button>
-      <button type="button" class="btn-primary" (click)="onNextStep()">
-        Next: Levels &amp; Files
+      <button type="button" class="btn-secondary" (click)="onSaveDraft()" [disabled]="isLoading">
+        @if (isLoading) {
+          <span>Saving...</span>
+        } @else {
+          <span>Save draft</span>
+        }
+      </button>
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        @if (isLoading) {
+          <span>Creating...</span>
+        } @else {
+          <span>Create Event</span>
+        }
       </button>
     </div>
   </form>
