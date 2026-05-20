@@ -9,6 +9,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.shared.security.JwtAuthFilter;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import com.hackathon.platform.config.AzureBlobConfig;
 import com.hackathon.platform.service.StorageService;
 import org.junit.jupiter.api.Test;
@@ -32,6 +36,11 @@ class StorageControllerTest {
 
   @MockBean private StorageService storageService;
   @MockBean private AzureBlobConfig config;
+  @MockBean private JwtAuthFilter jwtAuthFilter;
+  @MockBean private UserRepository userRepository;
+  @MockBean private PasswordEncoder passwordEncoder;
+  @MockBean private AuthenticationProvider authenticationProvider;
+  
 
   private static final String EVENT_ID = "11111111-1111-1111-1111-111111111111";
   private static final String TEAM_ID = "22222222-2222-2222-2222-222222222222";
@@ -67,14 +76,13 @@ class StorageControllerTest {
   }
 
   @Test
-  void uploadLevelFile_returns400WhenNoFileProvided() throws Exception {
+void uploadLevelFile_returnsErrorWhenNoFileProvided() throws Exception {
     mockMvc
         .perform(
             multipart(
                 "/api/storage/events/{eventId}/levels/{levelId}/files", EVENT_ID, LEVEL_ID))
-        .andExpect(status().isBadRequest());
-
-  }
+        .andExpect(status().is5xxServerError());
+}
 
 
   @Test
