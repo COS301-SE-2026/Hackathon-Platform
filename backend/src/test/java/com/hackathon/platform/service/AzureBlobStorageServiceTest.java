@@ -47,7 +47,6 @@ class AzureBlobStorageServiceTest {
   private static final String BLOB_URL =
       "https://hackathonplatform.blob.core.windows.net/event-resources/events/123/levels/1/test.txt";
 
-
   @BeforeEach
   void setUp() {
     when(blobServiceClient.getBlobContainerClient(CONTAINER)).thenReturn(containerClient);
@@ -64,9 +63,7 @@ class AzureBlobStorageServiceTest {
 
     verify(blobClient).upload(any(InputStream.class), anyLong(), anyBoolean());
     assertEquals(BLOB_URL, result);
-
   }
-
 
   @Test
   void upload_throwsStorageExceptionOnIoError() {
@@ -80,7 +77,6 @@ class AzureBlobStorageServiceTest {
 
     assertThrows(StorageException.class, () -> storageService.upload(CONTAINER, STORAGE_KEY, file));
   }
-
 
   @Test
   void uploadBytes_successfullyUploadsBytesAndReturnsBlobUrl() {
@@ -106,9 +102,7 @@ class AzureBlobStorageServiceTest {
   void download_throwsStorageExceptionOnFailure() {
     when(blobClient.openInputStream()).thenThrow(new RuntimeException("Azure error"));
 
-    assertThrows(
-        StorageException.class, () -> storageService.download(CONTAINER, STORAGE_KEY));
-
+    assertThrows(StorageException.class, () -> storageService.download(CONTAINER, STORAGE_KEY));
   }
 
   @Test
@@ -121,16 +115,12 @@ class AzureBlobStorageServiceTest {
   void delete_throwsStorageExceptionOnFailure() {
     doThrow(new RuntimeException("Azure error")).when(blobClient).deleteIfExists();
 
-    assertThrows(
-        StorageException.class, () -> storageService.delete(CONTAINER, STORAGE_KEY));
+    assertThrows(StorageException.class, () -> storageService.delete(CONTAINER, STORAGE_KEY));
   }
 
   @Test
   void exists_returnsTrueWhenBlobExists() {
     when(blobClient.exists()).thenReturn(true);
     assertTrue(storageService.exists(CONTAINER, STORAGE_KEY));
-
   }
-  
-
 }

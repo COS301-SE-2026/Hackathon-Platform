@@ -114,9 +114,12 @@ class EventServiceTest {
     req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
     req.setDuration(48);
 
-    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-      eventService.createEvent(req);
-    });
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
 
     assertThat(ex.getMessage()).isEqualTo("Event name is required.");
   }
@@ -132,9 +135,12 @@ class EventServiceTest {
     req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
     req.setDuration(48);
 
-    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-      eventService.createEvent(req);
-    });
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
 
     assertThat(ex.getMessage()).isEqualTo("Team size must be greater than 0.");
   }
@@ -150,9 +156,12 @@ class EventServiceTest {
     req.setStartDateTime(null);
     req.setDuration(48);
 
-    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-      eventService.createEvent(req);
-    });
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
 
     assertThat(ex.getMessage()).isEqualTo("Event start date is required.");
   }
@@ -168,9 +177,12 @@ class EventServiceTest {
     req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
     req.setDuration(-50);
 
-    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-      eventService.createEvent(req);
-    });
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
 
     assertThat(ex.getMessage()).isEqualTo("Event duration must be greater than 0.");
   }
@@ -186,9 +198,12 @@ class EventServiceTest {
     req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
     req.setDuration(50);
 
-    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-      eventService.createEvent(req);
-    });
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
 
     assertThat(ex.getMessage()).isEqualTo("Event visibility is required.");
   }
@@ -204,9 +219,12 @@ class EventServiceTest {
     req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
     req.setDuration(50);
 
-    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-      eventService.createEvent(req);
-    });
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
 
     assertThat(ex.getMessage()).isEqualTo("Event status is required.");
   }
@@ -223,9 +241,12 @@ class EventServiceTest {
     req.setDuration(50);
     req.setRegistrationKey(null);
 
-    IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
-      eventService.createEvent(req);
-    });
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
 
     assertThat(ex.getMessage()).isEqualTo("Registration key is required for private events.");
   }
