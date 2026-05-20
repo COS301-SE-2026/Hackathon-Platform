@@ -1,0 +1,6 @@
+# Hackathon Platform - Keyboard Gremlins
+
+### A cloud-agnostic, full-stack event management platform that is pupose-build for deterministic optimization challenges. This platform automates the entire hackathons lifecycle, from highly configurable event setups, particpant registaritons and team formation to execution. Submission are dynamically queued and processed by a scalable pool of parallel scoring workers, this allows the official grading solver to evaluate, score and log outputs in ral-time to drive dynamic live leaderboards. Engineered with a modular Spring Boot backend and a desktop-first, mobile-friendly Angular frontend. The system also supports dymanic runtime solver updates by the event orgranisers and scales scales such that it can handle peak submission spikes near competition deadlines.
+
+## Functional Requirements: [View the Software Requirements Specification (SRS)](./docs/SRS.pdf)
+## GitHub Project Board: [View the Project Board](https://github.com/orgs/COS301-SE-2026/projects/54)
