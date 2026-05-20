@@ -1,10 +1,8 @@
 package com.hackathon.platform.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
-
 import io.micrometer.common.lang.Nullable;
+import jakarta.validation.constraints.NotBlank;
+import java.util.UUID;
 
 /** DTO for team creation request payload. */
 public class CreateTeamRequest {
@@ -12,8 +10,7 @@ public class CreateTeamRequest {
   @NotBlank(message = "Team name is required")
   private String teamName;
 
-  @Nullable
-  private UUID eventId;
+  @Nullable private UUID eventId;
 
   /** Default constructor. */
   public CreateTeamRequest() {}

@@ -1,4 +1,4 @@
-import { Component, inject} from '@angular/core';
+import { Component, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -20,7 +20,7 @@ import { EventService, EventResponse } from '../../../services/event.service';
   templateUrl: './eventlist.component.html',
   styleUrls: ['./eventlist.component.scss']
 })
-export class EventlistComponent {
+export class EventlistComponent implements OnInit {
   private readonly eventService = inject(EventService);
   searchQuery = '';
   statusFilter = '';

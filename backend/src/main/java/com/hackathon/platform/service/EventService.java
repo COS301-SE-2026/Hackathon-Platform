@@ -1,29 +1,26 @@
 package com.hackathon.platform.service;
 
 import com.hackathon.platform.dto.EventRequest;
-import com.hackathon.platform.model.User;
 import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
 import java.util.List;
 import java.util.UUID;
-
-import javax.management.RuntimeErrorException;
-
-import org.springframework.boot.actuate.endpoint.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EventService {
   private final EventRepository eventRepository;
-  //public static final String CREATEDUSER = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
+
+  // public static final String CREATEDUSER = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
 
   public EventService(EventRepository eventRepository) {
     this.eventRepository = eventRepository;
   }
 
-  private UUID getCurrentAdminId(){
+  private UUID getCurrentAdminId() {
     User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     return user.getUserId();
   }
@@ -44,8 +41,8 @@ public class EventService {
     return eventRepository.save(event);
   }
 
-  /**Return all events created by the current admin */
-  public List<Event> getEventsByCurrentAdmin(){
+  /** Return all events created by the current admin */
+  public List<Event> getEventsByCurrentAdmin() {
     return eventRepository.fetchAllByAdmin(getCurrentAdminId());
   }
 
@@ -81,7 +78,7 @@ public class EventService {
         eventRepository
             .findById(eventId)
             .orElseThrow(() -> new RuntimeException("Event not found"));
-    
+
     if (visibility != null) {
       event.setVisibility(visibility);
     }
@@ -117,9 +114,7 @@ public class EventService {
   }
 
   public List<Event> getOpenEventsForParticipants() {
-  return eventRepository.findByVisibilityAndStatusIn(
-      "PUBLIC",
-      List.of("UPCOMING", "ONGOING", "ACTIVE")
-  );
-}
+    return eventRepository.findByVisibilityAndStatusIn(
+        "PUBLIC", List.of("UPCOMING", "ONGOING", "ACTIVE"));
+  }
 }

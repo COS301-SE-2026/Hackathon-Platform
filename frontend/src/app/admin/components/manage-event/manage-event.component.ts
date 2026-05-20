@@ -17,6 +17,7 @@ export class ManageEventComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly storageService = inject(StorageService);
 
   uploadFile: File | null = null;
   uploadFileName = '';
@@ -44,10 +45,6 @@ export class ManageEventComponent implements OnInit {
   originalEvent: EventResponse | null = null;
   statusOptions = ['UPCOMING', 'ONGOING', 'COMPLETED', 'CANCELED', 'ACTIVE', 'INACTIVE'];
   visibilityOptions = ['PUBLIC', 'PRIVATE'];
-
-    constructor(
-    private readonly storageService: StorageService 
-  ) {}
 
   ngOnInit(): void {
     this.eventId = this.route.snapshot.paramMap.get('id') || '';
@@ -93,7 +90,7 @@ export class ManageEventComponent implements OnInit {
     this.form.duration = event.duration;
     this.form.description = event.description || '';
     this.form.visibility = event.visibility as 'PUBLIC' | 'PRIVATE';
-    this.form.status = event.status as any;
+    this.form.status = event.status as typeof this.form.status;
     this.form.registrationKey = event.registrationKey || '';
   }
 

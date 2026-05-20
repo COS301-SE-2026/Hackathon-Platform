@@ -84,7 +84,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label>&nbsp;</label>
+            <span class="field-label-spacer" aria-hidden="true">&nbsp;</span>
             <button type="button" class="btn-patch" (click)="patchStatusOnly()" [disabled]="isSaving">
               Update Status Only
             </button>
@@ -96,12 +96,35 @@
       <div class="form-section">
         <h2 class="section-heading">Event Resources</h2>
         <div class="form-group">
-          <label>Problem Statement PDF (for participants)</label>
-          <div class="file-upload-area" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="onDropFile($event)">
-            <input #fileInput type="file" accept=".pdf" style="display:none" (change)="onFileSelected($event)" />
+          <label for="problemStatementFile">Problem Statement PDF (for participants)</label>
+          <div
+            class="file-upload-area"
+            role="button"
+            tabindex="0"
+            (click)="fileInput.click()"
+            (keydown.enter)="fileInput.click()"
+            (keydown.space)="fileInput.click(); $event.preventDefault()"
+            (dragover)="$event.preventDefault()"
+            (drop)="onDropFile($event)"
+          >
+            <input
+              id="problemStatementFile"
+              #fileInput
+              type="file"
+              accept=".pdf"
+              style="display:none"
+              (change)="onFileSelected($event)"
+            />
+
             <span>{{ uploadFileName || 'Click or drag PDF here' }}</span>
           </div>
-          <button type="button" class="btn-upload" (click)="uploadResource()" [disabled]="!uploadFile || isUploading">
+
+          <button
+            type="button"
+            class="btn-upload"
+            (click)="uploadResource()"
+            [disabled]="!uploadFile || isUploading"
+          >
             {{ isUploading ? 'Uploading...' : 'Upload to Azure' }}
           </button>
           @if (uploadSuccess) {

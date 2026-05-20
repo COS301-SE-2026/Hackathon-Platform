@@ -74,7 +74,8 @@ public class TeamService {
 
   /** Get the authenticated user's approved team, if they have one. */
   public Optional<TeamResponse> getMyTeam(UUID currentUserId) {
-    List<TeamMember> members = teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED");
+    List<TeamMember> members =
+        teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED");
 
     if (members.isEmpty()) {
       return Optional.empty();

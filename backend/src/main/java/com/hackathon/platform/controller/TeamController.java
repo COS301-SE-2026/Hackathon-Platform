@@ -73,7 +73,8 @@ public class TeamController {
       @PathVariable UUID userId,
       @RequestBody ApproveRequest request,
       @AuthenticationPrincipal User currentUser) {
-    teamService.approveOrRejectJoinRequest(teamId, userId, currentUser.getUserId(), request.isApprove());
+    teamService.approveOrRejectJoinRequest(
+        teamId, userId, currentUser.getUserId(), request.isApprove());
     return ResponseEntity.ok().build();
   }
 

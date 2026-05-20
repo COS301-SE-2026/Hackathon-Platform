@@ -1,20 +1,18 @@
 package com.hackathon.platform.storage;
 
 /**
- * Centralises storage key construction for all Azure Blob Storage operations.
- * This class ensures consistent naming conventions and prevents
- * path traversal attacks via uploaded filenames.
+ * Centralises storage key construction for all Azure Blob Storage operations. This class ensures
+ * consistent naming conventions and prevents path traversal attacks via uploaded filenames.
  */
 public final class BlobPath {
 
   private BlobPath() {}
 
   /**
-   * Storage key for a level input file.
-   * Stored in: levelfiles.storage_key
+   * Storage key for a level input file. Stored in: levelfiles.storage_key
    *
-   * @param eventId  the event UUID
-   * @param levelId  the level ID
+   * @param eventId the event UUID
+   * @param levelId the level ID
    * @param filename the original filename
    * @return storage key string
    */
@@ -23,10 +21,10 @@ public final class BlobPath {
   }
 
   /**
-   * Storage key for an event branding asset (logo, banner).
-   * Stored in: events.branding_storage_key (might be added later).
+   * Storage key for an event branding asset (logo, banner). Stored in: events.branding_storage_key
+   * (might be added later).
    *
-   * @param eventId  the event UUID
+   * @param eventId the event UUID
    * @param filename the original filename
    * @return storage key string
    */
@@ -35,11 +33,10 @@ public final class BlobPath {
   }
 
   /**
-   * Storage key for a solver version file.
-   * Stored in: solverversion.storage_key
+   * Storage key for a solver version file. Stored in: solverversion.storage_key
    *
-   * @param eventId  the event UUID
-   * @param version  the solver version number
+   * @param eventId the event UUID
+   * @param version the solver version number
    * @param filename the original filename
    * @return storage key string
    */
@@ -50,7 +47,7 @@ public final class BlobPath {
   /**
    * Storage key for an event problem statement.
    *
-   * @param eventId  the event UUID
+   * @param eventId the event UUID
    * @param filename the original filename
    * @return storage key string
    */
@@ -59,13 +56,13 @@ public final class BlobPath {
   }
 
   /**
-   * Storage key for a submission output file (the artifact graded by the solver).
-   * Stored in: submissions.output_storage_key
+   * Storage key for a submission output file (the artifact graded by the solver). Stored in:
+   * submissions.output_storage_key
    *
-   * @param eventId      the event UUID
-   * @param teamId       the team UUID
+   * @param eventId the event UUID
+   * @param teamId the team UUID
    * @param submissionId the submission ID
-   * @param filename     the original filename
+   * @param filename the original filename
    * @return storage key string
    */
   public static String submissionOutput(
@@ -75,13 +72,13 @@ public final class BlobPath {
   }
 
   /**
-   * Storage key for a submission source code ZIP archive.
-   * Stored in: submissions.source_code_storage_key
+   * Storage key for a submission source code ZIP archive. Stored in:
+   * submissions.source_code_storage_key
    *
-   * @param eventId      the event UUID
-   * @param teamId       the team UUID
+   * @param eventId the event UUID
+   * @param teamId the team UUID
    * @param submissionId the submission ID
-   * @param filename     the original filename
+   * @param filename the original filename
    * @return storage key string
    */
   public static String submissionSourceArchive(
@@ -93,9 +90,9 @@ public final class BlobPath {
   /**
    * Storage key for a scoring log file.
    *
-   * @param eventId      the event UUID
+   * @param eventId the event UUID
    * @param submissionId the submission ID
-   * @param filename     the log filename
+   * @param filename the log filename
    * @return storage key string
    */
   public static String scoringLog(String eventId, String submissionId, String filename) {
@@ -111,6 +108,4 @@ public final class BlobPath {
   private static String sanitise(String filename) {
     return filename.replaceAll("[/\\\\]", "_").trim();
   }
-
-  
 }

@@ -7,107 +7,66 @@
     <p class="auth-subtitle">Create a new account</p>
 
     <form #registerForm="ngForm" (ngSubmit)="onCreateAccount(registerForm)">
-
       <div class="form-row">
         <div class="form-group">
           <label for="firstName">First name</label>
-          <input
-            id="firstName"
-            type="text"
-            [(ngModel)]="firstName"
-            name="firstName"
-            required
-            #firstNameField="ngModel"
-          />
-          <span class="field-error" *ngIf="firstNameField.invalid && firstNameField.touched">
-            First name is required
-          </span>
+          <input id="firstName" type="text" [(ngModel)]="firstName" name="firstName" required #firstNameField="ngModel" />
+
+          @if (firstNameField.invalid && firstNameField.touched) {
+            <span class="field-error">First name is required</span>
+          }
         </div>
 
         <div class="form-group">
           <label for="lastName">Last name</label>
-          <input
-            id="lastName"
-            type="text"
-            [(ngModel)]="lastName"
-            name="lastName"
-            required
-            #lastNameField="ngModel"
-          />
-          <span class="field-error" *ngIf="lastNameField.invalid && lastNameField.touched">
-            Last name is required
-          </span>
+          <input id="lastName" type="text" [(ngModel)]="lastName" name="lastName" required #lastNameField="ngModel" />
+
+          @if (lastNameField.invalid && lastNameField.touched) {
+            <span class="field-error">Last name is required</span>
+          }
         </div>
       </div>
 
       <div class="form-group">
         <label for="email">Email address</label>
-        <input
-          id="email"
-          type="email"
-          [(ngModel)]="email"
-          name="email"
-          placeholder="you@example.com"
-          autocomplete="email"
-          required
-          email
-          #emailField="ngModel"
-        />
-        <span class="field-error" *ngIf="emailField.invalid && emailField.touched">
-          Please enter a valid email address
-        </span>
+        <input id="email" type="email" [(ngModel)]="email" name="email" placeholder="you@example.com" autocomplete="email" required email #emailField="ngModel" />
+
+        @if (emailField.invalid && emailField.touched) {
+          <span class="field-error">Please enter a valid email address</span>
+        }
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label for="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            [(ngModel)]="password"
-            name="password"
-            placeholder="••••••••"
-            autocomplete="new-password"
-            required
-            minlength="8"
-            #passwordField="ngModel"
-          />
-          <span class="field-error" *ngIf="passwordField.invalid && passwordField.touched">
-            Password must be at least 8 characters
-          </span>
+          <input id="password" type="password" [(ngModel)]="password" name="password" placeholder="••••••••" autocomplete="new-password" required minlength="8" #passwordField="ngModel" />
+
+          @if (passwordField.invalid && passwordField.touched) {
+            <span class="field-error">Password must be at least 8 characters</span>
+          }
         </div>
 
         <div class="form-group">
           <label for="confirmPassword">Confirm Password</label>
-          <input
-            id="confirmPassword"
-            type="password"
-            [(ngModel)]="confirmPassword"
-            name="confirmPassword"
-            placeholder="••••••••"
-            autocomplete="new-password"
-            required
-            #confirmPasswordField="ngModel"
-          />
-          <span class="field-error" *ngIf="confirmPasswordField.touched && password !== confirmPassword">
-            Passwords do not match
-          </span>
+          <input id="confirmPassword" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="••••••••" autocomplete="new-password" required #confirmPasswordField="ngModel" />
+
+          @if (confirmPasswordField.touched && password !== confirmPassword) {
+            <span class="field-error">Passwords do not match</span>
+          }
         </div>
       </div>
 
-      <div class="error-banner" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
+      @if (errorMessage) {
+        <div class="error-banner">{{ errorMessage }}</div>
+      }
 
-      <button
-        type="submit"
-        class="btn-primary btn-full"
-        [disabled]="isLoading"
-      >
-        <span *ngIf="!isLoading">Create account</span>
-        <span *ngIf="isLoading">Creating account...</span>
+      <button type="submit" class="btn-primary btn-full" [disabled]="isLoading">
+        @if (!isLoading) {
+          <span>Create account</span>
+        } @else {
+          <span>Creating account...</span>
+        }
       </button>
-
     </form>
 
     <p class="auth-footer">

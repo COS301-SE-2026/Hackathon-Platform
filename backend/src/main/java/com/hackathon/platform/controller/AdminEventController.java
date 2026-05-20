@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/api/admin/events")
@@ -40,9 +40,10 @@ public class AdminEventController {
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<Event>> getEvents(@AuthenticationPrincipal User user) {
-      List<Event> events = eventService.getEventByCreator(user.getUserId());
-      return ResponseEntity.ok(events);
+    List<Event> events = eventService.getEventByCreator(user.getUserId());
+    return ResponseEntity.ok(events);
   }
+
   /** Update existing event /api/admin/events/{id} */
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
