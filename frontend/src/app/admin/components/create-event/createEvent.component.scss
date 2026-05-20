@@ -142,6 +142,7 @@ textarea {
   flex-direction : column;
   align-items : center;
   gap: 6px;
+  width: 100%;
 
   &:hover { border-color: #40ae24; color: #40ae24; }
   .drop-hint { font-size: 0.78rem; color: #5fae11; }

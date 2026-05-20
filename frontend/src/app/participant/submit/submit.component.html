@@ -27,25 +27,24 @@
 
     <div class="form-group">
       <label for="outputFile">Solution output file*</label>
-      <div
+      <button type="button"
         class="drop-zone"
         (click)="outputInput.click()"
         (keydown.enter)="outputInput.click()"
         (dragover)="$event.preventDefault()"
         (drop)="onDropOutput($event)"
-        tabindex="0"
       >
         <input id="outputFile" #outputInput type="file" style="display:none" (change)="onOutputSelected($event)" accept=".txt,.csv,.json" />
         <span>{{ outputFileName || 'Drop output file here or browser' }}</span>
         @if (!outputFileName) {
           <span class="file-hint">.txt &nbsp;.csv &nbsp;.json</span>
         }
-      </div>
+      </button>
     </div>
 
     <div class="form-group">
       <label for="zipFile">Source code archive (.zip)*</label>
-      <div
+      <button
         class="drop-zone"
         (click)="zipInput.click()"
         (keydown.enter)="zipInput.click()"
@@ -55,7 +54,7 @@
       >
         <input id="zipFile" #zipInput type="file" style="display:none" (change)="onZipSelected($event)" accept=".zip" />
         <span>{{ zipFileName || 'Drop .zip here or browse' }}</span>
-      </div>
+      </button>
     </div>
 
     <button class="btn-submit" (click)="onSubmit()">Submit</button>
