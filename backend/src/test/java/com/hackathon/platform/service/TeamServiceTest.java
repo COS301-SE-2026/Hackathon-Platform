@@ -343,4 +343,189 @@ class TeamServiceTest {
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("Team not found");
   }
+
+  @Test
+  void createTeam_shouldThrow_whenExistingMembershipPointsToMissingTeam() {
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
+    TeamMember badMember = new TeamMember();
+    badMember.setTeamId(UUID.randomUUID());
+    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
+        .thenReturn(List.of(badMember));
+    when(teamRepository.findById(badMember.getTeamId())).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Team not found");
+    verify(teamRepository, never()).save(any(Team.class));
+    verify(teamMemberRepository, never()).save(any(TeamMember.class));
+  }
+
+  @Test
+  void requestToJoinTeam_shouldThrow_whenTeamNotFound() {
+    UUID teamId = UUID.randomUUID();
+    when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> teamService.requestToJoinTeam(teamId, userId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Team not found");
+    verify(teamMemberRepository, never()).save(any(TeamMember.class));
+  }
+
+  @Test
+  void approveOrRejectJoinRequest_shouldThrow_whenTeamNotFound() {
+    UUID teamId = UUID.randomUUID();
+    UUID targetUserId = UUID.randomUUID();
+    when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(
+            () -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Team not found");
+    verify(teamMemberRepository, never()).save(any(TeamMember.class));
+  }
+
+  @Test
+  void viewTeamMembers_shouldThrow_whenMemberUserNotFound() {
+    UUID teamId = UUID.randomUUID();
+    UUID creatorId = userId;
+    UUID memberId = UUID.randomUUID();
+    Team team = new Team();
+    team.setCreatedByUserId(creatorId);
+    TeamMember member = new TeamMember();
+    member.setUserId(memberId);
+    member.setStatus("APPROVED");
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED"))
+        .thenReturn(List.of(member));
+    when(userRepository.findById(memberId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> teamService.viewTeamMembers(teamId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("User not found");
+  }
+
+  @Test
+  void leaveTeam_shouldThrow_whenMembershipStatusInvalid() {
+    UUID teamId = UUID.randomUUID();
+    TeamMember membership = new TeamMember();
+    membership.setStatus("REJECTED");
+    when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId))
+        .thenReturn(Optional.of(membership));
+
+    assertThatThrownBy(() -> teamService.leaveTeam(teamId, userId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Cannot leave with current status: REJECTED");
+    verify(teamMemberRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      approveOrRejectJoinRequest_shouldApprove_whenUserApprovedInAnotherEventButDifferentEventId() {
+    UUID teamId = UUID.randomUUID();
+    UUID targetUserId = UUID.randomUUID();
+    Team team = new Team();
+    team.setEventId(eventId);
+    team.setCreatedByUserId(userId);
+    TeamMember pending = new TeamMember();
+    pending.setStatus("PENDING");
+    UUID otherEventId = UUID.randomUUID();
+    TeamMember approvedInOtherTeam = new TeamMember();
+    approvedInOtherTeam.setTeamId(UUID.randomUUID());
+    Team otherTeam = new Team();
+    otherTeam.setEventId(otherEventId);
+
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
+        .thenReturn(Optional.of(pending));
+    when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
+        .thenReturn(List.of(approvedInOtherTeam));
+    when(teamRepository.findById(approvedInOtherTeam.getTeamId()))
+        .thenReturn(Optional.of(otherTeam));
+    when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(1L);
+
+    teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true);
+
+    assertThat(pending.getStatus()).isEqualTo("APPROVED");
+    verify(teamMemberRepository).save(pending);
+  }
+
+  @Test
+  void createTeam_shouldSucceed_whenUserInAnotherTeamButDifferentEvent() {
+    UUID otherEventId = UUID.randomUUID();
+    Team otherTeam = new Team();
+    otherTeam.setEventId(otherEventId);
+    TeamMember otherMember = new TeamMember();
+    otherMember.setTeamId(UUID.randomUUID());
+    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
+        .thenReturn(List.of(otherMember));
+    when(teamRepository.findById(otherMember.getTeamId())).thenReturn(Optional.of(otherTeam));
+
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
+    Team savedTeam = new Team();
+    savedTeam.setTeamId(UUID.randomUUID());
+    savedTeam.setTeamName("Test Team");
+    savedTeam.setEventId(eventId);
+    savedTeam.setCreatedByUserId(userId);
+    when(teamRepository.save(any(Team.class))).thenReturn(savedTeam);
+    when(teamMemberRepository.save(any(TeamMember.class))).thenAnswer(inv -> inv.getArgument(0));
+
+    TeamResponse response = teamService.createTeam(createRequest, userId);
+
+    assertThat(response.getTeamName()).isEqualTo("Test Team");
+    verify(teamRepository).save(any(Team.class));
+    verify(teamMemberRepository).save(any(TeamMember.class));
+  }
+
+  @Test
+  void approveOrRejectJoinRequest_shouldThrow_whenJoinRequestNotFound() {
+    UUID teamId = UUID.randomUUID();
+    UUID targetUserId = UUID.randomUUID();
+    Team team = new Team();
+    team.setCreatedByUserId(userId);
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
+        .thenReturn(Optional.empty());
+
+    assertThatThrownBy(
+            () -> teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Join request not found");
+    verify(teamMemberRepository, never()).save(any());
+  }
+
+  @Test
+  void leaveTeam_shouldThrow_whenUserNotInTeam() {
+    UUID teamId = UUID.randomUUID();
+    when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> teamService.leaveTeam(teamId, userId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("User not in team");
+    verify(teamMemberRepository, never()).save(any());
+    verify(teamRepository, never()).save(any());
+  }
+
+  @Test
+  void viewTeamMembers_shouldReturnLeaderRole_whenMemberIsCreator() {
+    UUID teamId = UUID.randomUUID();
+    UUID creatorId = userId;
+    Team team = new Team();
+    team.setCreatedByUserId(creatorId);
+    TeamMember creatorMember = new TeamMember();
+    creatorMember.setUserId(creatorId);
+    creatorMember.setStatus("APPROVED");
+    creatorMember.setJoinedAt(Instant.now());
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED"))
+        .thenReturn(List.of(creatorMember));
+    User creatorUser = new User();
+    creatorUser.setFirstName("Jane");
+    creatorUser.setLastName("Creator");
+    creatorUser.setEmail("jane@example.com");
+    when(userRepository.findById(creatorId)).thenReturn(Optional.of(creatorUser));
+
+    List<TeamMemberResponse> members = teamService.viewTeamMembers(teamId);
+    assertThat(members).hasSize(1);
+    assertThat(members.get(0).getRole()).isEqualTo("LEADER");
+  }
 }
