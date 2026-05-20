@@ -2,6 +2,7 @@ package com.hackathon.platform.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -100,6 +101,154 @@ class EventServiceTest {
         .hasMessageContaining("Event request body cannot be null");
 
     verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void createEvent_withInvalidName_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName(null);
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 4);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(48);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event name is required.");
+  }
+
+  @Test
+  void createEvent_withInvalidTeamSize_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 0);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(48);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Team size must be greater than 0.");
+  }
+
+  @Test
+  void createEvent_withInvalidStartDateTime_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(null);
+    req.setDuration(48);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event start date is required.");
+  }
+
+  @Test
+  void createEvent_withInvalidDuration_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(-50);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event duration must be greater than 0.");
+  }
+
+  @Test
+  void createEvent_withInvalidVisiblity_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility(null);
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(50);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event visibility is required.");
+  }
+
+  @Test
+  void createEvent_withInvalidStatus_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PUBLIC");
+    req.setStatus(null);
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(50);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event status is required.");
+  }
+
+  @Test
+  void createEvent_withInvalidRegistrationKey_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PRIVATE");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(50);
+    req.setRegistrationKey(null);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Registration key is required for private events.");
   }
 
   @Test

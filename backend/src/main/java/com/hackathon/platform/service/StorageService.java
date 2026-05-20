@@ -5,7 +5,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Abstraction layer for object storage operations. Programming against this interface allows
- * swapping the storage provider without changing any controller or business logic code.
+ * swapping the storage provider (if we need to) without changing any controller or business logic
+ * code.
  */
 public interface StorageService {
 
