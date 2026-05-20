@@ -88,7 +88,14 @@
     <dependency>
       <groupId>com.azure</groupId>
       <artifactId>azure-storage-blob</artifactId>
-      <version>12.25.4</version>
+      <version>12.27.0</version>
+    </dependency>
+
+    <!-- Azure Spring Boot Starter -->
+    <dependency>
+        <groupId>com.azure.spring</groupId>
+        <artifactId>spring-cloud-azure-starter-storage-blob</artifactId>
+        <version>5.19.0</version>
     </dependency>
 
     <!-- WebSocket -->

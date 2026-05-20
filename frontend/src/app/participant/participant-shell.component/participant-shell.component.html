@@ -1,0 +1,36 @@
+<div class="participant-shell">
+  <nav class="navbar">
+    <div class="navbar-left">
+      <div class="brand">
+        <span class="brand-h">Hackathon</span>
+        <span class="brand-p">Platform</span>
+      </div>
+      <span class="user-badge">Jane Smith</span>
+    </div>
+    <div class="navbar-links">
+      <a routerLink="/participant/home">Home</a>
+      <a routerLink="/participant/events" routerLinkActive="active">My Events</a>
+    </div>
+  </nav>
+
+
+  <div class="event-body">
+    <aside class="sidebar">
+      <p class="event-label">ENTELECT 2026</p>
+      <ul class="sidebar-nav">
+        <li><a routerLink="overview"      routerLinkActive="active">Overview</a></li>
+        <li><a routerLink="rules"         routerLinkActive="active">Problems &amp; Rules</a></li>
+        <li><a routerLink="team"          routerLinkActive="active">My team</a></li>
+        <li><a routerLink="submit"        routerLinkActive="active">Levels &amp; submit</a></li>
+        <li><a routerLink="submissions"   routerLinkActive="active">Submission history</a></li>
+        <li><a routerLink="leaderboard"   routerLinkActive="active">Leaderboard</a></li>
+        <li><a routerLink="forum"         routerLinkActive="active">Q&amp;A forum</a></li>
+      </ul>
+    </aside>
+
+
+    <main class="event-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
