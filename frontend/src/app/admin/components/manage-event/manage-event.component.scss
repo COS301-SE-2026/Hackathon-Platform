@@ -219,3 +219,61 @@
     }
   }
 }
+
+.file-upload-area {
+  border: 2px dashed #a8b5c8;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  background-color: #c8d0e0;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #2563eb;
+    background-color: #d4dcec;
+  }
+
+  span {
+    color: #475569;
+    font-size: 0.875rem;
+  }
+}
+
+.btn-upload {
+  background-color: #40ae24;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: #2f8a1a;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.success-message {
+  background-color: #dcfce7;
+  color: #16a34a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.error-message {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}

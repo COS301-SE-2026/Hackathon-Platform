@@ -84,6 +84,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   createTeamForEvent(event: OpenEventView): void {
     this.saveCurrentEvent(event);
+    localStorage.setItem('currentEventId', event.eventId);
+    localStorage.setItem('currentEventName', event.name);
     this.router.navigate(['/participant/team'], {
       queryParams: { eventId: event.eventId }
     });

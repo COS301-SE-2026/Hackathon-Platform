@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse, EventRequest } from '../../../services/event.service';
+import { StorageService } from '../../../services/storage.service';
 
 @Component({
   selector: 'app-manage-event',
@@ -16,6 +17,12 @@ export class ManageEventComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  uploadFile: File | null = null;
+  uploadFileName = '';
+  isUploading = false;
+  uploadSuccess = false;
+  uploadError = '';
 
   eventId = '';
   isLoading = true;
@@ -38,6 +45,10 @@ export class ManageEventComponent implements OnInit {
   statusOptions = ['UPCOMING', 'ONGOING', 'COMPLETED', 'CANCELED', 'ACTIVE', 'INACTIVE'];
   visibilityOptions = ['PUBLIC', 'PRIVATE'];
 
+    constructor(
+    private readonly storageService: StorageService 
+  ) {}
+
   ngOnInit(): void {
     this.eventId = this.route.snapshot.paramMap.get('id') || '';
     if (!this.eventId) {
@@ -53,12 +64,9 @@ export class ManageEventComponent implements OnInit {
 
     this.eventService.getMyEvents().subscribe({
       next: (events) => {
-        console.log('📦 Received events from backend:', events);
-        console.log('📋 Event IDs in list:', events.map(e => e.eventId));
 
         const event = events.find(e => e.eventId === this.eventId);
         if (event) {
-          console.log('✅ Event found, populating form');
           this.originalEvent = event;
           this.populateForm(event);
           this.isLoading = false;
@@ -174,5 +182,63 @@ export class ManageEventComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/admin/event-list']);
+  }
+
+    onDropFile(event: DragEvent): void {
+    event.preventDefault();
+    const file = event.dataTransfer?.files[0];
+    if (file && file.type === 'application/pdf') {
+      this.uploadFile = file;
+      this.uploadFileName = file.name;
+      this.uploadSuccess = false;
+      this.uploadError = '';
+    } else {
+      this.uploadError = 'Please drop a PDF file.';
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.[0]) {
+      this.uploadFile = input.files[0];
+      this.uploadFileName = this.uploadFile.name;
+      this.uploadSuccess = false;
+      this.uploadError = '';
+      this.cdr.detectChanges();
+    }
+  }
+
+  uploadResource(): void {
+    if (!this.uploadFile) {
+      this.uploadError = 'No file selected.';
+      return;
+    }
+    if (!this.eventId) {
+      this.uploadError = 'Event ID not available.';
+      return;
+    }
+
+    this.isUploading = true;
+    this.uploadError = '';
+    this.uploadSuccess = false;
+
+    const levelId = '3';
+    const renamedFile = new File([this.uploadFile], 'problem_statement.pdf', { type: this.uploadFile.type });
+
+    this.storageService.uploadLevelFile(this.eventId, levelId, renamedFile).subscribe({
+      next: (resp) => {
+        console.log('Upload success:', resp);
+        this.isUploading = false;
+        this.uploadSuccess = true;
+        this.uploadFile = null;
+        this.uploadFileName = '';
+        setTimeout(() => (this.uploadSuccess = false), 3000);
+      },
+      error: (err) => {
+        console.error('Upload failed:', err);
+        this.isUploading = false;
+        this.uploadError = err.error?.message || 'Upload failed. Check console.';
+      }
+    });
   }
 }

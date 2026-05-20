@@ -93,6 +93,26 @@
         <p class="field-hint">Status determines if event is active, upcoming, etc.</p>
       </div>
 
+      <div class="form-section">
+        <h2 class="section-heading">Event Resources</h2>
+        <div class="form-group">
+          <label>Problem Statement PDF (for participants)</label>
+          <div class="file-upload-area" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="onDropFile($event)">
+            <input #fileInput type="file" accept=".pdf" style="display:none" (change)="onFileSelected($event)" />
+            <span>{{ uploadFileName || 'Click or drag PDF here' }}</span>
+          </div>
+          <button type="button" class="btn-upload" (click)="uploadResource()" [disabled]="!uploadFile || isUploading">
+            {{ isUploading ? 'Uploading...' : 'Upload to Azure' }}
+          </button>
+          @if (uploadSuccess) {
+            <p class="success-message" style="margin-top: 8px;">File uploaded successfully</p>
+          }
+          @if (uploadError) {
+            <p class="error-message" style="margin-top: 8px;">{{ uploadError }}</p>
+          }
+        </div>
+      </div>
+
       <div class="form-actions">
         <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>
         <button type="submit" class="btn-primary" [disabled]="isSaving">

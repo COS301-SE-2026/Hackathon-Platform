@@ -13,6 +13,7 @@
           <button
             class="btn-resource"
             [ngClass]="res.action === 'View' ? 'green' : 'purple'"
+            (click)="downloadResource(res)"
           >
             {{ res.action }}
           </button>
