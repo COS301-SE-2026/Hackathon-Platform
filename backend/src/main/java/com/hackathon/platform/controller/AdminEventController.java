@@ -36,7 +36,7 @@ public class AdminEventController {
     return ResponseEntity.ok(newEvent);
   }
 
-  /** Get all events created by admin /api/admin/events/{id} */
+  /** Get all events created by admin /api/admin/events */
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<Event>> getEvents(@AuthenticationPrincipal User user) {

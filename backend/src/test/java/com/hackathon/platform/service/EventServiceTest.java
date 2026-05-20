@@ -12,6 +12,7 @@ import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.model.User;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -20,9 +21,12 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.AfterEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceTest {
@@ -38,6 +42,12 @@ class EventServiceTest {
   void setUp() {
     eventId = UUID.randomUUID();
     creatorUserId = UUID.randomUUID();
+    User admin = new User();
+    admin.setUserId(creatorUserId);
+    admin.setEmail("admin@test.com");
+    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(admin, null, List.of());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
     event = new Event();
     event.setEventId(eventId);
     event.setCreatedByUserId(creatorUserId);
@@ -45,6 +55,11 @@ class EventServiceTest {
     event.setVisibility("PUBLIC");
     event.setStatus("INACTIVE");
     event.setRegistrationKey(null);
+  }
+
+  @AfterEach
+  void clear() {
+    SecurityContextHolder.clearContext();
   }
 
   @Test
@@ -89,7 +104,7 @@ class EventServiceTest {
     assertThat(result.getStatus()).isEqualTo("ACTIVE");
     assertThat(result.getDescription()).isEqualTo("This is a test");
     assertThat(result.getCreatedByUserId())
-        .isEqualTo(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
+        .isEqualTo(creatorUserId);
 
     verify(eventRepository).save(any(Event.class));
   }
@@ -273,7 +288,7 @@ class EventServiceTest {
     assertThat(result.getDescription()).isEqualTo("This is a test");
     assertThat(result.getRegistrationKey()).isEqualTo("THISISAKEY");
     assertThat(result.getCreatedByUserId())
-        .isEqualTo(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
+        .isEqualTo(creatorUserId);
 
     verify(eventRepository).findById(eventId);
     verify(eventRepository).save(any(Event.class));
