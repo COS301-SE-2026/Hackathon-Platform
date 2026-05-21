@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router, ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { of, throwError } from 'rxjs';
 import { HomeComponent } from './home.component';
+import { EventService } from '../../services/event.service';
 
 describe('HomeComponent', () => {
   let component: HomeComponent;
