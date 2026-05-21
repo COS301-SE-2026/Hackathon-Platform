@@ -1,0 +1,6 @@
+{
+  "http://localhost:52141/login": "https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1779298264080-50924.report.html",
+  "http://localhost:52141/register": "https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1779298265681-26090.report.html",
+  "http://localhost:52141/participant/home": "https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1779298267206-28230.report.html",
+  "http://localhost:52141/participant/team": "https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/1779298268602-49780.report.html"
+}

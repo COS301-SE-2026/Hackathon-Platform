@@ -92,7 +92,7 @@ class TeamControllerTest {
 
     userAuth =
         new UsernamePasswordAuthenticationToken(
-            userId.toString(), null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+            savedUser, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
   }
 
   @Test
@@ -138,7 +138,7 @@ class TeamControllerTest {
 
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(
-            memberId.toString(), null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+            savedMember, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
 
     mockMvc
         .perform(
@@ -200,7 +200,7 @@ class TeamControllerTest {
 
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(
-            memberId.toString(), null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+            savedMember, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
 
     mockMvc
         .perform(
@@ -247,7 +247,7 @@ class TeamControllerTest {
 
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(
-            memberId.toString(), null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+            savedMember, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
 
     mockMvc
         .perform(
