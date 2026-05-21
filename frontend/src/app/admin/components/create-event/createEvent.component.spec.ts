@@ -10,17 +10,29 @@ import { EventService } from '../../../services/event.service';
 describe('CreateEventComponent', () => {
   let component: CreateEventComponent;
   let fixture: ComponentFixture<CreateEventComponent>;
-  let routerSpy: jasmine.Spy;
+  let routerNavigateSpy: jasmine.Spy;
+  let eventServiceMock: jasmine.SpyObj<EventService>;
 
   beforeEach(async () => {
-    const router = jasmine.createSpyObj('Router', ['navigate']);
-    routerSpy = router.navigate;
+    eventServiceMock = jasmine.createSpyObj<EventService>('EventService', ['createEvent']);
+    eventServiceMock.createEvent.and.returnValue(of({ eventId: 'event-123' } as any));
 
     await TestBed.configureTestingModule({
-      imports: [FormsModule, CreateEventComponent],
-      providers: [{ provide: Router, useValue: router }]
+      imports: [FormsModule, RouterTestingModule, CreateEventComponent],
+      providers: [
+        { provide: EventService, useValue: eventServiceMock },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { queryParams: {}, params: {} },
+            queryParams: of({}),
+            params: of({})
+          }
+        }
+      ]
     }).compileComponents();
 
+    routerNavigateSpy = spyOn(TestBed.inject(Router), 'navigate');
     fixture = TestBed.createComponent(CreateEventComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -32,85 +44,132 @@ describe('CreateEventComponent', () => {
 
   it('should have default form values', () => {
     expect(component.form.eventName).toBe('');
-    expect(component.form.startDate).toBe('2026-04-20T09:00');
-    expect(component.form.duration).toBe('24 hours');
-    expect(component.form.minTeamSize).toBe(4);
-    expect(component.form.maxTeamSize).toBe(10);
-    expect(component.form.visibility).toBe('public');
+    expect(component.form.startDate).toBe('2024-12-01T09:00');
+    expect(component.form.visibility).toBe('PUBLIC');
     expect(component.form.bannerFile).toBeNull();
     expect(component.form.bannerFileName).toBe('');
     expect(component.form.description).toBe('');
   });
 
-  it('should set visibility to public when public button clicked', () => {
-    component.form.visibility = 'private';
-    const publicButton = fixture.debugElement.nativeElement.querySelector('.toggle-option');
-    publicButton.click();
-    fixture.detectChanges();
-    expect(component.form.visibility).toBe('public');
-  });
-
-  it('should set visibility to private when private button clicked', () => {
-    component.form.visibility = 'public';
-    const buttons = fixture.debugElement.nativeElement.querySelectorAll('.toggle-option');
-    const privateButton = buttons[1];
-    privateButton.click();
-    fixture.detectChanges();
-    expect(component.form.visibility).toBe('private');
-  });
-
   it('should set bannerFileName when a file is selected', () => {
     const fakeFile = new File(['content'], 'banner.png', { type: 'image/png' });
-    const event = { target: { files: [fakeFile] } } as any;
+    const event = { target: { files: [fakeFile] } } as unknown as Event;
+
     component.onFileSelected(event);
+
     expect(component.form.bannerFileName).toBe('banner.png');
     expect(component.form.bannerFile).toBe(fakeFile);
   });
 
-  it('should log form data when onSaveDraft is called', () => {
-    const consoleSpy = spyOn(console, 'log');
-    component.onSaveDraft();
-    expect(consoleSpy).toHaveBeenCalledWith('Saving draft:', component.form);
-  });
-
-  it('should log and navigate when onNextStep is called', () => {
-    const consoleSpy = spyOn(console, 'log');
-    component.onNextStep();
-    expect(consoleSpy).toHaveBeenCalledWith('Proceeding to Levels & Files:', component.form);
-    expect(routerSpy).toHaveBeenCalledWith(['/admin/events/create/levels']);
-  });
-
   it('should trigger file input when triggerFileInput is called', () => {
-  const clickSpy = spyOn(component.fileInput.nativeElement, 'click');
-  component.triggerFileInput();
-  expect(clickSpy).toHaveBeenCalled();
-});
+    const input = document.createElement('input');
+    const clickSpy = spyOn(input, 'click');
+    component.fileInput = new ElementRef(input);
 
-   it('should set banner file on drop', () => {
-  const fakeFile = new File(['content'], 'dropped.png', { type: 'image/png' });
-  const dragEvent = {
-    preventDefault: () => {},
-    dataTransfer: { files: [fakeFile] }
-  } as any;
-  component.onDrop(dragEvent);
-  expect(component.form.bannerFileName).toBe('dropped.png');
-  expect(component.form.bannerFile).toBe(fakeFile);
-});
+    component.triggerFileInput();
 
-    it('should not set banner file when drop has no file', () => {
-  const dragEvent = {
-    preventDefault: () => {},
-    dataTransfer: { files: [] }
-  } as any;
-  component.onDrop(dragEvent);
-  expect(component.form.bannerFileName).toBe('');
-  expect(component.form.bannerFile).toBeNull();
-});
+    expect(clickSpy).toHaveBeenCalled();
+  });
 
- it('should prevent default on drag over', () => {
-  const dragEvent = { preventDefault: jasmine.createSpy() } as any;
-  component.onDragOver(dragEvent);
-  expect(dragEvent.preventDefault).toHaveBeenCalled();
- });
+  it('should set banner file on drop', () => {
+    const fakeFile = new File(['content'], 'dropped.png', { type: 'image/png' });
+    const dragEvent = {
+      preventDefault: jasmine.createSpy('preventDefault'),
+      dataTransfer: { files: [fakeFile] }
+    } as unknown as DragEvent;
 
+    component.onDrop(dragEvent);
+
+    expect(component.form.bannerFileName).toBe('dropped.png');
+    expect(component.form.bannerFile).toBe(fakeFile);
+  });
+
+  it('should not set banner file when drop has no file', () => {
+    const dragEvent = {
+      preventDefault: jasmine.createSpy('preventDefault'),
+      dataTransfer: { files: [] }
+    } as unknown as DragEvent;
+
+    component.onDrop(dragEvent);
+
+    expect(component.form.bannerFileName).toBe('');
+    expect(component.form.bannerFile).toBeNull();
+  });
+
+  it('should prevent default on drag over', () => {
+    const dragEvent = { preventDefault: jasmine.createSpy('preventDefault') } as unknown as DragEvent;
+
+    component.onDragOver(dragEvent);
+
+    expect(dragEvent.preventDefault).toHaveBeenCalled();
+  });
+
+  it('should show error when createEvent is called without event name', () => {
+    component.form.eventName = '';
+
+    component.createEvent();
+
+    expect(component.errorMessage).toBe('Please enter an event name');
+    expect(eventServiceMock.createEvent).not.toHaveBeenCalled();
+  });
+
+  it('should show error when onNextStep is called without event name', () => {
+    component.form.eventName = '';
+
+    component.onNextStep();
+
+    expect(component.errorMessage).toBe('Please fill in event name');
+    expect(eventServiceMock.createEvent).not.toHaveBeenCalled();
+  });
+
+  it('should create event and navigate to event list', () => {
+    component.form.eventName = 'Test Hackathon';
+    component.form.description = 'Test description';
+
+    component.createEvent();
+
+    expect(eventServiceMock.createEvent).toHaveBeenCalledWith(jasmine.objectContaining({
+      name: 'Test Hackathon',
+      teamSizeLimit: 4,
+      duration: 48,
+      description: 'Test description',
+      visibility: 'PUBLIC',
+      status: 'ACTIVE',
+      registrationKey: undefined
+    }));
+    expect(component.isLoading).toBeFalse();
+    expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/event-list']);
+  });
+
+  it('should include registration key for private events', () => {
+    component.form.eventName = 'Private Hackathon';
+    component.form.visibility = 'PRIVATE';
+    component.form.registrationKey = 'SECRET123';
+
+    component.createEvent();
+
+    expect(eventServiceMock.createEvent).toHaveBeenCalledWith(jasmine.objectContaining({
+      visibility: 'PRIVATE',
+      registrationKey: 'SECRET123'
+    }));
+  });
+
+  it('should create event when onSaveDraft is called with valid data', () => {
+    component.form.eventName = 'Draft Event';
+
+    component.onSaveDraft();
+
+    expect(eventServiceMock.createEvent).toHaveBeenCalled();
+  });
+
+  it('should handle create event errors', () => {
+    eventServiceMock.createEvent.and.returnValue(throwError(() => ({ status: 403, error: {} })));
+    spyOn(console, 'error');
+    component.form.eventName = 'Test Hackathon';
+
+    component.createEvent();
+
+    expect(component.isLoading).toBeFalse();
+    expect(component.errorMessage).toBe('You are not authorized. Please login as admin.');
+  });
 });
