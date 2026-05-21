@@ -1,0 +1,35 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "./dist/frontend/browser",
+      "isSinglePageApplication": true,
+      "url": [
+        "http://localhost:9000/login",
+        "http://localhost:9000/register",
+        "http://localhost:9000/participant/home",
+        "http://localhost:9000/participant/team"
+      ],
+      "numberOfRuns": 1
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.5 }],
+        "categories:accessibility": ["warn", { "minScore": 0.7 }],
+        "categories:best-practices": ["warn", { "minScore": 0.7 }],
+        "categories:seo": ["warn", { "minScore": 0.7 }],
+
+        "installable-manifest": "off",
+        "maskable-icon": "off",
+        "splash-screen": "off",
+        "themed-omnibox": "off",
+        "csp-xss": "off",
+        "robots-txt": "off",
+        "unused-javascript": "off",
+        "total-byte-weight": "off"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
