@@ -73,7 +73,7 @@ class AdminEventControllerTest {
             adminUser, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
     Role participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
-    
+
     participantUser =
         User.builder()
             .userId(UUID.randomUUID())
