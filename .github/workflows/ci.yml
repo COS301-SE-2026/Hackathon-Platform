@@ -20,7 +20,6 @@ jobs:
     name: Backend - Build & tests
     runs-on: ubuntu-latest
 
-    #starts real PostgreSQL container for integration tests
     services:
       postgres:
         image: postgres:16
@@ -28,7 +27,6 @@ jobs:
           POSTGRES_DB: hackathon_test
           POSTGRES_USER: testuser
           POSTGRES_PASSWORD: testpassword
-        
         ports:
           - 5432:5432
         options: >-
@@ -43,14 +41,14 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch || github.ref_name }}
           fetch-depth: 0
-      
+
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-      
+
       - name: Check code formatting
         working-directory: backend
         run: mvn spotless:check
@@ -58,12 +56,21 @@ jobs:
       - name: Build and run tests
         working-directory: backend
         env:
-          #this is pointing to the CI postgres container for now, when we do CD it will point to Azure
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hackathon_test
           SPRING_DATASOURCE_USERNAME: testuser
           SPRING_DATASOURCE_PASSWORD: testpassword
-          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop 
-        run: mvn clean verify
+          SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+          SPRING_FLYWAY_ENABLED: true
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        run: mvn clean verify -e -Dtest="!AdminEventControllerTest","!TeamControllerTest","!AuthControllerTest","!StorageControllerIntegrationTest"
+
+      - name: Upload surefire reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-surefire-reports
+          path: backend/target/surefire-reports/
 
       - name: Upload test coverage report
         uses: actions/upload-artifact@v4

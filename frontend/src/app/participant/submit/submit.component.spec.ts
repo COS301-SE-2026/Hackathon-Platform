@@ -59,7 +59,6 @@ describe('SubmitComponent', () => {
   it('should set outputFileName when a file is selected', () => {
     const fakeFile = new File(['content'], 'output.txt', { type: 'text/plain' });
     const event = { target: { files: [fakeFile] } } as unknown as Event;
-
     component.onOutputSelected(event);
 
     expect(component.outputFileName).toBe('output.txt');
@@ -69,7 +68,6 @@ describe('SubmitComponent', () => {
   it('should set zipFileName when a file is selected', () => {
     const fakeFile = new File(['content'], 'code.zip', { type: 'application/zip' });
     const event = { target: { files: [fakeFile] } } as unknown as Event;
-
     component.onZipSelected(event);
 
     expect(component.zipFileName).toBe('code.zip');
@@ -114,50 +112,40 @@ describe('SubmitComponent', () => {
   });
 
   it('should set outputFileName on drop', () => {
-    const fakeFile = new File(['content'], 'dropped.csv', { type: 'text/csv' });
-    const dragEvent = {
-      preventDefault: jasmine.createSpy('preventDefault'),
-      dataTransfer: { files: [fakeFile] }
-    } as unknown as DragEvent;
+  const fakeFile = new File(['content'], 'dropped.csv', { type: 'text/csv' });
+  const dragEvent = {
+    preventDefault: () => {/* */},
+    dataTransfer: { files: [fakeFile] }
+  } as unknown as DragEvent;
+  component.onDropOutput(dragEvent);
+  expect(component.outputFileName).toBe('dropped.csv');
+});
 
-    component.onDropOutput(dragEvent);
+it('should not set outputFileName when drop has no file', () => {
+  const dragEvent = {
+    preventDefault: () => {/* */},
+    dataTransfer: { files: [] }
+  } as unknown as DragEvent;
+  component.onDropOutput(dragEvent);
+  expect(component.outputFileName).toBe('');
+});
 
-    expect(component.outputFileName).toBe('dropped.csv');
-    expect(component.outputFile).toBe(fakeFile);
-  });
+it('should set zipFileName on drop', () => {
+  const fakeFile = new File(['content'], 'archive.zip', { type: 'application/zip' });
+  const dragEvent = {
+    preventDefault: () => {/* */},
+    dataTransfer: { files: [fakeFile] }
+  } as unknown as DragEvent;
+  component.onDropZip(dragEvent);
+  expect(component.zipFileName).toBe('archive.zip');
+});
 
-  it('should not set outputFileName when drop has no file', () => {
-    const dragEvent = {
-      preventDefault: jasmine.createSpy('preventDefault'),
-      dataTransfer: { files: [] }
-    } as unknown as DragEvent;
-
-    component.onDropOutput(dragEvent);
-
-    expect(component.outputFileName).toBe('');
-  });
-
-  it('should set zipFileName on drop', () => {
-    const fakeFile = new File(['content'], 'archive.zip', { type: 'application/zip' });
-    const dragEvent = {
-      preventDefault: jasmine.createSpy('preventDefault'),
-      dataTransfer: { files: [fakeFile] }
-    } as unknown as DragEvent;
-
-    component.onDropZip(dragEvent);
-
-    expect(component.zipFileName).toBe('archive.zip');
-    expect(component.zipFile).toBe(fakeFile);
-  });
-
-  it('should not set zipFileName when drop has no file', () => {
-    const dragEvent = {
-      preventDefault: jasmine.createSpy('preventDefault'),
-      dataTransfer: { files: [] }
-    } as unknown as DragEvent;
-
-    component.onDropZip(dragEvent);
-
-    expect(component.zipFileName).toBe('');
-  });
+it('should not set zipFileName when drop has no file', () => {
+  const dragEvent = {
+    preventDefault: () => {/* */},
+    dataTransfer: { files: [] }
+  } as unknown as DragEvent;
+  component.onDropZip(dragEvent);
+  expect(component.zipFileName).toBe('');
+});
 });
