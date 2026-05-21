@@ -8,6 +8,36 @@ import { EventService } from '../../services/event.service';
 describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
+   let eventServiceMock: jasmine.SpyObj<EventService>;
+  let routerNavigateSpy: jasmine.Spy;
+
+  const mockEvents = [
+    {
+      eventId: 'event-1',
+      createdByUserId: 'admin-1',
+      name: 'ML Hackathon Q2',
+      registrationKey: null,
+      teamSizeLimit: 4,
+      startDateTime: '2099-05-20T09:00:00Z',
+      duration: 48,
+      description: 'ML event',
+      visibility: 'PUBLIC',
+      status: 'ACTIVE'
+    },
+    {
+      eventId: 'event-2',
+      createdByUserId: 'admin-1',
+      name: 'Internal Dev Challenge',
+      registrationKey: 'SECRET',
+      teamSizeLimit: 3,
+      startDateTime: '2099-06-20T09:00:00Z',
+      duration: 24,
+      description: 'Internal event',
+      visibility: 'PRIVATE',
+      status: 'UPCOMING'
+    }
+  ];
+
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
