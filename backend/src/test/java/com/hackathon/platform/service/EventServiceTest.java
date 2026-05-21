@@ -2,6 +2,7 @@ package com.hackathon.platform.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -10,18 +11,22 @@ import static org.mockito.Mockito.when;
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceTest {
@@ -37,6 +42,13 @@ class EventServiceTest {
   void setUp() {
     eventId = UUID.randomUUID();
     creatorUserId = UUID.randomUUID();
+    User admin = new User();
+    admin.setUserId(creatorUserId);
+    admin.setEmail("admin@test.com");
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(admin, null, List.of());
+    SecurityContextHolder.getContext().setAuthentication(auth);
+
     event = new Event();
     event.setEventId(eventId);
     event.setCreatedByUserId(creatorUserId);
@@ -44,6 +56,11 @@ class EventServiceTest {
     event.setVisibility("PUBLIC");
     event.setStatus("INACTIVE");
     event.setRegistrationKey(null);
+  }
+
+  @AfterEach
+  void clear() {
+    SecurityContextHolder.clearContext();
   }
 
   @Test
@@ -87,8 +104,7 @@ class EventServiceTest {
     assertThat(result.getVisibility()).isEqualTo("PUBLIC");
     assertThat(result.getStatus()).isEqualTo("ACTIVE");
     assertThat(result.getDescription()).isEqualTo("This is a test");
-    assertThat(result.getCreatedByUserId())
-        .isEqualTo(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
+    assertThat(result.getCreatedByUserId()).isEqualTo(creatorUserId);
 
     verify(eventRepository).save(any(Event.class));
   }
@@ -100,6 +116,154 @@ class EventServiceTest {
         .hasMessageContaining("Event request body cannot be null");
 
     verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void createEvent_withInvalidName_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName(null);
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 4);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(48);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event name is required.");
+  }
+
+  @Test
+  void createEvent_withInvalidTeamSize_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 0);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(48);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Team size must be greater than 0.");
+  }
+
+  @Test
+  void createEvent_withInvalidStartDateTime_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(null);
+    req.setDuration(48);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event start date is required.");
+  }
+
+  @Test
+  void createEvent_withInvalidDuration_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(-50);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event duration must be greater than 0.");
+  }
+
+  @Test
+  void createEvent_withInvalidVisiblity_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility(null);
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(50);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event visibility is required.");
+  }
+
+  @Test
+  void createEvent_withInvalidStatus_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PUBLIC");
+    req.setStatus(null);
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(50);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Event status is required.");
+  }
+
+  @Test
+  void createEvent_withInvalidRegistrationKey_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setName("null");
+    req.setVisibility("PRIVATE");
+    req.setStatus("ACTIVE");
+    req.setDescription("This is a test");
+    req.setTeamSizeLimit((short) 10);
+    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
+    req.setDuration(50);
+    req.setRegistrationKey(null);
+
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> {
+              eventService.createEvent(req);
+            });
+
+    assertThat(ex.getMessage()).isEqualTo("Registration key is required for private events.");
   }
 
   @Test
@@ -123,8 +287,7 @@ class EventServiceTest {
     assertThat(result.getStatus()).isEqualTo("ACTIVE");
     assertThat(result.getDescription()).isEqualTo("This is a test");
     assertThat(result.getRegistrationKey()).isEqualTo("THISISAKEY");
-    assertThat(result.getCreatedByUserId())
-        .isEqualTo(UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"));
+    assertThat(result.getCreatedByUserId()).isEqualTo(creatorUserId);
 
     verify(eventRepository).findById(eventId);
     verify(eventRepository).save(any(Event.class));

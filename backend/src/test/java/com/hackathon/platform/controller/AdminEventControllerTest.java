@@ -42,6 +42,8 @@ class AdminEventControllerTest {
   private UUID eventId;
   private UUID creatorUserId;
   private Event event;
+  private User adminUser;
+  private User participantUser;
 
   @BeforeEach
   void setUp() {
@@ -57,7 +59,7 @@ class AdminEventControllerTest {
     eventRequest.setTeamSizeLimit((short) 5);
 
     Role adminRole = Role.builder().roleId(1).name("ADMIN").build();
-    User adminUser =
+    adminUser =
         User.builder()
             .userId(UUID.randomUUID())
             .firstName("Jane")
@@ -72,7 +74,8 @@ class AdminEventControllerTest {
             adminUser, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
     Role participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
-    User participantUser =
+
+    participantUser =
         User.builder()
             .userId(UUID.randomUUID())
             .firstName("Jane")
@@ -112,7 +115,7 @@ class AdminEventControllerTest {
   @Test
   void getEventByCreator_asAdmin_return200Ok() throws Exception {
     mockMvc
-        .perform(get("/api/admin/events/{id}", creatorUserId).with(authentication(adminAuth)))
+        .perform(get("/api/admin/events").with(authentication(adminAuth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray());
   }
@@ -120,7 +123,7 @@ class AdminEventControllerTest {
   @Test
   void getEventByCreator_asParticipant_return403Forbidden() throws Exception {
     mockMvc
-        .perform(get("/api/admin/events/{id}", creatorUserId).with(authentication(participantAuth)))
+        .perform(get("/api/admin/events").with(authentication(participantAuth)))
         .andExpect(status().isForbidden());
   }
 

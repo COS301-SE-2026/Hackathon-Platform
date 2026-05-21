@@ -2,12 +2,24 @@
   <h1 class="welcome-title">Welcome back, User</h1>
   <p class="welcome-sub">Browse events and track your progress</p>
 
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
   <div class="top-cards">
     <div class="active-event-card">
       <p class="card-label">Your active event</p>
-      <h2 class="event-name">Entelect Challenge 2025</h2>
-      <p class="event-meta">Team : ByteForce · Rank #11 of 344</p>
-      <button class="btn-go">Go to event</button>
+
+      @if (activeEvent) {
+        <h2 class="event-name">{{ activeEvent.name }}</h2>
+        <p class="event-meta">
+          {{ activeEvent.dates }} · {{ activeEvent.visibility }} · Team size {{ activeEvent.teamSizeLimit }}
+        </p>
+        <button class="btn-go" (click)="goToEvent(activeEvent)">Go to event</button>
+      } @else {
+        <h2 class="event-name">No active event</h2>
+        <p class="event-meta">Choose an open event below to get started.</p>
+      }
     </div>
 
     <div class="timer-card">
@@ -20,23 +32,40 @@
   </div>
 
   <h2 class="section-title">Open events</h2>
-  <div class="events-list">
-    @for (event of openEvents; track event.name) {
-      <div class="event-row">
-        <div class="event-info">
-          <p class="ev-name">{{ event.name }}</p>
-          <p class="ev-meta">{{ event.dates }} &nbsp;·&nbsp; {{ event.teams }} teams &nbsp;·&nbsp; {{ event.visibility }} &nbsp;·&nbsp; {{ event.levels }} levels</p>
+
+  @if (isLoadingEvents) {
+    <p class="page-sub">Loading open events...</p>
+  } @else if (openEvents.length === 0) {
+    <p class="page-sub">No open events are available right now.</p>
+  } @else {
+    <div class="events-list">
+      @for (event of openEvents; track event.eventId) {
+        <div class="event-row">
+          <div class="event-info">
+            <p class="ev-name">{{ event.name }}</p>
+            <p class="ev-meta">
+              {{ event.dates }}
+              &nbsp;·&nbsp; {{ event.teams }} teams
+              &nbsp;·&nbsp; {{ event.visibility }}
+              &nbsp;·&nbsp; Team size {{ event.teamSizeLimit }}
+            </p>
+          </div>
+
+          <div class="event-actions">
+            <span class="status-badge" [ngClass]="event.status.toLowerCase()">
+              {{ event.status }}
+            </span>
+
+            <button class="btn-register" (click)="goToEvent(event)">
+              View event
+            </button>
+
+            <button class="btn-register key" (click)="createTeamForEvent(event)">
+              Create team
+            </button>
+          </div>
         </div>
-        <div class="event-actions">
-          <span class="status-badge" [ngClass]="event.status.toLowerCase()">{{ event.status }}</span>
-          <button
-            class="btn-register"
-            [class.key]="event.requiresKey"
-          >
-            {{ event.requiresKey ? 'Register with key' : 'Register' }}
-          </button>
-        </div>
-      </div>
-    }
-  </div>
+      }
+    </div>
+  }
 </div>

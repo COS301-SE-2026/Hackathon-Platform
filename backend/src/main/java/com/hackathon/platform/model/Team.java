@@ -25,7 +25,7 @@ public class Team {
   @Column(name = "created_by_user_id", nullable = false)
   private UUID createdByUserId;
 
-  @Column(name = "event_id", nullable = false)
+  @Column(name = "event_id", nullable = true)
   private UUID eventId;
 
   @Column(name = "created_at", nullable = false)
