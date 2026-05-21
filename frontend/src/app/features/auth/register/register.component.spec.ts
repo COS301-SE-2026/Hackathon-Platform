@@ -9,19 +9,44 @@ import { AuthService } from '../../../services/auth.service';
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
-  let routerSpy: jasmine.Spy;
+  let routerNavigateSpy: jasmine.Spy;
+  let authMock: jasmine.SpyObj<AuthService>;
+    function mockForm(valid = true): NgForm {
+    return {
+      valid,
+      invalid: !valid,
+      controls: {
+        firstName: { markAsTouched: jasmine.createSpy('markAsTouched') },
+        lastName: { markAsTouched: jasmine.createSpy('markAsTouched') },
+        email: { markAsTouched: jasmine.createSpy('markAsTouched') },
+        password: { markAsTouched: jasmine.createSpy('markAsTouched') },
+        confirmPassword: { markAsTouched: jasmine.createSpy('markAsTouched') }
+      }
+    } as unknown as NgForm;
+  }
 
   beforeEach(async () => {
+    authMock = jasmine.createSpyObj<AuthService>('AuthService', ['register']);
+
     await TestBed.configureTestingModule({
-      imports: [FormsModule, RouterTestingModule, RegisterComponent]
+      imports: [FormsModule, RouterTestingModule, RegisterComponent],
+      providers: [
+        { provide: AuthService, useValue: authMock },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { queryParams: {}, params: {} },
+            queryParams: of({}),
+            params: of({})
+          }
+        }
+      ]
     }).compileComponents();
 
+    routerNavigateSpy = spyOn(TestBed.inject(Router), 'navigate');
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-
-    const router = TestBed.inject(Router);
-    routerSpy = spyOn(router, 'navigate');
   });
 
   it('should create', () => {
