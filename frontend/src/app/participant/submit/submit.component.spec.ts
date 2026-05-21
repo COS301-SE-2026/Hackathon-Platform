@@ -25,14 +25,14 @@ describe('SubmitComponent', () => {
 
   it('should set outputFileName when a file is selected', () => {
     const fakeFile = new File(['content'], 'output.txt', { type: 'text/plain' });
-    const event = { target: { files: [fakeFile] } } as any;
+    const event = { target: { files: [fakeFile] } } as unknown as Event;
     component.onOutputSelected(event);
     expect(component.outputFileName).toBe('output.txt');
   });
 
   it('should set zipFileName when a file is selected', () => {
     const fakeFile = new File(['content'], 'code.zip', { type: 'application/zip' });
-    const event = { target: { files: [fakeFile] } } as any;
+    const event = { target: { files: [fakeFile] } } as unknown as Event;
     component.onZipSelected(event);
     expect(component.zipFileName).toBe('code.zip');
   });
@@ -56,18 +56,18 @@ describe('SubmitComponent', () => {
   it('should set outputFileName on drop', () => {
   const fakeFile = new File(['content'], 'dropped.csv', { type: 'text/csv' });
   const dragEvent = {
-    preventDefault: () => {},
+    preventDefault: () => {/* */},
     dataTransfer: { files: [fakeFile] }
-  } as any;
+  } as unknown as DragEvent;
   component.onDropOutput(dragEvent);
   expect(component.outputFileName).toBe('dropped.csv');
 });
 
 it('should not set outputFileName when drop has no file', () => {
   const dragEvent = {
-    preventDefault: () => {},
+    preventDefault: () => {/* */},
     dataTransfer: { files: [] }
-  } as any;
+  } as unknown as DragEvent;
   component.onDropOutput(dragEvent);
   expect(component.outputFileName).toBe('');
 });
@@ -75,18 +75,18 @@ it('should not set outputFileName when drop has no file', () => {
 it('should set zipFileName on drop', () => {
   const fakeFile = new File(['content'], 'archive.zip', { type: 'application/zip' });
   const dragEvent = {
-    preventDefault: () => {},
+    preventDefault: () => {/* */},
     dataTransfer: { files: [fakeFile] }
-  } as any;
+  } as unknown as DragEvent;
   component.onDropZip(dragEvent);
   expect(component.zipFileName).toBe('archive.zip');
 });
 
 it('should not set zipFileName when drop has no file', () => {
   const dragEvent = {
-    preventDefault: () => {},
+    preventDefault: () => {/* */},
     dataTransfer: { files: [] }
-  } as any;
+  } as unknown as DragEvent;
   component.onDropZip(dragEvent);
   expect(component.zipFileName).toBe('');
 });

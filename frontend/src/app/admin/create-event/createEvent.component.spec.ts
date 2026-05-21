@@ -57,7 +57,7 @@ describe('CreateEventComponent', () => {
 
   it('should set bannerFileName when a file is selected', () => {
     const fakeFile = new File(['content'], 'banner.png', { type: 'image/png' });
-    const event = { target: { files: [fakeFile] } } as any;
+    const event = { target: { files: [fakeFile] } } as unknown as Event;
     component.onFileSelected(event);
     expect(component.form.bannerFileName).toBe('banner.png');
     expect(component.form.bannerFile).toBe(fakeFile);
@@ -85,9 +85,9 @@ describe('CreateEventComponent', () => {
    it('should set banner file on drop', () => {
   const fakeFile = new File(['content'], 'dropped.png', { type: 'image/png' });
   const dragEvent = {
-    preventDefault: () => {},
+    preventDefault: () => {/* */},
     dataTransfer: { files: [fakeFile] }
-  } as any;
+  } as unknown as DragEvent;
   component.onDrop(dragEvent);
   expect(component.form.bannerFileName).toBe('dropped.png');
   expect(component.form.bannerFile).toBe(fakeFile);
@@ -95,16 +95,16 @@ describe('CreateEventComponent', () => {
 
     it('should not set banner file when drop has no file', () => {
   const dragEvent = {
-    preventDefault: () => {},
+    preventDefault: () => {/* */},
     dataTransfer: { files: [] }
-  } as any;
+  } as unknown as DragEvent;
   component.onDrop(dragEvent);
   expect(component.form.bannerFileName).toBe('');
   expect(component.form.bannerFile).toBeNull();
 });
 
  it('should prevent default on drag over', () => {
-  const dragEvent = { preventDefault: jasmine.createSpy() } as any;
+  const dragEvent = { preventDefault: jasmine.createSpy() } as unknown as DragEvent;
   component.onDragOver(dragEvent);
   expect(dragEvent.preventDefault).toHaveBeenCalled();
  });

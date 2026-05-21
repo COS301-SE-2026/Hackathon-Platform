@@ -1,5 +1,5 @@
 package com.hackathon.platform.service;
- 
+
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -17,24 +17,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
- 
+
 /**
- * Azure Blob Storage implementation of {@link StorageService}.
- * All binary assets (level files, submissions, solver versions, logs) are stored here.
- * Storage keys follow the conventions defined in {@link com.hackathon.platform.storage.BlobPath}.
+ * Azure Blob Storage implementation of {@link StorageService}. All binary assets (level files,
+ * submissions, solver versions, logs) are stored here. Storage keys follow the conventions defined
+ * in {@link com.hackathon.platform.storage.BlobPath}.
  */
 @Service
 @RequiredArgsConstructor
 public class AzureBlobStorageService implements StorageService {
 
   private static final Logger LOG = LoggerFactory.getLogger(AzureBlobStorageService.class);
- 
+
   private final BlobServiceClient blobServiceClient;
   private final AzureBlobConfig config;
- 
-  /**
-   * {@inheritDoc}
-   */
+
+  /** {@inheritDoc} */
   @Override
   public String upload(String containerName, String storageKey, MultipartFile file) {
     try {
@@ -42,8 +40,11 @@ public class AzureBlobStorageService implements StorageService {
       BlobHttpHeaders headers = new BlobHttpHeaders().setContentType(file.getContentType());
       blobClient.upload(file.getInputStream(), file.getSize(), true);
       blobClient.setHttpHeaders(headers);
-      LOG.info("Uploaded blob: container={} storageKey={} size={}",
-          containerName, storageKey, file.getSize());
+      LOG.info(
+          "Uploaded blob: container={} storageKey={} size={}",
+          containerName,
+          storageKey,
+          file.getSize());
       return blobClient.getBlobUrl();
     } catch (IOException e) {
       LOG.error("Failed to upload blob: container={} storageKey={}", containerName, storageKey, e);
@@ -51,9 +52,7 @@ public class AzureBlobStorageService implements StorageService {
     }
   }
 
-    /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public String uploadBytes(
       String containerName, String storageKey, byte[] data, String contentType) {
@@ -62,8 +61,11 @@ public class AzureBlobStorageService implements StorageService {
       BlobHttpHeaders headers = new BlobHttpHeaders().setContentType(contentType);
       blobClient.upload(new ByteArrayInputStream(data), data.length, true);
       blobClient.setHttpHeaders(headers);
-      LOG.info("Uploaded bytes blob: container={} storageKey={} size={}",
-          containerName, storageKey, data.length);
+      LOG.info(
+          "Uploaded bytes blob: container={} storageKey={} size={}",
+          containerName,
+          storageKey,
+          data.length);
       return blobClient.getBlobUrl();
     } catch (Exception e) {
       LOG.error("Failed to upload bytes: container={} storageKey={}", containerName, storageKey, e);
@@ -71,43 +73,42 @@ public class AzureBlobStorageService implements StorageService {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public String generatePresignedUrl(String containerName, String storageKey, int expiryMinutes) {
     try {
       BlobClient blobClient = getBlobClient(containerName, storageKey);
       BlobSasPermission permission = new BlobSasPermission().setReadPermission(true);
-      BlobServiceSasSignatureValues sasValues = new BlobServiceSasSignatureValues(
-          OffsetDateTime.now().plusMinutes(expiryMinutes), permission);
+      BlobServiceSasSignatureValues sasValues =
+          new BlobServiceSasSignatureValues(
+              OffsetDateTime.now().plusMinutes(expiryMinutes), permission);
       String sasToken = blobClient.generateSas(sasValues);
       LOG.debug("Generated presigned URL: container={} storageKey={}", containerName, storageKey);
       return blobClient.getBlobUrl() + "?" + sasToken;
     } catch (Exception e) {
-      LOG.error("Failed to generate presigned URL: container={} storageKey={}",
-          containerName, storageKey, e);
+      LOG.error(
+          "Failed to generate presigned URL: container={} storageKey={}",
+          containerName,
+          storageKey,
+          e);
       throw new StorageException("Failed to generate presigned URL: " + storageKey, e);
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public InputStream download(String containerName, String storageKey) {
     try {
       LOG.info("Downloading blob: container={} storageKey={}", containerName, storageKey);
       return getBlobClient(containerName, storageKey).openInputStream();
     } catch (Exception e) {
-      LOG.error("Failed to download blob: container={} storageKey={}", containerName, storageKey, e);
+      LOG.error(
+          "Failed to download blob: container={} storageKey={}", containerName, storageKey, e);
       throw new StorageException("Failed to download file: " + storageKey, e);
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public void delete(String containerName, String storageKey) {
     try {
@@ -119,9 +120,7 @@ public class AzureBlobStorageService implements StorageService {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public boolean exists(String containerName, String storageKey) {
     return getBlobClient(containerName, storageKey).exists();
@@ -131,18 +130,11 @@ public class AzureBlobStorageService implements StorageService {
    * Internal helper to get a BlobClient for the given container and storage key.
    *
    * @param containerName the Azure blob container name
-   * @param storageKey    the full storage key path
+   * @param storageKey the full storage key path
    * @return BlobClient instance
    */
   private BlobClient getBlobClient(String containerName, String storageKey) {
     BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
     return containerClient.getBlobClient(storageKey);
   }
-
-
-
-
-
-
-
 }
