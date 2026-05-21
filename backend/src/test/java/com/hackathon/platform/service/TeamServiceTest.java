@@ -76,33 +76,31 @@ class TeamServiceTest {
   @Test
   void createTeam_shouldThrow_whenDuplicateTeamName() {
 
-  Team existingTeam = new Team();
-  existingTeam.setTeamName("Test Team");
-  when(teamRepository.findAll()).thenReturn(List.of(existingTeam));
+    Team existingTeam = new Team();
+    existingTeam.setTeamName("Test Team");
+    when(teamRepository.findAll()).thenReturn(List.of(existingTeam));
 
-  assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
-      .isInstanceOf(RuntimeException.class)
-      .hasMessageContaining("Team name already exists");
-  verify(teamRepository, never()).save(any(Team.class));
-  verify(teamMemberRepository, never()).save(any(TeamMember.class));
+    assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Team name already exists");
+    verify(teamRepository, never()).save(any(Team.class));
+    verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
 
+  @Test
+  void createTeam_shouldThrow_whenUserAlreadyInTeam() {
 
-@Test
-void createTeam_shouldThrow_whenUserAlreadyInTeam() {
+    when(teamRepository.findAll()).thenReturn(Collections.emptyList());
 
-  when(teamRepository.findAll()).thenReturn(Collections.emptyList());
-  
-  when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
-      .thenReturn(List.of(new TeamMember()));
+    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
+        .thenReturn(List.of(new TeamMember()));
 
-  assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
-      .isInstanceOf(RuntimeException.class)
-      .hasMessageContaining("already a member of a team");
-  verify(teamRepository, never()).save(any(Team.class));
-  verify(teamMemberRepository, never()).save(any(TeamMember.class));
-}
-
+    assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("already a member of a team");
+    verify(teamRepository, never()).save(any(Team.class));
+    verify(teamMemberRepository, never()).save(any(TeamMember.class));
+  }
 
   @Test
   void requestToJoinTeam_shouldSucceed_whenValid() {
@@ -212,7 +210,6 @@ void createTeam_shouldThrow_whenUserAlreadyInTeam() {
         .thenReturn(Optional.of(pendingMembership));
     when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
         .thenReturn(List.of(approvedMembershipInOtherTeam));
-    
 
     assertThatThrownBy(
             () -> teamService.approveOrRejectJoinRequest(targetTeamId, targetUserId, userId, true))
@@ -344,8 +341,6 @@ void createTeam_shouldThrow_whenUserAlreadyInTeam() {
         .hasMessageContaining("Team not found");
   }
 
- 
-
   @Test
   void requestToJoinTeam_shouldThrow_whenTeamNotFound() {
     UUID teamId = UUID.randomUUID();
@@ -403,8 +398,6 @@ void createTeam_shouldThrow_whenUserAlreadyInTeam() {
         .hasMessageContaining("Cannot leave with current status: REJECTED");
     verify(teamMemberRepository, never()).save(any());
   }
-
-
 
   @Test
   void approveOrRejectJoinRequest_shouldThrow_whenJoinRequestNotFound() {

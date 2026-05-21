@@ -18,10 +18,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.AfterEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,7 +45,8 @@ class EventServiceTest {
     User admin = new User();
     admin.setUserId(creatorUserId);
     admin.setEmail("admin@test.com");
-    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(admin, null, List.of());
+    UsernamePasswordAuthenticationToken auth =
+        new UsernamePasswordAuthenticationToken(admin, null, List.of());
     SecurityContextHolder.getContext().setAuthentication(auth);
 
     event = new Event();
@@ -103,8 +104,7 @@ class EventServiceTest {
     assertThat(result.getVisibility()).isEqualTo("PUBLIC");
     assertThat(result.getStatus()).isEqualTo("ACTIVE");
     assertThat(result.getDescription()).isEqualTo("This is a test");
-    assertThat(result.getCreatedByUserId())
-        .isEqualTo(creatorUserId);
+    assertThat(result.getCreatedByUserId()).isEqualTo(creatorUserId);
 
     verify(eventRepository).save(any(Event.class));
   }
@@ -287,8 +287,7 @@ class EventServiceTest {
     assertThat(result.getStatus()).isEqualTo("ACTIVE");
     assertThat(result.getDescription()).isEqualTo("This is a test");
     assertThat(result.getRegistrationKey()).isEqualTo("THISISAKEY");
-    assertThat(result.getCreatedByUserId())
-        .isEqualTo(creatorUserId);
+    assertThat(result.getCreatedByUserId()).isEqualTo(creatorUserId);
 
     verify(eventRepository).findById(eventId);
     verify(eventRepository).save(any(Event.class));
