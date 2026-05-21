@@ -44,7 +44,7 @@ jobs:
 
       # Run Lighthouse against the built static file
       - name: Run Lighthouse CI
-        run: lhci autorun --config=lighthouserc.json || true
+        run: lhci autorun --config=lighthouserc.json
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

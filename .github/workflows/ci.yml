@@ -28,6 +28,12 @@ jobs:
           POSTGRES_DB: hackathon_test
           POSTGRES_USER: testuser
           POSTGRES_PASSWORD: testpassword
+
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+          SPRING_FLYWAY_ENABLED: false
+
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         
         ports:
           - 5432:5432
