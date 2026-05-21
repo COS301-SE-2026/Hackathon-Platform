@@ -8,7 +8,17 @@ describe('DashboardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RouterTestingModule, DashboardComponent]
+      imports: [RouterTestingModule, DashboardComponent],
+       providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { queryParams: {}, params: {} },
+            queryParams: of({}),
+            params: of({})
+          }
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);
