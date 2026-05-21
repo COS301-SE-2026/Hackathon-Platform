@@ -1,6 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { of, throwError } from 'rxjs';
 import { TeamComponent } from './team.component';
+import { TeamService } from '../../services/team.service';
+import { AuthService } from '../../services/auth.service';
+
 
 describe('TeamComponent', () => {
   let component: TeamComponent;
