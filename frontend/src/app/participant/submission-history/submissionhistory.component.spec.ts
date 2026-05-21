@@ -11,7 +11,17 @@ describe('SubmissionHistoryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormsModule, SubmissionHistoryComponent]
+      imports: [FormsModule, RouterTestingModule, SubmissionHistoryComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { queryParams: {}, params: {} },
+            queryParams: of({}),
+            params: of({})
+          }
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SubmissionHistoryComponent);
@@ -51,7 +61,7 @@ describe('SubmissionHistoryComponent', () => {
   });
 
   it('should toggle selectedSubmission when viewLogs is called', () => {
-    const sub = component.submissions[2]; 
+    const sub = component.submissions[2];
     component.viewLogs(sub);
     expect(component.selectedSubmission).toBe(sub);
     component.viewLogs(sub);
@@ -62,7 +72,9 @@ describe('SubmissionHistoryComponent', () => {
     const consoleSpy = spyOn(console, 'log');
     const alertSpy = spyOn(window, 'alert');
     const sub = component.submissions[0];
+
     component.downloadCode(sub);
+
     expect(consoleSpy).toHaveBeenCalledWith('Downloading code for', sub.id);
     expect(alertSpy).toHaveBeenCalledWith(`Downloading code for ${sub.id}`);
   });
