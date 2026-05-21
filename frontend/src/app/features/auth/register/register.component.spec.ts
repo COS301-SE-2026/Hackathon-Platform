@@ -1,8 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Router } from '@angular/router';
+import { of, throwError } from 'rxjs';
 import { RegisterComponent } from './register.component';
+import { AuthService } from '../../../services/auth.service';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
