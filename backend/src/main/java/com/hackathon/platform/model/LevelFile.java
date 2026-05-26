@@ -39,5 +39,79 @@ public class LevelFile {
   @Column(name = "content_type")
   private String contentType;
 
+  // Default constructor
+  public LevelFile() {}
 
+  // Constructor with required fields
+  public LevelFile(Long levelId, String fileName, String storageKey, String fileType) {
+    this.levelId = levelId;
+    this.fileName = fileName;
+    this.storageKey = storageKey;
+    this.fileType = fileType;
+  }
+
+  // Getters and Setters
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public Long getLevelId() {
+    return levelId;
+  }
+
+  public void setLevelId(Long levelId) {
+    this.levelId = levelId;
+  }
+
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
+  public Instant getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  public String getStorageKey() {
+    return storageKey;
+  }
+
+  public void setStorageKey(String storageKey) {
+    this.storageKey = storageKey;
+  }
+
+  public String getFileType() {
+    return fileType;
+  }
+
+  public void setFileType(String fileType) {
+    this.fileType = fileType;
+  }
+
+  public Long getFileSize() {
+    return fileSize;
+  }
+
+  public void setFileSize(Long fileSize) {
+    this.fileSize = fileSize;
+  }
+
+  public String getContentType() {
+    return contentType;
+  }
+
+  public void setContentType(String contentType) {
+    this.contentType = contentType;
+  }
 }
