@@ -1,0 +1,104 @@
+<div class = "participant-shell">
+    <nav class ="navbar">
+        <div class = "navbar-left">
+            <div class = "brand">
+                <span class ="brand-h">Hackathon</span>
+                <span class ="brand-p">Platform</span>
+            </div> 
+            </div>
+
+        <div class = "navbar-links">  
+        <a routerLink = "/participant/home">Home</a>
+        <a routerLink = "/participant/profile">Profile</a>
+        <a routerLink = "/participant/events">Events</a>
+        <a routerLink = "/participant/settings">Settings</a>
+        </div>
+         </nav>
+
+<div class = "profile-body">
+<h1 class = "page-title">My Profile</h1>
+
+<div class = "profile-header-card">
+    <div class = "profile-left">
+        <div class = "avatar"> js</div>
+        <div class = "profile-info">
+            <p class = "profile-name">Jane Smith</p>
+            <p class = "profile-email">@janesmith &nbsp;.&nbsp; janesmith@example.co.za</p>
+        </div>
+    </div>
+    <button class ="btn-edit" (click) = "toggleEdit()"> Edit</button>
+       
+</div>
+
+
+<div class = "form-card">
+    <h2 class = " card-title">Profile Information</h2>
+
+    <div class = "form-row">
+        <div class = "form-group">
+            <label>First Name</label>
+            <input type = "text" [(ngModel)] = "profile.firstName" [disabled] = "!isEditing"/>
+        </div>
+        <div class = "form-group">
+            <label>Last Name</label>
+            <input type = "text" [(ngModel)] = "profile.lastName" [disabled] = "!isEditing"/>
+    </div>
+    </div>
+
+
+        <div class = "form-group">
+            <label>Email Address</label>
+            <input type = "email" [(ngModel)] = "profile.email" [disabled] = "!isEditing"/>
+        </div>
+
+        <div class= "form-group">
+            <label>Username</label>
+            <input type = "text" [(ngModel)] = "profile.username" [disabled] = "!isEditing"/>
+        </div>
+
+        <p class = "change-password-label">Change Password:</p>
+
+
+        <div class = "form-row">
+            <div class = "form-group">
+                <label>Current Password</label>
+                <input type = "password" [(ngModel)] = "profile.currentPassword" [disabled] = "!isEditing" placeholder="••••••••"/>
+            </div>
+            <div class = "form-group">
+                <label>New Password</label>
+                <input type = "password" [(ngModel)] = "profile.newPassword" [disabled] = "!isEditing" placeholder="••••••••"/>
+                </div>
+
+                </div>
+
+                <div class = "form-actions">
+                    <button class = "btn-save" (click) = "saveProfile()" [disabled] = "!isEditing">Save Changes</button>
+                    <button class = "btn-cancel" (click) = "cancelEdit()" [disabled] = "!isEditing">Cancel</button>
+                    </div>
+                    </div>
+
+
+    <div class = "history-card">
+        <h2 class = "card-title">Participation History</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Team</th>
+                    <th>Final Rank</th>
+                    <th>Best Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor = "let history of participationHistory">
+                    <td>{{history.name}}</td>
+                    <td>{{history.team}}</td>
+                    <td>{{history.rank}}</td>
+                    <td>{{history.score | number}}</td>
+                </tr>   
+    
+    </tbody>
+    </table>
+    </div>
+    </div>
+    

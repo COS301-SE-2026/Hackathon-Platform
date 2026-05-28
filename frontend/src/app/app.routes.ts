@@ -49,6 +49,12 @@ export const routes: Routes = [
         path: 'home',
         loadComponent: () => import('./participant/home/home.component').then(m => m.HomeComponent),
       },
+      
+      {
+        path: 'profile',
+        loadComponent: () => import('./participant/profile/profile.component').then(m => m.ProfileComponent),
+      },
+
          {
         path: 'submissions',
         loadComponent: () => import('./participant/submission-history/submissionhistory.component').then(m => m.SubmissionHistoryComponent),
