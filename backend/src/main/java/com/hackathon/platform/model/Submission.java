@@ -75,5 +75,124 @@ public class Submission {
     this.outputStorageKey = outputStorageKey;
   }
 
-  
+  // Getters and Setters
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public UUID getTeamId() {
+    return teamId;
+  }
+
+  public void setTeamId(UUID teamId) {
+    this.teamId = teamId;
+  }
+
+  public Long getLevelId() {
+    return levelId;
+  }
+
+  public void setLevelId(Long levelId) {
+    this.levelId = levelId;
+  }
+
+  public Long getSolverVersionId() {
+    return solverVersionId;
+  }
+
+  public void setSolverVersionId(Long solverVersionId) {
+    this.solverVersionId = solverVersionId;
+  }
+
+  public BigDecimal getScore() {
+    return score;
+  }
+
+  public void setScore(BigDecimal score) {
+    this.score = score;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  public Instant getSubmittedAt() {
+    return submittedAt;
+  }
+
+  public void setSubmittedAt(Instant submittedAt) {
+    this.submittedAt = submittedAt;
+  }
+
+  public String getSourceCodeStorageKey() {
+    return sourceCodeStorageKey;
+  }
+
+  public void setSourceCodeStorageKey(String sourceCodeStorageKey) {
+    this.sourceCodeStorageKey = sourceCodeStorageKey;
+  }
+
+  public String getOutputStorageKey() {
+    return outputStorageKey;
+  }
+
+  public void setOutputStorageKey(String outputStorageKey) {
+    this.outputStorageKey = outputStorageKey;
+  }
+
+  public String getOutputFileName() {
+    return outputFileName;
+  }
+
+  public void setOutputFileName(String outputFileName) {
+    this.outputFileName = outputFileName;
+  }
+
+  public String getSourceFileName() {
+    return sourceFileName;
+  }
+
+  public void setSourceFileName(String sourceFileName) {
+    this.sourceFileName = sourceFileName;
+  }
+
+  public Long getOutputFileSize() {
+    return outputFileSize;
+  }
+
+  public void setOutputFileSize(Long outputFileSize) {
+    this.outputFileSize = outputFileSize;
+  }
+
+  public Long getSourceFileSize() {
+    return sourceFileSize;
+  }
+
+  public void setSourceFileSize(Long sourceFileSize) {
+    this.sourceFileSize = sourceFileSize;
+  }
+
+  public String getOutputContentType() {
+    return outputContentType;
+  }
+
+  public void setOutputContentType(String outputContentType) {
+    this.outputContentType = outputContentType;
+  }
+
+  public String getSourceContentType() {
+    return sourceContentType;
+  }
+
+  public void setSourceContentType(String sourceContentType) {
+    this.sourceContentType = sourceContentType;
+  }
 }
