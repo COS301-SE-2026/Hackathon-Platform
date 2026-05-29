@@ -59,5 +59,92 @@ public class SolverVersion {
     this.storageKey = storageKey;
   }
 
-  
+  // Getters and Setters
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public UUID getEventId() {
+    return eventId;
+  }
+
+  public void setEventId(UUID eventId) {
+    this.eventId = eventId;
+  }
+
+  public Instant getUploadedAt() {
+    return uploadedAt;
+  }
+
+  public void setUploadedAt(Instant uploadedAt) {
+    this.uploadedAt = uploadedAt;
+  }
+
+  public UUID getUploadedBy() {
+    return uploadedBy;
+  }
+
+  public void setUploadedBy(UUID uploadedBy) {
+    this.uploadedBy = uploadedBy;
+  }
+
+  public String getNotes() {
+    return notes;
+  }
+
+  public void setNotes(String notes) {
+    this.notes = notes;
+  }
+
+  public Boolean getIsActive() {
+    return isActive;
+  }
+
+  public void setIsActive(Boolean isActive) {
+    this.isActive = isActive;
+  }
+
+  public String getStorageKey() {
+    return storageKey;
+  }
+
+  public void setStorageKey(String storageKey) {
+    this.storageKey = storageKey;
+  }
+
+  public Integer getVersionNumber() {
+    return versionNumber;
+  }
+
+  public void setVersionNumber(Integer versionNumber) {
+    this.versionNumber = versionNumber;
+  }
+
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
+  public Long getFileSize() {
+    return fileSize;
+  }
+
+  public void setFileSize(Long fileSize) {
+    this.fileSize = fileSize;
+  }
+
+  public String getContentType() {
+    return contentType;
+  }
+
+  public void setContentType(String contentType) {
+    this.contentType = contentType;
+  }
 }
