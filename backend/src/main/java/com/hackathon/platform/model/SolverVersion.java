@@ -49,5 +49,15 @@ public class SolverVersion {
   @Column(name = "content_type")
   private String contentType;
 
- 
+  // Default constructor
+  public SolverVersion() {}
+
+  // Constructor with required fields
+  public SolverVersion(UUID eventId, UUID uploadedBy, String storageKey) {
+    this.eventId = eventId;
+    this.uploadedBy = uploadedBy;
+    this.storageKey = storageKey;
+  }
+
+  
 }
