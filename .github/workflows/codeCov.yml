@@ -1,0 +1,51 @@
+name: codeCov.yml
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: hackathon_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up java
+      uses: actions/setup-java@v4
+
+    - name: Set up Node
+      uses: actions/setup-node@v4
+
+    - name: Install frontend dependancies
+      working-directory: frontend
+      run: npm ci
+
+    - name: Run frontend tests
+      working-directory: frontend
+      run: npm run test:coverage
+
+    - name: Run backend tests
+      working-directory: backend
+      run: mvn clean test
+
+    - name: Upload to codeCov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: |
+          frontend/coverage/**/lcov.info
+          backend/target/site/jacoco/jacoco.xml
+        fail_ci_if_error: true
