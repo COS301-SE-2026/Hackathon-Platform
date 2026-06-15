@@ -14,6 +14,8 @@
 
 ![GitHub Requirements](https://img.shields.io/badge/requirements-documented-brightgreen)
 
+[![codecov](https://codecov.io/gh/COS301-SE-2026/Hackathon-Platform/graph/badge.svg?token=4O5Z04RGNW)](https://codecov.io/gh/COS301-SE-2026/Hackathon-Platform)
+
 ## Functional Requirements: [View the Software Requirements Specification (SRS)](./docs/SRS.pdf)
 ## GitHub Project Board: [View the Project Board](https://github.com/orgs/COS301-SE-2026/projects/54)
 
