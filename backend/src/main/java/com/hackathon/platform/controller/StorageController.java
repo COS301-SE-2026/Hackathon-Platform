@@ -95,26 +95,51 @@ public class StorageController {
 
   /**
    * Uploads a solver file for a specific event and version. The returned storageKey maps to
-   * solverversion.storage_key in the database.
+   * solverversion.storage_key in the database. Automatically deactivates all previous solver
+   * versions for this event before saving the new active one.
    *
    * @param eventId the event UUID
    * @param version the solver version number
    * @param file the uploaded solver file
-   * @return storageKey, blobUrl, and version
+   * @param uploadedBy UUID of the admin uploading the solver
+   * @param notes optional release notes for this solver version
+   * @return storageKey, blobUrl, version, and database record id
    */
   @PostMapping("/events/{eventId}/solver")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadSolver(
       @PathVariable String eventId,
       @RequestParam("version") int version,
-      @RequestParam("file") MultipartFile file) {
+      @RequestParam("file") MultipartFile file,
+      @RequestParam("uploadedBy") UUID uploadedBy,
+      @RequestParam(value = "notes", required = false) String notes) {
+
     String storageKey = BlobPath.solverFile(eventId, version, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
-    return ResponseEntity.ok(
-        Map.of(
-            "storageKey", storageKey,
-            "blobUrl", blobUrl,
-            "version", String.valueOf(version)));
+
+    // Deactivate all previous solver versions for this event
+    solverVersionRepository.findByEventId(UUID.fromString(eventId))
+        .forEach(sv -> { sv.setIsActive(false); solverVersionRepository.save(sv); });
+
+    SolverVersion saved = fileMetadataService.saveSolverVersion(
+        UUID.fromString(eventId),
+        uploadedBy,
+        storageKey,
+        version,
+        file.getOriginalFilename(),
+        file.getSize());
+
+    // Set notes separately since saveSolverVersion doesn't take it
+    if (notes != null) {
+      saved.setNotes(notes);
+      solverVersionRepository.save(saved);
+    }
+
+    return ResponseEntity.ok(Map.of(
+        "solverVersionId", String.valueOf(saved.getId()),
+        "storageKey", storageKey,
+        "blobUrl", blobUrl,
+        "version", String.valueOf(version)));
   }
 
   /**
