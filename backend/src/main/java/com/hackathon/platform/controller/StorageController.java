@@ -22,9 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * REST controller for all file upload and presigned download URL operations. All logic is delegated
- * to {@link StorageService}. Storage keys returned match the column names in the database schema
- * (Storage of key in db not yet implemented): storage_key, output_storage_key,
- * source_code_storage_key.
+ * to {@link StorageService}. Storage keys returned match the column names in the database schema.
+ * storage_key, output_storage_key, source_code_storage_key.
  */
 @RestController
 @RequestMapping("/api/storage")
@@ -33,6 +32,8 @@ public class StorageController {
 
   private final StorageService storageService;
   private final AzureBlobConfig config;
+  private final FileMetadataService fileMetadataService;
+  private final SolverVersionRepository solverVersionRepository;
 
   // Event Resources
 
@@ -43,18 +44,34 @@ public class StorageController {
    * @param eventId the event UUID
    * @param levelId the level ID
    * @param file the uploaded file
-   * @return storageKey and blobUrl
+   * @param fileType the file type (ZIP, TAR, PDF, TXT, CSV, JSON, IMAGE, OTHER)
+   * @return storageKey, blobUrl, and database record id
    */
   @PostMapping("/events/{eventId}/levels/{levelId}/files")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadLevelFile(
       @PathVariable String eventId,
-      @PathVariable String levelId,
-      @RequestParam("file") MultipartFile file) {
-    String storageKey = BlobPath.levelFile(eventId, levelId, file.getOriginalFilename());
+      @PathVariable Long levelId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam("fileType") String fileType) {
+
+    String storageKey = BlobPath.levelFile(eventId, String.valueOf(levelId), file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
-    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+
+    LevelFile saved = fileMetadataService.saveLevelFile(
+        levelId,
+        file.getOriginalFilename(),
+        storageKey,
+        fileType.toUpperCase(),
+        file.getSize(),
+        file.getContentType());
+
+    return ResponseEntity.ok(Map.of(
+        "id", String.valueOf(saved.getId()),
+        "storageKey", storageKey,
+        "blobUrl", blobUrl));
   }
+
 
   /**
    * Returns a presigned SAS URL for downloading a level file.
