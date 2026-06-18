@@ -70,6 +70,22 @@ public class FileMetadataService {
         log.info("Created submission record: id={}, outputStorageKey={}", saved.getId(), outputStorageKey);
         return saved;
 
-        
+
+    }
+
+    @Transactional
+    public Submission saveSubmissionSource(Long submissionId, String sourceStorageKey,
+                                           String sourceFileName, Long sourceFileSize) {
+        Submission submission = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new RuntimeException("Submission not found: " + submissionId));
+
+        submission.setSourceCodeStorageKey(sourceStorageKey);
+        submission.setSourceFileName(sourceFileName);
+        submission.setSourceFileSize(sourceFileSize);
+
+        Submission saved = submissionRepository.save(submission);
+        log.info("Updated submission source metadata: submissionId={}, storageKey={}",
+                submissionId, sourceStorageKey);
+        return saved;
     }
 }
