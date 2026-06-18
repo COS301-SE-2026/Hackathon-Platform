@@ -162,13 +162,16 @@ public class StorageController {
 
   /**
    * Uploads a submission output file for a specific team and level. The returned storageKey maps to
-   * submissions.output_storage_key in the database.
+   * submissions.output_storage_key in the database. Creates a new submission record with QUEUED
+   * status.
    *
    * @param eventId the event UUID
    * @param teamId the team UUID
-   * @param submissionId the submission ID
+   * @param submissionId the submission ID (used for blob path only)
    * @param file the solution output file
-   * @return storageKey and blobUrl
+   * @param levelId the level this submission is for
+   * @param solverVersionId the active solver version to use for scoring
+   * @return storageKey, blobUrl, and database submission id
    */
   @PostMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output")
   // @PreAuthorize("hasRole('PARTICIPANT')")
@@ -176,11 +179,28 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable String submissionId,
-      @RequestParam("file") MultipartFile file) {
+      @RequestParam("file") MultipartFile file,
+      @RequestParam("levelId") Long levelId,
+      @RequestParam("solverVersionId") Long solverVersionId) {
+
     String storageKey =
         BlobPath.submissionOutput(eventId, teamId, submissionId, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getSubmissionsContainer(), storageKey, file);
-    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+
+    Submission saved = fileMetadataService.saveSubmissionOutput(
+        UUID.fromString(teamId),
+        levelId,
+        solverVersionId,
+        storageKey,
+        file.getOriginalFilename(),
+        file.getSize(),
+        file.getContentType());
+
+    return ResponseEntity.ok(Map.of(
+        "submissionId", String.valueOf(saved.getId()),
+        "storageKey", storageKey,
+        "blobUrl", blobUrl,
+        "status", saved.getStatus()));
   }
 
   /**
