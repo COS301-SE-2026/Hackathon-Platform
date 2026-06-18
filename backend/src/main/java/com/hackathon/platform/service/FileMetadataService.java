@@ -36,5 +36,21 @@ public class FileMetadataService {
         return saved;
     }
 
+    @Transactional
+    public SolverVersion saveSolverVersion(UUID eventId, UUID uploadedBy, String storageKey,
+                                           Integer versionNumber, String fileName, Long fileSize) {
+        SolverVersion solverVersion = new SolverVersion(eventId, uploadedBy, storageKey);
+        solverVersion.setVersionNumber(versionNumber);
+        solverVersion.setFileName(fileName);
+        solverVersion.setFileSize(fileSize);
+        solverVersion.setIsActive(true);
+        solverVersion.setUploadedAt(Instant.now());
+
+        SolverVersion saved = solverVersionRepository.save(solverVersion);
+        log.info("Saved solver version metadata: eventId={}, version={}, storageKey={}",
+                eventId, versionNumber, storageKey);
+        return saved;
+    }
+
     
 }
