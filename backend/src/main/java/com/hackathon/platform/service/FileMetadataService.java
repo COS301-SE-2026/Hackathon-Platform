@@ -52,5 +52,24 @@ public class FileMetadataService {
         return saved;
     }
 
-    
+    @Transactional
+    public Submission saveSubmissionOutput(UUID teamId, Long levelId, Long solverVersionId,
+                                           String outputStorageKey, String outputFileName,
+                                           Long outputFileSize, String outputContentType) {
+        Submission submission = new Submission(
+                teamId, levelId, solverVersionId,
+                "pending", // source key placeholder - updated when source is uploaded
+                outputStorageKey);
+        submission.setOutputFileName(outputFileName);
+        submission.setOutputFileSize(outputFileSize);
+        submission.setOutputContentType(outputContentType);
+        submission.setStatus("QUEUED");
+        submission.setSubmittedAt(Instant.now());
+
+        Submission saved = submissionRepository.save(submission);
+        log.info("Created submission record: id={}, outputStorageKey={}", saved.getId(), outputStorageKey);
+        return saved;
+
+        
+    }
 }
