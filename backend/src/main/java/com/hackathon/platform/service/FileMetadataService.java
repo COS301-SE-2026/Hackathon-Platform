@@ -88,4 +88,26 @@ public class FileMetadataService {
                 submissionId, sourceStorageKey);
         return saved;
     }
+
+    @Transactional(readOnly = true)
+    public String getLevelFileStorageKey(Long levelId, String fileName) {
+        return levelFileRepository.findByLevelIdAndFileName(levelId, fileName)
+                .map(LevelFile::getStorageKey)
+                .orElseThrow(() -> new RuntimeException(
+                        String.format("Level file not found: levelId=%d, fileName=%s", levelId, fileName)));
+    }
+
+    @Transactional(readOnly = true)
+    public String getSubmissionOutputStorageKey(Long submissionId) {
+        return submissionRepository.findById(submissionId)
+                .map(Submission::getOutputStorageKey)
+                .orElseThrow(() -> new RuntimeException("Submission not found: " + submissionId));
+    }
+
+    @Transactional(readOnly = true)
+    public String getSubmissionSourceStorageKey(Long submissionId) {
+        return submissionRepository.findById(submissionId)
+                .map(Submission::getSourceCodeStorageKey)
+                .orElseThrow(() -> new RuntimeException("Submission not found: " + submissionId));
+    }
 }
