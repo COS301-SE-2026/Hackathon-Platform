@@ -256,7 +256,7 @@ public class StorageController {
     String url = storageService.generatePresignedUrl(
         config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
     return ResponseEntity.ok(Map.of("url", url));
-    }
+   }
 
   /**
    * Returns a presigned SAS URL for downloading a source code archive (Admin only for auditing).
@@ -268,18 +268,18 @@ public class StorageController {
    * @return presigned download URL
    */
   @GetMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
-  // @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
-      @PathVariable String eventId,
-      @PathVariable String teamId,
-      @PathVariable String submissionId,
-      @PathVariable String filename) {
-    String storageKey = BlobPath.submissionSourceArchive(eventId, teamId, submissionId, filename);
-    String url =
-        storageService.generatePresignedUrl(
-            config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
+    // @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
+        @PathVariable String eventId,
+        @PathVariable String teamId,
+        @PathVariable Long submissionId,
+        @PathVariable String filename) {
+
+    String storageKey = fileMetadataService.getSubmissionSourceStorageKey(submissionId);
+    String url = storageService.generatePresignedUrl(
+        config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
     return ResponseEntity.ok(Map.of("url", url));
-  }
+   }
 
   // Scoring Logs(might remove)
 
