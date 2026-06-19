@@ -6,6 +6,7 @@ import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
+import com.hackathon.platform.storage.BlobPath;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,42 +53,36 @@ public class FileMetadataService {
         return saved;
     }
 
-    @Transactional
-    public Submission saveSubmissionOutput(UUID teamId, Long levelId, Long solverVersionId,
-                                           String outputStorageKey, String outputFileName,
-                                           Long outputFileSize, String outputContentType) {
-        Submission submission = new Submission(
-                teamId, levelId, solverVersionId,
-                "pending", // source key placeholder - updated when source is uploaded
-                outputStorageKey);
+      @Transactional
+        public Submission saveSubmission(String eventId, UUID teamId, Long levelId, Long solverVersionId,
+                                        String outputFileName, Long outputFileSize, String outputContentType,
+                                        String sourceFileName, Long sourceFileSize, String sourceContentType) {
+
+        // Initial save with placeholders just to get a DB-generated id
+        Submission submission = new Submission(teamId, levelId, solverVersionId, "pending", "pending");
         submission.setOutputFileName(outputFileName);
         submission.setOutputFileSize(outputFileSize);
         submission.setOutputContentType(outputContentType);
+        submission.setSourceFileName(sourceFileName);
+        submission.setSourceFileSize(sourceFileSize);
+        submission.setSourceContentType(sourceContentType);
         submission.setStatus("QUEUED");
         submission.setSubmittedAt(Instant.now());
 
         Submission saved = submissionRepository.save(submission);
-        log.info("Created submission record: id={}, outputStorageKey={}", saved.getId(), outputStorageKey);
+
+        // Build canonical keys using the real DB id
+        String dbId = String.valueOf(saved.getId());
+        String outputKey = BlobPath.submissionOutput(eventId, teamId.toString(), dbId, outputFileName);
+        String sourceKey = BlobPath.submissionSourceArchive(eventId, teamId.toString(), dbId, sourceFileName);
+
+        saved.setOutputStorageKey(outputKey);
+        saved.setSourceCodeStorageKey(sourceKey);
+        saved = submissionRepository.save(saved);
+
+        log.info("Created submission record: id={}, outputKey={}, sourceKey={}", saved.getId(), outputKey, sourceKey);
         return saved;
-
-
-    }
-
-    @Transactional
-    public Submission saveSubmissionSource(Long submissionId, String sourceStorageKey,
-                                           String sourceFileName, Long sourceFileSize) {
-        Submission submission = submissionRepository.findById(submissionId)
-                .orElseThrow(() -> new RuntimeException("Submission not found: " + submissionId));
-
-        submission.setSourceCodeStorageKey(sourceStorageKey);
-        submission.setSourceFileName(sourceFileName);
-        submission.setSourceFileSize(sourceFileSize);
-
-        Submission saved = submissionRepository.save(submission);
-        log.info("Updated submission source metadata: submissionId={}, storageKey={}",
-                submissionId, sourceStorageKey);
-        return saved;
-    }
+       }
 
     @Transactional(readOnly = true)
     public String getLevelFileStorageKey(Long levelId, String fileName) {

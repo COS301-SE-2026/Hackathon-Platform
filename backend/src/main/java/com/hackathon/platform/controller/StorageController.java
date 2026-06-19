@@ -161,79 +161,49 @@ public class StorageController {
   // Submissions (Participant)
 
   /**
-   * Uploads a submission output file for a specific team and level. The returned storageKey maps to
-   * submissions.output_storage_key in the database. Creates a new submission record with QUEUED
-   * status.
-   *
-   * @param eventId the event UUID
-   * @param teamId the team UUID
-   * @param submissionId the submission ID (used for blob path only)
-   * @param file the solution output file
-   * @param levelId the level this submission is for
-   * @param solverVersionId the active solver version to use for scoring
-   * @return storageKey, blobUrl, and database submission id
-   */
-  @PostMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output")
-  // @PreAuthorize("hasRole('PARTICIPANT')")
-  public ResponseEntity<Map<String, String>> uploadSubmissionOutput(
-      @PathVariable String eventId,
-      @PathVariable String teamId,
-      @PathVariable String submissionId,
-      @RequestParam("file") MultipartFile file,
-      @RequestParam("levelId") Long levelId,
-      @RequestParam("solverVersionId") Long solverVersionId) {
+     * Uploads both the submission output file and source code archive in a single request. Creates
+     * one submission record with both storage keys set, then uploads both files to their canonical
+     * blob paths.
+     *
+     * @param eventId the event UUID
+     * @param teamId the team UUID
+     * @param outputFile the solution output file
+     * @param sourceFile the zipped source code archive
+     * @param levelId the level this submission is for
+     * @param solverVersionId the active solver version to use for scoring
+     * @return submissionId, both storage keys, and status
+     */
+    @PostMapping("/events/{eventId}/teams/{teamId}/submissions")
+    // @PreAuthorize("hasRole('PARTICIPANT')")
+    public ResponseEntity<Map<String, String>> uploadSubmission(
+        @PathVariable String eventId,
+        @PathVariable String teamId,
+        @RequestParam("outputFile") MultipartFile outputFile,
+        @RequestParam("sourceFile") MultipartFile sourceFile,
+        @RequestParam("levelId") Long levelId,
+        @RequestParam("solverVersionId") Long solverVersionId) {
 
-    String storageKey =
-        BlobPath.submissionOutput(eventId, teamId, submissionId, file.getOriginalFilename());
-    String blobUrl = storageService.upload(config.getSubmissionsContainer(), storageKey, file);
-
-    Submission saved = fileMetadataService.saveSubmissionOutput(
+    Submission saved = fileMetadataService.saveSubmission(
+        eventId,
         UUID.fromString(teamId),
         levelId,
         solverVersionId,
-        storageKey,
-        file.getOriginalFilename(),
-        file.getSize(),
-        file.getContentType());
+        outputFile.getOriginalFilename(),
+        outputFile.getSize(),
+        outputFile.getContentType(),
+        sourceFile.getOriginalFilename(),
+        sourceFile.getSize(),
+        sourceFile.getContentType());
+
+    storageService.upload(config.getSubmissionsContainer(), saved.getOutputStorageKey(), outputFile);
+    storageService.upload(config.getSubmissionsContainer(), saved.getSourceCodeStorageKey(), sourceFile);
 
     return ResponseEntity.ok(Map.of(
         "submissionId", String.valueOf(saved.getId()),
-        "storageKey", storageKey,
-        "blobUrl", blobUrl,
+        "outputStorageKey", saved.getOutputStorageKey(),
+        "sourceStorageKey", saved.getSourceCodeStorageKey(),
         "status", saved.getStatus()));
-  }
-
-  /**
-   * Uploads a source code ZIP archive alongside a submission. The returned storageKey maps to
-   * submissions.source_code_storage_key in the database. Updates the existing submission record
-   * created by the output upload.
-   *
-   * @param eventId the event UUID
-   * @param teamId the team UUID
-   * @param submissionId the submission ID from the output upload response
-   * @param file the zipped source code archive
-   * @return storageKey and blobUrl
-   */
-  @PostMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source")
-  // @PreAuthorize("hasRole('PARTICIPANT')")
-  public ResponseEntity<Map<String, String>> uploadSourceArchive(
-      @PathVariable String eventId,
-      @PathVariable String teamId,
-      @PathVariable String submissionId,
-      @RequestParam("file") MultipartFile file) {
-
-    String storageKey =
-        BlobPath.submissionSourceArchive(eventId, teamId, submissionId, file.getOriginalFilename());
-    String blobUrl = storageService.upload(config.getSubmissionsContainer(), storageKey, file);
-
-    fileMetadataService.saveSubmissionSource(
-        Long.parseLong(submissionId),
-        storageKey,
-        file.getOriginalFilename(),
-        file.getSize());
-
-    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
-  }
+    }
 
   /**
    * Returns a presigned SAS URL for downloading a submission output file.
