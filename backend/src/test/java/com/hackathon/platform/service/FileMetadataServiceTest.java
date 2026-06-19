@@ -178,5 +178,12 @@ class FileMetadataServiceTest {
     assertThat(result).isEqualTo("submissions/.../source/archive.zip");
   }
 
- 
+  @Test
+  void getSubmissionSourceStorageKey_throwsWhenNotFound() {
+    when(submissionRepository.findById(SUBMISSION_ID)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> fileMetadataService.getSubmissionSourceStorageKey(SUBMISSION_ID))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Submission not found");
+  }
 }
