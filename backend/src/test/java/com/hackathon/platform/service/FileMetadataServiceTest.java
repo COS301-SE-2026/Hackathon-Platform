@@ -127,5 +127,30 @@ class FileMetadataServiceTest {
     assertThat(result).isEqualTo("events/.../test.pdf");
   }
 
-  
+  @Test
+  void getLevelFileStorageKey_throwsWhenNotFound() {
+    when(levelFileRepository.findByLevelIdAndFileName(LEVEL_ID, "missing.pdf"))
+        .thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> fileMetadataService.getLevelFileStorageKey(LEVEL_ID, "missing.pdf"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Level file not found");
+  }
+
+  @Test
+  void getSubmissionOutputStorageKey_returnsKeyWhenFound() {
+    Submission submission =
+        new Submission(
+            TEAM_ID,
+            LEVEL_ID,
+            SOLVER_VERSION_ID,
+            "submissions/.../source/archive.zip",
+            "submissions/.../output/output.txt");
+    when(submissionRepository.findById(SUBMISSION_ID)).thenReturn(Optional.of(submission));
+
+    String result = fileMetadataService.getSubmissionOutputStorageKey(SUBMISSION_ID);
+
+    assertThat(result).isEqualTo("submissions/.../output/output.txt");
+  }
+
 }
