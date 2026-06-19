@@ -3,8 +3,8 @@ package com.hackathon.platform.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.hackathon.platform.model.LevelFile;
@@ -24,5 +24,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class FileMetadataServiceTest {
 
- 
+  @Mock private LevelFileRepository levelFileRepository;
+  @Mock private SolverVersionRepository solverVersionRepository;
+  @Mock private SubmissionRepository submissionRepository;
+
+  private FileMetadataService fileMetadataService;
+
+  private static final Long LEVEL_ID = 1L;
+  private static final String EVENT_ID_STR = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
+  private static final UUID EVENT_ID = UUID.fromString(EVENT_ID_STR);
+  private static final UUID UPLOADED_BY = UUID.randomUUID();
+  private static final UUID TEAM_ID = UUID.randomUUID();
+  private static final Long SOLVER_VERSION_ID = 1L;
+  private static final Long SUBMISSION_ID = 6L;
+
+  @BeforeEach
+  void setUp() {
+    fileMetadataService =
+        new FileMetadataService(levelFileRepository, solverVersionRepository, submissionRepository);
+  }
+
+  
 }
