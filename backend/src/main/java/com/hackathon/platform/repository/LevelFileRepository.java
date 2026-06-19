@@ -14,7 +14,8 @@ public interface LevelFileRepository extends JpaRepository<LevelFile, Long> {
   List<LevelFile> findByLevelId(Long levelId);
 
   @Query("SELECT lf FROM LevelFile lf WHERE lf.levelId = :levelId AND lf.fileType = :fileType")
-  List<LevelFile> findByLevelIdAndFileType(@Param("levelId") Long levelId, @Param("fileType") String fileType);
+  List<LevelFile> findByLevelIdAndFileType(
+      @Param("levelId") Long levelId, @Param("fileType") String fileType);
 
   boolean existsByStorageKey(String storageKey);
 

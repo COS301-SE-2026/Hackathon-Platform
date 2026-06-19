@@ -66,8 +66,12 @@ public class Submission {
   public Submission() {}
 
   // Constructor with required fields
-  public Submission(UUID teamId, Long levelId, Long solverVersionId, 
-                    String sourceCodeStorageKey, String outputStorageKey) {
+  public Submission(
+      UUID teamId,
+      Long levelId,
+      Long solverVersionId,
+      String sourceCodeStorageKey,
+      String outputStorageKey) {
     this.teamId = teamId;
     this.levelId = levelId;
     this.solverVersionId = solverVersionId;

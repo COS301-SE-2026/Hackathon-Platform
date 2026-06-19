@@ -55,23 +55,25 @@ public class StorageController {
       @RequestParam("file") MultipartFile file,
       @RequestParam("fileType") String fileType) {
 
-    String storageKey = BlobPath.levelFile(eventId, String.valueOf(levelId), file.getOriginalFilename());
+    String storageKey =
+        BlobPath.levelFile(eventId, String.valueOf(levelId), file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
 
-    LevelFile saved = fileMetadataService.saveLevelFile(
-        levelId,
-        file.getOriginalFilename(),
-        storageKey,
-        fileType.toUpperCase(),
-        file.getSize(),
-        file.getContentType());
+    LevelFile saved =
+        fileMetadataService.saveLevelFile(
+            levelId,
+            file.getOriginalFilename(),
+            storageKey,
+            fileType.toUpperCase(),
+            file.getSize(),
+            file.getContentType());
 
-    return ResponseEntity.ok(Map.of(
-        "id", String.valueOf(saved.getId()),
-        "storageKey", storageKey,
-        "blobUrl", blobUrl));
+    return ResponseEntity.ok(
+        Map.of(
+            "id", String.valueOf(saved.getId()),
+            "storageKey", storageKey,
+            "blobUrl", blobUrl));
   }
-
 
   /**
    * Returns a presigned SAS URL for downloading a level file.
@@ -118,16 +120,22 @@ public class StorageController {
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
 
     // Deactivate all previous solver versions for this event
-    solverVersionRepository.findByEventId(UUID.fromString(eventId))
-        .forEach(sv -> { sv.setIsActive(false); solverVersionRepository.save(sv); });
+    solverVersionRepository
+        .findByEventId(UUID.fromString(eventId))
+        .forEach(
+            sv -> {
+              sv.setIsActive(false);
+              solverVersionRepository.save(sv);
+            });
 
-    SolverVersion saved = fileMetadataService.saveSolverVersion(
-        UUID.fromString(eventId),
-        uploadedBy,
-        storageKey,
-        version,
-        file.getOriginalFilename(),
-        file.getSize());
+    SolverVersion saved =
+        fileMetadataService.saveSolverVersion(
+            UUID.fromString(eventId),
+            uploadedBy,
+            storageKey,
+            version,
+            file.getOriginalFilename(),
+            file.getSize());
 
     // Set notes separately since saveSolverVersion doesn't take it
     if (notes != null) {
@@ -135,11 +143,16 @@ public class StorageController {
       solverVersionRepository.save(saved);
     }
 
-    return ResponseEntity.ok(Map.of(
-        "solverVersionId", String.valueOf(saved.getId()),
-        "storageKey", storageKey,
-        "blobUrl", blobUrl,
-        "version", String.valueOf(version)));
+    return ResponseEntity.ok(
+        Map.of(
+            "solverVersionId",
+            String.valueOf(saved.getId()),
+            "storageKey",
+            storageKey,
+            "blobUrl",
+            blobUrl,
+            "version",
+            String.valueOf(version)));
   }
 
   /**
@@ -161,49 +174,53 @@ public class StorageController {
   // Submissions (Participant)
 
   /**
-     * Uploads both the submission output file and source code archive in a single request. Creates
-     * one submission record with both storage keys set, then uploads both files to their canonical
-     * blob paths.
-     *
-     * @param eventId the event UUID
-     * @param teamId the team UUID
-     * @param outputFile the solution output file
-     * @param sourceFile the zipped source code archive
-     * @param levelId the level this submission is for
-     * @param solverVersionId the active solver version to use for scoring
-     * @return submissionId, both storage keys, and status
-     */
-    @PostMapping("/events/{eventId}/teams/{teamId}/submissions")
-    // @PreAuthorize("hasRole('PARTICIPANT')")
-    public ResponseEntity<Map<String, String>> uploadSubmission(
-        @PathVariable String eventId,
-        @PathVariable String teamId,
-        @RequestParam("outputFile") MultipartFile outputFile,
-        @RequestParam("sourceFile") MultipartFile sourceFile,
-        @RequestParam("levelId") Long levelId,
-        @RequestParam("solverVersionId") Long solverVersionId) {
+   * Uploads both the submission output file and source code archive in a single request. Creates
+   * one submission record with both storage keys set, then uploads both files to their canonical
+   * blob paths.
+   *
+   * @param eventId the event UUID
+   * @param teamId the team UUID
+   * @param outputFile the solution output file
+   * @param sourceFile the zipped source code archive
+   * @param levelId the level this submission is for
+   * @param solverVersionId the active solver version to use for scoring
+   * @return submissionId, both storage keys, and status
+   */
+  @PostMapping("/events/{eventId}/teams/{teamId}/submissions")
+  // @PreAuthorize("hasRole('PARTICIPANT')")
+  public ResponseEntity<Map<String, String>> uploadSubmission(
+      @PathVariable String eventId,
+      @PathVariable String teamId,
+      @RequestParam("outputFile") MultipartFile outputFile,
+      @RequestParam("sourceFile") MultipartFile sourceFile,
+      @RequestParam("levelId") Long levelId,
+      @RequestParam("solverVersionId") Long solverVersionId) {
 
-    Submission saved = fileMetadataService.saveSubmission(
-        eventId,
-        UUID.fromString(teamId),
-        levelId,
-        solverVersionId,
-        outputFile.getOriginalFilename(),
-        outputFile.getSize(),
-        outputFile.getContentType(),
-        sourceFile.getOriginalFilename(),
-        sourceFile.getSize(),
-        sourceFile.getContentType());
+    Submission saved =
+        fileMetadataService.saveSubmission(
+            eventId,
+            UUID.fromString(teamId),
+            levelId,
+            solverVersionId,
+            outputFile.getOriginalFilename(),
+            outputFile.getSize(),
+            outputFile.getContentType(),
+            sourceFile.getOriginalFilename(),
+            sourceFile.getSize(),
+            sourceFile.getContentType());
 
-    storageService.upload(config.getSubmissionsContainer(), saved.getOutputStorageKey(), outputFile);
-    storageService.upload(config.getSubmissionsContainer(), saved.getSourceCodeStorageKey(), sourceFile);
+    storageService.upload(
+        config.getSubmissionsContainer(), saved.getOutputStorageKey(), outputFile);
+    storageService.upload(
+        config.getSubmissionsContainer(), saved.getSourceCodeStorageKey(), sourceFile);
 
-    return ResponseEntity.ok(Map.of(
-        "submissionId", String.valueOf(saved.getId()),
-        "outputStorageKey", saved.getOutputStorageKey(),
-        "sourceStorageKey", saved.getSourceCodeStorageKey(),
-        "status", saved.getStatus()));
-    }
+    return ResponseEntity.ok(
+        Map.of(
+            "submissionId", String.valueOf(saved.getId()),
+            "outputStorageKey", saved.getOutputStorageKey(),
+            "sourceStorageKey", saved.getSourceCodeStorageKey(),
+            "status", saved.getStatus()));
+  }
 
   /**
    * Returns a presigned SAS URL for downloading a submission output file.
@@ -215,18 +232,19 @@ public class StorageController {
    * @return presigned download URL
    */
   @GetMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
-    // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
-    public ResponseEntity<Map<String, String>> getSubmissionOutputUrl(
-        @PathVariable String eventId,
-        @PathVariable String teamId,
-        @PathVariable Long submissionId,
-        @PathVariable String filename) {
+  // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  public ResponseEntity<Map<String, String>> getSubmissionOutputUrl(
+      @PathVariable String eventId,
+      @PathVariable String teamId,
+      @PathVariable Long submissionId,
+      @PathVariable String filename) {
 
     String storageKey = fileMetadataService.getSubmissionOutputStorageKey(submissionId);
-    String url = storageService.generatePresignedUrl(
-        config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
+    String url =
+        storageService.generatePresignedUrl(
+            config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
     return ResponseEntity.ok(Map.of("url", url));
-   }
+  }
 
   /**
    * Returns a presigned SAS URL for downloading a source code archive (Admin only for auditing).
@@ -238,18 +256,19 @@ public class StorageController {
    * @return presigned download URL
    */
   @GetMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
-    // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
-        @PathVariable String eventId,
-        @PathVariable String teamId,
-        @PathVariable Long submissionId,
-        @PathVariable String filename) {
+  // @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
+      @PathVariable String eventId,
+      @PathVariable String teamId,
+      @PathVariable Long submissionId,
+      @PathVariable String filename) {
 
     String storageKey = fileMetadataService.getSubmissionSourceStorageKey(submissionId);
-    String url = storageService.generatePresignedUrl(
-        config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
+    String url =
+        storageService.generatePresignedUrl(
+            config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
     return ResponseEntity.ok(Map.of("url", url));
-   }
+  }
 
   // Scoring Logs(might remove)
 

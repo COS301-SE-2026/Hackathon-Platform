@@ -14,7 +14,8 @@ public interface SolverVersionRepository extends JpaRepository<SolverVersion, Lo
 
   Optional<SolverVersion> findByEventIdAndIsActiveTrue(UUID eventId);
 
-  @Query("SELECT sv FROM SolverVersion sv WHERE sv.eventId = :eventId ORDER BY sv.versionNumber DESC")
+  @Query(
+      "SELECT sv FROM SolverVersion sv WHERE sv.eventId = :eventId ORDER BY sv.versionNumber DESC")
   List<SolverVersion> findAllByEventIdOrderByVersionDesc(@Param("eventId") UUID eventId);
 
   Optional<SolverVersion> findByEventIdAndVersionNumber(UUID eventId, Integer versionNumber);
