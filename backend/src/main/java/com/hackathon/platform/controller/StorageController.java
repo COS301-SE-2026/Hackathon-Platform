@@ -205,11 +205,12 @@ public class StorageController {
 
   /**
    * Uploads a source code ZIP archive alongside a submission. The returned storageKey maps to
-   * submissions.source_code_storage_key in the database.
+   * submissions.source_code_storage_key in the database. Updates the existing submission record
+   * created by the output upload.
    *
    * @param eventId the event UUID
    * @param teamId the team UUID
-   * @param submissionId the submission ID
+   * @param submissionId the submission ID from the output upload response
    * @param file the zipped source code archive
    * @return storageKey and blobUrl
    */
@@ -220,9 +221,17 @@ public class StorageController {
       @PathVariable String teamId,
       @PathVariable String submissionId,
       @RequestParam("file") MultipartFile file) {
+
     String storageKey =
         BlobPath.submissionSourceArchive(eventId, teamId, submissionId, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getSubmissionsContainer(), storageKey, file);
+
+    fileMetadataService.saveSubmissionSource(
+        Long.parseLong(submissionId),
+        storageKey,
+        file.getOriginalFilename(),
+        file.getSize());
+
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
   }
 
