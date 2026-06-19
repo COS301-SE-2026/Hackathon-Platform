@@ -57,5 +57,18 @@ class FileMetadataServiceTest {
     verify(levelFileRepository).save(any(LevelFile.class));
   }
 
+  @Test
+  void saveSolverVersion_savesAndReturnsSolverVersion() {
+    SolverVersion expected = new SolverVersion(EVENT_ID, UPLOADED_BY, "events/.../solver.py");
+    when(solverVersionRepository.save(any(SolverVersion.class))).thenReturn(expected);
+
+    SolverVersion result =
+        fileMetadataService.saveSolverVersion(
+            EVENT_ID, UPLOADED_BY, "events/.../solver.py", 1, "solver.py", 2048L);
+
+    assertThat(result).isEqualTo(expected);
+    verify(solverVersionRepository).save(any(SolverVersion.class));
+  }
+
   
 }
