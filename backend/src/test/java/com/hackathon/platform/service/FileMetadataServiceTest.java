@@ -70,5 +70,51 @@ class FileMetadataServiceTest {
     verify(solverVersionRepository).save(any(SolverVersion.class));
   }
 
+  @Test
+  void saveSubmission_savesTwiceAndBuildsCanonicalKeysUsingRealId() {
+    Submission firstSave =
+        new Submission(TEAM_ID, LEVEL_ID, SOLVER_VERSION_ID, "pending", "pending");
+    firstSave.setId(SUBMISSION_ID);
+
+    when(submissionRepository.save(any(Submission.class)))
+        .thenReturn(firstSave)
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Submission result =
+        fileMetadataService.saveSubmission(
+            EVENT_ID_STR,
+            TEAM_ID,
+            LEVEL_ID,
+            SOLVER_VERSION_ID,
+            "output.txt",
+            512L,
+            "text/plain",
+            "archive.zip",
+            4096L,
+            "application/zip");
+
+    verify(submissionRepository, times(2)).save(any(Submission.class));
+
+    assertThat(result.getOutputStorageKey())
+        .isEqualTo(
+            "submissions/"
+                + EVENT_ID_STR
+                + "/"
+                + TEAM_ID
+                + "/"
+                + SUBMISSION_ID
+                + "/output/output.txt");
+    assertThat(result.getSourceCodeStorageKey())
+        .isEqualTo(
+            "submissions/"
+                + EVENT_ID_STR
+                + "/"
+                + TEAM_ID
+                + "/"
+                + SUBMISSION_ID
+                + "/source/archive.zip");
+    assertThat(result.getStatus()).isEqualTo("QUEUED");
+  }
+
   
 }
