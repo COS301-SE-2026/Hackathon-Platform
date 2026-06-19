@@ -44,5 +44,18 @@ class FileMetadataServiceTest {
         new FileMetadataService(levelFileRepository, solverVersionRepository, submissionRepository);
   }
 
+  @Test
+  void saveLevelFile_savesAndReturnsLevelFile() {
+    LevelFile expected = new LevelFile(LEVEL_ID, "test.pdf", "events/.../test.pdf", "PDF");
+    when(levelFileRepository.save(any(LevelFile.class))).thenReturn(expected);
+
+    LevelFile result =
+        fileMetadataService.saveLevelFile(
+            LEVEL_ID, "test.pdf", "events/.../test.pdf", "PDF", 1024L, "application/pdf");
+
+    assertThat(result).isEqualTo(expected);
+    verify(levelFileRepository).save(any(LevelFile.class));
+  }
+
   
 }
