@@ -153,4 +153,30 @@ class FileMetadataServiceTest {
     assertThat(result).isEqualTo("submissions/.../output/output.txt");
   }
 
+  @Test
+  void getSubmissionOutputStorageKey_throwsWhenNotFound() {
+    when(submissionRepository.findById(SUBMISSION_ID)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> fileMetadataService.getSubmissionOutputStorageKey(SUBMISSION_ID))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Submission not found");
+  }
+
+  @Test
+  void getSubmissionSourceStorageKey_returnsKeyWhenFound() {
+    Submission submission =
+        new Submission(
+            TEAM_ID,
+            LEVEL_ID,
+            SOLVER_VERSION_ID,
+            "submissions/.../source/archive.zip",
+            "submissions/.../output/output.txt");
+    when(submissionRepository.findById(SUBMISSION_ID)).thenReturn(Optional.of(submission));
+
+    String result = fileMetadataService.getSubmissionSourceStorageKey(SUBMISSION_ID);
+
+    assertThat(result).isEqualTo("submissions/.../source/archive.zip");
+  }
+
+ 
 }
