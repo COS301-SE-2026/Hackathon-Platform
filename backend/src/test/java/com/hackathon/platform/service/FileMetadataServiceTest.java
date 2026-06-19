@@ -116,5 +116,16 @@ class FileMetadataServiceTest {
     assertThat(result.getStatus()).isEqualTo("QUEUED");
   }
 
+  @Test
+  void getLevelFileStorageKey_returnsStorageKeyWhenFound() {
+    LevelFile levelFile = new LevelFile(LEVEL_ID, "test.pdf", "events/.../test.pdf", "PDF");
+    when(levelFileRepository.findByLevelIdAndFileName(LEVEL_ID, "test.pdf"))
+        .thenReturn(Optional.of(levelFile));
+
+    String result = fileMetadataService.getLevelFileStorageKey(LEVEL_ID, "test.pdf");
+
+    assertThat(result).isEqualTo("events/.../test.pdf");
+  }
+
   
 }
