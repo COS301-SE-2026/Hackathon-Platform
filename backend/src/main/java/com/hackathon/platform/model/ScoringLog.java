@@ -16,5 +16,22 @@ import java.time.Instant;
 @Table(name = "scoringlogs", schema = "public")
 public class ScoringLog {
 
- 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
+  private Long id;
+
+  @Column(name = "submission_id", nullable = false)
+  private Long submissionId;
+
+  @Column(name = "log_text", nullable = false, columnDefinition = "TEXT")
+  private String logText;
+
+  @Column(name = "error_type", length = 50)
+  private String errorType;
+
+  @Column(name = "created_at", nullable = false)
+  private Instant createdAt = Instant.now();
+
+  
 }
