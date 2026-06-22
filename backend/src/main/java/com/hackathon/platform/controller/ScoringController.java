@@ -43,5 +43,16 @@ public class ScoringController {
     return ResponseEntity.ok(scored);
   }
 
+  /**
+   * Full submission history for a team across all levels, most recent first. Used by the
+   * participant portal's "submission history" view.
+   *
+   * @param teamId the team UUID
+   */
+  @GetMapping("/teams/{teamId}/submissions")
+  public ResponseEntity<List<SubmissionResponse>> getTeamHistory(@PathVariable UUID teamId) {
+    return ResponseEntity.ok(submissionQueryService.getHistoryForTeam(teamId));
+  }
+
   
 }
