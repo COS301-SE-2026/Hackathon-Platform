@@ -66,5 +66,19 @@ public class ScoringController {
     return ResponseEntity.ok(submissionQueryService.getHistoryForTeamAndLevel(teamId, levelId));
   }
 
+  /**
+   * Full feedback for a single submission, including score, status and every scoring log entry
+   * (e.g. malformed output, rule violations, validation failures). Scoped to the owning team so a
+   * participant can't view another team's feedback by guessing IDs.
+   *
+   * @param teamId the team UUID
+   * @param submissionId the submission ID
+   */
+  @GetMapping("/teams/{teamId}/submissions/{submissionId}")
+  public ResponseEntity<SubmissionResponse> getSubmissionDetail(
+      @PathVariable UUID teamId, @PathVariable Long submissionId) {
+    return ResponseEntity.ok(submissionQueryService.getSubmissionDetail(submissionId, teamId));
+  }
+
   
 }
