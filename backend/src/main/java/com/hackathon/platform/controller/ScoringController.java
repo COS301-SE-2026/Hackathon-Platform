@@ -80,5 +80,14 @@ public class ScoringController {
     return ResponseEntity.ok(submissionQueryService.getSubmissionDetail(submissionId, teamId));
   }
 
-  
+  /**
+   * Admin variant: full feedback for any submission regardless of team, for support/auditing.
+   *
+   * @param submissionId the submission ID
+   */
+  @GetMapping("/admin/submissions/{submissionId}")
+  public ResponseEntity<SubmissionResponse> getSubmissionDetailForAdmin(
+      @PathVariable Long submissionId) {
+    return ResponseEntity.ok(submissionQueryService.getSubmissionDetailForAdmin(submissionId));
+  }
 }
