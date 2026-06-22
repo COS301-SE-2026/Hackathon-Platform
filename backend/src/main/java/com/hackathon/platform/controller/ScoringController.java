@@ -54,5 +54,17 @@ public class ScoringController {
     return ResponseEntity.ok(submissionQueryService.getHistoryForTeam(teamId));
   }
 
+  /**
+   * Submission history for a team, scoped to a single level, most recent first.
+   *
+   * @param teamId the team UUID
+   * @param levelId the level ID
+   */
+  @GetMapping("/teams/{teamId}/levels/{levelId}/submissions")
+  public ResponseEntity<List<SubmissionResponse>> getTeamLevelHistory(
+      @PathVariable UUID teamId, @PathVariable Long levelId) {
+    return ResponseEntity.ok(submissionQueryService.getHistoryForTeamAndLevel(teamId, levelId));
+  }
+
   
 }
