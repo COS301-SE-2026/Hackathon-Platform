@@ -35,6 +35,10 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/event-list/eventlist.component').then(m => m.EventlistComponent),
       },
       {
+        path: 'levels',
+        loadComponent: () => import('./admin/levels/levels.component').then(m => m.LevelsComponent),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
