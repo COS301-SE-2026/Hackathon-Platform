@@ -2,6 +2,7 @@ package com.hackathon.platform.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -10,9 +11,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.LevelFile;
+import com.hackathon.platform.model.SolverVersion;
+import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.StorageService;
 import com.hackathon.platform.shared.security.JwtAuthFilter;
+import java.util.Collections;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,15 +43,18 @@ class StorageControllerTest {
 
   @MockBean private StorageService storageService;
   @MockBean private AzureBlobConfig config;
+  @MockBean private FileMetadataService fileMetadataService;
+  @MockBean private SolverVersionRepository solverVersionRepository;
   @MockBean private JwtAuthFilter jwtAuthFilter;
   @MockBean private UserRepository userRepository;
   @MockBean private PasswordEncoder passwordEncoder;
   @MockBean private AuthenticationProvider authenticationProvider;
 
-  private static final String EVENT_ID = "11111111-1111-1111-1111-111111111111";
-  private static final String TEAM_ID = "22222222-2222-2222-2222-222222222222";
-  private static final String SUBMISSION_ID = "33333333-3333-3333-3333-333333333333";
+  private static final String EVENT_ID = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
+  private static final String TEAM_ID = "d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14";
+  private static final String UPLOADED_BY = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
   private static final String LEVEL_ID = "1";
+  private static final String SUBMISSION_ID = "1";
   private static final String BLOB_URL = "https://hackathonplatform.blob.core.windows.net/test";
   private static final String PRESIGNED_URL =
       "https://hackathonplatform.blob.core.windows.net/test?sv=...";
@@ -52,8 +63,13 @@ class StorageControllerTest {
   @Test
   void uploadLevelFile_returns200WithStorageKeyAndBlobUrl() throws Exception {
     when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
-    when(config.getSasExpiryMinutes()).thenReturn(60);
     when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+    LevelFile saved = new LevelFile(1L, "test.txt", "events/.../test.txt", "TXT");
+    saved.setId(1L);
+    when(fileMetadataService.saveLevelFile(
+            any(), anyString(), anyString(), anyString(), any(), any()))
+        .thenReturn(saved);
 
     MockMultipartFile file =
         new MockMultipartFile("file", "test.txt", "text/plain", "hello".getBytes());
@@ -61,23 +77,25 @@ class StorageControllerTest {
     mockMvc
         .perform(
             multipart("/api/storage/events/{eventId}/levels/{levelId}/files", EVENT_ID, LEVEL_ID)
-                .file(file))
+                .file(file)
+                .param("fileType", "TXT"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.storageKey").exists())
-        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL))
+        .andExpect(jsonPath("$.id").value("1"));
   }
 
   @Test
   void uploadLevelFile_returnsErrorWhenNoFileProvided() throws Exception {
     mockMvc
         .perform(
-            multipart("/api/storage/events/{eventId}/levels/{levelId}/files", EVENT_ID, LEVEL_ID))
+            multipart("/api/storage/events/{eventId}/levels/{levelId}/files", EVENT_ID, LEVEL_ID)
+                .param("fileType", "TXT"))
         .andExpect(status().is5xxServerError());
   }
 
   @Test
   void getLevelFileUrl_returns200WithPresignedUrl() throws Exception {
-
     when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
     when(config.getSasExpiryMinutes()).thenReturn(60);
     when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
@@ -98,6 +116,15 @@ class StorageControllerTest {
   void uploadSolver_returns200WithStorageKeyAndVersion() throws Exception {
     when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
     when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+    when(solverVersionRepository.findByEventId(any())).thenReturn(Collections.emptyList());
+
+    SolverVersion saved =
+        new SolverVersion(
+            UUID.fromString(EVENT_ID), UUID.fromString(UPLOADED_BY), "events/.../solver.py");
+    saved.setId(1L);
+    when(fileMetadataService.saveSolverVersion(
+            any(), any(), anyString(), any(), anyString(), any()))
+        .thenReturn(saved);
 
     MockMultipartFile file =
         new MockMultipartFile("file", "solver.py", "text/plain", "solver code".getBytes());
@@ -106,10 +133,13 @@ class StorageControllerTest {
         .perform(
             multipart("/api/storage/events/{eventId}/solver", EVENT_ID)
                 .file(file)
-                .param("version", "1"))
+                .param("version", "1")
+                .param("uploadedBy", UPLOADED_BY)
+                .param("notes", "Initial version"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.storageKey").exists())
-        .andExpect(jsonPath("$.version").value("1"));
+        .andExpect(jsonPath("$.version").value("1"))
+        .andExpect(jsonPath("$.solverVersionId").value("1"));
   }
 
   @Test
@@ -128,51 +158,70 @@ class StorageControllerTest {
   }
 
   @Test
-  void uploadSubmissionOutput_returns200WithStorageKey() throws Exception {
+  void uploadSubmission_returns200WithBothStorageKeysAndSubmissionId() throws Exception {
     when(config.getSubmissionsContainer()).thenReturn("submissions");
     when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
 
-    MockMultipartFile file =
-        new MockMultipartFile("file", "output.txt", "text/plain", "output data".getBytes());
+    Submission saved =
+        new Submission(
+            UUID.fromString(TEAM_ID),
+            1L,
+            1L,
+            "submissions/.../6/source/archive.zip",
+            "submissions/.../6/output/output.txt");
+    saved.setId(6L);
+    when(fileMetadataService.saveSubmission(
+            anyString(),
+            any(),
+            any(),
+            any(),
+            anyString(),
+            any(),
+            anyString(),
+            anyString(),
+            any(),
+            anyString()))
+        .thenReturn(saved);
+
+    MockMultipartFile outputFile =
+        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output data".getBytes());
+    MockMultipartFile sourceFile =
+        new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
 
     mockMvc
         .perform(
-            multipart(
-                    "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output",
-                    EVENT_ID,
-                    TEAM_ID,
-                    SUBMISSION_ID)
-                .file(file))
+            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID, TEAM_ID)
+                .file(outputFile)
+                .file(sourceFile)
+                .param("levelId", "1")
+                .param("solverVersionId", "1"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.storageKey").exists())
-        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+        .andExpect(jsonPath("$.submissionId").value("6"))
+        .andExpect(jsonPath("$.outputStorageKey").exists())
+        .andExpect(jsonPath("$.sourceStorageKey").exists())
+        .andExpect(jsonPath("$.status").value("QUEUED"));
   }
 
   @Test
-  void uploadSourceArchive_returns200WithStorageKey() throws Exception {
-    when(config.getSubmissionsContainer()).thenReturn("submissions");
-    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
-
-    MockMultipartFile file =
-        new MockMultipartFile("file", "source.zip", "application/zip", "zipdata".getBytes());
+  void uploadSubmission_returnsErrorWhenOutputFileMissing() throws Exception {
+    MockMultipartFile sourceFile =
+        new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
 
     mockMvc
         .perform(
-            multipart(
-                    "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source",
-                    EVENT_ID,
-                    TEAM_ID,
-                    SUBMISSION_ID)
-                .file(file))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.storageKey").exists())
-        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID, TEAM_ID)
+                .file(sourceFile)
+                .param("levelId", "1")
+                .param("solverVersionId", "1"))
+        .andExpect(status().is5xxServerError());
   }
 
   @Test
   void getSubmissionOutputUrl_returns200WithPresignedUrl() throws Exception {
     when(config.getSubmissionsContainer()).thenReturn("submissions");
     when(config.getSasExpiryMinutes()).thenReturn(60);
+    when(fileMetadataService.getSubmissionOutputStorageKey(anyLong()))
+        .thenReturn("submissions/.../1/output/output.txt");
     when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
         .thenReturn(PRESIGNED_URL);
 
@@ -192,6 +241,8 @@ class StorageControllerTest {
   void getSourceArchiveUrl_returns200WithPresignedUrl() throws Exception {
     when(config.getSubmissionsContainer()).thenReturn("submissions");
     when(config.getSasExpiryMinutes()).thenReturn(60);
+    when(fileMetadataService.getSubmissionSourceStorageKey(anyLong()))
+        .thenReturn("submissions/.../1/source/archive.zip");
     when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
         .thenReturn(PRESIGNED_URL);
 
@@ -202,9 +253,22 @@ class StorageControllerTest {
                 EVENT_ID,
                 TEAM_ID,
                 SUBMISSION_ID,
-                "source.zip"))
+                "archive.zip"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
+  }
+
+  @Test
+  void getSubmissionOutputUrl_returns5xxWhenSubmissionIdNotNumeric() throws Exception {
+    mockMvc
+        .perform(
+            get(
+                "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+                EVENT_ID,
+                TEAM_ID,
+                "not-a-number",
+                "output.txt"))
+        .andExpect(status().is5xxServerError());
   }
 
   @Test
