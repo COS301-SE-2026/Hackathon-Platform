@@ -1,17 +1,12 @@
-#   builds the Angular app for production
-#   runs Lighthouse against the static dist folder
-#   checks scores against thresholds in lighthouserc.json
-#   uploads the HTML report as a downloadable artifact
-#   posts a public report link to the PR on temporary public storage
 # limits are set low for now, they will increase as we improve the app
 
 name: Lighthouse CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, dev ]
 
 jobs:
   lighthouse:
@@ -44,7 +39,8 @@ jobs:
 
       # Run Lighthouse against the built static file
       - name: Run Lighthouse CI
-        run: lhci autorun --config=lighthouserc.json || true
+        working-directory: frontend
+        run: lhci autorun --config=lighthouserc.json
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

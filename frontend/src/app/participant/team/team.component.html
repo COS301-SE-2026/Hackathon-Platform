@@ -1,47 +1,139 @@
 <div class="team-page">
+
   <div class="page-header">
-    <div>
-      <h1>My team – {{ team.name }}</h1>
-      <p class="page-sub">{{ team.eventName }}</p>
-    </div>
+    <h1>My team {{ hasTeam ? '– ' + team.name : '' }}</h1>
+    <p class="page-sub">Manage your team and join requests</p>
   </div>
 
-  
-  <h2 class="section-title">Team members</h2>
-  <div class="members-list">
-    @for (member of team.members; track member.email) {
-      <div class="member-row">
-        <div class="member-left">
-          <div class="avatar">{{ getInitials(member.name) }}</div>
-          <div class="member-info">
-            <p class="member-name">{{ member.name }}{{ member.isLead ? ' (Team Lead)' : '' }}</p>
-            <p class="member-email">{{ member.email }}</p>
+  @if (errorMessage) {
+    <div class="msg-banner error">{{ errorMessage }}</div>
+  }
+  @if (successMessage) {
+    <div class="msg-banner success">{{ successMessage }}</div>
+  }
+
+  @if (isLoadingTeam) {
+    <p class="page-sub">Loading your team...</p>
+  }
+
+  @if (!isLoadingTeam && hasTeam) {
+
+    <h2 class="section-title">Team members</h2>
+    <div class="members-list">
+      @for (member of team.members; track member.userId) {
+        <div class="member-row">
+          <div class="member-left">
+            <div class="avatar">{{ getInitials(member.name) }}</div>
+            <div class="member-info">
+              <p class="member-name">
+                {{ member.name }}{{ member.isLead ? ' (Team Lead)' : '' }}
+              </p>
+              <p class="member-email">{{ member.email }}</p>
+            </div>
           </div>
+          <span class="member-status" [ngClass]="member.status.toLowerCase()">
+            {{ member.status }}
+          </span>
         </div>
-        <span class="member-status" [ngClass]="member.status.toLowerCase()">
-          {{ member.status }}
-        </span>
+      }
+    </div>
+
+    <div class="team-id-box">
+      <span class="team-id-label">Team ID (share this with others to join):</span>
+      <code class="team-id-value">{{ team.teamId }}</code>
+    </div>
+
+    @if (isTeamLead && pendingRequests.length > 0) {
+      <h2 class="section-title">Pending join requests</h2>
+      <div class="members-list">
+        @for (request of pendingRequests; track request.userId) {
+          <div class="member-row">
+            <div class="member-left">
+              <div class="avatar">{{ getInitials(request.name) }}</div>
+              <div class="member-info">
+                <p class="member-name">{{ request.name }}</p>
+                <p class="member-email">{{ request.email }}</p>
+              </div>
+            </div>
+            <div class="request-actions">
+              <button
+                class="btn-approve"
+                (click)="approveRequest(request.userId)"
+                [disabled]="isLoading"
+              >
+                Approve
+              </button>
+              <button
+                class="btn-reject"
+                (click)="rejectRequest(request.userId)"
+                [disabled]="isLoading"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        }
       </div>
     }
-  </div>
 
-  <div class="team-actions-grid">
-    <div class="action-card">
-      <h3>Join an existing team</h3>
-      <p class="action-desc">Search for an open team and send a join request. The team lead must approve</p>
-      <div class="search-row">
-        <input type="text" [(ngModel)]="teamSearch" placeholder="Search teams.." />
-        <button class="btn-search" (click)="onSearchTeams()">Search</button>
-      </div>
-    </div>
+    @if (isTeamLead && pendingRequests.length === 0) {
+      <p class="page-sub" style="margin-top: 8px;">No pending join requests.</p>
+    }
 
-    <div class="action-card">
-      <h3>Create new team</h3>
-      <label for="newTeamName" class="field-label">Team name</label>
-      <div class="create-row">
-        <input id="newTeamName" type="text" [(ngModel)]="newTeamName" placeholder="e.g Byteforce" />
-        <button class="btn-create" (click)="onCreateTeam()">Create team</button>
-      </div>
+    <!-- Leave team -->
+    <div class="leave-team-section">
+      <button class="btn-leave" (click)="leaveCurrentTeam()" [disabled]="isLoading">
+        {{ isLoading ? 'Leaving...' : 'Leave team' }}
+      </button>
     </div>
-  </div>
+  }
+
+  @if (!isLoadingTeam && !hasTeam) {
+    <div class="team-actions-grid">
+
+      <div class="action-card">
+        <h3>Join an existing team</h3>
+        <p class="action-desc">
+          Enter a team ID to send a join request. The team lead must approve before you join.
+        </p>
+        <div class="search-row">
+          <input
+            type="text"
+            [(ngModel)]="teamIdToJoin"
+            placeholder="Paste team ID here"
+            [disabled]="isLoading"
+          />
+          <button class="btn-search" (click)="joinTeam()" [disabled]="isLoading || !teamIdToJoin.trim()">
+            {{ isLoading ? 'Sending...' : 'Request to join' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="action-card">
+        <h3>Create a new team</h3>
+        <p class="action-desc">
+          Create a team and share your team ID with others so they can request to join.
+        </p>
+        <label for="newTeamName" class="field-label">Team name *</label>
+        <div class="create-row">
+          <input
+            id="newTeamName"
+            type="text"
+            [(ngModel)]="newTeamName"
+            placeholder="e.g., ByteForce"
+            [disabled]="isLoading"
+          />
+          <button
+            class="btn-create"
+            (click)="onCreateTeam()"
+            [disabled]="isLoading || !newTeamName.trim()"
+          >
+            {{ isLoading ? 'Creating...' : 'Create team' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  }
+
 </div>

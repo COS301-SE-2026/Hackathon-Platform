@@ -25,7 +25,7 @@ public class Team {
   @Column(name = "created_by_user_id", nullable = false)
   private UUID createdByUserId;
 
-  @Column(name = "event_id", nullable = false)
+  @Column(name = "event_id", nullable = true)
   private UUID eventId;
 
   @Column(name = "created_at", nullable = false)
@@ -35,7 +35,7 @@ public class Team {
   private String status = "ACTIVE";
 
   /** Default constructor. */
-  public Team() { }
+  public Team() {}
 
   /** Constructs a new Team with the given name, creator and event. */
   public Team(String teamName, UUID createdByUserId, UUID eventId) {

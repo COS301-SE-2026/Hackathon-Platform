@@ -1,26 +1,17 @@
 import { Routes } from '@angular/router';
-import { AdminShellComponent } from './admin/admin-shell.component/admin-shell.component';
+import { AdminShellComponent } from './admin/components/admin-shell.component/admin-shell.component';
 import { ParticipantShellComponent } from './participant/participant-shell.component/participant-shell.component';
+import { AuthGuard } from './guards/auth.guard';
+import { TeamComponent } from './participant/team/team.component';
 
 export const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'login',
-    pathMatch: 'full',
-  },
-  {
-    path: 'login',
-    loadComponent: () =>
-      import('./features/auth/login/login.component').then(m => m.LoginComponent),
-  },
-  {
-    path: 'register',  
-    loadComponent: () =>
-      import('./features/auth/register/register.component').then(m => m.RegisterComponent),
-  },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
+  { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
   {
     path: 'admin',
     component: AdminShellComponent,
+    canActivate: [AuthGuard],
     children: [
       {
         path: 'dashboard',
@@ -77,9 +68,6 @@ export const routes: Routes = [
         pathMatch: 'full',
       }
     ]
-  }, 
-  {
-    path: '**',
-    redirectTo: 'login',
   },
+  { path: '**', redirectTo: 'login' }
 ];

@@ -83,3 +83,25 @@
     &:hover { text-decoration: underline; }
   }
 }
+
+.field-error {
+  display: block;
+  color: #e53e3e;
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+ 
+.error-banner {
+  background-color: #fff5f5;
+  border: 1px solid #fc8181;
+  border-radius: 6px;
+  color: #c53030;
+  font-size: 0.875rem;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+ 
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
