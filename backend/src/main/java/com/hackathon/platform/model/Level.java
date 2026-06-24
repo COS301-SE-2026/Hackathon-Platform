@@ -34,9 +34,57 @@ public class Level {
 
     public Level() {}
 
-    public Level( UUID eventId, String name, Short levelNumber) {
+    public Level( UUID eventId, String name, short levelNumber) {
         this.eventId = eventId;
         this.name = name;
         this.levelNumber = levelNumber;
+    }
+
+    public void setId(short id) {
+        this.id = id;
+    }
+
+    public short getId() {
+        return id;
+    }
+
+    public void setEventId(UUID eventId) {
+        this.eventId = eventId;
+    }
+
+    public UUID getEventId() {
+        return eventId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setLevelNumber(short levelNumber) {
+        this.levelNumber = levelNumber;
+    }
+
+    public short getLevelNumber() {
+        return levelNumber;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }
