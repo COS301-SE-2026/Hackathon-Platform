@@ -31,4 +31,12 @@ public class Level {
 
     @Column(name = "description", nullable = true)
     private String description;
+
+    public Level() {}
+
+    public Level( UUID eventId, String name, Short levelNumber) {
+        this.eventId = eventId;
+        this.name = name;
+        this.levelNumber = levelNumber;
+    }
 }
