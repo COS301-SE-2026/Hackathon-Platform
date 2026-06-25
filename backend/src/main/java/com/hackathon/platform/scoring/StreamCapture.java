@@ -18,5 +18,11 @@ final class StreamCapture {
     this.thread.setDaemon(true);
   }
 
+  static StreamCapture read(InputStream input, int maxBytes) {
+    StreamCapture capture = new StreamCapture(input, maxBytes);
+    capture.thread.start();
+    return capture;
+  }
+
   
 }
