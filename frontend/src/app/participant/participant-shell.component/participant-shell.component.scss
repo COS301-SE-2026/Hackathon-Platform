@@ -52,48 +52,6 @@
   }
 }
 
-
-.event-body { display: flex; flex: 1; }
-
-
-.sidebar {
-  width: 178px;
-  background-color : #132248;
-  padding : 22px 14px ;
-  flex-shrink: 0  ;
-
-  .event-label {
-    font-size: 0.7rem ;
-    font-weight : 600;
-    color: #94a3b8;
-    letter-spacing  : 0.07em;
-    margin-bottom: 14px ;
-  }
-
-  .sidebar-nav {
-    list-style: none ;
-    display : flex;
-    flex-direction: column;
-    gap : 2px;
-
-    a {
-      display: block ;
-      color: #cbd5e1;
-      font-size : 0.875rem;
-      padding: 8px 10px  ;
-      border-radius: 6px;
-      text-decoration : none ;
-      transition: background-color 0.15s ;
-
-      &:hover, &.active {
-        background-color: rgba(255, 255, 255, 0.12);
-        color: #ffffff;
-      }
-    }
-  }
-}
-
-
 .event-content {
   flex: 1 ;
   padding : 28px 30px;
