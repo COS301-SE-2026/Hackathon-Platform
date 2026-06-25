@@ -8,5 +8,15 @@ import java.nio.charset.StandardCharsets;
 
 final class StreamCapture {
 
+  private final Thread thread;
+  private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+  private final int maxBytes;
+
+  private StreamCapture(InputStream input, int maxBytes) {
+    this.maxBytes = maxBytes;
+    this.thread = new Thread(() -> drain(input));
+    this.thread.setDaemon(true);
+  }
+
   
 }
