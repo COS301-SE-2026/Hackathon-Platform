@@ -24,5 +24,26 @@ final class StreamCapture {
     return capture;
   }
 
+  private void drain(InputStream input) {
+    byte[] chunk = new byte[4096];
+    int n;
+    try {
+      while ((n = input.read(chunk)) != -1) {
+        synchronized (buffer) {
+          if (buffer.size() < maxBytes) {
+            buffer.write(chunk, 0, Math.min(n, maxBytes - buffer.size()));
+
+            
+          }
+        }
+
+      }
+
+    } catch (IOException ignored) {
+      // Stream closes when the process exits or is killed;
+
+    }
+  }
+
   
 }
