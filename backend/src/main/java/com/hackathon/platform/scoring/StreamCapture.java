@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-
+/**
+ * Drains an InputStream on a background thread up to a byte cap, so a runaway solver can't exhaust
+ * heap by printing endlessly. Must be started immediately after process creation.
+ */
 final class StreamCapture {
 
   private final Thread thread;
@@ -33,7 +36,7 @@ final class StreamCapture {
           if (buffer.size() < maxBytes) {
             buffer.write(chunk, 0, Math.min(n, maxBytes - buffer.size()));
 
-            
+
           }
         }
 
@@ -42,6 +45,12 @@ final class StreamCapture {
     } catch (IOException ignored) {
       // Stream closes when the process exits or is killed;
 
+    }
+  }
+
+  String getTextSoFar() {
+    synchronized (buffer) {
+      return buffer.toString(StandardCharsets.UTF_8);
     }
   }
 
