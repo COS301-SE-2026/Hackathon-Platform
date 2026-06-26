@@ -270,25 +270,23 @@ public class StorageController {
     return ResponseEntity.ok(Map.of("url", url));
   }
 
-  // Scoring Logs(might remove)
+  // Scoring Logs
 
   /**
-   * Returns a presigned SAS URL for downloading a scoring log. Note: scoringlogs table stores
-   * log_text directly in the DB unlike the other endpoints for now. This endpoint is for any
-   * supplementary log files stored in blob storage.
+   * Returns a presigned SAS URL for downloading a scoring log.
    *
    * @param eventId the event UUID
-   * @param submissionId the submission ID
-   * @param filename the log filename
+   * @param teamId the team ID
+   * @param levelId the level ID
    * @return presigned download URL
    */
-  @GetMapping("/events/{eventId}/submissions/{submissionId}/logs/{filename}")
+  @GetMapping("/events/{eventId}/teams/{teamId}/levels/{levelId}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getScoringLogUrl(
       @PathVariable String eventId,
-      @PathVariable String submissionId,
-      @PathVariable String filename) {
-    String storageKey = BlobPath.scoringLog(eventId, submissionId, filename);
+      @PathVariable String teamId,
+      @PathVariable String levelId) {
+    String storageKey = BlobPath.scoringLog(eventId, teamId, levelId);
     String url =
         storageService.generatePresignedUrl(
             config.getScoringLogsContainer(), storageKey, config.getSasExpiryMinutes());
