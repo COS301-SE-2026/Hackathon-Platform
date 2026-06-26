@@ -18,12 +18,17 @@
 
 .navbar-left { display: flex; align-items: center; gap: 14px; }
 
-.brand {
-  font-size : 1.3rem;
-  font-weight: 700 ;
-  .brand-h { color: #ffffff; }
-  .brand-p { color: #5fae11; margin-left: 6px; }
+.logo {
+  display: flex;
+  align-items: center;
 }
+
+.logo img {
+  height: 50px;
+  width: auto;
+  display: block;
+}
+
 
 .user-badge {
   border : 1px solid #e2e8f0;
