@@ -23,9 +23,6 @@ public class Level {
     @Column(name = "name", nullable = false, length = 200)
     private String name;
 
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt = Instant.now();
-
     @Column(name = "level_number", nullable = false)
     private short levelNumber;
 
@@ -62,14 +59,6 @@ public class Level {
 
     public String getName() {
         return name;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
     }
 
     public void setLevelNumber(short levelNumber) {
