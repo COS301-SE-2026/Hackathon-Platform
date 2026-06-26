@@ -12,3 +12,13 @@ ALTER TABLE events
 ADD CONSTRAINT fk_event_hackathon
 FOREIGN KEY (hackathon_id)
 REFERENCES hackathon(hackathon_id)
+
+ALTER TABLE events
+DROP CONSTRAINT chk_events_duration;
+
+ALTER TABLE events
+ADD CONSTRAINT chk_events_duration
+CHECK (status IN ('ACTIVE', 'INACTIVE', 'COMPLETED', 'CANCELED', 'DRAFT'));
+
+ALTER TABLE levelfiles
+DROP COLUMN file_type;
