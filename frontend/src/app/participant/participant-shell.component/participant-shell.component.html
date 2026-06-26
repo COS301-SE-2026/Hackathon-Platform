@@ -1,19 +1,28 @@
 <div class="participant-shell">
   <nav class="navbar">
     <div class="navbar-left">
-    <div class="logo">
-      <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform Logo" />
+      <div class="logo">
+        <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform Logo" />
+      </div>
     </div>
-      <span class="user-badge">{{ userName }}</span>
-    </div>
-    <div class="navbar-links">
-      <a routerLink="/participant/home" routerLinkActive="active">Home</a>
-      <a routerLink="/participant/events" routerLinkActive="active">My Events</a>
-      <button class="logout-btn" (click)="logout()">Logout</button>
+    <div class="navbar-right">
+      <div class="navbar-links">
+        <a routerLink="/participant/home" routerLinkActive="active">Home</a>
+        <a routerLink="/participant/events" routerLinkActive="active">My Events</a>
+      </div>
+      <div class="user-menu">
+        <p-button 
+          [label]="userName + ' ▼'" 
+          icon="pi pi-user"
+          styleClass="user-menu-btn"
+          (click)="menu.toggle($event)"
+        ></p-button>
+        <p-menu #menu [model]="menuItems" [popup]="true"></p-menu>
+      </div>
     </div>
   </nav>
 
-    <main class="event-content">
-      <router-outlet></router-outlet>
-    </main>
+  <main class="event-content">
+    <router-outlet></router-outlet>
+  </main>
 </div>
