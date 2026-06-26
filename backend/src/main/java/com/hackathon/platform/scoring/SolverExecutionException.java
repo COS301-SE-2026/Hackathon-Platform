@@ -6,5 +6,19 @@ package com.hackathon.platform.scoring;
  */
 public class SolverExecutionException extends RuntimeException {
 
-  
+  private final String errorType;
+
+  public SolverExecutionException(String message, String errorType) {
+    super(message);
+    this.errorType = errorType;
+  }
+
+  public SolverExecutionException(String message, String errorType, Throwable cause) {
+    super(message, cause);
+    this.errorType = errorType;
+  }
+
+  public String getErrorType() {
+    return errorType;
+  }
 }
