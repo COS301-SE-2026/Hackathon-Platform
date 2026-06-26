@@ -15,6 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+/**
+ * Executes a solver script against a submission ouput. This is done within a temp directory.
+ * The solver works by running the solver script against a participants output file.
+ */
 @Component
 @RequiredArgsConstructor
 public class SolverRunner {
@@ -23,6 +27,13 @@ public class SolverRunner {
     private final SolverExecutionConfig solverConfig;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * The solver is ran against a single submission output
+     * @param solverPath this is the path to the solver .py file on the local disk
+     * @param outputPath This is the path to the participants output file on the local disk
+     * @param levelInput The directory that contains the relevent level's files
+     * @return The result from the grader, with raw process output for logging purposes
+     */
     public SolverRunOutcome run (Path solverPath, Path outputPath, Path levelInput) {
         Path tempDir = null;
         try {
