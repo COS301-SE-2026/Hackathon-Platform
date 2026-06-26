@@ -17,8 +17,8 @@ public class Level {
     @Column(name = "id", updatable = false, nullable = false)
     private short id;
 
-    @Column(name ="event_id", nullable = false)
-    private UUID eventId;
+    @Column(name ="hackathon_id", nullable = false)
+    private UUID hackathonId;
 
     @Column(name = "name", nullable = false, length = 200)
     private String name;
@@ -48,12 +48,12 @@ public class Level {
         return id;
     }
 
-    public void setEventId(UUID eventId) {
-        this.eventId = eventId;
+    public void setHackathonId(UUID hackathonId) {
+        this.hackathonId = hackathonId;
     }
 
-    public UUID getEventId() {
-        return eventId;
+    public UUID getHackathonId() {
+        return hackathonId;
     }
 
     public void setName(String name) {
