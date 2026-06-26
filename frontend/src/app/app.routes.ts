@@ -15,19 +15,23 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        loadComponent: () => import('./admin/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        loadComponent: () => import('./admin/components/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
         path: 'create-event',
-        loadComponent: () => import('./admin/create-event/createEvent.component').then(m => m.CreateEventComponent),
+        loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
       },
       {
         path: 'event-list',
-        loadComponent: () => import('./admin/event-list/eventlist.component').then(m => m.EventlistComponent),
+        loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
       },
       {
         path: 'levels',
-        loadComponent: () => import('./admin/levels/levels.component').then(m => m.LevelsComponent),
+        loadComponent: () => import('./admin/components/levels/levels.component').then(m => m.LevelsComponent),
+      },
+       {
+        path: 'solver',
+        loadComponent: () => import('./admin/components/solver/solver.component').then(m => m.SolverComponent),
       },
       {
         path: '',
