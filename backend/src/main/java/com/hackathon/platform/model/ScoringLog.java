@@ -41,7 +41,41 @@ public class ScoringLog {
 
   @Column(name = "created_at", nullable = false)
   private Instant createdAt = Instant.now();
-  
 
-  
+  public ScoringLog() {}
+
+  public ScoringLog(UUID teamId, UUID eventId, Long levelId, String storageKey) {
+    this.teamId = teamId;
+    this.eventId = eventId;
+    this.levelId = levelId;
+    this.storageKey = storageKey;
+    
+  }
+
+
+  public Long getId() { return id; }
+  public void setId(Long id) { this.id = id; }
+
+  public UUID getTeamId() { return teamId; }
+  public void setTeamId(UUID teamId) { this.teamId = teamId; }
+
+  public UUID getEventId() { return eventId; }
+  public void setEventId(UUID eventId) { this.eventId = eventId; }
+
+  public Long getLevelId() { return levelId; }
+  public void setLevelId(Long levelId) { this.levelId = levelId; }
+
+  public String getStorageKey() { return storageKey; }
+  public void setStorageKey(String storageKey) { this.storageKey = storageKey; }
+
+  public int getSubmissionCount() { return submissionCount; }
+  public void setSubmissionCount(int submissionCount) { this.submissionCount = submissionCount; }
+
+  public Instant getLastUpdatedAt() { return lastUpdatedAt; }
+  public void setLastUpdatedAt(Instant lastUpdatedAt) { this.lastUpdatedAt = lastUpdatedAt; }
+
+  public Instant getCreatedAt() { return createdAt; }
+  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+
 }
