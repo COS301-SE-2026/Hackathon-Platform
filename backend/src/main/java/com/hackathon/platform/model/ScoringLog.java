@@ -16,4 +16,32 @@ import java.util.UUID;
 @Table(name = "scoringlogs", schema = "public")
 public class ScoringLog {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
+  private Long id;
+
+  @Column(name = "team_id", nullable = false)
+  private UUID teamId;
+
+  @Column(name = "event_id", nullable = false)
+  private UUID eventId;
+
+  @Column(name = "level_id", nullable = false)
+  private Long levelId;
+
+  @Column(name = "storage_key", nullable = false)
+  private String storageKey;
+
+  @Column(name = "submission_count", nullable = false)
+  private int submissionCount = 0;
+
+  @Column(name = "last_updated_at", nullable = false)
+  private Instant lastUpdatedAt = Instant.now();
+
+  @Column(name = "created_at", nullable = false)
+  private Instant createdAt = Instant.now();
+  
+
+  
 }
