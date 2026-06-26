@@ -5,24 +5,106 @@
         <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform Logo" />
       </div>
     </div>
+
     <div class="navbar-right">
       <div class="navbar-links">
         <a routerLink="/participant/home" routerLinkActive="active">Home</a>
         <a routerLink="/participant/events" routerLinkActive="active">My Events</a>
       </div>
-      <div class="user-menu">
-        <p-button 
-          [label]="userName + ' ▼'" 
-          icon="pi pi-user"
-          styleClass="user-menu-btn"
-          (click)="menu.toggle($event)"
-        ></p-button>
-        <p-menu #menu [model]="menuItems" [popup]="true"></p-menu>
-      </div>
+
+     <div class="user-menu">
+  <p-button 
+    styleClass="user-menu-btn"
+    (click)="menu.toggle($event)"
+  >
+    <i class="pi pi-user" style="margin-right: 8px;"></i>
+    {{ userName }}
+    <i class="pi pi-chevron-down" style="margin-left: 6px; font-size: 12px;"></i>
+  </p-button>
+  <p-menu #menu [model]="menuItems" [popup]="true"></p-menu>
+</div>
+
+    </div>   
+    
+    <div class="mobile-menu-btn">
+      <p-button 
+        icon="pi pi-bars" 
+        styleClass="hamburger-btn"
+        (click)="sidebarVisible = true"
+      ></p-button>
     </div>
   </nav>
+
+  <p-drawer 
+    [(visible)]="sidebarVisible" 
+    [position]="'right'"
+    [baseZIndex]="10000"
+    styleClass="mobile-drawer"
+  >
+    <div class="drawer-content">
+      <div class="drawer-user">
+        <div class="drawer-avatar">
+          <i class="pi pi-user"></i>
+        </div>
+        <span class="drawer-username">{{ userName }}</span>
+      
+        <button class="drawer-close-btn" (click)="sidebarVisible = false">
+            <i class="pi pi-times"></i>
+        </button>
+      </div>
+    
+
+      <nav class="drawer-nav">
+        <a routerLink="/participant/home" routerLinkActive="active" (click)="sidebarVisible = false">
+          Home
+        </a>
+        <a routerLink="/participant/events" routerLinkActive="active" (click)="sidebarVisible = false">
+          My Events
+        </a>
+      </nav>
+
+      <div class="drawer-footer">
+        <button class="drawer-logout-btn" (click)="logout()">
+          <i class="pi pi-sign-out"></i> Logout
+        </button>
+      </div>
+    </div>
+  </p-drawer>
 
   <main class="event-content">
     <router-outlet></router-outlet>
   </main>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
