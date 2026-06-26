@@ -87,16 +87,17 @@ public final class BlobPath {
         "submissions/%s/%s/%s/source/%s", eventId, teamId, submissionId, sanitise(filename));
   }
 
-  /**
-   * Storage key for a scoring log file.
+   /**
+   * Storage key for a scoring log file. One file per team per level per event — new submissions
+   * to the same level append to this file. Stored in: scoringlogs.storage_key
    *
    * @param eventId the event UUID
-   * @param submissionId the submission ID
-   * @param filename the log filename
+   * @param teamId the team UUID
+   * @param levelId the level ID
    * @return storage key string
    */
-  public static String scoringLog(String eventId, String submissionId, String filename) {
-    return String.format("logs/%s/%s/%s", eventId, submissionId, sanitise(filename));
+  public static String scoringLog(String eventId, String teamId, String levelId) {
+    return String.format("logs/%s/%s/%s/scoring_log.txt", eventId, teamId, levelId);
   }
 
   /**
