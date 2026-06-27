@@ -33,6 +33,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import com.hackathon.platform.model.Hackathon;
+import com.hackathon.platform.repository.HackathonRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -43,6 +45,7 @@ class TeamControllerTest {
   @Autowired private UserRepository userRepository;
   @Autowired private RoleRepository roleRepository;
   @Autowired private EventRepository eventRepository;
+  @Autowired private HackathonRepository hackathonRepository;
 
   private CreateTeamRequest createTeamRequest;
   private ApproveRequest approveRequest;
@@ -71,6 +74,11 @@ class TeamControllerTest {
     User savedUser = userRepository.saveAndFlush(user);
     userId = savedUser.getUserId();
 
+    Hackathon hackathon = new Hackathon();
+    hackathon.setHackathonId(UUID.randomUUID());
+    hackathon.setName("testing hackathon");
+    Hackathon savedHackathon = hackathonRepository.saveAndFlush(hackathon);
+
     Event event = new Event();
     event.setCreatedByUserId(userId);
     event.setName("Test event");
@@ -79,6 +87,7 @@ class TeamControllerTest {
     event.setDuration(4000);
     event.setStartDateTime(OffsetDateTime.now().plusDays(7));
     event.setTeamSizeLimit((short) 3);
+    event.setHackathon(savedHackathon);
 
     Event savedEvent = eventRepository.saveAndFlush(event);
     eventId = savedEvent.getEventId();
