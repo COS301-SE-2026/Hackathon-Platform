@@ -14,9 +14,11 @@ import com.hackathon.platform.dto.ApproveRequest;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.HackathonRepository;
 import com.hackathon.platform.repository.RoleRepository;
 import com.hackathon.platform.repository.UserRepository;
 import java.time.OffsetDateTime;
@@ -33,8 +35,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
-import com.hackathon.platform.model.Hackathon;
-import com.hackathon.platform.repository.HackathonRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
