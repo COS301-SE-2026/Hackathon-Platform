@@ -60,6 +60,7 @@ public class TeamService {
     team.setTeamName(teamName);
     team.setCreatedByUserId(currentUserId);
     team.setStatus("ACTIVE");
+    team.setEventId(request.getEventId());
 
     Team savedTeam = teamRepository.save(team);
 
@@ -229,6 +230,7 @@ public class TeamService {
     TeamResponse response = new TeamResponse();
     response.setTeamId(team.getTeamId());
     response.setTeamName(team.getTeamName());
+    response.setEventId(team.getEventId());
     response.setCreatedByUserId(team.getCreatedByUserId());
     response.setCreatedAt(team.getCreatedAt());
     response.setStatus(team.getStatus());
