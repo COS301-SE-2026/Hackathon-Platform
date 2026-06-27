@@ -5,8 +5,13 @@ CREATE TABLE hackathon (
                         description TEXT
 );
 
+INSERT INTO hackathon (hackathon_id, name, description)
+VALUES ('f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 'Default hackathon', 'auto created for migration');
+
 ALTER TABLE events
-ADD COLUMN hackathon_id UUID NOT NULL;
+ADD COLUMN hackathon_id UUID;
+UPDATE events SET hackathon_id = 'f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16';
+ALTER TABLE events ALTER COLUMN hackathon_id SET NOT NULL;
 
 ALTER TABLE events
 ADD CONSTRAINT fk_event_hackathon
