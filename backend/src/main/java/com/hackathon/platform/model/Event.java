@@ -6,6 +6,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -16,6 +20,12 @@ public class Event {
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "event_id", updatable = false, nullable = false)
   private UUID eventId;
+
+  @Getter
+  @Setter
+  @ManyToOne
+  @JoinColumn(name = "hackathon_id")
+  private Hackathon hackathon;
 
   @Column(name = "created_by_user_id", nullable = false)
   private UUID createdByUserId;

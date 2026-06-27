@@ -6,25 +6,42 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import jakarta.persistence.OneToMany;
+import java.util.List;
 
 @Entity
 @Table(name="hackathon", schema="public")
 public class Hackathon {
+
+    @Getter
+    @Setter
+    @OneToMany(mappedBy = "hackathon")
+    private List<Event> events;
+
+    @Setter
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "hackathon_id", updatable = false, nullable = false)
-    private UUID hackathon_id;
+    private UUID hackathonId;
 
+    @Setter
+    @Getter
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime created_at;
+    @Setter
+    @Getter
+    @Column(name = "created_at", updatable = false, insertable = false)
+    private OffsetDateTime createdAt;
 
+    @Setter
+    @Getter
     @Column(name = "description")
     private String description;
-
 
 }
