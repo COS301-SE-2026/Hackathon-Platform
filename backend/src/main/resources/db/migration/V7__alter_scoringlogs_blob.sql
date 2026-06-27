@@ -13,3 +13,17 @@ ALTER TABLE scoringlogs
     ADD COLUMN submission_count INT NOT NULL DEFAULT 0,
     ADD COLUMN last_updated_at TIMESTAMPZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
+ALTER TABLE scoringlogs
+    ALTER COLUMN team_id DROP DEFAULT,
+    ALTER COLUMN event_id DROP DEFAULT,
+    ALTER COLUMN level_id DROP DEFAULT,
+    ALTER COLUMN storage_key DROP DEFAULT;
+
+ALTER TABLE scoringlogs
+    ADD CONSTRAINT uq_scoringlogs_team_event_level UNIQUE (team_id, event_id, level_id);
+
+ALTER TABLE scoringlogs
+    ADD CONSTRAINT fk_scoringlogs_team_id
+        FOREIGN KEY (team_id) REFERENCES  teams(team_id) ON DELETE CASCADE,
+    ADD CONSTRAINT fk_scoringlogs_event_id
+        FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE;
