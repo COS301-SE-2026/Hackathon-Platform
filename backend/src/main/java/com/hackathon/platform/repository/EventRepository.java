@@ -31,7 +31,8 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
         """)
   List<Event> findUserActiveEvents(@Param("userId") UUID userId);
 
-  @Query("""
+  @Query(
+      """
     SELECT e FROM Event e
     WHERE e.status IN ('COMPLETED')
     AND EXISTS(
