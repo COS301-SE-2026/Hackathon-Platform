@@ -42,7 +42,7 @@ public class SubmissionQueryService {
 
     @Transactional(readOnly = true)
     public List<SubmissionResponse> getHistoryForTeamAndLevel(UUID teamId, Long levelId) {
-        return List.of();
+        return submissionRepo.findLatestByTeamAndLevel(teamId, levelId).stream().map(s -> toResponse(s, false)).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
