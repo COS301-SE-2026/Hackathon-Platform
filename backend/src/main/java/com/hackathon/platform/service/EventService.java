@@ -156,4 +156,8 @@ public class EventService {
     return eventRepository.findByVisibilityAndStatusIn(
         "PUBLIC", List.of("UPCOMING", "ONGOING", "ACTIVE"));
   }
+
+  public List<Event> getUserActiveEvents() {
+    
+  }
 }
