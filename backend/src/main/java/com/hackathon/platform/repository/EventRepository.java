@@ -35,10 +35,13 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     SELECT e FROM Event e
     WHERE e.status IN ('COMPLETED')
     AND EXISTS(
-        SELECT tm FROM TeamMember tm
-        WHERE tm.teamId = t.teamId
-        AND tm.userId = :userId
-        AND tm.status IN ('APPROVED', 'ACTIVE')
+        SELECT t FROM Team t
+        WHERE t.eventId = e.eventId
+        AND EXISTS(
+          SELECT tm FROM TeamMember tm
+          WHERE tm.teamId = t.teamId
+          AND tm.userId = :userId
+          AND tm.status IN ('APPROVED', 'ACTIVE')
         )
     )
 """)
