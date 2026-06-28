@@ -76,6 +76,15 @@ public class SubmissionQueryService {
         return toResponse(sub, true);
     }
 
+    @Transactional(readOnly = true)
+    public ScoringLogResponse getTeamScoringLog(UUID teamId, UUID eventId, Long levelId) {
+        Optional<ScoringLog> metaData = scoringLogRepo.findByTeamIdAndEventIdAndLevelId(teamId, eventId, levelId);
+        if(metaData.isEmpty()) {
+            return null;
+        }
+        return toLogResponse(metaData.get());
+    }
+
     private SubmissionResponse toResponse(Submission sub, boolean incLog) {
         ScoringLogResponse log = null;
         if (incLog) {
