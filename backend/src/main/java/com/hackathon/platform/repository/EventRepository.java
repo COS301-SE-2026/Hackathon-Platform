@@ -30,4 +30,17 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
         )
         """)
   List<Event> findUserActiveEvents(@Param("userId") UUID userId);
+
+  @Query("""
+    SELECT e FROM Event e
+    WHERE e.status IN ('COMPLETED')
+    AND EXISTS(
+        SELECT tm FROM TeamMember tm
+        WHERE tm.teamId = t.teamId
+        AND tm.userId = :userId
+        AND tm.status IN ('APPROVED', 'ACTIVE')
+        )
+    )
+""")
+  List<Event> findUserCompletedEvents(@Param("userId") UUID userId);
 }
