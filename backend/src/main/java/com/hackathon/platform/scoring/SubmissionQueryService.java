@@ -76,6 +76,9 @@ public class SubmissionQueryService {
         return toResponse(sub, true);
     }
 
+    /**
+     * Gets the scoring log for a team according to level from the blob storage. This is all the submissions that the team has made to a specific level.
+     */
     @Transactional(readOnly = true)
     public ScoringLogResponse getTeamScoringLog(UUID teamId, UUID eventId, Long levelId) {
         Optional<ScoringLog> metaData = scoringLogRepo.findByTeamIdAndEventIdAndLevelId(teamId, eventId, levelId);
@@ -85,6 +88,9 @@ public class SubmissionQueryService {
         return toLogResponse(metaData.get());
     }
 
+    /**
+     * Returns only the meta data for all levels a team has submitted to in a specific event. 
+     */
     @Transactional(readOnly = true)
     public List<ScoringLogResponse> getAllLevelLogsForTeam(UUID teamId, UUID eventId) {
         return scoringLogRepo.findByTeamIdAndEventId(teamId, eventId).stream().map(this::toLogResponseMetDataOnly).collect(Collectors.toList());
