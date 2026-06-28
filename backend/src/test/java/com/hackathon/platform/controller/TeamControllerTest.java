@@ -14,9 +14,11 @@ import com.hackathon.platform.dto.ApproveRequest;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.HackathonRepository;
 import com.hackathon.platform.repository.RoleRepository;
 import com.hackathon.platform.repository.UserRepository;
 import java.time.OffsetDateTime;
@@ -43,6 +45,7 @@ class TeamControllerTest {
   @Autowired private UserRepository userRepository;
   @Autowired private RoleRepository roleRepository;
   @Autowired private EventRepository eventRepository;
+  @Autowired private HackathonRepository hackathonRepository;
 
   private CreateTeamRequest createTeamRequest;
   private ApproveRequest approveRequest;
@@ -71,6 +74,11 @@ class TeamControllerTest {
     User savedUser = userRepository.saveAndFlush(user);
     userId = savedUser.getUserId();
 
+    Hackathon hackathon = new Hackathon();
+    hackathon.setHackathonId(UUID.randomUUID());
+    hackathon.setName("testing hackathon");
+    Hackathon savedHackathon = hackathonRepository.saveAndFlush(hackathon);
+
     Event event = new Event();
     event.setCreatedByUserId(userId);
     event.setName("Test event");
@@ -79,6 +87,7 @@ class TeamControllerTest {
     event.setDuration(4000);
     event.setStartDateTime(OffsetDateTime.now().plusDays(7));
     event.setTeamSizeLimit((short) 3);
+    event.setHackathon(savedHackathon);
 
     Event savedEvent = eventRepository.saveAndFlush(event);
     eventId = savedEvent.getEventId();
