@@ -85,6 +85,11 @@ public class SubmissionQueryService {
         return toLogResponse(metaData.get());
     }
 
+    @Transactional(readOnly = true)
+    public List<ScoringLogResponse> getAllLevelLogsForTeam(UUID teamId, UUID eventId) {
+        return scoringLogRepo.findByTeamIdAndEventId(teamId, eventId).stream().map(this::toLogResponseMetDataOnly).collect(Collectors.toList());
+    }
+
     private SubmissionResponse toResponse(Submission sub, boolean incLog) {
         ScoringLogResponse log = null;
         if (incLog) {
@@ -130,5 +135,16 @@ public class SubmissionQueryService {
             logger.warn("the scoring Log {} could not be downloaded: {}", storageKey, e.getMessage());
             return "[Content unavailable]";
         }
+    }
+
+    private ScoringLogResponse toLogResponseMetDataOnly(ScoringLog MD) {
+        return new ScoringLogResponse(
+            MD.getTeamId(),
+            MD.getEventId(),
+            MD.getStorageKey(),
+            MD.getSubmissionCount(),
+            MD.getLastUpdatedAt(),
+            null
+        );
     }
 }
