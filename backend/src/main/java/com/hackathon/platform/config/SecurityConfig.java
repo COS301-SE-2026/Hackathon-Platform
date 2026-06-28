@@ -57,7 +57,7 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/storage/**")
                     .permitAll()
-                    .requestMatchers("api/scoring/**")
+                    .requestMatchers("/api/scoring/**")
                     .permitAll()
                     .requestMatchers("/api/admin/**")
                     .hasRole("ADMIN")
