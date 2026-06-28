@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "events", schema = "public")
@@ -23,6 +24,7 @@ public class Event {
 
   @Getter
   @Setter
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "hackathon_id")
   private Hackathon hackathon;

@@ -24,4 +24,9 @@ public class ParticipantEventController {
   public ResponseEntity<List<Event>> getOpenEvents() {
     return ResponseEntity.ok(eventService.getOpenEventsForParticipants());
   }
+
+  @GetMapping("/user-active-events")
+  public ResponseEntity<List<Event>> getUserActiveEvents() {
+    return ResponseEntity.ok(eventService.getUserActiveEvents());
+  }
 }

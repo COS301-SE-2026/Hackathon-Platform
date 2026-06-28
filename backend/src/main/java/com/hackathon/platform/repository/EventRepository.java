@@ -12,4 +12,21 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
   List<Event> fetchAllByAdmin(@Param("userId") UUID userId);
 
   List<Event> findByVisibilityAndStatusIn(String visibility, List<String> statuses);
+
+  @Query("""
+        SELECT e FROM Event e
+        WHERE e.status = 'ACTIVE'
+        AND EXISTS (
+        SELECT t FROM Team t
+        WHERE t.eventId = e.eventId
+        AND t.status = 'ACTIVE'
+        AND EXISTS (
+            SELECT tm FROM TeamMember tm
+            WHERE tm.teamId = t.teamId
+            AND tm.userId = :userId
+            AND tm.status = 'APPROVED'
+            )
+        )
+        """)
+  List<Event> findUserActiveEvents(@Param("userId") UUID userId);
 }
