@@ -47,7 +47,10 @@ public class SubmissionQueryService {
 
     @Transactional(readOnly = true)
     public SubmissionResponse getSubmissionDetail(Long subId, UUID teamId) {
-        return null;
+        Submission sub = submissionRepo.findByIdAndTeamId(subId, teamId).orElseThrow(() -> new IllegalArgumentException(
+            "The submission could not be for this team: " + subId
+        ));
+        return toResponse(sub, true);
     }
 
     @Transactional(readOnly = true)
