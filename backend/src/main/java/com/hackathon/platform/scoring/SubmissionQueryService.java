@@ -55,7 +55,10 @@ public class SubmissionQueryService {
 
     @Transactional(readOnly = true)
     public SubmissionResponse getSubmissionDetailForAdmin(Long subId) {
-        return null;
+        Submission sub = submissionRepo.findById(subId).orElseThrow(() -> new IllegalArgumentException(
+            "The following submission could not be found: " + subId
+        ));
+        return toResponse(sub, true);
     }
 
     private SubmissionResponse toResponse(Submission sub, boolean incLog) {
