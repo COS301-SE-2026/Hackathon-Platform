@@ -24,6 +24,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Queries for submissions
+ */
 @Service
 @RequiredArgsConstructor
 public class SubmissionQueryService {
@@ -35,16 +38,25 @@ public class SubmissionQueryService {
     private final StorageService storageService;
     private final AzureBlobConfig blobConfig;
 
+    /**
+     * All the submissions for a team across all of the levels, ordered by most recent first.
+     */
     @Transactional(readOnly = true)
     public List<SubmissionResponse> getHistoryForTeam(UUID teamId) {
         return submissionRepo.findByTeamId(teamId).stream().sorted((a, b) -> b.getSubmittedAt().compareTo(a.getSubmittedAt())).map(s -> toResponse(s, false)).collect(Collectors.toList());
     }
 
+    /**
+     * Submissions for a team based on a specific level, ordered by most recent first.
+     */
     @Transactional(readOnly = true)
     public List<SubmissionResponse> getHistoryForTeamAndLevel(UUID teamId, Long levelId) {
         return submissionRepo.findLatestByTeamAndLevel(teamId, levelId).stream().map(s -> toResponse(s, false)).collect(Collectors.toList());
     }
 
+    /**
+     * All the details for 1 submissions, this includes a teams complete scoring log from the blob storage. A team can only view their own feedback.
+     */
     @Transactional(readOnly = true)
     public SubmissionResponse getSubmissionDetail(Long subId, UUID teamId) {
         Submission sub = submissionRepo.findByIdAndTeamId(subId, teamId).orElseThrow(() -> new IllegalArgumentException(
@@ -53,6 +65,9 @@ public class SubmissionQueryService {
         return toResponse(sub, true);
     }
 
+    /**
+     * Same as the previous, only that this can get details for any submissions regardless of the teamId.
+     */
     @Transactional(readOnly = true)
     public SubmissionResponse getSubmissionDetailForAdmin(Long subId) {
         Submission sub = submissionRepo.findById(subId).orElseThrow(() -> new IllegalArgumentException(
