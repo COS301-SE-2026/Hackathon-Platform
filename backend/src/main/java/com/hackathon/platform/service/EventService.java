@@ -165,4 +165,8 @@ public class EventService {
   public List<Event> getUserActiveEvents() {
     return eventRepository.findUserActiveEvents(getCurrentAdminId());
   }
+
+  public List<Event> getUserCompletedEvents() {
+    return eventRepository.findUserCompletedEvents(getCurrentAdminId());
+  }
 }
