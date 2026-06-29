@@ -1,13 +1,18 @@
 package com.hackathon.platform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "events", schema = "public")
@@ -16,6 +21,13 @@ public class Event {
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "event_id", updatable = false, nullable = false)
   private UUID eventId;
+
+  @Getter
+  @Setter
+  @JsonIgnore
+  @ManyToOne
+  @JoinColumn(name = "hackathon_id")
+  private Hackathon hackathon;
 
   @Column(name = "created_by_user_id", nullable = false)
   private UUID createdByUserId;
