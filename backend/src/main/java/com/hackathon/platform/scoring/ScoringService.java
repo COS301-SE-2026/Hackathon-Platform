@@ -34,6 +34,15 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Scores a single submission in the following order:
+ * 
+ * 1. Looks for the submission, solver version, levels input files.
+ * 2. Downloads the solver script, participants output file, level input from blob storage.
+ * 3. calls the SolverRunner with a hard timeout.
+ * 4. adds score and status to the submission.
+ * 5. adds the scoring log to the team's log file in blob storage and updates the meta data in the scoringlogs table.
+ */
 @Service
 @RequiredArgsConstructor
 public class ScoringService {
@@ -49,6 +58,12 @@ public class ScoringService {
     private final AzureBlobConfig blobConfig;
     private final SolverRunner solverRunner;
 
+/**
+ * Scores the submission, can be recalled, each call appends a new log to the teams log file.
+ * 
+ * @param submissionId the submission we are scoring
+ * @return new submission with score and status set
+ */
     @Transactional
     public Submission scoreSubmission(Long submissionId) {
         Submission sub = submissionRepo.findById(submissionId).orElseThrow(() -> new IllegalArgumentException("Submission not found: " + submissionId));
