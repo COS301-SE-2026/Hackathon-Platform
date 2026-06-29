@@ -31,8 +31,8 @@ public class Level {
 
     public Level() {}
 
-    public Level( UUID eventId, String name, short levelNumber) {
-        this.eventId = eventId;
+    public Level( UUID hackathonId, String name, short levelNumber) {
+        this.hackathonId = hackathonId;
         this.name = name;
         this.levelNumber = levelNumber;
     }
