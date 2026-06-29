@@ -1,5 +1,6 @@
 package com.hackathon.platform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,6 +24,7 @@ public class Event {
 
   @Getter
   @Setter
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "hackathon_id")
   private Hackathon hackathon;
