@@ -153,11 +153,20 @@ public class EventService {
   }
 
   public List<Event> getOpenEventsForParticipants() {
-    return eventRepository.findByVisibilityAndStatusIn(
-        "PUBLIC", List.of("UPCOMING", "ONGOING", "ACTIVE"));
+    List<Event> ret =
+        eventRepository.findByVisibilityAndStatusIn(
+            "PUBLIC", List.of("UPCOMING", "ONGOING", "ACTIVE"));
+    ret.addAll(
+        eventRepository.findByVisibilityAndStatusIn(
+            "PRIVATE", List.of("UPCOMING", "ONGOING", "ACTIVE")));
+    return ret;
   }
 
   public List<Event> getUserActiveEvents() {
     return eventRepository.findUserActiveEvents(getCurrentAdminId());
+  }
+
+  public List<Event> getUserCompletedEvents() {
+    return eventRepository.findUserCompletedEvents(getCurrentAdminId());
   }
 }
