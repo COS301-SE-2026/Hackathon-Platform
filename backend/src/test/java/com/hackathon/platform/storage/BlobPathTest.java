@@ -64,7 +64,8 @@
 
 //   @Test
 //   void submissionOutput_sanitisesBackslash() {
-//     String result = BlobPath.submissionOutput(EVENT_ID, TEAM_ID, SUBMISSION_ID, "folder\\file.txt");
+//     String result = BlobPath.submissionOutput(EVENT_ID, TEAM_ID, SUBMISSION_ID,
+// "folder\\file.txt");
 //     assertFalse(result.contains("\\"));
 //   }
 

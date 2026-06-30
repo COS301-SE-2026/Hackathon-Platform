@@ -157,7 +157,8 @@
 //         new MockMultipartFile("file", "logo.png", "image/png", "imagedata".getBytes());
 
 //     mockMvc
-//         .perform(multipart("/api/storage/events/{hackathonId}/branding", HACKATHON_ID).file(file))
+//         .perform(multipart("/api/storage/events/{hackathonId}/branding",
+// HACKATHON_ID).file(file))
 //         .andExpect(status().isOk())
 //         .andExpect(jsonPath("$.storageKey").exists())
 //         .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
@@ -190,9 +191,11 @@
 //         .thenReturn(saved);
 
 //     MockMultipartFile outputFile =
-//         new MockMultipartFile("outputFile", "output.txt", "text/plain", "output data".getBytes());
+//         new MockMultipartFile("outputFile", "output.txt", "text/plain", "output
+// data".getBytes());
 //     MockMultipartFile sourceFile =
-//         new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
+//         new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
+// "zipdata".getBytes());
 
 //     mockMvc
 //         .perform(
@@ -214,7 +217,8 @@
 //   @Test
 //   void uploadSubmission_returnsErrorWhenOutputFileMissing() throws Exception {
 //     MockMultipartFile sourceFile =
-//         new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
+//         new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
+// "zipdata".getBytes());
 
 //     mockMvc
 //         .perform(
@@ -240,7 +244,8 @@
 //     mockMvc
 //         .perform(
 //             get(
-//                 "/api/storage/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+//
+// "/api/storage/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
 //                 HACKATHON_ID,
 //                 TEAM_ID,
 //                 SUBMISSION_ID,
@@ -261,7 +266,8 @@
 //     mockMvc
 //         .perform(
 //             get(
-//                 "/api/storage/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}",
+//
+// "/api/storage/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}",
 //                 HACKATHON_ID,
 //                 TEAM_ID,
 //                 SUBMISSION_ID,
@@ -275,7 +281,8 @@
 //     mockMvc
 //         .perform(
 //             get(
-//                 "/api/storage/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+//
+// "/api/storage/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
 //                 HACKATHON_ID,
 //                 TEAM_ID,
 //                 "not-a-number",
