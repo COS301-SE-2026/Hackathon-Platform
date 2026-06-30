@@ -14,11 +14,10 @@ import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.HackathonRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import com.hackathon.platform.repository.HackathonRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
