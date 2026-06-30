@@ -80,8 +80,8 @@ public class SubmissionQueryService {
      * Gets the scoring log for a team according to level from the blob storage. This is all the submissions that the team has made to a specific level.
      */
     @Transactional(readOnly = true)
-    public ScoringLogResponse getTeamScoringLog(UUID teamId, UUID eventId, Long levelId) {
-        Optional<ScoringLog> metaData = scoringLogRepo.findByTeamIdAndEventIdAndLevelId(teamId, eventId, levelId);
+    public ScoringLogResponse getTeamScoringLog(UUID teamId, UUID hackathonId, Long levelId) {
+        Optional<ScoringLog> metaData = scoringLogRepo.findByTeamIdAndHackathonIdAndLevelId(teamId, hackathonId, levelId);
         if(metaData.isEmpty()) {
             return null;
         }
@@ -92,8 +92,8 @@ public class SubmissionQueryService {
      * Returns only the meta data for all levels a team has submitted to in a specific event. 
      */
     @Transactional(readOnly = true)
-    public List<ScoringLogResponse> getAllLevelLogsForTeam(UUID teamId, UUID eventId) {
-        return scoringLogRepo.findByTeamIdAndEventId(teamId, eventId).stream().map(this::toLogResponseMetDataOnly).collect(Collectors.toList());
+    public List<ScoringLogResponse> getAllLevelLogsForTeam(UUID teamId, UUID hackathonId) {
+        return scoringLogRepo.findByTeamIdAndHackathonId(teamId, hackathonId).stream().map(this::toLogResponseMetDataOnly).collect(Collectors.toList());
     }
 
     private SubmissionResponse toResponse(Submission sub, boolean incLog) {
@@ -101,7 +101,7 @@ public class SubmissionQueryService {
         if (incLog) {
             Team team = teamRepo.findById(sub.getTeamId()).orElse(null);
             if (team != null) {
-                Optional<ScoringLog> metaData = scoringLogRepo.findByTeamIdAndEventIdAndLevelId(sub.getTeamId(), team.getEventId(), sub.getLevelId());
+                Optional<ScoringLog> metaData = scoringLogRepo.findByTeamIdAndHackathonIdAndLevelId(sub.getTeamId(), team.getEventId(), sub.getLevelId());
                 if (metaData.isPresent()) {
                     log = toLogResponse(metaData.get());
                 }
@@ -126,7 +126,7 @@ public class SubmissionQueryService {
         String content = downloadLogContent(metaData.getStorageKey());
         return new ScoringLogResponse(
             metaData.getTeamId(),
-            metaData.getEventId(),
+            metaData.getHackathonId(),
             metaData.getStorageKey(),
             metaData.getSubmissionCount(),
             metaData.getLastUpdatedAt(),
@@ -146,7 +146,7 @@ public class SubmissionQueryService {
     private ScoringLogResponse toLogResponseMetDataOnly(ScoringLog MD) {
         return new ScoringLogResponse(
             MD.getTeamId(),
-            MD.getEventId(),
+            MD.getHackathonId(),
             MD.getStorageKey(),
             MD.getSubmissionCount(),
             MD.getLastUpdatedAt(),

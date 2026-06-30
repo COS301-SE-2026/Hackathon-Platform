@@ -105,8 +105,8 @@ public class ScoringService {
         return sub;
     }
 
-    private void appendToScoringLog(UUID teamId, UUID eventId, Long levelId, String logString) {
-        String storageKey = BlobPath.scoringLog(eventId.toString(), teamId.toString(), levelId.toString());
+    private void appendToScoringLog(UUID teamId, UUID hackathonId, Long levelId, String logString) {
+        String storageKey = BlobPath.scoringLog(hackathonId.toString(), teamId.toString(), levelId.toString());
         String content = "";
         if(storageService.exists(blobConfig.getScoringLogsContainer(), storageKey)) {
             try (InputStream in = storageService.download(blobConfig.getScoringLogsContainer(), storageKey)) {
@@ -120,8 +120,8 @@ public class ScoringService {
         byte[] contentBytes = newContent.getBytes(StandardCharsets.UTF_8);
         storageService.uploadBytes(blobConfig.getScoringLogsContainer(), storageKey, contentBytes, "text/plain");
 
-        Optional<ScoringLog> old = scoringLogRepo.findByTeamIdAndEventIdAndLevelId(teamId, eventId, levelId);
-        ScoringLog metaData = old.orElseGet(() -> new ScoringLog(teamId, eventId, levelId, storageKey));
+        Optional<ScoringLog> old = scoringLogRepo.findByTeamIdAndHackathonIdAndLevelId(teamId, hackathonId, levelId);
+        ScoringLog metaData = old.orElseGet(() -> new ScoringLog(teamId, hackathonId, levelId, storageKey));
         metaData.setSubmissionCount(metaData.getSubmissionCount() + 1);
         metaData.setLastUpdatedAt(Instant.now());
         scoringLogRepo.save(metaData);
