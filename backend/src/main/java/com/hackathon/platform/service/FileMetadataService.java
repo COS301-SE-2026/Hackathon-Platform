@@ -43,13 +43,13 @@ public class FileMetadataService {
 
   @Transactional
   public SolverVersion saveSolverVersion(
-      UUID eventId,
+      UUID hackathonId,
       UUID uploadedBy,
       String storageKey,
       Integer versionNumber,
       String fileName,
       Long fileSize) {
-    SolverVersion solverVersion = new SolverVersion(eventId, uploadedBy, storageKey);
+    SolverVersion solverVersion = new SolverVersion(hackathonId, uploadedBy, storageKey);
     solverVersion.setVersionNumber(versionNumber);
     solverVersion.setFileName(fileName);
     solverVersion.setFileSize(fileSize);
@@ -58,8 +58,8 @@ public class FileMetadataService {
 
     SolverVersion saved = solverVersionRepository.save(solverVersion);
     log.info(
-        "Saved solver version metadata: eventId={}, version={}, storageKey={}",
-        eventId,
+        "Saved solver version metadata: hackathonId={}, version={}, storageKey={}",
+        hackathonId,
         versionNumber,
         storageKey);
     return saved;
@@ -67,7 +67,7 @@ public class FileMetadataService {
 
   @Transactional
   public Submission saveSubmission(
-      String eventId,
+      String hackathonId,
       UUID teamId,
       Long levelId,
       Long solverVersionId,
@@ -93,9 +93,9 @@ public class FileMetadataService {
 
     // Build canonical keys using the real DB id
     String dbId = String.valueOf(saved.getId());
-    String outputKey = BlobPath.submissionOutput(eventId, teamId.toString(), dbId, outputFileName);
+    String outputKey = BlobPath.submissionOutput(hackathonId, teamId.toString(), dbId, outputFileName);
     String sourceKey =
-        BlobPath.submissionSourceArchive(eventId, teamId.toString(), dbId, sourceFileName);
+        BlobPath.submissionSourceArchive(hackathonId, teamId.toString(), dbId, sourceFileName);
 
     saved.setOutputStorageKey(outputKey);
     saved.setSourceCodeStorageKey(sourceKey);
