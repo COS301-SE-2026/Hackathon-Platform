@@ -17,11 +17,6 @@ import lombok.Setter;
 @Table(name = "hackathon", schema = "public")
 public class Hackathon {
 
-  @Getter
-  @Setter
-  @OneToMany(mappedBy = "hackathon")
-  private List<Event> events;
-
   @Setter
   @Getter
   @Id

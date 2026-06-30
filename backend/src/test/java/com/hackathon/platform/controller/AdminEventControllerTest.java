@@ -11,11 +11,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import com.hackathon.platform.repository.HackathonRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 class AdminEventControllerTest {
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objMapper;
+  @Autowired private HackathonRepository hackathonRepository;
 
   private EventRequest eventRequest;
   private UsernamePasswordAuthenticationToken adminAuth;
@@ -43,11 +47,18 @@ class AdminEventControllerTest {
   private Event event;
   private User adminUser;
   private User participantUser;
+  private Hackathon testHackathon;
 
   @BeforeEach
   void setUp() {
     eventId = UUID.randomUUID();
     creatorUserId = UUID.randomUUID();
+
+    testHackathon = new Hackathon();
+    testHackathon.setName("Test Hackathon");
+    testHackathon.setDescription("seeded foe admin controller test");
+    testHackathon = hackathonRepository.save(testHackathon);
+
     eventRequest = new EventRequest();
     eventRequest.setName("Test Hackathon");
     eventRequest.setVisibility("PUBLIC");
@@ -56,6 +67,7 @@ class AdminEventControllerTest {
     eventRequest.setDuration(400);
     eventRequest.setStartDateTime(OffsetDateTime.now().plusDays(7));
     eventRequest.setTeamSizeLimit((short) 5);
+    eventRequest.setHackathonId(testHackathon.getHackathonId());
 
     Role adminRole = Role.builder().roleId(1).name("ADMIN").build();
     adminUser =
