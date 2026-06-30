@@ -24,10 +24,8 @@ public class Event {
 
   @Getter
   @Setter
-  @JsonIgnore
-  @ManyToOne
-  @JoinColumn(name = "hackathon_id")
-  private Hackathon hackathon;
+  @Column(name = "hackathon_id")
+  private UUID hackathon;
 
   @Column(name = "created_by_user_id", nullable = false)
   private UUID createdByUserId;

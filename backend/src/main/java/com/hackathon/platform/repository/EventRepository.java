@@ -14,7 +14,7 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
   List<Event> findByVisibilityAndStatusIn(String visibility, List<String> statuses);
 
-  @Query("SELECT e.hackathon.hackathonId FROM Event e WHERE e.eventId = :eventId")
+  @Query("SELECT e.hackathon FROM Event e WHERE e.eventId = :eventId")
   Optional<UUID> findHackathonIdByEventId(@Param("eventId") UUID eventId);
 
   @Query(
