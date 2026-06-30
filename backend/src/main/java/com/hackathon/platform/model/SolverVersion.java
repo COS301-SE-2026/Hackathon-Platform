@@ -19,8 +19,8 @@ public class SolverVersion {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
-  @Column(name = "event_id", nullable = false)
-  private UUID eventId;
+  @Column(name = "hackathon_id", nullable = false)
+  private UUID hackathonId;
 
   @Column(name = "uploaded_at", nullable = false)
   private Instant uploadedAt = Instant.now();
@@ -53,8 +53,8 @@ public class SolverVersion {
   public SolverVersion() {}
 
   // Constructor with required fields
-  public SolverVersion(UUID eventId, UUID uploadedBy, String storageKey) {
-    this.eventId = eventId;
+  public SolverVersion(UUID hackathonId, UUID uploadedBy, String storageKey) {
+    this.hackathonId = hackathonId;
     this.uploadedBy = uploadedBy;
     this.storageKey = storageKey;
   }
@@ -68,12 +68,12 @@ public class SolverVersion {
     this.id = id;
   }
 
-  public UUID getEventId() {
-    return eventId;
+  public UUID getHackathonId() {
+    return hackathonId;
   }
 
-  public void setEventId(UUID eventId) {
-    this.eventId = eventId;
+  public void setHackathonId(UUID hackathonId) {
+    this.hackathonId = hackathonId;
   }
 
   public Instant getUploadedAt() {
