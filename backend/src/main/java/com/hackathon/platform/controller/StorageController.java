@@ -47,7 +47,7 @@ public class StorageController {
    * @param fileType the file type (ZIP, TAR, PDF, TXT, CSV, JSON, IMAGE, OTHER)
    * @return storageKey, blobUrl, and database record id
    */
-  @PostMapping("/events/{hackathonId}/levels/{levelId}/files")
+  @PostMapping("/hackathons/{hackathonId}/levels/{levelId}/files")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadLevelFile(
       @PathVariable String hackathonId,
@@ -83,7 +83,7 @@ public class StorageController {
    * @param filename the blob filename
    * @return presigned download URL
    */
-  @GetMapping("/events/{hackathonId}/levels/{levelId}/files/{filename}")
+  @GetMapping("/hackathons/{hackathonId}/levels/{levelId}/files/{filename}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getLevelFileUrl(
       @PathVariable String hackathonId, @PathVariable String levelId, @PathVariable String filename) {
@@ -162,7 +162,7 @@ public class StorageController {
    * @param file the uploaded image file
    * @return storageKey and blobUrl
    */
-  @PostMapping("/events/{hackathonId}/branding")
+  @PostMapping("/hackathons/{hackathonId}/branding")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadBrandingAsset(
       @PathVariable String hackathonId, @RequestParam("file") MultipartFile file) {
@@ -186,7 +186,7 @@ public class StorageController {
    * @param solverVersionId the active solver version to use for scoring
    * @return submissionId, both storage keys, and status
    */
-  @PostMapping("/events/{hackathonId}/teams/{teamId}/submissions")
+  @PostMapping("/hackathons/{hackathonId}/teams/{teamId}/submissions")
   // @PreAuthorize("hasRole('PARTICIPANT')")
   public ResponseEntity<Map<String, String>> uploadSubmission(
       @PathVariable String hackathonId,
@@ -231,7 +231,7 @@ public class StorageController {
    * @param filename the blob filename
    * @return presigned download URL
    */
-  @GetMapping("/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
+  @GetMapping("/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getSubmissionOutputUrl(
       @PathVariable String hackathonId,
@@ -255,7 +255,7 @@ public class StorageController {
    * @param filename the blob filename
    * @return presigned download URL
    */
-  @GetMapping("/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
+  @GetMapping("/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
       @PathVariable String hackathonId,
@@ -280,7 +280,7 @@ public class StorageController {
    * @param levelId the level ID
    * @return presigned download URL
    */
-  @GetMapping("/events/{hackathonId}/teams/{teamId}/levels/{levelId}")
+  @GetMapping("/hackathons/{hackathonId}/teams/{teamId}/levels/{levelId}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getScoringLogUrl(
       @PathVariable String hackathonId,
