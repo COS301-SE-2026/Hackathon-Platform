@@ -7,6 +7,7 @@ import com.hackathon.platform.model.ScoringLog;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.repository.ScoringLogRepository;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.service.StorageService;
@@ -35,6 +36,7 @@ public class SubmissionQueryService {
     private final SubmissionRepository submissionRepo;
     private final ScoringLogRepository scoringLogRepo;
     private final TeamRepository teamRepo;
+    private final EventRepository eventRepo;
     private final StorageService storageService;
     private final AzureBlobConfig blobConfig;
 
@@ -101,9 +103,12 @@ public class SubmissionQueryService {
         if (incLog) {
             Team team = teamRepo.findById(sub.getTeamId()).orElse(null);
             if (team != null) {
-                Optional<ScoringLog> metaData = scoringLogRepo.findByTeamIdAndHackathonIdAndLevelId(sub.getTeamId(), team.getEventId(), sub.getLevelId());
-                if (metaData.isPresent()) {
-                    log = toLogResponse(metaData.get());
+                Optional<UUID> hackathonId = eventRepo.findHackathonIdByEventId(team.getEventId());
+                if (hackathonId.isPresent()) {
+                    Optional<ScoringLog> metaData = scoringLogRepo.findByTeamIdAndHackathonIdAndLevelId(sub.getTeamId(), hackathonId.get(), sub.getLevelId());
+                    if (metaData.isPresent()) {
+                        log = toLogResponse(metaData.get());
+                    }
                 }
             }
         }
