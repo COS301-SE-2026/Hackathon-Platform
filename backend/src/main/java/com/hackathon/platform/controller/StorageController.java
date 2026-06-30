@@ -107,7 +107,7 @@ public class StorageController {
    * @param notes optional release notes for this solver version
    * @return storageKey, blobUrl, version, and database record id
    */
-  @PostMapping("/events/{hackathonId}/solver")
+  @PostMapping("/hackathons/{hackathonId}/solver")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadSolver(
       @PathVariable String hackathonId,
