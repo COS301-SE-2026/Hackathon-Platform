@@ -11,7 +11,6 @@ public class SolverRunOutcome {
     this.result = result;
     this.stdout = stdout;
     this.stderr = stderr;
-
   }
 
   public SolverResult getResult() {
@@ -24,8 +23,5 @@ public class SolverRunOutcome {
 
   public String getStderr() {
     return stderr;
-
   }
-
-  
 }

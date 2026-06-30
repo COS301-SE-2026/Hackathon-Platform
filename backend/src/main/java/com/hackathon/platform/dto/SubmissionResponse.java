@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Response shape for a single submission, including its score, status and log metadata.
- */
+/** Response shape for a single submission, including its score, status and log metadata. */
 public class SubmissionResponse {
 
   private Long submissionId;
@@ -34,7 +32,6 @@ public class SubmissionResponse {
       String sourceFileName,
       ScoringLogResponse scoringLog) {
 
-        
     this.submissionId = submissionId;
     this.teamId = teamId;
     this.levelId = levelId;
@@ -45,7 +42,6 @@ public class SubmissionResponse {
     this.outputFileName = outputFileName;
     this.sourceFileName = sourceFileName;
     this.scoringLog = scoringLog;
-
   }
 
   public Long getSubmissionId() {
@@ -114,7 +110,6 @@ public class SubmissionResponse {
 
   public String getSourceFileName() {
     return sourceFileName;
-
   }
 
   public void setSourceFileName(String sourceFileName) {
@@ -127,8 +122,5 @@ public class SubmissionResponse {
 
   public void setScoringLog(ScoringLogResponse scoringLog) {
     this.scoringLog = scoringLog;
-
   }
-
-
 }

@@ -76,7 +76,10 @@ class StorageControllerTest {
 
     mockMvc
         .perform(
-            multipart("/api/storage/events/{hackathonId}/levels/{levelId}/files", HACKATHON_ID, LEVEL_ID)
+            multipart(
+                    "/api/storage/events/{hackathonId}/levels/{levelId}/files",
+                    HACKATHON_ID,
+                    LEVEL_ID)
                 .file(file)
                 .param("fileType", "TXT"))
         .andExpect(status().isOk())
@@ -89,7 +92,10 @@ class StorageControllerTest {
   void uploadLevelFile_returnsErrorWhenNoFileProvided() throws Exception {
     mockMvc
         .perform(
-            multipart("/api/storage/events/{hackathonId}/levels/{levelId}/files", HACKATHON_ID, LEVEL_ID)
+            multipart(
+                    "/api/storage/events/{hackathonId}/levels/{levelId}/files",
+                    HACKATHON_ID,
+                    LEVEL_ID)
                 .param("fileType", "TXT"))
         .andExpect(status().is5xxServerError());
   }
@@ -190,7 +196,10 @@ class StorageControllerTest {
 
     mockMvc
         .perform(
-            multipart("/api/storage/events/{hackathonId}/teams/{teamId}/submissions", HACKATHON_ID, TEAM_ID)
+            multipart(
+                    "/api/storage/events/{hackathonId}/teams/{teamId}/submissions",
+                    HACKATHON_ID,
+                    TEAM_ID)
                 .file(outputFile)
                 .file(sourceFile)
                 .param("levelId", "1")
@@ -209,7 +218,10 @@ class StorageControllerTest {
 
     mockMvc
         .perform(
-            multipart("/api/storage/events/{hackathonId}/teams/{teamId}/submissions", HACKATHON_ID, TEAM_ID)
+            multipart(
+                    "/api/storage/events/{hackathonId}/teams/{teamId}/submissions",
+                    HACKATHON_ID,
+                    TEAM_ID)
                 .file(sourceFile)
                 .param("levelId", "1")
                 .param("solverVersionId", "1"))

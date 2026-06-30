@@ -86,7 +86,9 @@ public class StorageController {
   @GetMapping("/hackathons/{hackathonId}/levels/{levelId}/files/{filename}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getLevelFileUrl(
-      @PathVariable String hackathonId, @PathVariable String levelId, @PathVariable String filename) {
+      @PathVariable String hackathonId,
+      @PathVariable String levelId,
+      @PathVariable String filename) {
 
     String storageKey = BlobPath.levelFile(hackathonId, levelId, filename);
     String url =
@@ -231,7 +233,8 @@ public class StorageController {
    * @param filename the blob filename
    * @return presigned download URL
    */
-  @GetMapping("/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
+  @GetMapping(
+      "/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getSubmissionOutputUrl(
       @PathVariable String hackathonId,
@@ -255,7 +258,8 @@ public class StorageController {
    * @param filename the blob filename
    * @return presigned download URL
    */
-  @GetMapping("/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
+  @GetMapping(
+      "/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
       @PathVariable String hackathonId,
@@ -283,9 +287,7 @@ public class StorageController {
   @GetMapping("/hackathons/{hackathonId}/teams/{teamId}/levels/{levelId}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getScoringLogUrl(
-      @PathVariable String hackathonId,
-      @PathVariable String teamId,
-      @PathVariable String levelId) {
+      @PathVariable String hackathonId, @PathVariable String teamId, @PathVariable String levelId) {
     String storageKey = BlobPath.scoringLog(hackathonId, teamId, levelId);
     String url =
         storageService.generatePresignedUrl(

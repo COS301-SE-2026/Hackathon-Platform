@@ -51,6 +51,4 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     )
 """)
   List<Event> findUserCompletedEvents(@Param("userId") UUID userId);
-
-  
 }

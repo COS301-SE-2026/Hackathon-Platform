@@ -35,11 +35,8 @@ final class StreamCapture {
         synchronized (buffer) {
           if (buffer.size() < maxBytes) {
             buffer.write(chunk, 0, Math.min(n, maxBytes - buffer.size()));
-
-
           }
         }
-
       }
 
     } catch (IOException ignored) {
@@ -53,6 +50,4 @@ final class StreamCapture {
       return buffer.toString(StandardCharsets.UTF_8);
     }
   }
-
-  
 }

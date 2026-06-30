@@ -9,9 +9,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Metadata record for a team's scoring log file in blob storage.
- */
+/** Metadata record for a team's scoring log file in blob storage. */
 @Entity
 @Table(name = "scoringlogs", schema = "public")
 public class ScoringLog {
@@ -49,33 +47,69 @@ public class ScoringLog {
     this.hackathonId = hackathonId;
     this.levelId = levelId;
     this.storageKey = storageKey;
-    
   }
 
+  public Long getId() {
+    return id;
+  }
 
-  public Long getId() { return id; }
-  public void setId(Long id) { this.id = id; }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-  public UUID getTeamId() { return teamId; }
-  public void setTeamId(UUID teamId) { this.teamId = teamId; }
+  public UUID getTeamId() {
+    return teamId;
+  }
 
-  public UUID getHackathonId() { return hackathonId; }
-  public void setHackathonId(UUID hackathonId) { this.hackathonId = hackathonId; }
+  public void setTeamId(UUID teamId) {
+    this.teamId = teamId;
+  }
 
-  public Long getLevelId() { return levelId; }
-  public void setLevelId(Long levelId) { this.levelId = levelId; }
+  public UUID getHackathonId() {
+    return hackathonId;
+  }
 
-  public String getStorageKey() { return storageKey; }
-  public void setStorageKey(String storageKey) { this.storageKey = storageKey; }
+  public void setHackathonId(UUID hackathonId) {
+    this.hackathonId = hackathonId;
+  }
 
-  public int getSubmissionCount() { return submissionCount; }
-  public void setSubmissionCount(int submissionCount) { this.submissionCount = submissionCount; }
+  public Long getLevelId() {
+    return levelId;
+  }
 
-  public Instant getLastUpdatedAt() { return lastUpdatedAt; }
-  public void setLastUpdatedAt(Instant lastUpdatedAt) { this.lastUpdatedAt = lastUpdatedAt; }
+  public void setLevelId(Long levelId) {
+    this.levelId = levelId;
+  }
 
-  public Instant getCreatedAt() { return createdAt; }
-  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+  public String getStorageKey() {
+    return storageKey;
+  }
 
+  public void setStorageKey(String storageKey) {
+    this.storageKey = storageKey;
+  }
 
+  public int getSubmissionCount() {
+    return submissionCount;
+  }
+
+  public void setSubmissionCount(int submissionCount) {
+    this.submissionCount = submissionCount;
+  }
+
+  public Instant getLastUpdatedAt() {
+    return lastUpdatedAt;
+  }
+
+  public void setLastUpdatedAt(Instant lastUpdatedAt) {
+    this.lastUpdatedAt = lastUpdatedAt;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+  }
 }

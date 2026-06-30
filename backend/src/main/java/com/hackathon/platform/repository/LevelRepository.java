@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LevelRepository extends JpaRepository<Level, Short> {
 
-    List<Level> findByHackathonId(UUID hackathonId);
+  List<Level> findByHackathonId(UUID hackathonId);
 
-    List<Level> findByHackathonIdOrderByLevelNumberAsc(UUID hackathonId);
+  List<Level> findByHackathonIdOrderByLevelNumberAsc(UUID hackathonId);
 }
