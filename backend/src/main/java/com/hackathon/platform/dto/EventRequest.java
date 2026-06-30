@@ -1,6 +1,10 @@
 package com.hackathon.platform.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public class EventRequest {
   private String name;
@@ -11,6 +15,10 @@ public class EventRequest {
   private String description;
   private String visibility;
   private String status;
+
+  @Setter
+  @Getter
+  private UUID hackathonId;
 
   public String getName() {
     return name;
