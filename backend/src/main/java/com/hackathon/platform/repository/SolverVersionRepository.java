@@ -10,15 +10,17 @@ import org.springframework.data.repository.query.Param;
 
 public interface SolverVersionRepository extends JpaRepository<SolverVersion, Long> {
 
-  List<SolverVersion> findByEventId(UUID eventId);
+  List<SolverVersion> findByHackathonId(UUID hackathonId);
 
-  Optional<SolverVersion> findByEventIdAndIsActiveTrue(UUID eventId);
+  Optional<SolverVersion> findByHackathonIdAndIsActiveTrue(UUID hackathonId);
 
   @Query(
-      "SELECT sv FROM SolverVersion sv WHERE sv.eventId = :eventId ORDER BY sv.versionNumber DESC")
-  List<SolverVersion> findAllByEventIdOrderByVersionDesc(@Param("eventId") UUID eventId);
+      "SELECT sv FROM SolverVersion sv WHERE sv.hackathonId = :hackathonId ORDER BY sv.versionNumber DESC")
+  List<SolverVersion> findAllByHackathonIdOrderByVersionDesc(
+      @Param("hackathonId") UUID hackathonId);
 
-  Optional<SolverVersion> findByEventIdAndVersionNumber(UUID eventId, Integer versionNumber);
+  Optional<SolverVersion> findByHackathonIdAndVersionNumber(
+      UUID hackathonId, Integer versionNumber);
 
   boolean existsByStorageKey(String storageKey);
 }

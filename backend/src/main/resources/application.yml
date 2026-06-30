@@ -6,6 +6,15 @@ azure:
       submissions: submissions
       scoring-logs: scoring-logs
     sas-expiry-minutes: 60
+
+
+scoring:
+  solver:
+    timeout-seconds: ${SOLVER_TIMEOUT_SECONDS:30}
+    python-executable: ${SOLVER_PYTHON_EXECUTABLE:python}
+    workdir: ${SOLVER_WORKDIR:/tmp/hackathon-scoring}
+    max-output-bytes: 1048576
+
  
 spring:
   servlet:
