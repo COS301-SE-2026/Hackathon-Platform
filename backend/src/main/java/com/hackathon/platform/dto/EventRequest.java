@@ -1,10 +1,9 @@
 package com.hackathon.platform.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
 
 public class EventRequest {
   private String name;
@@ -16,9 +15,7 @@ public class EventRequest {
   private String visibility;
   private String status;
 
-  @Setter
-  @Getter
-  private UUID hackathonId;
+  @Setter @Getter private UUID hackathonId;
 
   public String getName() {
     return name;

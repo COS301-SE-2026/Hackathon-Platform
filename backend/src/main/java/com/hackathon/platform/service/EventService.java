@@ -61,7 +61,7 @@ public class EventService {
       throw new IllegalArgumentException("Registration key is required for private events.");
     }
 
-    if(req.getHackathonId() == null){
+    if (req.getHackathonId() == null) {
       throw new IllegalArgumentException("HackathonId is required");
     }
 
@@ -111,6 +111,9 @@ public class EventService {
     event.setDescription(req.getDescription());
     event.setVisibility(req.getVisibility());
     event.setStatus(req.getStatus());
+    if (req.getHackathonId() == null) {
+      event.setHackathon(req.getHackathonId());
+    }
 
     return eventRepository.save(event);
   }
