@@ -10,7 +10,7 @@ import java.util.UUID;
 public class ScoringLogResponse {
 
   private UUID teamId;
-  private UUID eventId;
+  private UUID hackathonId;
   private String storageKey;
   private int submissionCount;
   private Instant lastUpdatedAt;
@@ -20,13 +20,13 @@ public class ScoringLogResponse {
 
   public ScoringLogResponse(
       UUID teamId,
-      UUID eventId,
+      UUID hackathonId,
       String storageKey,
       int submissionCount,
       Instant lastUpdatedAt,
       String logContent) {
     this.teamId = teamId;
-    this.eventId = eventId;
+    this.hackathonId = hackathonId;
     this.storageKey = storageKey;
     this.submissionCount = submissionCount;
     this.lastUpdatedAt = lastUpdatedAt;
@@ -39,8 +39,8 @@ public class ScoringLogResponse {
   public UUID getTeamId() { return teamId; }
   public void setTeamId(UUID teamId) { this.teamId = teamId; }
 
-  public UUID getEventId() { return eventId; }
-  public void setEventId(UUID eventId) { this.eventId = eventId; }
+  public UUID getHackathonId() { return hackathonId; }
+  public void setHackathonId(UUID hackathonId) { this.hackathonId = hackathonId; }
 
   public String getStorageKey() { return storageKey; }
   public void setStorageKey(String storageKey) { this.storageKey = storageKey; }
