@@ -1,46 +1,28 @@
-<div class="admin-shell">
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <span class="brand-hackathon">Hackathon</span>
-      <span class="brand-platform">Platform</span>
-    </div>
-    <div class="navbar-links">
-      <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
-      <a routerLink="/admin/events/create" routerLinkActive="active">Create Event</a>
-      <a routerLink="/admin/eventlist" routerLinkActive="active">Event List</a>
-      <a routerLink="/admin/users" routerLinkActive="active">Users</a>
-      <a routerLink="/admin/settings" routerLinkActive="active">Settings</a>
-    </div>
-    <div class="navbar-right">
-      <span class="role-badge">Admin</span>
-      <button class="logout-btn" (click)="logout()">Logout</button>
-    </div>
-  </nav>
+<div class = "admin-shell">
 
-  <div class="admin-body">
-    <aside class="sidebar">
-      <p class="sidebar-label">Navigation</p>
-      <ul class="sidebar-nav">
-        <li>
-          <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
-        </li>
-        <li>
-          <a routerLink="/admin/create-event" routerLinkActive="active">Create Events</a>
-        </li>
-        <li>
-          <a routerLink="/admin/event-list" routerLinkActive="active">Event List</a>
-        </li>
-        <li>
-          <a routerLink="/admin/users" routerLinkActive="active">Users</a>
-        </li>
-        <li>
-          <a routerLink="/admin/settings" routerLinkActive="active">Settings</a>
-        </li>
-      </ul>
-    </aside>
+    <nav class = "topnav">
+        <div class = "topnav-left">
+            <div class = "logo-badge">H</div>
+            <span class = "brand">Hackathon <span class = "brand-accent">Platform</span></span>
 
-    <main class="admin-content">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
+        </div>
+
+        <div class = "topnav-links">
+            <a routerLink = "/admin/dashboard" routerLinkActive = "active">Dashboard</a>
+            <a routerLink = "/admin/create-event" routerLinkActive = "active">Create Event</a>
+            <a routerLink = "/admin/event-list" routerLinkActive = "active">Event List</a>
+            <a routerLink = "/admin/manage-event" routerLinkActive = "active">Manage Events</a>
+            <a routerLink = "/admin/levels" routerLinkActive = "active">Levels</a>
+            <a routerLink = "/admin/solver" routerLinkActive = "active">Solver</a>
+
+        </div>
+        <div class = "topnav-right">
+            <span class = "admin-pill">Admin</span>
+            <div class = "avatar-circle">A</div>
+            <button class = "logout-btn" (click) = "logout()">Logout</button>
+        </div>
+    </nav>
+
+
+    
 </div>
