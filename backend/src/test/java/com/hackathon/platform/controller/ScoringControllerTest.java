@@ -103,4 +103,24 @@ class ScoringControllerTest {
 
         mockMvc.perform(get("/api/scoring/teams/{teamId}/submissions/{submissionId}", TEAM_ID, SUB_ID)).andExpect(status().isOk()).andExpect(jsonPath("$.scoringLog.logContent").value("malformed output on row 2 - MALFORMED_OUTPUT"));
     }
+
+    @Test
+    void getSubmissionDetailForAdmin_returnsFeedbackForAnyTeam() throws Exception {
+        SubmissionResponse response = new SubmissionResponse(
+            SUB_ID,
+            TEAM_ID,
+            LEVEL_ID,
+            3L,
+            new BigDecimal("74.55"),
+            "SCORED",
+            Instant.now(),
+            "output.txt",
+            "code.zip",
+            null
+        );
+
+        when(subQueryS.getSubmissionDetailForAdmin(SUB_ID)).thenReturn(response);
+
+        mockMvc.perform(get("/api/scoring/admin/submissions/{submissionId}", SUB_ID)).andExpect(status().isOk()).andExpect(jsonPath("$.submissionId").value(SUB_ID));
+    }
 }
