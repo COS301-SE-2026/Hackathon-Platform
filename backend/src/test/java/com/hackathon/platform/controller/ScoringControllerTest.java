@@ -39,6 +39,7 @@ class ScoringControllerTest {
     @MockBean private AuthenticationProvider authProvider;
 
     private static final UUID TEAM_ID = UUID.fromString("d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
+    private static final UUID EVENT_ID = UUID.fromString("c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
     private static final Long SUB_ID = 1L;
     private static final Long LEVEL_ID = 2L;
 
@@ -79,5 +80,27 @@ class ScoringControllerTest {
         when(subQueryS.getHistoryForTeamAndLevel(TEAM_ID, LEVEL_ID)).thenReturn(List.of());
 
         mockMvc.perform(get("/api/scoring/teams/{teamId}/levels/{levelId}/submissions", TEAM_ID, LEVEL_ID)).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getSubmissionDetail_returnsFullFeedbackWithLogs() throws Exception {
+        ScoringLogResponse log = new ScoringLogResponse(TEAM_ID, EVENT_ID, "logs/event/team/level/scoring_log.txt", 1, Instant.now(), "malformed output on row 2 - MALFORMED_OUTPUT");
+
+        SubmissionResponse response = new SubmissionResponse(
+            SUB_ID,
+            TEAM_ID,
+            LEVEL_ID,
+            3L,
+            BigDecimal.ZERO,
+            "FAILED",
+            Instant.now(),
+            "output.txt",
+            "code.zip",
+            log
+        );
+
+        when(subQueryS.getSubmissionDetail(SUB_ID, TEAM_ID)).thenReturn(response);
+
+        mockMvc.perform(get("/api/scoring/teams/{teamId}/submissions/{submissionId}", TEAM_ID, SUB_ID)).andExpect(status().isOk()).andExpect(jsonPath("$.scoringLog.logContent").value("malformed output on row 2 - MALFORMED_OUTPUT"));
     }
 }
