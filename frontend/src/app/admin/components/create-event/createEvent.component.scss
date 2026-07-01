@@ -6,14 +6,14 @@
 
 .create-event-page {
     min-height: 100vh;
-    background-color: #f4f6f9;
+    background-color: transparent;
 
 }
 
 .content{
     max-width : 720px;
     margin : 0 auto;
-    padding: 32px 28px 60px;
+    padding: 0;
 
 }
 
@@ -165,13 +165,16 @@ textarea{
         font-weight: 700;
         color: #13192d;
         display : block;
+        margin-bottom: 4px;
     }
 
-    .toggle-desc {
-        font-size: 0.78rem;
-        color : #6b7588;
+    .toggle-description {
+        font-size: 0.85rem;
+        color : #4a5568;
         display : block ;
-        margin-top : 3px;
+        margin-top : 2px;
+        line-height: 1.4;
+        font-weight: 500;
 
     }
 
@@ -179,11 +182,19 @@ textarea{
         border-color : #1983c2;
         background-color : rgba(25,131,194,0.06);
 
+        .toggle-description{
+            color : #2d3748;
+        }
+
     }
 
     &:hover:not(.selected){
         border-color : #a3aabb;
     }
+
+     .toggle-description{
+            color : #2d3748;
+        }
 }
 
 .form-actions {
@@ -242,4 +253,8 @@ textarea{
     .form-row {
         grid-template-columns : 1fr;
     }
+
+     .toggle-group{
+            grid-template-columns : 1fr;
+        }
 }
