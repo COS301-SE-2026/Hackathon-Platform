@@ -2,6 +2,10 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse } from '../../services/event.service';
+import { CarouselModule } from 'primeng/carousel';  
+import { CardModule } from 'primeng/card';         
+import { ButtonModule } from 'primeng/button';      
+import { TagModule } from 'primeng/tag';  
 
 interface OpenEventView {
   eventId: string;
@@ -20,7 +24,7 @@ interface OpenEventView {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CarouselModule, CardModule, ButtonModule, TagModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -40,6 +44,24 @@ export class HomeComponent implements OnInit, OnDestroy {
   private timerInterval: ReturnType<typeof setInterval> | undefined;
   private endTime: Date | null = null;
 
+    responsiveOptionsForCarousel = [
+    {
+      breakpoint: '1024px',
+      numVisible: 1,
+      numScroll: 1
+    },
+    {
+      breakpoint: '768px',
+      numVisible: 1,
+      numScroll: 1
+    },
+    {
+      breakpoint: '560px',
+       numVisible: 1,
+      numScroll: 1
+    }
+  ];
+
   ngOnInit(): void {
     this.loadOpenEvents();
     this.loadUsersActiveEvents();
@@ -51,6 +73,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       clearInterval(this.timerInterval);
     }
   }
+
+  onCarouselSlide(event: any): void {
+  const currentEvent = this.activeEvents[event.page];
+  if (currentEvent) {
+    this.activeEvent = currentEvent;
+    this.setTimerForEvent(currentEvent);
+  }
+}
 
   loadOpenEvents(): void {
     this.isLoadingEvents = true;
