@@ -73,4 +73,11 @@ class ScoringControllerTest {
 
         mockMvc.perform(get("/api/scoring/teams/{teamId}/submissions", TEAM_ID)).andExpect(status().isOk()).andExpect(jsonPath("$[0].submissionId").value(SUB_ID)).andExpect(jsonPath("$[0].status").value("SCORED"));
     }
+
+    @Test
+    void getTeamLevelHistory_returnsScopedSubmissionList() throws Exception {
+        when(subQueryS.getHistoryForTeamAndLevel(TEAM_ID, LEVEL_ID)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/scoring/teams/{teamId}/levels/{levelId}/submissions", TEAM_ID, LEVEL_ID)).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
+    }
 }
