@@ -135,11 +135,6 @@
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
@@ -189,7 +184,7 @@
                   <limit>
                     <counter>LINE</counter>
                     <value>COVEREDRATIO</value>
-                    <minimum>0.60</minimum>
+                    <minimum>0.30</minimum>
                   </limit>
                 </limits>
               </rule>

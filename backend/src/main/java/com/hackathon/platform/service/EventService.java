@@ -61,6 +61,10 @@ public class EventService {
       throw new IllegalArgumentException("Registration key is required for private events.");
     }
 
+    if (req.getHackathonId() == null) {
+      throw new IllegalArgumentException("HackathonId is required");
+    }
+
     Event event = new Event();
     event.setCreatedByUserId(getCurrentAdminId());
     event.setName(req.getName());
@@ -70,6 +74,7 @@ public class EventService {
     event.setDescription(req.getDescription());
     event.setVisibility(req.getVisibility());
     event.setStatus(req.getStatus());
+    event.setHackathon(req.getHackathonId());
 
     if ("PRIVATE".equals(req.getVisibility())) {
       event.setRegistrationKey(req.getRegistrationKey());
@@ -106,6 +111,9 @@ public class EventService {
     event.setDescription(req.getDescription());
     event.setVisibility(req.getVisibility());
     event.setStatus(req.getStatus());
+    if (req.getHackathonId() == null) {
+      event.setHackathon(req.getHackathonId());
+    }
 
     return eventRepository.save(event);
   }
@@ -153,7 +161,20 @@ public class EventService {
   }
 
   public List<Event> getOpenEventsForParticipants() {
-    return eventRepository.findByVisibilityAndStatusIn(
-        "PUBLIC", List.of("UPCOMING", "ONGOING", "ACTIVE"));
+    List<Event> ret =
+        eventRepository.findByVisibilityAndStatusIn(
+            "PUBLIC", List.of("UPCOMING", "ONGOING", "ACTIVE"));
+    ret.addAll(
+        eventRepository.findByVisibilityAndStatusIn(
+            "PRIVATE", List.of("UPCOMING", "ONGOING", "ACTIVE")));
+    return ret;
+  }
+
+  public List<Event> getUserActiveEvents() {
+    return eventRepository.findUserActiveEvents(getCurrentAdminId());
+  }
+
+  public List<Event> getUserCompletedEvents() {
+    return eventRepository.findUserCompletedEvents(getCurrentAdminId());
   }
 }
