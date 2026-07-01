@@ -30,8 +30,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   timeDisplay = '00 : 00 : 00';
   isLoadingEvents = false;
+  isLoadingActiveEvents = false;
   errorMessage = '';
 
+  activeEvents: OpenEventView[] = [];
   activeEvent: OpenEventView | null = null;
   openEvents: OpenEventView[] = [];
 
@@ -40,6 +42,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadOpenEvents();
+    this.loadUsersActiveEvents();
     this.timerInterval = setInterval(() => this.tick(), 60000);
   }
 
@@ -57,22 +60,51 @@ export class HomeComponent implements OnInit, OnDestroy {
       next: (events) => {
         this.isLoadingEvents = false;
         this.openEvents = events.map((event) => this.toOpenEventView(event));
-
-        this.activeEvent =
-          this.openEvents.find((event) => event.status === 'ONGOING' || event.status === 'ACTIVE') ||
-          this.openEvents[0] ||
-          null;
-
-        if (this.activeEvent) {
-          this.setTimerForEvent(this.activeEvent);
-        }
-      },
+},
       error: (error) => {
         this.isLoadingEvents = false;
         console.error('Error loading open events:', error);
         this.errorMessage = 'Could not load open events.';
       }
     });
+  }
+
+  loadUsersActiveEvents(): void{
+  
+    this.isLoadingActiveEvents = true;
+    this.errorMessage = '';
+
+   this.eventService.getUserActiveEvents().subscribe({
+    next: (events) => {
+      this.isLoadingActiveEvents = false;
+      
+      if (events && events.length > 0) {
+        
+        this.activeEvents = events.map(event => this.toOpenEventView(event));
+        this.activeEvent = this.activeEvents[0] || null;
+        
+        if (this.activeEvent) {
+          this.setTimerForEvent(this.activeEvent);
+        }
+      } 
+      
+      else {
+        
+        this.activeEvents = [];
+        this.activeEvent = null;
+      }
+    },
+    
+    error: (err) => {
+      
+      this.isLoadingActiveEvents = false;
+      console.error('Error loading active events:', err);
+      this.errorMessage = 'Could not load your active events. Please refresh the page';
+       this.activeEvent = null;
+      this.activeEvents = [];
+     
+    }
+  });
   }
 
   goToEvent(event: OpenEventView): void {
