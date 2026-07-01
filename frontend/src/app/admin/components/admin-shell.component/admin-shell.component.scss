@@ -119,3 +119,17 @@
         color : #ffffff;
     }
 }
+
+.admin-content {
+    max-width : 1100px;
+    margin : 0 auto ;
+    padding : 32px 28px 60px;
+    background-color : #f4f6f9;
+    min-height : calc(100vh - 64px);
+}
+
+@media (max-width: 900px) {
+    .topnav-links{
+        display : none;
+    }
+}
