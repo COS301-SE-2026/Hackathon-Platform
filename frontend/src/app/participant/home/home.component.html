@@ -21,6 +21,10 @@
     [numVisible]="1"
     [numScroll]="1"
     [responsiveOptions]="responsiveOptionsForCarousel"
+    [showIndicators]="true"
+    [showNavigators]="true"
+    [circular]="true"
+    [autoplayInterval]="10000"
     (onPage)="onCarouselSlide($event)"
   >
     <ng-template let-event pTemplate="item">
@@ -46,7 +50,7 @@
 
             <span>
               <i class="pi pi-users"></i>
-              Team size {{ event.teamSizeLimit }}
+              Debug Thugs · {{ event.teamSizeLimit }} members 
             </span>
           </div>
 
@@ -70,15 +74,27 @@
         <div class="active-timer">
           <span class="timer-label">
                   <i class="pi pi-clock"></i>
-                  Time Remaining
+                  {{ event.timer.label }}
           </span>
 
           <div class="timer-display">
-            <span class="timer-value">{{ timeDisplay }}</span>
+            <span class="timer-number">{{ event.timer.days }}</span>
+            <span class="timer-separator">:</span>
+            <span class="timer-number">{{ event.timer.hours }}</span>
+            <span class="timer-separator">:</span>
+            <span class="timer-number">{{ event.timer.minutes }}</span>
+            <span class="timer-separator">:</span>
+            <span class="timer-number">{{ event.timer.seconds }}</span>
           </div>
+
+          <div class="timer-labels">
+            <span>days</span>
+            <span>hrs</span>
+            <span>min</span>
+            <span>sec</span>
+          </div>  
         </div>
       </div>
-
     </ng-template>
   </p-carousel>
 </div>

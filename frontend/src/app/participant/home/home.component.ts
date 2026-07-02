@@ -41,18 +41,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly eventService = inject(EventService);
   private readonly router = inject(Router);
 
-  timeDisplay = '00 : 00 : 00';
+ 
   isLoadingEvents = false;
   isLoadingActiveEvents = false;
   errorMessage = '';
 
   activeEvents: OpenEventView[] = [];
   currentActiveEventIndex = 0;
-  activeEvent: OpenEventView | null = null;
   openEvents: OpenEventView[] = [];
 
   private timerInterval: ReturnType<typeof setInterval> | undefined;
-  private endTime: Date | null = null;
+  
 
     responsiveOptionsForCarousel = [
     {
@@ -87,11 +86,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   onCarouselSlide(event: any): void {
 
   this.currentActiveEventIndex = event.page;
-  const currentEvent = this.activeEvents[event.page];
-  if (currentEvent) {
-    this.activeEvent = currentEvent;
-    this.setTimerForEvent(currentEvent);
-  }
 }
 
   loadOpenEvents(): void {
@@ -124,17 +118,13 @@ export class HomeComponent implements OnInit, OnDestroy {
         
         this.activeEvents = events.map(event => this.toOpenEventView(event));
         this.currentActiveEventIndex = 0;
-        this.activeEvent = this.activeEvents[0] || null;
-        
-        if (this.activeEvent) {
-          this.setTimerForEvent(this.activeEvent);
-        }
+        this.tick();
       } 
       
       else {
         
         this.activeEvents = [];
-        this.activeEvent = null;
+      
       }
     },
     
@@ -143,7 +133,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.isLoadingActiveEvents = false;
       console.error('Error loading active events:', err);
       this.errorMessage = 'Could not load your active events. Please refresh the page';
-       this.activeEvent = null;
       this.activeEvents = [];
      
     }
@@ -204,14 +193,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   private formatShortDate(date: Date): string {
     return date.toLocaleDateString('en-ZA', {
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     });
-  }
-
-  private setTimerForEvent(event: OpenEventView): void {
-    const start = new Date(event.startDateTime);
-    this.endTime = new Date(start.getTime() + event.duration * 60 * 60 * 1000);
-    this.tick();
   }
 
   private tick(): void {
