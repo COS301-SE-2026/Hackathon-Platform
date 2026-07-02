@@ -7,6 +7,14 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';      
 import { TagModule } from 'primeng/tag';  
 
+interface EventTimer {
+  label: string;
+  days: string;
+  hours: string;
+  minutes: string;
+  seconds: string;
+}
+
 interface OpenEventView {
   eventId: string;
   name: string;
@@ -19,6 +27,7 @@ interface OpenEventView {
   description?: string;
   startDateTime: string;
   duration: number;
+  timer: EventTimer;
 }
 
 @Component({
@@ -174,7 +183,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       teamSizeLimit: event.teamSizeLimit,
       description: event.description,
       startDateTime: event.startDateTime,
-      duration: event.duration
+      duration: event.duration,
+      timer: {
+        label: '',
+        days: '00',
+        hours: '00',
+        minutes: '00',
+        seconds: '00'
+      }
     };
   }
 
