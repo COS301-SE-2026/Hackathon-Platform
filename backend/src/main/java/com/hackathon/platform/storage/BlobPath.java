@@ -66,9 +66,9 @@ public final class BlobPath {
    * @return storage key string
    */
   public static String submissionOutput(
-      String hackathonId, String teamId, String submissionId, String filename) {
+      String hackathonId, String teamId, String levelId, String submissionId, String filename) {
     return String.format(
-        "submissions/%s/%s/%s/output/%s", hackathonId, teamId, submissionId, sanitise(filename));
+        "submissions/%s/%s/levels/%s/output/%s", hackathonId, teamId, levelId, submissionId, sanitise(filename));
   }
 
   /**
@@ -82,7 +82,7 @@ public final class BlobPath {
    * @return storage key string
    */
   public static String submissionSourceArchive(
-      String hackathonId, String levelId, String teamId, String submissionId, String filename) {
+      String hackathonId, String teamId, String levelId, String submissionId, String filename) {
     return String.format(
         "submissions/%s/%s/levels/%s/source/%s", hackathonId, teamId, levelId, submissionId, sanitise(filename));
   }
