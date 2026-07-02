@@ -67,5 +67,43 @@
 }
 
 
+::ng-deep{
+  .events-table {
+    border-radius: 14px;
+    overflow: hidden;
+  }
+.events-table .p-datable-table-container{
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(19,25,45,0.04);
+}
 
+.events-table .p-data-thead > tr >th {
+  background-color: #ffffff;
+  color :#6b7588;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 18px;
+  border-bottom : 1px solid #e7eaf0;
+}
 
+.events-table .p-dataable-tbody >tr {
+  background-color : #ffffff;
+  >td {
+    padding: 14px 18px;
+    font-size: 0.875rem;
+    color: #3a4357;
+    border-bottom: 1px solid #f1f3f7;
+  }
+
+  &:hover > td {
+    background-color: #f9fafc;
+  }
+
+  &:last-child > td {
+    border-bottom: none;
+  }
+}
+}
