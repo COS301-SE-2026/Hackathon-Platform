@@ -9,6 +9,11 @@
 <div class="active-card">
   <div class="active-header">
     <span class="active-label">Your Active Events</span>
+      @if (activeEvents.length > 0) {
+    <span class="active-counter">
+      {{ currentActiveEventIndex + 1 }} / {{ activeEvents.length }}
+    </span>
+  }
   </div>
 
   <p-carousel

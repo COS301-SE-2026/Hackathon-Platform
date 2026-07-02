@@ -38,6 +38,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   errorMessage = '';
 
   activeEvents: OpenEventView[] = [];
+  currentActiveEventIndex = 0;
   activeEvent: OpenEventView | null = null;
   openEvents: OpenEventView[] = [];
 
@@ -75,6 +76,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   onCarouselSlide(event: any): void {
+
+  this.currentActiveEventIndex = event.page;
   const currentEvent = this.activeEvents[event.page];
   if (currentEvent) {
     this.activeEvent = currentEvent;
@@ -111,6 +114,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (events && events.length > 0) {
         
         this.activeEvents = events.map(event => this.toOpenEventView(event));
+        this.currentActiveEventIndex = 0;
         this.activeEvent = this.activeEvents[0] || null;
         
         if (this.activeEvent) {
