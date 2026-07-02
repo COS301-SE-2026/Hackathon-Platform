@@ -6,30 +6,67 @@
     <div class="error-message">{{ errorMessage }}</div>
   }
 
-  <div class="top-cards">
-    <div class="active-event-card">
-      <p class="card-label">Your active event</p>
-
-      @if (activeEvent) {
-        <h2 class="event-name">{{ activeEvent.name }}</h2>
-        <p class="event-meta">
-          {{ activeEvent.dates }} · {{ activeEvent.visibility }} · Team size {{ activeEvent.teamSizeLimit }}
-        </p>
-        <button class="btn-go" (click)="goToEvent(activeEvent)">Go to event</button>
-      } @else {
-        <h2 class="event-name">No active event</h2>
-        <p class="event-meta">Choose an open event below to get started.</p>
-      }
-    </div>
-
-    <div class="timer-card">
-      <p class="card-label">Time Remaining</p>
-      <div class="timer-display">
-        <span class="timer-value">{{ timeDisplay }}</span>
-      </div>
-      <p class="timer-labels">days &nbsp;–&nbsp; hours &nbsp;–&nbsp; minutes</p>
-    </div>
+<div class="active-card">
+  <div class="active-header">
+    <span class="active-label">Your Active Events</span>
   </div>
+
+  <p-carousel
+    [value]="activeEvents"
+    [numVisible]="1"
+    [numScroll]="1"
+    [responsiveOptions]="responsiveOptionsForCarousel"
+    (onPage)="onCarouselSlide($event)"
+  >
+    <ng-template let-event pTemplate="item">
+
+      <div class="active-body">
+
+        <div class="active-info">
+
+          <div class="event-title-row">
+            <h3 class="event-name">{{ event.name }}</h3>
+
+            <p-tag
+              [value]="event.visibility === 'PRIVATE' ? 'Private' : 'Public'"
+              [severity]="event.visibility === 'PRIVATE' ? 'warn' : 'info'">
+            </p-tag>
+          </div>
+
+          <div class="event-meta">
+            <span>
+              <i class="pi pi-calendar"></i>
+              {{ event.dates }}
+            </span>
+
+            <span>
+              <i class="pi pi-users"></i>
+              Team size {{ event.teamSizeLimit }}
+            </span>
+          </div>
+
+          <div class="active-actions">
+            <button
+              pButton
+              label="Go to Event"
+              icon="pi pi-arrow-right"
+              (click)="goToEvent(event)">
+            </button>
+
+            <button
+              pButton
+              label="Manage Team"
+              icon="pi pi-users">
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </ng-template>
+  </p-carousel>
+</div>
 
   <h2 class="section-title">Open events</h2>
 
