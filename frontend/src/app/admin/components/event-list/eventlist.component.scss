@@ -5,13 +5,13 @@
 
 .events-page{
   min-height : 100vh;
-  background-color: #f4f6f9;
+  background-color: transparent;
 }
 
 .content{
   max-width: 1100px;
   margin: 0 auto;
-  padding: 32px 28px 60px;
+  padding: 0;
 }
 
 .page-header{
@@ -34,7 +34,7 @@
   }
 }
 
-.filter-bar{
+.filters-bar{
   display: flex;
   gap: 10px;
   margin-bottom: 18px;
@@ -72,13 +72,13 @@
     border-radius: 14px;
     overflow: hidden;
   }
-.events-table .p-datable-table-container{
+.events-table .p-datatable-table-container{
   border: 1px solid #e7eaf0;
   border-radius: 14px;
   box-shadow: 0 1px 2px rgba(19,25,45,0.04);
 }
 
-.events-table .p-data-thead > tr >th {
+.events-table .p-datatable-thead > tr >th {
   background-color: #ffffff;
   color :#6b7588;
   font-size: 0.72rem;
@@ -89,7 +89,7 @@
   border-bottom : 1px solid #e7eaf0;
 }
 
-.events-table .p-dataable-tbody >tr {
+.events-table .p-datatable-tbody >tr {
   background-color : #ffffff;
   >td {
     padding: 14px 18px;
