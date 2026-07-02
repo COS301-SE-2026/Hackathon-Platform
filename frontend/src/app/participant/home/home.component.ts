@@ -75,7 +75,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadOpenEvents();
     this.loadUsersActiveEvents();
-    this.timerInterval = setInterval(() => this.tick(), 60000);
+    this.timerInterval = setInterval(() => this.tick(), 1000);
   }
 
   ngOnDestroy(): void {
@@ -215,18 +215,35 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private tick(): void {
-    if (!this.endTime) {
-      this.timeDisplay = '00 : 00 : 00';
-      return;
+    const now = new Date();
+
+    this.activeEvents.forEach(event => {
+    const start = new Date(event.startDateTime);
+    const end = new Date(start.getTime() + event.duration * 60 * 60 * 1000);
+    
+    let target: Date;
+    let label: string;
+
+    if (now < start) {
+      target = start;
+      label = 'Starts in';
+    } else {
+      target = end;
+      label = 'Time Remaining';
     }
 
-    const diff = Math.max(0, this.endTime.getTime() - Date.now());
-    const totalMins = Math.floor(diff / 60000);
-    const days = Math.floor(totalMins / 1440);
-    const hours = Math.floor((totalMins % 1440) / 60);
-    const mins = totalMins % 60;
+    const diff = Math.max(0, target.getTime() - now.getTime());
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    this.timeDisplay =
-      `${String(days).padStart(2, '0')} : ${String(hours).padStart(2, '0')} : ${String(mins).padStart(2, '0')}`;
+    event.timer.label = label;
+    event.timer.days = String(days).padStart(2, '0');
+    event.timer.hours = String(hours).padStart(2, '0');
+    event.timer.minutes = String(minutes).padStart(2, '0');
+    event.timer.seconds = String(seconds).padStart(2, '0');
+    });
   }
+
 }
