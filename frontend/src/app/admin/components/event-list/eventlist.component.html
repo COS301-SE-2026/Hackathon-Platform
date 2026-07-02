@@ -1,60 +1,77 @@
-<div class="events-page">
-  <div class="page-header">
-    <div>
-      <h1>Events</h1>
-      <p class="page-subtitle">All hackathon events on this platform</p>
+<div class = "events-page">
+  <main class = "content">
+    <div class = "page-header">
+      <div>
+        <h1>Events</h1>
+        <p class = "page-subtitle">All hackathon events on this platform</p>
+      </div>
+      <p-button label = "+ New Event" routerLink = "/admin/create-event"/>
     </div>
-    <button class="btn-primary" routerLink="/admin/events/create">+ New event</button>
-  </div>
 
-  <div class="filters-bar">
-    <input
-      type="text"
-      class="search-input"
+    <div class = "filters-bar">
+      <input pInputText
+      type = "text"
+      class = "search-input"
       placeholder="Search events..."
-      [(ngModel)]="searchQuery"
-    />
-    <select class="filter-select" [(ngModel)]="statusFilter">
-      <option value="">All statuses</option>
-      <option value="live">Live</option>
-      <option value="upcoming">Upcoming</option>
-      <option value="ended">Ended</option>
-    </select>
-    <select class="filter-select" [(ngModel)]="visibilityFilter">
-      <option value="">All visibility</option>
-      <option value="public">Public</option>
-      <option value="private">Private</option>
-    </select>
-  </div>
+      [(ngModel)] = "searchQuery"/>
 
-  @if (isLoading){
-    <div class="loading">Loading events...</div>
-  } @else{
-  <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th>EVENT</th>
-          <th>Dates</th>
-          <th>Teams</th>
-          <th>Visibility</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (event of filteredEvents; track event.name) {
-            <tr>
-              <td><p class="event-name">{{ event.name }}</p></td>
-              <td>{{ event.startDateTime | date:'MMM d' }} – {{ event.startDateTime | date:'MMM d, y' }}</td>
-              <td>{{ event.teamSizeLimit }}</td>
-              <td>{{ event.visibility }}</td>
-              <td><span class="status-badge" [ngClass]="getStatusClass(event.status)">{{ event.status }}</span></td>
-              <td><button class="btn-manage" [routerLink]="['/admin/events/edit', event.eventId]">Manage & Edit</button></td>
-            </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-  }
+      <p-select 
+      [options] = "statusOptions"
+      [(ngModel)] = "statusFilter"
+      optionValue = "value"
+      optionLabel = "label"
+      placeholder = "All statuses"
+      [showClear] = "true"/>
+
+       <p-select 
+      [options] = "visibilityOptions"
+      [(ngModel)] = "visibilityFilter"
+      optionValue = "value"
+      optionLabel = "label"
+      placeholder = "All visibility"
+      [showClear] = "true"/>
+    </div>
+
+    @if (isLoading){
+      <div class = "loading">Loading events...</div>
+
+    }@else {
+      <p-table [value] = "filteredEvents" styleClass = "events-table" [rowHover] = "true">
+        <ng-template #header>
+          <tr>
+            <th>Event</th>
+            <th>Dates</th>
+            <th>Teams</th>
+            <th>Visibility</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template #body let-event>
+          <tr>
+            <td><p class ="event-name"> {{ event.name}}</p></td>
+            <td>{{ event.startDateTime | date:'MMM d'}} &ndash; {{event.startDateTime | date:'MMM d, y'}}</td>
+            <td>{{event.teamSizeLimit}}</td>
+            <td>{{event.visibility}}</td>
+            <td>
+              <p-tag [value] = "event.status" [severity] = "statusSeverity(event.status)"/>
+            </td>
+            <td>
+              <p-button
+              label = "Manage &amp; Edit"
+              size = "small"
+              [routerLink] = "['/admin/events/edit',event.eventId]"/>
+
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan = "6" class = "empty-row">No events match you filter.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </main>
 </div>
