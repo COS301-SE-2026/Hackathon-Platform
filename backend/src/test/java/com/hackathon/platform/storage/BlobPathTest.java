@@ -45,6 +45,14 @@ class BlobPathTest {
   }
 
   @Test
+  void submissionOutput_filenameIsPresentInPath() {
+    String result =
+        BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "output.txt");
+    assertTrue(result.endsWith("/output.txt"));
+  }
+
+
+  @Test
   void submissionSourceArchive_returnsCorrectPath() {
     String result =
         BlobPath.submissionSourceArchive(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "source.zip");
@@ -52,23 +60,66 @@ class BlobPathTest {
   }
 
   @Test
+  void submissionSourceArchive_filenameIsPresentInPath() {
+    String result =
+        BlobPath.submissionSourceArchive(
+            HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "source.zip");
+    assertTrue(result.endsWith("/source.zip"));
+  }
+
+
+  @Test
+  void submissionOutput_differentLevelsProduceDifferentPaths() {
+    String levelOne = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, "1", SUBMISSION_ID, "output.txt");
+    String levelTwo = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, "2", SUBMISSION_ID, "output.txt");
+    assertFalse(levelOne.equals(levelTwo));
+    assertEquals(
+        "submissions/hackathon-123/team-789/levels/1/sub-101/output/output.txt", levelOne);
+    assertEquals(
+        "submissions/hackathon-123/team-789/levels/2/sub-101/output/output.txt", levelTwo);
+  }
+ 
+  @Test
+  void submissionOutput_differentSubmissionsProduceDifferentPaths() {
+    String subOne = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, "1", "output.txt");
+    String subTwo = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, "2", "output.txt");
+    assertFalse(subOne.equals(subTwo));
+  }
+
+
+  @Test
   void scoringLog_returnsCorrectPath() {
-    String result = BlobPath.scoringLog(EVENT_ID, SUBMISSION_ID, "log.txt");
-    assertEquals("logs/event-123/sub-101/log.txt", result);
+    String result = BlobPath.scoringLog(HACKATHON_ID, TEAM_ID, LEVEL_ID);
+    assertEquals("logs/hackathon-123/team-789/level-456/scoring_log.txt", result);
   }
 
   @Test
   void levelFile_sanitisesPathTraversal() {
-    String result = BlobPath.levelFile(EVENT_ID, LEVEL_ID, "../../../etc/passwd");
+    String result = BlobPath.levelFile(HACKATHON_ID, LEVEL_ID, "../../../etc/passwd");
     assertFalse(result.contains(".."));
   }
 
   @Test
+  void levelFile_sanitisesForwardSlash() {
+    String result = BlobPath.levelFile(HACKATHON_ID, LEVEL_ID, "folder/file.txt");
+    assertFalse(result.substring(result.lastIndexOf('/') + 1).contains("/"));
+  }
+
+
+  @Test
   void submissionOutput_sanitisesBackslash() {
-    String result = BlobPath.submissionOutput(EVENT_ID, TEAM_ID, SUBMISSION_ID,
-"folder\\file.txt");
+    String result = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID,"folder\\file.txt");
     assertFalse(result.contains("\\"));
   }
+
+  @Test
+  void submissionSourceArchive_sanitisesPathTraversal() {
+    String result =
+        BlobPath.submissionSourceArchive(
+            HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "../../secrets.zip");
+    assertFalse(result.contains(".."));
+  }
+
 
   @Test
   void solverFile_versionNumberAppearsInPath() {
