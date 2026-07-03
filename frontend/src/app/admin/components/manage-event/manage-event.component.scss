@@ -229,6 +229,137 @@
 
 }
 
+.btn-secondary {
+  background-color: transparent;
+  color:#1983c2;
+  border: 2px solid #1983c2;
+  border-radius: 9px;
+  padding:10px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:hover:not(:disabled){
+    background-color: rgba(25,131,194,0.08);
+  }
+
+  &:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background-color: #1983c2;
+  color:#ffffff;
+  border: none;
+  border-radius: 9px;
+  padding:10px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:hover:not(:disabled){
+    background-color: #146a9d;
+  }
+
+  &:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-danger {
+  background-color: #c0392b;
+  color:#ffffff;
+  border: none;
+  border-radius: 9px;
+  padding:10px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:hover:not(:disabled){
+    background-color: #a93226;
+  }
+
+  &:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-patch {
+  background-color: transparent;
+  color:#6b7588;
+  border: 2px solid #6b7588;
+  border-radius: 9px;
+  padding:10px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:hover:not(:disabled){
+    background-color: rgba(107,117,136,0.08);
+  }
+
+  &:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+
+.btn-upload{
+  margin-top: 12px;
+  background-color: #268b42;
+  color:#ffffff;
+  border: none;
+  border-radius: 8px;
+  padding:10px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:hover:not(:disabled){
+    background-color: #1f7236;
+  }
+
+  &:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.file-upload-area {
+  background-color: #f9fafc;
+  color:#6b7588;
+  border: 2px dashed #c4cbd8;
+  border-radius: 10px;
+  padding:30px 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.15s , border-color 0.15s;
+
+  &:hover{
+    background-color: #f0f4f8;
+    border-color: #1983c2;
+  }
+
+  
+}
+
 @media (max-width : 600px){
   .form-row {
     grid-template-columns: 1fr;
