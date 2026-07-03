@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+import {ButtonModule} from 'primeng/button';
+import { TagModule } from 'primeng/tag';
+
 interface SolverVersion {
     version : string;
     uploaded :string;
@@ -15,7 +18,7 @@ interface SolverVersion {
 @Component({
     selector : 'app-solver',
     standalone : true,
-    imports : [CommonModule , FormsModule , RouterModule],
+    imports : [CommonModule , FormsModule , RouterModule,ButtonModule,TagModule],
     templateUrl : './solver.component.html',
     styleUrls: ['./solver.component.scss']
 })
@@ -47,7 +50,7 @@ onFileSelected(event: Event): void{
     }
 }
 
-onFileDrop(event: DragEvent):void{
+onDropFile(event: DragEvent):void{
     event.preventDefault();
     const file = event.dataTransfer?.files[0];
     if (file){
