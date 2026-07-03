@@ -111,7 +111,7 @@ class StorageControllerTest {
     mockMvc
         .perform(
             get(
-                "/api/storage/events/{hackathonId}/levels/{levelId}/files/{filename}",
+                "/api/storage/hackathons/{hackathonId}/levels/{levelId}/files/{filename}",
                 HACKATHON_ID,
                 LEVEL_ID,
                 "test.txt"))
@@ -127,7 +127,7 @@ class StorageControllerTest {
 
     SolverVersion saved =
         new SolverVersion(
-            UUID.fromString(HACKATHON_ID), UUID.fromString(UPLOADED_BY), "events/.../solver.py");
+            UUID.fromString(HACKATHON_ID), UUID.fromString(UPLOADED_BY), "hackathons/.../solver.py");
     saved.setId(1L);
     when(fileMetadataService.saveSolverVersion(
             any(), any(), anyString(), any(), anyString(), any()))
@@ -138,7 +138,7 @@ class StorageControllerTest {
 
     mockMvc
         .perform(
-            multipart("/api/storage/events/{hackathonId}/solver", HACKATHON_ID)
+            multipart("/api/storage/hackathons/{hackathonId}/solver", HACKATHON_ID)
                 .file(file)
                 .param("version", "1")
                 .param("uploadedBy", UPLOADED_BY)
@@ -158,7 +158,7 @@ class StorageControllerTest {
         new MockMultipartFile("file", "logo.png", "image/png", "imagedata".getBytes());
 
     mockMvc
-        .perform(multipart("/api/storage/events/{hackathonId}/branding",
+        .perform(multipart("/api/storage/hackathons/{hackathonId}/branding",
 HACKATHON_ID).file(file))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.storageKey").exists())
@@ -201,7 +201,7 @@ data".getBytes());
     mockMvc
         .perform(
             multipart(
-                    "/api/storage/events/{hackathonId}/teams/{teamId}/submissions",
+                    "/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions",
                     HACKATHON_ID,
                     TEAM_ID)
                 .file(outputFile)
@@ -224,7 +224,7 @@ data".getBytes());
     mockMvc
         .perform(
             multipart(
-                    "/api/storage/events/{hackathonId}/teams/{teamId}/submissions",
+                    "/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions",
                     HACKATHON_ID,
                     TEAM_ID)
                 .file(sourceFile)
@@ -246,7 +246,7 @@ data".getBytes());
         .perform(
             get(
 
-"/api/storage/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+"/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
                 HACKATHON_ID,
                 TEAM_ID,
                 SUBMISSION_ID,
@@ -268,7 +268,7 @@ data".getBytes());
         .perform(
             get(
 
-"/api/storage/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}",
+"/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}",
                 HACKATHON_ID,
                 TEAM_ID,
                 SUBMISSION_ID,
@@ -283,7 +283,7 @@ data".getBytes());
         .perform(
             get(
 
-"/api/storage/events/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+"/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
                 HACKATHON_ID,
                 TEAM_ID,
                 "not-a-number",
@@ -301,7 +301,7 @@ data".getBytes());
     mockMvc
         .perform(
             get(
-                "/api/storage/events/{hackathonId}/submissions/{submissionId}/logs/{filename}",
+                "/api/storage/hackathons/{hackathonId}/submissions/{submissionId}/logs/{filename}",
                 HACKATHON_ID,
                 SUBMISSION_ID,
                 "log.txt"))
