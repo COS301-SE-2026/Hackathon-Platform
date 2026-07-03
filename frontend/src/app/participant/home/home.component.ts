@@ -1,11 +1,16 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common'; 
 import { Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse } from '../../services/event.service';
 import { CarouselModule } from 'primeng/carousel';  
 import { CardModule } from 'primeng/card';         
 import { ButtonModule } from 'primeng/button';      
 import { TagModule } from 'primeng/tag';  
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { SelectButtonModule } from 'primeng/selectbutton';
 
 interface EventTimer {
   label: string;
@@ -33,7 +38,7 @@ interface OpenEventView {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, CarouselModule, CardModule, ButtonModule, TagModule],
+  imports: [CommonModule, FormsModule, RouterModule, CarouselModule, CardModule, ButtonModule, TagModule, InputTextModule, IconFieldModule, InputIconModule, SelectButtonModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -45,6 +50,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   isLoadingEvents = false;
   isLoadingActiveEvents = false;
   errorMessage = '';
+  searchTerm = '';
+  selectedFilterOption = 'All';
 
   activeEvents: OpenEventView[] = [];
   currentActiveEventIndex = 0;
@@ -71,6 +78,29 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   ];
 
+filterOptions = [
+  { label: 'All', value: 'All' },
+  { label: 'Public', value: 'Public' },
+  { label: 'Private', value: 'Private' }
+];
+
+get filteredOpenEvents(): OpenEventView[] {
+  return this.openEvents.filter(event => {
+
+    const search = this.searchTerm.toLowerCase();
+    const name = event.name.toLowerCase();
+
+    if (!name.includes(search)) {
+      return false;
+    }
+
+    if (this.selectedFilterOption === 'All') {
+      return true;
+    }
+
+    return event.visibility === this.selectedFilterOption.toUpperCase();
+  });
+}
   ngOnInit(): void {
     this.loadOpenEvents();
     this.loadUsersActiveEvents();

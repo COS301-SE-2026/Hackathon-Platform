@@ -58,13 +58,13 @@
             <button
               pButton
               label="Go to Event"
-              icon="pi pi-arrow-right"
+              styleClass="go-event-btn"
               (click)="goToEvent(event)">
             </button>
 
             <button
               pButton
-              label="Manage Team"
+               label="Manage Team"
               icon="pi pi-users">
             </button>
           </div>
@@ -101,36 +101,88 @@
 
   <h2 class="section-title">Open events</h2>
 
-  @if (isLoadingEvents) {
-    <p class="page-sub">Loading open events...</p>
-  } @else if (openEvents.length === 0) {
-    <p class="page-sub">No open events are available right now.</p>
-  } @else {
+  <div class="events-toolbar">
+
+    <p-iconfield class="events-search">
+      <p-inputicon class="pi pi-search"></p-inputicon>
+
+        <input
+          pInputText
+          type="text"
+          placeholder="Search events..."
+          [(ngModel)]="searchTerm" />
+      </p-iconfield>
+
+    <p-selectButton
+        class="events-filter"
+        [options]="filterOptions"
+        [(ngModel)]="selectedFilterOption"
+        optionLabel="label"
+        optionValue="value">
+    </p-selectButton>
+
+  </div>
+
+@if (isLoadingEvents) {
+
+<p>Loading...</p>
+
+} @else if (openEvents.length === 0) {
+
+  <p>No open events are available right now.</p>
+
+} @else if (filteredOpenEvents.length === 0) {
+
+  <p>No events match your search.</p>
+
+} @else {
     <div class="events-list">
-      @for (event of openEvents; track event.eventId) {
+      @for (event of filteredOpenEvents; track event.eventId) {
         <div class="event-row">
           <div class="event-info">
             <p class="ev-name">{{ event.name }}</p>
-            <p class="ev-meta">
-              {{ event.dates }}
-              &nbsp;·&nbsp; {{ event.teams }} teams
-              &nbsp;·&nbsp; {{ event.visibility }}
-              &nbsp;·&nbsp; Team size {{ event.teamSizeLimit }}
-            </p>
+            <div class="ev-meta">
+
+              <span>
+                <i class="pi pi-calendar"></i>
+                {{ event.dates }}
+              </span>
+
+              <span>
+                <i class="pi pi-users"></i>
+                {{ event.teams }} teams
+              </span>
+
+              <span>
+                <i
+                  [class]="event.visibility === 'PRIVATE'
+                    ? 'pi pi-lock'
+                    : 'pi pi-eye'">
+                </i>
+                {{ event.visibility }}
+              </span>
+
+              <span>
+                <i class="pi pi-users"></i>
+                Max Team Members: {{ event.teamSizeLimit }}
+              </span>
+
+            </div>
+
           </div>
 
           <div class="event-actions">
-            <span class="status-badge" [ngClass]="event.status.toLowerCase()">
-              {{ event.status }}
-            </span>
+          <p-button
+              label="View Event"
+              styleClass="view-event-btn"
+              (onClick)="goToEvent(event)">
+          </p-button>
 
-            <button class="btn-register" (click)="goToEvent(event)">
-              View event
-            </button>
-
-            <button class="btn-register key" (click)="createTeamForEvent(event)">
-              Create team
-            </button>
+          <p-button
+              label="Create Team"
+              styleClass="create-team-btn"
+              (onClick)="createTeamForEvent(event)">
+          </p-button>
           </div>
         </div>
       }
