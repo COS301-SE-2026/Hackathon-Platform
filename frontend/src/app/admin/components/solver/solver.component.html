@@ -1,32 +1,11 @@
-<div class = "Solver-page">
-    <nav class = "topnav">
-        <div class = "topnav-left">
-            <div class = "logo-badge">H</div>
-            <span class = "brand">Hackathon <span class = "brand-accent">Platform</span></span>
-        </div>
-
-        <div class = "topnav-links">
-            <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
-            <a routerLink="/admin/levels" routerLinkActive="active">Levels</a>
-            <a routerLink="/admin/challenges" routerLinkActive="active">Challenges</a>
-            <a routerLink="/admin/create-event" routerLinkActive="active">Create Event</a>
-            <a routerLink="/admin/submissions" routerLinkActive="active">Submissions</a>
-            <a routerLink="/admin/event-list" routerLinkActive="active">Event List</a>
-            <a routerLink = "/admin/solver" routerLinkActive = "active">Solver</a>
-        </div>
-
-        <div class = "topnav-right">
-            <span class = "admin-pill">Admin</span>
-            <div class = "avatar-circle">A</div>
-        </div>
-    </nav>
+<div class = "solver-page">
 
     <div class = "event-subnav">
         <div class = "event-subnav-inner">
-            <span class = "event-tabs">ENTELECT 2026</span>
+            <span class = "event-tag">ENTELECT 2026</span>
             <div class = "event-tabs">
                 <a routerLink="Overview" routerLinkActive="active">Overview &amp; live ops</a>
-                <a routerLink="Levels" routerLinkActive="active">Levels&amp; files</a>
+                <a routerLink="Levels" routerLinkActive="active">Levels &amp; files</a>
                 <a routerLink="Solver" routerLinkActive="active">Solver</a>
                 <a routerLink="Registrations" routerLinkActive="active">Registrations</a>
                 <a routerLink="Teams" routerLinkActive="active">Teams</a>
@@ -54,14 +33,18 @@
         #uploadForm
         (click) = "fileInput.click()"
         (dragover) = "$event.preventDefault()"
-        (drop) = "onFileDrop($event)">
+        (drop) = "onDropFile($event)">
     <input #fileInput type = "file" style = "display:none" (change) = "onFileSelected($event)" accept=".py,.jar,.zip"/>
-    <span>{{ selectedFileName || '+ Drop solver file here or browse }}</span>
+    <span>{{ selectedFileName || '+ Drop solver file here or browse' }}</span>
     
     </div>
     <div class = "form-row">
         <div class = "form-group">
             <label>Version label</label>
+            <input type = "text" [(ngModel)] = "versionLabel" placeholder = "e.g. v1.2.2" />
+        </div>
+        <div class = "form-group">
+            <label>Change notes</label>
             <input type = "text" [(ngModel)] = "changeNotes" placeholder = "What changed in this version?" />
         </div>
     </div>
@@ -82,7 +65,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor = "let v of versionHistory">
+                @for (v of versionHistory; track v.version){
+                <tr >
                     <td class = "version-cell">{{ v.version }}</td>
                     <td> {{v.uploaded}}</td>
                     <td>{{v.runs | number }}</td>
@@ -92,8 +76,12 @@
                         <span class = "status-badge" [ngClass] ="v.status.toLowerCase()">{{v.status}}</span>
                     </td>
                 </tr>
+            }
             </tbody>
         </table>
+        @if (versionHistory.length ===0){
+            <div class = "empty-state">No solver versions uploaded yet.</div>
+        }
     </div>
 </main>
 </div>
