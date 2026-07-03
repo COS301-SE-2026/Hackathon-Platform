@@ -311,6 +311,19 @@
     margin-top: 8px;
 }
 
+::ng-deep {
+    .p-fileupload .p-fileupload-content {
+        border: 1.5px dashed #c4cbd8;
+        border-radius: 10px;
+        background-color: #f9fafc;
+    }
+
+    .p-dialog .p-dialog-footer {
+        display : flex;
+        justify-content: flex-end;
+        gap :10px;
+    }
+}
 
 @media (max-width: 720px){
     .topnav-links {
