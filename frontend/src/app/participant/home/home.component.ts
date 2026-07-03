@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common'; 
+import { AuthService } from '../../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse } from '../../services/event.service';
 import { CarouselModule } from 'primeng/carousel';  
@@ -45,8 +46,9 @@ interface OpenEventView {
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly eventService = inject(EventService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
- 
+  userFirstName = '';
   isLoadingEvents = false;
   isLoadingActiveEvents = false;
   errorMessage = '';
@@ -102,6 +104,8 @@ get filteredOpenEvents(): OpenEventView[] {
   });
 }
   ngOnInit(): void {
+    const user = this.authService.getUser();
+    this.userFirstName = user ? user.firstName : 'Participant';
     this.loadOpenEvents();
     this.loadUsersActiveEvents();
     this.timerInterval = setInterval(() => this.tick(), 1000);
