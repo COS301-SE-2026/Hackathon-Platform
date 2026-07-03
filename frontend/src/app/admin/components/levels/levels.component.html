@@ -111,7 +111,7 @@
             </div>
         }}
 
-            <div class = "drop-zone" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="onFileDrop($event)">
+            <div class = "drop-zone" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="onDropFile($event)">
         
                 <input #fileInput type = "file" style = "display: none" (change)="onFileSelected($event)" multiple />
                 <span>+ Drop file here or browse</span>
