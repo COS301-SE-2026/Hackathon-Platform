@@ -204,3 +204,29 @@
   gap: 12px;
   padding-top: 4px;
 }
+
+::ng-deep {
+  .p-fileupload .p-fileupload-content {
+    border : 1.5px dashed #c4cbd8;
+    border-radius: 10px;
+    background-color: #f9fafc;
+  }
+
+  .upload-azure-btn {
+    margin-top : 12px;
+    background-color: #268b42 !important;
+    border-color: #268b42 !important;
+
+    &:hover:not(:disabled){
+      background-color: #1f7236 !important;
+      border-color: #1f7236 !important;
+    }
+  }
+
+}
+
+@media (max-width : 600px){
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
