@@ -64,16 +64,16 @@ class StorageControllerTest {
   void uploadLevelFile_returns200WithStorageKeyAndBlobUrl() throws Exception {
     when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
     when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
- 
+
     LevelFile saved = new LevelFile(1L, "test.txt", "hackathons/.../test.txt", "TXT");
     saved.setId(1L);
     when(fileMetadataService.saveLevelFile(
             any(), anyString(), anyString(), anyString(), any(), any()))
         .thenReturn(saved);
- 
+
     MockMultipartFile file =
         new MockMultipartFile("file", "test.txt", "text/plain", "hello".getBytes());
- 
+
     mockMvc
         .perform(
             multipart(
@@ -87,7 +87,6 @@ class StorageControllerTest {
         .andExpect(jsonPath("$.blobUrl").value(BLOB_URL))
         .andExpect(jsonPath("$.id").value("1"));
   }
-
 
   @Test
   void uploadLevelFile_returnsErrorWhenNoFileProvided() throws Exception {
@@ -127,7 +126,9 @@ class StorageControllerTest {
 
     SolverVersion saved =
         new SolverVersion(
-            UUID.fromString(HACKATHON_ID), UUID.fromString(UPLOADED_BY), "hackathons/.../solver.py");
+            UUID.fromString(HACKATHON_ID),
+            UUID.fromString(UPLOADED_BY),
+            "hackathons/.../solver.py");
     saved.setId(1L);
     when(fileMetadataService.saveSolverVersion(
             any(), any(), anyString(), any(), anyString(), any()))
@@ -158,8 +159,8 @@ class StorageControllerTest {
         new MockMultipartFile("file", "logo.png", "image/png", "imagedata".getBytes());
 
     mockMvc
-        .perform(multipart("/api/storage/hackathons/{hackathonId}/branding",
-HACKATHON_ID).file(file))
+        .perform(
+            multipart("/api/storage/hackathons/{hackathonId}/branding", HACKATHON_ID).file(file))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.storageKey").exists())
         .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
@@ -175,8 +176,8 @@ HACKATHON_ID).file(file))
             UUID.fromString(TEAM_ID),
             1L,
             1L,
-            "submissions/.../6/source/archive.zip",
-            "submissions/.../6/output/output.txt");
+            "submissions/.../levels/1/.../6/source/archive.zip",
+            "submissions/.../levels/1/.../6/output/output.txt");
     saved.setId(6L);
     when(fileMetadataService.saveSubmission(
             anyString(),
@@ -192,11 +193,9 @@ HACKATHON_ID).file(file))
         .thenReturn(saved);
 
     MockMultipartFile outputFile =
-        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output
-data".getBytes());
+        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output data".getBytes());
     MockMultipartFile sourceFile =
-        new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
-"zipdata".getBytes());
+        new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
 
     mockMvc
         .perform(
@@ -218,8 +217,7 @@ data".getBytes());
   @Test
   void uploadSubmission_returnsErrorWhenOutputFileMissing() throws Exception {
     MockMultipartFile sourceFile =
-        new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
-"zipdata".getBytes());
+        new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
 
     mockMvc
         .perform(
@@ -234,19 +232,37 @@ data".getBytes());
   }
 
   @Test
+  void uploadSubmission_returnsErrorWhenLevelIdMissing() throws Exception {
+    MockMultipartFile outputFile =
+        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output data".getBytes());
+    MockMultipartFile sourceFile =
+        new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
+
+    mockMvc
+        .perform(
+            multipart(
+                    "/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions",
+                    HACKATHON_ID,
+                    TEAM_ID)
+                .file(outputFile)
+                .file(sourceFile)
+                .param("solverVersionId", "1"))
+        .andExpect(status().is5xxServerError());
+  }
+
+  @Test
   void getSubmissionOutputUrl_returns200WithPresignedUrl() throws Exception {
     when(config.getSubmissionsContainer()).thenReturn("submissions");
     when(config.getSasExpiryMinutes()).thenReturn(60);
     when(fileMetadataService.getSubmissionOutputStorageKey(anyLong()))
-        .thenReturn("submissions/.../1/output/output.txt");
+        .thenReturn("submissions/.../levels/1/.../1/output/output.txt");
     when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
         .thenReturn(PRESIGNED_URL);
 
     mockMvc
         .perform(
             get(
-
-"/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+                "/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
                 HACKATHON_ID,
                 TEAM_ID,
                 SUBMISSION_ID,
@@ -260,15 +276,14 @@ data".getBytes());
     when(config.getSubmissionsContainer()).thenReturn("submissions");
     when(config.getSasExpiryMinutes()).thenReturn(60);
     when(fileMetadataService.getSubmissionSourceStorageKey(anyLong()))
-        .thenReturn("submissions/.../1/source/archive.zip");
+        .thenReturn("submissions/.../levels/1/.../1/source/archive.zip");
     when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
         .thenReturn(PRESIGNED_URL);
 
     mockMvc
         .perform(
             get(
-
-"/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}",
+                "/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}",
                 HACKATHON_ID,
                 TEAM_ID,
                 SUBMISSION_ID,
@@ -282,8 +297,7 @@ data".getBytes());
     mockMvc
         .perform(
             get(
-
-"/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+                "/api/storage/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
                 HACKATHON_ID,
                 TEAM_ID,
                 "not-a-number",
@@ -301,10 +315,10 @@ data".getBytes());
     mockMvc
         .perform(
             get(
-                "/api/storage/hackathons/{hackathonId}/submissions/{submissionId}/logs/{filename}",
+                "/api/storage/hackathons/{hackathonId}/teams/{teamId}/levels/{levelId}",
                 HACKATHON_ID,
-                SUBMISSION_ID,
-                "log.txt"))
+                TEAM_ID,
+                LEVEL_ID))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
   }
