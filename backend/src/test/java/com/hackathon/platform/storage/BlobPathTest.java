@@ -30,26 +30,25 @@ class BlobPathTest {
   void solverFile_returnsCorrectPathWithVersion() {
     String result = BlobPath.solverFile(HACKATHON_ID, 2, "solver.py");
     assertEquals("hackathons/hackathon-123/solver/v2/solver.py", result);
-
   }
 
   @Test
   void problemStatement_returnsCorrectPath() {
-    String result = BlobPath.problemStatement(EVENT_ID, "problem.pdf");
-    assertEquals("events/event-123/problem/problem.pdf", result);
+    String result = BlobPath.problemStatement(HACKATHON_ID, "problem.pdf");
+    assertEquals("hackathons/hackathon-123/problem/problem.pdf", result);
   }
 
   @Test
   void submissionOutput_returnsCorrectPath() {
-    String result = BlobPath.submissionOutput(EVENT_ID, TEAM_ID, SUBMISSION_ID, "output.txt");
-    assertEquals("submissions/event-123/team-789/sub-101/output/output.txt", result);
+    String result = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "output.txt");
+    assertEquals("submissions/hackathon-123/team-789/levels/level-456/sub-101/output/output.txt", result);
   }
 
   @Test
   void submissionSourceArchive_returnsCorrectPath() {
     String result =
-        BlobPath.submissionSourceArchive(EVENT_ID, TEAM_ID, SUBMISSION_ID, "source.zip");
-    assertEquals("submissions/event-123/team-789/sub-101/source/source.zip", result);
+        BlobPath.submissionSourceArchive(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "source.zip");
+    assertEquals("submissions/hackathon-123/team-789/levels/level-456/sub-101/source/source.zip", result);
   }
 
   @Test
@@ -73,9 +72,9 @@ class BlobPathTest {
 
   @Test
   void solverFile_versionNumberAppearsInPath() {
-    String resultV1 = BlobPath.solverFile(EVENT_ID, 1, "solver.py");
-    String resultV3 = BlobPath.solverFile(EVENT_ID, 3, "solver.py");
-    assertEquals("events/event-123/solver/v1/solver.py", resultV1);
-    assertEquals("events/event-123/solver/v3/solver.py", resultV3);
+    String resultV1 = BlobPath.solverFile(HACKATHON_ID, 1, "solver.py");
+    String resultV3 = BlobPath.solverFile(HACKATHON_ID, 3, "solver.py");
+    assertEquals("hackathons/hackathon-123/solver/v1/solver.py", resultV1);
+    assertEquals("hackathons/hackathon-123/solver/v3/solver.py", resultV3);
   }
 }
