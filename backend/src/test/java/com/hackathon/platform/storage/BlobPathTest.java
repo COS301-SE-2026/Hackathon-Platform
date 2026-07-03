@@ -9,27 +9,28 @@ import org.junit.jupiter.api.Test;
 /** Unit tests for {@link BlobPath} storage key construction. */
 class BlobPathTest {
 
-  private static final String EVENT_ID = "event-123";
+  private static final String HACKATHON_ID = "hackathon-123";
   private static final String LEVEL_ID = "level-456";
   private static final String TEAM_ID = "team-789";
   private static final String SUBMISSION_ID = "sub-101";
 
   @Test
   void levelFile_returnsCorrectPath() {
-    String result = BlobPath.levelFile(EVENT_ID, LEVEL_ID, "input.txt");
-    assertEquals("events/event-123/levels/level-456/input.txt", result);
+    String result = BlobPath.levelFile(HACKATHON_ID, LEVEL_ID, "input.txt");
+    assertEquals("hackathons/hackathon-123/levels/level-456/input.txt", result);
   }
 
   @Test
   void brandingAsset_returnsCorrectPath() {
-    String result = BlobPath.brandingAsset(EVENT_ID, "logo.png");
-    assertEquals("events/event-123/branding/logo.png", result);
+    String result = BlobPath.brandingAsset(HACKATHON_ID, "logo.png");
+    assertEquals("events/hackathon-123/branding/logo.png", result);
   }
 
   @Test
   void solverFile_returnsCorrectPathWithVersion() {
-    String result = BlobPath.solverFile(EVENT_ID, 2, "solver.py");
-    assertEquals("events/event-123/solver/v2/solver.py", result);
+    String result = BlobPath.solverFile(HACKATHON_ID, 2, "solver.py");
+    assertEquals("hackathons/hackathon-123/solver/v2/solver.py", result);
+
   }
 
   @Test
