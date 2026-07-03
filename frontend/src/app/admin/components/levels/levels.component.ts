@@ -2,7 +2,14 @@ import {Component } from '@angular/core';
 import {CommonModule } from '@angular/common';
 import {FormsModule } from '@angular/forms';
 import {RouterModule } from '@angular/router';
+import { CdkDragDrop , DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 
+
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { TagModule } from 'primeng/tag';
+import{ SelectModule } from 'primeng/select';
+import {FileUploadModule, FileSelectEvent} from 'primeng/fileupload';
 
 interface Level {
   id: number ;
@@ -16,7 +23,7 @@ interface Level {
 @Component({
   selector: 'app-levels',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule,DragDropModule,ButtonModule,DialogModule,SelectModule,TagModule,FileUploadModule],
   templateUrl: './levels.component.html',
   styleUrls: ['./levels.component.scss'] 
 })
@@ -27,6 +34,22 @@ export class LevelsComponent {
     { id: 1, name: 'Level 1', difficulty: 'Introduction', scoringMode: 'highest', files: ['Level1_input.txt', 'problem_statement.pdf']},   
     { id: 2, name: 'Level 2', difficulty: 'Intermediate', scoringMode: 'highest', files: ['Level2_input.txt', 'resources.zip'] },
     { id: 3, name: 'Level 3', difficulty: 'Advanced', scoringMode: 'highest', files: ['Level3_input.txt', 'resources.zip', 'problem_statement.pdf'] },
+  ];
+  
+  difficultyOptions =[
+    {label: 'Introduction', value: 'Introduction'},
+    {label: 'Intermediate', value: 'Intermediate'},
+    {label: 'Advanced', value: 'Advanced'},
+    {label: 'Expert', value: 'Expert'},
+
+  ];
+
+   scoringOptions =[
+    {label: 'Highest score wins', value: 'highest'},
+    {label: 'Lowest time wins', value: 'lowest'},
+    {label: 'Time', value: 'time'},
+
+
   ];
 
   showLevelModal = false;
@@ -40,6 +63,10 @@ export class LevelsComponent {
     scoringMode: 'highest',
 
   };
+
+  onDrop(event:CdkDragDrop<Level[]>):void{
+    moveItemInArray(this.levels, event.previousIndex, event.currentIndex);
+  }
 
 
   openAddLevelModal(): void {
@@ -55,6 +82,11 @@ export class LevelsComponent {
 
   closeLevelModal(): void {
     this.showLevelModal = false;
+  }
+
+  closeFilesModal(): void{
+    this.showFilesModal = false;
+    this.activeLevel = null;
   }
 
   saveLevel(): void {
@@ -92,17 +124,32 @@ export class LevelsComponent {
     this.activeLevel.files = this.activeLevel.files.filter(f => f !== fileName);
     }
 
-    onFileSelected(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        if (input.files && this.activeLevel) {
-            Array.from(input.files).forEach(file => this.activeLevel!.files.push(file.name));
-            }
-        }
+  
 
-onFileDrop(event: DragEvent): void {
-    event.preventDefault(); 
-    if(event.dataTransfer?.files && this.activeLevel) {
-        Array.from(event.dataTransfer.files).forEach(f => this.activeLevel!.files.push(f.name));
-    }
+onDropFile(event:DragEvent): void {
+  event.preventDefault();
+  if (!this.activeLevel) return;
+
+
+  const files = event.dataTransfer?.files;
+  if (files){
+    Array.from(files).forEach(file=> {
+      this.activeLevel!.files.push(file.name);
+    });
+  }
 }
+
+onFileSelected(event: Event):void{
+  if (!this.activeLevel) return;
+
+  const input = event.target as HTMLInputElement;
+  if (input.files){
+    Array.from(input.files).forEach(file=>
+    {
+      this.activeLevel!.files.push(file.name);
+    }
+    );
+  }
+}
+
 }
