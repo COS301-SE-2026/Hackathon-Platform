@@ -25,6 +25,10 @@ export const routes: Routes = [
         path: 'event-list',
         loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
       },
+       {
+        path: 'manage-event',
+        loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
+      },
       {
         path: 'levels',
         loadComponent: () => import('./admin/components/levels/levels.component').then(m => m.LevelsComponent),
