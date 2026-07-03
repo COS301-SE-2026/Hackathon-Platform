@@ -94,7 +94,7 @@ class StorageControllerTest {
     mockMvc
         .perform(
             multipart(
-                    "/api/storage/events/{hackathonId}/levels/{levelId}/files",
+                    "/api/storage/hackathons/{hackathonId}/levels/{levelId}/files",
                     HACKATHON_ID,
                     LEVEL_ID)
                 .param("fileType", "TXT"))
