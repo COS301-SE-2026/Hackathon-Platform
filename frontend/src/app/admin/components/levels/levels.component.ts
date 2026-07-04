@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TagModule } from 'primeng/tag';
 import{ SelectModule } from 'primeng/select';
-import {FileUploadModule, FileSelectEvent} from 'primeng/fileupload';
+import {FileUploadModule} from 'primeng/fileupload';
 
 interface Level {
   id: number ;
