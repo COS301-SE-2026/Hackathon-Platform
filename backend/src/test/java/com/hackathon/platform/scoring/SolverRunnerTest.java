@@ -71,6 +71,15 @@ class SolverRunnerTest {
     assertThat(outcome.getStdout()).contains("starting validation");
   }
 
-  
+  @Test
+  void run_withNonZeroExitCode_throwsSolverExecutionException() throws IOException {
+    Path script = writeScript("import sys\nsys.exit(1)");
+
+    assertThatThrownBy(() -> solverRunner.run(script, outputFile, null))
+        .isInstanceOf(SolverExecutionException.class)
+        .hasFieldOrPropertyWithValue("errorType", "SOLVER_CRASH");
+  }
+
+
   
 }
