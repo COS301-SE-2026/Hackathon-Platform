@@ -99,5 +99,39 @@ class SolverRunnerTest {
     assertThat(outcome.getResult().getErrorType()).isEqualTo("MALFORMED_OUTPUT");
   }
 
+  @Test
+  void run_thatExceedsTimeout_isKilledAndThrowsTimeout() throws IOException {
+    SolverExecutionConfig fastTimeoutConfig = new SolverExecutionConfig();
+    setField(fastTimeoutConfig, "timeoutSeconds", 1);
+    setField(fastTimeoutConfig, "pythonExecutable", "python");
+    setField(fastTimeoutConfig, "workDir", tempDir.resolve("scratch2").toString());
+    setField(fastTimeoutConfig, "maxOutputBytes", 1024 * 1024);
+    SolverRunner fastTimeoutRunner = new SolverRunner(fastTimeoutConfig);
+
+    Path script = writeScript("import time\ntime.sleep(10)");
+
+    assertThatThrownBy(() -> fastTimeoutRunner.run(script, outputFile, null))
+        .isInstanceOf(SolverExecutionException.class)
+        .hasFieldOrPropertyWithValue("errorType", "TIMEOUT");
+  }
+
+  @Test
+  void run_passesOutputAndLevelInputPaths_asArgumentsToScript() throws IOException {
+    Path levelInputs = Files.createDirectory(tempDir.resolve("level-inputs"));
+    Path script =
+    writeScript(
+        "import sys, json\n"
+            + "out = sys.argv[1]\n"
+            + "inputs = sys.argv[2]\n"
+            + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"out=\" + out, \"inputs=\" + inputs]}))");
+
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, levelInputs);
+
+    assertThat(outcome.getResult().getMessages().get(0)).contains(outputFile.toString());
+    assertThat(outcome.getResult().getMessages().get(1)).contains(levelInputs.toString());
+  }
+
+  
+
   
 }
