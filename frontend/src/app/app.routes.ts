@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { AdminShellComponent } from './admin/components/admin-shell.component/admin-shell.component';
 import { ParticipantShellComponent } from './participant/participant-shell.component/participant-shell.component';
 import { AuthGuard } from './guards/auth.guard';
-import { TeamComponent } from './participant/team/team.component';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
