@@ -174,11 +174,13 @@ get filteredOpenEvents(): OpenEventView[] {
   }
 
   goToEvent(event: OpenEventView): void {
-    this.saveCurrentEvent(event);
-    this.router.navigate(['/participant/submit'], {
-      queryParams: { eventId: event.eventId }
-    });
-  }
+  this.saveCurrentEvent(event);
+
+  this.router.navigate([
+    '/participant/events',
+    event.eventId
+  ]);
+}
 
   createTeamForEvent(event: OpenEventView): void {
     this.saveCurrentEvent(event);
