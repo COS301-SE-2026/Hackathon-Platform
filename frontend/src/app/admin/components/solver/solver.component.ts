@@ -26,9 +26,9 @@ interface SolverVersion {
 export class SolverComponent {
     @ViewChild('uploadForm') uploadFormRef!: ElementRef<HTMLElement>;
     selectedFile: File | null = null;
-    selectedFileName : string = '';
-    versionLabel : string = '';
-    changeNotes: string ='';
+    selectedFileName  = '';
+    versionLabel  = '';
+    changeNotes ='';
 
     versionHistory: SolverVersion[] = [
         {version: 'v1.2.1', uploaded: 'Apr 22, 09:12', runs: 4123, avgRuntime: '2.3s', errorRate: '3.2%', status: 'Active'},
