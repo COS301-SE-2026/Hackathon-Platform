@@ -80,6 +80,24 @@ class SolverRunnerTest {
         .hasFieldOrPropertyWithValue("errorType", "SOLVER_CRASH");
   }
 
+  @Test
+  void run_withMalformedFinalLine_throwsWithMalformedOutputType() throws IOException {
+    Path script = writeScript("print('not json at all')");
+
+    assertThatThrownBy(() -> solverRunner.run(script, outputFile, null))
+        .isInstanceOf(SolverExecutionException.class)
+        .hasFieldOrPropertyWithValue("errorType", "MALFORMED_OUTPUT");
+  }
+
+  @Test
+  void run_withInvalidStatusValue_normalisesToFailed() throws IOException {
+    Path script = writeScript("print('{\"score\": 0, \"status\": \"BANANA\"}')");
+
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null);
+
+    assertThat(outcome.getResult().getStatus()).isEqualTo("FAILED");
+    assertThat(outcome.getResult().getErrorType()).isEqualTo("MALFORMED_OUTPUT");
+  }
 
   
 }
