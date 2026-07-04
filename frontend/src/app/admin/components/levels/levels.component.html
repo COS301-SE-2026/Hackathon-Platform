@@ -45,8 +45,8 @@
             </div>
 
             <div class = "level-actions">
-                <button class = "btn-edit" (click) = "openEditModal(level)">Edit</button>
-                <button class = "btn-manage-files" (click) = "openManageFiles(level)">Manage Files</button>   
+                <button type = "button" class = "btn-edit" (click) = "openEditModal(level)"  >Edit</button>
+                <button type = "button" class = "btn-manage-files" (click) = "openManageFiles(level)" (keyup.enter) = "openManageFiles(level)" (keyup.space) = "openManageFiles(level)" >Manage Files</button>   
             </div>
         </div>
             }
@@ -111,6 +111,7 @@
             </div>
         }}
 
+       
             <div class = "drop-zone" (click)="fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()" tabindex = "0" role ="button"
             (dragover)="$event.preventDefault()" (drop)="onDropFile($event)">
         
