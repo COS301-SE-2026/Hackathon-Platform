@@ -36,24 +36,24 @@
 
     <div class = "form-row">
         <div class = "form-group">
-            <label>First Name</label>
-            <input type = "text" [(ngModel)] = "profile.firstName" [disabled] = "!isEditing"/>
+            <label for = "firstName">First Name</label>
+            <input id = "firstName" type = "text" [(ngModel)] = "profile.firstName" [disabled] = "!isEditing"/>
         </div>
         <div class = "form-group">
-            <label>Last Name</label>
-            <input type = "text" [(ngModel)] = "profile.lastName" [disabled] = "!isEditing"/>
+            <label for = "lastName" >Last Name</label>
+            <input  id = "lastName" type = "text" [(ngModel)] = "profile.lastName" [disabled] = "!isEditing"/>
     </div>
     </div>
 
 
         <div class = "form-group">
-            <label>Email Address</label>
-            <input type = "email" [(ngModel)] = "profile.email" [disabled] = "!isEditing"/>
+            <label for = "email" >Email Address</label>
+            <input id = "email"  type = "email" [(ngModel)] = "profile.email" [disabled] = "!isEditing"/>
         </div>
 
         <div class= "form-group">
-            <label>Username</label>
-            <input type = "text" [(ngModel)] = "profile.username" [disabled] = "!isEditing"/>
+            <label for = "username"  >Username</label>
+            <input  id = "username" type = "text" [(ngModel)] = "profile.username" [disabled] = "!isEditing"/>
         </div>
 
         <p class = "change-password-label">Change Password:</p>
@@ -61,12 +61,12 @@
 
         <div class = "form-row">
             <div class = "form-group">
-                <label>Current Password</label>
-                <input type = "password" [(ngModel)] = "profile.currentPassword" [disabled] = "!isEditing" placeholder="••••••••"/>
+                <label for = "currentPassword" >Current Password</label>
+                <input id = "currentPassword" type = "password" [(ngModel)] = "profile.currentPassword" [disabled] = "!isEditing" placeholder="••••••••"/>
             </div>
             <div class = "form-group">
-                <label>New Password</label>
-                <input type = "password" [(ngModel)] = "profile.newPassword" [disabled] = "!isEditing" placeholder="••••••••"/>
+                <label for = "newPassword">New Password</label>
+                <input id = "newPassword" type = "password" [(ngModel)] = "profile.newPassword" [disabled] = "!isEditing" placeholder="••••••••"/>
                 </div>
 
                 </div>
@@ -90,12 +90,14 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor = "let history of participationHistory">
+                @for (history of participationHistory; track history.name){
+                <tr>
                     <td>{{history.name}}</td>
                     <td>{{history.team}}</td>
                     <td>{{history.rank}}</td>
                     <td>{{history.score | number}}</td>
-                </tr>   
+                </tr>  
+            } 
     
     </tbody>
     </table>
