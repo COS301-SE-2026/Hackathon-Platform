@@ -64,13 +64,13 @@
         <h2 class = "modal-title">{{ editingLevel ? 'Edit Level' : 'Add New Level' }}</h2>
     
             <div class = "form-group">
-                <label>Level Name</label>
-                <input  type="text" [(ngModel)]="modalForm.name" placeholder = "e.g. Level 1 - Introduction"/>
+                <label for = "levelName">Level Name</label>
+                <input  id = "levelName" type="text" [(ngModel)]="modalForm.name" placeholder = "e.g. Level 1 - Introduction"/>
             </div>
 
             <div class = "form-group">
-                <label> Difficulty</label>
-                <select [(ngModel)]="modalForm.difficulty">
+                <label for = "levelDifficulty">Difficulty</label>
+                <select id = "levelDifficulty" [(ngModel)]="modalForm.difficulty">
                     <option value="Introduction">Introduction</option>
                     <option value="Intermediate">Intermediate</option>
                     <option value="Advanced">Advanced</option>
@@ -79,8 +79,8 @@
             </div>
 
             <div class = "form-group">
-                <label>Scoring mode</label>
-                <select [(ngModel)]="modalForm.scoringMode">
+                <label for = "scoringMode">Scoring mode</label>
+                <select id = "scoringMode" [(ngModel)]="modalForm.scoringMode">
                     <option value="highest">Highest score wins</option>
                     <option value="lowest">Lowest time wins</option>
                     <option value="time">Time</option>
@@ -111,7 +111,8 @@
             </div>
         }}
 
-            <div class = "drop-zone" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="onDropFile($event)">
+            <div class = "drop-zone" (click)="fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()" tabindex = "0" role ="button"
+            (dragover)="$event.preventDefault()" (drop)="onDropFile($event)">
         
                 <input #fileInput type = "file" style = "display: none" (change)="onFileSelected($event)" multiple />
                 <span>+ Drop file here or browse</span>
