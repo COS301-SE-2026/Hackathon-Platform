@@ -34,12 +34,13 @@
         <div class="active-info">
 
           <div class="event-title-row">
-            <h3 class="event-name">{{ event.name }}</h3>
-
             <p-tag
+
               [value]="event.visibility === 'PRIVATE' ? 'Private' : 'Public'"
               [severity]="event.visibility === 'PRIVATE' ? 'warn' : 'info'">
             </p-tag>
+            <h3 class="event-name">{{ event.name }}</h3>
+
           </div>
 
           <div class="event-meta">
@@ -58,14 +59,14 @@
             <button
               pButton
               label="Go to Event"
-              styleClass="go-event-btn"
+              class="go-event-btn"
               (click)="goToEvent(event)">
             </button>
 
             <button
               pButton
                label="Manage Team"
-              icon="pi pi-users">
+               class="manage-team-btn">
             </button>
           </div>
 
@@ -125,15 +126,15 @@
 
 @if (isLoadingEvents) {
 
-<p>Loading...</p>
+<p class="events-message">Loading...</p>
 
 } @else if (openEvents.length === 0) {
 
-  <p>No open events are available right now.</p>
+<p class="events-message">No open events are available right now.</p>
 
 } @else if (filteredOpenEvents.length === 0) {
 
-  <p>No events match your search.</p>
+  <p class="events-message">No events match your search.</p>
 
 } @else {
     <div class="events-list">
@@ -164,7 +165,7 @@
 
               <span>
                 <i class="pi pi-users"></i>
-                Max Team Members: {{ event.teamSizeLimit }}
+                Max: {{ event.teamSizeLimit }}
               </span>
 
             </div>
@@ -174,13 +175,13 @@
           <div class="event-actions">
           <p-button
               label="View Event"
-              styleClass="view-event-btn"
+              class="view-event-btn"
               (onClick)="goToEvent(event)">
           </p-button>
 
           <p-button
               label="Create Team"
-              styleClass="create-team-btn"
+              class="create-team-btn"
               (onClick)="createTeamForEvent(event)">
           </p-button>
           </div>
