@@ -57,7 +57,20 @@ class SolverRunnerTest {
     assertThat(outcome.getResult().getMessages()).containsExactly("validated ok");
   }
 
-  
+  @Test
+  void run_withLogChatterBeforeJsonLine_stillParsesFinalLine() throws IOException {
+    Path script =
+        writeScript(
+            "print('starting validation...')\n"
+                + "print('checking constraints')\n"
+                + "print('{\"score\": 10, \"status\": \"SCORED\", \"messages\": []}')");
 
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null);
+
+    assertThat(outcome.getResult().getScore()).isEqualByComparingTo(BigDecimal.TEN);
+    assertThat(outcome.getStdout()).contains("starting validation");
+  }
+
+  
   
 }
