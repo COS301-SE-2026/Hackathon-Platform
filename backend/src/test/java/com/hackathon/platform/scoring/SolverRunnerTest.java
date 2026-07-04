@@ -131,7 +131,21 @@ class SolverRunnerTest {
     assertThat(outcome.getResult().getMessages().get(1)).contains(levelInputs.toString());
   }
 
-  
+  private Path writeScript(String body) throws IOException {
+    Path script = Files.createTempFile(tempDir, "solver-", ".py");
+    Files.writeString(script, body, StandardCharsets.UTF_8);
+    return script;
+  }
+
+  private void setField(Object target, String fieldName, Object value) {
+    try {
+      Field field = target.getClass().getDeclaredField(fieldName);
+      field.setAccessible(true);
+      field.set(target, value);
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   
 }
