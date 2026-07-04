@@ -45,7 +45,19 @@ class SolverRunnerTest {
 
   }
 
- 
+  @Test
+  void run_withValidJsonResult_parsesScoreAndStatus() throws IOException {
+    Path script = writeScript("print('{\"score\": 85.5, \"status\": \"SCORED\", "
+        + "\"messages\": [\"validated ok\"]}')");
+
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null);
+
+    assertThat(outcome.getResult().getScore()).isEqualByComparingTo(new BigDecimal("85.5"));
+    assertThat(outcome.getResult().getStatus()).isEqualTo("SCORED");
+    assertThat(outcome.getResult().getMessages()).containsExactly("validated ok");
+  }
+
+  
 
   
 }
