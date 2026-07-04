@@ -32,6 +32,10 @@
         <div class = "drop-zone"
         #uploadForm
         (click) = "fileInput.click()"
+        (keyup.enter) = "fileInput.click()"
+        (keyup.space) = "fileInput.click()"
+        tabindex = "0"
+        role ="button"
         (dragover) = "$event.preventDefault()"
         (drop) = "onDropFile($event)">
     <input #fileInput type = "file" style = "display:none" (change) = "onFileSelected($event)" accept=".py,.jar,.zip"/>
@@ -40,12 +44,12 @@
     </div>
     <div class = "form-row">
         <div class = "form-group">
-            <label>Version label</label>
-            <input type = "text" [(ngModel)] = "versionLabel" placeholder = "e.g. v1.2.2" />
+            <label for = "versionLabel">Version label</label>
+            <input id = "versionLabel" type = "text" [(ngModel)] = "versionLabel" placeholder = "e.g. v1.2.2" />
         </div>
         <div class = "form-group">
-            <label>Change notes</label>
-            <input type = "text" [(ngModel)] = "changeNotes" placeholder = "What changed in this version?" />
+            <label for = "changeNotes">Change notes</label>
+            <input id = "changeNotes" type = "text" [(ngModel)] = "changeNotes" placeholder = "What changed in this version?" />
         </div>
     </div>
     <button class = "btn-upload-activate" (click) = "onUploadAndActivate()">Upload &amp; activate</button>
