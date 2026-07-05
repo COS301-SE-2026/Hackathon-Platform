@@ -1,0 +1,64 @@
+<div class="event-banner">
+
+  <div class="banner-content">
+
+        <div class="banner-left">
+
+        <button 
+                class="leave-btn" 
+                type="button">
+                <i class="pi pi-arrow-left"></i> Back to Events
+        </button>
+
+        <h1 class="event-title">{{ event.name }}</h1>
+
+        <p class="event-description">{{ event.description }}</p>
+
+        <div class="banner-buttons">
+                <button
+                pButton
+                label="Register"
+                class="register-btn">
+                </button>
+
+                <button
+                pButton
+                label="Download Problem Statement"
+                class="download-btn">
+                </button>
+        </div>
+
+        </div>
+
+        <div class="banner-right">
+
+        <div class="info-card">
+                <i class="pi pi-trophy info-icon"></i>
+                <div class="info-content">
+                    <span class="label">Prize Pool</span>
+                    <span class="value">{{ event.prizePool }}</span>
+                </div>
+
+        </div>
+
+        <div class="info-card">
+                <i class="pi pi-calendar info-icon"></i>
+                <div class="info-content">
+                    <span class="label">Start Date</span>
+                    <span class="value">{{ event.startDate }}</span>
+                </div>
+        </div>
+
+        <div class="info-card">
+                <i class="pi pi-clock info-icon"></i>
+                <div class="info-content">
+                    <span class="label">End Date</span>
+                    <span class="value">{{ event.endDate }}</span>
+                </div>
+        </div>
+
+        </div>
+
+  </div>
+
+</div>
