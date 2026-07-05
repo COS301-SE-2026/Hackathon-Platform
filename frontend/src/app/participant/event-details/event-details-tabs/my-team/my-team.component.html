@@ -33,6 +33,42 @@
 
 }
 
+@else {
+
+<div class="my-team-page">
+
+    <h1 class="team-page-title">MY TEAM - {{ team.name }}</h1>
+
+    <p class="team-page-prompt">Manage your team for this hackathon.</p>
+
+    <div class="my-team-content">
+
+       <div class="join-code-section">
+
+            <h3 class="section-title">Join Code</h3>
+
+            <div class="join-code-card">
+                
+                 <div class="join-code-display">{{ team.teamId }}</div>
+
+                <button
+                    pButton
+                    icon="pi pi-copy"
+                    label="Copy"
+                    class="copy-code-btn">
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+}
+
+
 <p-dialog 
     header="Create Team" 
     class="team-dialog"  
