@@ -130,7 +130,7 @@
 :host ::ng-deep .active-actions .manage-team-btn {
    background: transparent;
     color: var(--text-dark);
-    border: 1px solid var(--text-dark);
+    border: 2px solid var(--text-dark);
     
 }
 
@@ -424,7 +424,7 @@
 
 :host ::ng-deep .view-event-btn .p-button {
   background: transparent;
-  border: 1px solid var(--text-dark);
+  border: 2px solid var(--text-dark);
   color: var(--text-dark);
 }
 

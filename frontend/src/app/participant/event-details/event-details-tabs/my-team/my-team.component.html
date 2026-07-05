@@ -1,1 +1,31 @@
-<p>my-team-tab works!</p>
+@if (isLoadingTeam) {   <p>Team Loading...</p>  }
+
+@else if (hasTeam == false) {
+
+<div class="no-team-page">
+
+    <i class="pi pi-users empty-icon"></i>
+
+    <h2>You're currently not part of a team</h2>
+
+    <p>Join an existing team or create your own team to collaborate during this hackathon.</p>
+
+    <div class="team-buttons">
+
+        <button
+            pButton
+            label="Create Team"
+            class="create-team-btn">
+        </button>
+
+        <button
+            pButton
+            label="Request to Join"
+            class="join-team-btn">
+        </button>
+
+    </div>
+
+</div>
+
+}

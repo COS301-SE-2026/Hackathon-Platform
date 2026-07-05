@@ -19,7 +19,7 @@ interface DisplayTeamMember {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, ButtonModule],
   templateUrl: './my-team.component.html',
-  styleUrl: './my-team.component.css',
+  styleUrl: './my-team.component.scss',
 })
 
 export class MyTeamComponent implements OnInit {
