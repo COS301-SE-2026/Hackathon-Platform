@@ -62,3 +62,45 @@
   </div>
 
 </div>
+
+
+<div class="event-body">
+    <p-tabs value="overview">
+        <p-tablist>
+        <p-tab value="overview">Overview</p-tab>
+
+        <p-tab value="rules">Rules</p-tab>
+
+        <p-tab value="submissions">Submissions</p-tab>
+
+        <p-tab value="team">My Team</p-tab>
+        
+        <p-tab value="leaderboard">Leaderboard</p-tab>
+        </p-tablist>
+
+        <p-tabpanels>
+
+        <p-tabpanel value="overview">
+            <app-overview/>
+        </p-tabpanel>
+
+        <p-tabpanel value="rules">
+            <app-rules/>
+        </p-tabpanel>
+
+        <p-tabpanel value="submissions">
+            <app-submissions/>
+        </p-tabpanel>
+
+        <p-tabpanel value="team">
+            <app-my-team/>
+        </p-tabpanel>
+
+        <p-tabpanel value="leaderboard">
+            <app-leaderboard/>
+        </p-tabpanel>
+
+        </p-tabpanels>
+ </p-tabs>
+
+</div>
