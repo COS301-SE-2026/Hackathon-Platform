@@ -84,6 +84,20 @@ line-height: 1.5;
   color: var(--background-white);
 }
 
+:host ::ng-deep .register-btn:hover {
+  background: var(--accent-bright-blue) !important;
+  border-color: var(--accent-bright-blue) !important;
+  color: var(--background-white) !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .download-btn:hover {
+  background: transparent !important;
+  border-color: var(--background-white) !important;
+  color: var(--background-white) !important;
+  box-shadow: none !important;
+}
+
 .banner-right {
   width: 270px;
   display: flex;
