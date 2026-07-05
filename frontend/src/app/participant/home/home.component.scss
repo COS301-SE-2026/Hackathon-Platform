@@ -124,7 +124,7 @@
 :host ::ng-deep .active-actions .go-event-btn {
     background: var(--accent-bright-blue);
     color: var(--background-white);
-    border-color: none;
+    border: none;
 }
 
 :host ::ng-deep .active-actions .manage-team-btn {
