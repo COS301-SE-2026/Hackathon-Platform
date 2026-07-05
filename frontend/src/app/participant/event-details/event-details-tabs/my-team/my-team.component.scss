@@ -110,10 +110,11 @@
   color: var(--text-dark);
 }
 
- :host ::ng-deep .team-dialog .team-name-input {
+ :host ::ng-deep .team-dialog .team-dialog-input {
   width: 100%;
   height: 44px;
   padding: 0 12px;
+  margin-bottom: 8px;
   border-radius: 0;
   font-size: 16px;
 }
@@ -136,20 +137,20 @@
   line-height: 1.2;
 }
 
-:host ::ng-deep .team-dialog  .team-dialog-cancel {
+:host ::ng-deep .team-dialog  .team-dialog-secondary-btn {
   background: transparent;
   border: 2px solid var(--text-dark);
   color: var(--text-dark);
 }
 
-:host ::ng-deep .team-dialog .team-dialog-create-btn {
+:host ::ng-deep .team-dialog .team-dialog-primary-btn {
   background: var(--accent-bright-blue);
   border: none;
   color: var(--background-white);
 }
 
 
-:host ::ng-deep .team-dialog  .team-dialog-cancel:hover {
+:host ::ng-deep .team-dialog  .team-dialog-secondary-btn:hover {
   background: transparent !important;
   border-color: var(--text-dark) !important;
   border: 2px solid var(--text-dark) !important;
@@ -157,7 +158,7 @@
   
 }
 
-:host ::ng-deep .team-dialog  .team-dialog-create-btn:hover {
+:host ::ng-deep .team-dialog  .team-dialog-primary-btn:hover {
   background: var(--accent-bright-blue) !important;
   border: none !important;
   color: var(--background-white) !important;

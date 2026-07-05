@@ -37,6 +37,7 @@ export class MyTeamComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   createTeamDialogVisible = false;
+  requestToJoinDialogVisible = false;
 
   hasTeam = false;
   currentUserId = '';
@@ -160,6 +161,7 @@ export class MyTeamComponent implements OnInit {
         this.isLoading = false;
         this.successMessage = 'Join request sent! Waiting for the team lead to approve.';
         this.teamIdToJoin = '';
+        this.requestToJoinDialogVisible = false;
       },
       error: (error) => {
         this.isLoading = false;
