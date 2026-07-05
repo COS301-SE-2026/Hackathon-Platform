@@ -111,21 +111,27 @@
 }
 
 :host ::ng-deep .active-actions .p-button {
-    width: 150px;
+    min-width: 150px;
     height: 44px;
-
+    padding: 0 20px;
+    text-transform: uppercase;
+    font-size: 14px;
+    line-height: 1.2;
     border-radius: 0;
     font-weight: 600;
 }
 
 :host ::ng-deep .active-actions .go-event-btn {
     background: var(--accent-bright-blue);
-    border-color: var(--accent-bright-blue);
+    color: var(--background-white);
+    border-color: none;
 }
 
 :host ::ng-deep .active-actions .manage-team-btn {
-    background: var(--accent-teal);
-    border-color: var(--accent-teal);
+   background: transparent;
+    color: var(--text-dark);
+    border: 1px solid var(--text-dark);
+    
 }
 
 
@@ -405,23 +411,27 @@
   flex-shrink: 0;
 }
 
-:host ::ng-deep .view-event-btn .p-button,
-:host ::ng-deep .create-team-btn .p-button {
-  width: 150px;
+:host ::ng-deep .event-actions .p-button {
+  min-width: 150px;
   height: 44px;
-
-  border-radius: 0;
+  padding: 0 20px;
+  text-transform: uppercase;
+  font-size: 14px;
   font-weight: 600;
+  line-height: 1.2;
+  border-radius: 0;
 }
 
 :host ::ng-deep .view-event-btn .p-button {
-  background: var(--accent-bright-blue);
-  border-color: var(--accent-bright-blue);
+  background: transparent;
+  border: 1px solid var(--text-dark);
+  color: var(--text-dark);
 }
 
-:host ::ng-deep .create-team-btn .p-button {
-  background: var(--accent-teal);
-  border-color: var(--accent-teal);
+:host ::ng-deep .register-btn .p-button {
+  background: var(--accent-bright-blue);
+  border: none;
+  color: var(--background-white);
 }
 
 .events-message {
@@ -459,7 +469,7 @@
     flex-wrap: wrap;
   }
    :host ::ng-deep .view-event-btn .p-button,
-  :host ::ng-deep .create-team-btn .p-button {
+  :host ::ng-deep .register-btn .p-button {
     width: 100%;
   }
 }
@@ -470,7 +480,7 @@
   }
 
   :host ::ng-deep .view-event-btn .p-button,
-  :host ::ng-deep .create-team-btn .p-button {
+  :host ::ng-deep .register-btn .p-button {
     width: 100%;
   }
 
