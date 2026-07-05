@@ -5,6 +5,8 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TeamService, TeamMemberResponse } from '../../../../services/team.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 
 interface DisplayTeamMember {
   name: string;
@@ -17,7 +19,7 @@ interface DisplayTeamMember {
 @Component({
   selector: 'app-my-team',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ButtonModule],
+  imports: [CommonModule, FormsModule, RouterModule, ButtonModule, DialogModule, InputTextModule],
   templateUrl: './my-team.component.html',
   styleUrl: './my-team.component.scss',
 })
@@ -34,6 +36,7 @@ export class MyTeamComponent implements OnInit {
   isLoadingTeam = true;
   errorMessage = '';
   successMessage = '';
+  createTeamDialogVisible = false;
 
   hasTeam = false;
   currentUserId = '';
@@ -123,6 +126,7 @@ export class MyTeamComponent implements OnInit {
     this.teamService.createTeam({ teamName: this.newTeamName.trim() }).subscribe({
       next: () => {
         this.isLoading = false;
+        this.createTeamDialogVisible = false;
         this.successMessage = `Team "${this.newTeamName.trim()}" created successfully!`;
         this.newTeamName = '';
         this.loadUserTeam();

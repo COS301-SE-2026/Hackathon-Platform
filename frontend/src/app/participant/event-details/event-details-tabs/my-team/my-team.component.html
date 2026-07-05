@@ -15,7 +15,9 @@
         <button
             pButton
             label="Create Team"
-            class="create-team-btn">
+            class="create-team-btn"
+            (click)="createTeamDialogVisible = true"
+            >
         </button>
 
         <button
@@ -29,3 +31,35 @@
 </div>
 
 }
+
+
+
+
+<p-dialog header="Create Team"  [(visible)]="createTeamDialogVisible"  [modal]="true"  [draggable]="false"  [style]="{ width: '420px' }">
+
+    <p class="dialog-prompt"> Enter a unique name for your hackathon team.</p>
+
+    <label for="teamName">Team Name</label>
+
+    <input pInputText id="teamName"  [(ngModel)]="newTeamName"  placeholder="Enter team name"  class="team-name-input" />
+
+    <div class="team-dialog-buttons">
+
+        <button
+            pButton
+            label="Cancel"
+            class="team-dialog-cancel"
+            (click)="createTeamDialogVisible = false">
+        </button>
+
+        <button
+            pButton
+            label="Create Team"
+            class="team-dialog-create-btn"
+            (click)="onCreateTeam()"
+            [disabled]="!newTeamName.trim() || isLoading">
+        </button>
+
+    </div>
+
+</p-dialog>
