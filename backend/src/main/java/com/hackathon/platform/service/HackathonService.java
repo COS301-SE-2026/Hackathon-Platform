@@ -38,4 +38,26 @@ public class HackathonService {
     public Hackathon getHackathonById(UUID id) {
         return hackathonRepository.findById(id).orElseThrow(() -> new RuntimeException("Hackathon not found"));
     }
+
+    public Hackathon updateHackathonById(UUID id, HackathonRequest req) {
+        Hackathon hackathon = hackathonRepository.findById(id).orElseThrow(() -> new RuntimeException("Hackathon wasnt found"));
+
+        if(req.getName() !=null && !req.getName().isBlank()) {
+            hackathon.setName(req.getName());
+        }
+        hackathon.setDescription(req.getDescription());
+
+        return hackathonRepository.save(hackathon);
+    }
+
+    public void deleteHackathonById(UUID id) {
+        if(!hackathonRepository.existsById(id))){
+    throw new RuntimeException("Hackathon wasnt found");
+        }
+        hackathonRepository.deleteById(id);
+    }
+
+    public boolean hackathonExists(UUID id) {
+        return hackathonRepository.existsById(id);
+    }
 }
