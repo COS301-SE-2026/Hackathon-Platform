@@ -84,15 +84,20 @@
 
                 <div class="team-member-card">
 
-                    <div class="member-avatar">{{ getInitials(member.name) }}</div>
+                    <div class="member-info">
 
-                    <div class="member-details">
+                        <div class="member-avatar">{{ getInitials(member.name) }}</div>
 
-                        <div class="member-name">{{ member.name }} @if (member.isLead) {<span class="team-lead-badge">Team Lead</span> }</div>
+                        <div class="member-details">
 
-                        <div class="member-email">{{ member.email }}</div>
+                            <div class="member-name">{{ member.name }} </div>
+
+                            <div class="member-email">{{ member.email }}</div>
+
+                        </div>
 
                     </div>
+                              @if (member.isLead) {<span class="team-lead-badge">Team Lead</span>}
 
                 </div>
 
@@ -102,10 +107,79 @@
 
         </div>
 
+
+@if (isTeamLead) {
+
+<div class="team-requests-section">
+
+    <div class="section-header">
+
+        <h3 class="requests-title">Pending Requests</h3>
+
     </div>
+
+
+    @if (pendingRequests.length > 0) {
+
+    
+    <div class="team-requests-list">
+        @for (request of pendingRequests; track request.userId) {
+
+        <div class="team-member-card">
+
+            <div class="member-info">
+
+                <div class="member-avatar">
+                    {{ getInitials(request.name) }}
+                </div>
+
+                <div class="member-details">
+
+                    <div class="member-name">
+                        {{ request.name }}
+                    </div>
+
+                    <div class="member-email">
+                        {{ request.email }}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="request-actions">
+
+                <button
+                    pButton
+                    label="Approve"
+                    class="approve-request-btn"
+                    (click)="approveRequest(request.userId)"
+                    [disabled]="isLoading">
+                </button>
+
+                <button
+                    pButton
+                    label="Reject"
+                    class="reject-request-btn"
+                    (click)="rejectRequest(request.userId)"
+                    [disabled]="isLoading">
+                </button>
+
+            </div>
+
+        </div>
+
+        }
+   </div>
+
+    } @else { <p class="no-requests-message">No pending join requests.</p> }
 
 </div>
 
+}
+    </div>
+
+</div>
 }
 
 <p-dialog 

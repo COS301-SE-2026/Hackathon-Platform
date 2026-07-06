@@ -273,6 +273,15 @@
   color: var(--text-dark);
 }
 
+.requests-title{
+ margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-dark);
+
+}
+
 :host ::ng-deep .refresh-team-btn {
   height: 44px;
   padding: 0 16px;
@@ -308,12 +317,19 @@
 
 .team-member-card {
   display: flex;
+   justify-content: space-between;
   align-items: center;
   height: 80px;
   width: 100%;
   padding: 18px 20px;
   background: var(--background-white);
   border: 1px solid var(--border-silver);
+}
+
+.member-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
 .member-avatar {
@@ -363,4 +379,53 @@
   font-weight: 600;
   line-height: 1.3;
   text-transform: uppercase;
+}
+
+.team-requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.request-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+:host ::ng-deep .request-actions .p-button {
+  min-width: 150px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+:host ::ng-deep .approve-request-btn {
+  background: var(--status-success);
+  border: 1px solid var(--status-success);
+  color: var(--background-white);
+}
+
+:host ::ng-deep .reject-request-btn {
+  background: var(--status-error);
+  border: 1px solid var(--status-error);
+  color: var(--background-white);
+}
+
+:host ::ng-deep .approve-request-btn:hover {
+  background: var(--status-success) !important;
+  border-color: var(--status-success) !important;
+  color: var(--background-white) !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .reject-request-btn:hover {
+  background: var(--status-error) !important;
+  border-color: var(--status-error) !important;
+  color: var(--background-white) !important;
+  box-shadow: none !important;
 }
