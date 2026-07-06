@@ -18,23 +18,31 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/components/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
-        path: 'create-event',
-        loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
+        path: 'hackathons',
+        loadComponent: () => import('./admin/components/hackathons/hackathons.component').then(m => m.HackathonsComponent),
       },
       {
-        path: 'event-list',
+        path: 'hackathons/:hackathonId/events',
         loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
       },
        {
-        path: 'manage-event',
+        path: 'events',
+        loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
+      },
+      {
+        path: 'hackathons/:hackathonId/events/create',
+        loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
+      },
+       {
+        path: 'events/:eventId/manage',
         loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
       },
       {
-        path: 'levels',
+        path: 'events/:eventId/levels',
         loadComponent: () => import('./admin/components/levels/levels.component').then(m => m.LevelsComponent),
       },
-       {
-        path: 'solver',
+      {
+        path: 'events/:eventId/solver',
         loadComponent: () => import('./admin/components/solver/solver.component').then(m => m.SolverComponent),
       },
       {
