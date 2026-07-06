@@ -73,6 +73,18 @@ class SubmissionQueryServiceTest {
         verifyNoInteractions(scoringLogRepo);
     }
 
+    @Test
+    void getSubmissionDetail_returnsNoLogWhenNoneExists() {
+        Submission sub = buildSubmission(5L, Instant.parse("2026-01-01T00:00:00Z"));
+
+        when(subRepo.findByIdAndTeamId(5L, TEAM_ID)).thenReturn(Optional.of(sub));
+
+        SubmissionResponse res = subQueryService.getSubmissionDetail(5L, TEAM_ID);
+
+        assertThat(res).isNotNull();
+        assertThat(res.getScoringLog()).isNull();
+    }
+
     private Submission buildSubmission(Long id, Instant submittedAt) {
         Submission sub = new Submission(TEAM_ID, LEVEL_ID, SOLVER_V_ID, "src/code.zip", "out/output.txt");
         sub.setId(id);
