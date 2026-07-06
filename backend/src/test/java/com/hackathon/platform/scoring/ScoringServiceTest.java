@@ -150,4 +150,16 @@ class ScoringServiceTest {
 
         verify(solverRunner).run(any(Path.class), any(Path.class), any(Path.class));
     }
+
+    @Test
+    void scoreSubmission_withUnknownSubmission_throwsIllegalArgumentException() {
+        when(subRepo.findById(SUB_ID)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> scoringService.scoreSubmission(SUB_ID)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("not found");
+
+        verify(subRepo, never()).save(any());
+
+        assertThat(azure.getEventResourcesContainer()).isEqualTo("event-resources");
+        assertThat(azure.getSubmissionsContainer()).isEqualTo("submissions");
+        assertThat(azure.getScoringLogsContainer()).isEqualTo("scoring-logs");
+    }
 }
