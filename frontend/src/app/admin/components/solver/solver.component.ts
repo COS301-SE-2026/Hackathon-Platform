@@ -1,8 +1,8 @@
-import {Component, ViewChild, ElementRef} from '@angular/core';
+import {Component, ViewChild, ElementRef,inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-
+import { Router } from '@angular/router';
 import {ButtonModule} from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 
@@ -24,6 +24,7 @@ interface SolverVersion {
 })
 
 export class SolverComponent {
+    private readonly router = inject(Router);
     @ViewChild('uploadForm') uploadFormRef!: ElementRef<HTMLElement>;
     selectedFile: File | null = null;
     selectedFileName  = '';
@@ -81,6 +82,9 @@ onUploadAndActivate(): void{
     this.changeNotes= '';
 }
 
+  goBack(): void {
+    this.router.navigate(['/admin/events']);
+  }
 
 
 
