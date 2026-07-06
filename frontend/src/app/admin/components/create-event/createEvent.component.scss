@@ -249,6 +249,27 @@ textarea{
 
 }
 
+.back-navigation {
+    margin-bottom: 16px;
+}
+
+.back-btn{
+    background: none;
+    border: none;
+    color:#1983c2;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding:8px 0 ;
+    font-family: inherit;
+    transition: color 0.15s;
+
+    &:hover {
+        color:#146a9d;
+        text-decoration: underline;
+    }
+}
+
 @media (max-width : 600px){
     .form-row {
         grid-template-columns : 1fr;
