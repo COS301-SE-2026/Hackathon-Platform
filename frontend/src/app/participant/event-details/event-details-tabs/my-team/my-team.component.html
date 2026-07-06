@@ -37,9 +37,23 @@
 
 <div class="my-team-page">
 
-    <h1 class="team-page-title">MY TEAM - {{ team.name }}</h1>
+    <div class="team-page-header">
 
-    <p class="team-page-prompt">Manage your team for this hackathon.</p>
+        <div class="team-page-info">
+            <h1 class="team-page-title">MY TEAM - {{ team.name }}</h1>
+
+            <p class="team-page-prompt">Manage your team for this hackathon.</p>
+        </div>
+
+        <button
+            pButton
+            label="Leave Team"
+            icon="pi pi-sign-out"
+            class="leave-team-btn"
+            (click)="leaveCurrentTeam()">
+        </button>
+
+    </div>
 
     <div class="my-team-content">
 

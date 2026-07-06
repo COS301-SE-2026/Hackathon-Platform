@@ -166,6 +166,43 @@
     margin-top: 20px;
 }
 
+.team-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+
+.team-page-info {
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .leave-team-btn {
+  min-width: 150px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 0;
+  background: transparent;
+  border: 2px solid var(--text-dark);
+  color: var(--text-dark);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+:host ::ng-deep .leave-team-btn:hover {
+  background: transparent !important;
+  border: 2px solid var(--text-dark) !important;
+  color: var(--text-dark) !important;
+}
+
+:host ::ng-deep .leave-team-btn .pi {
+  color: var(--text-dark);
+}
+
 .team-page-title {
     margin-bottom: 8px;
     font-size: 24px;
@@ -182,7 +219,6 @@
     line-height: 1.5;
     color: var(--text-muted);
 }
-
 
 .my-team-content {
     width: 100%;
