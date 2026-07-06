@@ -2,6 +2,7 @@ import { Component, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { Router,ActivatedRoute } from '@angular/router';
 
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
@@ -30,6 +31,10 @@ import { EventService, EventResponse } from '../../../services/event.service';
 })
 export class EventlistComponent implements OnInit {
   private readonly eventService = inject(EventService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  hackathonId: string = '';
   searchQuery = '';
   statusFilter = '';
   visibilityFilter = '';
@@ -55,6 +60,7 @@ export class EventlistComponent implements OnInit {
   isLoading = true;
 
   ngOnInit(): void{
+    this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
     this.loadEvents();
   }
 
@@ -62,7 +68,11 @@ export class EventlistComponent implements OnInit {
     this.isLoading = true;
     this.eventService.getMyEvents().subscribe({
       next: (events) => {
+        if (this.hackathonId){
         this.events = events;
+        }else{
+         this.events = events; 
+        }
         this.isLoading = false;
       },
       error: (error) => {
@@ -102,5 +112,9 @@ export class EventlistComponent implements OnInit {
       case 'ended' :return 'danger';
       default: return 'info';
     }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin/hackathons']);
   }
 }
