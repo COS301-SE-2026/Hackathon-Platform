@@ -35,7 +35,7 @@
           <th>Teams</th>
           <th>Visibility</th>
           <th>Status</th>
-          <th></th>
+          <th style="text-align: center;">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -57,7 +57,11 @@
             </td>
 
             <td>
-              <button class="btn-manage">Manage &amp; Edit</button>
+              <div class = "action-buttons">
+                <button class="btn-manage" [routerLink] ="['/admin/events',event.id,'manage']">Manage</button>
+                 <button class="btn-levels" [routerLink] ="['/admin/events',event.id,'levels']">Levels</button>
+                  <button class="btn-solver" [routerLink] ="['/admin/events',event.id,'solver']">Solver</button>
+              </div>
             </td>
           </tr>
         }
