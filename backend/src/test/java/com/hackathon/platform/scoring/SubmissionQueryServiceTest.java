@@ -3,6 +3,7 @@ package com.hackathon.platform.scoring;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.hackathon.platform.dto.SubmissionResponse;
 import com.hackathon.platform.model.ScoringLog;
@@ -56,6 +57,20 @@ class SubmissionQueryServiceTest {
         assertThat(hist).hasSize(2);
         assertThat(hist.get(0).getSubmissionId()).isEqualTo(2L);
         assertThat(hist.get(1).getSubmissionId()).isEqualTo(1L);
+    }
+
+    @Test
+    void getHistoryForTeam_doesNotEagerlyLoadLogs() {
+        Submission sub = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
+        
+        when(subRepo.findByTeamId(TEAM_ID)).thenReturn(List.of(sub));
+
+        List<SubmissionResponse> hist = subQueryService.getHistoryForTeam(TEAM_ID);
+
+        assertThat(hist).hasSize(1);
+        assertThat(hist.get(0).getScoringLog()).isNull();
+
+        verifyNoInteractions(scoringLogRepo);
     }
 
     private Submission buildSubmission(Long id, Instant submittedAt) {
