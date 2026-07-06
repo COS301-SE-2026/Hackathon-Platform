@@ -1,9 +1,9 @@
-import {Component } from '@angular/core';
+import {Component,inject } from '@angular/core';
 import {CommonModule } from '@angular/common';
 import {FormsModule } from '@angular/forms';
 import {RouterModule } from '@angular/router';
 import { CdkDragDrop , DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
-
+import {Router } from '@angular/router';
 
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -20,16 +20,19 @@ interface Level {
 
 }
 
+
 @Component({
   selector: 'app-levels',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule,DragDropModule,ButtonModule,DialogModule,SelectModule,TagModule,FileUploadModule],
   templateUrl: './levels.component.html',
   styleUrls: ['./levels.component.scss'] 
+  
 })
 
 
 export class LevelsComponent {
+  private readonly router = inject(Router);
   levels: Level[] = [
     { id: 1, name: 'Level 1', difficulty: 'Introduction', scoringMode: 'highest', files: ['Level1_input.txt', 'problem_statement.pdf']},   
     { id: 2, name: 'Level 2', difficulty: 'Intermediate', scoringMode: 'highest', files: ['Level2_input.txt', 'resources.zip'] },
@@ -61,6 +64,7 @@ export class LevelsComponent {
     name: '',
     difficulty: 'Introduction',
     scoringMode: 'highest',
+    
 
   };
 
@@ -151,5 +155,9 @@ onFileSelected(event: Event):void{
     );
   }
 }
+
+  goBack(): void {
+    this.router.navigate(['/admin/events']);
+  }
 
 }
