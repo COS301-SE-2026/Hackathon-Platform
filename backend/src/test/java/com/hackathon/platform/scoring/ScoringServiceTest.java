@@ -24,6 +24,7 @@ import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.service.StorageService;
 import java.io.ByteArrayInputStream;
+import java.nio.file.Path;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -127,5 +128,26 @@ class ScoringServiceTest {
         assertThat(scored.getScore()).isEqualByComparingTo(BigDecimal.ZERO);
         verify(scoringLogRepo).save(any());
 
+    }
+
+    @Test
+    void scoreSubmission_downloadLevelInputsWhenLevelFilesExist() {
+        LevelFile inputFile = new LevelFile(LVL_ID, "input.txt", "events/.../input.txt", "TXT");
+        when(subRepo.findById(SUB_ID)).thenReturn(Optional.of(sub));
+        when(teamRepo.findById(TEAM_ID)).thenReturn(Optional.of(team));
+        when(eventRepo.findHackathonIdByEventId(EVENT_ID)).thenReturn(Optional.of(HACK_ID));
+        when(solverVRepo.findById(SOLVER_V_ID)).thenReturn(Optional.of(solverVersion));
+        when(lvlFileRepo.findByLevelId(LVL_ID)).thenReturn(List.of(inputFile));
+
+        when(storageS.download(eq("event-resources"), any())).thenReturn(new ByteArrayInputStream("data". getBytes()));
+        when(storageS.download(eq("submissions"), any())).thenReturn(new ByteArrayInputStream("output". getBytes()));
+
+        SolverResult res = new SolverResult(new BigDecimal("60.66"), "SCORED", null, List.of());
+        when(solverRunner.run(any(), any(), any())).thenReturn(new SolverRunOutcome(res, "{}", ""));
+        when(subRepo.save(any(Submission.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        scoringService.scoreSubmission(SUB_ID);
+
+        verify(solverRunner).run(any(Path.class), any(Path.class), any(Path.class));
     }
 }
