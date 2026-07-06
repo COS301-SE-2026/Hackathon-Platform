@@ -97,7 +97,8 @@ public class FileMetadataService {
     String outputKey =
         BlobPath.submissionOutput(hackathonId, teamId.toString(), levelIdStr, dbId, outputFileName);
     String sourceKey =
-        BlobPath.submissionSourceArchive(hackathonId, teamId.toString(), levelIdStr, dbId, sourceFileName);
+        BlobPath.submissionSourceArchive(
+            hackathonId, teamId.toString(), levelIdStr, dbId, sourceFileName);
 
     saved.setOutputStorageKey(outputKey);
     saved.setSourceCodeStorageKey(sourceKey);

@@ -1,11 +1,11 @@
 package com.hackathon.platform.storage;
- 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
- 
+
 import org.junit.jupiter.api.Test;
- 
+
 /** Unit tests for {@link BlobPath} storage key construction. */
 class BlobPathTest {
 
@@ -40,8 +40,10 @@ class BlobPathTest {
 
   @Test
   void submissionOutput_returnsCorrectPath() {
-    String result = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "output.txt");
-    assertEquals("submissions/hackathon-123/team-789/levels/level-456/sub-101/output/output.txt", result);
+    String result =
+        BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "output.txt");
+    assertEquals(
+        "submissions/hackathon-123/team-789/levels/level-456/sub-101/output/output.txt", result);
   }
 
   @Test
@@ -51,12 +53,13 @@ class BlobPathTest {
     assertTrue(result.endsWith("/output.txt"));
   }
 
-
   @Test
   void submissionSourceArchive_returnsCorrectPath() {
     String result =
-        BlobPath.submissionSourceArchive(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "source.zip");
-    assertEquals("submissions/hackathon-123/team-789/levels/level-456/sub-101/source/source.zip", result);
+        BlobPath.submissionSourceArchive(
+            HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "source.zip");
+    assertEquals(
+        "submissions/hackathon-123/team-789/levels/level-456/sub-101/source/source.zip", result);
   }
 
   @Test
@@ -67,25 +70,23 @@ class BlobPathTest {
     assertTrue(result.endsWith("/source.zip"));
   }
 
-
   @Test
   void submissionOutput_differentLevelsProduceDifferentPaths() {
-    String levelOne = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, "1", SUBMISSION_ID, "output.txt");
-    String levelTwo = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, "2", SUBMISSION_ID, "output.txt");
+    String levelOne =
+        BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, "1", SUBMISSION_ID, "output.txt");
+    String levelTwo =
+        BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, "2", SUBMISSION_ID, "output.txt");
     assertFalse(levelOne.equals(levelTwo));
-    assertEquals(
-        "submissions/hackathon-123/team-789/levels/1/sub-101/output/output.txt", levelOne);
-    assertEquals(
-        "submissions/hackathon-123/team-789/levels/2/sub-101/output/output.txt", levelTwo);
+    assertEquals("submissions/hackathon-123/team-789/levels/1/sub-101/output/output.txt", levelOne);
+    assertEquals("submissions/hackathon-123/team-789/levels/2/sub-101/output/output.txt", levelTwo);
   }
- 
+
   @Test
   void submissionOutput_differentSubmissionsProduceDifferentPaths() {
     String subOne = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, "1", "output.txt");
     String subTwo = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, "2", "output.txt");
     assertFalse(subOne.equals(subTwo));
   }
-
 
   @Test
   void scoringLog_returnsCorrectPath() {
@@ -105,10 +106,11 @@ class BlobPathTest {
     assertFalse(result.substring(result.lastIndexOf('/') + 1).contains("/"));
   }
 
-
   @Test
   void submissionOutput_sanitisesBackslash() {
-    String result = BlobPath.submissionOutput(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID,"folder\\file.txt");
+    String result =
+        BlobPath.submissionOutput(
+            HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "folder\\file.txt");
     assertFalse(result.contains("\\"));
   }
 
@@ -119,7 +121,6 @@ class BlobPathTest {
             HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID, "../../secrets.zip");
     assertFalse(result.contains(".."));
   }
-
 
   @Test
   void solverFile_versionNumberAppearsInPath() {

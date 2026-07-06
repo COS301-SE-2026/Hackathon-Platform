@@ -41,14 +41,14 @@ class SolverRunnerTest {
   }
 
   @AfterEach
-  void tearDown() {
-
-  }
+  void tearDown() {}
 
   @Test
   void run_withValidJsonResult_parsesScoreAndStatus() throws IOException {
-    Path script = writeScript("print('{\"score\": 85.5, \"status\": \"SCORED\", "
-        + "\"messages\": [\"validated ok\"]}')");
+    Path script =
+        writeScript(
+            "print('{\"score\": 85.5, \"status\": \"SCORED\", "
+                + "\"messages\": [\"validated ok\"]}')");
 
     SolverRunOutcome outcome = solverRunner.run(script, outputFile, null);
 
@@ -119,11 +119,11 @@ class SolverRunnerTest {
   void run_passesOutputAndLevelInputPaths_asArgumentsToScript() throws IOException {
     Path levelInputs = Files.createDirectory(tempDir.resolve("level-inputs"));
     Path script =
-    writeScript(
-        "import sys, json\n"
-            + "out = sys.argv[1]\n"
-            + "inputs = sys.argv[2]\n"
-            + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"out=\" + out, \"inputs=\" + inputs]}))");
+        writeScript(
+            "import sys, json\n"
+                + "out = sys.argv[1]\n"
+                + "inputs = sys.argv[2]\n"
+                + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"out=\" + out, \"inputs=\" + inputs]}))");
 
     SolverRunOutcome outcome = solverRunner.run(script, outputFile, levelInputs);
 
@@ -146,6 +146,4 @@ class SolverRunnerTest {
       throw new RuntimeException(e);
     }
   }
-
-  
 }

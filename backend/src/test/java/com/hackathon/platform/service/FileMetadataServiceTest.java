@@ -148,8 +148,7 @@ class FileMetadataServiceTest {
 
   @Test
   void saveSubmission_differentLevelIdsProduceDifferentStorageKeys() {
-    Submission firstSaveA =
-        new Submission(TEAM_ID, 1L, SOLVER_VERSION_ID, "pending", "pending");
+    Submission firstSaveA = new Submission(TEAM_ID, 1L, SOLVER_VERSION_ID, "pending", "pending");
     firstSaveA.setId(SUBMISSION_ID);
     when(submissionRepository.save(any(Submission.class)))
         .thenReturn(firstSaveA)
@@ -168,8 +167,7 @@ class FileMetadataServiceTest {
             4096L,
             "application/zip");
 
-    Submission firstSaveB =
-        new Submission(TEAM_ID, 2L, SOLVER_VERSION_ID, "pending", "pending");
+    Submission firstSaveB = new Submission(TEAM_ID, 2L, SOLVER_VERSION_ID, "pending", "pending");
     firstSaveB.setId(SUBMISSION_ID);
     when(submissionRepository.save(any(Submission.class)))
         .thenReturn(firstSaveB)
