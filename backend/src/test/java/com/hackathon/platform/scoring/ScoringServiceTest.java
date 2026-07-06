@@ -105,4 +105,27 @@ class ScoringServiceTest {
         assertThat(scored.getStatus()).isEqualTo("SCORED");
         verify(scoringLogRepo).save(any());
     }
+
+    @Test
+    void scoreSubmission_withSolverFailure_marksFailedAndLogsReason() {
+        when(subRepo.findById(SUB_ID)).thenReturn(Optional.of(sub));
+        when(teamRepo.findById(TEAM_ID)).thenReturn(Optional.of(team));
+        when(eventRepo.findHackathonIdByEventId(EVENT_ID)).thenReturn(Optional.of(HACK_ID));
+        when(solverVRepo.findById(SOLVER_V_ID)).thenReturn(Optional.of(solverVersion));
+        when(lvlFileRepo.findByLevelId(LVL_ID)).thenReturn(List.of());
+
+        when(storageS.download(eq("event-resources"), any())).thenReturn(new ByteArrayInputStream("Solver code". getBytes()));
+        when(storageS.download(eq("submissions"), any())).thenReturn(new ByteArrayInputStream("output data". getBytes()));
+
+        when(solverRunner.run(any(), any(), any())).thenThrow(new SolverExecutionException("SolverExceeded time limit", "TIMEOUT"));
+
+        when(subRepo.save(any(Submission.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Submission scored = scoringService.scoreSubmission(SUB_ID);
+
+        assertThat(scored.getStatus()).isEqualTo("FAILED");
+        assertThat(scored.getScore()).isEqualByComparingTo(BigDecimal.ZERO);
+        verify(scoringLogRepo).save(any());
+
+    }
 }
