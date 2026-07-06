@@ -30,4 +30,12 @@ public class HackathonService {
 
         return hackathonRepository.save(hackathon);
     }
+
+    public List<Hackathon> getAllHackathons() {
+        return hackathonRepository.findAll();
+    }
+
+    public Hackathon getHackathonById(UUID id) {
+        return hackathonRepository.findById(id).orElseThrow(() -> new RuntimeException("Hackathon not found"));
+    }
 }
