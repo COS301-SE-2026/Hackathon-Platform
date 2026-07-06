@@ -51,7 +51,7 @@ public class HackathonService {
     }
 
     public void deleteHackathonById(UUID id) {
-        if(!hackathonRepository.existsById(id))){
+        if(!hackathonRepository.existsById(id)) {
     throw new RuntimeException("Hackathon wasnt found");
         }
         hackathonRepository.deleteById(id);
