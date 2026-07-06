@@ -85,6 +85,13 @@ class SubmissionQueryServiceTest {
         assertThat(res.getScoringLog()).isNull();
     }
 
+    @Test
+    void getSubmissionDetails_forWrongTeam_throwsIllegalArgumentException() {
+        when(subRepo.findByIdAndTeamId(5L, TEAM_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> subQueryService.getSubmissionDetail(5L, TEAM_ID)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("The submission could not be for this team: ");
+    }
+
     private Submission buildSubmission(Long id, Instant submittedAt) {
         Submission sub = new Submission(TEAM_ID, LEVEL_ID, SOLVER_V_ID, "src/code.zip", "out/output.txt");
         sub.setId(id);
