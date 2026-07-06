@@ -92,6 +92,17 @@ class SubmissionQueryServiceTest {
         assertThatThrownBy(() -> subQueryService.getSubmissionDetail(5L, TEAM_ID)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("The submission could not be for this team: ");
     }
 
+    @Test
+    void getSubmissionDetailForAdmin_ignoresTeamOwnership() {
+        Submission sub = buildSubmission(9L, Instant.parse("2026-01-01T00:00:00Z"));
+        
+        when(subRepo.findById(9L)).thenReturn(Optional.of(sub));
+
+        SubmissionResponse res = subQueryService.getSubmissionDetailForAdmin(9L);
+        
+        assertThat(res.getSubmissionId()).isEqualTo(9L);
+    }
+
     private Submission buildSubmission(Long id, Instant submittedAt) {
         Submission sub = new Submission(TEAM_ID, LEVEL_ID, SOLVER_V_ID, "src/code.zip", "out/output.txt");
         sub.setId(id);
