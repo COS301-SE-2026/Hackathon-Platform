@@ -178,7 +178,7 @@ export class ManageEventComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/event-list']);
+    this.router.navigate(['/admin/events']);
   }
 
     onDropFile(event: DragEvent): void {
@@ -238,4 +238,6 @@ export class ManageEventComponent implements OnInit {
       }
     });
   }
+
+  
 }
