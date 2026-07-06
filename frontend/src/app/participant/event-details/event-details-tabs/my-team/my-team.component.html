@@ -45,10 +45,10 @@
 
        <div class="join-code-section">
 
-            <h3 class="section-title">Join Code</h3>
+            <h3 class="join-code-title">Join Code</h3>
 
             <div class="join-code-card">
-                
+
                  <div class="join-code-display">{{ team.teamId }}</div>
 
                 <button
@@ -62,12 +62,51 @@
 
         </div>
 
+        <div class="team-members-section">
+
+            <div class="section-header">
+
+                <h3 class="team-members-section-title">Members</h3>
+
+                <button
+                    pButton
+                    icon="pi pi-refresh"
+                    label="Refresh Teammates"
+                    class="refresh-team-btn"
+                    (click)="refreshTeamMembers()">
+                </button>
+
+            </div>
+
+            <div class="team-members-list">
+
+                @for (member of team.members; track member.userId) {
+
+                <div class="team-member-card">
+
+                    <div class="member-avatar">{{ getInitials(member.name) }}</div>
+
+                    <div class="member-details">
+
+                        <div class="member-name">{{ member.name }} @if (member.isLead) {<span class="team-lead-badge">Team Lead</span> }</div>
+
+                        <div class="member-email">{{ member.email }}</div>
+
+                    </div>
+
+                </div>
+
+                }
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
 
 }
-
 
 <p-dialog 
     header="Create Team" 
@@ -122,12 +161,12 @@
 
     <label for="teamJoinCode">Join Code</label>
 
-    <input
-        pInputText
-        id="teamJoinCode"
-        [(ngModel)]="teamIdToJoin"
-        placeholder="Enter join code"
-        class="team-dialog-input" />
+        <input
+            pInputText
+            id="teamJoinCode"
+            [(ngModel)]="teamIdToJoin"
+            placeholder="Enter join code"
+            class="team-dialog-input" />
 
     <div class="team-dialog-buttons">
 

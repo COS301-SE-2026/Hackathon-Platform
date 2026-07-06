@@ -85,6 +85,10 @@ export class MyTeamComponent implements OnInit {
     });
   }
 
+  refreshTeamMembers(): void {
+  this.loadTeamMembers(this.team.teamId);
+  }
+
   loadTeamMembers(teamId: string): void {
     this.teamService.getTeamMembers(teamId).subscribe({
       next: (members) => {
