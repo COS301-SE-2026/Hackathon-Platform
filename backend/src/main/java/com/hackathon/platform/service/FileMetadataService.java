@@ -93,7 +93,8 @@ public class FileMetadataService {
 
     // Build canonical keys using the real DB id
     String dbId = String.valueOf(saved.getId());
-    String outputKey = BlobPath.submissionOutput(hackathonId, teamId.toString(), dbId, outputFileName);
+    String outputKey =
+        BlobPath.submissionOutput(hackathonId, teamId.toString(), dbId, outputFileName);
     String sourceKey =
         BlobPath.submissionSourceArchive(hackathonId, teamId.toString(), dbId, sourceFileName);
 

@@ -95,6 +95,7 @@ class EventServiceTest {
     req.setTeamSizeLimit((short) 4);
     req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
     req.setDuration(48);
+    req.setHackathonId(UUID.randomUUID());
     when(eventRepository.save(any(Event.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
     Event result = eventService.createEvent(req);
@@ -255,6 +256,7 @@ class EventServiceTest {
     req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
     req.setDuration(50);
     req.setRegistrationKey(null);
+    req.setHackathonId(UUID.randomUUID());
 
     IllegalArgumentException ex =
         assertThrows(

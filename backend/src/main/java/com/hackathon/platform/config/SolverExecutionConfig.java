@@ -4,8 +4,7 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-/**  Configuration for hardened solver execution: how long a solver is allowed to run, and which */
- 
+/** Configuration for hardened solver execution: how long a solver is allowed to run, and which */
 @Configuration
 @Getter
 public class SolverExecutionConfig {

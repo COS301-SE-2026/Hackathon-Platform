@@ -87,7 +87,7 @@ public final class BlobPath {
         "submissions/%s/%s/%s/source/%s", hackathonId, teamId, submissionId, sanitise(filename));
   }
 
-   /**
+  /**
    * Storage key for a scoring log file. One file per team per level per hackathon — new submissions
    * to the same level append to this file. Stored in: scoringlogs.storage_key
    *

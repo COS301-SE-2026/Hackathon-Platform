@@ -16,9 +16,11 @@ public interface SolverVersionRepository extends JpaRepository<SolverVersion, Lo
 
   @Query(
       "SELECT sv FROM SolverVersion sv WHERE sv.hackathonId = :hackathonId ORDER BY sv.versionNumber DESC")
-  List<SolverVersion> findAllByHackathonIdOrderByVersionDesc(@Param("hackathonId") UUID hackathonId);
+  List<SolverVersion> findAllByHackathonIdOrderByVersionDesc(
+      @Param("hackathonId") UUID hackathonId);
 
-  Optional<SolverVersion> findByHackathonIdAndVersionNumber(UUID hackathonId, Integer versionNumber);
+  Optional<SolverVersion> findByHackathonIdAndVersionNumber(
+      UUID hackathonId, Integer versionNumber);
 
   boolean existsByStorageKey(String storageKey);
 }

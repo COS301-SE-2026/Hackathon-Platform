@@ -2,6 +2,7 @@ package com.hackathon.platform.repository;
 
 import com.hackathon.platform.model.Event;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,9 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
   List<Event> fetchAllByAdmin(@Param("userId") UUID userId);
 
   List<Event> findByVisibilityAndStatusIn(String visibility, List<String> statuses);
+
+  @Query("SELECT e.hackathon FROM Event e WHERE e.eventId = :eventId")
+  Optional<UUID> findHackathonIdByEventId(@Param("eventId") UUID eventId);
 
   @Query(
       """
@@ -47,4 +51,7 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     )
 """)
   List<Event> findUserCompletedEvents(@Param("userId") UUID userId);
+
+  @Query("SELECT e FROM Event e WHERE e.hackathon = :hackathonId")
+  List<Event> findByHackathon(@Param("hackathonId") UUID hackathonId);
 }

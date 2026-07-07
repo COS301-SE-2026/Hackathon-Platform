@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Response shape for a team's scoring log. Contains metadata about the log file plus
- * the full text content downloaded from blob storage.
+ * Response shape for a team's scoring log. Contains metadata about the log file plus the full text
+ * content downloaded from blob storage.
  */
 public class ScoringLogResponse {
 
@@ -14,7 +14,7 @@ public class ScoringLogResponse {
   private String storageKey;
   private int submissionCount;
   private Instant lastUpdatedAt;
-  private String logContent;   // full text of the log file from blob
+  private String logContent; // full text of the log file from blob
 
   public ScoringLogResponse() {}
 
@@ -31,28 +31,53 @@ public class ScoringLogResponse {
     this.submissionCount = submissionCount;
     this.lastUpdatedAt = lastUpdatedAt;
     this.logContent = logContent;
-
-
   }
-  
 
-  public UUID getTeamId() { return teamId; }
-  public void setTeamId(UUID teamId) { this.teamId = teamId; }
+  public UUID getTeamId() {
+    return teamId;
+  }
 
-  public UUID getHackathonId() { return hackathonId; }
-  public void setHackathonId(UUID hackathonId) { this.hackathonId = hackathonId; }
+  public void setTeamId(UUID teamId) {
+    this.teamId = teamId;
+  }
 
-  public String getStorageKey() { return storageKey; }
-  public void setStorageKey(String storageKey) { this.storageKey = storageKey; }
+  public UUID getHackathonId() {
+    return hackathonId;
+  }
 
-  public int getSubmissionCount() { return submissionCount; }
-  public void setSubmissionCount(int submissionCount) { this.submissionCount = submissionCount; }
+  public void setHackathonId(UUID hackathonId) {
+    this.hackathonId = hackathonId;
+  }
 
-  public Instant getLastUpdatedAt() { return lastUpdatedAt; }
-  public void setLastUpdatedAt(Instant lastUpdatedAt) { this.lastUpdatedAt = lastUpdatedAt; }
+  public String getStorageKey() {
+    return storageKey;
+  }
 
-  public String getLogContent() { return logContent; }
-  public void setLogContent(String logContent) { this.logContent = logContent; }
+  public void setStorageKey(String storageKey) {
+    this.storageKey = storageKey;
+  }
 
+  public int getSubmissionCount() {
+    return submissionCount;
+  }
 
+  public void setSubmissionCount(int submissionCount) {
+    this.submissionCount = submissionCount;
+  }
+
+  public Instant getLastUpdatedAt() {
+    return lastUpdatedAt;
+  }
+
+  public void setLastUpdatedAt(Instant lastUpdatedAt) {
+    this.lastUpdatedAt = lastUpdatedAt;
+  }
+
+  public String getLogContent() {
+    return logContent;
+  }
+
+  public void setLogContent(String logContent) {
+    this.logContent = logContent;
+  }
 }
