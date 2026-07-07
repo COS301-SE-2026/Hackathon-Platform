@@ -150,6 +150,22 @@ navigateToCreateEvent(hackathonId: string): void {
     this.router.navigate(['/admin/hackathons',hackathonId, 'events','create']);
 }
 
+navigateToManage(hackathonId: string): void {
+    this.router.navigate(['/admin/hackathons', hackathonId, 'manage']);
+
+}
+
+navigateToLevels(hackathonId: string): void {
+    this.router.navigate(['/admin/hackathons', hackathonId, 'levels']);
+
+}
+
+navigateToSolver(hackathonId: string): void {
+    this.router.navigate(['/admin/hackathons', hackathonId, 'solver']);
+
+}
+
+
 getStatusClass(status: string): string {
     switch (status){
         case 'active': return 'status-active';
