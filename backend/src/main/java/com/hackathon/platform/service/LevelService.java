@@ -6,6 +6,7 @@ import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.HackathonRepository;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class LevelService {
@@ -40,5 +41,16 @@ public class LevelService {
         level.setDescription(req.getDescription());
 
         return levelRepository.save(level);
+    }
+
+    public List<Level> getLevelByHackathonId(UUID id){
+        if(!hackathonRepository.existsById(id)){
+            throw new IllegalArgumentException("hackathon not found");
+        }
+        return levelRepository.findByHackathonIdOrderByLevelNumberAsc(id);
+    }
+
+    public Level getLevelById(short id){
+        return levelRepository.findById(id).orElseThrow(() -> new RuntimeException("Lvele not found"));
     }
 }
