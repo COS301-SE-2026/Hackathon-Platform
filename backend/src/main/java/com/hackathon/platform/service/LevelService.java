@@ -53,4 +53,28 @@ public class LevelService {
     public Level getLevelById(short id){
         return levelRepository.findById(id).orElseThrow(() -> new RuntimeException("Lvele not found"));
     }
+
+    public Level updateLevel(short id, LevelRequest req) {
+        Level level = levelRepository.findById(id).orElseThrow(() -> new RuntimeException("Level not found"));
+
+        if(req.getName()!=null && !req.getName().isBlank()){
+            level.setName(req.getName());
+        }
+
+        if(req.getLevelNumber()!=null && req.getLevelNumber()>0 && req.getLevelNumber()!=level.getLevelNumber()){
+            if(levelRepository.existsByHackathonIdAndLevelNumber(level.getHackathonId(), req.getLevelNumber())) {
+                throw new IllegalArgumentException("level number "+req.getLevelNumber()+" already exists");
+            }
+            level.setLevelNumber(req.getLevelNumber());
+        }
+        level.setDescription(req.getDescription());
+        return levelRepository.save(level);
+    }
+
+    public void deletLevel(short id){
+        if(!levelRepository.existsById(id)){
+            throw new RuntimeException("level not found");
+        }
+        levelRepository.deleteById(id);
+    }
 }
