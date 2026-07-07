@@ -69,6 +69,6 @@ public class HackathonController {
 
     @GetMapping("/{hackathonId}/events")
     public ResponseEntity<List<Event>> getEventsForHackathon(@PathVariable("hackathonId") UUID hackathonId) {
-        return ResponseEntity.ok(eventService.getEventsbyHackathonId(hackathonId));
+        return ResponseEntity.ok(eventService.getEventsByHackathonId(hackathonId));
     }
 }
