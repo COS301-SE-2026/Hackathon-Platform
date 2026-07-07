@@ -68,7 +68,7 @@ public class EventService {
       throw new IllegalArgumentException("HackathonId is required");
     }
 
-    if(!hackathonRepository.existsById(req.getHackathonId())){
+    if (!hackathonRepository.existsById(req.getHackathonId())) {
       throw new IllegalArgumentException("Hackathon not found for this id " + req.getHackathonId());
     }
 
@@ -119,7 +119,7 @@ public class EventService {
     event.setVisibility(req.getVisibility());
     event.setStatus(req.getStatus());
     if (req.getHackathonId() != null) {
-      if(!hackathonRepository.existsById(req.getHackathonId())){
+      if (!hackathonRepository.existsById(req.getHackathonId())) {
         throw new RuntimeException("Hackathon not found for id " + req.getHackathonId());
       }
       event.setHackathon(req.getHackathonId());
@@ -187,7 +187,7 @@ public class EventService {
   public List<Event> getUserCompletedEvents() {
     return eventRepository.findUserCompletedEvents(getCurrentAdminId());
   }
-  
+
   public List<Event> getEventsByHackathonId(UUID hackathonId) {
     if (!hackathonRepository.existsById(hackathonId)) {
       throw new RuntimeException("this Hackathon wasnnt found");
