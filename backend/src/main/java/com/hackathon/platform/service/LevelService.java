@@ -71,7 +71,7 @@ public class LevelService {
         return levelRepository.save(level);
     }
 
-    public void deletLevel(short id){
+    public void deleteLevel(short id){
         if(!levelRepository.existsById(id)){
             throw new RuntimeException("level not found");
         }
