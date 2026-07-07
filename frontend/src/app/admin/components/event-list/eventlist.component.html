@@ -66,10 +66,26 @@
               <p-tag [value] = "event.status" [severity] = "statusSeverity(event.status)"/>
             </td>
             <td>
+              <div class = "action-buttons">
               <p-button
               label = "Manage &amp; Edit"
               size = "small"
-              [routerLink] = "['/admin/events/edit',event.eventId]"/>
+              [routerLink] = "['/admin/events',event.eventId,'manage']"
+              styleClass = "p-button-primary"/>
+
+              <p-button
+              label = "Levels"
+              size = "small"
+              [routerLink] = "['/admin/events',event.eventId,'levels']"
+              styleClass = "p-button-secondary"/>
+
+              <p-button
+              label = "Solver"
+              size = "small"
+              [routerLink] = "['/admin/events',event.eventId,'solver']"
+              styleClass = "p-button-primary"/>
+
+              </div>
 
             </td>
           </tr>
