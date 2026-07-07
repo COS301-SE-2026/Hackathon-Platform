@@ -1,10 +1,10 @@
-import {Component, ViewChild, ElementRef,inject} from '@angular/core';
+import {Component, ViewChild, ElementRef,inject,OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { Router } from '@angular/router';
+import { RouterModule,Router, ActivatedRoute } from '@angular/router';
 import {ButtonModule} from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import {StorageService} from '../../../services/storage.service';
 
 interface SolverVersion {
     version : string;
@@ -23,13 +23,19 @@ interface SolverVersion {
     styleUrls: ['./solver.component.scss']
 })
 
-export class SolverComponent {
+export class SolverComponent implements OnInit{
     private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly storageService = inject(StorageService);
+
     @ViewChild('uploadForm') uploadFormRef!: ElementRef<HTMLElement>;
     selectedFile: File | null = null;
     selectedFileName  = '';
     versionLabel  = '';
     changeNotes ='';
+    hackathonId: string ='';
+    isUploading = false;
+    uploadError = '';
 
     versionHistory: SolverVersion[] = [
         {version: 'v1.2.1', uploaded: 'Apr 22, 09:12', runs: 4123, avgRuntime: '2.3s', errorRate: '3.2%', status: 'Active'},
@@ -45,8 +51,15 @@ scrollToUploadForm(): void{
 onFileSelected(event: Event): void{
     const input = event.target as HTMLInputElement;
     if (input.files?.[0]){
-        this.selectedFile = input.files[0];
-        this.selectedFileName= input.files[0].name;
+        const file = input.files[0];
+        if (file.name.endsWith('.py') || file.name.endsWith('.jar')|| file.name.endsWith('.zip')){
+            this.selectedFile = file;
+            this.selectedFileName = file.name;
+            this.uploadError = '';
+        }else {
+            this.uploadError = 'Please select a .py, .jar, or .zip file';
+            this.selectedFile = null;
+            this.selectedFileName= '';        }
 
     }
 }
@@ -55,9 +68,20 @@ onDropFile(event: DragEvent):void{
     event.preventDefault();
     const file = event.dataTransfer?.files[0];
     if (file){
-        this.selectedFile = file;
-        this.selectedFileName = file.name;
+        if (file.name.endsWith('.py') || file.name.endsWith('.jar')|| file.name.endsWith('.zip')){
+            this.selectedFile = file;
+            this.selectedFileName = file.name;
+            this.uploadError = '';
+        }else {
+            this.uploadError = 'Please select a .py, .jar, or .zip file';
+            this.selectedFile = null;
+            this.selectedFileName= '';      
+          }
+
     }
+
+
+
 }
 
 onUploadAndActivate(): void{
@@ -65,27 +89,63 @@ onUploadAndActivate(): void{
         alert("Please select a solver file and provide a version label. ");
         return;
     }
-    console.log('Uploading solver version:',this.versionLabel,this.selectedFileName,this.changeNotes);
+    if (!this.hackathonId){
+        alert("Hackathon ID not available.");
+        return;
+    }
 
-    this.versionHistory.unshift({
-        version: this.versionLabel,
-        uploaded: new Date().toLocaleString('en-ZA',{month: 'short',day:'2-digit',hour:'2-digit' ,minute:'2-digit'}),
-        runs:0,
-        avgRuntime: '-',
-        errorRate: '-',
-        status:'Active'
-    });
+    this.isUploading = true;
+    this.uploadError ='';
 
+    this.storageService.uploadHackathonSolver(
+        this.hackathonId,
+        this.selectedFile,
+        this.versionLabel
+    ).subscribe({
+        next: (response) => {
+            console.log('Solver uploaded successfully:', response);
+            this.isUploading = false;
+
+            this.versionHistory.unshift({
+                version: this.versionLabel,
+                uploaded: new Date().toLocaleString('en-ZA',{month: 'short', day:'2-digit',hour:'2-digit',minute: '2-digit'}),
+                runs:0,
+                avgRuntime:'-',
+                errorRate: '-',
+                status:'Active'
+
+            });
     this.selectedFile= null;
     this.selectedFileName ='';
     this.versionLabel = '';
     this.changeNotes= '';
+        },
+        error: (error) => {
+            console.error('Upload failed:',error);
+            this.isUploading = false;
+            this.uploadError = error.error?.message || 'Upload failed. Please try again';
+        }
+    });
+
+  
 }
 
   goBack(): void {
-    this.router.navigate(['/admin/events']);
+    this.router.navigate(['/admin/hackathons', this.hackathonId]);
   }
 
+  ngOnInit(): void {
+    this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
 
+    if (!this.hackathonId){
+        alert('No hackathon ID provided');
+        return;
+    }
+    this.loadSolverVersions();
+  }
+
+loadSolverVersions(): void {
+    console.log('Loading solver for hackathon:',this.hackathonId);
+}
 
 }
