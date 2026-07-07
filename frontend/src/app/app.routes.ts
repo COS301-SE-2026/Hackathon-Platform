@@ -34,15 +34,15 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
       },
        {
-        path: 'events/:eventId/manage',
+        path: 'hackathons/:hackathonId/manage',
         loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
       },
       {
-        path: 'events/:eventId/levels',
+        path: 'hackathons/:hackathonId/levels',
         loadComponent: () => import('./admin/components/levels/levels.component').then(m => m.LevelsComponent),
       },
       {
-        path: 'events/:eventId/solver',
+        path: 'hackathons/:hackathonId/solver',
         loadComponent: () => import('./admin/components/solver/solver.component').then(m => m.SolverComponent),
       },
       {
