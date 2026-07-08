@@ -131,4 +131,20 @@ class HackathonServiceTest {
         when(hackathonRepository.findById(id)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> hackathonService.updateHackathonById(id, req)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
     }
+
+    @Test
+    void deleteHackathon_delete_whenExist(){
+        UUID id = UUID.randomUUID();
+        when(hackathonRepository.existsById(id)).thenReturn(true);
+        hackathonService.deleteHackathonById(id);
+        verify(hackathonRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    void deleteHackathon_throws_whenNotExist(){
+        UUID id = UUID.randomUUID();
+        when(hackathonRepository.existsById(id)).thenReturn(false);
+        assertThatThrownBy(() -> hackathonService.deleteHackathonById(id)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
+        verify(hackathonRepository, times(1)).deleteById(any(UUID.class));
+    }
 }
