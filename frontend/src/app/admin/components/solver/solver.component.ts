@@ -131,7 +131,13 @@ onUploadAndActivate(): void{
 }
 
   goBack(): void {
-    this.router.navigate(['/admin/hackathons', this.hackathonId]);
+    if (this.hackathonId){
+         this.router.navigate(['/admin/hackathons', this.hackathonId]);
+
+    }else {
+        this.router.navigate(['/admin/hackathons']);
+    }
+   
   }
 
   ngOnInit(): void {
