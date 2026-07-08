@@ -200,6 +200,28 @@
     }
 }
 
+.btn-secondary {
+  background-color: transparent;
+  color:#1983c2;
+  border: 2px solid #1983c2;
+  border-radius: 9px;
+  padding:10px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+
+  &:hover:not(:disabled){
+    background-color: rgba(25,131,194,0.08);
+  }
+
+  &:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
 
 .form-group{
     margin-bottom: 16px;

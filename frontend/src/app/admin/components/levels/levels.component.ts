@@ -72,8 +72,8 @@ export class LevelsComponent {
   };
 
   ngOnInit(): void{
-    this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || "";
-    if (this.hackathonId){
+    this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
+    if (!this.hackathonId){
       console.warn('No hackathon ID provided for levels page');
     }
   }
@@ -168,9 +168,9 @@ onFileSelected(event: Event):void{
 
   goBack(): void {
     if (this.hackathonId){
-    this.router.navigate(['/admin/hackthons',this.hackathonId]);
+    this.router.navigate(['/admin/hackathons',this.hackathonId]);
     }else {
-      this.router.navigate(['/admin/hackthons']);
+      this.router.navigate(['/admin/hackathons']);
 
     }
     
