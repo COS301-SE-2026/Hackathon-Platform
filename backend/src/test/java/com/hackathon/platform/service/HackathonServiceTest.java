@@ -86,4 +86,49 @@ class HackathonServiceTest {
         when( hackathonRepository.findById(id)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> hackathonService.getHackathonById(id)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
     }
+
+    @Test
+    void updateHackathon_updatesNameAndDescription(){
+        UUID id = UUID.randomUUID();
+        Hackathon exist = new Hackathon();
+        exist.setHackathonId(id);
+        exist.setName("old name");
+        exist.setDescription("old descr");
+
+        HackathonRequest req =new HackathonRequest();
+        req.setName("pls change");
+        req.setDescription("pls change");
+        when(hackathonRepository.findById(id)).thenReturn(Optional.of(exist));
+        when(hackathonRepository.save(any(Hackathon.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Hackathon res = hackathonService.updateHackathonById(id, req);
+        assertThat(res.getName()).isEqualTo("pls change");
+        assertThat(res.getDescription()).isEqualTo("pls change");
+
+    }
+
+    @Test
+    void updateHackathon_keepExistingName_hwnRequestBlank(){
+        UUID id = UUID.randomUUID();
+        Hackathon old =new Hackathon();
+        old.setHackathonId(id);
+        old.setName("name");
+
+        HackathonRequest req = new HackathonRequest();
+        req.setName(" ");
+        req.setDescription("new descr");
+        when(hackathonRepository.findById(id)).thenReturn(Optional.of(old));
+        when(hackathonRepository.save(any(Hackathon.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Hackathon res = hackathonService.updateHackathonById(id,req);
+        assertThat(res.getName()).isEqualTo("name");
+        assertThat(res.getDescription()).isEqualTo("new descr");
+    }
+
+    @Test
+    void updateHackathon_throws_whenNotFound(){
+        UUID id = UUID.randomUUID();
+        HackathonRequest req = new HackathonRequest();
+        req.setName("name");
+        when(hackathonRepository.findById(id)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> hackathonService.updateHackathonById(id, req)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
+    }
 }
