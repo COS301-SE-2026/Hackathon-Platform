@@ -11,20 +11,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ParticipantLevelController {
-    private final LevelService levelService;
+  private final LevelService levelService;
 
-    public ParticipantLevelController(LevelService levelService){
-        this.levelService = levelService;
-    }
+  public ParticipantLevelController(LevelService levelService) {
+    this.levelService = levelService;
+  }
 
-    @GetMapping("/api/hackathons/{hackathonId}/leveks")
-    public ResponseEntity<List<Level>> getLevelsForHackathon(@PathVariable("hackathonId") UUID hackathonId) {
-        return ResponseEntity.ok(levelService.getLevelByHackathonId(hackathonId));
-    }
+  @GetMapping("/api/hackathons/{hackathonId}/levels")
+  public ResponseEntity<List<Level>> getLevelsForHackathon(
+      @PathVariable("hackathonId") UUID hackathonId) {
+    return ResponseEntity.ok(levelService.getLevelByHackathonId(hackathonId));
+  }
 
-    @GetMapping("/api/levels/{levelId}")
-    public ResponseEntity<Level> getLevel(@PathVariable("levelId") short levelId){
-        return ResponseEntity.ok(levelService.getLevelById(levelId));
-    }
+  @GetMapping("/api/levels/{levelId}")
+  public ResponseEntity<Level> getLevel(@PathVariable("levelId") short levelId) {
+    return ResponseEntity.ok(levelService.getLevelById(levelId));
+  }
 }
-
