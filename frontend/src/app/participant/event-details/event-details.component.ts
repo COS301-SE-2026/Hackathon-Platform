@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OverviewTabComponent } from './event-details-tabs/overview/overview.component';
 import { RulesTabComponent } from './event-details-tabs/rules/rules.component';
-import { SubmissionsTabComponent } from './event-details-tabs/submissions/submission.component';
+import { SubmissionsComponent } from './event-details-tabs/submissions/submission.component';
 import { MyTeamComponent } from './event-details-tabs/my-team/my-team.component';
 import { LeaderboardTabComponent } from './event-details-tabs/leaderboard/leaderboard.component';
 import { ButtonModule } from 'primeng/button';
@@ -17,7 +17,7 @@ import { TabsModule } from 'primeng/tabs';
       TabsModule,
       OverviewTabComponent,
       RulesTabComponent,
-      SubmissionsTabComponent,
+      SubmissionsComponent,
       MyTeamComponent,
       LeaderboardTabComponent
     ],

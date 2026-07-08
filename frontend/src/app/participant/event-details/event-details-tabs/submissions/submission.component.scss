@@ -1,0 +1,167 @@
+.submission-page {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.submission-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.submission-title {
+   margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-dark);
+}
+
+.submission-prompt {
+  margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+:host ::ng-deep .p-tabs {
+    background: transparent;
+}
+
+:host ::ng-deep .p-tablist {
+     background: #e9ecef; 
+    border: none;
+    padding: 0;
+}
+
+:host ::ng-deep .p-tab {
+    flex: 0 0 auto;
+    min-width: 95px;
+    padding: 14px 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+:host ::ng-deep .p-tab:hover {
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    border-bottom-color: transparent !important;
+}
+
+:host ::ng-deep .p-tab-active:hover {
+    background: var(--background-light-gray) !important;
+    color: var(--text-dark) !important;
+    border-bottom: 3px solid var(--accent-lime-green) !important;
+}
+
+:host ::ng-deep .p-tablist-prev-button:hover, :host ::ng-deep .p-tablist-next-button:hover {
+    background: var(--background-light-gray) !important;
+    color: var(--text-muted) !important;
+}
+
+:host ::ng-deep .p-tab-title {
+    white-space: nowrap;
+    text-align: center;
+}
+
+:host ::ng-deep .p-tab-active {
+    background: var(--background-light-gray) !important;
+    color: var(--text-dark) !important;
+    border-bottom: 3px solid var(--accent-lime-green);
+}
+
+
+:host ::ng-deep .p-tablist-prev-button, :host ::ng-deep .p-tablist-next-button {
+    width: 40px;
+    border: none;
+    background: var(--background-light-gray);
+    color: var(--text-muted);
+}
+
+:host ::ng-deep .p-tablist-prev-button:hover,
+:host ::ng-deep .p-tablist-next-button:hover {
+    background: var(--background-light-gray);
+}
+
+:host ::ng-deep .p-tablist-prev-button:disabled,
+:host ::ng-deep .p-tablist-next-button:disabled {
+    display: none;
+}
+
+:host ::ng-deep .p-tabpanels {
+    margin-top: 16px;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.level-content {
+    width: 100%;
+    min-height: 450px;
+    background: var(--background-white);
+    border: 1px solid var(--border-silver);
+    border-radius: 0px;
+    padding: 24px;
+    box-shadow:0 2px 8px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.level-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.level-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.level-number {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: var(--accent-bright-blue);
+    color: var(--background-white);
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.level-name {
+    
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-dark)
+}
+
+.download-level-btn {
+    background: transparent !important;
+    color: var(--text-dark) !important;
+    min-width: 150px;
+    height: 44px;
+    padding: 0 20px;
+    border: 2px solid var(--text-dark) !important;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+
