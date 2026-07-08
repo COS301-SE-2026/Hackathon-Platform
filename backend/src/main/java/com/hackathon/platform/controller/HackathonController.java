@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/hackahon")
+@RequestMapping("/api/hackathon")
 public class HackathonController {
 
   private final HackathonService hackathonService;
@@ -42,7 +42,7 @@ public class HackathonController {
     return ResponseEntity.ok(hackathonService.getAllHackathons());
   }
 
-  @GetMapping("/{hackathonId")
+  @GetMapping("/{hackathonId}")
   public ResponseEntity<Hackathon> getHackathon(@PathVariable("hackathonId") UUID hackathonId) {
     return ResponseEntity.ok(hackathonService.getHackathonById(hackathonId));
   }
