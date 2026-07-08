@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class HackathonServiceTest {
@@ -39,5 +40,21 @@ class HackathonServiceTest {
         assertThat(result.getName()).isEqualTo("Challenge 2026");
         assertThat(result.getDescription()).isEqualTo("test hackathon");
         verify(hackathonRepository, times(1)).save(any(Hackathon.class));
+    }
+
+    @Test
+    void createHackathon_throws_whenNameIsNull(){
+        HackathonRequest req = new HackathonRequest();
+        req.setName(null);
+        assertThatThrownBy(() -> hackathonService.createHackathon(req)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("name is required");
+        verifyNoInteractions(hackathonRepository);
+    }
+
+    @Test
+    void createHackathon_throws_whenNameIsBlank(){
+        HackathonRequest req = new HackathonRequest();
+        req.setName(" ");
+        assertThatThrownBy(() -> hackathonService.createHackathon(req)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("name is required");
+        verifyNoInteractions(hackathonRepository);
     }
 }
