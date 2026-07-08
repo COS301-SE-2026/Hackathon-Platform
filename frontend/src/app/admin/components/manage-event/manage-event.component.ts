@@ -123,7 +123,12 @@ export class ManageEventComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/admin/hackathons', this.hackathonId]);
+     if (this.hackathonId){
+         this.router.navigate(['/admin/hackathons', this.hackathonId]);
+
+    }else {
+        this.router.navigate(['/admin/hackathons']);
+    }
   }
 
     onDropFile(event: DragEvent): void {
