@@ -57,4 +57,33 @@ class HackathonServiceTest {
         assertThatThrownBy(() -> hackathonService.createHackathon(req)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("name is required");
         verifyNoInteractions(hackathonRepository);
     }
+
+    @Test
+    void getAllHackathons_returnsAllfromRepository(){
+        Hackathon h1 = new Hackathon();
+        h1.setName("h1");
+        Hackathon h2 = new Hackathon();
+        h2.setName("h2");
+        when(hackathonRepository.findAll()).thenReturn(List.of(h1, h2));
+        List<Hackathon> result = hackathonService.getAllHackathons();
+        assertThat(result).hasSize(2).containsExactly(h1, h2);
+    }
+
+    @Test
+    void getHackathonById_returnHackathon_whenFound(){
+        UUID id = UUID.randomUUID();
+        Hackathon hackathon = new Hackathon();
+        hackathon.setHackathonId(id);
+        hackathon.setName("pls find hackathon");
+        when (hackathonRepository.findById(id)).thenReturn(Optional.of(hackathon));
+        Hackathon result = hackathonService.getHackathonById(id);
+        assertThat(result.getName()).isEqualTo("pls find hackathon");
+    }
+
+    @Test
+    void getHackathonById_throws_whenNotFound(){
+        UUID id= UUID.randomUUID();
+        when( hackathonRepository.findById(id)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> hackathonService.getHackathonById(id)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
+    }
 }
