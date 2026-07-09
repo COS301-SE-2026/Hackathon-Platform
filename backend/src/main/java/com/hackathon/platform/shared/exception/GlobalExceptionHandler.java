@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.security.access.AccessDeniedException;
 
 /** Catches exceptions anywhere from the whole app and converts it into JSON errors. */
 @RestControllerAdvice
@@ -114,7 +114,15 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(AccessDeniedException.class)
-  public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex){
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("status", 403, "error", "Access denied", "timestamp", LocalDateTime.now().toString()));
+  public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(
+            Map.of(
+                "status",
+                403,
+                "error",
+                "Access denied",
+                "timestamp",
+                LocalDateTime.now().toString()));
   }
 }

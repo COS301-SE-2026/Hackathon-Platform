@@ -13,13 +13,12 @@ import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.HackathonRepository;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import com.hackathon.platform.repository.HackathonRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
