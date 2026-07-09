@@ -2,8 +2,18 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { EventService, EventResponse, EventRequest } from '../../../services/event.service';
+import { EventService} from '../../../services/event.service';
 import { StorageService } from '../../../services/storage.service';
+
+interface HackathonData {
+  id?: string;
+  name?: string;
+  description?: string;
+  visibility?: 'PUBLIC' | 'PRIVATE';
+  status?: 'UPCOMING' | 'ONGOING'|'COMPLETED'| 'CANCELED'|'ACTIVE'|'INACTIVE';
+}
+
+
 
 @Component({
   selector: 'app-manage-event',
@@ -25,9 +35,9 @@ export class ManageEventComponent implements OnInit {
   uploadSuccess = false;
   uploadError = '';
 
-  hackathonId : string ='';
+  hackathonId  ='';
 
-  eventId: string = '';
+  eventId = '';
   isLoading = true;
   isSaving = false;
   errorMessage = '';
@@ -42,7 +52,7 @@ export class ManageEventComponent implements OnInit {
     status: 'UPCOMING' as 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE',
   };
 
-  originalHackathon:any = null;
+  originalHackathon: HackathonData | null = null;
   statusOptions = ['UPCOMING', 'ONGOING', 'COMPLETED', 'CANCELED', 'ACTIVE', 'INACTIVE'];
   visibilityOptions = ['PUBLIC', 'PRIVATE'];
 
