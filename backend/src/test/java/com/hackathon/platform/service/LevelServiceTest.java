@@ -136,4 +136,57 @@ class LevelServiceTest{
         when(levelRepository.findById((short)6767)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> levelService.getLevelById((short)6767)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
     }
+
+    @Test
+    void updateLevel_updateNameAndDescr_whenLvlNumUnchanged(){
+        UUID hackathonId = UUID.randomUUID();
+        Level ex = new Level(hackathonId, "old", (short)1);
+        ex.setId((short)1);
+        ex.setDescription("old descr");
+        LevelRequest req = new LevelRequest();
+        req.setName("new");
+        req.setLevelNumber((short)1);
+        req.setDescription("new scr");
+        when(levelRepository.findById((short)1)).thenReturn(Optional.of(ex));
+        when(levelRepository.save(any(Level.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Level res = levelService.updateLevel((short)1, req);
+        assertThat(res.getName()).isEqualTo("new");
+        assertThat(res.getDescription()).isEqualTo("new scr");
+        verify(levelRepository, never()).existsByHackathonIdAndLevelNumber(eq(hackathonId), any(Short.class));
+    }
+
+    @Test
+    void updateLevel_changeLvlNum_NumFree(){
+        UUID hackathonId = UUID.randomUUID();
+        Level ex = new Level(hackathonId, "me", (short)1);
+        ex.setId((short)1);
+        LevelRequest req = new LevelRequest();
+        req.setLevelNumber((short)2);
+        when(levelRepository.findById((short)1)).thenReturn(Optional.of(ex));
+        when(levelRepository.existsByHackathonIdAndLevelNumber(hackathonId, (short) 2)).thenReturn(false);
+        when(levelRepository.save(any(Level.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Level res = levelService.updateLevel((short) 1,req);
+        assertThat(res.getLevelNumber()).isEqualTo((short)2 );
+    }
+
+    @Test
+    void updateLevel_throws_whenNewLvlNumTaken(){
+        UUID hackathonId = UUID.randomUUID();
+        Level ex = new Level(hackathonId, "name", (short) 1);
+        ex.setId((short) 1);
+
+        LevelRequest rq = new LevelRequest();
+        rq.setLevelNumber((short)2);
+        when(levelRepository.findById((short) 1)).thenReturn(Optional.of(ex));
+        when(levelRepository.existsByHackathonIdAndLevelNumber(hackathonId, (short)2)).thenReturn(true);
+        assertThatThrownBy(() -> levelService.updateLevel((short) 1, rq)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("already exists");
+        verify(levelRepository, never()).save(any());
+    }
+
+    @Test
+    void updateLevel_throw_whenLevelNotFound(){
+        LevelRequest req = validRequest();
+        when(levelRepository.findById((short) 1)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> levelService.updateLevel((short) 1, req)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
+    }
 }
