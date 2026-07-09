@@ -107,7 +107,7 @@ class HackathonControllerTest{
     }
 
     @Test
-    void deleteHackathon_asParticipant_return403() throws Exception(){
+    void deleteHackathon_asParticipant_return403() throws Exception{
         mockMvc.perform(delete("/api/hackathon/{hackathonId}", seededHackathonId).with(authentication(partic))).andExpect(status().isForbidden());
     }
 }
