@@ -86,4 +86,18 @@ class HackathonControllerTest{
     void getHackathonById_returnSeededHackathon() throws Exception {
         mockMvc.perform(get("/api/hackathons/{hackathonId}", seededHackathonId).with(authentication(partic))).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Seeded hackathon"));
     }
+
+    @Test
+    void updateHackathon_asAdmin_return200() throws Exception{
+        HackathonRequest updateReq = new HackathonRequest();
+        updateReq.setName("updated name");
+        updateReq.setDescription("updated description");
+
+        mockMvc.perform(put("/api/hackathon/{hackathonId}", seededHackathonId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(updateReq))).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("updated name"));
+    }
+
+    @Test
+    void updateHackathon_asParticipant_return403() throws Exception{
+        mockMvc.perform(put("/api/hackathon/{hackathonId}", seededHackathonId).with(authentication(partic)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(hackathonRequest))).andExpect(status().isForbidden());
+    }
 }
