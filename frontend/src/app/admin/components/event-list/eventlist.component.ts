@@ -34,7 +34,7 @@ export class EventlistComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  hackathonId: string = '';
+  hackathonId = '';
   searchQuery = '';
   statusFilter = '';
   visibilityFilter = '';

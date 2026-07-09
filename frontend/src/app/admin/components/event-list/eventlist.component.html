@@ -1,13 +1,13 @@
 <div class = "events-page">
   <main class = "content">
 
-    <div class = "back-navigation" *ngIf = "hackathonId">
-      <button class = "back-btn" (click) = "goBack()">
-
+    @if (hackathonId){
+     <div class = "back-navigation">
+       <button class = "back-btn" (click) = "goBack()">
       </button>
-    </div>
-
-    
+     </div>
+    }
+      
     <div class = "page-header">
       <div>
         <h1>Events</h1>
