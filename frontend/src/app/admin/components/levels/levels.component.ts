@@ -176,4 +176,14 @@ onFileSelected(event: Event):void{
     
   }
 
+  deleteLevel() : void {
+    if (!this.editingLevel) return;
+
+    if (confirm(`Are you sure you want to delete "${this.editingLevel.name}"?`)){
+      this.levels = this.levels.filter(level => level.id !== this.editingLevel!.id);
+
+      this.closeLevelModal();
+    }
+  }
+
 }

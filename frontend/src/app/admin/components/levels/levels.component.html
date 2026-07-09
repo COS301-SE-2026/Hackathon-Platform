@@ -93,6 +93,9 @@
             </div>
 
             <div class = "modal-actions">
+                @if (editingLevel){
+                    <button class = "btn-danger" (click) = "deleteLevel()">Delete Level</button>
+                }
                 <button  class = "btn-cancel" (click) = "closeLevelModal()">Cancel</button>
                 <button  class = "btn-save" (click)="saveLevel()">{{editingLevel ? 'Save changes' : 'Add Level'}}</button>
             </div>
