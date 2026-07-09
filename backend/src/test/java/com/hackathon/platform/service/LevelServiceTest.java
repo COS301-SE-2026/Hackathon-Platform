@@ -189,4 +189,18 @@ class LevelServiceTest{
         when(levelRepository.findById((short) 1)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> levelService.updateLevel((short) 1, req)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
     }
+
+    @Test
+    void deleteLevel_deltes_ifExist(){
+        when(levelRepository.existsById((short)1)).thenReturn(true);
+        levelService.deleteLevel((short)1);
+        verify(levelRepository).deleteById((short)1);
+    }
+
+    @Test
+    void deleteLevel_throw_whenNotExist(){
+        when(levelRepository.existsById((short)1)).thenReturn(false);
+        assertThatThrownBy(() -> levelService.deleteLevel((short)1)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
+        verify(levelRepository, never()).deleteById(any(Short.class));
+    }
 }
