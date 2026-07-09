@@ -1,4 +1,4 @@
-import {Component,inject } from '@angular/core';
+import {Component,inject, OnInit } from '@angular/core';
 import {CommonModule } from '@angular/common';
 import {FormsModule } from '@angular/forms';
 import {RouterModule,ActivatedRoute } from '@angular/router';
@@ -31,12 +31,12 @@ interface Level {
 })
 
 
-export class LevelsComponent {
+export class LevelsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  hackathonId: string = '';
-  hackathonName : string ='';
+  hackathonId = '';
+  hackathonName  ='';
   levels: Level[] = [
     { id: 1, name: 'Level 1', difficulty: 'Introduction', scoringMode: 'highest', files: ['Level1_input.txt', 'problem_statement.pdf']},   
     { id: 2, name: 'Level 2', difficulty: 'Intermediate', scoringMode: 'highest', files: ['Level2_input.txt', 'resources.zip'] },

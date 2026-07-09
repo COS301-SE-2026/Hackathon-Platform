@@ -61,25 +61,25 @@ export class StorageService {
   );
 }
 
-uploadHackathonProblemStatement(hackathonId: string, file: File): Observable<any>{
+uploadHackathonProblemStatement(hackathonId: string, file: File): Observable<{storageKey: string; blobUrl: string}>{
   const formData = new FormData();
   formData.append('file',file);
   formData.append('hackathonId',hackathonId);
 
-  return this.http.post(`${this.baseUrl}/hackathons/${hackathonId}/problem-statement`,formData);
+  return this.http.post<{storageKey: string; blobUrl: string}>(`${this.baseUrl}/hackathons/${hackathonId}/problem-statement`,formData);
 }
 
 uploadHackathonSolver (
   hackathonId : string,
   file:File,
   versionLabel : string
-): Observable<any> {
+): Observable<{storageKey: string; blobUrl: string}> {
   const formData = new FormData();
   formData.append('file',file);
   formData.append('hackathonId',hackathonId);
   formData.append('versionLabel',versionLabel);
 
-  return this.http.post(`${this.baseUrl}/hackathons/${hackathonId}/solver`,formData);
+  return this.http.post<{storageKey: string; blobUrl: string}>(`${this.baseUrl}/hackathons/${hackathonId}/solver`,formData);
 }
 
 }

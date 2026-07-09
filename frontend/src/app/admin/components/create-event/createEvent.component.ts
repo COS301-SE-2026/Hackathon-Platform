@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule,ActivatedRoute } from '@angular/router';
@@ -11,7 +11,7 @@ import { EventService, EventRequest } from '../../../services/event.service';
   templateUrl: './createEvent.component.html',
   styleUrls: ['./createEvent.component.scss']
 })
-export class CreateEventComponent {
+export class CreateEventComponent implements OnInit {
 
   @ViewChild('fileInput')
   fileInput!: ElementRef<HTMLInputElement>;
@@ -20,7 +20,7 @@ export class CreateEventComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  hackathonId: string ='';
+  hackathonId ='';
 
   form = {
     eventName: '',

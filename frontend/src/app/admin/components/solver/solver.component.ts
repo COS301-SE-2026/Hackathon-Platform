@@ -33,7 +33,7 @@ export class SolverComponent implements OnInit{
     selectedFileName  = '';
     versionLabel  = '';
     changeNotes ='';
-    hackathonId: string ='';
+    hackathonId ='';
     isUploading = false;
     uploadError = '';
 
