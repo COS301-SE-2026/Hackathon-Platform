@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.hackathon.platform.repository.HackathonRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 class EventServiceTest {
   @Mock private EventRepository eventRepository;
   @Mock private EventRequest eventRequest;
+  @Mock private HackathonRepository hackathonRepository;
   @InjectMocks EventService eventService;
 
   private UUID eventId;
@@ -98,6 +101,7 @@ class EventServiceTest {
     req.setHackathonId(UUID.randomUUID());
     when(eventRepository.save(any(Event.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
+    when(hackathonRepository.existsById(any())).thenReturn(true);
     Event result = eventService.createEvent(req);
 
     assertThat(result).isNotNull();

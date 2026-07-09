@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class HackathonServiceTest {
@@ -46,7 +47,7 @@ class HackathonServiceTest {
     void createHackathon_throws_whenNameIsNull(){
         HackathonRequest req = new HackathonRequest();
         req.setName(null);
-        assertThatThrownBy(() -> hackathonService.createHackathon(req)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("name is required");
+        assertThatThrownBy(() -> hackathonService.createHackathon(req)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("isnt entered");
         verifyNoInteractions(hackathonRepository);
     }
 
@@ -54,7 +55,7 @@ class HackathonServiceTest {
     void createHackathon_throws_whenNameIsBlank(){
         HackathonRequest req = new HackathonRequest();
         req.setName(" ");
-        assertThatThrownBy(() -> hackathonService.createHackathon(req)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("name is required");
+        assertThatThrownBy(() -> hackathonService.createHackathon(req)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("isnt entered");
         verifyNoInteractions(hackathonRepository);
     }
 
@@ -129,7 +130,7 @@ class HackathonServiceTest {
         HackathonRequest req = new HackathonRequest();
         req.setName("name");
         when(hackathonRepository.findById(id)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> hackathonService.updateHackathonById(id, req)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
+        assertThatThrownBy(() -> hackathonService.updateHackathonById(id, req)).isInstanceOf(RuntimeException.class).hasMessageContaining("wasnt found");
     }
 
     @Test
@@ -144,7 +145,7 @@ class HackathonServiceTest {
     void deleteHackathon_throws_whenNotExist(){
         UUID id = UUID.randomUUID();
         when(hackathonRepository.existsById(id)).thenReturn(false);
-        assertThatThrownBy(() -> hackathonService.deleteHackathonById(id)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
-        verify(hackathonRepository, times(1)).deleteById(any(UUID.class));
+        assertThatThrownBy(() -> hackathonService.deleteHackathonById(id)).isInstanceOf(RuntimeException.class).hasMessageContaining("wasnt found");
+        verify(hackathonRepository, never()).deleteById(any(UUID.class));
     }
 }

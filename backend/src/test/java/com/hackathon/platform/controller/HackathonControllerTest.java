@@ -74,17 +74,17 @@ class HackathonControllerTest{
 
     @Test
     void createHackathon_asAdmin_return403() throws Exception {
-        mockMvc.perform(post("/api/hackahon").with(authentication(partic)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(hackathonRequest))).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/hackathon").with(authentication(partic)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(hackathonRequest))).andExpect(status().isForbidden());
     }
 
     @Test
     void getAllHackathons_returnSeededHackathon() throws Exception{
-        mockMvc.perform(get("/api/hackathon").with(authentication(partic))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray()).andExpect(jsonPath("$[?(@.hackathonId == ' " +seededHackathonId+"')]").exists());
+        mockMvc.perform(get("/api/hackathon").with(authentication(partic))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray()).andExpect(jsonPath("$[?(@.hackathonId == '"+seededHackathonId+"')]").exists());
     }
 
     @Test
     void getHackathonById_returnSeededHackathon() throws Exception {
-        mockMvc.perform(get("/api/hackathons/{hackathonId}", seededHackathonId).with(authentication(partic))).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Seeded hackathon"));
+        mockMvc.perform(get("/api/hackathon/{hackathonId}", seededHackathonId).with(authentication(partic))).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Seeded hackathon"));
     }
 
     @Test
@@ -103,7 +103,7 @@ class HackathonControllerTest{
 
     @Test
     void deleteHackathon_asAdmin_return204() throws Exception{
-        mockMvc.perform(delete("/api/hackathons/{hackathonId}", seededHackathonId).with(authentication(admin))).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/hackathon/{hackathonId}", seededHackathonId).with(authentication(admin))).andExpect(status().isNoContent());
     }
 
     @Test
