@@ -35,7 +35,8 @@ export class LevelsComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  hackathonId:string ='';
+  hackathonId: string = '';
+  hackathonName : string ='';
   levels: Level[] = [
     { id: 1, name: 'Level 1', difficulty: 'Introduction', scoringMode: 'highest', files: ['Level1_input.txt', 'problem_statement.pdf']},   
     { id: 2, name: 'Level 2', difficulty: 'Intermediate', scoringMode: 'highest', files: ['Level2_input.txt', 'resources.zip'] },
@@ -73,8 +74,14 @@ export class LevelsComponent {
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
-    if (!this.hackathonId){
-      console.warn('No hackathon ID provided for levels page');
+
+    const navigation = this.router.getCurrentNavigation();
+    if(navigation?.extras?.state) {
+      this.hackathonName = navigation.extras.state['hackathonName'] || '';
+    }
+
+    if (!this.hackathonName){
+      this.hackathonName = 'Loading...';
     }
   }
 

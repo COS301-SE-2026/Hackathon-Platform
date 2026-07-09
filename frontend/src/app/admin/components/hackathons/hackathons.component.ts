@@ -156,7 +156,10 @@ navigateToManage(hackathonId: string): void {
 }
 
 navigateToLevels(hackathonId: string): void {
-    this.router.navigate(['/admin/hackathons', hackathonId, 'levels']);
+    const hackathon = this.hackathons.find(h => h.id === hackathonId);
+    this.router.navigate(['/admin/hackathons', hackathonId, 'levels'],{
+    state: {hackathonName: hackathon?.name || ''}
+    });
 
 }
 
