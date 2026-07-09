@@ -1,0 +1,69 @@
+package com.hackathon.platform.controller;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hackathon.platform.dto.HackathonRequest;
+import com.hackathon.platform.model.Hackathon;
+import com.hackathon.platform.model.Role;
+import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.RoleRepository;
+import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.repository.HackathonRepository;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc
+@Transactional
+class HackathonControllerTest{
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private UserRepository userRepository;
+    @Autowired private RoleRepository roleRepository;
+    @Autowired private HackathonRepository hackathonRepository;
+    private HackathonRequest hackathonRequest;
+    private UsernamePasswordAuthenticationToken admin;
+    private UsernamePasswordAuthenticationToken partic;
+    private UUID seededHackathonId;
+
+    @BeforeEach
+    void setUp(){
+        Role adminRole = Role.builder().roleId(1).name("ADMIN").build();
+        roleRepository.saveAndFlush(adminRole);
+        Role partiRole = Role.builder().roleId(2).name("PARTICIPANT").build();
+        roleRepository.saveAndFlush(partiRole);
+
+        User ad = User.builder().userId(UUID.randomUUID()).firstName("Abhishek").lastName("Bachan").email("abachan@gmail.com").passwordHash("($2a$12$hashedpassword").role(adminRole).status("ACTIVE").build();
+        User savedAdmin = userRepository.saveAndFlush(ad);
+
+        User parti= User.builder().userId(UUID.randomUUID()).firstName("Janhvi").lastName("Kapoor").email("jk@gmail.com").passwordHash("$2a$12$hashedpassword").role(partiRole).status("ACTIVE").build();
+        User savedParti=userRepository.saveAndFlush(parti);
+        admin=new UsernamePasswordAuthenticationToken(savedAdmin, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        partic= new UsernamePasswordAuthenticationToken(savedParti, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+
+        Hackathon seededHack = new Hackathon();
+        seededHack.setName("Seeded hackathon");
+        seededHack.setDescription("Seeeded for test for controler");
+        Hackathon savedHack = hackathonRepository.saveAndFlush(seededHack);
+        seededHackathonId = savedHack.getHackathonId();
+        hackathonRequest = new HackathonRequest();
+        hackathonRequest.setName("New");
+        hackathonRequest.setDescription("New Description");
+    }
+}
