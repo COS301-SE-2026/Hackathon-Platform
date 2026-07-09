@@ -66,4 +66,16 @@ class HackathonControllerTest{
         hackathonRequest.setName("New");
         hackathonRequest.setDescription("New Description");
     }
+
+    @Test
+    void createHackathon_asAdmin_return200() throws Exception {
+        mockMvc.perform(post("/api/hackathon").with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(hackathonRequest))).andExpect(status().isOk()).andExpect(jsonPath("$.hackathonId").exists()).andExpect(jsonPath("$.name").value("New"));
+    }
+
+    @Test
+    void createHackathon_asAdmin_return403() throws Exception {
+        mockMvc.perform(post("/api/hackahon").with(authentication(partic)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(hackathonRequest))).andExpect(status().isForbidden());
+    }
+
+
 }
