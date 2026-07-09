@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { DatePickerModule } from 'primeng/datepicker';
+
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -16,8 +16,6 @@ interface Hackathon {
     id : string;
     name : string;
     description : string;
-    startDate : Date;
-    endDate : Date;
     status : 'active' | 'upcoming' | 'completed'; 
     eventCount : number;
 
@@ -33,7 +31,6 @@ interface Hackathon {
         ButtonModule,
         DialogModule,
         InputTextModule,
-        DatePickerModule,
         InputNumberModule,
         ToastModule,
         TextareaModule
@@ -57,8 +54,7 @@ export class HackathonsComponent implements OnInit {
  newHackathon = {
     name : '',
     description: '',
-    startDate: new Date(),
-    endDate : new Date(),
+
  };
 
  ngOnInit(): void {
@@ -79,8 +75,7 @@ export class HackathonsComponent implements OnInit {
     this.newHackathon = {
         name: '',
         description:'',
-        startDate : new Date(),
-        endDate : new Date(),
+
         };
         this.showDialog =  true;
  }
@@ -90,8 +85,7 @@ export class HackathonsComponent implements OnInit {
     this.newHackathon = {
         name: hackathon.name,
         description: hackathon.description,
-        startDate: hackathon.startDate,
-        endDate: hackathon.endDate,
+
     };
     this.showDialog = true;
  }
@@ -112,8 +106,7 @@ export class HackathonsComponent implements OnInit {
                 ...this.hackathons[index],
                 name: this.newHackathon.name,
                 description: this.newHackathon.description,
-                startDate: this.newHackathon.startDate,
-                endDate: this.newHackathon.endDate,
+
             };
         }
 
@@ -123,8 +116,6 @@ export class HackathonsComponent implements OnInit {
                 id: Date.now().toString(),
                 name: this.newHackathon.name,
                 description: this.newHackathon.description,
-                startDate: this.newHackathon.startDate,
-                endDate: this.newHackathon.endDate,
                 status: 'upcoming',
                 eventCount: 0
 

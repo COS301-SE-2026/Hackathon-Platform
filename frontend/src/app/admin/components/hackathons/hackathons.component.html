@@ -22,12 +22,6 @@
 
                 <p class = "hackathon-description">{{hackathon.description}}</p>
 
-                <div class = "hackathon-dates">
-                    <span>{{hackathon.startDate | date:'MMM d, y'}}</span>
-                    <span>-</span>
-                    <span>{{ hackathon.endDate | date:'MMM d, y' }}</span>
-                </div>
-
                 <div class = "hackathon-stats">
                     <span>{{hackathon.eventCount}} events</span>
                 </div>
@@ -100,21 +94,8 @@
         <label>Description</label>
         <textarea pTextarea [(ngModel)] = "newHackathon.description" rows = "3" placeholder = "Enter description"></textarea>
     </div>
-
-    <div class = "form-row">
-        <div class = "form-group">
-            <label>Start Date</label>
-            <p-datePicker [(ngModel)] = "newHackathon.startDate" dateFormat = "mm/dd/yy" />
-
-        </div>
-
-            <div class = "form-group">
-            <label>End Date</label>
-            <p-datePicker [(ngModel)] = "newHackathon.endDate" dateFormat = "mm/dd/yy" />
-            </div>
-
-    </div>
 </div>
+
 
 <ng-template #footer>
     <p-button label = "Cancel" (onClick) = "showDialog = false" styleClass = "p-button-secondary" />
