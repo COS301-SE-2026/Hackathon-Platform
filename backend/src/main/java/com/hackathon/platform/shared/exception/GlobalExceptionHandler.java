@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.access.AccessDeniedException;
 
 /** Catches exceptions anywhere from the whole app and converts it into JSON errors. */
 @RestControllerAdvice
@@ -110,5 +111,10 @@ public class GlobalExceptionHandler {
                 "status", 500,
                 "error", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()));
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex){
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("status", 403, "error", "Access denied", "timestamp", LocalDateTime.now().toString()));
   }
 }
