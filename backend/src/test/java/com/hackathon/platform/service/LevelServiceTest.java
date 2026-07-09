@@ -103,4 +103,37 @@ class LevelServiceTest{
         assertThatThrownBy(() -> levelService.createLevel(hackathonId, req)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("already exist");
         verify(levelRepository, never()).save(any());
     }
+
+    @Test
+    void getLevel_returnOrderLevels(){
+        UUID hackathonId = UUID.randomUUID();
+        Level l1 = new Level(hackathonId, "ez clapz", (short)1);
+        Level l2 = new Level(hackathonId, "dis 1 hard", (short)2);
+        when(hackathonRepository.existsById(hackathonId)).thenReturn(true);
+        when(levelRepository.findByHackathonIdOrderByLevelNumberAsc(hackathonId)).thenReturn(List.of(l1, l2));
+        List<Level> res = levelService.getLevelByHackathonId(hackathonId);
+        assertThat(res).containsExactly(l1,l2);
+    }
+
+    @Test
+    void getLevelByHackathon_throws_whenHackathonDoesntExist() {
+        UUID hackathonId = UUID.randomUUID();
+        when(hackathonRepository.existsById(hackathonId)).thenReturn(false);
+        assertThatThrownBy(() -> levelService.getLevelByHackathonId(hackathonId)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
+    }
+
+    @Test
+    void getLevelById_returnLevel_whenFound(){
+        Level lvl = new Level(UUID.randomUUID(), "ez", (short)1);
+        lvl.setId((short)5);
+        when(levelRepository.findById((short)5)).thenReturn(Optional.of(lvl));
+        Level res = levelService.getLevelById((short)5);
+        assertThat(res.getName()).isEqualTo("ez");
+    }
+
+    @Test
+    void getLevelById_throw_whenCantFind(){
+        when(levelRepository.findById((short)6767)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> levelService.getLevelById((short)6767)).isInstanceOf(RuntimeException.class).hasMessageContaining("not found");
+    }
 }
