@@ -100,4 +100,14 @@ class HackathonControllerTest{
     void updateHackathon_asParticipant_return403() throws Exception{
         mockMvc.perform(put("/api/hackathon/{hackathonId}", seededHackathonId).with(authentication(partic)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(hackathonRequest))).andExpect(status().isForbidden());
     }
+
+    @Test
+    void deleteHackathon_asAdmin_return204() throws Exception{
+        mockMvc.perform(delete("/api/hackathons/{hackathonId}", seededHackathonId).with(authentication(admin))).andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteHackathon_asParticipant_return403() throws Exception(){
+        mockMvc.perform(delete("/api/hackathon/{hackathonId}", seededHackathonId).with(authentication(partic))).andExpect(status().isForbidden());
+    }
 }
