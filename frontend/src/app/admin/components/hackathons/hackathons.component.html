@@ -86,13 +86,13 @@
 
 <div class = "dialog-content">
     <div class = "form-group">
-        <label>Hackathon Name *</label>
-        <input pInputText [(ngModel)] = "newHackathon.name" placeholder = "Enter hackathon name" />
+        <label for = "hackathonName">Hackathon Name *</label>
+        <input id = "hackathonName" pInputText [(ngModel)] = "newHackathon.name" placeholder = "Enter hackathon name" />
 
     </div>
     <div class = "form-group">
-        <label>Description</label>
-        <textarea pTextarea [(ngModel)] = "newHackathon.description" rows = "3" placeholder = "Enter description"></textarea>
+        <label for = "hackathonDescription">Description</label>
+        <textarea id = "hackathonDescription" pTextarea [(ngModel)] = "newHackathon.description" rows = "3" placeholder = "Enter description"></textarea>
     </div>
 </div>
 
