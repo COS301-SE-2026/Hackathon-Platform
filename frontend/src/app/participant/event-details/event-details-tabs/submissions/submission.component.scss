@@ -164,4 +164,189 @@
     text-transform: uppercase;
 }
 
+.upload-area {
+    margin-top: 32px;
+}
 
+.upload-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.upload-card {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    background: var(--background-white);
+    border: 1px solid var(--border-silver);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.upload-title {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-dark);
+}
+
+
+
+:host ::ng-deep .p-fileupload {
+    width: 100%;
+}
+
+:host ::ng-deep .p-fileupload-header {
+    display: none;
+}
+
+:host ::ng-deep .p-fileupload-content {
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+
+
+.upload-dropzone {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 240px;
+    padding: 32px;
+    background: var(--background-light-gray);
+    border: 2px dashed var(--border-silver);
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.upload-dropzone:hover {
+    border-color: var(--primary-dark-navy);
+}
+
+.upload-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 20px;
+    font-size: 44px;
+    color: var(--primary-dark-navy);
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+
+.drop-title {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.drop-subtitle {
+    margin: 0 0 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.choose-file-btn {
+  min-width: 150px;
+  height: 44px;
+  padding: 0 20px;
+  line-height: 1.2;
+  background: transparent !important;
+  color: var(--text-dark) !important;
+  border: 2px solid var(--text-dark) !important;
+  border-radius: 0;
+  font-size: 14px;
+ font-weight: 600;
+text-transform: uppercase;
+}
+
+.file-selected {
+    background: #f2fbf4;                
+    border-color: var(--accent-lime-green);
+}
+
+.file-selected .upload-icon {
+    color: var(--accent-lime-green);
+    font-size: 48px;
+}
+
+.remove-file-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.selected-file-name {
+    margin: 0 0 12px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+:host ::ng-deep .remove-file-btn {
+    background: transparent !important;
+    border: none !important;
+}
+
+:host ::ng-deep .remove-file-btn .pi {
+    color: var(--primary-dark-navy) !important;
+}
+
+.submit-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 80px;
+    margin-top: 32px;
+    padding: 0 24px;
+    background: var(--primary-dark-navy);
+}
+
+.submit-message {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--background-light-gray);
+}
+
+.submit-btn {
+    min-width: 150px;
+  height: 44px;
+  padding: 0 20px;
+   line-height: 1.2;
+    border: none;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--accent-bright-blue) !important;
+    color: var(--background-white) !important;
+}
+
+:host ::ng-deep .submit-btn:hover {
+    background: var(--accent-bright-blue) !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: var(--background-white) !important;
+}
+
+.submit-btn:disabled {
+    background: var(--text-muted) !important;
+    color: var(--background-white) !important;
+}

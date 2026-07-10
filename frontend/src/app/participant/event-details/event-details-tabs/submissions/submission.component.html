@@ -25,7 +25,7 @@
 
                     <div class="level-content">
 
-                       <div class="level-header">
+                        <div class="level-header">
 
                             <div class="level-info">
                                 <div class="level-number">{{ level.id }}</div>
@@ -39,7 +39,151 @@
                                 class="download-level-btn">
                             </button>
 
-                         </div>
+                        </div>
+
+                        <div class="upload-area">
+
+                                <div class="upload-grid">
+
+                                    <div class="upload-card">
+
+                                        <h3 class="upload-title">Upload Source Code Archive</h3>
+
+                                        <p-fileUpload
+                                            #sourceUploader
+                                            mode="advanced"
+                                            accept=".zip"
+                                            [multiple]="false"
+                                            [customUpload]="true"
+                                            [auto]="false"
+                                            (onSelect)="onSourceSelected($event)"
+                                            >
+
+                                            <ng-template pTemplate="content">
+
+                                                <div class="upload-dropzone" [class.file-selected]="sourceArchive">
+
+                                                    @if (sourceArchive) {
+
+                                                        <button
+                                                            pButton
+                                                            type="button"
+                                                            icon="pi pi-times"
+                                                            text rounded
+                                                            class="remove-file-btn"
+                                                            (click)="removeSourceFile(sourceUploader)">
+                                                        </button>
+
+                                                        <i class="pi pi-file upload-icon"></i>
+                                                        <h4 class="selected-file-name">{{ formatFileName(sourceArchive.name) }}</h4>
+                                                        <p class="drop-subtitle"> Click or drag a new file to replace</p>
+
+                                                        <button
+                                                            pButton
+                                                            type="button"
+                                                            label="Replace ZIP File"
+                                                            class="choose-file-btn"
+                                                            (click)="sourceUploader.choose()">
+                                                        </button>
+                                                    } 
+                                                    
+                                                    @else {
+
+                                                        <i class="pi pi-cloud-upload upload-icon"></i>
+                                                        <h4 class="drop-title">Drag and drop your ZIP here</h4>
+
+                                                        <p class="drop-subtitle">or click to browse files</p>
+                                                        <button
+                                                            pButton
+                                                            type="button"
+                                                            label="Choose ZIP File"
+                                                            class="choose-file-btn"
+                                                            (click)="sourceUploader.choose()">
+                                                        </button>
+                                                    }
+
+                                                </div>
+                                            </ng-template>
+
+                                        </p-fileUpload>
+
+                                    </div>
+
+                                    <div class="upload-card">
+
+                                        <h3 class="upload-title">Upload Solution Output File</h3>
+
+                                        <p-fileUpload
+                                            #solutionUploader
+                                            mode="advanced"
+                                            [multiple]="false"
+                                            [customUpload]="true"
+                                            accept=".txt"
+                                            [auto]="false"                                      
+                                            (onSelect)="onSolutionSelected($event)"
+                                            >
+                                            <ng-template pTemplate="content">
+
+                                                <div
+                                                    class="upload-dropzone" [class.file-selected]="solutionOutput">
+
+                                                    @if (solutionOutput) {
+                                                        <button
+                                                            pButton
+                                                            type="button"
+                                                            icon="pi pi-times"
+                                                            text rounded
+                                                            class="remove-file-btn"
+                                                            (click)="removeSolutionFile(solutionUploader)">
+                                                        </button>
+
+                                                        <i class="pi pi-file upload-icon"></i>
+
+                                                        <h4 class="selected-file-name">{{ formatFileName(solutionOutput.name) }}</h4>
+                                                        <p class="drop-subtitle">Click or drag a new file to replace </p>
+
+                                                        <button
+                                                            pButton
+                                                            type="button"
+                                                            label="Replace Output File"
+                                                            class="choose-file-btn"
+                                                            (click)="solutionUploader.choose()">
+                                                        </button>
+
+                                                    } @else {
+                                                        <i class="pi pi-cloud-upload upload-icon"></i>
+                                                        <h4 class="drop-title">Drag and drop your TXT here</h4>
+                                                         <p class="drop-subtitle">or click to browse files</p>
+
+                                                        <button
+                                                            pButton
+                                                            type="button"
+                                                            label="Choose TXT File"
+                                                            class="choose-file-btn"
+                                                            (click)="solutionUploader.choose()">
+                                                        </button>
+                                                    }
+
+                                                </div>
+
+                                            </ng-template>
+
+                                        </p-fileUpload>
+
+                                    </div>
+                                </div>
+
+                                <div class="submit-bar">
+                                    <span class="submit-message">Upload ZIP and TXT files to enable submission</span>
+                                    <button
+                                        pButton
+                                        type="button"
+                                        label="Submit Solution"
+                                        class="submit-btn"
+                                        [disabled]="!canSubmit">
+                                    </button>
+                                </div>
+                        </div>
 
                     </div>
 
