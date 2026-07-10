@@ -2,6 +2,7 @@ package com.hackathon.platform.controller;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +25,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import static org.hamcrest.Matchers.hasSize;
+import org.springframework.test.web.servlet.MvcResult;
+import com.hackathon.platform.model.Level;
 
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -77,5 +81,18 @@ class LevelControllerTest {
     @Test
     void createLevel_asPart_return403() throws Exception {
         mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(part)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num1", 1)))).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getLevelForHackathon_returnOrderLevels() throws Exception{
+        mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num2", 2))));
+        mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num1",1))));
+        mockMvc.perform(get("/api/hackathon/{hackathonId}/level", hackId).with(authentication(part))).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2))).andExpect(jsonPath("$[0].levelNumber").value(1)).andExpect(jsonPath("$[1].levelNumber").value(2));
+    }
+
+    @Test
+    void updateLevel_asAdmin_return200() throws Exception{
+        MvcResult createRes = mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("old",1)))).andExpect(status().isOk()).andReturn();
+        Level created = objectMapper.readValue(createRes.getResponse().getContentAsString(), Level.class);
     }
 }
