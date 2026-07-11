@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.hasSize;
 import org.springframework.test.web.servlet.MvcResult;
 import com.hackathon.platform.model.Level;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -76,36 +77,50 @@ class LevelControllerTest {
 
     @Test
     void createLevel_asAdmin_return200() throws Exception {
-        mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num1", 1)))).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("num1")).andExpect(jsonPath("$.name").value(1));
+        mockMvc.perform(post("/api/hackathons/{hackathonId}/levels", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num1", 1)))).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("num1")).andExpect(jsonPath("$.name").value("num1"));
     }
 
     @Test
     void createLevel_asPart_return403() throws Exception {
-        mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(part)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num1", 1)))).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/hackathons/{hackathonId}/levels", hackId).with(authentication(part)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num1", 1)))).andExpect(status().isForbidden());
     }
 
     @Test
     void getLevelForHackathon_returnOrderLevels() throws Exception{
-        mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num2", 2))));
-        mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num1",1))));
-        mockMvc.perform(get("/api/hackathon/{hackathonId}/level", hackId).with(authentication(part))).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2))).andExpect(jsonPath("$[0].levelNumber").value(1)).andExpect(jsonPath("$[1].levelNumber").value(2));
+        mockMvc.perform(post("/api/hackathons/{hackathonId}/levels", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num2", 2))));
+        mockMvc.perform(post("/api/hackathons/{hackathonId}/levels", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("num1",1))));
+        mockMvc.perform(get("/api/hackathons/{hackathonId}/levels", hackId).with(authentication(part))).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2))).andExpect(jsonPath("$[0].levelNumber").value(1)).andExpect(jsonPath("$[1].levelNumber").value(2));
     }
 
     @Test
     void updateLevel_asAdmin_return200() throws Exception{
-        MvcResult createRes = mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("old",1)))).andExpect(status().isOk()).andReturn();
+        MvcResult createRes = mockMvc.perform(post("/api/hackathons/{hackathonId}/levels", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("old",1)))).andExpect(status().isOk()).andReturn();
         Level created = objectMapper.readValue(createRes.getResponse().getContentAsString(), Level.class);
         LevelRequest updateReq = new LevelRequest();
         updateReq.setName("new");
         updateReq.setLevelNumber((short)1);
         updateReq.setDescription("new descr");
-        mockMvc.perform(put("/api/level/{levelId}", created.getId()).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(updateReq))).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("new"));
+        mockMvc.perform(put("/api/levels/{levelId}", created.getId()).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(updateReq))).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("new"));
     }
 
     @Test
     void updateLevel_Participant_return403() throws Exception{
-        MvcResult createRes = mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("lvl1", 1)))).andExpect(status().isOk()).andReturn();
+        MvcResult createRes = mockMvc.perform(post("/api/hackathons/{hackathonId}/levels", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("lvl1", 1)))).andExpect(status().isOk()).andReturn();
         Level creat = objectMapper.readValue(createRes.getResponse().getContentAsString(), Level.class);
-        mockMvc.perform(put("/api/level/{levelId}", creat.getId()).with(authentication(part)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("im tired of testing", 1)))).andExpect(status().isForbidden());
+        mockMvc.perform(put("/api/levels/{levelId}", creat.getId()).with(authentication(part)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("im tired of testing", 1)))).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deleteLevel_asAdmin_return204() throws Exception{
+        MvcResult createRes = mockMvc.perform(post("/api/hackathons/{hackathonId}/levels", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("delte test",1)))).andExpect(status().isOk()).andReturn();
+        Level newOne = objectMapper.readValue(createRes.getResponse().getContentAsString(), Level.class);
+        mockMvc.perform(delete("/api/levels/{levelId}", newOne.getId()).with(authentication(admin))).andExpect(status().isNoContent());
+    }
+
+    @Test
+    void delLvl_periticpant_return403() throws Exception{
+        MvcResult createRes = mockMvc.perform(post("/api/hackathons/{hackathonId}/levels", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("test", 1)))).andExpect(status().isOk()).andReturn();
+        Level newLvl = objectMapper.readValue(createRes.getResponse().getContentAsString(), Level.class);
+        mockMvc.perform(delete("/api/levels/{levelId}",newLvl.getId()).with(authentication(part))).andExpect(status().isForbidden());
     }
 }
