@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.hamcrest.Matchers.hasSize;
 import org.springframework.test.web.servlet.MvcResult;
 import com.hackathon.platform.model.Level;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -94,5 +95,17 @@ class LevelControllerTest {
     void updateLevel_asAdmin_return200() throws Exception{
         MvcResult createRes = mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("old",1)))).andExpect(status().isOk()).andReturn();
         Level created = objectMapper.readValue(createRes.getResponse().getContentAsString(), Level.class);
+        LevelRequest updateReq = new LevelRequest();
+        updateReq.setName("new");
+        updateReq.setLevelNumber((short)1);
+        updateReq.setDescription("new descr");
+        mockMvc.perform(put("/api/level/{levelId}", created.getId()).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(updateReq))).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("new"));
+    }
+
+    @Test
+    void updateLevel_Participant_return403() throws Exception{
+        MvcResult createRes = mockMvc.perform(post("/api/hackathon/{hackathonId}/level", hackId).with(authentication(admin)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("lvl1", 1)))).andExpect(status().isOk()).andReturn();
+        Level creat = objectMapper.readValue(createRes.getResponse().getContentAsString(), Level.class);
+        mockMvc.perform(put("/api/level/{levelId}", creat.getId()).with(authentication(part)).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(levelRequest("im tired of testing", 1)))).andExpect(status().isForbidden());
     }
 }
