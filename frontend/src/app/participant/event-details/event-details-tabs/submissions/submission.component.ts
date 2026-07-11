@@ -3,16 +3,24 @@ import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
 import { ButtonModule } from 'primeng/button';
 import { FileUploadModule } from 'primeng/fileupload';
+import { TableModule } from 'primeng/table';
 
 interface Level {
   id: number;
   name: string;
 }
 
+interface Submission {
+  uploadedAt: string;
+  level: number;
+   status: 'Completed' | 'Processing' | 'Failed';
+  score: number | null;
+}
+
 @Component({
   selector: 'app-submissions',
   standalone: true,
-  imports: [CommonModule, TabsModule, ButtonModule, FileUploadModule],
+  imports: [CommonModule, TabsModule, ButtonModule, FileUploadModule, TableModule],
   templateUrl: './submission.component.html',
   styleUrl: './submission.component.scss',
 })
@@ -22,6 +30,28 @@ export class SubmissionsComponent {
 
 sourceArchive: File | null = null;
 solutionOutput: File | null = null;
+
+submissionHistory: Submission[] = [
+  {
+    uploadedAt: '2026-06-27 09:39:20',
+    level: 3,
+    status: 'Processing',
+    score: null
+  },
+  {
+    uploadedAt: '2026-06-30 06:30:47',
+    level: 2,
+    status: 'Completed',
+    score: 2400000
+  },
+  {
+    uploadedAt: '2026-06-30 06:30:50',
+    level: 5,
+    status: 'Failed',
+    score: null
+  }
+];
+
 
   levels: Level[] = [
     { id: 1, name: 'Level 1' },

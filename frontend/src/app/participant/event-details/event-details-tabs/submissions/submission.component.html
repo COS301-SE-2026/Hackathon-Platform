@@ -195,4 +195,66 @@
 
     </p-tabs>
 
+    <div class="submission-history">
+
+        <div class="history-header">
+
+            <h2 class="history-title">Submission History</h2>
+
+            <button
+                pButton
+                type="button"
+                icon="pi pi-refresh"
+                label="Refresh"
+                class="refresh-btn">
+            </button>
+
+        </div>
+
+        <p class="history-description"> Uploaded solutions are processed by the solver after submission. Refresh this section periodically to view updated scores. Solver logs are available for download and can assist with debugging failed submissions.</p>
+
+        @if (submissionHistory.length > 0) {
+
+            <p-table
+                [value]="submissionHistory"
+                class="submission-table">
+
+                <ng-template pTemplate="header">
+
+                    <tr>
+                        <th>Uploaded</th>
+                        <th>Level</th>
+                        <th>Status</th>
+                        <th>Score</th>
+                        <th></th>
+                    </tr>
+
+                </ng-template>
+
+                <ng-template pTemplate="body"
+                    let-submission>
+
+                    <tr>
+                        <td>{{ submission.uploadedAt }}</td>
+                        <td>Level {{ submission.level }}</td>
+                        <td><span class="status-badge" [ngClass]="submission.status.toLowerCase()"> {{ submission.status }}</span></td>
+                        <td>{{ submission.score ?? '--' }}</td>
+                        <td>
+                            <button
+                                pButton
+                                type="button"
+                                label="Log"
+                                icon="pi pi-download"
+                                class="log-btn">
+                            </button>
+                        </td>
+                    </tr>
+
+                </ng-template>
+
+            </p-table>
+
+        } @else { <div class="empty-history">No submissions yet</div> }
+
+    </div>
 </div>
