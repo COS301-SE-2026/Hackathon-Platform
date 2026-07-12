@@ -81,4 +81,46 @@
 
 </div>
 
+<div class="rankings-section">
+
+    <div class="rankings-header">
+
+        <h2 class="rankings-title">Full Rankings</h2>
+
+    </div>
+
+    <p-table [value]="leaderboard" class="leaderboard-table">
+
+        <ng-template pTemplate="header">
+
+         <tr>
+            <th>Rank</th>
+            <th>Team</th>
+            <th>Score</th>
+        </tr>
+
+        </ng-template>
+
+        <ng-template  pTemplate="body" let-team>
+
+         <tr [class.current-team]="team.name === myTeam.name">
+
+             <td>{{ team.rank }}</td>
+
+                <td>
+                  <div class="team-cell">
+                   <div class="team-avatar">{{ getInitials(team.name) }}</div>
+                       <span>{{ team.name }}</span>
+                    </div>
+                </td>
+
+                <td>{{ team.score}}</td>
+         </tr>
+
+        </ng-template>
+
+    </p-table>
+
+</div>
+
 </div>
