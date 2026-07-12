@@ -3,7 +3,7 @@
  <div class="leaderboard-header">
 
      <h1 class="leaderboard-title">Current Standings</h1>
-     
+
       <p class="leaderboard-prompt">See how your team ranks against the competition.</p>
 
         <div class="my-team-summary">
@@ -21,5 +21,64 @@
      </div>
 
  </div>
+
+
+ <div class="podium-section">
+
+ <div class="podium-header">
+
+        <h2 class="podium-title">Top Teams</h2>
+        <p class="podium-prompt">The three highest scoring teams in the competition.</p>
+    </div>
+
+    <div class="podium">
+
+        
+        <div class="podium-card rank-2">
+
+          <div class="podium-medal silver">
+            <i class="pi pi-trophy"></i>
+          </div>
+
+            <h3 class="podium-team">{{ topThree[1].name }}</h3>
+
+            <p class="podium-score">{{ topThree[1].score}} pts </p>
+
+            <span class="podium-rank-2">Rank #2</span>
+
+        </div>
+
+        
+        <div class="podium-card rank-1">
+
+          <div class="podium-medal gold">
+         <i class="pi pi-trophy"></i>
+          </div>
+
+            <h3 class="podium-team">{{ topThree[0].name }}</h3>
+
+            <p class="podium-score">{{ topThree[0].score}} pts</p>
+
+            <span class="podium-rank-1">Rank #1</span>
+
+        </div>
+
+      
+        <div class="podium-card rank-3">
+           <div class="podium-medal bronze">
+             <i class="pi pi-trophy"></i>
+            </div>
+
+            <h3 class="podium-team">{{ topThree[2].name }}</h3>
+
+            <p class="podium-score">{{ topThree[2].score}} pts</p>
+
+            <span class="podium-rank-3">Rank #3</span>
+
+        </div>
+
+    </div>
+
+</div>
 
 </div>

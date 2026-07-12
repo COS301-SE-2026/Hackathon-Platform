@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-interface MyTeamStanding {
+interface Team {
   rank: number;
   name: string;
   score: number;
@@ -15,10 +15,21 @@ interface MyTeamStanding {
 })
 export class LeaderboardComponent {
 
-    myTeam: MyTeamStanding = {
+    myTeam: Team = {
     rank: 4,
     name: 'ByteForce',
     score: 8420
   };
 
+  leaderboard: Team[] = [
+  { rank: 1, name: 'Debug Thugs', score: 98420 },
+  { rank: 2, name: 'Keybord Gremlins', score: 97210 },
+  { rank: 3, name: 'Code Blooded', score: 96155 },
+  { rank: 4, name: 'ByteForce', score: 8420 },
+  { rank: 5, name: 'Null Pointers', score: 8310 }
+];
+
+get topThree(): Team[] {
+  return this.leaderboard.slice(0, 3);
+}
 }
