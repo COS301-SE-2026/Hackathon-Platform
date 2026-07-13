@@ -359,3 +359,26 @@
 :host ::ng-deep .leaderboard-table th:nth-child(3), :host ::ng-deep .leaderboard-table td:nth-child(3) {
     width: 170px;
 }
+
+.no-leaderboard-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 520px;
+    margin: 72px auto;
+    text-align: center;
+}
+
+.empty-icon {
+    margin-bottom: 24px;
+    font-size: 40px;
+    color: var(--primary-dark-navy);
+}
+
+.no-leaderboard-page h2 {
+    margin-bottom: 12px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--primary-dark-navy);
+}

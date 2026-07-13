@@ -1,5 +1,5 @@
 <div class="leaderboard-page">
-
+   @if (leaderboardAvailable) {
  <div class="leaderboard-header">
 
      <h1 class="leaderboard-title">Current Standings</h1>
@@ -122,5 +122,16 @@
     </p-table>
 
 </div>
+   } @else{
+
+<div class="no-leaderboard-page">
+
+    <i class="pi pi-lock empty-icon"></i>
+
+    <h2>Leaderboard Currently Unavailable</h2>
+
+</div>
+
+}
 
 </div>

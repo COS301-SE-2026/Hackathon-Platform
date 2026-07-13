@@ -16,6 +16,8 @@ interface Team {
 })
 export class LeaderboardComponent {
 
+  leaderboardAvailable = 1;
+
     myTeam: Team = {
     rank: 4,
     name: 'ByteForce',
