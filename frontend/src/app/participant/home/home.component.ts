@@ -182,6 +182,18 @@ get filteredOpenEvents(): OpenEventView[] {
   ]);
 }
 
+goToMyTeam(event: OpenEventView): void {
+  this.saveCurrentEvent(event);
+  this.router.navigate(
+    ['/participant/events', event.eventId],
+    { 
+      queryParams: {
+        tab: 'team'
+      }
+   }
+  );
+}
+
   createTeamForEvent(event: OpenEventView): void {
     this.saveCurrentEvent(event);
     localStorage.setItem('currentEventId', event.eventId);
