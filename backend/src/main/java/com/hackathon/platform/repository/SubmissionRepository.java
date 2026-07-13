@@ -24,6 +24,18 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   @Query("SELECT s FROM Submission s WHERE s.status = :status ORDER BY s.submittedAt ASC")
   List<Submission> findByStatusOrderBySubmittedAtAsc(@Param("status") String status);
 
+  @Query(
+      """
+        WITH BestSubmissions AS (
+            SELECT DISTINCT ON (team_id) team_id, score, submitted_at FROM submissions s WHERE level_id = :levelId AND status = 'SCORED' ORDER BY score DESC
+        )
+        SELECT team.team_id AS "teamId", team.team_name AS "teamName", COALESCE(best.score, CAST(0 AS NUMERIC)) AS "bestScore", best.submitted_at AS "lastScoredAt"
+        FROM teams team LEFT JOIN BestSubmissions BS ON team.team_id = BS.team_id WHERE team.event_id = :eventId AND team.status = 'ACTIVE' ORDER BY "bestScore" DESC
+        """,
+      nativeQuery = true)
+  List<LeaderboardEntry> findLeaderboardByEventIdAndLevelId(
+      @Param("eventId") UUID eventId, @Param("levelId") Long levelId);
+
   boolean existsByOutputStorageKey(String storageKey);
 
   boolean existsBySourceCodeStorageKey(String storageKey);
