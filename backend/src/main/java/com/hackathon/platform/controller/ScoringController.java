@@ -1,9 +1,11 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.SubmissionResponse;
+import com.hackathon.platform.dto.LeaderboardEntryResponse;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.scoring.ScoringService;
 import com.hackathon.platform.scoring.SubmissionQueryService;
+import com.hackathon.platform.scoring.LeaderboardService;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class ScoringController {
 
   private final ScoringService scoringService;
   private final SubmissionQueryService submissionQueryService;
+  private final LeaderboardService leaderboardService;
 
   /**
    * Triggers scoring for a submission: runs the active solver against the submission's output file
@@ -89,5 +92,13 @@ public class ScoringController {
   public ResponseEntity<SubmissionResponse> getSubmissionDetailForAdmin(
       @PathVariable Long submissionId) {
     return ResponseEntity.ok(submissionQueryService.getSubmissionDetailForAdmin(submissionId));
+  }
+
+  @GetMapping("/events/{eventId}/levels/{levelId}/leaderboard")
+  public ResponseEntity<List<LeaderboardEntryResponse>> getLeaderboard(
+    @PathVariable UUID eventId,
+    @PathVariable Long levelId
+  ) {
+    return ResponseEntity.ok(leaderboardService.getLeaderboard(eventId, levelId));
   }
 }
