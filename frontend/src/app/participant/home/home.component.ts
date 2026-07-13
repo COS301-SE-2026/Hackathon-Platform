@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse } from '../../services/event.service';
-import { CarouselModule } from 'primeng/carousel';  
+import { CarouselModule, CarouselPageEvent } from 'primeng/carousel';
 import { CardModule } from 'primeng/card';         
 import { ButtonModule } from 'primeng/button';      
 import { TagModule } from 'primeng/tag';  
@@ -117,9 +117,8 @@ get filteredOpenEvents(): OpenEventView[] {
     }
   }
 
-  onCarouselSlide(event: { page: number }): void {
-
-  this.currentActiveEventIndex = event.page;
+  onCarouselSlide(event: CarouselPageEvent): void {
+    this.currentActiveEventIndex = event.page ?? 0;
 }
 
   loadOpenEvents(): void {
