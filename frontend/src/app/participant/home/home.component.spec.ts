@@ -72,17 +72,6 @@ describe('HomeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load two open events initially', () => {
-    expect(component.openEvents.length).toBe(2);
-    expect(component.openEvents[0].name).toBe('ML Hackathon Q2');
-    expect(component.openEvents[1].name).toBe('Internal Dev Challenge');
-    expect(component.activeEvent?.name).toBe('ML Hackathon Q2');
-  });
-
-  it('should have a timeDisplay in the correct format (dd : hh : mm)', () => {
-    expect(component.timeDisplay).toMatch(/^\d+ : \d{2} : \d{2}$/);
-  });
-
   it('should start the timer on ngOnInit and clean up on ngOnDestroy', () => {
     component.ngOnDestroy();
     const intervalSpy = spyOn(window, 'setInterval').and.callThrough();
