@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { AdminShellComponent } from './admin/components/admin-shell.component/admin-shell.component';
 import { ParticipantShellComponent } from './participant/participant-shell.component/participant-shell.component';
 import { AuthGuard } from './guards/auth.guard';
-import { TeamComponent } from './participant/team/team.component';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -27,7 +27,6 @@ export const routes: Routes = [
       { path: 'home', loadComponent: () => import('./participant/home/home.component').then(m => m.HomeComponent) },
       {path: 'events/:eventId', loadComponent: () => import('./participant/event-details/event-details.component').then(m => m.EventDetailsComponent)},
       { path: 'submissions', loadComponent: () => import('./participant/submission-history/submissionhistory.component').then(m => m.SubmissionHistoryComponent) },
-      { path: 'team', component: TeamComponent },
       { path: 'submit', loadComponent: () => import('./participant/submit/submit.component').then(m => m.SubmitComponent) },
       { path: '', redirectTo: 'home', pathMatch: 'full' }
     ]
