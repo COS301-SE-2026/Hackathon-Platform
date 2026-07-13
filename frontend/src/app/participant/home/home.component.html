@@ -6,14 +6,15 @@
     <div class="error-message">{{ errorMessage }}</div>
   }
 
+  @if (activeEvents.length > 0) {
 <div class="active-card">
   <div class="active-header">
     <span class="active-label">Your Active Events</span>
-      @if (activeEvents.length > 0) {
+      
     <span class="active-counter">
       {{ currentActiveEventIndex + 1 }} / {{ activeEvents.length }}
     </span>
-  }
+  
   </div>
 
   <p-carousel
@@ -99,7 +100,27 @@
     </ng-template>
   </p-carousel>
 </div>
+}
 
+  @else {
+
+<div class="active-card empty-active-card">
+
+    <div class="active-header">
+      <span class="active-label">Your Active Events</span>
+    </div>
+
+    <div class="empty-active-content">
+
+        <i class="pi pi-calendar-times empty-active-icon"></i>
+
+        <h3 class="empty-active-title">No Active Events</h3>
+
+        <p class="empty-active-message"> You're currently not participating in any active events. Register for an event to get started.</p>
+    </div>
+</div>
+
+}
   <h2 class="section-title">Open events</h2>
 
   <div class="events-toolbar">

@@ -489,3 +489,37 @@
     gap: 10px;
   }
 }
+
+.empty-active-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.empty-active-content {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.empty-active-icon {
+  margin-bottom: 20px;
+  font-size: 40px;
+  color: var(--primary-dark-navy);
+}
+
+.empty-active-title {
+  margin: 0 0 12px;
+  color: var(--text-dark);
+    font-size: 24px;
+  font-weight: 700;
+}
+
+.empty-active-message {
+  max-width: 460px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
