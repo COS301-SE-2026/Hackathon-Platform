@@ -101,4 +101,11 @@ public class ScoringController {
   ) {
     return ResponseEntity.ok(leaderboardService.getLeaderboard(eventId, levelId));
   }
+
+  @GetMapping("/events/{eventId}/leaderboard")
+  public ResponseEntity<List<LeaderboardEntryResponse>> getEventLeaderboard(
+    @PathVariable UUID eventId
+  ) {
+    return ResponseEntity.ok(leaderboardService.getEventLeaderboard(eventId));
+  }
 }
