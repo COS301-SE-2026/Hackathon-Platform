@@ -1,6 +1,6 @@
 .participant-shell {
   min-height : 100vh;
-  background-color: var(--background-light-gray);
+  background-color: var(--background-white);
   display: flex ;
   flex-direction: column  ;
 }
@@ -114,7 +114,7 @@
   padding : 28px 30px;
   color: var(--background-white); 
   overflow-y : auto;
-  background-color: var(--background-light-gray) ;
+  background-color: var(--background-white) ;
 }
 
 .mobile-menu-btn {
