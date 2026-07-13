@@ -283,9 +283,7 @@
     border-bottom: 1px solid var(--border-silver);
 }
 
-:host ::ng-deep .leaderboard-table tr:last-child td {
-    border-bottom: none;
-}
+
 
 .team-cell {
     display: flex;
@@ -318,3 +316,46 @@
     border-left: 5px solid var(--accent-bright-blue);
 }
 
+
+:host ::ng-deep .p-paginator {
+    padding: 14px 18px;
+    border-top: none;
+  border-radius: 0; 
+    background: var(--background-white);
+    border: 1px solid var(--border-silver);
+}
+
+
+:host ::ng-deep .p-paginator * {
+    background: transparent !important;
+     border: none !important;
+    box-shadow: none !important;
+}
+
+:host ::ng-deep .p-paginator-page.p-paginator-page-selected {
+    background: var(--accent-bright-blue) !important;
+    color: var(--background-white) !important;
+    border-radius: 50%;
+}
+
+
+:host ::ng-deep .p-paginator-rpp-dropdown {
+    display: none;
+}
+
+:host ::ng-deep .leaderboard-table table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+:host ::ng-deep .leaderboard-table th:nth-child(1), :host ::ng-deep .leaderboard-table td:nth-child(1) {
+    width: 90px;
+}
+
+:host ::ng-deep .leaderboard-table th:nth-child(2), :host ::ng-deep .leaderboard-table td:nth-child(2) {
+    width: auto;
+}
+
+:host ::ng-deep .leaderboard-table th:nth-child(3), :host ::ng-deep .leaderboard-table td:nth-child(3) {
+    width: 170px;
+}

@@ -27,7 +27,12 @@ export class LeaderboardComponent {
   { rank: 2, name: 'Keybord Gremlins', score: 9700000 },
   { rank: 3, name: 'Code Blooded', score: 9600000 },
   { rank: 4, name: 'ByteForce', score: 9500000 },
-  { rank: 5, name: 'Null Pointers', score: 9400000 }
+  { rank: 5, name: 'Null Pointers', score: 9400000 },
+  { rank: 6, name: 'Runtime Rebels', score: 9300000 },
+  { rank: 7, name: 'Stack Smashers', score: 9200000 },
+  { rank: 8, name: 'Segmentation Squad', score: 9100000 },
+  { rank: 9, name: 'Kernel Panic', score: 9000000 },
+  { rank: 10, name: 'Binary Bandits', score: 8900000 },
 ];
 
 get topThree(): Team[] {
