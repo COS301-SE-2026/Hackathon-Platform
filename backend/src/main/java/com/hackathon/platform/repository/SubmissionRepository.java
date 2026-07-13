@@ -27,10 +27,15 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   @Query(
       """
         WITH BestSubmissions AS (
-            SELECT DISTINCT ON (team_id) team_id, score, submitted_at FROM submissions s WHERE level_id = :levelId AND status = 'SCORED' ORDER BY score DESC
+            SELECT DISTINCT ON (team_id) team_id, score, submitted_at FROM submissions s WHERE level_id = :levelId AND status = 'SCORED' ORDER BY team_id, score DESC, submitted_at ASC
         )
-        SELECT team.team_id AS "teamId", team.team_name AS "teamName", COALESCE(best.score, CAST(0 AS NUMERIC)) AS "bestScore", best.submitted_at AS "lastScoredAt"
-        FROM teams team LEFT JOIN BestSubmissions BS ON team.team_id = BS.team_id WHERE team.event_id = :eventId AND team.status = 'ACTIVE' ORDER BY "bestScore" DESC
+        SELECT 
+            team.team_id AS "teamId", 
+            team.team_name AS "teamName", 
+            COALESCE(best.score, CAST(0 AS NUMERIC)) AS "bestScore", 
+            best.submitted_at AS "lastScoredAt"
+        FROM teams team 
+            LEFT JOIN BestSubmissions best ON team.team_id = best.team_id WHERE team.event_id = :eventId AND team.status = 'ACTIVE' ORDER BY "bestScore" DESC
         """,
       nativeQuery = true)
   List<LeaderboardEntry> findLeaderboardByEventIdAndLevelId(
