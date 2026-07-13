@@ -46,8 +46,56 @@ submissionHistory: Submission[] = [
   },
   {
     uploadedAt: '2026-06-30 06:30:50',
+    level: 3,
+    status: 'Failed',
+    score: null
+  },
+   {
+    uploadedAt: '2026-06-30 06:30:50',
+    level: 4,
+    status: 'Completed',
+    score: null
+  },
+   {
+    uploadedAt: '2026-06-30 06:30:50',
+    level: 1,
+    status: 'Completed',
+    score: null
+  },
+   {
+    uploadedAt: '2026-06-30 06:30:50',
     level: 5,
     status: 'Failed',
+    score: null
+  },
+   {
+    uploadedAt: '2026-06-30 06:30:50',
+    level: 5,
+    status: 'Completed',
+    score: null
+  },
+   {
+    uploadedAt: '2026-06-30 06:30:50',
+    level: 5,
+    status: 'Completed',
+    score: null
+  },
+   {
+    uploadedAt: '2026-06-30 06:30:50',
+    level: 5,
+    status: 'Completed',
+    score: null
+  },
+   {
+    uploadedAt: '2026-06-30 06:30:50',
+    level: 5,
+    status: 'Completed',
+    score: null
+  },
+   {
+    uploadedAt: '2026-06-30 06:30:50',
+    level: 5,
+    status: 'Completed',
     score: null
   }
 ];

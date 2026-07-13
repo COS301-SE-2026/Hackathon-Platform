@@ -31,7 +31,8 @@
 }
 
 :host ::ng-deep .p-tablist {
-     background: #e9ecef; 
+    //  background: #e9ecef; 
+      background: var(--background-white); 
     border: none;
     padding: 0;
 }
@@ -74,7 +75,7 @@
 }
 
 :host ::ng-deep .p-tab-active {
-    background: var(--background-light-gray) !important;
+    background: var(--background-white) !important;
     color: var(--text-dark) !important;
     border-bottom: 3px solid var(--accent-lime-green);
 }
@@ -89,7 +90,7 @@
 
 :host ::ng-deep .p-tablist-prev-button:hover,
 :host ::ng-deep .p-tablist-next-button:hover {
-    background: var(--background-light-gray);
+    background: var(--background-white);
 }
 
 :host ::ng-deep .p-tablist-prev-button:disabled,
@@ -108,10 +109,11 @@
     width: 100%;
     min-height: 450px;
     background: var(--background-white);
-    border: 1px solid var(--border-silver);
+    // border: 1px solid var(--border-silver);
+    border: none;
     border-radius: 0px;
-    padding: 24px;
-    box-shadow:0 2px 8px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.08);
+    padding: 0px;
+    // box-shadow:0 2px 8px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .level-header {
@@ -180,6 +182,7 @@
     padding: 24px;
     background: var(--background-white);
     border: 1px solid var(--border-silver);
+    // border: none;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
@@ -191,7 +194,6 @@
     text-transform: uppercase;
     color: var(--text-dark);
 }
-
 
 
 :host ::ng-deep .p-fileupload {
@@ -207,7 +209,6 @@
     border: none;
     background: transparent;
 }
-
 
 
 .upload-dropzone {
@@ -405,7 +406,7 @@ text-transform: uppercase;
 
 :host ::ng-deep .submission-table th {
     padding: 16px 24px;
-    background: var(--background-white);
+    background: var(--background-light-gray);
     border-bottom: 1px solid var(--border-silver);
     text-align: left;
     font-size: 12px;
@@ -421,7 +422,6 @@ text-transform: uppercase;
     color: var(--text-dark);
     vertical-align: middle;
 }
-
 
 .status-badge {
     display: inline-flex;
@@ -486,4 +486,31 @@ text-transform: uppercase;
     font-size: 16px;
     font-weight: 500;
     color: var(--text-muted);
+}
+
+
+
+:host ::ng-deep .p-paginator {
+    padding: 14px 18px;
+    background: var(--background-white);
+    border: 1px solid var(--border-silver);
+    border-top: none;
+    border-radius: 0;
+}
+
+:host ::ng-deep .p-paginator * {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+
+:host ::ng-deep .p-paginator-page.p-paginator-page-selected {
+    background: var(--accent-bright-blue) !important;
+    border-radius: 50%;
+    color: var(--background-white) !important;
+}
+
+:host ::ng-deep .p-paginator-rpp-dropdown {
+    display: none;
 }
