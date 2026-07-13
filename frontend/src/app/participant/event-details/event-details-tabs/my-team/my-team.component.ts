@@ -158,6 +158,13 @@ export class MyTeamComponent implements OnInit {
 
 }
 
+openRequestToJoinDialog(): void {
+  this.errorMessage = '';
+  this.teamIdToJoin = '';
+  this.requestToJoinDialogVisible = true;
+
+}
+
   joinTeam(): void {
     this.clearMessages();
 

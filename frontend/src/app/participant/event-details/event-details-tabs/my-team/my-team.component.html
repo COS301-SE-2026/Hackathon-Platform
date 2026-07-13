@@ -24,7 +24,7 @@
             pButton
             label="Request to Join"
             class="join-team-btn"
-            (click)="requestToJoinDialogVisible = true">
+            (click)="openRequestToJoinDialog()">
         </button>
 
     </div>
@@ -257,6 +257,8 @@
             [(ngModel)]="teamIdToJoin"
             placeholder="Enter join code"
             class="team-dialog-input" />
+
+      @if (errorMessage) {<small class="dialog-error">{{ errorMessage }}</small>} 
 
     <div class="team-dialog-buttons">
 
