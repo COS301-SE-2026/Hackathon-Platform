@@ -44,6 +44,41 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   List<LeaderboardEntry> findLeaderboardByEventIdAndLevelId(
       @Param("eventId") UUID eventId, @Param("levelId") Long levelId);
 
+    @Query(value =
+        """
+        WITH BestSubmissions AS (
+            SELECT DISTINCT ON (s.team_id, s.level_id) s.team_id, s.level_id, s.score, s.submitted_at
+            FROM submissions s
+            INNER JOIN teams t ON t.team_id = s.team_id
+            WHERE t.event_id = :eventId AND s.status = 'SCORED'
+            ORDER BY s.team_id, s.level_id, s.score DESC, s.submitted_at ASC, s.id ASC
+        ),
+        TeamTotals AS (
+            SELECT 
+                team_id, 
+                sum(score) AS total_score, 
+                MAX(submitted_at) AS last_scored_at
+            FROM BestSubmissions
+            GROUP BY team_id
+        )
+        SELECT
+        t.team_id AS "teamId", 
+        t.team_name AS "teamName",
+        COALESCE(totals.total_score, 0) AS "bestScore", totals.last_scored_at AS "lastScoredAt"
+        FROM teams t
+        LEFT JOIN TeamTotals totals ON t.team_id = totals.team_id
+        WHERE t.event_id = :eventId AND t.status = 'ACTIVE'
+        ORDER BY
+            "bestScore" DESC,
+            totals.last_scored_at ASC NULLS LAST,
+            t.team_name ASC,
+            t.team_id ASC
+
+        """,
+        nativeQuery = true)
+    List<LeaderboardEntry> findLeaderboardByEventId(
+      @Param("eventId") UUID eventId);
+
   boolean existsByOutputStorageKey(String storageKey);
 
   boolean existsBySourceCodeStorageKey(String storageKey);
