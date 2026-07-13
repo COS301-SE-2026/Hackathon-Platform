@@ -16,7 +16,7 @@
             pButton
             label="Create Team"
             class="create-team-btn"
-            (click)="createTeamDialogVisible = true"
+            (click)="openCreateTeamDialog()"
             >
         </button>
 
@@ -215,6 +215,8 @@
         placeholder="Enter team name"  
         class="team-dialog-input" 
         />
+
+     @if (errorMessage) {<small class="dialog-error">{{ errorMessage }}</small>}
 
     <div class="team-dialog-buttons">
 

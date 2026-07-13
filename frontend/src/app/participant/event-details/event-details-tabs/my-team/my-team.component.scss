@@ -491,3 +491,10 @@
     background: var(--status-error) !important;
     border: none !important;
 }
+
+.dialog-error {
+    color: var(--status-error);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+}

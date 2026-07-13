@@ -143,13 +143,20 @@ export class MyTeamComponent implements OnInit {
         if (error.status === 409 || error.error?.message?.includes('already exists')) {
           this.errorMessage = 'A team with that name already exists. Choose a different name.';
         } else if (error.error?.message?.includes('already a member')) {
-          this.errorMessage = 'You are already a member of a team. Leave your current team first.';
+         this.errorMessage = 'You are already a member of a team. Leave your current team first.';
         } else {
           this.errorMessage = error.error?.message || 'Failed to create team. Please try again.';
         }
       }
     });
   }
+
+  openCreateTeamDialog(): void {
+  this.errorMessage = '';
+  this.newTeamName = '';
+  this.createTeamDialogVisible = true;
+
+}
 
   joinTeam(): void {
     this.clearMessages();
