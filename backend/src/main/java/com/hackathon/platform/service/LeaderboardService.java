@@ -33,4 +33,23 @@ public class LeaderboardService {
 
         return leaderboard;
     }
+
+    @Transactional(readOnly = true)
+    public List<LeaderboardEntryResponse> getEventLeaderboard(UUID eventId) {
+        List<LeaderboardEntry> entries = subRepo.findLeaderboardByEventId(eventId);
+        List<LeaderboardEntryResponse> leaderboard = new ArrayList<>(entries.size());
+
+        for (int i = 0; i < entries.size(); i++) {
+            LeaderboardEntry entry = entries.get(i);
+            leaderboard.add(new LeaderboardEntryResponse(
+                i + 1,
+                entry.getTeamId(),
+                entry.getTeamName(),
+                entry.getBestScore(),
+                entry.getLastScoredAt()
+            ));
+        }
+
+        return leaderboard;
+    }
 }
