@@ -223,15 +223,17 @@
 .my-team-content {
     width: 100%;
     background: var(--background-white);
-    border: 1px solid var(--border-silver);
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .08);
+    // border: 1px solid var(--border-silver);
+    border: none;
+    // padding: 24px;
+    // box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .08);
 
 }
 
 .join-code-section {
   margin-bottom: 36px;
   margin-top: 36px;
+  width: 100%;
 }
 
 .join-code-title {
@@ -246,14 +248,17 @@
 
 .join-code-card {
   display: flex;
-  justify-content: center;
+  // justify-content: center;
   align-items: center;
   gap: 10px;
+ width: 100%;
+  
 }
 
 .join-code-display {
-  width: 100%;
-  max-width: 700px;
+   flex: 1;
+    min-width: 0;
+ 
   padding: 12px 20px;
   background: var(--background-light-gray);
   border: 1px solid var(--border-silver);
@@ -268,6 +273,7 @@
 
 :host ::ng-deep .copy-code-btn {
   height: 44px;
+  flex-shrink: 0;
   min-width: 100px;
   border-radius: 0;
   background: transparent;
@@ -276,6 +282,7 @@
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
+   box-sizing: border-box;
 }
 
 :host ::ng-deep .copy-code-btn:hover {
@@ -319,30 +326,31 @@
 }
 
 :host ::ng-deep .refresh-team-btn {
-  height: 44px;
-  padding: 0 16px;
-  background: transparent;
-  border: 2px solid transparent;
-  border-radius: 0;
-  color: var(--accent-bright-blue);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.2;
-  box-shadow: none;
+     min-width: 150px;
+    height: 44px;
+    padding: 0 20px;
+    background: transparent !important;
+    color: var(--text-dark) !important;
+    border: 2px solid var(--text-dark) !important;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-transform: uppercase;
 }
 
 :host ::ng-deep .refresh-team-btn:hover {
   background: transparent !important;
-  border: 2px solid transparent !important;
-  color: var(--accent-bright-blue) !important;
+  border: 2px solid var(--text-dark) !important;
+ color: var(--text-dark) !important;
   box-shadow: none !important;
 }
 
-:host ::ng-deep .refresh-team-btn .pi {
-  margin-right: 8px;
-  font-size: 16px;
-  color: var(--accent-bright-blue);
-}
+// :host ::ng-deep .refresh-team-btn .pi {
+//   margin-right: 8px;
+//   font-size: 16px;
+//   color: var(--accent-bright-blue);
+// }
 
 
 .team-members-list {
@@ -464,4 +472,22 @@
   border-color: var(--status-error) !important;
   color: var(--background-white) !important;
   box-shadow: none !important;
+}
+
+.dialog-warning {
+    line-height: 1.5;
+      margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.team-dialog-leave-btn {
+    background: var(--status-error) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.team-dialog-leave-btn:hover {
+    background: var(--status-error) !important;
+    border: none !important;
 }

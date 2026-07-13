@@ -38,6 +38,7 @@ export class MyTeamComponent implements OnInit {
   successMessage = '';
   createTeamDialogVisible = false;
   requestToJoinDialogVisible = false;
+  leaveTeamDialogVisible = false;
 
   hasTeam = false;
   currentUserId = '';
@@ -211,7 +212,7 @@ export class MyTeamComponent implements OnInit {
   }
 
   leaveCurrentTeam(): void {
-    if (!confirm('Are you sure you want to leave this team?')) return;
+    // if (!confirm('Are you sure you want to leave this team?')) return;
 
     this.isLoading = true;
     this.clearMessages();
@@ -230,6 +231,11 @@ export class MyTeamComponent implements OnInit {
       }
     });
   }
+
+  confirmLeaveTeam(): void {
+  this.leaveTeamDialogVisible = false;
+  this.leaveCurrentTeam();
+}
 
   getInitials(name: string): string {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);

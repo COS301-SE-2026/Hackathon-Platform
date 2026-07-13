@@ -50,7 +50,7 @@
             label="Leave Team"
             icon="pi pi-sign-out"
             class="leave-team-btn"
-            (click)="leaveCurrentTeam()">
+            (click)="leaveTeamDialogVisible = true">
         </button>
 
     </div>
@@ -85,7 +85,7 @@
                 <button
                     pButton
                     icon="pi pi-refresh"
-                    label="Refresh Teammates"
+                    label="Refresh"
                     class="refresh-team-btn"
                     (click)="refreshTeamMembers()">
                 </button>
@@ -273,6 +273,37 @@
             [disabled]="!teamIdToJoin.trim() || isLoading">
         </button>
 
+    </div>
+
+</p-dialog>
+
+<p-dialog
+    header="Leave Team"
+    class="team-dialog"
+    [(visible)]="leaveTeamDialogVisible"
+    [modal]="true"
+    [draggable]="false"
+    [style]="{ width: '420px' }">
+    
+    <p class="dialog-prompt">Are you sure you want to leave <strong>{{ team.name }}</strong>?</p>
+     <p class="dialog-warning">You will no longer be a member of this team. You can only rejoin if you submit a new join request. </p>
+
+    <div class="team-dialog-buttons">
+
+        <button
+            pButton
+            label="Cancel"
+            class="team-dialog-secondary-btn"
+            (click)="leaveTeamDialogVisible = false">
+        </button>
+
+        <button
+            pButton
+            label="Leave Team"
+            class="team-dialog-leave-btn"
+            (click)="confirmLeaveTeam()"
+            [disabled]="isLoading">
+        </button>
     </div>
 
 </p-dialog>
