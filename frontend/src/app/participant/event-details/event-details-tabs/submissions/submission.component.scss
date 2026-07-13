@@ -63,11 +63,6 @@
     border-bottom: 3px solid var(--accent-lime-green) !important;
 }
 
-:host ::ng-deep .p-tablist-prev-button:hover, :host ::ng-deep .p-tablist-next-button:hover {
-    background: var(--background-light-gray) !important;
-    color: var(--text-muted) !important;
-}
-
 :host ::ng-deep .p-tab-title {
     white-space: nowrap;
     text-align: center;

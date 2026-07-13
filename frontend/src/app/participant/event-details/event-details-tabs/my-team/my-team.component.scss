@@ -149,7 +149,6 @@
 
 :host ::ng-deep .team-dialog  .team-dialog-secondary-btn:hover {
   background: transparent !important;
-  border-color: var(--text-dark) !important;
   border: 2px solid var(--text-dark) !important;
   color: var(--text-dark) !important;
   
@@ -223,10 +222,7 @@
 .my-team-content {
     width: 100%;
     background: var(--background-white);
-    // border: 1px solid var(--border-silver);
     border: none;
-    // padding: 24px;
-    // box-shadow: 0 2px 8px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .08);
 
 }
 
@@ -248,7 +244,6 @@
 
 .join-code-card {
   display: flex;
-  // justify-content: center;
   align-items: center;
   gap: 10px;
  width: 100%;
@@ -345,13 +340,6 @@
  color: var(--text-dark) !important;
   box-shadow: none !important;
 }
-
-// :host ::ng-deep .refresh-team-btn .pi {
-//   margin-right: 8px;
-//   font-size: 16px;
-//   color: var(--accent-bright-blue);
-// }
-
 
 .team-members-list {
   display: flex;

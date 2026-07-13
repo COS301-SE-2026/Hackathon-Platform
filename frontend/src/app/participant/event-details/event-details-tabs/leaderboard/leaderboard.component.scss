@@ -163,10 +163,6 @@
     transform: translateY(-8px) scale(.97);
 }
 
-.podium-medal {
-    margin-bottom: 20px;
-    font-size: 44px;
-}
 
 .podium-team {
     width: 100%;
@@ -189,7 +185,6 @@
 
 .podium-rank-1 {
     padding: 6px 14px;
-    background: var(--background-light-gray);
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
@@ -200,7 +195,6 @@
 
 .podium-rank-2 {
     padding: 6px 14px;
-    background: var(--background-light-gray);
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
@@ -211,7 +205,6 @@
 
 .podium-rank-3 {
     padding: 6px 14px;
-    background: var(--background-light-gray);
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
@@ -221,6 +214,8 @@
 
 
 .podium-medal {
+     margin-bottom: 20px;
+    font-size: 44px;
     display: flex;
     width: 64px;
     height: 64px;
