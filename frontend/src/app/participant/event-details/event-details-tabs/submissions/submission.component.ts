@@ -110,7 +110,7 @@ submissionHistory: Submission[] = [
 
 
 
-onSourceSelected(event: any): void {
+onSourceSelected(event: { files: File[] }): void {
   const file = event.files[0];
   if (!file || !file.name.toLowerCase().endsWith('.zip')) {  
     return;   
@@ -118,7 +118,7 @@ onSourceSelected(event: any): void {
   this.sourceArchive = file;
 }
 
-onSolutionSelected(event: any): void {
+onSolutionSelected(event: { files: File[] }): void {
   const file = event.files[0];
   if (!file || !file.name.toLowerCase().endsWith('.txt')) { 
     return;
@@ -126,12 +126,12 @@ onSolutionSelected(event: any): void {
   this.solutionOutput = file;
 }
 
-removeSourceFile(uploader: any): void {
+removeSourceFile(uploader: { clear(): void }): void {
   this.sourceArchive = null;
   uploader.clear();
 }
 
-removeSolutionFile(uploader: any): void {
+removeSolutionFile(uploader:{ clear(): void }): void {
   this.solutionOutput = null;
    uploader.clear();
 }

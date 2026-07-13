@@ -117,7 +117,7 @@ get filteredOpenEvents(): OpenEventView[] {
     }
   }
 
-  onCarouselSlide(event: any): void {
+  onCarouselSlide(event: { page: number }): void {
 
   this.currentActiveEventIndex = event.page;
 }
