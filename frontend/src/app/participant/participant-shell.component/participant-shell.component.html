@@ -16,6 +16,8 @@
   <p-button 
     styleClass="user-menu-btn"
     (click)="menu.toggle($event)"
+     (keydown.enter)="menu.toggle($event)"
+    (keydown.space)="menu.toggle($event)"
   >
     <i class="pi pi-user" style="margin-right: 8px;"></i>
     {{ userName }}
@@ -31,6 +33,8 @@
         icon="pi pi-bars" 
         styleClass="hamburger-btn"
         (click)="sidebarVisible = true"
+        (keydown.enter)="sidebarVisible = true"
+        (keydown.space)="sidebarVisible = true"
       ></p-button>
     </div>
   </nav>
