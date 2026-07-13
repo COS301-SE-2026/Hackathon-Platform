@@ -24,10 +24,13 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   @Query("SELECT s FROM Submission s WHERE s.status = :status ORDER BY s.submittedAt ASC")
   List<Submission> findByStatusOrderBySubmittedAtAsc(@Param("status") String status);
 
-  @Query(
+  @Query(value =
       """
         WITH BestSubmissions AS (
-            SELECT DISTINCT ON (team_id) team_id, score, submitted_at FROM submissions s WHERE level_id = :levelId AND status = 'SCORED' ORDER BY team_id, score DESC, submitted_at ASC
+            SELECT DISTINCT ON (team_id) team_id, score, submitted_at 
+            FROM submissions s 
+            WHERE level_id = :levelId AND status = 'SCORED' 
+            ORDER BY team_id, score DESC, submitted_at ASC
         )
         SELECT 
             team.team_id AS "teamId", 
