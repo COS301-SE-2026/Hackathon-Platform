@@ -165,4 +165,10 @@ it('should navigate to levels with hackathon name', () => {
         {state: {hackathonName: 'Test Hackathon'}}
     );
 });
+
+
+it('should navigate to solver', () => {
+    component.navigateToManage('hack-123');
+    expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','solver']);
+});
 });
