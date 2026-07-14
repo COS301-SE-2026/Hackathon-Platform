@@ -148,6 +148,17 @@ describe('LevelsComponent',() => {
     });
 
 
+        it('should remove file from level' , () =>{
+        component.activeLevel= {...mockLevel, files: ['file1.txt', 'file2.pdf']};
+        component.removeFile('file1.txt');
+        expect(component.activeLevel.files).toEqual(['file2.pdf']);
+
+    });
+
+
+
+
+
 
 
 
