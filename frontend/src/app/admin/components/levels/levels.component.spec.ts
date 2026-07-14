@@ -140,6 +140,14 @@ describe('LevelsComponent',() => {
     });
 
 
+    it('should open manage files modal' , () =>{
+        component.openManageFiles(mockLevel);
+        expect(component.showFilesModal).toBeTrue();
+        expect(component.activeLevel).toEqual(mockLevel);
+
+    });
+
+
 
 
 
