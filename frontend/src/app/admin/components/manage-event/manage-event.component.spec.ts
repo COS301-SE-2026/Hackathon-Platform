@@ -102,4 +102,15 @@ describe('LevelsComponent',() => {
     },1100);
         
     });
+
+    it ('should patch status only', (done) => {
+    component.patchStatusOnly();
+    expect(component.isSaving).toBeTrue();
+    setTimeout(()=>{
+        expect(component.isSaving).toBeFalse();
+        expect(component.successMessage).toBe('Hackathon updated successfully');
+        done();
+    },1100);
+        
+    });
 });
