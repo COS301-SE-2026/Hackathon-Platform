@@ -126,4 +126,16 @@ describe('LevelsComponent',() => {
         expect(component.uploadFileName).toBe('test.pdf');
 
     });
+
+      it('should reject non-PDF files on drop', () => {
+        const file = new File(['content'], 'test.pdf',{type: 'text/plain'});
+        const dragEvent = {
+            preventDefault: jasmine.createSpy(),
+            dataTransfer: {files: [file]}
+
+        }as unknown as DragEvent;
+        component.onDropFile(dragEvent);
+        expect(component.uploadError).toBe('Please drop a PDF file');
+
+    });
 });
