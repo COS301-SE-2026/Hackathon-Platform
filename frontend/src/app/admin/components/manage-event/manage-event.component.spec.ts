@@ -80,4 +80,12 @@ describe('LevelsComponent',() => {
         expect(component.errorMessage).toBe('Hackathon name is required');
 
     });
+
+    it('should start date on update',()=>{
+    component.form.name = 'Test Hackathon';
+    component.form.startDate = '';
+    component.updateHackathon();
+    expect(component.errorMessage).toBe('Start date is required');
+
+    });
 });
