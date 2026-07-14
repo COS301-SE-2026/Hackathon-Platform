@@ -148,7 +148,10 @@ it('should navigate to events', () => {
     expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','events']);
 });
 
-
+it('should navigate to create events', () => {
+    component.navigateToCreateEvent('hack-123');
+    expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','events','create']);
+});
 
 
 });
