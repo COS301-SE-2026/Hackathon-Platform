@@ -138,4 +138,19 @@ describe('LevelsComponent',() => {
         expect(component.uploadError).toBe('Please drop a PDF file');
 
     });
+
+    
+    it('should handle file selection', () => {
+        const file = new File(['content'], 'test.pdf',{type: 'application/pdf'});
+        const event = {
+            target: {files: [file]}
+
+        }as unknown as Event;
+        component.onFileSelected(event);
+        expect(component.uploadFile).toBe(file);
+        expect(component.uploadFileName).toBe('test.pdf');
+
+    });
+
+    
 });
