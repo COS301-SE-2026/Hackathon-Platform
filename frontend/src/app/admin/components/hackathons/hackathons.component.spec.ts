@@ -74,4 +74,16 @@ it('should open edit dialog with hackathon data', () =>{
 
 });
 
+it ('should show error when saving without name', ()=>{
+    component.newHackathon.name = '';
+    component.saveHackathon();
+
+    expect(messageServiceMock.add).toHaveBeenCalledWith({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Hackathon name is required'
+    });
+    expect(component.showDialog).toBeTrue();
+});
+
 });
