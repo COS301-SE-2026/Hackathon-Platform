@@ -8,7 +8,7 @@ import { EventService } from "../../../services/event.service";
 import { StorageService } from "../../../services/storage.service";
 
 
-describe('LevelsComponent',() => {
+describe('ManageEventComponent',() => {
     let component: ManageEventComponent;
     let fixture: ComponentFixture<ManageEventComponent>;
     let routerNavigateSpy: jasmine.Spy;
@@ -57,7 +57,7 @@ describe('LevelsComponent',() => {
 
     it('should initialize with hackathonId and eventId from route', () =>{
     expect(component.hackathonId).toBe('hack-123');
-    expect(component.eventId).toBe('event-123');
+    expect(component.eventId).toBe('event-456');
     });
 
     it('should show error if no hackathonId', () =>{
@@ -81,7 +81,7 @@ describe('LevelsComponent',() => {
 
     });
 
-    it('should start date on update',()=>{
+    it('should validate start date on update',()=>{
     component.form.name = 'Test Hackathon';
     component.form.startDate = '';
     component.updateHackathon();
@@ -89,7 +89,7 @@ describe('LevelsComponent',() => {
 
     });
 
-    it ('should update hackathons successfully', (done) => {
+    it ('should update hackathon successfully', (done) => {
     component.form.name = 'Test Hackathon';
     component.form.startDate = '2025-12-01T09:00';
     component.form.endDate = '2025-12-03T09:00';
@@ -128,14 +128,14 @@ describe('LevelsComponent',() => {
     });
 
       it('should reject non-PDF files on drop', () => {
-        const file = new File(['content'], 'test.pdf',{type: 'text/plain'});
+        const file = new File(['content'], 'test.txt',{type: 'text/plain'});
         const dragEvent = {
             preventDefault: jasmine.createSpy(),
             dataTransfer: {files: [file]}
 
         }as unknown as DragEvent;
         component.onDropFile(dragEvent);
-        expect(component.uploadError).toBe('Please drop a PDF file');
+        expect(component.uploadError).toBe('Please drop a PDF file.');
 
     });
 
@@ -151,6 +151,27 @@ describe('LevelsComponent',() => {
         expect(component.uploadFileName).toBe('test.pdf');
 
     });
+
+        it('should upload resource successfully', () => {
+        const file = new File(['content'], 'test.pdf',{type: 'application/pdf'});
+
+        component.uploadFile = file ;
+        component.hackathonId = 'hack-123' ;
+        storageServiceMock.uploadHackathonProblemStatement.and.returnValue(of({}));
+
+        component.uploadResource();
+        expect(component.isUploading).toBeTrue();
+        expect(storageServiceMock.uploadHackathonProblemStatement).toHaveBeenCalled();
+
+    });
+
+    it('should show error when uploading without file', () =>{
+        component.uploadFile = null;
+        component.uploadResource();
+        expect(component.uploadError).toBe('No file selected');
+    });
+
+
 
     
 });
