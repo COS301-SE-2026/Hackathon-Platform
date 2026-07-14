@@ -86,4 +86,22 @@ it ('should show error when saving without name', ()=>{
     expect(component.showDialog).toBeTrue();
 });
 
+it('should create new hackathon', () =>{
+    component.newHackathon.name = 'New Hackathon';
+    component.newHackathon.description = 'New Description';
+    component.saveHackathon();
+
+    expect(component.hackathons.length).toBe(1);
+    expect(component.hackathons[0].name).toBe('New Hackathon');
+    expect(component.hackathons[0].description).toBe('New Description');
+    expect(component.hackathons[0].status).toBe('upcoming');
+    expect(component.hackathons[0].eventCount).toBe(0);
+    expect(component.showDialog).toBeFalse();
+    expect(messageServiceMock.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Hackathon created successfully'
+    });
+});
+
 });
