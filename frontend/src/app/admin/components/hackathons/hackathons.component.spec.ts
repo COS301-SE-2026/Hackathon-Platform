@@ -135,5 +135,15 @@ it ('should delete hackathon', () => {
     });
 });
 
+it ('should not delelte hackathon if cancelled', () => {
+    component.hackathons = [{ ...mockHackathon}];
+    spyOn(window, 'confirm').and.returnValue(false);
+    component.deleteHackathon('hack-123');
+    expect(component.hackathons.length).toBe(1);
+    expect(messageServiceMock.add).toHaveBeenCalled();
+});
+
+
+
 
 });
