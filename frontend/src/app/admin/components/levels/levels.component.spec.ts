@@ -128,6 +128,18 @@ describe('LevelsComponent',() => {
     });
 
 
+    it('should update existing level', () => {
+        component.editingLevel = mockLevel;
+        component.modalForm.name = 'Updated level';
+        component.modalForm.difficulty = 'Expert';
+        component.saveLevel();
+
+        expect(mockLevel.name).toBe('Updated level');
+        expect(mockLevel.difficulty).toBe('Expert');
+        expect(component.showLevelModal).toBeFalse();
+    });
+
+
 
 
 
