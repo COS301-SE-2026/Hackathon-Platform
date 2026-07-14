@@ -1,4 +1,4 @@
-import { ComponentFixture,TestBed,fakeAsync,tick } from "@angular/core/testing";
+import { ComponentFixture,TestBed} from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
 import { Router,ActivatedRoute} from "@angular/router";
 import { RouterTestingModule } from "@angular/router/testing";
@@ -152,7 +152,7 @@ describe('ManageEventComponent',() => {
 
     });
 
-        it('should upload resource successfully',fakeAsync(() => {
+        it('should upload resource successfully',(done) => {
         const file = new File(['content'], 'test.pdf',{type: 'application/pdf'});
 
         component.uploadFile = file ;
@@ -162,13 +162,18 @@ describe('ManageEventComponent',() => {
         component.uploadResource();
         expect(component.isUploading).toBeTrue();
         expect(storageServiceMock.uploadHackathonProblemStatement).toHaveBeenCalled();
-        tick();
+        
+        setTimeout(()=>{
         expect(component.isUploading).toBeFalse();
         expect(component.uploadSuccess).toBeTrue();
         expect(component.uploadFile).toBeNull();
         expect(component.uploadFileName).toBe('');
+        done();
 
-    }));
+        }, 100);
+
+
+    });
 
     it('should show error when uploading without file', () =>{
         component.uploadFile = null;
