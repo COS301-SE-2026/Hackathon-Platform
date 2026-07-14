@@ -44,4 +44,8 @@ describe('LevelsComponent',() => {
     fixture.detectChanges();
 
 });
-})
+
+it('should create', () =>{
+    expect(component).toBeTruthy();
+});
+});
