@@ -88,4 +88,18 @@ describe('LevelsComponent',() => {
     expect(component.errorMessage).toBe('Start date is required');
 
     });
+
+    it ('should update hackathons successfully', (done) => {
+    component.form.name = 'Test Hackathon';
+    component.form.startDate = '2025-12-01T09:00';
+    component.form.endDate = '2025-12-03T09:00';
+    component.updateHackathon();
+    expect(component.isSaving).toBeTrue();
+    setTimeout(()=>{
+        expect(component.isSaving).toBeFalse();
+        expect(component.successMessage).toBe('Hackathon updated successfully');
+        done();
+    },1100);
+        
+    });
 });
