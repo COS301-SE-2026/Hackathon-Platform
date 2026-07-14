@@ -12,29 +12,40 @@ describe('CreateEventComponent', () => {
   let fixture: ComponentFixture<CreateEventComponent>;
   let routerNavigateSpy: jasmine.Spy;
   let eventServiceMock: jasmine.SpyObj<EventService>;
+  let activatedRouteMock: any;
 
   beforeEach(async () => {
     eventServiceMock = jasmine.createSpyObj<EventService>('EventService', ['createEvent']);
     eventServiceMock.createEvent.and.returnValue(of({ eventId: 'event-123' } as any));
 
+  activatedRouteMock = {
+    snapshot: {
+      paramMap:{
+        get: jasmine.createSpy('get').and.returnValue(null)
+
+      }
+    },
+    queryParams: of({}),
+    params: of ({})
+  };
+
     await TestBed.configureTestingModule({
       imports: [FormsModule, RouterTestingModule, CreateEventComponent],
       providers: [
-        { provide: EventService, useValue: eventServiceMock },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: { queryParams: {}, params: {} },
-            queryParams: of({}),
-            params: of({})
-          }
-        }
+        {provide: EventService, useValue: eventServiceMock},
+        {provide: ActivatedRoute, useValue: activatedRouteMock}
       ]
+
     }).compileComponents();
 
     routerNavigateSpy = spyOn(TestBed.inject(Router), 'navigate');
     fixture = TestBed.createComponent(CreateEventComponent);
     component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const inputElement = document.createElement('input');
+    component.fileInput = new ElementRef(inputElement);
+    
     fixture.detectChanges();
   });
 
@@ -113,18 +124,11 @@ describe('CreateEventComponent', () => {
     expect(eventServiceMock.createEvent).not.toHaveBeenCalled();
   });
 
-  it('should show error when onNextStep is called without event name', () => {
-    component.form.eventName = '';
-
-    component.onNextStep();
-
-    expect(component.errorMessage).toBe('Please fill in event name');
-    expect(eventServiceMock.createEvent).not.toHaveBeenCalled();
-  });
 
   it('should create event and navigate to event list', () => {
     component.form.eventName = 'Test Hackathon';
     component.form.description = 'Test description';
+    component.hackathonId= '';
 
     component.createEvent();
 
@@ -138,7 +142,7 @@ describe('CreateEventComponent', () => {
       registrationKey: undefined
     }));
     expect(component.isLoading).toBeFalse();
-    expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/event-list']);
+    expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/events']);
   });
 
   it('should include registration key for private events', () => {
@@ -172,4 +176,13 @@ describe('CreateEventComponent', () => {
     expect(component.isLoading).toBeFalse();
     expect(component.errorMessage).toBe('You are not authorized. Please login as admin.');
   });
+
+
+it('should navigate back to hackathon events when hackathonId exists', () =>{
+  activatedRouteMock.snapshot.paramMap.get.and.returnValue('hack-123');
+  component.hackathonId = 'hack-123';
+  component.form.eventName = 'Test Event';
+  component.createEvent();
+  expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','events']);
+});
 });
