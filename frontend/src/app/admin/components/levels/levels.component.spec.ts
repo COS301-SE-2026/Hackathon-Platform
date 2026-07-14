@@ -169,6 +169,21 @@ describe('LevelsComponent',() => {
         expect(component.activeLevel.files).toContain('dropped.txt');
     });
 
+    it('should add files on file selection',() => {
+
+    component.activeLevel = {...mockLevel, files: []};
+    const file = new File(['content'], 'selected.txt',{type: 'text/plain'});
+        const event ={
+            target: {
+                files: [file] }
+
+        } as unknown as DragEvent;
+        component.onDropFile(event);
+        expect(component.activeLevel.files).toContain('selected.txt');
+    });
+
+
+    });
 
 
 
@@ -218,4 +233,4 @@ describe('LevelsComponent',() => {
 
 
 
-});
+
