@@ -1,4 +1,4 @@
-import { ComponentFixture,TestBed } from "@angular/core/testing";
+import { ComponentFixture,TestBed,fakeAsync,tick } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
 import { Router,ActivatedRoute} from "@angular/router";
 import { RouterTestingModule } from "@angular/router/testing";
@@ -152,30 +152,35 @@ describe('ManageEventComponent',() => {
 
     });
 
-        it('should upload resource successfully', () => {
+        it('should upload resource successfully',fakeAsync(() => {
         const file = new File(['content'], 'test.pdf',{type: 'application/pdf'});
 
         component.uploadFile = file ;
         component.hackathonId = 'hack-123' ;
-        storageServiceMock.uploadHackathonProblemStatement.and.returnValue(of({}));
+        storageServiceMock.uploadHackathonProblemStatement.and.returnValue(of({} as any));
 
         component.uploadResource();
         expect(component.isUploading).toBeTrue();
         expect(storageServiceMock.uploadHackathonProblemStatement).toHaveBeenCalled();
+        tick();
+        expect(component.isUploading).toBeFalse();
+        expect(component.uploadSuccess).toBeTrue();
+        expect(component.uploadFile).toBeNull();
+        expect(component.uploadFileName).toBe('');
 
-    });
+    }));
 
     it('should show error when uploading without file', () =>{
         component.uploadFile = null;
         component.uploadResource();
-        expect(component.uploadError).toBe('No file selected');
+        expect(component.uploadError).toBe('No file selected.');
     });
 
-    it('should show error whne uploading without hackathonId', () => {
+    it('should show error when uploading without hackathonId', () => {
         component.uploadFile = new File(['content'],'test.pdf', {type: 'application/pdf'});
         component.hackathonId ='';
         component.uploadResource();
-        expect(component.uploadError).toBe('Hackathon ID not available');
+        expect(component.uploadError).toBe('Hackathon ID not available.');
 
     });
 
