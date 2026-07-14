@@ -72,5 +72,12 @@ describe('LevelsComponent',() => {
         expect(component.isLoading).toBeFalse();
         expect(component.form.name).toBe('');
         expect(component.form.visibility).toBe('PUBLIC');
-    })
+    });
+
+    it('should validate name on update',()=>{
+        component.form.name = '';
+        component.updateHackathon();
+        expect(component.errorMessage).toBe('Hackathon name is required');
+
+    });
 });
