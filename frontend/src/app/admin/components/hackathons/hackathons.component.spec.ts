@@ -104,4 +104,24 @@ it('should create new hackathon', () =>{
     });
 });
 
+it('should update existing hackathon', () =>{
+
+    component.hackathons = [{...mockHackathon}];
+    component.editingHackathon = mockHackathon;
+    component.newHackathon.name = 'Updated Name';
+    component.newHackathon.description = 'Updated Description';
+    component.saveHackathon();
+
+    expect(component.hackathons[0].name).toBe('Updated Name');
+    expect(component.hackathons[0].description).toBe('Updated Description');
+    expect(component.showDialog).toBeFalse();
+    expect(messageServiceMock.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Hackathon created successfully'
+    });
+});
+
+
+
 });
