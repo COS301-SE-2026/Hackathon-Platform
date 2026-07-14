@@ -1,6 +1,6 @@
 import { ComponentFixture,TestBed } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
-import { Router,ActivatedRoute, RouterModule } from "@angular/router";
+import { Router,ActivatedRoute} from "@angular/router";
 import { RouterTestingModule } from "@angular/router/testing";
 import { MessageService } from "primeng/api";
 import {of} from 'rxjs';
@@ -118,7 +118,7 @@ it('should update existing hackathon', () =>{
     expect(messageServiceMock.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Success',
-        detail: 'Hackathon created successfully'
+        detail: 'Hackathon updated successfully'
     });
 });
 
@@ -135,12 +135,12 @@ it ('should delete hackathon', () => {
     });
 });
 
-it ('should not delelte hackathon if cancelled', () => {
+it ('should not delete hackathon if cancelled', () => {
     component.hackathons = [{ ...mockHackathon}];
     spyOn(window, 'confirm').and.returnValue(false);
     component.deleteHackathon('hack-123');
     expect(component.hackathons.length).toBe(1);
-    expect(messageServiceMock.add).toHaveBeenCalled();
+    expect(messageServiceMock.add).not.toHaveBeenCalled();
 });
 
 it('should navigate to events', () => {
@@ -162,13 +162,13 @@ it('should navigate to levels with hackathon name', () => {
     component.hackathons = [{ ...mockHackathon}];
     component.navigateToLevels('hack-123');
     expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','levels'],
-        {state: {hackathonName: 'Test Hackathon'}}
+        {state: {hackathonName: 'Testing Hackathon'}}
     );
 });
 
 
 it('should navigate to solver', () => {
-    component.navigateToManage('hack-123');
+    component.navigateToSolver('hack-123');
     expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','solver']);
 });
 
