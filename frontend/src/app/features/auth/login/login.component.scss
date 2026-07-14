@@ -1,93 +1,16 @@
-.auth-wrapper {
-  min-height : 100vh;
-  background-color  : #0d1b3e;
+.login-page {
   display: flex;
-  align-items: center  ;
-  justify-content: center ;
-  padding : 24px;
+  height: 100vh;
+  width: 100%;
+  background-color: white;
 }
 
-.auth-card {
-  background-color : #c8cdd6;
-  border-radius: 16px;
-  padding: 48px 40px  ;
-  width : 100%;
-  max-width : 480px;
-  text-align : center  ;
+.login-panel {
+  width: 60%;
+  overflow-y: auto;
 }
 
-.brand {
-  font-size : 2rem;
-  font-weight: 700  ;
-  margin-bottom: 12px ;
-  .brand-hackathon { color: #132248; }
-  .brand-platform  { color: #5fae11; margin-left: 8px; }
-}
-
-.auth-subtitle {
-  color : #1e293b;
-  font-size  : 1rem;
-  margin-bottom : 28px ;
-}
-
-.form-group {
-  text-align: left  ;
-  margin-bottom: 18px ;
-
-  label {
-    display : block;
-    color: #1e293b;
-    font-size  : 0.875rem;
-    font-weight: 500;
-    margin-bottom: 6px ;
-  }
-
-  input {
-    width: 100%;
-    padding : 12px 16px;
-    border: none;
-    border-radius : 8px;
-    background-color: #ffffff ;
-    color: #1e293b ;
-    font-size: 0.95rem;
-    outline: none  ;
-
-    &::placeholder { color: #9ca3af; }
-    &:focus { box-shadow: 0 0 0 2px #7c3aed; }
-  }
-}
-
-.forgot-link-wrapper {
-  text-align : right;
-  margin-top: 8px  ;
-  a {
-    color: #2563eb;
-    font-size: 0.875rem;
-    &:hover { text-decoration: underline; }
-  }
-}
-
-.btn-primary {
-  width : 100%;
-  background-color: #2563eb;
-  color: #ffffff;
-  border : none  ;
-  border-radius: 8px ;
-  padding: 14px;
-  font-size: 1rem;
-  font-weight: 600 ;
-  margin-top : 8px;
-  transition: background-color 0.2s;
-  &:hover { background-color: #1d4ed8; }
-}
-
-.auth-footer {
-  margin-top: 24px ;
-  color: #1e293b;
-  font-size: 0.9rem ;
-  a {
-    color: #2563eb;
-    font-weight: 500;
-    &:hover { text-decoration: underline; }
-  }
+.hero-container {
+  width: 40%;
+  overflow: hidden;
 }
