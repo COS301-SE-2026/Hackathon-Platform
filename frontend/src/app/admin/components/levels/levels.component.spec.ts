@@ -79,6 +79,15 @@ describe('LevelsComponent',() => {
     });
 
 
+     it('should open edit level mode', () =>{
+        component.openEditModal(mockLevel);
+        expect(component.showLevelModal).toBeTrue();
+        expect(component.editingLevel).toBeNull(mockLevel);
+        expect(component.modalForm.name).toBe(mockLevel.name);
+        expect(component.modalForm.difficulty).toBe(mockLevel.difficulty);
+    });
+
+
 
 
 
