@@ -120,6 +120,13 @@ describe('LevelsComponent',() => {
 
     });
 
+    it('should not save level without name', () => {
+        component.modalForm.name ='';
+        const initialLength = component.levels.length;
+        component.saveLevel();
+        expect(component.levels.length).toBe(initialLength);
+    });
+
 
 
 
