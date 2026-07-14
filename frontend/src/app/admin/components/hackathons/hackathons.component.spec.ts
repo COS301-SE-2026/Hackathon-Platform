@@ -56,4 +56,14 @@ it('should load hackathons on init', () =>{
     expect(component.hackathons).toEqual([]);
 })
 
+it('should open create dialog', () =>{
+    component.openCreateDialog();
+    expect(component.showDialog).toBeTrue();
+    expect(component.editingHackathon).toBeNull();
+    expect(component.newHackathon.name).toBe('');
+    expect(component.newHackathon.description).toBe('');
+});
+ 
+
+
 });
