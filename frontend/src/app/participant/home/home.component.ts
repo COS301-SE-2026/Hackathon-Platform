@@ -1,7 +1,25 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common'; 
+import { AuthService } from '../../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse } from '../../services/event.service';
+import { CarouselModule, CarouselPageEvent } from 'primeng/carousel';
+import { CardModule } from 'primeng/card';         
+import { ButtonModule } from 'primeng/button';      
+import { TagModule } from 'primeng/tag';  
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { SelectButtonModule } from 'primeng/selectbutton';
+
+interface EventTimer {
+  label: string;
+  days: string;
+  hours: string;
+  minutes: string;
+  seconds: string;
+}
 
 interface OpenEventView {
   eventId: string;
@@ -15,32 +33,82 @@ interface OpenEventView {
   description?: string;
   startDateTime: string;
   duration: number;
+  timer: EventTimer;
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, CarouselModule, CardModule, ButtonModule, TagModule, InputTextModule, IconFieldModule, InputIconModule, SelectButtonModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly eventService = inject(EventService);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
-  timeDisplay = '00 : 00 : 00';
+  userFirstName = '';
   isLoadingEvents = false;
+  isLoadingActiveEvents = false;
   errorMessage = '';
+  searchTerm = '';
+  selectedFilterOption = 'All';
 
-  activeEvent: OpenEventView | null = null;
+  activeEvents: OpenEventView[] = [];
+  currentActiveEventIndex = 0;
   openEvents: OpenEventView[] = [];
 
   private timerInterval: ReturnType<typeof setInterval> | undefined;
-  private endTime: Date | null = null;
+  
 
+    responsiveOptionsForCarousel = [
+    {
+      breakpoint: '1024px',
+      numVisible: 1,
+      numScroll: 1
+    },
+    {
+      breakpoint: '768px',
+      numVisible: 1,
+      numScroll: 1
+    },
+    {
+      breakpoint: '560px',
+       numVisible: 1,
+      numScroll: 1
+    }
+  ];
+
+filterOptions = [
+  { label: 'All', value: 'All' },
+  { label: 'Public', value: 'Public' },
+  { label: 'Private', value: 'Private' }
+];
+
+get filteredOpenEvents(): OpenEventView[] {
+  return this.openEvents.filter(event => {
+
+    const search = this.searchTerm.toLowerCase();
+    const name = event.name.toLowerCase();
+
+    if (!name.includes(search)) {
+      return false;
+    }
+
+    if (this.selectedFilterOption === 'All') {
+      return true;
+    }
+
+    return event.visibility === this.selectedFilterOption.toUpperCase();
+  });
+}
   ngOnInit(): void {
+    const user = this.authService.getUser();
+    this.userFirstName = user ? user.firstName : 'Participant';
     this.loadOpenEvents();
-    this.timerInterval = setInterval(() => this.tick(), 60000);
+    this.loadUsersActiveEvents();
+    this.timerInterval = setInterval(() => this.tick(), 1000);
   }
 
   ngOnDestroy(): void {
@@ -48,6 +116,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       clearInterval(this.timerInterval);
     }
   }
+
+  onCarouselSlide(event: CarouselPageEvent): void {
+    this.currentActiveEventIndex = event.page ?? 0;
+}
 
   loadOpenEvents(): void {
     this.isLoadingEvents = true;
@@ -57,16 +129,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       next: (events) => {
         this.isLoadingEvents = false;
         this.openEvents = events.map((event) => this.toOpenEventView(event));
-
-        this.activeEvent =
-          this.openEvents.find((event) => event.status === 'ONGOING' || event.status === 'ACTIVE') ||
-          this.openEvents[0] ||
-          null;
-
-        if (this.activeEvent) {
-          this.setTimerForEvent(this.activeEvent);
-        }
-      },
+},
       error: (error) => {
         this.isLoadingEvents = false;
         console.error('Error loading open events:', error);
@@ -75,12 +138,60 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  goToEvent(event: OpenEventView): void {
-    this.saveCurrentEvent(event);
-    this.router.navigate(['/participant/submit'], {
-      queryParams: { eventId: event.eventId }
-    });
+  loadUsersActiveEvents(): void{
+  
+    this.isLoadingActiveEvents = true;
+    this.errorMessage = '';
+
+   this.eventService.getUserActiveEvents().subscribe({
+    next: (events) => {
+      this.isLoadingActiveEvents = false;
+      
+      if (events && events.length > 0) {
+        
+        this.activeEvents = events.map(event => this.toOpenEventView(event));
+        this.currentActiveEventIndex = 0;
+        this.tick();
+      } 
+      
+      else {
+        
+        this.activeEvents = [];
+      
+      }
+    },
+    
+    error: (err) => {
+      
+      this.isLoadingActiveEvents = false;
+      console.error('Error loading active events:', err);
+      this.errorMessage = 'Could not load your active events. Please refresh the page';
+      this.activeEvents = [];
+     
+    }
+  });
   }
+
+  goToEvent(event: OpenEventView): void {
+  this.saveCurrentEvent(event);
+
+  this.router.navigate([
+    '/participant/events',
+    event.eventId
+  ]);
+}
+
+goToMyTeam(event: OpenEventView): void {
+  this.saveCurrentEvent(event);
+  this.router.navigate(
+    ['/participant/events', event.eventId],
+    { 
+      queryParams: {
+        tab: 'team'
+      }
+   }
+  );
+}
 
   createTeamForEvent(event: OpenEventView): void {
     this.saveCurrentEvent(event);
@@ -108,7 +219,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       teamSizeLimit: event.teamSizeLimit,
       description: event.description,
       startDateTime: event.startDateTime,
-      duration: event.duration
+      duration: event.duration,
+      timer: {
+        label: '',
+        days: '00',
+        hours: '00',
+        minutes: '00',
+        seconds: '00'
+      }
     };
   }
 
@@ -122,29 +240,41 @@ export class HomeComponent implements OnInit, OnDestroy {
   private formatShortDate(date: Date): string {
     return date.toLocaleDateString('en-ZA', {
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     });
   }
 
-  private setTimerForEvent(event: OpenEventView): void {
-    const start = new Date(event.startDateTime);
-    this.endTime = new Date(start.getTime() + event.duration * 60 * 60 * 1000);
-    this.tick();
-  }
-
   private tick(): void {
-    if (!this.endTime) {
-      this.timeDisplay = '00 : 00 : 00';
-      return;
+    const now = new Date();
+
+    this.activeEvents.forEach(event => {
+    const start = new Date(event.startDateTime);
+    const end = new Date(start.getTime() + event.duration * 60 * 60 * 1000);
+    
+    let target: Date;
+    let label: string;
+
+    if (now < start) {
+      target = start;
+      label = 'Starts in';
+    } else {
+      target = end;
+      label = 'Time Remaining';
     }
 
-    const diff = Math.max(0, this.endTime.getTime() - Date.now());
-    const totalMins = Math.floor(diff / 60000);
-    const days = Math.floor(totalMins / 1440);
-    const hours = Math.floor((totalMins % 1440) / 60);
-    const mins = totalMins % 60;
+    const diff = Math.max(0, target.getTime() - now.getTime());
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    this.timeDisplay =
-      `${String(days).padStart(2, '0')} : ${String(hours).padStart(2, '0')} : ${String(mins).padStart(2, '0')}`;
+    event.timer.label = label;
+    event.timer.days = String(days).padStart(2, '0');
+    event.timer.hours = String(hours).padStart(2, '0');
+    event.timer.minutes = String(minutes).padStart(2, '0');
+    event.timer.seconds = String(seconds).padStart(2, '0');
+    });
   }
+
 }
