@@ -64,6 +64,14 @@ it('should open create dialog', () =>{
     expect(component.newHackathon.description).toBe('');
 });
  
+it('should open edit dialog with hackathon data', () =>{
+    component.hackathons = [mockHackathon];
+    component.openEditDialog(mockHackathon);
+    expect(component.showDialog).toBeTrue();
+    expect(component.editingHackathon).toEqual(mockHackathon);
+    expect(component.newHackathon.name).toBe(mockHackathon.name);
+    expect(component.newHackathon.description).toBe(mockHackathon.description);
 
+});
 
 });
