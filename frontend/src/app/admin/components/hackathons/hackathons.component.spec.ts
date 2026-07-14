@@ -158,5 +158,11 @@ it('should navigate to manage', () => {
     expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','manage']);
 });
 
-
+it('should navigate to levels with hackathon name', () => {
+    component.hackathons = [{ ...mockHackathon}];
+    component.navigateToLevels('hack-123');
+    expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','levels'],
+        {state: {hackathonName: 'Test Hackathon'}}
+    );
+});
 });
