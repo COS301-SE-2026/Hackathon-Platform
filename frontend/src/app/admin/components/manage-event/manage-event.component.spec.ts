@@ -1,0 +1,53 @@
+import { ComponentFixture,TestBed } from "@angular/core/testing";
+import { FormsModule } from "@angular/forms";
+import { Router,ActivatedRoute} from "@angular/router";
+import { RouterTestingModule } from "@angular/router/testing";
+import {of,throwError} from 'rxjs';
+import {ManageEventComponent} from './manage-event.component';
+import { EventService } from "../../../services/event.service";
+import { StorageService } from "../../../services/storage.service";
+
+
+describe('LevelsComponent',() => {
+    let component: ManageEventComponent;
+    let fixture: ComponentFixture<ManageEventComponent>;
+    let routerNavigateSpy: jasmine.Spy;
+    let activatedRouteMock: any;
+    let eventServiceMock: jasmine.SpyObj<EventService>;
+    let storageServiceMock: jasmine.SpyObj<StorageService>;
+
+    
+    beforeEach(async () => {
+        eventServiceMock = jasmine.createSpyObj('EventService',['updateEvent','getEvent']);
+        storageServiceMock = jasmine.createSpyObj('StorageService',['uploadHackathonProblemStatement']);
+        activatedRouteMock ={
+            snapshot: {
+                paramMap:{
+                    get: jasmine.createSpy('get').and.callFake((key: string) =>{
+                        if (key =='hackathonId') return 'hack-123';
+                        if (key =='eventId') return 'event-456';
+                        return null;
+                    })
+                }
+            },
+            queryParams: of ({}),
+            params: of({})
+        };
+
+    await TestBed.configureTestingModule({
+        imports: [FormsModule,RouterTestingModule,ManageEventComponent],
+        providers: [ 
+            {provide: EventService, useValue: eventServiceMock},
+            {provide: StorageService, useValue: storageServiceMock},
+            {provide: ActivatedRoute, useValue: activatedRouteMock}
+            ]
+    
+        }).compileComponents();
+
+    routerNavigateSpy = spyOn(TestBed.inject(Router),'navigate');
+    fixture = TestBed.createComponent(ManageEventComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    });
+});
