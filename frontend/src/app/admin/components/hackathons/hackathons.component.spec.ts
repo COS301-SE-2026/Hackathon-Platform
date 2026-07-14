@@ -171,4 +171,12 @@ it('should navigate to solver', () => {
     component.navigateToManage('hack-123');
     expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','solver']);
 });
+
+
+it('should return correct status classes', () =>{
+    expect(component.getStatusClass('active')).toBe('status-active');
+    expect(component.getStatusClass('upcoming')).toBe('status-upcoming');
+    expect(component.getStatusClass('completed')).toBe('status-completed');
+    expect(component.getStatusClass('unknown')).toBe('');
+});
 });
