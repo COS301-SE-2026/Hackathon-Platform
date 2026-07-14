@@ -88,6 +88,13 @@ describe('LevelsComponent',() => {
     });
 
 
+     it('should close level mode', () =>{
+        component.showLevelModal= true;
+        component.closeLevelModal();
+        expect(component.showLevelModal).toBeFalse();
+    });
+
+
 
 
 
