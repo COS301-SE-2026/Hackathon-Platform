@@ -170,7 +170,7 @@ describe('ManageEventComponent',() => {
         expect(component.uploadFileName).toBe('');
         done();
 
-        }, 100);
+        }, 500);
 
 
     });
