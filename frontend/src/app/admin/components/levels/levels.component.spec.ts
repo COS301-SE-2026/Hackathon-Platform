@@ -187,6 +187,15 @@ describe('LevelsComponent',() => {
         expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123']);
     });
 
+    it('should delete level', () => {
+        spyOn(window, 'confirm').and.returnValue(true);
+        component.editingLevel = mockLevel;
+        const initialLength = component.levels.length;
+        component.deleteLevel();
+        expect(component.levels.length).toBe(initialLength -1);
+        expect(component.showLevelModal).toBeFalse();
+    });
+
 
     });
 
