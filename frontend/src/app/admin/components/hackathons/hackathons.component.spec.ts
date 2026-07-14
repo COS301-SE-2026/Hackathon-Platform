@@ -47,4 +47,8 @@ describe('HackathonsComponent', () =>{
 
 });
 
+it('should create', () =>{
+    expect(component).toBeTruthy();
+});
+
 });
