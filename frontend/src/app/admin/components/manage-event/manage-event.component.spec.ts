@@ -171,6 +171,14 @@ describe('ManageEventComponent',() => {
         expect(component.uploadError).toBe('No file selected');
     });
 
+    it('should show error whne uploading without hackathonId', () => {
+        component.uploadFile = new File(['content'],'test.pdf', {type: 'application/pdf'});
+        component.hackathonId ='';
+        component.uploadResource();
+        expect(component.uploadError).toBe('Hackathon ID not available');
+
+    });
+
 
 
     
