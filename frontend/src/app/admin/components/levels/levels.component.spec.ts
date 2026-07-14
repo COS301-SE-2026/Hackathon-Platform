@@ -104,6 +104,28 @@ describe('LevelsComponent',() => {
     });
 
 
+    it('should close files mode', () =>{
+        component.modalForm.name = 'New Level';
+        component.modalForm.difficulty = 'Advanced';
+        component.modalForm.scoringMode = 'time';
+
+        const initialLength = component.levels.length;
+        component.saveLevel();
+
+        expect(component.levels.length).toBe(initialLength + 1);
+        expect(component.levels[initialLength].name).toBe('New Level');
+        expect(component.levels[initialLength].difficulty).toBe('Advanced');
+        expect(component.levels[initialLength].scoringMode).toBe('time');
+        expect(component.showFilesModal).toBeFalse();
+
+    });
+
+
+
+
+
+
+
 
 
 
