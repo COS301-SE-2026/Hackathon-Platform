@@ -45,6 +45,14 @@ export class EventService {
     return this.http.get<EventResponse[]>(`${this.baseUrl}/events/open`);
   }
 
+  getUserActiveEvents(): Observable<EventResponse[]> {
+    return this.http.get<EventResponse[]>(`${this.baseUrl}/events/user-active-events`);
+  }
+
+  getCompletedEvents(): Observable<EventResponse[]> {
+    return this.http.get<EventResponse[]>(`${this.baseUrl}/events/completed`);
+  }
+
   patchEventStatus(eventId: string, visibility?: string, status?: string, registrationKey?: string): Observable<EventResponse> {
     return this.http.patch<EventResponse>(
       `${this.baseUrl}/admin/events/${eventId}/status`,
