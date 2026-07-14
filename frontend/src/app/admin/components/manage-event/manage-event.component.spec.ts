@@ -179,6 +179,11 @@ describe('ManageEventComponent',() => {
 
     });
 
+    it('should navigate back', () =>{
+        component.goBack();
+        expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123']);
+    });
+
 
 
     
