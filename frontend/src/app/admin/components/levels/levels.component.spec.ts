@@ -182,6 +182,11 @@ describe('LevelsComponent',() => {
         expect(component.activeLevel.files).toContain('selected.txt');
     });
 
+    it('should navigate back',() => {
+        component.goBack();
+        expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123']);
+    });
+
 
     });
 
