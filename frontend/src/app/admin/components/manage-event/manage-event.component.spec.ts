@@ -113,4 +113,17 @@ describe('LevelsComponent',() => {
     },1100);
         
     });
+
+    it('should handle file drop', () => {
+        const file = new File(['content'], 'test.pdf',{type: 'application/pdf'});
+        const dragEvent = {
+            preventDefault: jasmine.createSpy(),
+            dataTransfer: {files: [file]}
+
+        }as unknown as DragEvent;
+        component.onDropFile(dragEvent);
+        expect(component.uploadFile).toBe(file);
+        expect(component.uploadFileName).toBe('test.pdf');
+
+    });
 });
