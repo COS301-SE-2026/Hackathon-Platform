@@ -94,7 +94,16 @@ describe('LevelsComponent',() => {
         expect(component.showLevelModal).toBeFalse();
     });
 
-    
+
+     it('should close files mode', () =>{
+        component.showLevelModal= true;
+        component.activeLevel = mockLevel;
+        component.closeFilesModal();
+        expect(component.showFilesModal).toBeFalse();
+        expect(component.activeLevel).toBeNull();
+    });
+
+
 
 
 
