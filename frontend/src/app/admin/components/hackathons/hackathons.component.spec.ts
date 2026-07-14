@@ -10,7 +10,7 @@ describe('HackathonsComponent', () =>{
     let component: HackathonsComponent;
     let fixture: ComponentFixture<HackathonsComponent>;
     let routerNavigateSpy: jasmine.Spy;
-    let messageServiceMock: jasmine.SpyObj<MessageService>;
+    let messageService: MessageService;
     let activatedRouteMock: any;
 
     const mockHackathon = {
@@ -22,7 +22,6 @@ describe('HackathonsComponent', () =>{
     };
 
     beforeEach(async () => {
-        messageServiceMock = jasmine.createSpyObj('MessageService', ['add']);
         activatedRouteMock ={
             snapshot: {
                 paramMap:{
@@ -34,15 +33,20 @@ describe('HackathonsComponent', () =>{
         };
     await TestBed.configureTestingModule({
         imports: [FormsModule,RouterTestingModule,HackathonsComponent],
-        providers: [
-            {provide: MessageService, useValue: messageServiceMock},
+        providers: [ 
             {provide: ActivatedRoute, useValue: activatedRouteMock}
             ]
+    
         }).compileComponents();
 
     routerNavigateSpy = spyOn(TestBed.inject(Router),'navigate');
     fixture = TestBed.createComponent(HackathonsComponent);
     component = fixture.componentInstance;
+
+        messageService = fixture.debugElement.injector.get(MessageService);
+        spyOn(messageService, 'add');
+
+ 
     fixture.detectChanges();
 
 });
@@ -75,10 +79,11 @@ it('should open edit dialog with hackathon data', () =>{
 });
 
 it ('should show error when saving without name', ()=>{
+    component.showDialog = true;
     component.newHackathon.name = '';
     component.saveHackathon();
 
-    expect(messageServiceMock.add).toHaveBeenCalledWith({
+    expect(messageService.add).toHaveBeenCalledWith({
         severity: 'error',
         summary: 'Error',
         detail: 'Hackathon name is required'
@@ -97,7 +102,7 @@ it('should create new hackathon', () =>{
     expect(component.hackathons[0].status).toBe('upcoming');
     expect(component.hackathons[0].eventCount).toBe(0);
     expect(component.showDialog).toBeFalse();
-    expect(messageServiceMock.add).toHaveBeenCalledWith({
+    expect(messageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Success',
         detail: 'Hackathon created successfully'
@@ -115,7 +120,7 @@ it('should update existing hackathon', () =>{
     expect(component.hackathons[0].name).toBe('Updated Name');
     expect(component.hackathons[0].description).toBe('Updated Description');
     expect(component.showDialog).toBeFalse();
-    expect(messageServiceMock.add).toHaveBeenCalledWith({
+    expect(messageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Success',
         detail: 'Hackathon updated successfully'
@@ -127,7 +132,7 @@ it ('should delete hackathon', () => {
     spyOn(window, 'confirm').and.returnValue(true);
     component.deleteHackathon('hack-123');
     expect(component.hackathons.length).toBe(0);
-    expect(messageServiceMock.add).toHaveBeenCalledWith({
+    expect(messageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Success',
         detail: 'Hackathon deleted successfully'  
@@ -140,7 +145,7 @@ it ('should not delete hackathon if cancelled', () => {
     spyOn(window, 'confirm').and.returnValue(false);
     component.deleteHackathon('hack-123');
     expect(component.hackathons.length).toBe(1);
-    expect(messageServiceMock.add).not.toHaveBeenCalled();
+    expect(messageService.add).not.toHaveBeenCalled();
 });
 
 it('should navigate to events', () => {
