@@ -155,6 +155,20 @@ describe('LevelsComponent',() => {
 
     });
 
+    it('should add files on drop',() =>{
+        component.activeLevel = {...mockLevel, files: []};
+        const dragEvent ={
+            preventDefault: jasmine.createSpy(),
+            dataTransfer:{
+                files: [
+                    new File(['content'],'dropped.txt',{type:'text/plain'})
+                ]
+            }
+        } as unknown as DragEvent;
+        component.onDropFile(dragEvent);
+        expect(component.activeLevel.files).toContain('dropped.txt');
+    });
+
 
 
 
