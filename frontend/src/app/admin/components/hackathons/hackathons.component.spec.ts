@@ -51,4 +51,9 @@ it('should create', () =>{
     expect(component).toBeTruthy();
 });
 
+it('should load hackathons on init', () =>{
+    expect(component.isLoading).toBeFalse();
+    expect(component.hackathons).toEqual([]);
+})
+
 });
