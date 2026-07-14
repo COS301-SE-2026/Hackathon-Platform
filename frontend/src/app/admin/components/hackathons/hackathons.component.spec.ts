@@ -143,6 +143,11 @@ it ('should not delelte hackathon if cancelled', () => {
     expect(messageServiceMock.add).toHaveBeenCalled();
 });
 
+it('should navigate to events', () => {
+    component.navigateToEvents('hack-123');
+    expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','events']);
+});
+
 
 
 
