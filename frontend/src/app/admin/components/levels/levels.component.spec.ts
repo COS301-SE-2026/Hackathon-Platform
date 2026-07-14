@@ -196,6 +196,15 @@ describe('LevelsComponent',() => {
         expect(component.showLevelModal).toBeFalse();
     });
 
+        it('should not delete level if cancelled', () => {
+        spyOn(window, 'confirm').and.returnValue(false);
+        component.editingLevel = mockLevel;
+        const initialLength = component.levels.length;
+        component.deleteLevel();
+        expect(component.levels.length).toBe(initialLength);
+    
+    });
+
 
     });
 
