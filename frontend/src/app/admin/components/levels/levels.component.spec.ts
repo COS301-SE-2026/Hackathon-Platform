@@ -70,6 +70,17 @@ describe('LevelsComponent',() => {
     });
 
 
+    it('should open add level mode', () =>{
+        component.openAddLevelModal();
+        expect(component.showLevelModal).toBeTrue();
+        expect(component.editingLevel).toBeNull();
+        expect(component.modalForm.name).toBe('');
+        expect(component.modalForm.difficulty).toBe('Introduction');
+    });
+
+
+
+
 
 
 
