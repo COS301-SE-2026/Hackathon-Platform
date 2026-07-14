@@ -122,6 +122,18 @@ it('should update existing hackathon', () =>{
     });
 });
 
+it ('should delete hackathon', () => {
+    component.hackathons = [{ ...mockHackathon}];
+    spyOn(window, 'confirm').and.returnValue(true);
+    component.deleteHackathon('hack-123');
+    expect(component.hackathons.length).toBe(0);
+    expect(messageServiceMock.add).toHaveBeenCalledWith({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Hackathon deleted successfully'  
+
+    });
+});
 
 
 });
