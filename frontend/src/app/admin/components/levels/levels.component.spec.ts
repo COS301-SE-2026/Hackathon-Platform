@@ -43,7 +43,7 @@ describe('LevelsComponent',() => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-});
+    });
 
     it('should create', () =>{
         expect(component).toBeTruthy();
@@ -51,7 +51,16 @@ describe('LevelsComponent',() => {
 
     it('should initialize with hackathonId from route', () =>{
     expect(component.hackathonId).toBe('hack-123');
-});
+    });
+
+
+    it('should have default levels', () =>{
+    expect(component.levels.length).toBe(3);
+    expect(component.levels[0].name).toBe('Level 1');
+    });
+
+
+
 
 
 
