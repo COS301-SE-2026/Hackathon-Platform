@@ -59,4 +59,11 @@ describe('LevelsComponent',() => {
     expect(component.hackathonId).toBe('hack-123');
     expect(component.eventId).toBe('event-123');
     });
+
+    it('should show error if no hackathonId', () =>{
+        activatedRouteMock.snapshot.paramMap.get.and.returnValue(null);
+        component.ngOnInit();
+        expect(component.errorMessage).toBe('No hackathon ID provided');
+        expect(component.isLoading).toBeFalse();
+    })
 });
