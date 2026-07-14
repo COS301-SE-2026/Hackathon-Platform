@@ -185,6 +185,10 @@ describe('ManageEventComponent',() => {
     });
 
 
-
-    
+    it('should navigate back to hackathons list if no hackathonId', () =>{
+        component.hackathonId = '';
+        component.goBack();
+        expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons']);
+    });
+ 
 });
