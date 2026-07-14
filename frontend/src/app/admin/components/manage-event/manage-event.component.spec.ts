@@ -65,5 +65,12 @@ describe('LevelsComponent',() => {
         component.ngOnInit();
         expect(component.errorMessage).toBe('No hackathon ID provided');
         expect(component.isLoading).toBeFalse();
+    });
+
+    it('should load hackathon data', () =>{
+        component.loadHackathon();
+        expect(component.isLoading).toBeFalse();
+        expect(component.form.name).toBe('');
+        expect(component.form.visibility).toBe('PUBLIC');
     })
 });
