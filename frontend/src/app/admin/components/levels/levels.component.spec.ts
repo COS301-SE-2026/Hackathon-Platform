@@ -70,7 +70,7 @@ describe('LevelsComponent',() => {
     });
 
 
-    it('should open add level mode', () =>{
+    it('should open add level modal', () =>{
         component.openAddLevelModal();
         expect(component.showLevelModal).toBeTrue();
         expect(component.editingLevel).toBeNull();
@@ -79,24 +79,24 @@ describe('LevelsComponent',() => {
     });
 
 
-     it('should open edit level mode', () =>{
+     it('should open edit level modal', () =>{
         component.openEditModal(mockLevel);
         expect(component.showLevelModal).toBeTrue();
-        expect(component.editingLevel).toBeNull(mockLevel);
+        expect(component.editingLevel).toEqual(mockLevel);
         expect(component.modalForm.name).toBe(mockLevel.name);
         expect(component.modalForm.difficulty).toBe(mockLevel.difficulty);
     });
 
 
-     it('should close level mode', () =>{
+     it('should close level modal', () =>{
         component.showLevelModal= true;
         component.closeLevelModal();
         expect(component.showLevelModal).toBeFalse();
     });
 
 
-     it('should close files mode', () =>{
-        component.showLevelModal= true;
+     it('should close files modal', () =>{
+        component.showFilesModal= true;
         component.activeLevel = mockLevel;
         component.closeFilesModal();
         expect(component.showFilesModal).toBeFalse();
@@ -104,7 +104,7 @@ describe('LevelsComponent',() => {
     });
 
 
-    it('should close files mode', () =>{
+    it('should save new level', () =>{
         component.modalForm.name = 'New Level';
         component.modalForm.difficulty = 'Advanced';
         component.modalForm.scoringMode = 'time';
@@ -116,7 +116,7 @@ describe('LevelsComponent',() => {
         expect(component.levels[initialLength].name).toBe('New Level');
         expect(component.levels[initialLength].difficulty).toBe('Advanced');
         expect(component.levels[initialLength].scoringMode).toBe('time');
-        expect(component.showFilesModal).toBeFalse();
+        expect(component.showLevelModal).toBeFalse();
 
     });
 
@@ -177,8 +177,8 @@ describe('LevelsComponent',() => {
             target: {
                 files: [file] }
 
-        } as unknown as DragEvent;
-        component.onDropFile(event);
+        } as unknown as Event;
+        component.onFileSelected(event);
         expect(component.activeLevel.files).toContain('selected.txt');
     });
 
