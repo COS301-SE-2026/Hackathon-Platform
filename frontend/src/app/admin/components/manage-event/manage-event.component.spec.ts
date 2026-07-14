@@ -51,7 +51,12 @@ describe('LevelsComponent',() => {
 
     });
 
-      it('should create', () =>{
+    it('should create', () =>{
         expect(component).toBeTruthy();
+    });
+
+    it('should initialize with hackathonId and eventId from route', () =>{
+    expect(component.hackathonId).toBe('hack-123');
+    expect(component.eventId).toBe('event-123');
     });
 });
