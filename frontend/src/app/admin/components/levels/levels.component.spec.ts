@@ -59,6 +59,16 @@ describe('LevelsComponent',() => {
     expect(component.levels[0].name).toBe('Level 1');
     });
 
+    it ('should reorder levels on drop', () => {
+        const initializeFirst = component.levels[0];
+        const event = {
+            previousIndex:0, currentIndex: 1
+        } as any;
+        component.onDrop(event);
+        expect(component.levels[1]).toBe(initializeFirst);
+
+    });
+
 
 
 
