@@ -166,8 +166,11 @@ describe('SolverComponent',() =>{
         expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons']);
     });
 
-
-    
+    it('should load solver versions on init',()=>{
+        spyOn(console,'log');
+        component.loadSolverVersions();
+        expect(console.log).toHaveBeenCalledWith('Loading solver for hackathon:','hack-123');
+    });   
 
 
 });
