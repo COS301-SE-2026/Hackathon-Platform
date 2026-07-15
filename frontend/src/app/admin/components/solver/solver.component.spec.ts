@@ -111,6 +111,14 @@ describe('SolverComponent',() =>{
         expect(window.alert).toHaveBeenCalledWith('Please select a solver file and provide a version label.');
     });
 
+    it('should show alert when uploading without version label', () =>{
+        spyOn(window,'alert');
+        component.selectedFile = new File(['content'],'solver.py',{type: 'text/x-python'});
+        component.versionLabel = '';
+        component.onUploadAndActivate();
+        expect(window.alert).toHaveBeenCalledWith('Please select a solver file and provide a version label.');
+    });
+
 
 
 });
