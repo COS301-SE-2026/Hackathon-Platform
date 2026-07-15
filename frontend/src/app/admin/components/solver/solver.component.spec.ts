@@ -154,5 +154,11 @@ describe('SolverComponent',() =>{
        
     });
 
+    
+    it('should navigate back',() => {
+        component.goBack();
+        expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123']);
+    });
+
 
 });
