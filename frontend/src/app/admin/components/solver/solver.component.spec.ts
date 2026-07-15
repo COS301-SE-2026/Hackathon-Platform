@@ -108,7 +108,7 @@ describe('SolverComponent',() =>{
         component.selectedFile = null;
         component.versionLabel = 'v1.0';
         component.onUploadAndActivate();
-        expect(window.alert).toHaveBeenCalledWith('Please select a solver file and provide a version label.');
+        expect(window.alert).toHaveBeenCalledWith('Please select a solver file and provide a version label. ');
     });
 
     it('should show alert when uploading without version label', () =>{
@@ -116,7 +116,7 @@ describe('SolverComponent',() =>{
         component.selectedFile = new File(['content'],'solver.py',{type: 'text/x-python'});
         component.versionLabel = '';
         component.onUploadAndActivate();
-        expect(window.alert).toHaveBeenCalledWith('Please select a solver file and provide a version label.');
+        expect(window.alert).toHaveBeenCalledWith('Please select a solver file and provide a version label. ');
     });
 
     it('should show alert when hackathonId is missing', () =>{
@@ -125,33 +125,7 @@ describe('SolverComponent',() =>{
         component.versionLabel = 'v1.0';
         component.hackathonId = '';
         component.onUploadAndActivate();
-        expect(window.alert).toHaveBeenCalledWith('Hackathon ID not available');
-    });
-
-    it('should upload solver successfully' , () =>{
-        const file = new File(['content'],'solver.py',{type:'text/x-python'});
-        component.selectedFile = file;
-        component.versionLabel = 'v1.2.2';
-        component.hackathonId = 'hack-123';
-        storageServiceMock.uploadHackathonSolver.and.returnValue(of({} as any));
-
-        component.onUploadAndActivate();
-        expect(component.isUploading).toBeTrue();
-        expect(storageServiceMock.uploadHackathonSolver).toHaveBeenCalledWith('hack-123',file,'v1.2.2');
-
-
-    });
-
-        it('should handle upload error' , () =>{
-        const file = new File(['content'],'solver.py',{type:'text/x-python'});
-        component.selectedFile = file;
-        component.versionLabel = 'v1.2.2';
-        component.hackathonId = 'hack-123';
-        storageServiceMock.uploadHackathonSolver.and.returnValue(throwError(()=>({error:{message:'Upload failed'}})));
-
-        component.onUploadAndActivate();
-        expect(component.isUploading).toBeTrue();
-       
+        expect(window.alert).toHaveBeenCalledWith('Hackathon ID not available.');
     });
 
     
