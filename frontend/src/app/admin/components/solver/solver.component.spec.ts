@@ -90,6 +90,18 @@ describe('SolverComponent',() =>{
     });
 
 
+    it('should reject dropped file with invalid extension',()=>{
+       const file = new File(['content'],'solver.exe',{type:'application/octet-stream'});
+       const dragEvent = {
+        preventDefault: jasmine.createSpy(),
+        dataTransfer: {files: [file]}
+       } as unknown as DragEvent;
+
+       component.onDropFile(dragEvent);
+       expect(component.selectedFile).toBeNull();
+       expect(component.selectedFileName).toBe('');
+       expect(component.uploadError).toBe('Please select a .py, .jar, or .zip file');
+    });
 
 
 
