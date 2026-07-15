@@ -17,6 +17,7 @@ export class LoginComponent {
   password = '';
   isLoading = false;
   errorMsg = '';
+ showPassword = false;
 
  private readonly router = inject(Router);
  private readonly authService = inject(AuthService);

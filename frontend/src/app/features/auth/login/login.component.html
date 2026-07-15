@@ -17,6 +17,48 @@
 
       <div class="section-divider"></div>
 
+      <form class="login-form" (ngSubmit)="onSignIn()">
+
+        <div class="form-group">
+
+          <label for="email">Email address</label>
+
+          <input
+          id="email"
+          pInputText
+          name="email"
+          type="email"
+          [(ngModel)]="email"
+          placeholder="Enter your email"
+          autocomplete="email" />
+
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+
+            <div class="password-container">
+              <input
+              id="password"
+              pInputText
+              [(ngModel)]="password"
+              [type]="showPassword ? 'text' : 'password'"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password" />
+
+              <button
+                type="button"
+                class="password-visibility"
+                (click)="showPassword = !showPassword">
+                <i class="pi" [ngClass]="showPassword ? 'pi-eye-slash' : 'pi-eye'"></i>
+              </button>
+
+            </div>
+
+        </div>
+
+      </form>
 
     </div>
 

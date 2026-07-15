@@ -38,7 +38,6 @@
 }
 
 .heading-area {
-  text-align: center;
   margin-bottom: 30px;
 }
 
@@ -46,12 +45,99 @@
   font-size: 36px;
   font-weight: 700;
   line-height: 1.2;
-  text-transform: uppercase;
   color: var(--background-white);
 }
 
 .section-divider {
   width: 100%;
-  height: 1px;
+  height: 0.3px;
   background: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.login-form {
+  width: 100%;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.form-group label {
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.form-group input {
+    color: var(--background-white);
+     width: 100%;
+    height: 48px;
+    padding: 0 12px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0px;
+    background: rgba(255, 255, 255, 0.05);
+  font-size: 14px;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+ font-size: 14px;
+  font-weight: 400;
+}
+
+.form-group input:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.form-group input:focus {
+  border-color: var(--accent-bright-blue);
+box-shadow: 0 0 0 3px rgba(25, 131, 194, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-container input {
+  padding-right: 48px;
+}
+
+.password-visibility {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.45);
+  transition: color 0.2s ease;
+}
+
+.password-visibility:hover {
+  color: var(--accent-bright-blue);
+}
+
+.password-visibility:focus {
+  outline: none;
+}
+
+.password-visibility .pi {
+  font-size: 16px;
 }
