@@ -47,4 +47,10 @@ describe('SolverComponent',() =>{
     it('should initialize with hackathonId from route', () =>{
     expect(component.hackathonId).toBe('hack-123');
     });
+
+    
+    it('should have version history', () =>{
+    expect(component.versionHistory.length).toBe(2);
+    expect(component.versionHistory[0].version).toBe('v1.2.1');
+    });
 });
