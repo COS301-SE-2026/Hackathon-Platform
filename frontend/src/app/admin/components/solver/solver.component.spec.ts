@@ -103,6 +103,14 @@ describe('SolverComponent',() =>{
        expect(component.uploadError).toBe('Please select a .py, .jar, or .zip file');
     });
 
+    it('should show alert when uploading without file',() =>{
+        spyOn(window,'alert');
+        component.selectedFile = null;
+        component.versionLabel = 'v1.0';
+        component.onUploadAndActivate();
+        expect(window.alert).toHaveBeenCalledWith('Please select a solver file and provide a version label.');
+    });
+
 
 
 });
