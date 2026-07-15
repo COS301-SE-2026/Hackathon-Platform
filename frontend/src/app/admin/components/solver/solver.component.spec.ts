@@ -43,4 +43,8 @@ describe('SolverComponent',() =>{
     it('should create', () =>{
         expect(component).toBeTruthy();
     });
+
+    it('should initialize with hackathonId from route', () =>{
+    expect(component.hackathonId).toBe('hack-123');
+    });
 });
