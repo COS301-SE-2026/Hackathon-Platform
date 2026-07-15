@@ -53,4 +53,15 @@ describe('SolverComponent',() =>{
     expect(component.versionHistory.length).toBe(2);
     expect(component.versionHistory[0].version).toBe('v1.2.1');
     });
+
+    it('should handle file selection with valid extension',() =>{
+        const file = new File(['content'],'solver.py',{type:'text/x-python'});
+        const event = {target: {files:[file]}} as unknown as Event;
+
+        component.onFileSelected(event);
+        expect(component.selectedFile).toBe(file);
+        expect(component.selectedFileName).toBe('solver.py');
+        expect(component.uploadError).toBe('');
+
+    });
 });
