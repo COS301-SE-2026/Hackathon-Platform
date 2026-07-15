@@ -64,4 +64,20 @@ describe('SolverComponent',() =>{
         expect(component.uploadError).toBe('');
 
     });
+
+    it('should reject file with invalid extension',() =>{
+        const file = new File(['content'],'solver.exe',{type:'application/octet-stream'});
+        const event = {target: {files:[file]}} as unknown as Event;
+
+        component.onFileSelected(event);
+        expect(component.selectedFile).toBeNull();
+        expect(component.selectedFileName).toBe('');
+        expect(component.uploadError).toBe('Please select a .py, .jar, or .zip file');
+
+    });
+
+
+
+
+
 });
