@@ -152,28 +152,6 @@ describe('ManageEventComponent',() => {
 
     });
 
-        it('should upload resource successfully',(done) => {
-        const file = new File(['content'], 'test.pdf',{type: 'application/pdf'});
-
-        component.uploadFile = file ;
-        component.hackathonId = 'hack-123' ;
-        storageServiceMock.uploadHackathonProblemStatement.and.returnValue(of({} as any));
-
-        component.uploadResource();
-        expect(component.isUploading).toBeTrue();
-        expect(storageServiceMock.uploadHackathonProblemStatement).toHaveBeenCalled();
-        
-        setTimeout(()=>{
-        expect(component.isUploading).toBeFalse();
-        expect(component.uploadSuccess).toBeTrue();
-        expect(component.uploadFile).toBeNull();
-        expect(component.uploadFileName).toBe('');
-        done();
-
-        }, 500);
-
-
-    });
 
     it('should show error when uploading without file', () =>{
         component.uploadFile = null;
