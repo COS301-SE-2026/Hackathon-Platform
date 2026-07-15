@@ -36,3 +36,22 @@
   height: auto;
   display: block;
 }
+
+.heading-area {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header-prompt {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--background-white);
+}
+
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--text-muted);
+}
