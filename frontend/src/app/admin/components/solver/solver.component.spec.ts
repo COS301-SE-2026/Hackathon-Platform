@@ -119,6 +119,15 @@ describe('SolverComponent',() =>{
         expect(window.alert).toHaveBeenCalledWith('Please select a solver file and provide a version label.');
     });
 
+    it('should show alert when hackathonId is missing', () =>{
+        spyOn(window,'alert');
+        component.selectedFile = new File(['content'],'solver.py',{type: 'text/x-python'});
+        component.versionLabel = 'v1.0';
+        component.hackathonId = '';
+        component.onUploadAndActivate();
+        expect(window.alert).toHaveBeenCalledWith('Hackathon ID not available');
+    });
+
 
 
 });
