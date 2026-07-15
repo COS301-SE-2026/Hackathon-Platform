@@ -128,6 +128,19 @@ describe('SolverComponent',() =>{
         expect(window.alert).toHaveBeenCalledWith('Hackathon ID not available');
     });
 
+    it('should upload solver successfully' , () =>{
+        const file = new File(['content'],'solver.py',{type:'text/x-python'});
+        component.selectedFile = file;
+        component.versionLabel = 'v1.2.2';
+        component.hackathonId = 'hack-123';
+        storageServiceMock.uploadHackathonSolver.and.returnValue(of({} as any));
+
+        component.onUploadAndActivate();
+        expect(component.isUploading).toBeTrue();
+        expect(storageServiceMock.uploadHackathonSolver).toHaveBeenCalledWith('hack-123',file,'v1.2.2');
+
+
+    });
 
 
 });
