@@ -76,6 +76,19 @@ describe('SolverComponent',() =>{
 
     });
 
+    it('should handle file drop with valid extension',()=>{
+       const file = new File(['content'],'solver.jar',{type:'application/java-archive'});
+       const dragEvent = {
+        preventDefault: jasmine.createSpy(),
+        dataTransfer: {files: [file]}
+       } as unknown as DragEvent;
+
+       component.onDropFile(dragEvent);
+       expect(component.selectedFile).toBe(file);
+       expect(component.selectedFileName).toBe('solver.jar');
+       expect(component.uploadError).toBe('');
+    });
+
 
 
 
