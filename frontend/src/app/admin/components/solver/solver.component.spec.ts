@@ -142,5 +142,17 @@ describe('SolverComponent',() =>{
 
     });
 
+        it('should handle upload error' , () =>{
+        const file = new File(['content'],'solver.py',{type:'text/x-python'});
+        component.selectedFile = file;
+        component.versionLabel = 'v1.2.2';
+        component.hackathonId = 'hack-123';
+        storageServiceMock.uploadHackathonSolver.and.returnValue(throwError(()=>({error:{message:'Upload failed'}})));
+
+        component.onUploadAndActivate();
+        expect(component.isUploading).toBeTrue();
+       
+    });
+
 
 });
