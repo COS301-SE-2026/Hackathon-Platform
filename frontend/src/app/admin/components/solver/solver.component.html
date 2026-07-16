@@ -34,19 +34,20 @@
         <h2 class = "card-title">Upload solver version</h2>
         <p class = "card-hint">Solver file (.py, .jar, .zip)</p>
 
-        <div class = "drop-zone"
+
+        <label for = "fileInput" class = "sr-only">Upload solver file</label>
+        <button class = "drop-zone"
         #uploadForm
         (click) = "fileInput.click()"
         (keyup.enter) = "fileInput.click()"
         (keyup.space) = "fileInput.click()"
-        tabindex = "0"
-        role ="button"
         (dragover) = "$event.preventDefault()"
-        (drop) = "onDropFile($event)">
-    <input #fileInput type = "file" style = "display:none" (change) = "onFileSelected($event)" accept=".py,.jar,.zip"/>
+        (drop) = "onDropFile($event)"
+        type = "button">
+    <input #fileInput id = "fileInput" type = "file" style = "display:none" (change) = "onFileSelected($event)" accept=".py,.jar,.zip"/>
     <span>{{ selectedFileName || '+ Drop solver file here or browse' }}</span>
     
-    </div>
+    </button>
     <div class = "form-row">
         <div class = "form-group">
             <label for = "versionLabel">Version label</label>
@@ -65,12 +66,12 @@
         <table>
             <thead>
                 <tr>
-                <th>Version</th> 
-                <th>Uploaded</th>    
-                <th>Runs</th>  
-                <th>Avg Runtime</th>      
-                <th>Error Rate</th>
-                <th>Status</th>
+                <th scope ="col">Version</th> 
+                <th scope ="col">Uploaded</th>    
+                <th scope ="col">Runs</th>  
+                <th scope ="col">Avg Runtime</th>      
+                <th scope ="col">Error Rate</th>
+                <th scope ="col">Status</th>
                 </tr>
             </thead>
             <tbody>
