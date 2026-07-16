@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService, RegisterRequest } from '../../../services/auth.service';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ButtonModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
@@ -17,6 +18,8 @@ export class RegisterComponent {
   email = '';
   password = '';
   confirmPassword = '';
+   showPassword = false;
+   showConfirmPassword= false;
 
   isLoading = false;
   errorMessage = '';

@@ -1,7 +1,7 @@
-import { Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule,ActivatedRoute } from '@angular/router';
 import { EventService, EventRequest } from '../../../services/event.service';
 
 @Component({
@@ -11,13 +11,16 @@ import { EventService, EventRequest } from '../../../services/event.service';
   templateUrl: './createEvent.component.html',
   styleUrls: ['./createEvent.component.scss']
 })
-export class CreateEventComponent {
+export class CreateEventComponent implements OnInit {
 
   @ViewChild('fileInput')
   fileInput!: ElementRef<HTMLInputElement>;
 
   private readonly eventService = inject(EventService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  hackathonId ='';
 
   form = {
     eventName: '',
@@ -33,6 +36,10 @@ export class CreateEventComponent {
 
   isLoading = false;
   errorMessage = '';
+
+   ngOnInit(): void {
+    this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
+   }
 
   triggerFileInput(): void {
     this.fileInput.nativeElement.click();
@@ -107,7 +114,13 @@ export class CreateEventComponent {
       next: (response) => {
         console.log('Event created successfully:', response);
         this.isLoading = false;
-        this.router.navigate(['/admin/event-list']);
+
+        if (this.hackathonId){
+         this.router.navigate(['/admin/hackathons',this.hackathonId,'events']);
+        }else {
+           this.router.navigate(['/admin/events']);
+        }
+       
       },
       error: (error) => {
         console.error('Error creating event:', error);
@@ -130,5 +143,13 @@ export class CreateEventComponent {
       return;
     }
     this.createEvent();
+  }
+
+  goBack(): void {
+    if (this.hackathonId){
+      this.router.navigate(['/admin/hackathons', this.hackathonId, 'events'])
+    }else {
+      this.router.navigate(['/admin/events']);
+    }
   }
 }
