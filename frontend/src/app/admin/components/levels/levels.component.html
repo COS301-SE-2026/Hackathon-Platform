@@ -119,13 +119,13 @@
             </div>
         }}
 
-       
-            <div class = "drop-zone" (click)="fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()" tabindex = "0" role ="button"
-            (dragover)="$event.preventDefault()" (drop)="onDropFile($event)">
+             <label for = "fileUpload" class = "sr-only">Upload files</label>
+            <button class = "drop-zone" (click)="fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()" tabindex = "0" role ="button"
+            (dragover)="$event.preventDefault()" (drop)="onDropFile($event)" type ="button">
         
-                <input #fileInput type = "file" style = "display: none" (change)="onFileSelected($event)" multiple />
+                <input #fileInput id = "fileUpload" type = "file" style = "display: none" (change)="onFileSelected($event)" multiple />
                 <span>+ Drop file here or browse</span>
-                </div>
+    </button>
 
         <div class = "modal-actions">
             <button  class = "btn-cancel" (click) = "closeFilesModal()">Close</button>
