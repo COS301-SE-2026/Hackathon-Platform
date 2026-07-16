@@ -96,7 +96,7 @@ it('should create new hackathon', () =>{
     component.newHackathon.description = 'New Description';
     component.saveHackathon();
 
-    expect(component.hackathons.length).toBe(1);
+    expect(component.hackathons).toHaveSize(1);
     expect(component.hackathons[0].name).toBe('New Hackathon');
     expect(component.hackathons[0].description).toBe('New Description');
     expect(component.hackathons[0].status).toBe('upcoming');
@@ -131,7 +131,7 @@ it ('should delete hackathon', () => {
     component.hackathons = [{ ...mockHackathon}];
     spyOn(window, 'confirm').and.returnValue(true);
     component.deleteHackathon('hack-123');
-    expect(component.hackathons.length).toBe(0);
+    expect(component.hackathons).toHaveSize(0);
     expect(messageService.add).toHaveBeenCalledWith({
         severity: 'success',
         summary: 'Success',
@@ -144,7 +144,7 @@ it ('should not delete hackathon if cancelled', () => {
     component.hackathons = [{ ...mockHackathon}];
     spyOn(window, 'confirm').and.returnValue(false);
     component.deleteHackathon('hack-123');
-    expect(component.hackathons.length).toBe(1);
+    expect(component.hackathons).toHaveSize(1);
     expect(messageService.add).not.toHaveBeenCalled();
 });
 
