@@ -102,7 +102,7 @@
             color : #a3aabb;
 
         }
-        &::focus {
+        &:focus {
             border-color : #1983c2;
             background-color : #ffffff;
         }
@@ -133,7 +133,7 @@ textarea{
             color : #a3aabb;
 
         }
-        &::focus {
+        &:focus {
             border-color : #1983c2;
             background-color : #ffffff;
         }
@@ -192,9 +192,7 @@ textarea{
         border-color : #a3aabb;
     }
 
-     .toggle-description{
-            color : #2d3748;
-        }
+  
 }
 
 .form-actions {
@@ -270,27 +268,6 @@ textarea{
     }
 }
 
-.btn-secondary {
-  background-color: transparent;
-  color:#1983c2;
-  border: 2px solid #1983c2;
-  border-radius: 9px;
-  padding:10px 24px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background-color 0.15s;
-
-  &:hover:not(:disabled){
-    background-color: rgba(25,131,194,0.08);
-  }
-
-  &:disabled{
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
 
 @media (max-width : 600px){
     .form-row {
