@@ -55,7 +55,7 @@ describe('LevelsComponent',() => {
 
 
     it('should have default levels', () =>{
-    expect(component.levels.length).toBe(3);
+    expect(component.levels).toHaveSize(3);
     expect(component.levels[0].name).toBe('Level 1');
     });
 
@@ -112,7 +112,7 @@ describe('LevelsComponent',() => {
         const initialLength = component.levels.length;
         component.saveLevel();
 
-        expect(component.levels.length).toBe(initialLength + 1);
+        expect(component.levels).toHaveSize(initialLength + 1);
         expect(component.levels[initialLength].name).toBe('New Level');
         expect(component.levels[initialLength].difficulty).toBe('Advanced');
         expect(component.levels[initialLength].scoringMode).toBe('time');
@@ -124,7 +124,7 @@ describe('LevelsComponent',() => {
         component.modalForm.name ='';
         const initialLength = component.levels.length;
         component.saveLevel();
-        expect(component.levels.length).toBe(initialLength);
+        expect(component.levels).toHaveSize(initialLength);
     });
 
 
@@ -192,7 +192,7 @@ describe('LevelsComponent',() => {
         component.editingLevel = mockLevel;
         const initialLength = component.levels.length;
         component.deleteLevel();
-        expect(component.levels.length).toBe(initialLength -1);
+        expect(component.levels).toHaveSize(initialLength -1);
         expect(component.showLevelModal).toBeFalse();
     });
 
@@ -201,7 +201,7 @@ describe('LevelsComponent',() => {
         component.editingLevel = mockLevel;
         const initialLength = component.levels.length;
         component.deleteLevel();
-        expect(component.levels.length).toBe(initialLength);
+        expect(component.levels).toHaveSize(initialLength);
     
     });
 
