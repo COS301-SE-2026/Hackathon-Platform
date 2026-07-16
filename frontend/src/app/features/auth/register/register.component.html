@@ -103,6 +103,27 @@
 
 
 
+            <button pButton type="submit" class="create-account-btn" [disabled]="isLoading">
+              @if (!isLoading) {<span>Create Account</span>}
+               @else {<span>Creating Account...</span>}
+            </button>
+
+          <div class="section-divider"></div>
+
+<div class="signin-section">
+
+  <p class="signin-text">
+    Already have an account?
+  </p>
+
+        <button
+          pButton
+          type="button"
+          class="signin-btn"
+          routerLink="/login">Sign In
+        </button>
+
+</div>
 
 
 

@@ -153,18 +153,6 @@ box-shadow: 0 0 0 3px rgba(25, 131, 194, 0.35);
   color: var(--accent-bright-blue);
 }
 
-.signin-btn {
-  width: 100%;
-  height: 52px;
-  margin-bottom: 50px;
-  border: none !important;
-  border-radius: 0 !important;
-  background: var(--accent-bright-blue) !important;
-  color: var(--background-white) !important;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
 
 .register-section {
   display: flex;
@@ -177,18 +165,6 @@ box-shadow: 0 0 0 3px rgba(25, 131, 194, 0.35);
   margin: 0 0 20px;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.75);
-}
-
-.signup-btn {
-  width: 100%;
-  height: 52px;
-  border: 2px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: var(--background-white) !important;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
 }
 
 input::-ms-reveal,
@@ -222,4 +198,40 @@ input::-ms-clear {
 }
 
 
+.create-account-btn {
+  width: 100%;
+  height: 52px;
+  margin-bottom: 50px;
+  border: none !important;
+  border-radius: 0 !important;
+  background: var(--accent-bright-blue) !important;
+  color: var(--background-white) !important;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
 
+.signin-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.signin-text {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: rgba(255,255,255,.75);
+}
+
+.signin-btn {
+  width: 100%;
+  height: 52px;
+  border: 2px solid rgba(255,255,255,.2) !important;
+  border-radius: 0 !important;
+  font-size: 14px;
+    background: transparent !important;
+  color: var(--background-white) !important;
+  font-weight: 600;
+  text-transform: uppercase;
+}
