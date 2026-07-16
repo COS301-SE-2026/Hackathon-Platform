@@ -101,6 +101,8 @@ class FileMetadataServiceTest {
                 + EVENT_ID_STR
                 + "/"
                 + TEAM_ID
+                + "/levels/"
+                + LEVEL_ID
                 + "/"
                 + SUBMISSION_ID
                 + "/output/output.txt");
@@ -110,10 +112,82 @@ class FileMetadataServiceTest {
                 + EVENT_ID_STR
                 + "/"
                 + TEAM_ID
+                + "/levels/"
+                + LEVEL_ID
                 + "/"
                 + SUBMISSION_ID
                 + "/source/archive.zip");
     assertThat(result.getStatus()).isEqualTo("QUEUED");
+  }
+
+  @Test
+  void saveSubmission_outputKeyEndsWithOutputFileName() {
+    Submission firstSave =
+        new Submission(TEAM_ID, LEVEL_ID, SOLVER_VERSION_ID, "pending", "pending");
+    firstSave.setId(SUBMISSION_ID);
+    when(submissionRepository.save(any(Submission.class)))
+        .thenReturn(firstSave)
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Submission result =
+        fileMetadataService.saveSubmission(
+            EVENT_ID_STR,
+            TEAM_ID,
+            LEVEL_ID,
+            SOLVER_VERSION_ID,
+            "my_output.txt",
+            512L,
+            "text/plain",
+            "my_archive.zip",
+            4096L,
+            "application/zip");
+
+    assertThat(result.getOutputStorageKey()).endsWith("/my_output.txt");
+    assertThat(result.getSourceCodeStorageKey()).endsWith("/my_archive.zip");
+  }
+
+  @Test
+  void saveSubmission_differentLevelIdsProduceDifferentStorageKeys() {
+    Submission firstSaveA = new Submission(TEAM_ID, 1L, SOLVER_VERSION_ID, "pending", "pending");
+    firstSaveA.setId(SUBMISSION_ID);
+    when(submissionRepository.save(any(Submission.class)))
+        .thenReturn(firstSaveA)
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Submission resultLevelOne =
+        fileMetadataService.saveSubmission(
+            EVENT_ID_STR,
+            TEAM_ID,
+            1L,
+            SOLVER_VERSION_ID,
+            "output.txt",
+            512L,
+            "text/plain",
+            "archive.zip",
+            4096L,
+            "application/zip");
+
+    Submission firstSaveB = new Submission(TEAM_ID, 2L, SOLVER_VERSION_ID, "pending", "pending");
+    firstSaveB.setId(SUBMISSION_ID);
+    when(submissionRepository.save(any(Submission.class)))
+        .thenReturn(firstSaveB)
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Submission resultLevelTwo =
+        fileMetadataService.saveSubmission(
+            EVENT_ID_STR,
+            TEAM_ID,
+            2L,
+            SOLVER_VERSION_ID,
+            "output.txt",
+            512L,
+            "text/plain",
+            "archive.zip",
+            4096L,
+            "application/zip");
+
+    assertThat(resultLevelOne.getOutputStorageKey())
+        .isNotEqualTo(resultLevelTwo.getOutputStorageKey());
   }
 
   @Test

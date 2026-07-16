@@ -2,8 +2,11 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
-import { TeamService, TeamMemberResponse } from '../../services/team.service';
-import { AuthService } from '../../services/auth.service';
+import { TeamService, TeamMemberResponse } from '../../../../services/team.service';
+import { AuthService } from '../../../../services/auth.service';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 
 interface DisplayTeamMember {
   name: string;
@@ -14,13 +17,14 @@ interface DisplayTeamMember {
 }
 
 @Component({
-  selector: 'app-team',
+  selector: 'app-my-team',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './team.component.html',
-  styleUrls: ['./team.component.scss']
+  imports: [CommonModule, FormsModule, RouterModule, ButtonModule, DialogModule, InputTextModule],
+  templateUrl: './my-team.component.html',
+  styleUrl: './my-team.component.scss',
 })
-export class TeamComponent implements OnInit {
+
+export class MyTeamComponent implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
@@ -32,6 +36,9 @@ export class TeamComponent implements OnInit {
   isLoadingTeam = true;
   errorMessage = '';
   successMessage = '';
+  createTeamDialogVisible = false;
+  requestToJoinDialogVisible = false;
+  leaveTeamDialogVisible = false;
 
   hasTeam = false;
   currentUserId = '';
@@ -79,6 +86,10 @@ export class TeamComponent implements OnInit {
     });
   }
 
+  refreshTeamMembers(): void {
+  this.loadTeamMembers(this.team.teamId);
+  }
+
   loadTeamMembers(teamId: string): void {
     this.teamService.getTeamMembers(teamId).subscribe({
       next: (members) => {
@@ -121,6 +132,7 @@ export class TeamComponent implements OnInit {
     this.teamService.createTeam({ teamName: this.newTeamName.trim() }).subscribe({
       next: () => {
         this.isLoading = false;
+        this.createTeamDialogVisible = false;
         this.successMessage = `Team "${this.newTeamName.trim()}" created successfully!`;
         this.newTeamName = '';
         this.loadUserTeam();
@@ -131,13 +143,27 @@ export class TeamComponent implements OnInit {
         if (error.status === 409 || error.error?.message?.includes('already exists')) {
           this.errorMessage = 'A team with that name already exists. Choose a different name.';
         } else if (error.error?.message?.includes('already a member')) {
-          this.errorMessage = 'You are already a member of a team. Leave your current team first.';
+         this.errorMessage = 'You are already a member of a team. Leave your current team first.';
         } else {
           this.errorMessage = error.error?.message || 'Failed to create team. Please try again.';
         }
       }
     });
   }
+
+  openCreateTeamDialog(): void {
+  this.errorMessage = '';
+  this.newTeamName = '';
+  this.createTeamDialogVisible = true;
+
+}
+
+openRequestToJoinDialog(): void {
+  this.errorMessage = '';
+  this.teamIdToJoin = '';
+  this.requestToJoinDialogVisible = true;
+
+}
 
   joinTeam(): void {
     this.clearMessages();
@@ -154,6 +180,7 @@ export class TeamComponent implements OnInit {
         this.isLoading = false;
         this.successMessage = 'Join request sent! Waiting for the team lead to approve.';
         this.teamIdToJoin = '';
+        this.requestToJoinDialogVisible = false;
       },
       error: (error) => {
         this.isLoading = false;
@@ -199,7 +226,7 @@ export class TeamComponent implements OnInit {
   }
 
   leaveCurrentTeam(): void {
-    if (!confirm('Are you sure you want to leave this team?')) return;
+    // if (!confirm('Are you sure you want to leave this team?')) return;
 
     this.isLoading = true;
     this.clearMessages();
@@ -218,6 +245,11 @@ export class TeamComponent implements OnInit {
       }
     });
   }
+
+  confirmLeaveTeam(): void {
+  this.leaveTeamDialogVisible = false;
+  this.leaveCurrentTeam();
+}
 
   getInitials(name: string): string {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);

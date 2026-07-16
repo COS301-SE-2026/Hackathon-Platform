@@ -1,68 +1,214 @@
 <div class="home-body">
-  <h1 class="welcome-title">Welcome back, User</h1>
+  <h1 class="welcome-title">Welcome back, {{ userFirstName }}</h1>
   <p class="welcome-sub">Browse events and track your progress</p>
 
   @if (errorMessage) {
     <div class="error-message">{{ errorMessage }}</div>
   }
 
-  <div class="top-cards">
-    <div class="active-event-card">
-      <p class="card-label">Your active event</p>
-
-      @if (activeEvent) {
-        <h2 class="event-name">{{ activeEvent.name }}</h2>
-        <p class="event-meta">
-          {{ activeEvent.dates }} · {{ activeEvent.visibility }} · Team size {{ activeEvent.teamSizeLimit }}
-        </p>
-        <button class="btn-go" (click)="goToEvent(activeEvent)">Go to event</button>
-      } @else {
-        <h2 class="event-name">No active event</h2>
-        <p class="event-meta">Choose an open event below to get started.</p>
-      }
-    </div>
-
-    <div class="timer-card">
-      <p class="card-label">Time Remaining</p>
-      <div class="timer-display">
-        <span class="timer-value">{{ timeDisplay }}</span>
-      </div>
-      <p class="timer-labels">days &nbsp;–&nbsp; hours &nbsp;–&nbsp; minutes</p>
-    </div>
+  @if (activeEvents.length > 0) {
+<div class="active-card">
+  <div class="active-header">
+    <span class="active-label">Your Active Events</span>
+      
+    <span class="active-counter">
+      {{ currentActiveEventIndex + 1 }} / {{ activeEvents.length }}
+    </span>
+  
   </div>
 
+  <p-carousel
+    [value]="activeEvents"
+    [numVisible]="1"
+    [numScroll]="1"
+    [responsiveOptions]="responsiveOptionsForCarousel"
+    [showIndicators]="true"
+    [showNavigators]="true"
+    [circular]="true"
+    [autoplayInterval]="10000"
+    (onPage)="onCarouselSlide($event)"
+  >
+    <ng-template let-event pTemplate="item">
+
+      <div class="active-body">
+
+        <div class="active-info">
+
+          <div class="event-title-row">
+            <p-tag
+
+              [value]="event.visibility === 'PRIVATE' ? 'Private' : 'Public'"
+              [severity]="event.visibility === 'PRIVATE' ? 'warn' : 'info'">
+            </p-tag>
+            <h3 class="event-name">{{ event.name }}</h3>
+
+          </div>
+
+          <div class="event-meta">
+            <span>
+              <i class="pi pi-calendar"></i>
+              {{ event.dates }}
+            </span>
+
+            <span>
+              <i class="pi pi-users"></i>
+              Debug Thugs · {{ event.teamSizeLimit }} members 
+            </span>
+          </div>
+
+          <div class="active-actions">
+            <button
+              pButton
+              label="Go to Event"
+              class="go-event-btn"
+              (click)="goToEvent(event)">
+            </button>
+
+            <button
+              pButton
+               label="View Team"
+               class="manage-team-btn"
+                (click)="goToMyTeam(event)">
+            </button>
+          </div>
+
+        </div>
+
+        <div class="active-timer">
+          <span class="timer-label">
+                  <i class="pi pi-clock"></i>
+                  {{ event.timer.label }}
+          </span>
+
+          <div class="timer-display">
+            <span class="timer-number">{{ event.timer.days }}</span>
+            <span class="timer-separator">:</span>
+            <span class="timer-number">{{ event.timer.hours }}</span>
+            <span class="timer-separator">:</span>
+            <span class="timer-number">{{ event.timer.minutes }}</span>
+            <span class="timer-separator">:</span>
+            <span class="timer-number">{{ event.timer.seconds }}</span>
+          </div>
+
+          <div class="timer-labels">
+            <span>days</span>
+            <span>hrs</span>
+            <span>min</span>
+            <span>sec</span>
+          </div>  
+        </div>
+      </div>
+    </ng-template>
+  </p-carousel>
+</div>
+}
+
+  @else {
+
+<div class="active-card empty-active-card">
+
+    <div class="active-header">
+      <span class="active-label">Your Active Events</span>
+    </div>
+
+    <div class="empty-active-content">
+
+        <i class="pi pi-calendar-times empty-active-icon"></i>
+
+        <h3 class="empty-active-title">No Active Events</h3>
+
+        <p class="empty-active-message"> You're currently not participating in any active events. Register for an event to get started.</p>
+    </div>
+</div>
+
+}
   <h2 class="section-title">Open events</h2>
 
-  @if (isLoadingEvents) {
-    <p class="page-sub">Loading open events...</p>
-  } @else if (openEvents.length === 0) {
-    <p class="page-sub">No open events are available right now.</p>
-  } @else {
+  <div class="events-toolbar">
+
+      <label for="event-search" class="sr-only">Search events</label>
+
+    <p-iconfield class="events-search">
+      <p-inputicon class="pi pi-search"></p-inputicon>
+
+        <input
+          id="event-search"
+          pInputText
+          type="text"
+          placeholder="Search events..."
+          [(ngModel)]="searchTerm" />
+      </p-iconfield>
+
+    <p-selectButton
+        class="events-filter"
+        [options]="filterOptions"
+        [(ngModel)]="selectedFilterOption"
+        optionLabel="label"
+        optionValue="value">
+    </p-selectButton>
+
+  </div>
+
+@if (isLoadingEvents) {
+
+<p class="events-message">Loading...</p>
+
+} @else if (openEvents.length === 0) {
+
+<p class="events-message">No open events are available right now.</p>
+
+} @else if (filteredOpenEvents.length === 0) {
+
+  <p class="events-message">No events match your search.</p>
+
+} @else {
     <div class="events-list">
-      @for (event of openEvents; track event.eventId) {
+      @for (event of filteredOpenEvents; track event.eventId) {
         <div class="event-row">
           <div class="event-info">
             <p class="ev-name">{{ event.name }}</p>
-            <p class="ev-meta">
-              {{ event.dates }}
-              &nbsp;·&nbsp; {{ event.teams }} teams
-              &nbsp;·&nbsp; {{ event.visibility }}
-              &nbsp;·&nbsp; Team size {{ event.teamSizeLimit }}
-            </p>
+            <div class="ev-meta">
+
+              <span>
+                <i class="pi pi-calendar"></i>
+                {{ event.dates }}
+              </span>
+
+              <span>
+                <i class="pi pi-users"></i>
+                {{ event.teams }} teams
+              </span>
+
+              <span>
+                <i
+                  [class]="event.visibility === 'PRIVATE'
+                    ? 'pi pi-lock'
+                    : 'pi pi-eye'">
+                </i>
+                {{ event.visibility }}
+              </span>
+
+              <span>
+                <i class="pi pi-users"></i>
+                Max: {{ event.teamSizeLimit }}
+              </span>
+
+            </div>
+
           </div>
 
           <div class="event-actions">
-            <span class="status-badge" [ngClass]="event.status.toLowerCase()">
-              {{ event.status }}
-            </span>
+          <p-button
+              label="Learn More"
+              class="view-event-btn"
+              (onClick)="goToEvent(event)">
+          </p-button>
 
-            <button class="btn-register" (click)="goToEvent(event)">
-              View event
-            </button>
-
-            <button class="btn-register key" (click)="createTeamForEvent(event)">
-              Create team
-            </button>
+          <p-button
+              label="Register"
+              class="register-btn"
+              (onClick)="createTeamForEvent(event)">
+          </p-button>
           </div>
         </div>
       }
