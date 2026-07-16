@@ -27,7 +27,11 @@
             <p class = "page-subtitle">{{hackathonName || 'Loading...'}}</p>
 
         </div>
-        <p-button label = "+ Add New Level" (click) = "openAddLevelModal()"/>
+        <p-button label = "+ Add New Level" 
+        (click) = "openAddLevelModal()"
+        (keyup.enter)="openAddLevelModal()"
+        (keyup.space) ="openAddLevelModal()">
+        </p-button>
     </div>
 
 
@@ -64,8 +68,8 @@
 </div>
 
 @if (showLevelModal){
-<div class = "modal-overlay"  (click)="closeLevelModal()">
-    <div class = "modal-card" (click)="$event.stopPropagation()">
+<div class = "modal-overlay"  (click)="closeLevelModal()" (keydown.escape) = "closeLevelModal()" tabindex="-1">
+    <div class = "modal-card" (click)="$event.stopPropagation()" (keydown.escape) = "$event.stopPropagation()" >
         <h2 class = "modal-title">{{ editingLevel ? 'Edit Level' : 'Add New Level' }}</h2>
     
             <div class = "form-group">
@@ -105,8 +109,8 @@
 </div>
 }
     @if (showFilesModal){
-<div class = "modal-overlay"  (click)="closeFilesModal()">
-    <div class = "modal-card" (click)="$event.stopPropagation()">
+<div class = "modal-overlay"  (click)="closeFilesModal()" (keydown.escape)="closeFilesModal()" tabindex="-1" >
+    <div class = "modal-card" (click)="$event.stopPropagation()" (keydown.escape)="$event.stopPropagation()">
         <h2 class = "modal-title">Manage Files &ndash; {{ activeLevel?.name }}</h2>
     
         @if (activeLevel && activeLevel.files.length === 0){
