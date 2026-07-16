@@ -120,7 +120,7 @@
         }}
 
              <label for = "fileUpload" class = "sr-only">Upload files</label>
-            <button class = "drop-zone" (click)="fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()" tabindex = "0" role ="button"
+            <button class = "drop-zone" (click)="fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()" 
             (dragover)="$event.preventDefault()" (drop)="onDropFile($event)" type ="button">
         
                 <input #fileInput id = "fileUpload" type = "file" style = "display: none" (change)="onFileSelected($event)" multiple />
