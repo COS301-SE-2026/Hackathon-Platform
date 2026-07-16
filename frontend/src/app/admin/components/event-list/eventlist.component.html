@@ -17,7 +17,9 @@
     </div>
 
     <div class = "filters-bar">
+      <label for = "searchInput" class = "sr-only">Search events</label>
       <input pInputText
+      id = "searchInput"
       type = "text"
       class = "search-input"
       placeholder="Search events..."
@@ -47,12 +49,12 @@
       <p-table [value] = "filteredEvents" styleClass = "events-table" [rowHover] = "true">
         <ng-template #header>
           <tr>
-            <th>Event</th>
-            <th>Dates</th>
-            <th>Teams</th>
-            <th>Visibility</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th scope = "col">Event</th>
+            <th scope = "col">Dates</th>
+            <th scope = "col">Teams</th>
+            <th scope = "col">Visibility</th>
+            <th scope = "col">Status</th>
+            <th scope = "col">Actions</th>
           </tr>
         </ng-template>
 
