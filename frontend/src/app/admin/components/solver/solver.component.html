@@ -1,0 +1,97 @@
+<div class = "solver-page">
+
+     <div class = "back-navigation" >
+      <button class = "btn-secondary" (click) = "goBack()">Back to Hackathon
+      </button>
+    </div>
+
+    <div class = "event-subnav">
+        <div class = "event-subnav-inner">
+            <span class = "event-tag">ENTELECT 2026</span>
+            <div class = "event-tabs">
+                <a routerLink="Overview" routerLinkActive="active">Overview &amp; live ops</a>
+                <a routerLink="Levels" routerLinkActive="active">Levels &amp; files</a>
+                <a routerLink="Solver" routerLinkActive="active">Solver</a>
+                <a routerLink="Registrations" routerLinkActive="active">Registrations</a>
+                <a routerLink="Teams" routerLinkActive="active">Teams</a>
+                <a routerLink="Submissions" routerLinkActive="active">Submissions</a>   
+                <a routerLink="Analytics" routerLinkActive="active">Analytics</a>
+            </div>
+        </div>
+    </div>
+
+
+<main class = "content">
+    <div class = "page-header">
+        <div>
+            <h1>Solver management</h1>
+            <p class = "page-subtitle">Entelect Challenge 2026</p>
+        </div>
+        <button class = "btn-primary" (click) = "scrollToUploadForm()">Upload new version</button>
+    </div>
+
+    <div class = "upload-card">
+        <h2 class = "card-title">Upload solver version</h2>
+        <p class = "card-hint">Solver file (.py, .jar, .zip)</p>
+
+
+        <label for = "fileInput" class = "sr-only">Upload solver file</label>
+        <button class = "drop-zone"
+        #uploadForm
+        (click) = "fileInput.click()"
+        (keyup.enter) = "fileInput.click()"
+        (keyup.space) = "fileInput.click()"
+        (dragover) = "$event.preventDefault()"
+        (drop) = "onDropFile($event)"
+        type = "button">
+    <input #fileInput id = "fileInput" type = "file" style = "display:none" (change) = "onFileSelected($event)" accept=".py,.jar,.zip"/>
+    <span>{{ selectedFileName || '+ Drop solver file here or browse' }}</span>
+    
+    </button>
+    <div class = "form-row">
+        <div class = "form-group">
+            <label for = "versionLabel">Version label</label>
+            <input id = "versionLabel" type = "text" [(ngModel)] = "versionLabel" placeholder = "e.g. v1.2.2" />
+        </div>
+        <div class = "form-group">
+            <label for = "changeNotes">Change notes</label>
+            <input id = "changeNotes" type = "text" [(ngModel)] = "changeNotes" placeholder = "What changed in this version?" />
+        </div>
+    </div>
+    <button class = "btn-upload-activate" (click) = "onUploadAndActivate()">Upload &amp; activate</button>
+    </div>
+    
+    <h2 class = "section-title">Version History</h2>
+    <div class = "table-card">
+        <table>
+            <thead>
+                <tr>
+                <th scope ="col">Version</th> 
+                <th scope ="col">Uploaded</th>    
+                <th scope ="col">Runs</th>  
+                <th scope ="col">Avg Runtime</th>      
+                <th scope ="col">Error Rate</th>
+                <th scope ="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (v of versionHistory; track v.version){
+                <tr >
+                    <td class = "version-cell">{{ v.version }}</td>
+                    <td> {{v.uploaded}}</td>
+                    <td>{{v.runs | number }}</td>
+                    <td> {{v.avgRuntime }}</td>
+                    <td>{{v.errorRate}}</td>
+                    <td>
+                        <span class = "status-badge" [ngClass] ="v.status.toLowerCase()">{{v.status}}</span>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        @if (versionHistory.length ===0){
+            <div class = "empty-state">No solver versions uploaded yet.</div>
+        }
+    </div>
+</main>
+</div>
