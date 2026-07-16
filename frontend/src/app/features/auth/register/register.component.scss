@@ -174,10 +174,12 @@ input::-ms-clear {
 
 
 .hero-container {
-  position: relative;
-  width: 40%;
-  min-height: 100vh;
-  overflow: hidden;
+    position: sticky;
+    top: 0;
+    width: 40%;
+    height: 100vh;
+    overflow: hidden;
+    align-self: flex-start;
 }
 
 .hero-image {
