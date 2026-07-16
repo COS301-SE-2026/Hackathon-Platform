@@ -211,8 +211,8 @@
     }
 
     &:disabled {
-      background-color  : #eef0f5;
-      color: #64748b ;
+      background-color  : #e2e8f0;
+      color: #1a202c ;
       cursor : not-allowed;
     }
   }
@@ -234,7 +234,7 @@
 }
 
 .btn-save {
-  background-color  : #25eb28;
+  background-color  : #059669;
   color  : #ffffff;
    border: none;
   border-radius : 8px;
@@ -247,7 +247,7 @@
 
   &:hover:not(:disabled) {
     
-    background-color: #059669  ; 
+    background-color: #047857 ; 
   }
 
   &:disabled {
@@ -257,7 +257,7 @@
 }
 
 .btn-cancel {
-  background-color : #ef4444;
+  background-color : #b91c1c;
   color: #ffffff;
   border : none;
   border-radius: 8px;
@@ -269,7 +269,7 @@
    transition: background-color 0.2s ;
 
    &:hover:not(:disabled) {
-     background-color : #dc2626; ;
+     background-color : #991b1b ;
     }
 
     &:disabled {
