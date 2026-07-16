@@ -18,6 +18,8 @@ export class RegisterComponent {
   email = '';
   password = '';
   confirmPassword = '';
+   showPassword = false;
+   showConfirmPassword= false;
 
   isLoading = false;
   errorMessage = '';

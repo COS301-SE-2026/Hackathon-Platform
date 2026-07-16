@@ -15,7 +15,104 @@
       </div>
       <div class="section-divider"></div>
 
+      <form class="register-form" #registerForm="ngForm" (ngSubmit)="onCreateAccount(registerForm)">
 
+        <div class="form-group">
+
+          <label for="firstName">First name</label>
+
+            <input id="firstName" type="text" [(ngModel)]="firstName" 
+            name="firstName" placeholder="Enter your first name" 
+            autocomplete="given-name" required pInputText />
+        </div>
+
+        <div class="form-group">
+
+           <label for="lastName">Last name</label>
+
+             <input id="lastName" pInputText type="text" name="lastName"
+              [(ngModel)]="lastName" placeholder="Enter your last name"
+              autocomplete="family-name"
+              required />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email address</label>
+
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            placeholder="Enter your email"
+            autocomplete="email"
+             pInputText
+            required />
+        </div>
+
+        <div class="form-group">
+        <label for="password">Password</label>
+
+        <div class="password-container">
+
+          <input
+            id="password"
+            pInputText
+            name="password"
+            [(ngModel)]="password"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Create a password"
+            autocomplete="new-password"
+            required />
+
+          <button
+            type="button"
+            class="password-visibility"
+            (click)="showPassword = !showPassword">
+            <i class="pi" [ngClass]="showPassword ? 'pi-eye-slash' : 'pi-eye'"></i>
+          </button>
+
+        </div>
+        </div>
+
+        <div class="form-group">
+
+          <label for="confirmPassword">Confirm password</label>
+
+          <div class="password-container">
+
+            <input
+              id="confirmPassword"
+              pInputText
+              [(ngModel)]="confirmPassword"
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              placeholder="Confirm your password"
+              name="confirmPassword"
+              autocomplete="new-password"
+              required />
+
+              <button
+                type="button"
+                class="password-visibility"
+                (click)="showConfirmPassword = !showConfirmPassword">
+                <i class="pi" [ngClass]="showConfirmPassword ? 'pi-eye-slash' : 'pi-eye'"></i>
+              </button>
+
+                </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+      </form>
 
 
 
