@@ -178,18 +178,18 @@
   font-weight: 600;
 
   &.scored{
-    background-color: rgba(38,139,66,0.12);
-    color:#268b42
+    background-color: rgba(38,139,66,0.25);
+    color:#1a5c2d;
   }
 
   &.error{
-    background-color: rgba(192,57,43,0.12);
-    color:#c0392b;
+    background-color: rgba(192,57,43,0.25);
+    color:#751712;
   }
 
   &.pending{
-    background-color: rgba(161,191,36,0.18);
-    color:#7a8f1a;
+    background-color: rgba(161,191,36,0.30);
+    color:#5c6e12;
   }
 }
 
