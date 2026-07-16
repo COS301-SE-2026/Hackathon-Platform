@@ -50,7 +50,7 @@ describe('SolverComponent',() =>{
 
     
     it('should have version history', () =>{
-    expect(component.versionHistory.length).toBe(2);
+    expect(component.versionHistory).toHaveSize(2);
     expect(component.versionHistory[0].version).toBe('v1.2.1');
     });
 
