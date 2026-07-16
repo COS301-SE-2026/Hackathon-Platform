@@ -80,18 +80,18 @@
     text-transform: uppercase;
 
     &.status-active {
-        background-color: rgba(38,139,66,0.12);
-        color: #268b42;
+        background-color: #e8f5e9;
+        color: #1b5e20;
     }
 
         &.status-upcoming {
-        background-color: rgba(25,131,194,0.12);
-        color: #1983c2;
+        background-color: #e3f2fd;
+        color: #0d47a1;
     }
 
         &.status-completed {
-        background-color: rgba(107,117,136,0.12);
-        color: #6b7588;
+        background-color: #f5f5f5;
+        color: #424242;
     }
 
 }
