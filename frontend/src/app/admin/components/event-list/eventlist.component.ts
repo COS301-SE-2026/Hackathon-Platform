@@ -1,8 +1,8 @@
 import { Component, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { Router,ActivatedRoute } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
+
 
 import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
@@ -10,16 +10,6 @@ import { TagModule } from 'primeng/tag';
 import{ SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { EventService, EventResponse } from '../../../services/event.service';
-
-/* interface HackathonEvent {
-  name: string;
-  type: string;
-  dates: string;
-  teams: number;
-  visibility: 'Public' | 'Private';
-  status: 'Live' | 'Upcoming' | 'Ended';
-} */
-
 
 
 @Component({
@@ -68,11 +58,7 @@ export class EventlistComponent implements OnInit {
     this.isLoading = true;
     this.eventService.getMyEvents().subscribe({
       next: (events) => {
-        if (this.hackathonId){
         this.events = events;
-        }else{
-         this.events = events; 
-        }
         this.isLoading = false;
       },
       error: (error) => {
