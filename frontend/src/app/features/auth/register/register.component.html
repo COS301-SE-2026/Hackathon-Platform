@@ -1,77 +1,157 @@
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="brand">
-      <span class="brand-hackathon">Hackathon</span>
-      <span class="brand-platform">Platform</span>
-    </div>
-    <p class="auth-subtitle">Create a new account</p>
+<div class="register-page">
 
-    <form #registerForm="ngForm" (ngSubmit)="onCreateAccount(registerForm)">
-      <div class="form-row">
+ <div class="register-panel">
+
+   <div class="register-content">
+      <div class="logo-section">
+        <img
+           src="assets/images/hackathon_logo_navbar.png"
+          alt="Hackathon Platform Logo"
+          class="register-logo" />
+      </div>
+
+      <div class="heading-area">
+        <h1 class="header-prompt">Create your Hackathon Platform Account</h1>
+      </div>
+      <div class="section-divider"></div>
+
+      <form class="register-form" #registerForm="ngForm" (ngSubmit)="onCreateAccount(registerForm)">
+
         <div class="form-group">
+
           <label for="firstName">First name</label>
-          <input id="firstName" type="text" [(ngModel)]="firstName" name="firstName" required #firstNameField="ngModel" />
 
-          @if (firstNameField.invalid && firstNameField.touched) {
-            <span class="field-error">First name is required</span>
-          }
+            <input id="firstName" type="text" [(ngModel)]="firstName" 
+            name="firstName" placeholder="Enter your first name" 
+            autocomplete="given-name" required pInputText />
         </div>
 
         <div class="form-group">
-          <label for="lastName">Last name</label>
-          <input id="lastName" type="text" [(ngModel)]="lastName" name="lastName" required #lastNameField="ngModel" />
 
-          @if (lastNameField.invalid && lastNameField.touched) {
-            <span class="field-error">Last name is required</span>
-          }
-        </div>
-      </div>
+           <label for="lastName">Last name</label>
 
-      <div class="form-group">
-        <label for="email">Email address</label>
-        <input id="email" type="email" [(ngModel)]="email" name="email" placeholder="you@example.com" autocomplete="email" required email #emailField="ngModel" />
-
-        @if (emailField.invalid && emailField.touched) {
-          <span class="field-error">Please enter a valid email address</span>
-        }
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input id="password" type="password" [(ngModel)]="password" name="password" placeholder="••••••••" autocomplete="new-password" required minlength="8" #passwordField="ngModel" />
-
-          @if (passwordField.invalid && passwordField.touched) {
-            <span class="field-error">Password must be at least 8 characters</span>
-          }
+             <input id="lastName" pInputText type="text" name="lastName"
+              [(ngModel)]="lastName" placeholder="Enter your last name"
+              autocomplete="family-name"
+              required />
         </div>
 
         <div class="form-group">
-          <label for="confirmPassword">Confirm Password</label>
-          <input id="confirmPassword" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="••••••••" autocomplete="new-password" required #confirmPasswordField="ngModel" />
+          <label for="email">Email address</label>
 
-          @if (confirmPasswordField.touched && password !== confirmPassword) {
-            <span class="field-error">Passwords do not match</span>
-          }
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            placeholder="Enter your email"
+            autocomplete="email"
+             pInputText
+            required />
         </div>
-      </div>
 
-      @if (errorMessage) {
-        <div class="error-banner">{{ errorMessage }}</div>
-      }
+        <div class="form-group">
+        <label for="password">Password</label>
 
-      <button type="submit" class="btn-primary btn-full" [disabled]="isLoading">
-        @if (!isLoading) {
-          <span>Create account</span>
-        } @else {
-          <span>Creating account...</span>
-        }
-      </button>
-    </form>
+        <div class="password-container">
 
-    <p class="auth-footer">
-      Already have an account?
-      <a routerLink="/login">Sign in</a>
-    </p>
+          <input
+            id="password"
+            pInputText
+            name="password"
+            [(ngModel)]="password"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Create a password"
+            autocomplete="new-password"
+            required />
+
+          <button
+            type="button"
+            class="password-visibility"
+            (click)="showPassword = !showPassword">
+            <i class="pi" [ngClass]="showPassword ? 'pi-eye-slash' : 'pi-eye'"></i>
+          </button>
+
+        </div>
+        </div>
+
+        <div class="form-group">
+
+          <label for="confirmPassword">Confirm password</label>
+
+          <div class="password-container">
+
+            <input
+              id="confirmPassword"
+              pInputText
+              [(ngModel)]="confirmPassword"
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              placeholder="Confirm your password"
+              name="confirmPassword"
+              autocomplete="new-password"
+              required />
+
+              <button
+                type="button"
+                class="password-visibility"
+                (click)="showConfirmPassword = !showConfirmPassword">
+                <i class="pi" [ngClass]="showConfirmPassword ? 'pi-eye-slash' : 'pi-eye'"></i>
+              </button>
+
+                </div>
+        </div>
+
+
+
+            <button pButton type="submit" class="create-account-btn" [disabled]="isLoading">
+              @if (!isLoading) {<span>Create Account</span>}
+               @else {<span>Creating Account...</span>}
+            </button>
+
+          <div class="section-divider"></div>
+
+<div class="signin-section">
+
+  <p class="signin-text">
+    Already have an account?
+  </p>
+
+        <button
+          pButton
+          type="button"
+          class="signin-btn"
+          routerLink="/login">Sign In
+        </button>
+
+</div>
+
+
+
+
+
+
+
+
+
+      </form>
+
+
+
+    </div>
+
   </div>
+
+
+
+  <div class="hero-container">
+
+    <img
+       src="assets/images/hackathon-hero.png"
+      alt="Hackathon participants collaborating"
+      class="hero-image" />
+
+    <div class="hero-overlay"></div>
+
+  </div>
+
 </div>
