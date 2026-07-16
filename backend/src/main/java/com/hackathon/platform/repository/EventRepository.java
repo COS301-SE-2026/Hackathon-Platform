@@ -51,4 +51,7 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
     )
 """)
   List<Event> findUserCompletedEvents(@Param("userId") UUID userId);
+
+  @Query("SELECT e FROM Event e WHERE e.hackathon = :hackathonId")
+  List<Event> findByHackathon(@Param("hackathonId") UUID hackathonId);
 }

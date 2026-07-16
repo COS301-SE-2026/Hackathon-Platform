@@ -13,6 +13,7 @@ import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.HackathonRepository;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 class EventServiceTest {
   @Mock private EventRepository eventRepository;
   @Mock private EventRequest eventRequest;
+  @Mock private HackathonRepository hackathonRepository;
   @InjectMocks EventService eventService;
 
   private UUID eventId;
@@ -98,6 +100,7 @@ class EventServiceTest {
     req.setHackathonId(UUID.randomUUID());
     when(eventRepository.save(any(Event.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
+    when(hackathonRepository.existsById(any())).thenReturn(true);
     Event result = eventService.createEvent(req);
 
     assertThat(result).isNotNull();
