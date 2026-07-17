@@ -23,7 +23,7 @@ public class ScoringJobConsumer implements StreamListener<String,MapRecord<Strin
         String submission = msg.getValue().get("SubmissionId");
         Long submissionId = submission != null ? Long.valueOf(submission) : null;
 
-        if(submissionId = null){
+        if(submissionId == null){
             logger.error("something wrong with id {} will be dropped", msg.getId());
             ack(msg);
             return;
