@@ -39,6 +39,6 @@ public class ScoringJobConsumer implements StreamListener<String,MapRecord<Strin
 
 
     private void ack(MapRecord<String, String, String> record) {
-        redis.opsForStream().acknowledge(properties.getConsumerGroup(), record);
+        redis.opsForStream().acknowledge(properties.getConsumerKey(), record);
     }
 }

@@ -9,6 +9,14 @@ import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.context.annotation.Bean;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.stream.StreamMessageListenerContainer;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.stream.StreamMessageListenerContainer.StreamMessageListenerContainerOptions;
+import java.time.Duration;
+import org.springframework.data.redis.connection.stream.Consumer;
+import org.springframework.data.redis.connection.stream.StreamOffset;
 
 @Configuration
 @RequiredArgsConstructor
@@ -19,16 +27,30 @@ public class ScoringQueueConfig{
     private final ScoringJobConsumer consumer;
 
     public void createConsumerGroup(){
-        try{redis.opsForStream().createGroup(properties.getStreamKey(), ReadOffset.from("0"), properties.getConsumerGroup());
-                logger.info("Created consumer group {} on stream no. {}", properties.getConsumerGroup(), properties.getStreamKey());
+        try{redis.opsForStream().createGroup(properties.getStreamKey(), ReadOffset.from("0"), properties.getConsumerKey());
+                logger.info("Created consumer group {} on stream no. {}", properties.getConsumerKey(), properties.getStreamKey());
     } catch (Exception e){
             if(e.getMessage()!=null && e.getMessage().contains("BUSYGROUP")){
-                logger.info("Consumer group {} exists", properties.getConsumerGroup());
+                logger.info("Consumer group {} exists", properties.getConsumerKey());
             }else{ throw e;}
         }}
 
-    @Bean(destoryMethod = "shutdown")
+    @Bean(destroyMethod = "shutdown")
     public ExecutorService scoringStreamExecutor(){
         return Executors.newFixedThreadPool(properties.getConcurrency());
     }
+
+    @Bean(initMethod = "start", destroyMethod = "stop")
+    public StreamMessageListenerContainer<String, MapRecord<String,String,String>> scoringStreamContainer(RedisConnectionFactory connection, @Qualifier("scoringStreamExecutor") ExecutorService executor) {
+        StreamMessageListenerContainerOptions<String, MapRecord<String,String,String>> options = StreamMessageListenerContainerOptions.builder().pollTimeout(Duration.ofMillis(properties.getPollTimeoutMs())).executor(executor).build();
+        StreamMessageListenerContainer<String, MapRecord<String,String,String>> container = StreamMessageListenerContainer.create(connection, options);
+
+        for(int i=0; i<properties.getConcurrency(); i++){
+            String name = "worker-"+1;
+            container.receive(Consumer.from(properties.getConsumerKey(), name),StreamOffset.create(properties.getStreamKey(), ReadOffset.lastConsumed()), consumer);
+
+        }
+        return container;
+    }
+
 }
