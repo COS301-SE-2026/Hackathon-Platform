@@ -12,25 +12,33 @@ import org.slf4j.LoggerFactory;
 
 @Component
 @RequiredArgsConstructor
-public class ScoringJobConsumer implements StreamListener<String,MapRecord<String,String,String>>  {
+public class ScoringJobConsumer implements StreamListener<String,MapRecord<String,String,String>> {
     private final StringRedisTemplate redis;
     private final ScoringQueueProperties properties;
     private static final Logger logger = LoggerFactory.getLogger(ScoringJobConsumer.class);
     private final ScoringService scorer;
 
     @Override
-    public void onMessage(MapRecord<String,String,String> msg){
+    public void onMessage(MapRecord<String, String, String> msg) {
         String submission = msg.getValue().get("SubmissionId");
         Long submissionId = submission != null ? Long.valueOf(submission) : null;
 
-        if(submissionId == null){
+        if (submissionId == null) {
             logger.error("something wrong with id {} will be dropped", msg.getId());
             ack(msg);
             return;
         }
+        try {
+            logger.info("got submission {} from record {}", submissionId, msg.getId());
+            scorer.scoreSubmission(submissionId);
+            ack(msg);
+        } catch (Exception e) {
+            logger.error("error scoring submission {}, will retry", submissionId, msg.getId(), e);
+        }
     }
 
-    private void ack(MapRecord<String, String, String> record){
+
+    private void ack(MapRecord<String, String, String> record) {
         redis.opsForStream().acknowledge(properties.getConsumerGroup(), record);
     }
 }
