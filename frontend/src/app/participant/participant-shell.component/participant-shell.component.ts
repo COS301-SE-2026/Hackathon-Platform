@@ -3,14 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ButtonModule } from 'primeng/button';
-import { MenuModule } from 'primeng/menu';
 import { DrawerModule } from 'primeng/drawer';
-import { MenuItem } from 'primeng/api';
+
 
 @Component({
   selector: 'app-participant-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule, ButtonModule, MenuModule, DrawerModule],
+  imports: [CommonModule, RouterModule, ButtonModule, DrawerModule],
   templateUrl: './participant-shell.component.html',
   styleUrls: ['./participant-shell.component.scss']
 })
@@ -19,25 +18,21 @@ export class ParticipantShellComponent implements OnInit {
   private readonly router = inject(Router);
   userName = '';
   sidebarVisible = false;
-  menuItems: MenuItem[] = [];
+   userMenuOpen = false;
 
   ngOnInit(): void {
     const user = this.authService.getUser();
-    this.userName = user ? `${user.firstName} ${user.lastName}` : 'Participant';
-
-    this.menuItems = [
-      {label: 'Profile', icon: 'pi pi-user',},
-
-      {label: 'Settings', icon: 'pi pi-cog',},
-
-      {separator: true},
-
-      {label: 'Logout',icon: 'pi pi-sign-out',command: () => this.logout()}
-    ];
+    this.userName = user ? `${user.firstName}` : 'Participant';
+    
 
   }
 
+  toggleUserMenu(): void {
+  this.userMenuOpen = !this.userMenuOpen;
+  }
+
   logout(): void {
+    this.userMenuOpen = false;
     this.authService.logout();
     this.router.navigate(['/login']);
   }
@@ -45,6 +40,8 @@ export class ParticipantShellComponent implements OnInit {
 
 @HostListener('window:resize')
 onResize(): void {
+
+  this.userMenuOpen = false;
   if (window.innerWidth > 768 && this.sidebarVisible) {
     this.sidebarVisible = false;
   }
