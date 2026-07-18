@@ -34,7 +34,7 @@ export class ParticipantShellComponent implements OnInit {
   logout(): void {
     this.userMenuOpen = false;
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 
 
