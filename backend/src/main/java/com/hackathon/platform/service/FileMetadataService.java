@@ -130,6 +130,18 @@ public class FileMetadataService {
   }
 
   @Transactional(readOnly = true)
+  public List<LevelFile> listLevelFiles(Long levelId) {
+    return levelFileRepository.findByLevelId(levelId);
+  }
+
+  @Transactional(readOnly = true)
+  public LevelFile getLevelFile(Long fileId) {
+    return levelFileRepository
+        .findById(fileId)
+        .orElseThrow(() -> new RuntimeException("Level file not found: " + fileId));
+  }
+
+  @Transactional(readOnly = true)
   public String getLevelFileStorageKey(Long levelId, String fileName) {
     return levelFileRepository
         .findByLevelIdAndFileName(levelId, fileName)
