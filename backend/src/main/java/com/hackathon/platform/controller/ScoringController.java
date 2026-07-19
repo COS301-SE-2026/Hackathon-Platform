@@ -43,7 +43,7 @@ public class ScoringController {
   @PostMapping("/submissions/{submissionId}/score")
   public ResponseEntity<Map<String,String>> scoreSubmission(@PathVariable Long submissionId) {
     String record = scoringJobProducer.enqueue(submissionId);
-    return ResponseEntity.accepted().body(Map.of("submissionId", String.valueOf(submissionId), "queued", "true", "recordId", record));
+    return ResponseEntity.accepted().body(Map.of("submissionId", String.valueOf(submissionId), "status", "QUEUED", "recordId", record!=null?record : ""));
   }
 
   /**

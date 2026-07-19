@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import com.hackathon.platform.scoring.queue.ScoringJobProducer;
 
 /**
  * REST controller for all file upload and presigned download URL operations. All logic is delegated
@@ -34,6 +35,7 @@ public class StorageController {
   private final AzureBlobConfig config;
   private final FileMetadataService fileMetadataService;
   private final SolverVersionRepository solverVersionRepository;
+  private final ScoringJobProducer producer;
 
   // Event Resources
 
@@ -216,12 +218,15 @@ public class StorageController {
     storageService.upload(
         config.getSubmissionsContainer(), saved.getSourceCodeStorageKey(), sourceFile);
 
+    String record = producer.enqueue(saved.getId());
+
     return ResponseEntity.ok(
         Map.of(
             "submissionId", String.valueOf(saved.getId()),
             "outputStorageKey", saved.getOutputStorageKey(),
             "sourceStorageKey", saved.getSourceCodeStorageKey(),
-            "status", saved.getStatus()));
+            "status", "QUEUED",
+                "scoringRecordId", record != null ? record : ""));
   }
 
   /**
