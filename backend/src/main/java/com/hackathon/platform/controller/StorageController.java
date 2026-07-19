@@ -110,6 +110,21 @@ public class StorageController {
   }
 
   /**
+   * Lists all files uploaded for a specific level (input files, resource bundles, supplementary
+   * documents, etc). Used by the admin Levels page to render each level's file list.
+   *
+   * @param hackathonId the hackathon UUID
+   * @param levelId the level ID
+   * @return the level's file metadata records
+   */
+  @GetMapping("/hackathons/{hackathonId}/levels/{levelId}/files")
+  // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  public ResponseEntity<List<LevelFile>> listLevelFiles(
+      @PathVariable String hackathonId, @PathVariable Long levelId) {
+    return ResponseEntity.ok(fileMetadataService.listLevelFiles(levelId));
+  }
+
+  /**
    * Uploads a solver file for a specific event and version. The returned storageKey maps to
    * solverversion.storage_key in the database. Automatically deactivates all previous solver
    * versions for this event before saving the new active one.
