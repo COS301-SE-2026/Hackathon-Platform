@@ -141,6 +141,15 @@ public class FileMetadataService {
         .orElseThrow(() -> new RuntimeException("Level file not found: " + fileId));
   }
 
+  @Transactional
+  public void deleteLevelFile(Long fileId) {
+    if (!levelFileRepository.existsById(fileId)) {
+      throw new RuntimeException("Level file not found: " + fileId);
+    }
+    levelFileRepository.deleteById(fileId);
+    log.info("Deleted level file metadata: fileId={}", fileId);
+  }
+
   @Transactional(readOnly = true)
   public String getLevelFileStorageKey(Long levelId, String fileName) {
     return levelFileRepository
