@@ -1,14 +1,17 @@
 package com.hackathon.platform.service;
 
+import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.repository.HackathonRepository;
 import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
 import com.hackathon.platform.storage.BlobPath;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,8 @@ public class FileMetadataService {
   private final LevelFileRepository levelFileRepository;
   private final SolverVersionRepository solverVersionRepository;
   private final SubmissionRepository submissionRepository;
+  private final HackathonRepository hackathonRepository;
+
 
   @Transactional
   public LevelFile saveLevelFile(
@@ -109,6 +114,18 @@ public class FileMetadataService {
         saved.getId(),
         outputKey,
         sourceKey);
+    return saved;
+  }
+
+  @Transactional
+  public Hackathon updateProblemStatementStorageKey(UUID hackathonId, String storageKey) {
+    Hackathon hackathon =
+        hackathonRepository
+            .findById(hackathonId)
+            .orElseThrow(() -> new RuntimeException("Hackathon not found: " + hackathonId));
+    hackathon.setProblemStatementStorageKey(storageKey);
+    Hackathon saved = hackathonRepository.save(hackathon);
+    log.info("Updated problem statement storage key: hackathonId={}", hackathonId);
     return saved;
   }
 
