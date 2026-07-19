@@ -125,6 +125,23 @@ public class StorageController {
   }
 
   /**
+   * Deletes a level file, removing both the blob and its metadata record.
+   *
+   * @param hackathonId the hackathon UUID
+   * @param levelId the level ID
+   * @param fileId the level file's database id
+   */
+  @DeleteMapping("/hackathons/{hackathonId}/levels/{levelId}/files/{fileId}")
+  // @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> deleteLevelFile(
+      @PathVariable String hackathonId, @PathVariable Long levelId, @PathVariable Long fileId) {
+    LevelFile file = fileMetadataService.getLevelFile(fileId);
+    storageService.delete(config.getEventResourcesContainer(), file.getStorageKey());
+    fileMetadataService.deleteLevelFile(fileId);
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
    * Uploads a solver file for a specific event and version. The returned storageKey maps to
    * solverversion.storage_key in the database. Automatically deactivates all previous solver
    * versions for this event before saving the new active one.
