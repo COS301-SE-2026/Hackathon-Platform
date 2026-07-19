@@ -4,14 +4,21 @@ import com.hackathon.platform.config.AzureBlobConfig;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.service.FileMetadataService;
+import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
 import com.hackathon.platform.storage.BlobPath;
+import com.hackathon.platform.storage.StorageException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.hackathon.platform.scoring.queue.ScoringJobProducer;
 
 /**
  * REST controller for all file upload and presigned download URL operations. All logic is delegated
@@ -173,6 +179,58 @@ public class StorageController {
     String storageKey = BlobPath.brandingAsset(hackathonId, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+  }
+
+  /**
+   * Uploads the problem statement PDF for a hackathon. The returned storageKey is saved to
+   * hackathon.problem_statement_storage_key, replacing any previous problem statement for this
+   * hackathon.
+   *
+   * @param hackathonId the hackathon UUID
+   * @param file the uploaded PDF file
+   * @return storageKey and blobUrl
+   */
+  @PostMapping("/hackathons/{hackathonId}/problem-statement")
+  // @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, String>> uploadProblemStatement(
+      @PathVariable String hackathonId, @RequestParam("file") MultipartFile file) {
+
+    if (file.isEmpty()) {
+      throw new StorageException("No file provided");
+    }
+    if (!"application/pdf".equals(file.getContentType())) {
+      throw new StorageException("Problem statement must be a PDF file");
+    }
+
+    String storageKey = BlobPath.problemStatement(hackathonId, file.getOriginalFilename());
+    String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
+
+    fileMetadataService.updateProblemStatementStorageKey(UUID.fromString(hackathonId), storageKey);
+
+    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+  }
+
+  /**
+   * Returns a presigned SAS URL for downloading a hackathon's problem statement PDF.
+   *
+   * @param hackathonId the hackathon UUID
+   * @return presigned download URL and the storage key
+   */
+  @GetMapping("/hackathons/{hackathonId}/problem-statement")
+  // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  public ResponseEntity<Map<String, String>> getProblemStatementUrl(
+      @PathVariable String hackathonId) {
+    String storageKey =
+        hackathonService.getHackathonById(UUID.fromString(hackathonId)).getProblemStatementStorageKey();
+
+    if (storageKey == null) {
+      return ResponseEntity.notFound().build();
+    }
+
+    String url =
+        storageService.generatePresignedUrl(
+            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
+    return ResponseEntity.ok(Map.of("url", url, "storageKey", storageKey));
   }
 
   // Submissions (Participant)
