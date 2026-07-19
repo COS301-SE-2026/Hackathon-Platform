@@ -14,10 +14,19 @@ scoring:
     python-executable: ${SOLVER_PYTHON_EXECUTABLE:python}
     workdir: ${SOLVER_WORKDIR:/tmp/hackathon-scoring}
     max-output-bytes: 1048576
+  queue:
+    stream-key: scoring:jobs
+    consumer-group: scoring-workers
+    concurrency: ${SCORING_CONCURRENCY:10}
+    poll-timeout-ms: 2000
+    pending-min-idle-ms: 60000
 
- 
 spring:
   servlet:
     multipart:
       max-file-size: 8MB
       max-request-size: 8MB
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}

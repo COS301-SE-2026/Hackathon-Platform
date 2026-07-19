@@ -64,15 +64,9 @@ public class ScoringService {
    * @param submissionId the submission we are scoring
    * @return new submission with score and status set
    */
-  @Transactional
+
   public Submission scoreSubmission(Long submissionId) {
-    Submission sub =
-        submissionRepo
-            .findById(submissionId)
-            .orElseThrow(
-                () -> new IllegalArgumentException("Submission not found: " + submissionId));
-    sub.setStatus("SCORING");
-    submissionRepo.save(sub);
+    Submission sub = markAsScoring(submissionId);
 
     Team team =
         teamRepo
@@ -133,12 +127,25 @@ public class ScoringService {
       }
     }
 
-    submissionRepo.save(sub);
+    saveResult(sub);
     appendToScoringLog(teamId, hackathonId, sub.getLevelId(), logString);
     return sub;
   }
 
-  private void appendToScoringLog(UUID teamId, UUID hackathonId, Long levelId, String logString) {
+  @Transactional
+  public Submission markAsScoring(Long submissionId){
+    Submission sub = submissionRepo.findById(submissionId).orElseThrow(() -> new IllegalArgumentException("Submission wasnt found "+submissionId));
+    sub.setStatus("SCORING");
+    return submissionRepo.save(sub);
+  }
+
+  @Transactional
+  public void saveResult(Submission sub){
+    submissionRepo.save(sub);
+  }
+
+  @Transactional
+  public void appendToScoringLog(UUID teamId, UUID hackathonId, Long levelId, String logString) {
     String storageKey =
         BlobPath.scoringLog(hackathonId.toString(), teamId.toString(), levelId.toString());
     String content = "";
