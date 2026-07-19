@@ -1,0 +1,51 @@
+<nav class="navbar" aria-label="Landing navigation">
+     <div class="navbar-left">
+    <div class="logo">
+    <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform Logo">
+    </div>
+    </div>
+
+  <div class="navbar-right">
+
+    <div class="navbar-links">
+    <a href="#home">Home</a>
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How it Works</a>
+    <a href="#faq">FAQ</a>
+    </div>
+
+    <div class="login-button">
+      <a routerLink="/login" class="login-btn">
+     <i class="pi pi-user login-icon"></i>
+     <span>Login</span>
+      </a>
+    </div>
+  </div>
+
+ <div class="mobile-menu-btn">
+  <p-button
+    icon="pi pi-bars"
+    styleClass="hamburger-btn"
+    (click)="toggleMobileMenu()">
+  </p-button>
+</div>
+</nav>
+
+@if (mobileMenuOpen) {
+
+<div class="mobile-nav-dropdown">
+
+  <nav class="mobile-nav-links">
+
+    <a href="#home" (click)="closeMobileMenu()">Home</a>
+    <a href="#features" (click)="closeMobileMenu()">Features</a>
+    <a href="#how-it-works" (click)="closeMobileMenu()">How it Works</a>
+    <a href="#faq" (click)="closeMobileMenu()">Frequently Asked Questions</a>
+
+    <a routerLink="/login" (click)="closeMobileMenu()" class="mobile-login-btn">
+      <i class="pi pi-user"></i> Login
+    </a>
+  </nav>
+</div>
+
+}
