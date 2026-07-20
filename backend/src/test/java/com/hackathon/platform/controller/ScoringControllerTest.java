@@ -42,6 +42,7 @@ class ScoringControllerTest {
   private static final UUID EVENT_ID = UUID.fromString("c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
   private static final Long SUB_ID = 1L;
   private static final Long LEVEL_ID = 2L;
+  private static final int LIMIT = 5;
 
   @Test
   void scoreSubmission_returns200WithUpdatedSubmission() throws Exception {
@@ -91,6 +92,12 @@ class ScoringControllerTest {
         .perform(get("/api/scoring/teams/{teamId}/levels/{levelId}/submissions", TEAM_ID, LEVEL_ID))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray());
+  }
+
+  @Test
+  void getRecentSubmissions_returnRecentSubmissions() throws Exception {
+    when(subQueryS.getRecentSubmissions(LIMIT)).thenReturn(List.of());
+    mockMvc.perform(get("/api/scoring/admin/recentsubmissions/{limit}", LIMIT)).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
   }
 
   @Test
