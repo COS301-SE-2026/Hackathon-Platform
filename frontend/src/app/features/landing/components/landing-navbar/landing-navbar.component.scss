@@ -90,15 +90,25 @@
 }
 
 .mobile-nav-dropdown {
-  position: absolute;
+  position: fixed;
   top: 90px;
   left: 0;
-  width: 100%;
+  right: 0;
   padding-bottom: 12px;
   background: var(--primary-dark-navy);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  z-index: 999;
+  z-index: 1001;
+}
+
+.mobile-menu-backdrop {
+  position: fixed;
+  top: 90px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 1000;
 }
 
 .mobile-nav-links {
@@ -111,7 +121,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 56px;
+  min-height: 70px;
   padding: 0 24px;
   color: var(--background-white);
   text-decoration: none;
@@ -126,7 +136,13 @@
 
 .mobile-login-btn {
   margin-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.divider{
+  width: 100%;
+  height: 1px;
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .mobile-login-btn i {
@@ -169,6 +185,10 @@
     top: 60px;
   }
 
+   .mobile-menu-backdrop{
+    top:60px;
+  }
+  
   .mobile-nav-links a, .mobile-login-btn {
     min-height: 52px;
     padding: 0 18px;

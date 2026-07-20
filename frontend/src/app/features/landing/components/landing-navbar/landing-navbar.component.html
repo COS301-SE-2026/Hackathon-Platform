@@ -33,6 +33,11 @@
 
 @if (mobileMenuOpen) {
 
+  <div
+  class="mobile-menu-backdrop"
+  (click)="closeMobileMenu()">
+</div>
+
 <div class="mobile-nav-dropdown">
 
   <nav class="mobile-nav-links">
@@ -42,6 +47,8 @@
   <a (click)="scrollTo('how-it-works')">How it Works</a>
   <a (click)="scrollTo('faq')">Frequently Asked Questions</a>
 
+  <div class="divider"></div>
+  
     <a routerLink="/login" (click)="closeMobileMenu()" class="mobile-login-btn">
       <i class="pi pi-user"></i> Login
     </a>
