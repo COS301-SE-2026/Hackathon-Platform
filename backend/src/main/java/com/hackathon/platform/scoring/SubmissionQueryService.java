@@ -55,8 +55,10 @@ public class SubmissionQueryService {
   }
 
   @Transactional(readOnly = true)
-  public List<SubmissionResponse> getRecentSubmissions(int limit){
-    return submissionRepo.getRecentSubmissions(limit).stream().map(s -> toResponse(s, false)).collect(Collectors.toList());
+  public List<SubmissionResponse> getRecentSubmissions(int limit) {
+    return submissionRepo.getRecentSubmissions(limit).stream()
+        .map(s -> toResponse(s, false))
+        .collect(Collectors.toList());
   }
 
   /**

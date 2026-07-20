@@ -97,7 +97,10 @@ class ScoringControllerTest {
   @Test
   void getRecentSubmissions_returnRecentSubmissions() throws Exception {
     when(subQueryS.getRecentSubmissions(LIMIT)).thenReturn(List.of());
-    mockMvc.perform(get("/api/scoring/admin/recentsubmissions/{limit}", LIMIT)).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
+    mockMvc
+        .perform(get("/api/scoring/admin/recentsubmissions/{limit}", LIMIT))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray());
   }
 
   @Test
