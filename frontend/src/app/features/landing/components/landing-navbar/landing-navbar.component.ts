@@ -23,6 +23,11 @@ export class LandingNavbarComponent {
     this.mobileMenuOpen = false;
   }
 
+    scrollTo(id: string): void {
+     document.getElementById(id)?.scrollIntoView({behavior: 'smooth'});
+    this.closeMobileMenu();
+  }
+
   @HostListener('window:resize')
   onResize(): void {
     if (window.innerWidth > 768) {
