@@ -62,7 +62,7 @@ class SubmissionQueryServiceTest {
   }
 
   @Test
-  void getRecentSubmissions_returnsCorrect(){
+  void getRecentSubmissions_returnsCorrect() {
     Submission old = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
     Submission newer = buildSubmission(2L, Instant.parse("2026-02-01T00:00:00Z"));
     when(subRepo.getRecentSubmissions(LIMIT)).thenReturn(List.of(old, newer));
@@ -88,7 +88,7 @@ class SubmissionQueryServiceTest {
   }
 
   @Test
-  void getRecentSubmission_doesntLoadLogs(){
+  void getRecentSubmission_doesntLoadLogs() {
     Submission sub = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
     when(subRepo.getRecentSubmissions(LIMIT)).thenReturn(List.of(sub));
 
