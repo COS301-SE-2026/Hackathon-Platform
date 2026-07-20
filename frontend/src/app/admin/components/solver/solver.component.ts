@@ -37,12 +37,7 @@ export class SolverComponent implements OnInit{
     isUploading = false;
     uploadError = '';
 
-    versionHistory: SolverVersion[] = [
-        {version: 'v1.2.1', uploaded: 'Apr 22, 09:12', runs: 4123, avgRuntime: '2.3s', errorRate: '3.2%', status: 'Active'},
-        {version: 'v1.2.0', uploaded: 'Apr 18, 10:12', runs: 9845, avgRuntime: '2.6s', errorRate: '4.8%', status: 'Inactive'}
-
-
-    ];
+    versionHistory: SolverVersion[] = [];
 
 scrollToUploadForm(): void{
     this.uploadFormRef?.nativeElement.scrollIntoView({behavior:'smooth',block: 'center'});
@@ -94,13 +89,24 @@ onUploadAndActivate(): void{
         return;
     }
 
+    if (!/^v?\d+\.\d+\.\d+$/.test(this.versionLabel) && !/^\d+$/.test(this.versionLabel)) {
+        alert("Please enter a valid version format (e.g., v1.2.2 or 1)");
+        return;
+    }
+
     this.isUploading = true;
     this.uploadError ='';
+
+    let versionNumber = this.versionLabel.replace(/^v/, '');
+
+    if (versionNumber.includes('.')) {
+        versionNumber = versionNumber.split('.')[0];
+    }
 
     this.storageService.uploadHackathonSolver(
         this.hackathonId,
         this.selectedFile,
-        this.versionLabel
+        versionNumber
     ).subscribe({
         next: (response) => {
             console.log('Solver uploaded successfully:', response);
@@ -152,6 +158,8 @@ onUploadAndActivate(): void{
 
 loadSolverVersions(): void {
     console.log('Loading solver for hackathon:',this.hackathonId);
+    // TODO: Implement API call to fetch version history
+
 }
 
 }
