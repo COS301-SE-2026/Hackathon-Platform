@@ -69,8 +69,8 @@ class SubmissionQueryServiceTest {
     List<SubmissionResponse> r = subQueryService.getRecentSubmissions(LIMIT);
 
     assertThat(r).hasSize(2);
-    assertThat(r.get(0).getSubmissionId()).isEqualTo(2L);
-    assertThat(r.get(1).getSubmissionId()).isEqualTo(1L);
+    assertThat(r.get(0).getSubmissionId()).isEqualTo(1L);
+    assertThat(r.get(1).getSubmissionId()).isEqualTo(2L);
   }
 
   @Test
@@ -80,6 +80,19 @@ class SubmissionQueryServiceTest {
     when(subRepo.findByTeamId(TEAM_ID)).thenReturn(List.of(sub));
 
     List<SubmissionResponse> hist = subQueryService.getHistoryForTeam(TEAM_ID);
+
+    assertThat(hist).hasSize(1);
+    assertThat(hist.get(0).getScoringLog()).isNull();
+
+    verifyNoInteractions(scoringLogRepo);
+  }
+
+  @Test
+  void getRecentSubmission_doesntLoadLogs(){
+    Submission sub = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
+    when(subRepo.getRecentSubmissions(LIMIT)).thenReturn(List.of(sub));
+
+    List<SubmissionResponse> hist = subQueryService.getRecentSubmissions(LIMIT);
 
     assertThat(hist).hasSize(1);
     assertThat(hist.get(0).getScoringLog()).isNull();
