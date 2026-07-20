@@ -7,7 +7,7 @@
 
     <div class = " event-subnav">
         <div class = "event-subnav-inner">
-            <span class = "event-tag">ENTELECT 2026</span>
+            <span class = "event-tag">{{ hackathonName || 'Loading...' }}</span>
             <div class = "event-tabs">
                 <a routerLink="Overview" routerLinkActive="active">Overview &amp; live ops</a>
                 <a routerLink="Levels" routerLinkActive="active">Levels &amp; files</a>
@@ -20,121 +20,134 @@
         </div>
     </div>
 
-<main class = "content">
-    <div class  = "page-header">
-        <div>
-            <h1>Levels &amp; Files</h1>
-            <p class = "page-subtitle">{{hackathonName || 'Loading...'}}</p>
-
-        </div>
-        <p-button label = "+ Add New Level" 
-        (click) = "openAddLevelModal()"
+<main class="content">
+    <div class="page-header">
+      <div>
+        <h1>Levels &amp; Files</h1>
+        <p class="page-subtitle">{{ hackathonName || 'Loading...' }}</p>
+      </div>
+      <p-button
+        label="+ Add New Level"
+        (click)="openAddLevelModal()"
         (keyup.enter)="openAddLevelModal()"
-        (keyup.space) ="openAddLevelModal()">
-        </p-button>
+        (keyup.space)="openAddLevelModal()"
+        [disabled]="isLoading">
+      </p-button>
     </div>
 
-
-
-    <div class = "levels-list" cdkDropList (cdkDropListDropped) = "onDrop($event)">
-        @if (levels.length ===0){
-            <div class = "empty-state" >No levels created yet</div>
-        } @else {
-            @for (level of levels; track level.id){
-                <div class = "level-card" cdkDrag>
-                    <div class = "drag-handle" cdkDragHandle>
-                        <span class = "drag-dot"></span><span class = "drag-dot"></span>
-                        <span class = "drag-dot"></span><span class = "drag-dot"></span>
-                        <span class = "drag-dot"></span><span class = "drag-dot"></span>
-
-                    </div>
-                     <div class = "level-info">
-            <p class = "level-name">{{ level.name }}</p>
-            <p class = "level-difficulty">{{ level.difficulty }}</p> 
-            </div>
-
-            <div class = "level-actions">
-                <button type = "button" class = "btn-edit" (click) = "openEditModal(level)"  >Edit</button>
-                <button type = "button" class = "btn-manage-files" (click) = "openManageFiles(level)" (keyup.enter) = "openManageFiles(level)" (keyup.space) = "openManageFiles(level)" >Manage Files</button>   
-            </div>
-        </div>
-            }
-        }
-   
-        </div>
-
-        <button class ="add-new-level-row" (click) = "openAddLevelModal()">+ Add New Level</button>
-    </main>
-</div>
-
-@if (showLevelModal){
-<div class = "modal-overlay"  (click)="closeLevelModal()" (keydown.escape) = "closeLevelModal()" tabindex="-1">
-    <div class = "modal-card" (click)="$event.stopPropagation()" (keydown.escape) = "$event.stopPropagation()" >
-        <h2 class = "modal-title">{{ editingLevel ? 'Edit Level' : 'Add New Level' }}</h2>
-    
-            <div class = "form-group">
-                <label for = "levelName">Level Name</label>
-                <input  id = "levelName" type="text" [(ngModel)]="modalForm.name" placeholder = "e.g. Level 1 - Introduction"/>
-            </div>
-
-            <div class = "form-group">
-                <label for = "levelDifficulty">Difficulty</label>
-                <select id = "levelDifficulty" [(ngModel)]="modalForm.difficulty">
-                    <option value="Introduction">Introduction</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
-                    <option value="Expert">Expert</option>
-                </select>
-            </div>
-
-            <div class = "form-group">
-                <label for = "scoringMode">Scoring mode</label>
-                <select id = "scoringMode" [(ngModel)]="modalForm.scoringMode">
-                    <option value="highest">Highest score wins</option>
-                    <option value="lowest">Lowest time wins</option>
-                    <option value="time">Time</option>
-                </select>
-            </div>
-
-            <div class = "modal-actions">
-                @if (editingLevel){
-                    <button class = "btn-danger" (click) = "deleteLevel()">Delete Level</button>
-                }
-                <button  class = "btn-cancel" (click) = "closeLevelModal()">Cancel</button>
-                <button  class = "btn-save" (click)="saveLevel()">{{editingLevel ? 'Save changes' : 'Add Level'}}</button>
-            </div>
-
-
-    </div>
-</div>
-}
-    @if (showFilesModal){
-<div class = "modal-overlay"  (click)="closeFilesModal()" (keydown.escape)="closeFilesModal()" tabindex="-1" >
-    <div class = "modal-card" (click)="$event.stopPropagation()" (keydown.escape)="$event.stopPropagation()">
-        <h2 class = "modal-title">Manage Files &ndash; {{ activeLevel?.name }}</h2>
-    
-        @if (activeLevel && activeLevel.files.length === 0){
-            <p class = "empty-files">No files uploaded for this level.</p>
-        }@else{
-            @for (file of activeLevel?.files; track file){
-            <div class = "file-row" >
-                <span class = "file-name">{{ file }}</span>
-                <button class = "btn-remove-file" (click)="removeFile(file)">Remove</button>
-            </div>
-        }}
-
-             <label for = "fileUpload" class = "sr-only">Upload files</label>
-            <button class = "drop-zone" (click)="fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()" 
-            (dragover)="$event.preventDefault()" (drop)="onDropFile($event)" type ="button">
-        
-                <input #fileInput id = "fileUpload" type = "file" style = "display: none" (change)="onFileSelected($event)" multiple />
-                <span>+ Drop file here or browse</span>
-    </button>
-
-        <div class = "modal-actions">
-            <button  class = "btn-cancel" (click) = "closeFilesModal()">Close</button>
-        </div>
-
-    </div>
-</div>
+    @if (isSavingOrder) {
+      <div class="info-banner">Saving new order...</div>
     }
+    @if (errorMessage) {
+      <div class="error-banner">{{ errorMessage }}</div>
+    }
+
+    @if (isLoading) {
+      <div class="empty-state">Loading levels...</div>
+    } @else {
+      <div class="levels-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
+        @if (levels.length === 0) {
+          <div class="empty-state">No levels created yet</div>
+        } @else {
+          @for (level of levels; track level.id) {
+            <div class="level-card" cdkDrag [cdkDragDisabled]="isSavingOrder">
+              <div class="drag-handle" cdkDragHandle>
+                <span class="drag-dot"></span><span class="drag-dot"></span>
+                <span class="drag-dot"></span><span class="drag-dot"></span>
+                <span class="drag-dot"></span><span class="drag-dot"></span>
+              </div>
+              <div class="level-info">
+                <p class="level-name">Level {{ level.levelNumber }} &ndash; {{ level.name }}</p>
+                <p class="level-difficulty">{{ level.description || 'No description' }}</p>
+              </div>
+
+              <div class="level-actions">
+                <button type="button" class="btn-edit" (click)="openEditModal(level)">Edit</button>
+                <button type="button" class="btn-manage-files" (click)="openManageFiles(level)"
+                  (keyup.enter)="openManageFiles(level)" (keyup.space)="openManageFiles(level)">
+                  Manage Files
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <button class="add-new-level-row" (click)="openAddLevelModal()">+ Add New Level</button>
+    }
+  </main>
+</div>
+
+@if (showLevelModal) {
+  <div class="modal-overlay" (click)="closeLevelModal()" (keydown.escape)="closeLevelModal()" tabindex="-1">
+    <div class="modal-card" (click)="$event.stopPropagation()" (keydown.escape)="$event.stopPropagation()">
+      <h2 class="modal-title">{{ editingLevel ? 'Edit Level' : 'Add New Level' }}</h2>
+
+      @if (modalError) {
+        <p class="error-banner">{{ modalError }}</p>
+      }
+
+      <div class="form-group">
+        <label for="levelName">Level Name</label>
+        <input id="levelName" type="text" [(ngModel)]="modalForm.name" placeholder="e.g. Introduction" />
+      </div>
+
+      <div class="form-group">
+        <label for="levelNumber">Level Number</label>
+        <input id="levelNumber" type="number" min="1" [(ngModel)]="modalForm.levelNumber" />
+      </div>
+
+      <div class="form-group">
+        <label for="levelDescription">Description</label>
+        <textarea id="levelDescription" rows="3" [(ngModel)]="modalForm.description" placeholder="Optional description of this level"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        @if (editingLevel) {
+          <button class="btn-danger" (click)="deleteLevel()" [disabled]="isSavingLevel">Delete Level</button>
+        }
+        <button class="btn-cancel" (click)="closeLevelModal()" [disabled]="isSavingLevel">Cancel</button>
+        <button class="btn-save" (click)="saveLevel()" [disabled]="isSavingLevel">
+          {{ isSavingLevel ? 'Saving...' : (editingLevel ? 'Save changes' : 'Add Level') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showFilesModal) {
+  <div class="modal-overlay" (click)="closeFilesModal()" (keydown.escape)="closeFilesModal()" tabindex="-1">
+    <div class="modal-card" (click)="$event.stopPropagation()" (keydown.escape)="$event.stopPropagation()">
+      <h2 class="modal-title">Manage Files &ndash; {{ activeLevel?.name }}</h2>
+
+      @if (filesError) {
+        <p class="error-banner">{{ filesError }}</p>
+      }
+
+      @if (isLoadingFiles) {
+        <p class="empty-files">Loading files...</p>
+      } @else if (activeLevel && activeLevel.files.length === 0) {
+        <p class="empty-files">No files uploaded for this level.</p>
+      } @else {
+        @for (file of activeLevel?.files; track file.id) {
+          <div class="file-row">
+            <span class="file-name">{{ file.fileName }}</span>
+            <button class="btn-remove-file" (click)="removeFile(file)">Remove</button>
+          </div>
+        }
+      }
+
+      <label for="fileUpload" class="sr-only">Upload files</label>
+      <button class="drop-zone" (click)="fileInput.click()" (keyup.enter)="fileInput.click()" (keyup.space)="fileInput.click()"
+        (dragover)="$event.preventDefault()" (drop)="onDropFile($event)" type="button" [disabled]="isUploadingFile">
+
+        <input #fileInput id="fileUpload" type="file" style="display: none" (change)="onFileSelected($event)" multiple />
+        <span>{{ isUploadingFile ? 'Uploading...' : '+ Drop file here or browse' }}</span>
+      </button>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeFilesModal()">Close</button>
+      </div>
+    </div>
+  </div>
+}
