@@ -5,11 +5,12 @@ import { LandingNavbarComponent } from './components/landing-navbar/landing-navb
 import { LandingHomeComponent } from './components/landing-home/landing-home.component';
 import { LandingFeaturesComponent } from './components/landing-features/landing-features.component';
 import { LandingHowItWorksComponent } from './components/landing-how-it-works/landing-how-it-works.component';
+import { LandingBuiltForComponent } from './components/landing-built-for/landing-built-for.component';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, LandingNavbarComponent, LandingHomeComponent, LandingFeaturesComponent, LandingHowItWorksComponent],
+  imports: [CommonModule, RouterModule, LandingNavbarComponent, LandingHomeComponent, LandingFeaturesComponent, LandingHowItWorksComponent, LandingBuiltForComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss'
 })
