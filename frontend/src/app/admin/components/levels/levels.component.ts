@@ -1,21 +1,19 @@
-import {Component,inject, OnInit } from '@angular/core';
-import {CommonModule } from '@angular/common';
-import {FormsModule } from '@angular/forms';
-import {RouterModule,ActivatedRoute,Router } from '@angular/router';
-import { CdkDragDrop , DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { TagModule } from 'primeng/tag';
-import{ SelectModule } from 'primeng/select';
-import {FileUploadModule} from 'primeng/fileupload';
+import { firstValueFrom } from 'rxjs';
 
-interface Level {
-  id: number ;
-  name: string;
-  difficulty: string ;
-  scoringMode: string;
-  files: string[];
+import { LevelService, LevelRequest, LevelResponse } from '../../../services/level.service';
+import { StorageService, LevelFileResponse } from '../../../services/storage.service';
+import { HackathonService } from '../../../services/hackathon.service';
 
+/** A level plus its lazily-loaded file list, used only by this component's view. */
+interface UiLevel extends LevelResponse {
+  files: LevelFileResponse[];
+  filesLoaded: boolean;
 }
 
 
