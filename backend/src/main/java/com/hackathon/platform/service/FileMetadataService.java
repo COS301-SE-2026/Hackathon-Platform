@@ -72,7 +72,7 @@ public class FileMetadataService {
 
   @Transactional
   public Submission saveSubmission(
-      String hackathonId,
+      String eventId,
       UUID teamId,
       Long levelId,
       Long solverVersionId,
@@ -85,6 +85,7 @@ public class FileMetadataService {
 
     // Initial save with placeholders just to get a DB-generated id
     Submission submission = new Submission(teamId, levelId, solverVersionId, "pending", "pending");
+    submission.setEventId(UUID.fromString(eventId));
     submission.setOutputFileName(outputFileName);
     submission.setOutputFileSize(outputFileSize);
     submission.setOutputContentType(outputContentType);
@@ -100,10 +101,10 @@ public class FileMetadataService {
     String dbId = String.valueOf(saved.getId());
     String levelIdStr = String.valueOf(levelId);
     String outputKey =
-        BlobPath.submissionOutput(hackathonId, teamId.toString(), levelIdStr, dbId, outputFileName);
+        BlobPath.submissionOutput(eventId, teamId.toString(), levelIdStr, dbId, outputFileName);
     String sourceKey =
         BlobPath.submissionSourceArchive(
-            hackathonId, teamId.toString(), levelIdStr, dbId, sourceFileName);
+            eventId, teamId.toString(), levelIdStr, dbId, sourceFileName);
 
     saved.setOutputStorageKey(outputKey);
     saved.setSourceCodeStorageKey(sourceKey);

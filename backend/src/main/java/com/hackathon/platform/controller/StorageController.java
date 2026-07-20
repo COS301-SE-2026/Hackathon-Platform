@@ -280,7 +280,7 @@ public class StorageController {
    * one submission record with both storage keys set, then uploads both files to their canonical
    * blob paths.
    *
-   * @param hackathonId the event UUID
+   * @param eventId the event UUID
    * @param teamId the team UUID
    * @param outputFile the solution output file
    * @param sourceFile the zipped source code archive
@@ -288,10 +288,10 @@ public class StorageController {
    * @param solverVersionId the active solver version to use for scoring
    * @return submissionId, both storage keys, and status
    */
-  @PostMapping("/hackathons/{hackathonId}/teams/{teamId}/submissions")
+  @PostMapping("/events/{eventId}/teams/{teamId}/submissions")
   // @PreAuthorize("hasRole('PARTICIPANT')")
   public ResponseEntity<Map<String, String>> uploadSubmission(
-      @PathVariable String hackathonId,
+      @PathVariable String eventId,
       @PathVariable String teamId,
       @RequestParam("outputFile") MultipartFile outputFile,
       @RequestParam("sourceFile") MultipartFile sourceFile,
@@ -300,7 +300,7 @@ public class StorageController {
 
     Submission saved =
         fileMetadataService.saveSubmission(
-            hackathonId,
+            eventId,
             UUID.fromString(teamId),
             levelId,
             solverVersionId,
@@ -330,17 +330,17 @@ public class StorageController {
   /**
    * Returns a presigned SAS URL for downloading a submission output file.
    *
-   * @param hackathonId the event UUID
+   * @param eventId the event UUID
    * @param teamId the team UUID
    * @param submissionId the submission ID
    * @param filename the blob filename
    * @return presigned download URL
    */
   @GetMapping(
-      "/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
+      "/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getSubmissionOutputUrl(
-      @PathVariable String hackathonId,
+      @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
       @PathVariable String filename) {
@@ -355,17 +355,17 @@ public class StorageController {
   /**
    * Returns a presigned SAS URL for downloading a source code archive (Admin only for auditing).
    *
-   * @param hackathonId the event UUID
+   * @param eventId the event UUID
    * @param teamId the team UUID
    * @param submissionId the submission ID
    * @param filename the blob filename
    * @return presigned download URL
    */
   @GetMapping(
-      "/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
+      "/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
-      @PathVariable String hackathonId,
+      @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
       @PathVariable String filename) {
@@ -382,16 +382,16 @@ public class StorageController {
   /**
    * Returns a presigned SAS URL for downloading a scoring log.
    *
-   * @param hackathonId the event UUID
+   * @param eventId the event UUID
    * @param teamId the team ID
    * @param levelId the level ID
    * @return presigned download URL
    */
-  @GetMapping("/hackathons/{hackathonId}/teams/{teamId}/levels/{levelId}")
+  @GetMapping("/events/{eventId}/teams/{teamId}/levels/{levelId}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getScoringLogUrl(
-      @PathVariable String hackathonId, @PathVariable String teamId, @PathVariable String levelId) {
-    String storageKey = BlobPath.scoringLog(hackathonId, teamId, levelId);
+      @PathVariable String eventId, @PathVariable String teamId, @PathVariable String levelId) {
+    String storageKey = BlobPath.scoringLog(eventId, teamId, levelId);
     String url =
         storageService.generatePresignedUrl(
             config.getScoringLogsContainer(), storageKey, config.getSasExpiryMinutes());
