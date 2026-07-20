@@ -159,8 +159,12 @@ public class StorageController {
       @PathVariable String hackathonId,
       @RequestParam("version") int version,
       @RequestParam("file") MultipartFile file,
-      @RequestParam("uploadedBy") UUID uploadedBy,
+      @AuthenticationPrincipal User currentUser,
       @RequestParam(value = "notes", required = false) String notes) {
+
+    if (currentUser == null) {
+      throw new StorageException("You must be logged in as an admin to upload a solver");
+    }
 
     String storageKey = BlobPath.solverFile(hackathonId, version, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
@@ -177,7 +181,7 @@ public class StorageController {
     SolverVersion saved =
         fileMetadataService.saveSolverVersion(
             UUID.fromString(hackathonId),
-            uploadedBy,
+            currentUser.getUserId(),
             storageKey,
             version,
             file.getOriginalFilename(),
