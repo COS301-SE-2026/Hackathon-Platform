@@ -26,7 +26,9 @@
   <p-button
     icon="pi pi-bars"
     styleClass="hamburger-btn"
-    (click)="toggleMobileMenu()">
+    (click)="toggleMobileMenu()"
+    (keydown.enter)="toggleMobileMenu()"
+  (keydown.space)="toggleMobileMenu()">
   </p-button>
 </div>
 </nav>
@@ -35,12 +37,15 @@
 
   <div
   class="mobile-menu-backdrop"
-  (click)="closeMobileMenu()">
+  (click)="closeMobileMenu()"
+  (keydown.enter)="closeMobileMenu()"
+  (keydown.space)="closeMobileMenu()">>
+  
 </div>
 
 <div class="mobile-nav-dropdown">
 
-  <nav class="mobile-nav-links">
+  <nav class="mobile-nav-links" aria-label="Mobile navigation">
 
    <a (click)="scrollTo('home')">Home</a>
   <a (click)="scrollTo('features')">Features</a>
@@ -48,7 +53,7 @@
   <a (click)="scrollTo('faq')">Frequently Asked Questions</a>
 
   <div class="divider"></div>
-  
+
     <a routerLink="/login" (click)="closeMobileMenu()" class="mobile-login-btn">
       <i class="pi pi-user"></i> Login
     </a>
