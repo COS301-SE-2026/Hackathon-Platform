@@ -38,6 +38,7 @@ class SubmissionQueryServiceTest {
   private static final UUID TEAM_ID = UUID.randomUUID();
   private static final Long LEVEL_ID = 1L;
   private static final Long SOLVER_V_ID = 2L;
+  private static final int LIMIT = 5;
 
   @BeforeEach
   void setUp() {
@@ -58,6 +59,18 @@ class SubmissionQueryServiceTest {
     assertThat(hist).hasSize(2);
     assertThat(hist.get(0).getSubmissionId()).isEqualTo(2L);
     assertThat(hist.get(1).getSubmissionId()).isEqualTo(1L);
+  }
+
+  @Test
+  void getRecentSubmissions_returnsCorrect(){
+    Submission old = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
+    Submission newer = buildSubmission(2L, Instant.parse("2026-02-01T00:00:00Z"));
+    when(subRepo.getRecentSubmissions(LIMIT)).thenReturn(List.of(old, newer));
+    List<SubmissionResponse> r = subQueryService.getRecentSubmissions(LIMIT);
+
+    assertThat(r).hasSize(2);
+    assertThat(r.get(0).getSubmissionId()).isEqualTo(2L);
+    assertThat(r.get(1).getSubmissionId()).isEqualTo(1L);
   }
 
   @Test
