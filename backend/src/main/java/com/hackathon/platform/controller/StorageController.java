@@ -306,9 +306,9 @@ public class StorageController {
 
     SolverVersion latestSolver =
         solverVersionRepository
-            .findFirstByHackathonIdOrderByVersionNumberDesc(hackathonId)
+            .findByHackathonIdAndIsActiveTrue(hackathonId)
             .orElseThrow(
-                () -> new StorageException("No solver has been uploaded for this hackathon yet"));
+                () -> new StorageException("No active solver has been uploaded for this hackathon yet"));
 
     Submission saved =
         fileMetadataService.saveSubmission(
