@@ -22,8 +22,8 @@ public class ScoringLog {
   @Column(name = "team_id", nullable = false)
   private UUID teamId;
 
-  @Column(name = "hackathon_id", nullable = false)
-  private UUID hackathonId;
+  @Column(name = "event_id", nullable = false)
+  private UUID eventId;
 
   @Column(name = "level_id", nullable = false)
   private Long levelId;
@@ -42,9 +42,9 @@ public class ScoringLog {
 
   public ScoringLog() {}
 
-  public ScoringLog(UUID teamId, UUID hackathonId, Long levelId, String storageKey) {
+  public ScoringLog(UUID teamId, UUID eventId, Long levelId, String storageKey) {
     this.teamId = teamId;
-    this.hackathonId = hackathonId;
+    this.eventId = eventId;
     this.levelId = levelId;
     this.storageKey = storageKey;
   }
@@ -65,12 +65,12 @@ public class ScoringLog {
     this.teamId = teamId;
   }
 
-  public UUID getHackathonId() {
-    return hackathonId;
+  public UUID getEventId() {
+    return eventId;
   }
 
-  public void setHackathonId(UUID hackathonId) {
-    this.hackathonId = hackathonId;
+  public void setEventId(UUID eventId) {
+    this.eventId = eventId;
   }
 
   public Long getLevelId() {

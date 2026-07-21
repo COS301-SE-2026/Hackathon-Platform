@@ -13,13 +13,46 @@ export const routes: Routes = [
     component: AdminShellComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: 'dashboard', loadComponent: () => import('./admin/components/dashboard/dashboard.component').then(m => m.DashboardComponent) },
-      { path: 'create-event', loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent) },
-      { path: 'event-list', loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent) },
-      { path: 'events/edit/:id', loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent) },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./admin/components/dashboard/dashboard.component').then(m => m.DashboardComponent),
+      },
+      {
+        path: 'hackathons',
+        loadComponent: () => import('./admin/components/hackathons/hackathons.component').then(m => m.HackathonsComponent),
+      },
+      {
+        path: 'hackathons/:hackathonId/events',
+        loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
+      },
+       {
+        path: 'events',
+        loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
+      },
+      {
+        path: 'hackathons/:hackathonId/events/create',
+        loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
+      },
+       {
+        path: 'hackathons/:hackathonId/manage',
+        loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
+      },
+      {
+        path: 'hackathons/:hackathonId/levels',
+        loadComponent: () => import('./admin/components/levels/levels.component').then(m => m.LevelsComponent),
+      },
+      {
+        path: 'hackathons/:hackathonId/solver',
+        loadComponent: () => import('./admin/components/solver/solver.component').then(m => m.SolverComponent),
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      }
     ]
   },
+
   {
     path: 'participant',
     component: ParticipantShellComponent,

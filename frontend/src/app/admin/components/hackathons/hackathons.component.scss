@@ -1,0 +1,194 @@
+:host {
+    display: block;
+    font-family: 'Inter' , -apple-system, sans-serif;
+}
+
+.hackathons-page{
+    min-height: 100vh;
+    background-color: transparent;
+    padding: 0;
+
+}
+
+.page-header{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 26px;
+
+    h1{
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: #13192d;
+        letter-spacing: -0.01em;
+    }
+
+    .page-subtitle{
+        color : #6b7588;
+        font-size: 0.9rem;
+        margin-top: 3px;
+    }
+}
+
+.loading {
+    text-align: center;
+    padding: 60px 0;
+    color: #6b7588;
+    font-size: 0.95rem;
+}
+
+.hackathons-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.hackathon-card{
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid #e7eaf0;
+    box-shadow: 0 1px 2px rgba(19,25,45,0.04);
+    transition: box-shadow 0.15s, transform 0.15s;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(19,25,45,0.08);
+        transform: translateY(-2px);
+    }
+}
+
+.hackathon-header{
+    display : flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.hackathon-name{
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #13192d;
+    margin:0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+
+    &.status-active {
+        background-color: #e8f5e9;
+        color: #1b5e20;
+    }
+
+        &.status-upcoming {
+        background-color: #e3f2fd;
+        color: #0d47a1;
+    }
+
+        &.status-completed {
+        background-color: #f5f5f5;
+        color: #424242;
+    }
+
+}
+
+.hackathons-description{
+    color:#6b7588;
+    font-size: 0.9rem;
+    margin: 8px 0 12px 0;
+    line-height: 1.4;
+}
+
+
+.hackathon-stats{
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f1f3f7;
+    color:#6b7588;
+    font-size: 0.85rem;
+}
+
+.hackathon-actions{
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+.empty-state{
+    grid-column: 1/ -1;
+    text-align: center;
+    padding: 60px 0;
+    color: #8089a0;
+
+    p{
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+    }
+}
+
+.dialog-content {
+    padding: 8px 0;
+
+}
+
+.form-group{
+    margin-bottom: 16px;
+
+    label{
+        display: block;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #3a4357;
+        margin-bottom: 7px;
+    }
+    input, textarea {
+        width: 100%;
+    }
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap : 16px;
+}
+
+::ng-deep {
+    .p-dialog .p-dialog-content{
+        padding: 24px;
+    }
+
+    .p-dialog .p-dialog-footer{
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 16px 24px;
+    }
+}
+
+@media(max-width: 768px){
+    .hackathons-grid{
+        grid-template-columns: 1fr;
+    }
+
+    .form-row{
+        grid-template-columns: 1fr;
+    }
+
+    .page-header{
+        flex-direction: column;
+        gap:16px;
+
+    }
+
+    .hackathon-actions{
+        flex-direction: column;
+    }
+
+    .hackathon-actions p-button {
+        width: 100%;
+    }
+}

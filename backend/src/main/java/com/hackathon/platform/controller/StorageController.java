@@ -4,14 +4,21 @@ import com.hackathon.platform.config.AzureBlobConfig;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.service.FileMetadataService;
+import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
 import com.hackathon.platform.storage.BlobPath;
+import com.hackathon.platform.storage.StorageException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import com.hackathon.platform.scoring.queue.ScoringJobProducer;
+
 
 /**
  * REST controller for all file upload and presigned download URL operations. All logic is delegated
@@ -34,6 +43,9 @@ public class StorageController {
   private final AzureBlobConfig config;
   private final FileMetadataService fileMetadataService;
   private final SolverVersionRepository solverVersionRepository;
+  private final ScoringJobProducer producer;
+  private final HackathonService hackathonService;
+
 
   // Event Resources
 
@@ -98,6 +110,38 @@ public class StorageController {
   }
 
   /**
+   * Lists all files uploaded for a specific level (input files, resource bundles, supplementary
+   * documents, etc). Used by the admin Levels page to render each level's file list.
+   *
+   * @param hackathonId the hackathon UUID
+   * @param levelId the level ID
+   * @return the level's file metadata records
+   */
+  @GetMapping("/hackathons/{hackathonId}/levels/{levelId}/files")
+  // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  public ResponseEntity<List<LevelFile>> listLevelFiles(
+      @PathVariable String hackathonId, @PathVariable Long levelId) {
+    return ResponseEntity.ok(fileMetadataService.listLevelFiles(levelId));
+  }
+
+  /**
+   * Deletes a level file, removing both the blob and its metadata record.
+   *
+   * @param hackathonId the hackathon UUID
+   * @param levelId the level ID
+   * @param fileId the level file's database id
+   */
+  @DeleteMapping("/hackathons/{hackathonId}/levels/{levelId}/files/{fileId}")
+  // @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> deleteLevelFile(
+      @PathVariable String hackathonId, @PathVariable Long levelId, @PathVariable Long fileId) {
+    LevelFile file = fileMetadataService.getLevelFile(fileId);
+    storageService.delete(config.getEventResourcesContainer(), file.getStorageKey());
+    fileMetadataService.deleteLevelFile(fileId);
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
    * Uploads a solver file for a specific event and version. The returned storageKey maps to
    * solverversion.storage_key in the database. Automatically deactivates all previous solver
    * versions for this event before saving the new active one.
@@ -115,8 +159,12 @@ public class StorageController {
       @PathVariable String hackathonId,
       @RequestParam("version") int version,
       @RequestParam("file") MultipartFile file,
-      @RequestParam("uploadedBy") UUID uploadedBy,
+      @AuthenticationPrincipal User currentUser,
       @RequestParam(value = "notes", required = false) String notes) {
+
+    if (currentUser == null) {
+      throw new StorageException("You must be logged in as an admin to upload a solver");
+    }
 
     String storageKey = BlobPath.solverFile(hackathonId, version, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
@@ -133,7 +181,7 @@ public class StorageController {
     SolverVersion saved =
         fileMetadataService.saveSolverVersion(
             UUID.fromString(hackathonId),
-            uploadedBy,
+            currentUser.getUserId(),
             storageKey,
             version,
             file.getOriginalFilename(),
@@ -173,6 +221,58 @@ public class StorageController {
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
   }
 
+  /**
+   * Uploads the problem statement PDF for a hackathon. The returned storageKey is saved to
+   * hackathon.problem_statement_storage_key, replacing any previous problem statement for this
+   * hackathon.
+   *
+   * @param hackathonId the hackathon UUID
+   * @param file the uploaded PDF file
+   * @return storageKey and blobUrl
+   */
+  @PostMapping("/hackathons/{hackathonId}/problem-statement")
+  // @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, String>> uploadProblemStatement(
+      @PathVariable String hackathonId, @RequestParam("file") MultipartFile file) {
+
+    if (file.isEmpty()) {
+      throw new StorageException("No file provided");
+    }
+    if (!"application/pdf".equals(file.getContentType())) {
+      throw new StorageException("Problem statement must be a PDF file");
+    }
+
+    String storageKey = BlobPath.problemStatement(hackathonId, file.getOriginalFilename());
+    String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
+
+    fileMetadataService.updateProblemStatementStorageKey(UUID.fromString(hackathonId), storageKey);
+
+    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+  }
+
+  /**
+   * Returns a presigned SAS URL for downloading a hackathon's problem statement PDF.
+   *
+   * @param hackathonId the hackathon UUID
+   * @return presigned download URL and the storage key
+   */
+  @GetMapping("/hackathons/{hackathonId}/problem-statement")
+  // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  public ResponseEntity<Map<String, String>> getProblemStatementUrl(
+      @PathVariable String hackathonId) {
+    String storageKey =
+        hackathonService.getHackathonById(UUID.fromString(hackathonId)).getProblemStatementStorageKey();
+
+    if (storageKey == null) {
+      return ResponseEntity.notFound().build();
+    }
+
+    String url =
+        storageService.generatePresignedUrl(
+            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
+    return ResponseEntity.ok(Map.of("url", url, "storageKey", storageKey));
+  }
+
   // Submissions (Participant)
 
   /**
@@ -180,7 +280,7 @@ public class StorageController {
    * one submission record with both storage keys set, then uploads both files to their canonical
    * blob paths.
    *
-   * @param hackathonId the event UUID
+   * @param eventId the event UUID
    * @param teamId the team UUID
    * @param outputFile the solution output file
    * @param sourceFile the zipped source code archive
@@ -188,10 +288,10 @@ public class StorageController {
    * @param solverVersionId the active solver version to use for scoring
    * @return submissionId, both storage keys, and status
    */
-  @PostMapping("/hackathons/{hackathonId}/teams/{teamId}/submissions")
+  @PostMapping("/events/{eventId}/teams/{teamId}/submissions")
   // @PreAuthorize("hasRole('PARTICIPANT')")
   public ResponseEntity<Map<String, String>> uploadSubmission(
-      @PathVariable String hackathonId,
+      @PathVariable String eventId,
       @PathVariable String teamId,
       @RequestParam("outputFile") MultipartFile outputFile,
       @RequestParam("sourceFile") MultipartFile sourceFile,
@@ -200,7 +300,7 @@ public class StorageController {
 
     Submission saved =
         fileMetadataService.saveSubmission(
-            hackathonId,
+            eventId,
             UUID.fromString(teamId),
             levelId,
             solverVersionId,
@@ -216,28 +316,31 @@ public class StorageController {
     storageService.upload(
         config.getSubmissionsContainer(), saved.getSourceCodeStorageKey(), sourceFile);
 
+    String record = producer.enqueue(saved.getId());
+
     return ResponseEntity.ok(
         Map.of(
             "submissionId", String.valueOf(saved.getId()),
             "outputStorageKey", saved.getOutputStorageKey(),
             "sourceStorageKey", saved.getSourceCodeStorageKey(),
-            "status", saved.getStatus()));
+            "status", "QUEUED",
+                "scoringRecordId", record != null ? record : ""));
   }
 
   /**
    * Returns a presigned SAS URL for downloading a submission output file.
    *
-   * @param hackathonId the event UUID
+   * @param eventId the event UUID
    * @param teamId the team UUID
    * @param submissionId the submission ID
    * @param filename the blob filename
    * @return presigned download URL
    */
   @GetMapping(
-      "/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
+      "/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getSubmissionOutputUrl(
-      @PathVariable String hackathonId,
+      @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
       @PathVariable String filename) {
@@ -252,17 +355,17 @@ public class StorageController {
   /**
    * Returns a presigned SAS URL for downloading a source code archive (Admin only for auditing).
    *
-   * @param hackathonId the event UUID
+   * @param eventId the event UUID
    * @param teamId the team UUID
    * @param submissionId the submission ID
    * @param filename the blob filename
    * @return presigned download URL
    */
   @GetMapping(
-      "/hackathons/{hackathonId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
+      "/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
-      @PathVariable String hackathonId,
+      @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
       @PathVariable String filename) {
@@ -279,16 +382,16 @@ public class StorageController {
   /**
    * Returns a presigned SAS URL for downloading a scoring log.
    *
-   * @param hackathonId the event UUID
+   * @param eventId the event UUID
    * @param teamId the team ID
    * @param levelId the level ID
    * @return presigned download URL
    */
-  @GetMapping("/hackathons/{hackathonId}/teams/{teamId}/levels/{levelId}")
+  @GetMapping("/events/{eventId}/teams/{teamId}/levels/{levelId}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getScoringLogUrl(
-      @PathVariable String hackathonId, @PathVariable String teamId, @PathVariable String levelId) {
-    String storageKey = BlobPath.scoringLog(hackathonId, teamId, levelId);
+      @PathVariable String eventId, @PathVariable String teamId, @PathVariable String levelId) {
+    String storageKey = BlobPath.scoringLog(eventId, teamId, levelId);
     String url =
         storageService.generatePresignedUrl(
             config.getScoringLogsContainer(), storageKey, config.getSasExpiryMinutes());

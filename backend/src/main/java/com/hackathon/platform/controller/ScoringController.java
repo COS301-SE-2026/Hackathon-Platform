@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.hackathon.platform.scoring.queue.ScoringJobProducer;
+import java.util.Map;
 
 /**
  * REST endpoints for scoring submissions and retrieving submission history/feedback.
@@ -31,6 +33,7 @@ public class ScoringController {
   private final ScoringService scoringService;
   private final SubmissionQueryService submissionQueryService;
   private final LeaderboardService leaderboardService;
+  private final ScoringJobProducer scoringJobProducer;
 
   /**
    * Triggers scoring for a submission: runs the active solver against the submission's output file
@@ -41,9 +44,9 @@ public class ScoringController {
    * @return the updated submission with score/status set
    */
   @PostMapping("/submissions/{submissionId}/score")
-  public ResponseEntity<Submission> scoreSubmission(@PathVariable Long submissionId) {
-    Submission scored = scoringService.scoreSubmission(submissionId);
-    return ResponseEntity.ok(scored);
+  public ResponseEntity<Map<String,String>> scoreSubmission(@PathVariable Long submissionId) {
+    String record = scoringJobProducer.enqueue(submissionId);
+    return ResponseEntity.accepted().body(Map.of("submissionId", String.valueOf(submissionId), "status", "QUEUED", "recordId", record!=null?record : ""));
   }
 
   /**
