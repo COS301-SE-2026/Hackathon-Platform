@@ -93,11 +93,15 @@
         </p-tabpanel>
 
         <p-tabpanel value="team">
+          @if (activeTab === 'team') {
             <app-my-team/>
+          }
         </p-tabpanel>
 
         <p-tabpanel value="leaderboard">
-            <app-leaderboard/>
+          @if (activeTab === 'leaderboard' && eventId) {
+            <app-leaderboard [eventId]="eventId"/>
+          }
         </p-tabpanel>
 
         </p-tabpanels>
