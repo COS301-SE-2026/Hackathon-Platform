@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
+import { LeaderboardEntry, LeaderboardService } from '../../../../services/leaderboard.service';
+import { TeamService } from '../../../../services/team.service';
 
-interface Team {
-  rank: number;
+interface LeaderboardInfo extends LeaderboardEntry {
   name: string;
-  score: number;
+  score: string;
 }
 
 @Component({
@@ -15,30 +16,79 @@ interface Team {
   styleUrl: './leaderboard.component.scss',
 })
 export class LeaderboardComponent {
+  private readonly leaderboardService = inject(LeaderboardService);
+  private readonly teamService = inject(TeamService);
+  private readonly change = inject(ChangeDetectorRef);
+  private eventID = '';
 
-  leaderboardAvailable = 1;
+  @Input({ required: true })
+  set eventId(value: string) {
+    if(!value || value === this.eventID) {
+      return;
+    }
 
-    myTeam: Team = {
-    rank: 4,
-    name: 'ByteForce',
-    score: 	9500000
-  };
+    this.eventID = value;
+    this.loadMyTeam();
+    this.loadLeaderboard();
+  }
 
-  leaderboard: Team[] = [
-  { rank: 1, name: 'Debug Thugs', score: 9800000 },
-  { rank: 2, name: 'Keybord Gremlins', score: 9700000 },
-  { rank: 3, name: 'Code Blooded', score: 9600000 },
-  { rank: 4, name: 'ByteForce', score: 9500000 },
-  { rank: 5, name: 'Null Pointers', score: 9400000 },
-  { rank: 6, name: 'Runtime Rebels', score: 9300000 },
-  { rank: 7, name: 'Stack Smashers', score: 9200000 },
-  { rank: 8, name: 'Segmentation Squad', score: 9100000 },
-  { rank: 9, name: 'Kernel Panic', score: 9000000 },
-  { rank: 10, name: 'Binary Bandits', score: 8900000 },
-];
+  get eventId(): string {
+    return this.eventID;
+  }
 
-get topThree(): Team[] {
+  leaderboardAvailable = false;
+  loading = false;
+  errorMsg = '';
+  currTeamId: string | null = null;
+
+  leaderboard: LeaderboardInfo[] = [];
+
+  loadLeaderboard(): void {
+    if (!this.eventID) {
+      this.errorMsg = "The event ID is missing";
+      this.loading = false;
+      this.leaderboardAvailable = false;
+      this.change.detectChanges();
+      return;
+    }
+
+    this.loading = true;
+    this.errorMsg = '';
+    this.leaderboardAvailable = false;
+    this.change.detectChanges();
+
+    this.leaderboardService.getEventLeaderboard(this.eventId).subscribe({
+      next: entries => {
+        this.leaderboard = entries.map(entry => ({
+          ...entry,
+          name: entry.teamName,
+          score: Number(entry.bestScore).toFixed(2),
+        }));
+
+        this.loading = false;
+        this.leaderboardAvailable = this.leaderboard.length > 0;
+        this.change.detectChanges();
+      },
+      error: () => {
+        this.errorMsg = "The leaderboard could not be loaded.";
+        this.loading = false;
+        this.leaderboardAvailable = false;
+        this.change.detectChanges();
+      },
+    });
+  }
+
+get topThree(): LeaderboardInfo[] {
      return this.leaderboard.slice(0, 3);
+}
+
+get myTeam(): LeaderboardInfo | null{
+  if (!this.currTeamId) {
+    return null;
+  }
+  return (
+    this.leaderboard.find(team => team.teamId === this.currTeamId) ?? null
+  );
 }
 
 getInitials(name: string): string {
@@ -52,5 +102,22 @@ getInitials(name: string): string {
 
   }
 
+  loadMyTeam(): void {
+    this.teamService.getMyTeam().subscribe({
+      next: team => {
+        if(team && team.eventId === this.eventId) {
+          this.currTeamId = team.teamId;
+        } else {
+          this.currTeamId = null;
+        }
+
+        this.change.detectChanges();
+      },
+      error: () => {
+        this.currTeamId = null;
+        this.change.detectChanges();
+      },
+    });
+  }
 
 }
