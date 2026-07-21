@@ -5,6 +5,7 @@ import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.HackathonService;
@@ -43,6 +44,7 @@ public class StorageController {
   private final AzureBlobConfig config;
   private final FileMetadataService fileMetadataService;
   private final SolverVersionRepository solverVersionRepository;
+  private final EventRepository eventRepository;
   private final ScoringJobProducer producer;
   private final HackathonService hackathonService;
 
@@ -285,7 +287,6 @@ public class StorageController {
    * @param outputFile the solution output file
    * @param sourceFile the zipped source code archive
    * @param levelId the level this submission is for
-   * @param solverVersionId the active solver version to use for scoring
    * @return submissionId, both storage keys, and status
    */
   @PostMapping("/events/{eventId}/teams/{teamId}/submissions")
@@ -295,15 +296,26 @@ public class StorageController {
       @PathVariable String teamId,
       @RequestParam("outputFile") MultipartFile outputFile,
       @RequestParam("sourceFile") MultipartFile sourceFile,
-      @RequestParam("levelId") Long levelId,
-      @RequestParam("solverVersionId") Long solverVersionId) {
+      @RequestParam("levelId") Long levelId) {
+
+    UUID hackathonId =
+        eventRepository
+            .findHackathonIdByEventId(UUID.fromString(eventId))
+            .orElseThrow(
+                () -> new StorageException("Hackathon could not be resolved for event: " + eventId));
+
+    SolverVersion latestSolver =
+        solverVersionRepository
+            .findFirstByHackathonIdOrderByVersionNumberDesc(hackathonId)
+            .orElseThrow(
+                () -> new StorageException("No solver has been uploaded for this hackathon yet"));
 
     Submission saved =
         fileMetadataService.saveSubmission(
             eventId,
             UUID.fromString(teamId),
             levelId,
-            solverVersionId,
+            latestSolver.getId(),
             outputFile.getOriginalFilename(),
             outputFile.getSize(),
             outputFile.getContentType(),
