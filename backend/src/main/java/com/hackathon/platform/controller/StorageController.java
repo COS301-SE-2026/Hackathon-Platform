@@ -7,6 +7,7 @@ import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
+import com.hackathon.platform.scoring.queue.ScoringJobProducer;
 import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
@@ -17,7 +18,6 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.hackathon.platform.scoring.queue.ScoringJobProducer;
-
 
 /**
  * REST controller for all file upload and presigned download URL operations. All logic is delegated
@@ -47,7 +45,6 @@ public class StorageController {
   private final EventRepository eventRepository;
   private final ScoringJobProducer producer;
   private final HackathonService hackathonService;
-
 
   // Event Resources
 
@@ -263,7 +260,9 @@ public class StorageController {
   public ResponseEntity<Map<String, String>> getProblemStatementUrl(
       @PathVariable String hackathonId) {
     String storageKey =
-        hackathonService.getHackathonById(UUID.fromString(hackathonId)).getProblemStatementStorageKey();
+        hackathonService
+            .getHackathonById(UUID.fromString(hackathonId))
+            .getProblemStatementStorageKey();
 
     if (storageKey == null) {
       return ResponseEntity.notFound().build();
@@ -302,13 +301,16 @@ public class StorageController {
         eventRepository
             .findHackathonIdByEventId(UUID.fromString(eventId))
             .orElseThrow(
-                () -> new StorageException("Hackathon could not be resolved for event: " + eventId));
+                () ->
+                    new StorageException("Hackathon could not be resolved for event: " + eventId));
 
     SolverVersion latestSolver =
         solverVersionRepository
             .findByHackathonIdAndIsActiveTrue(hackathonId)
             .orElseThrow(
-                () -> new StorageException("No active solver has been uploaded for this hackathon yet"));
+                () ->
+                    new StorageException(
+                        "No active solver has been uploaded for this hackathon yet"));
 
     Submission saved =
         fileMetadataService.saveSubmission(
@@ -332,11 +334,16 @@ public class StorageController {
 
     return ResponseEntity.ok(
         Map.of(
-            "submissionId", String.valueOf(saved.getId()),
-            "outputStorageKey", saved.getOutputStorageKey(),
-            "sourceStorageKey", saved.getSourceCodeStorageKey(),
-            "status", "QUEUED",
-                "scoringRecordId", record != null ? record : ""));
+            "submissionId",
+            String.valueOf(saved.getId()),
+            "outputStorageKey",
+            saved.getOutputStorageKey(),
+            "sourceStorageKey",
+            saved.getSourceCodeStorageKey(),
+            "status",
+            "QUEUED",
+            "scoringRecordId",
+            record != null ? record : ""));
   }
 
   /**
@@ -348,8 +355,7 @@ public class StorageController {
    * @param filename the blob filename
    * @return presigned download URL
    */
-  @GetMapping(
-      "/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
+  @GetMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}")
   // @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getSubmissionOutputUrl(
       @PathVariable String eventId,
@@ -373,8 +379,7 @@ public class StorageController {
    * @param filename the blob filename
    * @return presigned download URL
    */
-  @GetMapping(
-      "/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
+  @GetMapping("/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}")
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> getSourceArchiveUrl(
       @PathVariable String eventId,

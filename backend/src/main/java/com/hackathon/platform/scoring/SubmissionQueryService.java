@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,8 +55,8 @@ public class SubmissionQueryService {
   }
 
   @Transactional(readOnly = true)
-  public List<SubmissionResponse> getRecentSubmissions(int limit) {
-    return submissionRepo.getRecentSubmissions(limit).stream()
+  public List<SubmissionResponse> getRecentSubmissions(UUID userId, int limit) {
+    return submissionRepo.getRecentSubmissions(userId, PageRequest.of(0, limit)).stream()
         .map(s -> toResponse(s, false))
         .collect(Collectors.toList());
   }
