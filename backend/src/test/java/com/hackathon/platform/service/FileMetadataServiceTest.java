@@ -218,6 +218,33 @@ class FileMetadataServiceTest {
   }
 
   @Test
+  void updateProblemStatementStorageKey_throwsWhenHackathonNotFound() {
+    when(hackathonRepository.findById(EVENT_ID)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(
+            () ->
+                fileMetadataService.updateProblemStatementStorageKey(
+                    EVENT_ID, "hackathons/.../problem/spec.pdf"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Hackathon not found");
+
+    verify(hackathonRepository, never()).save(any());
+  }
+
+  @Test
+  void listLevelFiles_returnsFilesForLevel() {
+    LevelFile fileA = new LevelFile(LEVEL_ID, "a.pdf", "hackathons/.../a.pdf", "PDF");
+    LevelFile fileB = new LevelFile(LEVEL_ID, "b.pdf", "hackathons/.../b.pdf", "PDF");
+    when(levelFileRepository.findByLevelId(LEVEL_ID)).thenReturn(List.of(fileA, fileB));
+
+    List<LevelFile> result = fileMetadataService.listLevelFiles(LEVEL_ID);
+
+    assertThat(result).containsExactly(fileA, fileB);
+  }
+
+  
+
+  @Test
   void getLevelFileStorageKey_returnsStorageKeyWhenFound() {
     LevelFile levelFile = new LevelFile(LEVEL_ID, "test.pdf", "events/.../test.pdf", "PDF");
     when(levelFileRepository.findByLevelIdAndFileName(LEVEL_ID, "test.pdf"))
