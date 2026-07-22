@@ -143,40 +143,157 @@ export class SubmissionsComponent {
     });
   }
 
-onSourceSelected(event: { files: File[] }): void {
-  const file = event.files[0];
-  if (!file?.name.toLowerCase().endsWith('.zip')) return;
+  onSourceSelected(event: { files: File[] }): void {
+    const file = event.files[0];
+    if (!file?.name.toLowerCase().endsWith('.zip')) return;
 
-  this.sourceArchive = file;
-}
+    this.sourceArchive = file;
 
-onSolutionSelected(event: { files: File[] }): void {
-  const file = event.files[0];
-  if (!file?.name.toLowerCase().endsWith('.txt')) return;
-  this.solutionOutput = file;
-}
+  }
 
-removeSourceFile(uploader: { clear(): void }): void {
-  this.sourceArchive = null;
-  uploader.clear();
-}
+  onSolutionSelected(event: { files: File[] }): void {
+    const file = event.files[0];
+    if (!file?.name.toLowerCase().endsWith('.json')) return;
+    this.solutionOutput = file;
+  }
 
-removeSolutionFile(uploader:{ clear(): void }): void {
-  this.solutionOutput = null;
-   uploader.clear();
-}
+  removeSourceFile(uploader: { clear(): void }): void {
+    this.sourceArchive = null;
+    uploader.clear();
+  }
+
+  removeSolutionFile(uploader: { clear(): void }): void {
+    this.solutionOutput = null;
+    uploader.clear();
+  }
 
   get canSubmit(): boolean {
-  return this.sourceArchive !== null && this.solutionOutput !== null;
-}
+    return (
+      this.sourceArchive !== null &&
+      this.solutionOutput !== null &&
+      !!this.teamId &&
+      !!this.activeLevel &&
+      !this.submitting
+    );
+
+  }
+
+  submitSolution(sourceUploader: { clear(): void }, solutionUploader: { clear(): void }): void {
+    if (!this.canSubmit || !this.teamId) {
+      return;
+    }
+
+    this.submitting = true;
+    this.submitError = '';
+    this.submitSuccess = '';
+    this.change.detectChanges();
+
+    this.submissionService
+      .uploadSubmission(
+        this.eventID,
+        this.teamId,
+        Number(this.activeLevel),
+        this.solutionOutput!,
+        this.sourceArchive!
+      )
+      .subscribe({
+        next: () => {
+          this.submitting = false;
+          this.submitSuccess = 'Your solution was uploaded and queued for scoring.';
+          this.removeSourceFile(sourceUploader);
+          this.removeSolutionFile(solutionUploader);
+          this.loadHistory();
+          this.change.detectChanges();
+          
+        },
+        error: err => {
+          this.submitting = false;
+          this.submitError =
+            err?.error?.message ?? 'The submission could not be uploaded. Please try again.';
+          this.change.detectChanges();
+        },
+      });
+  }
+
+  downloadLevelFiles(levelId: number): void {
+    if (!this.hackathonID) return;
+
+    this.storageService.listLevelFiles(this.hackathonID, levelId).subscribe({
+      next: files => {
+        if (!files.length) {
+          alert('No files have been uploaded for this level yet.');
+          return;
+        }
+
+        files.forEach(file => {
+          this.storageService
+            .getLevelFileUrl(this.hackathonID, String(levelId), file.fileName)
+            .subscribe({
+              next: res => window.open(res.url, '_blank'),
+              error: () => alert(`"${file.fileName}" could not be downloaded.`),
+            });
+        });
+      },
+      error: () => alert('The level files could not be loaded.'),
+    });
+
+
+  }
+
+  downloadLog(submission: SubmissionResponse): void {
+    if (!this.teamId) return;
+
+    this.submissionService.getSubmissionDetail(this.teamId, submission.submissionId).subscribe({
+      next: detail => {
+        const content = detail.scoringLog?.logContent ?? 'No log is available for this submission yet.';
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `submission-${submission.submissionId}-log.txt`;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => alert('The log could not be downloaded.'),
+    });
+  }
+
+  statusLabel(status: string): string {
+    switch (status) {
+      case 'SCORED': return 'Completed';
+      case 'FAILED': return 'Failed';
+      case 'SCORING': return 'Scoring';
+      case 'QUEUED': return 'Queued';
+      default: return status;
+    }
+  }
+
+  statusClass(status: string): string {
+    switch (status) {
+      case 'SCORED': return 'completed';
+      case 'FAILED': return 'failed';
+      default: return 'processing';
+    }
+  }
+
+  formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleString('en-ZA', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+  }
 
   formatFileName(fileName: string): string {
 
- const dotPosition = fileName.lastIndexOf('.');
+    const dotPosition = fileName.lastIndexOf('.');
 
-    if (dotPosition === -1) { 
-      return fileName; 
-     }
+    if (dotPosition === -1) {
+      return fileName;
+    }
 
     const fileNameWithoutExtension = fileName.substring(0, dotPosition);
     const fileExtension = fileName.substring(dotPosition);
@@ -185,6 +302,7 @@ removeSolutionFile(uploader:{ clear(): void }): void {
       return fileName;
     }
     return fileNameWithoutExtension.substring(0, 18) + '...' + fileExtension;
-}
+  }
+
 
 }
