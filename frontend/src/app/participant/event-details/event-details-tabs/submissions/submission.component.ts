@@ -1,21 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
 import { ButtonModule } from 'primeng/button';
 import { FileUploadModule } from 'primeng/fileupload';
 import { TableModule } from 'primeng/table';
-
-interface Level {
-  id: number;
-  name: string;
-}
-
-interface Submission {
-  uploadedAt: string;
-  level: number;
-   status: 'Completed' | 'Processing' | 'Failed';
-  score: number | null;
-}
+import { LevelService, LevelResponse } from '../../../../services/level.service';
+import { TeamService } from '../../../../services/team.service';
+import { StorageService } from '../../../../services/storage.service';
+import { SubmissionService, SubmissionResponse } from '../../../../services/submission.service';
 
 @Component({
   selector: 'app-submissions',
@@ -25,90 +17,131 @@ interface Submission {
   styleUrl: './submission.component.scss',
 })
 export class SubmissionsComponent {
+  private readonly levelService = inject(LevelService);
+  private readonly teamService = inject(TeamService);
+  private readonly storageService = inject(StorageService);
+  private readonly submissionService = inject(SubmissionService);
+  private readonly change = inject(ChangeDetectorRef);
 
-  activeLevel = '1';
+  private eventID = '';
+  private hackathonID = '';
 
-sourceArchive: File | null = null;
-solutionOutput: File | null = null;
-
-submissionHistory: Submission[] = [
-  {
-    uploadedAt: '2026-06-27 09:39:20',
-    level: 3,
-    status: 'Processing',
-    score: null
-  },
-  {
-    uploadedAt: '2026-06-30 06:30:47',
-    level: 2,
-    status: 'Completed',
-    score: 2400000
-  },
-  {
-    uploadedAt: '2026-06-30 06:30:50',
-    level: 3,
-    status: 'Failed',
-    score: null
-  },
-   {
-    uploadedAt: '2026-06-30 06:30:50',
-    level: 4,
-    status: 'Completed',
-    score: null
-  },
-   {
-    uploadedAt: '2026-06-30 06:30:50',
-    level: 1,
-    status: 'Completed',
-    score: null
-  },
-   {
-    uploadedAt: '2026-06-30 06:30:50',
-    level: 5,
-    status: 'Failed',
-    score: null
-  },
-   {
-    uploadedAt: '2026-06-30 06:30:50',
-    level: 5,
-    status: 'Completed',
-    score: null
-  },
-   {
-    uploadedAt: '2026-06-30 06:30:50',
-    level: 5,
-    status: 'Completed',
-    score: null
-  },
-   {
-    uploadedAt: '2026-06-30 06:30:50',
-    level: 5,
-    status: 'Completed',
-    score: null
-  },
-   {
-    uploadedAt: '2026-06-30 06:30:50',
-    level: 5,
-    status: 'Completed',
-    score: null
-  },
-   {
-    uploadedAt: '2026-06-30 06:30:50',
-    level: 5,
-    status: 'Completed',
-    score: null
+  @Input({ required: true })
+  set eventId(value: string) {
+    if (!value || value === this.eventID) {
+      return;
+    }
+    this.eventID = value;
+    this.loadMyTeam();
   }
-];
 
+  get eventId(): string {
+    return this.eventID;
+  }
 
-  levels: Level[] = [
-    { id: 1, name: 'Level 1' },
-    { id: 2, name: 'Level 2' },
-    { id: 3, name: 'Level 3' },
-    { id: 4, name: 'Level 4' }
-  ];
+  @Input({ required: true })
+  set hackathonId(value: string) {
+    if (!value || value === this.hackathonID) {
+      return;
+    }
+    this.hackathonID = value;
+    this.loadLevels();
+  }
 
+  get hackathonId(): string {
+    return this.hackathonID;
+  }
 
+  activeLevel = '';
+
+  levels: LevelResponse[] = [];
+  levelsLoading = false;
+  levelsError = '';
+
+  teamId: string | null = null;
+  teamLoading = false;
+  teamError = '';
+
+  sourceArchive: File | null = null;
+  solutionOutput: File | null = null;
+  submitting = false;
+  submitError = '';
+  submitSuccess = '';
+
+  submissionHistory: SubmissionResponse[] = [];
+  historyLoading = false;
+  historyError = '';
+
+  loadLevels(): void {
+    this.levelsLoading = true;
+    this.levelsError = '';
+    this.change.detectChanges();
+
+    this.levelService.getLevels(this.hackathonID).subscribe({
+      next: levels => {
+        this.levels = [...levels].sort((a, b) => a.levelNumber - b.levelNumber);
+        if (!this.activeLevel && this.levels.length > 0) {
+          this.activeLevel = this.levels[0].id.toString();
+        }
+        this.levelsLoading = false;
+        this.change.detectChanges();
+      },
+      error: () => {
+        this.levelsError = 'The levels for this event could not be loaded.';
+        this.levelsLoading = false;
+        this.change.detectChanges();
+      },
+    });
+  }
+
+  loadMyTeam(): void {
+    this.teamLoading = true;
+    this.teamError = '';
+    this.change.detectChanges();
+
+    this.teamService.getMyTeam().subscribe({
+      next: team => {
+        this.teamLoading = false;
+        if (team && team.eventId === this.eventID) {
+          this.teamId = team.teamId;
+          this.loadHistory();
+        } else {
+          this.teamId = null;
+          this.teamError = 'Join or create a team for this event before submitting a solution.';
+        }
+        this.change.detectChanges();
+      },
+      error: () => {
+        this.teamId = null;
+        this.teamLoading = false;
+        this.teamError = 'Your team could not be loaded.';
+        this.change.detectChanges();
+      },
+    });
+  }
+
+  loadHistory(): void {
+    if (!this.teamId) {
+      return;
+    }
+
+    this.historyLoading = true;
+    this.historyError = '';
+    this.change.detectChanges();
+
+    this.submissionService.getTeamHistory(this.teamId).subscribe({
+      next: history => {
+        this.submissionHistory = history;
+        this.historyLoading = false;
+        this.change.detectChanges();
+      },
+      error: () => {
+        this.historyError = 'Submission history could not be loaded.';
+        this.historyLoading = false;
+        this.change.detectChanges();
+      },
+    });
+  }
 
 onSourceSelected(event: { files: File[] }): void {
   const file = event.files[0];
