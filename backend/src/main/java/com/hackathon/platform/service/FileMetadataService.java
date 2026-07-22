@@ -10,8 +10,8 @@ import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
 import com.hackathon.platform.storage.BlobPath;
 import java.time.Instant;
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,6 @@ public class FileMetadataService {
   private final SolverVersionRepository solverVersionRepository;
   private final SubmissionRepository submissionRepository;
   private final HackathonRepository hackathonRepository;
-
 
   @Transactional
   public LevelFile saveLevelFile(

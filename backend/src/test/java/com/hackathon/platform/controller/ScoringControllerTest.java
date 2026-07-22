@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.hackathon.platform.dto.ScoringLogResponse;
 import com.hackathon.platform.dto.SubmissionResponse;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.UserRepository;
 import com.hackathon.platform.scoring.ScoringService;
 import com.hackathon.platform.scoring.SubmissionQueryService;
@@ -23,10 +24,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import com.hackathon.platform.model.User;
 
 @WebMvcTest(ScoringController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -102,7 +102,13 @@ class ScoringControllerTest {
     User user = new User();
     user.setUserId(userId);
     when(subQueryS.getRecentSubmissions(userId, LIMIT)).thenReturn(List.of());
-    mockMvc.perform(get("/api/scoring/admin/recentsubmissions/{limit}", LIMIT).principal(new UsernamePasswordAuthenticationToken(userId, null, user.getAuthorities()))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
+    mockMvc
+        .perform(
+            get("/api/scoring/admin/recentsubmissions/{limit}", LIMIT)
+                .principal(
+                    new UsernamePasswordAuthenticationToken(userId, null, user.getAuthorities())))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray());
   }
 
   @Test

@@ -5,11 +5,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 public interface LeaderboardEntry {
-    UUID getTeamId();
+  UUID getTeamId();
 
-    String getTeamName();
+  String getTeamName();
 
-    BigDecimal getBestScore();
+  BigDecimal getBestScore();
 
-    Instant getLastScoredAt();
+  Instant getLastScoredAt();
 }

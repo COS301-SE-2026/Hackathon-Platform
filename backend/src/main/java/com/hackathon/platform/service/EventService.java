@@ -196,6 +196,8 @@ public class EventService {
   }
 
   public Event getEventById(UUID eventId) {
-    return eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("The event could not be found"));
+    return eventRepository
+        .findById(eventId)
+        .orElseThrow(() -> new RuntimeException("The event could not be found"));
   }
 }
