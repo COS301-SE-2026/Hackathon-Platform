@@ -25,6 +25,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.hackathon.platform.model.User;
 
 @WebMvcTest(ScoringController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -96,11 +98,11 @@ class ScoringControllerTest {
 
   @Test
   void getRecentSubmissions_returnRecentSubmissions() throws Exception {
-    when(subQueryS.getRecentSubmissions(LIMIT)).thenReturn(List.of());
-    mockMvc
-        .perform(get("/api/scoring/admin/recentsubmissions/{limit}", LIMIT))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray());
+    UUID userId = UUID.randomUUID();
+    User user = new User();
+    user.setUserId(userId);
+    when(subQueryS.getRecentSubmissions(userId, LIMIT)).thenReturn(List.of());
+    mockMvc.perform(get("/api/scoring/admin/recentsubmissions/{limit}", LIMIT).principal(new UsernamePasswordAuthenticationToken(userId, null, user.getAuthorities()))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
   }
 
   @Test
