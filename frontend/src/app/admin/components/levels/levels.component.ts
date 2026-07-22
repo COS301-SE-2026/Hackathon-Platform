@@ -1,19 +1,28 @@
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ButtonModule } from 'primeng/button';
-import { firstValueFrom } from 'rxjs';
-
-import { LevelService, LevelRequest, LevelResponse } from '../../../services/level.service';
-import { StorageService, LevelFileResponse } from '../../../services/storage.service';
-import { HackathonService } from '../../../services/hackathon.service';
+import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
+import { TagModule } from 'primeng/tag';
+import { FileUploadModule } from 'primeng/fileupload';
 
 /** A level plus its lazily-loaded file list, used only by this component's view. */
-interface UiLevel extends LevelResponse {
-  files: LevelFileResponse[];
-  filesLoaded: boolean;
+interface Level {
+  id: number;
+  levelNumber: number;
+  name: string;
+  difficulty: string;
+  scoringMode: string;
+  description: string;
+  files: LevelFile[];
+}
+
+interface LevelFile {
+  id: number;
+  fileName: string;
 }
 
 
@@ -34,9 +43,9 @@ export class LevelsComponent implements OnInit {
   hackathonId = '';
   hackathonName  ='';
   levels: Level[] = [
-    { id: 1, name: 'Level 1', difficulty: 'Introduction', scoringMode: 'highest', files: ['Level1_input.txt', 'problem_statement.pdf']},   
-    { id: 2, name: 'Level 2', difficulty: 'Intermediate', scoringMode: 'highest', files: ['Level2_input.txt', 'resources.zip'] },
-    { id: 3, name: 'Level 3', difficulty: 'Advanced', scoringMode: 'highest', files: ['Level3_input.txt', 'resources.zip', 'problem_statement.pdf'] },
+    { id: 1, levelNumber: 1, name: 'Level 1', difficulty: 'Introduction', scoringMode: 'highest', description: "Level 1", files: [{ id: 1, fileName: 'Level1_input.txt' },{ id: 2, fileName: 'Problem_statement.pdf' }]},   
+    { id: 2, levelNumber: 2 , name: 'Level 2', difficulty: 'Intermediate', scoringMode: 'highest', description: "Level 2", files: [{ id: 3, fileName: 'Level2_input.txt' },{ id: 2, fileName: 'Problem_statement.pdf' }] },
+    { id: 3, levelNumber: 3, name: 'Level 3', difficulty: 'Advanced', scoringMode: 'highest', description: "Level 3", files: [{ id: 4, fileName: 'Level3_input.txt' },{ id: 2, fileName: 'Problem_statement.pdf' }] },
   ];
   
   difficultyOptions =[
@@ -56,16 +65,24 @@ export class LevelsComponent implements OnInit {
   ];
 
   showLevelModal = false;
-  showFilesModal = false ;
+  showFilesModal = false;
+  isLoading = false;
+  isSavingOrder = false;
+  isSavingLevel = false;
+  isLoadingFiles = false;
+  isUploadingFile = false;
+  errorMsg = '';
+  modalErr = '';
+  fileErr = '';
   editingLevel: Level | null = null;
   activeLevel: Level | null = null;
 
   modalForm = {
     name: '',
+    levelNumber: 1,
     difficulty: 'Introduction',
     scoringMode: 'highest',
-    
-
+    description: '',
   };
 
   ngOnInit(): void{
@@ -88,12 +105,26 @@ export class LevelsComponent implements OnInit {
 
   openAddLevelModal(): void {
     this.editingLevel = null;
-    this.modalForm = {name : '', difficulty: 'Introduction', scoringMode: 'highest'};
+    this.modalErr = '';
+    this.modalForm = {
+      name : '',
+      levelNumber: this.levels.length + 1,
+      difficulty: 'Introduction', 
+      scoringMode: 'highest',
+      description: '',
+    };
     this.showLevelModal = true;
   }
   openEditModal(level: Level): void {
     this.editingLevel = level;
-    this.modalForm = { name: level.name, difficulty: level.difficulty, scoringMode: level.scoringMode};
+    this.modalErr = '';
+    this.modalForm = { 
+      name: level.name, 
+      levelNumber: level.levelNumber,
+      difficulty: level.difficulty, 
+      scoringMode: level.scoringMode,
+      description: level.description,
+    };
     this.showLevelModal = true; 
   }
 
@@ -107,20 +138,29 @@ export class LevelsComponent implements OnInit {
   }
 
   saveLevel(): void {
-    if (!this.modalForm.name.trim()) 
-        return;
+    if (!this.modalForm.name.trim()) {
+      this.modalErr = 'The level name must be present';
+      return;
+    }
+
+    this.isSavingLevel = true;
 
     if (this.editingLevel) {
       this.editingLevel.name = this.modalForm.name;
+      this.editingLevel.levelNumber = this.modalForm.levelNumber;
       this.editingLevel.difficulty = this.modalForm.difficulty;
       this.editingLevel.scoringMode = this.modalForm.scoringMode;
+      this.editingLevel.description = this.modalForm.description;
+      
     } else {
         this.levels.push({
         id: Date.now(),
+        levelNumber: this.modalForm.levelNumber,
         name: this.modalForm.name,
         difficulty: this.modalForm.difficulty,
         scoringMode: this.modalForm.scoringMode,
-        files: []
+        description: this.modalForm.description,
+        files: [],
       });
     }
       this.closeLevelModal();
@@ -136,9 +176,9 @@ export class LevelsComponent implements OnInit {
         this.activeLevel = null;
     }
 
-    removeFile(fileName: string): void {
+    removeFile(file: LevelFile): void {
     if(!this.activeLevel) return;
-    this.activeLevel.files = this.activeLevel.files.filter(f => f !== fileName);
+    this.activeLevel.files = this.activeLevel.files.filter(EF => EF.id !== file.id);
     }
 
   
@@ -151,7 +191,7 @@ onDropFile(event:DragEvent): void {
   const files = event.dataTransfer?.files;
   if (files){
     Array.from(files).forEach(file=> {
-      this.activeLevel!.files.push(file.name);
+      this.activeLevel!.files.push({id: Date.now() + Math.floor(Math.random() * 1000), fileName: file.name,});
     });
   }
 }
@@ -163,7 +203,7 @@ onFileSelected(event: Event):void{
   if (input.files){
     Array.from(input.files).forEach(file=>
     {
-      this.activeLevel!.files.push(file.name);
+      this.activeLevel!.files.push({id: Date.now() + Math.floor(Math.random() * 1000), fileName: file.name,});
     }
     );
   }
