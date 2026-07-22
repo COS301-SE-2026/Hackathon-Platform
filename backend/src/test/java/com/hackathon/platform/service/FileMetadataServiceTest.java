@@ -242,7 +242,44 @@ class FileMetadataServiceTest {
     assertThat(result).containsExactly(fileA, fileB);
   }
 
-  
+  @Test
+  void getLevelFile_returnsFileWhenFound() {
+    LevelFile file = new LevelFile(LEVEL_ID, "test.pdf", "events/.../test.pdf", "PDF");
+    when(levelFileRepository.findById(10L)).thenReturn(Optional.of(file));
+
+    LevelFile result = fileMetadataService.getLevelFile(10L);
+
+    assertThat(result).isEqualTo(file);
+  }
+
+  @Test
+  void getLevelFile_throwsWhenNotFound() {
+    when(levelFileRepository.findById(99L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> fileMetadataService.getLevelFile(99L))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Level file not found");
+  }
+
+  @Test
+  void deleteLevelFile_deletesWhenFileExists() {
+    when(levelFileRepository.existsById(10L)).thenReturn(true);
+
+    fileMetadataService.deleteLevelFile(10L);
+
+    verify(levelFileRepository).deleteById(10L);
+  }
+
+  @Test
+  void deleteLevelFile_throwsWhenNotFound() {
+    when(levelFileRepository.existsById(99L)).thenReturn(false);
+
+    assertThatThrownBy(() -> fileMetadataService.deleteLevelFile(99L))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Level file not found");
+
+    verify(levelFileRepository, never()).deleteById(any());
+  }
 
   @Test
   void getLevelFileStorageKey_returnsStorageKeyWhenFound() {
