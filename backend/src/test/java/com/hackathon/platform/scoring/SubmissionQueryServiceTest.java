@@ -23,6 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class SubmissionQueryServiceTest {
@@ -63,10 +66,11 @@ class SubmissionQueryServiceTest {
 
   @Test
   void getRecentSubmissions_returnsCorrect() {
+    UUID id = UUID.randomUUID();
     Submission old = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
     Submission newer = buildSubmission(2L, Instant.parse("2026-02-01T00:00:00Z"));
-    when(subRepo.getRecentSubmissions(LIMIT)).thenReturn(List.of(old, newer));
-    List<SubmissionResponse> r = subQueryService.getRecentSubmissions(LIMIT);
+    when(subRepo.getRecentSubmissions(eq(id), any(Pageable.class))).thenReturn(List.of(old, newer));
+    List<SubmissionResponse> r = subQueryService.getRecentSubmissions(eq(id), LIMIT);
 
     assertThat(r).hasSize(2);
     assertThat(r.get(0).getSubmissionId()).isEqualTo(1L);
@@ -89,10 +93,11 @@ class SubmissionQueryServiceTest {
 
   @Test
   void getRecentSubmission_doesntLoadLogs() {
+    UUID id = UUID.randomUUID();
     Submission sub = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
-    when(subRepo.getRecentSubmissions(LIMIT)).thenReturn(List.of(sub));
+    when(subRepo.getRecentSubmissions(eq(id), any(Pageable.class))).thenReturn(List.of(sub));
 
-    List<SubmissionResponse> hist = subQueryService.getRecentSubmissions(LIMIT);
+    List<SubmissionResponse> hist = subQueryService.getRecentSubmissions(id, LIMIT);
 
     assertThat(hist).hasSize(1);
     assertThat(hist.get(0).getScoringLog()).isNull();
