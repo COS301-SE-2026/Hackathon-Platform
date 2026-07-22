@@ -35,6 +35,7 @@ export class EventDetailsComponent {
 
   activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'overview';
   eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
+  hackathonId = '';
 
   loading = false;
   eventError = '';
@@ -69,6 +70,7 @@ export class EventDetailsComponent {
     this.eventService.getEventById(this.eventId).subscribe({
       next: event => {
         this.event = this.toEventView(event);
+        this.hackathonId = event.hackathon;
         this.loading = false;
 
         this.change.markForCheck();
