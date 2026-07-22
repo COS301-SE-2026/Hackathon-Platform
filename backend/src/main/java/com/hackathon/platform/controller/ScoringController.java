@@ -1,9 +1,11 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.SubmissionResponse;
+import com.hackathon.platform.dto.LeaderboardEntryResponse;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.scoring.ScoringService;
 import com.hackathon.platform.scoring.SubmissionQueryService;
+import com.hackathon.platform.scoring.LeaderboardService;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.hackathon.platform.scoring.queue.ScoringJobProducer;
+import java.util.Map;
 
 /**
  * REST endpoints for scoring submissions and retrieving submission history/feedback.
@@ -28,6 +32,8 @@ public class ScoringController {
 
   private final ScoringService scoringService;
   private final SubmissionQueryService submissionQueryService;
+  private final LeaderboardService leaderboardService;
+  private final ScoringJobProducer scoringJobProducer;
 
   /**
    * Triggers scoring for a submission: runs the active solver against the submission's output file
@@ -38,9 +44,9 @@ public class ScoringController {
    * @return the updated submission with score/status set
    */
   @PostMapping("/submissions/{submissionId}/score")
-  public ResponseEntity<Submission> scoreSubmission(@PathVariable Long submissionId) {
-    Submission scored = scoringService.scoreSubmission(submissionId);
-    return ResponseEntity.ok(scored);
+  public ResponseEntity<Map<String,String>> scoreSubmission(@PathVariable Long submissionId) {
+    String record = scoringJobProducer.enqueue(submissionId);
+    return ResponseEntity.accepted().body(Map.of("submissionId", String.valueOf(submissionId), "status", "QUEUED", "recordId", record!=null?record : ""));
   }
 
   /**
@@ -94,5 +100,20 @@ public class ScoringController {
   public ResponseEntity<SubmissionResponse> getSubmissionDetailForAdmin(
       @PathVariable Long submissionId) {
     return ResponseEntity.ok(submissionQueryService.getSubmissionDetailForAdmin(submissionId));
+  }
+
+  @GetMapping("/events/{eventId}/levels/{levelId}/leaderboard")
+  public ResponseEntity<List<LeaderboardEntryResponse>> getLeaderboard(
+    @PathVariable UUID eventId,
+    @PathVariable Long levelId
+  ) {
+    return ResponseEntity.ok(leaderboardService.getLeaderboard(eventId, levelId));
+  }
+
+  @GetMapping("/events/{eventId}/leaderboard")
+  public ResponseEntity<List<LeaderboardEntryResponse>> getEventLeaderboard(
+    @PathVariable UUID eventId
+  ) {
+    return ResponseEntity.ok(leaderboardService.getEventLeaderboard(eventId));
   }
 }

@@ -1,14 +1,17 @@
 package com.hackathon.platform.service;
 
+import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.repository.HackathonRepository;
 import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
 import com.hackathon.platform.storage.BlobPath;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,8 @@ public class FileMetadataService {
   private final LevelFileRepository levelFileRepository;
   private final SolverVersionRepository solverVersionRepository;
   private final SubmissionRepository submissionRepository;
+  private final HackathonRepository hackathonRepository;
+
 
   @Transactional
   public LevelFile saveLevelFile(
@@ -67,7 +72,7 @@ public class FileMetadataService {
 
   @Transactional
   public Submission saveSubmission(
-      String hackathonId,
+      String eventId,
       UUID teamId,
       Long levelId,
       Long solverVersionId,
@@ -80,6 +85,7 @@ public class FileMetadataService {
 
     // Initial save with placeholders just to get a DB-generated id
     Submission submission = new Submission(teamId, levelId, solverVersionId, "pending", "pending");
+    submission.setEventId(UUID.fromString(eventId));
     submission.setOutputFileName(outputFileName);
     submission.setOutputFileSize(outputFileSize);
     submission.setOutputContentType(outputContentType);
@@ -95,10 +101,10 @@ public class FileMetadataService {
     String dbId = String.valueOf(saved.getId());
     String levelIdStr = String.valueOf(levelId);
     String outputKey =
-        BlobPath.submissionOutput(hackathonId, teamId.toString(), levelIdStr, dbId, outputFileName);
+        BlobPath.submissionOutput(eventId, teamId.toString(), levelIdStr, dbId, outputFileName);
     String sourceKey =
         BlobPath.submissionSourceArchive(
-            hackathonId, teamId.toString(), levelIdStr, dbId, sourceFileName);
+            eventId, teamId.toString(), levelIdStr, dbId, sourceFileName);
 
     saved.setOutputStorageKey(outputKey);
     saved.setSourceCodeStorageKey(sourceKey);
@@ -110,6 +116,39 @@ public class FileMetadataService {
         outputKey,
         sourceKey);
     return saved;
+  }
+
+  @Transactional
+  public Hackathon updateProblemStatementStorageKey(UUID hackathonId, String storageKey) {
+    Hackathon hackathon =
+        hackathonRepository
+            .findById(hackathonId)
+            .orElseThrow(() -> new RuntimeException("Hackathon not found: " + hackathonId));
+    hackathon.setProblemStatementStorageKey(storageKey);
+    Hackathon saved = hackathonRepository.save(hackathon);
+    log.info("Updated problem statement storage key: hackathonId={}", hackathonId);
+    return saved;
+  }
+
+  @Transactional(readOnly = true)
+  public List<LevelFile> listLevelFiles(Long levelId) {
+    return levelFileRepository.findByLevelId(levelId);
+  }
+
+  @Transactional(readOnly = true)
+  public LevelFile getLevelFile(Long fileId) {
+    return levelFileRepository
+        .findById(fileId)
+        .orElseThrow(() -> new RuntimeException("Level file not found: " + fileId));
+  }
+
+  @Transactional
+  public void deleteLevelFile(Long fileId) {
+    if (!levelFileRepository.existsById(fileId)) {
+      throw new RuntimeException("Level file not found: " + fileId);
+    }
+    levelFileRepository.deleteById(fileId);
+    log.info("Deleted level file metadata: fileId={}", fileId);
   }
 
   @Transactional(readOnly = true)

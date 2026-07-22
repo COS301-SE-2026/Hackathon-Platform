@@ -23,6 +23,9 @@ public class Submission {
   @Column(name = "team_id", nullable = false)
   private UUID teamId;
 
+  @Column(name = "event_id", nullable = false)
+  private UUID eventId;
+
   @Column(name = "level_id", nullable = false)
   private Long levelId;
 
@@ -94,6 +97,14 @@ public class Submission {
 
   public void setTeamId(UUID teamId) {
     this.teamId = teamId;
+  }
+
+  public UUID getEventId() {
+    return eventId;
+  }
+
+  public void setEventId(UUID eventId) {
+    this.eventId = eventId;
   }
 
   public Long getLevelId() {
