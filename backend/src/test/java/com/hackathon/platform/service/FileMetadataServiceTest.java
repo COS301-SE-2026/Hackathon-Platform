@@ -3,16 +3,20 @@ package com.hackathon.platform.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.repository.HackathonRepository;
 import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +31,7 @@ class FileMetadataServiceTest {
   @Mock private LevelFileRepository levelFileRepository;
   @Mock private SolverVersionRepository solverVersionRepository;
   @Mock private SubmissionRepository submissionRepository;
+  @Mock private HackathonRepository hackathonRepository;
 
   private FileMetadataService fileMetadataService;
 
@@ -41,7 +46,8 @@ class FileMetadataServiceTest {
   @BeforeEach
   void setUp() {
     fileMetadataService =
-        new FileMetadataService(levelFileRepository, solverVersionRepository, submissionRepository);
+        new FileMetadataService(
+            levelFileRepository, solverVersionRepository, submissionRepository, hackathonRepository);
   }
 
   @Test
@@ -75,6 +81,7 @@ class FileMetadataServiceTest {
     Submission firstSave =
         new Submission(TEAM_ID, LEVEL_ID, SOLVER_VERSION_ID, "pending", "pending");
     firstSave.setId(SUBMISSION_ID);
+    firstSave.setEventId(EVENT_ID);
 
     when(submissionRepository.save(any(Submission.class)))
         .thenReturn(firstSave)
@@ -118,6 +125,7 @@ class FileMetadataServiceTest {
                 + SUBMISSION_ID
                 + "/source/archive.zip");
     assertThat(result.getStatus()).isEqualTo("QUEUED");
+    assertThat(result.getEventId()).isEqualTo(EVENT_ID);
   }
 
   @Test
@@ -188,6 +196,25 @@ class FileMetadataServiceTest {
 
     assertThat(resultLevelOne.getOutputStorageKey())
         .isNotEqualTo(resultLevelTwo.getOutputStorageKey());
+  }
+
+  @Test
+  void updateProblemStatementStorageKey_updatesAndReturnsHackathon() {
+    Hackathon hackathon = new Hackathon();
+    hackathon.setHackathonId(EVENT_ID);
+    hackathon.setName("Test Hackathon");
+
+    when(hackathonRepository.findById(EVENT_ID)).thenReturn(Optional.of(hackathon));
+    when(hackathonRepository.save(any(Hackathon.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Hackathon result =
+        fileMetadataService.updateProblemStatementStorageKey(
+            EVENT_ID, "hackathons/.../problem/spec.pdf");
+
+    assertThat(result.getProblemStatementStorageKey())
+        .isEqualTo("hackathons/.../problem/spec.pdf");
+    verify(hackathonRepository).save(hackathon);
   }
 
   @Test
