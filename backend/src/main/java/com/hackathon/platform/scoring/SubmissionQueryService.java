@@ -53,6 +53,13 @@ public class SubmissionQueryService {
         .collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
+  public List<SubmissionResponse> getRecentSubmissions(int limit) {
+    return submissionRepo.getRecentSubmissions(limit).stream()
+        .map(s -> toResponse(s, false))
+        .collect(Collectors.toList());
+  }
+
   /**
    * All the details for 1 submissions, this includes a teams complete scoring log from the blob
    * storage. A team can only view their own feedback.

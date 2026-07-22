@@ -24,6 +24,8 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   @Query("SELECT s FROM Submission s WHERE s.status = :status ORDER BY s.submittedAt ASC")
   List<Submission> findByStatusOrderBySubmittedAtAsc(@Param("status") String status);
 
+  @Query("SELECT s FROM Submission s ORDER BY s.submittedAt ASC LIMIT :limit")
+  List<Submission> getRecentSubmissions(@Param("limit") int limit);
   @Query(value =
       """
         WITH BestSubmissions AS (

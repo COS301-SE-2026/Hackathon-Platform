@@ -72,6 +72,11 @@ public class ScoringController {
     return ResponseEntity.ok(submissionQueryService.getHistoryForTeamAndLevel(teamId, levelId));
   }
 
+  @GetMapping("/admin/recentsubmissions/{limit}")
+  public ResponseEntity<List<SubmissionResponse>> getRecentSubmissions(@PathVariable int limit) {
+    return ResponseEntity.ok(submissionQueryService.getRecentSubmissions(limit));
+  }
+
   /**
    * Full feedback for a single submission, including score, status and every scoring log entry
    * (e.g. malformed output, rule violations, validation failures). Scoped to the owning team so a
