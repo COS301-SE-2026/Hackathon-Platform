@@ -44,5 +44,52 @@ export class SubmissionService {
   private readonly storageUrl = 'http://localhost:8080/api/storage';
   private readonly scoringUrl = 'http://localhost:8080/api/scoring';
 
+  /**
+   * Uploads the solution output file and source code archive together for a level. The backend
+   * creates the submission record, stores both files and enqueues scoring automatically.
+   */
+  uploadSubmission(
+    eventId: string,
+    teamId: string,
+    levelId: number,
+    outputFile: File,
+    sourceFile: File
+  ): Observable<SubmissionUploadResult> {
+    const formData = new FormData();
+    formData.append('outputFile', outputFile);
+    formData.append('sourceFile', sourceFile);
+    formData.append('levelId', levelId.toString());
 
+    return this.http.post<SubmissionUploadResult>(
+      `${this.storageUrl}/events/${eventId}/teams/${teamId}/submissions`,
+      formData
+    );
+  }
+
+  /** Full submission history for a team across all levels, most recent first. */
+  getTeamHistory(teamId: string): Observable<SubmissionResponse[]> {
+    return this.http.get<SubmissionResponse[]>(`${this.scoringUrl}/teams/${teamId}/submissions`);
+  }
+
+  /** Submission history for a team, scoped to a single level, most recent first. */
+  getTeamLevelHistory(teamId: string, levelId: number): Observable<SubmissionResponse[]> {
+    return this.http.get<SubmissionResponse[]>(
+      `${this.scoringUrl}/teams/${teamId}/levels/${levelId}/submissions`
+    );
+  }
+
+  /** Full feedback for a single submission, including the scoring log content. */
+  getSubmissionDetail(teamId: string, submissionId: number): Observable<SubmissionResponse> {
+    return this.http.get<SubmissionResponse>(
+      `${this.scoringUrl}/teams/${teamId}/submissions/${submissionId}`
+    );
+  }
+
+  /** Manually (re-)triggers scoring for a submission, e.g. after a solver hotfix. */
+  scoreSubmission(submissionId: number): Observable<{ submissionId: string; status: string; recordId: string }> {
+    return this.http.post<{ submissionId: string; status: string; recordId: string }>(
+      `${this.scoringUrl}/submissions/${submissionId}/score`,
+      {}
+    );
+  }
 }
