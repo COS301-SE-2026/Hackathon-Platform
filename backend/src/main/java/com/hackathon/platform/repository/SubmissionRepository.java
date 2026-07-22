@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Pageable;
 
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
@@ -24,8 +25,8 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   @Query("SELECT s FROM Submission s WHERE s.status = :status ORDER BY s.submittedAt ASC")
   List<Submission> findByStatusOrderBySubmittedAtAsc(@Param("status") String status);
 
-  @Query("SELECT s FROM Submission s ORDER BY s.submittedAt ASC LIMIT :limit")
-  List<Submission> getRecentSubmissions(@Param("limit") int limit);
+  @Query("SELECT s FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId ORDER BY s.submittedAt DESC")
+  List<Submission> getRecentSubmissions(@Param("userId") UUID userId, Pageable pageeable);
   @Query(value =
       """
         WITH BestSubmissions AS (
