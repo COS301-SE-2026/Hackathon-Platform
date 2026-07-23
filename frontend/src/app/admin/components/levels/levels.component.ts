@@ -1,19 +1,28 @@
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ButtonModule } from 'primeng/button';
-import { firstValueFrom } from 'rxjs';
-
-import { LevelService, LevelRequest, LevelResponse } from '../../../services/level.service';
-import { StorageService, LevelFileResponse } from '../../../services/storage.service';
-import { HackathonService } from '../../../services/hackathon.service';
+import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
+import { TagModule } from 'primeng/tag';
+import { FileUploadModule } from 'primeng/fileupload';
 
 /** A level plus its lazily-loaded file list, used only by this component's view. */
-interface UiLevel extends LevelResponse {
-  files: LevelFileResponse[];
-  filesLoaded: boolean;
+interface Level {
+  id: number;
+  levelNumber: number;
+  name: string;
+  difficulty: string;
+  scoringMode: string;
+  description: string;
+  files: LevelFile[];
+}
+
+interface LevelFile {
+  id: number;
+  fileName: string;
 }
 
 @Component({

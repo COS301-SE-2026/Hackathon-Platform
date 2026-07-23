@@ -55,6 +55,7 @@ public class ScoringService {
   private final StorageService storageService;
   private final AzureBlobConfig blobConfig;
   private final SolverRunner solverRunner;
+  private final LeaderboardUpdateService leaderboardUpdateService;
 
   /**
    * Scores the submission, can be recalled, each call appends a new log to the teams log file.
@@ -119,6 +120,15 @@ public class ScoringService {
 
     saveResult(sub);
     appendToScoringLog(teamId, eventId, sub.getLevelId(), logString);
+
+    if("SCORED".equalsIgnoreCase(sub.getStatus())) {
+      leaderboardUpdateService.pushLeaderboardUpdate(
+        eventId,
+        sub.getLevelId(),
+        teamId,
+        sub.getId()
+      );
+    }
     return sub;
   }
 

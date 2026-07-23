@@ -7,17 +7,23 @@ import com.hackathon.platform.scoring.LeaderboardService;
 import com.hackathon.platform.scoring.ScoringService;
 import com.hackathon.platform.scoring.SubmissionQueryService;
 import com.hackathon.platform.scoring.queue.ScoringJobProducer;
+import com.hackathon.platform.scoring.LeaderboardService;
+import com.hackathon.platform.scoring.LeaderboardUpdateService;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import com.hackathon.platform.scoring.queue.ScoringJobProducer;
+import java.util.Map;
 
 /**
  * REST endpoints for scoring submissions and retrieving submission history/feedback.
@@ -35,6 +41,7 @@ public class ScoringController {
   private final SubmissionQueryService submissionQueryService;
   private final LeaderboardService leaderboardService;
   private final ScoringJobProducer scoringJobProducer;
+  private final LeaderboardUpdateService leaderboardUpdateService;
 
   /**
    * Triggers scoring for a submission: runs the active solver against the submission's output file
@@ -122,5 +129,10 @@ public class ScoringController {
   public ResponseEntity<List<LeaderboardEntryResponse>> getEventLeaderboard(
       @PathVariable UUID eventId) {
     return ResponseEntity.ok(leaderboardService.getEventLeaderboard(eventId));
+  }
+
+  @GetMapping(value = "/events/{eventId}/leaderboard/update", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  public SseEmitter updateEventLeaderboard(@PathVariable UUID eventId) {
+    return leaderboardUpdateService.subscribe(eventId);
   }
 }
