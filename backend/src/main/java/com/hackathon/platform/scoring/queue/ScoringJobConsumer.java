@@ -18,10 +18,10 @@ public class ScoringJobConsumer
   private static final Logger logger = LoggerFactory.getLogger(ScoringJobConsumer.class);
   private final ScoringService scorer;
 
-  @Override
-  public void onMessage(MapRecord<String, String, String> msg) {
-    String submission = msg.getValue().get("SubmissionId");
-    Long submissionId = submission != null ? Long.valueOf(submission) : null;
+    @Override
+    public void onMessage(MapRecord<String, String, String> msg) {
+        String submission = msg.getValue().get("submissionId");
+        Long submissionId = submission != null ? Long.valueOf(submission) : null;
 
     if (submissionId == null) {
       logger.error("something wrong with id {} will be dropped", msg.getId());
