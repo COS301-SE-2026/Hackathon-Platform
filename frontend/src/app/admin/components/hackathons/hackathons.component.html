@@ -29,27 +29,27 @@
                 <div class = "hackathon-actions">
                     <p-button 
                     label = "View Events"
-                    (onClick) = "navigateToEvents(hackathon.id)"
+                    (onClick) = "navigateToEvents(hackathon.hackathonId)"
                     styleClass = "p-button-primary" />
 
                     <p-button 
                     label = "+ Create Event"
-                    (onClick) = "navigateToCreateEvent(hackathon.id)"
+                    (onClick) = "navigateToCreateEvent(hackathon.hackathonId)"
                     styleClass = "p-button-success" />
 
                      <p-button 
                     label = "Manage"
-                    (onClick) = "navigateToManage(hackathon.id)"
+                    (onClick) = "navigateToManage(hackathon.hackathonId)"
                     styleClass = "p-button-secondary" />
 
                      <p-button 
                     label = "Levels"
-                    (onClick) = "navigateToLevels(hackathon.id)"
+                    (onClick) = "navigateToLevels(hackathon.hackathonId)"
                     styleClass = "p-button-secondary" />
 
                     <p-button 
                     label = "Solver"
-                    (onClick) = "navigateToSolver(hackathon.id)"
+                    (onClick) = "navigateToSolver(hackathon.hackathonId)"
                     styleClass = "p-button-secondary" />
 
 
@@ -60,7 +60,7 @@
 
                     <p-button 
                     label = "Delete"
-                    (onClick) = "deleteHackathon(hackathon.id)"
+                    (onClick) = "deleteHackathon(hackathon.hackathonId)"
                     styleClass = "p-button-danger" />
 
                 </div>

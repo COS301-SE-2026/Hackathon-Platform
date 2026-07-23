@@ -68,7 +68,7 @@ export class HackathonsComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.hackathonService.getAllHackathons().subscribe({
+    this.hackathonService.getAllHacathons().subscribe({
         next: (hackathons) => {
             this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0 }));
             this.isLoading = false;
@@ -109,7 +109,7 @@ export class HackathonsComponent implements OnInit {
     this.editingHackathon = hackathon;
     this.newHackathon = {
         name: hackathon.name,
-        description: hackathon.description,
+        description: hackathon.description || '',
 
     };
     this.showDialog = true;
@@ -139,7 +139,7 @@ export class HackathonsComponent implements OnInit {
         next: (saved) => {
             this.isSaving = false;
             if(this.editingHackathon) {
-                const index = this.hackathons.findIndex(h => h.hackathonId === this.editingHackathon.hackathonId);
+                const index = this.hackathons.findIndex(h => h.hackathonId === this.editingHackathon!.hackathonId);
                 if(index !== -1) {
                     this.hackathons[index] = { ...this.hackathons[index], ...saved };
                 }

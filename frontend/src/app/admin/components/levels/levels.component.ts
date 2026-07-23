@@ -110,13 +110,11 @@ export class LevelsComponent implements OnInit {
     return Math.max(...this.levels.map((l) => l.levelNumber)) + 1;
   }
 
-  onDrop(event: DragEvent): void {
-    event.preventDefault();
-    if (!this.activeLevel) return;
-    const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      this.uploadFiles(files);
-    }
+  onDrop(event: CdkDragDrop<UiLevel[]>): void {
+    if(event.previousIndex === event.currentIndex) return;
+    const prevOrder = [...this.levels];
+    moveItemInArray(this.levels, event.previousIndex, event.currentIndex);
+    this.persistOrder(prevOrder);
   }
 
   private uploadFiles(files: FileList): void {
@@ -307,11 +305,13 @@ export class LevelsComponent implements OnInit {
 
   
 
-onDropFile(event: CdkDragDrop<UiLevel[]>): void {
-  if(event.previousIndex === event.currentIndex) return;
-  const prevOrder = [...this.levels];
-  moveItemInArray(this.levels, event.previousIndex, event.currentIndex);
-  this.persistOrder(prevOrder);
+onDropFile(event: DragEvent): void {
+ event.preventDefault();
+ if(!this.activeLevel) return;
+ const files = event.dataTransfer?.files;
+ if(files && files.length > 0) {
+  this.uploadFiles(files);
+ }
 }
 
 onFileSelected(event: Event):void{
