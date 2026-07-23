@@ -2,18 +2,8 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { EventService} from '../../../services/event.service';
+import { EventService, EventResponse, EventRequest } from '../../../services/event.service';
 import { StorageService } from '../../../services/storage.service';
-
-interface HackathonData {
-  id?: string;
-  name?: string;
-  description?: string;
-  visibility?: 'PUBLIC' | 'PRIVATE';
-  status?: 'UPCOMING' | 'ONGOING'|'COMPLETED'| 'CANCELED'|'ACTIVE'|'INACTIVE';
-}
-
-
 
 @Component({
   selector: 'app-manage-event',
@@ -35,8 +25,6 @@ export class ManageEventComponent implements OnInit {
   uploadSuccess = false;
   uploadError = '';
 
-  hackathonId  ='';
-
   eventId = '';
   isLoading = true;
   isSaving = false;
@@ -45,72 +33,117 @@ export class ManageEventComponent implements OnInit {
 
   form = {
     name: '',
+    teamSizeLimit: 4,
     startDate: '',
-    endDate:'',
+    duration: 0,
     description: '',
     visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
     status: 'UPCOMING' as 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE',
+    registrationKey: ''
   };
 
-  originalHackathon: HackathonData | null = null;
+  originalEvent: EventResponse | null = null;
   statusOptions = ['UPCOMING', 'ONGOING', 'COMPLETED', 'CANCELED', 'ACTIVE', 'INACTIVE'];
   visibilityOptions = ['PUBLIC', 'PRIVATE'];
 
   ngOnInit(): void {
-
-    this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
-    this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
-    if (!this.hackathonId) {
-      this.errorMessage = 'No hackathon ID provided';
+    this.eventId = this.route.snapshot.paramMap.get('id') || '';
+    if (!this.eventId) {
+      this.errorMessage = 'No event ID provided';
       this.isLoading = false;
       return;
     }
-    this.loadHackathon();
+    this.loadEvent();
   }
 
-  loadHackathon(): void {
+  loadEvent(): void {
     this.isLoading = true;
 
-    this.populateEmptyForm();
-    this.isLoading = false;
+    this.eventService.getMyEvents().subscribe({
+      next: (events) => {
+
+        const event = events.find(e => e.eventId === this.eventId);
+        if (event) {
+          this.originalEvent = event;
+          this.populateForm(event);
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        } else {
+          this.errorMessage = `Event with ID "${this.eventId}" not found.`;
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        this.errorMessage = `Failed to load events: ${err.status}`;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  populateEmptyForm(): void {
-    this.form.name = '';
-    this.form.description = '';
-    this.form.startDate = '';
-    this.form.endDate = '';
-    this.form.visibility = 'PUBLIC';
-    this.form.status = 'UPCOMING';
-
+  populateForm(event: EventResponse): void {
+    this.form.name = event.name;
+    this.form.teamSizeLimit = event.teamSizeLimit;
+    const date = new Date(event.startDateTime);
+    this.form.startDate = date.toISOString().slice(0, 16);
+    this.form.duration = event.duration;
+    this.form.description = event.description || '';
+    this.form.visibility = event.visibility as 'PUBLIC' | 'PRIVATE';
+    this.form.status = event.status as typeof this.form.status;
+    this.form.registrationKey = event.registrationKey || '';
   }
 
-
-
-  updateHackathon(): void {
+  updateEvent(): void {
     if (!this.form.name.trim()) {
-      this.errorMessage = 'Hackathon name is required';
+      this.errorMessage = 'Event name is required';
       return;
     }
-   
+    if (this.form.teamSizeLimit < 1) {
+      this.errorMessage = 'Team size limit must be at least 1';
+      return;
+    }
     if (!this.form.startDate) {
       this.errorMessage = 'Start date is required';
       return;
     }
-   
+    if (this.form.duration < 1) {
+      this.errorMessage = 'Duration must be at least 1 hour';
+      return;
+    }
 
     this.isSaving = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    setTimeout(() =>{
-      this.isSaving = false;
-      this.successMessage = 'Hackathon updated successfully';
-      setTimeout(() =>(this.successMessage = ''), 30000
-      );
-    },1000);
+    const startDateTime = new Date(this.form.startDate).toISOString();
 
+    const eventData: EventRequest = {
+      name: this.form.name,
+      teamSizeLimit: this.form.teamSizeLimit,
+      startDateTime: startDateTime,
+      duration: this.form.duration,
+      description: this.form.description || undefined,
+      visibility: this.form.visibility,
+      status: this.form.status,
+      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined
+    };
 
+    this.eventService.updateEvent(this.eventId, eventData).subscribe({
+      next: (response) => {
+        console.log('Event updated:', response);
+        this.isSaving = false;
+        this.successMessage = 'Event updated successfully!';
+        this.originalEvent = response;
+        this.populateForm(response);
+        setTimeout(() => (this.successMessage = ''), 3000);
+      },
+      error: (error) => {
+        console.error('Error updating event:', error);
+        this.isSaving = false;
+        this.errorMessage = error.error?.message || 'Failed to update event';
+      }
+    });
   }
 
   patchStatusOnly(): void {
@@ -118,27 +151,34 @@ export class ManageEventComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-       setTimeout(() =>{
-      this.isSaving = false;
-      this.successMessage = 'Hackathon updated successfully';
-      setTimeout(() =>(this.successMessage = ''), 30000
-      );
-    },1000);
-
-   
+    this.eventService.patchEventStatus(
+      this.eventId,
+      this.form.visibility,
+      this.form.status,
+      this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined
+    ).subscribe({
+      next: (response) => {
+        this.isSaving = false;
+        this.successMessage = 'Event status updated successfully!';
+        this.originalEvent = response;
+        this.populateForm(response);
+        setTimeout(() => (this.successMessage = ''), 3000);
+      },
+      error: (error) => {
+        console.error('Error patching status:', error);
+        this.isSaving = false;
+        this.errorMessage = error.error?.message || 'Failed to update status';
+      }
+    });
   }
 
-  deleteHackathon(): void {
+  deleteEvent(): void {
+    // Note: Delete endpoint not done add later
     alert('Delete functionality not yet implemented');
   }
 
   goBack(): void {
-     if (this.hackathonId){
-         this.router.navigate(['/admin/hackathons', this.hackathonId]);
-
-    }else {
-        this.router.navigate(['/admin/hackathons']);
-    }
+    this.router.navigate(['/admin/event-list']);
   }
 
     onDropFile(event: DragEvent): void {
@@ -170,8 +210,8 @@ export class ManageEventComponent implements OnInit {
       this.uploadError = 'No file selected.';
       return;
     }
-    if (!this.hackathonId) {
-      this.uploadError = 'Hackathon ID not available.';
+    if (!this.eventId) {
+      this.uploadError = 'Event ID not available.';
       return;
     }
 
@@ -179,10 +219,10 @@ export class ManageEventComponent implements OnInit {
     this.uploadError = '';
     this.uploadSuccess = false;
 
-   
+    const levelId = '3';
     const renamedFile = new File([this.uploadFile], 'problem_statement.pdf', { type: this.uploadFile.type });
 
-    this.storageService.uploadHackathonProblemStatement(this.hackathonId, renamedFile).subscribe({
+    this.storageService.uploadLevelFile(this.eventId, levelId, renamedFile).subscribe({
       next: (resp) => {
         console.log('Upload success:', resp);
         this.isUploading = false;
@@ -198,6 +238,4 @@ export class ManageEventComponent implements OnInit {
       }
     });
   }
-
-  
 }

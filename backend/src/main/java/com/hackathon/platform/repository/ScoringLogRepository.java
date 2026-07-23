@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ScoringLogRepository extends JpaRepository<ScoringLog, Long> {
 
-  Optional<ScoringLog> findByTeamIdAndEventIdAndLevelId(UUID teamId, UUID eventId, Long levelId);
+  Optional<ScoringLog> findByTeamIdAndHackathonIdAndLevelId(
+      UUID teamId, UUID hackathonId, Long levelId);
 
-  List<ScoringLog> findByTeamIdAndEventId(UUID teamId, UUID eventId);
+  List<ScoringLog> findByTeamIdAndHackathonId(UUID teamId, UUID hackathonId);
 }

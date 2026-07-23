@@ -14,9 +14,6 @@ public interface SolverVersionRepository extends JpaRepository<SolverVersion, Lo
 
   Optional<SolverVersion> findByHackathonIdAndIsActiveTrue(UUID hackathonId);
 
-  /** The most recently uploaded solver version for a hackathon (highest version number). */
-  Optional<SolverVersion> findFirstByHackathonIdOrderByVersionNumberDesc(UUID hackathonId);
-
   @Query(
       "SELECT sv FROM SolverVersion sv WHERE sv.hackathonId = :hackathonId ORDER BY sv.versionNumber DESC")
   List<SolverVersion> findAllByHackathonIdOrderByVersionDesc(

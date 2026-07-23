@@ -36,9 +36,4 @@ public class Hackathon {
   @Getter
   @Column(name = "description")
   private String description;
-
-  @Setter
-  @Getter
-  @Column(name = "problem_statement_storage_key")
-  private String problemStatementStorageKey;
 }

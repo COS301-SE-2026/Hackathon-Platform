@@ -10,8 +10,6 @@ describe('EventlistComponent', () => {
   let component: EventlistComponent;
   let fixture: ComponentFixture<EventlistComponent>;
   let eventServiceMock: jasmine.SpyObj<EventService>;
-  let activatedRouteMock: any;
-
 
   const mockEvents = [
     {
@@ -56,21 +54,18 @@ describe('EventlistComponent', () => {
     eventServiceMock = jasmine.createSpyObj<EventService>('EventService', ['getMyEvents']);
     eventServiceMock.getMyEvents.and.returnValue(of(mockEvents as any));
 
-    activatedRouteMock = {
-      snapshot:{
-        paramMap:{
-          get: jasmine.createSpy('get').and.returnValue(null)
-        }
-      },
-      queryParams: of({}),
-      params:of({})
-    };
-
     await TestBed.configureTestingModule({
       imports: [FormsModule, RouterTestingModule, EventlistComponent],
       providers: [
         { provide: EventService, useValue: eventServiceMock },
-        { provide: ActivatedRoute,useValue: activatedRouteMock}
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { queryParams: {}, params: {} },
+            queryParams: of({}),
+            params: of({})
+          }
+        }
       ]
     }).compileComponents();
 

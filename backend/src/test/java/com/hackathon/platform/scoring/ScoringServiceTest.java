@@ -13,6 +13,7 @@ import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.Team;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.ScoringLogRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
@@ -36,17 +37,19 @@ class ScoringServiceTest {
   @Mock private SubmissionRepository subRepo;
   @Mock private SolverVersionRepository solverVRepo;
   @Mock private LevelFileRepository lvlFileRepo;
-  @Mock private ScoringLogRepository scoringLogRepo;
   @Mock private TeamRepository teamRepo;
+  @Mock private ScoringLogRepository scoringLogRepo;
   @Mock private StorageService storageS;
   @Mock private AzureBlobConfig azure;
   @Mock private SolverRunner solverRunner;
+  @Mock private EventRepository eventRepo;
 
   private ScoringService scoringService;
 
   private static final Long SUB_ID = 1L;
   private static final UUID TEAM_ID = UUID.randomUUID();
   private static final UUID EVENT_ID = UUID.randomUUID();
+  private static final UUID HACK_ID = UUID.randomUUID();
   private static final Long LVL_ID = 2L;
   private static final Long SOLVER_V_ID = 3L;
 
@@ -58,12 +61,18 @@ class ScoringServiceTest {
   void setUp() {
     scoringService =
         new ScoringService(
-            subRepo, solverVRepo, lvlFileRepo, scoringLogRepo, teamRepo, storageS, azure,
+            subRepo,
+            solverVRepo,
+            lvlFileRepo,
+            scoringLogRepo,
+            teamRepo,
+            eventRepo,
+            storageS,
+            azure,
             solverRunner);
 
     sub = new Submission(TEAM_ID, LVL_ID, SOLVER_V_ID, "src/code.zip", "out/output.txt");
     sub.setId(SUB_ID);
-    sub.setEventId(EVENT_ID);
     sub.setOutputFileName("output.txt");
 
     team = new Team();
@@ -72,11 +81,9 @@ class ScoringServiceTest {
     team.setCreatedByUserId(UUID.randomUUID());
     team.setEventId(EVENT_ID);
 
-    solverVersion = new SolverVersion(UUID.randomUUID(), UUID.randomUUID(), "events/.../solver.py");
+    solverVersion = new SolverVersion(EVENT_ID, UUID.randomUUID(), "events/.../solver.py");
     solverVersion.setId(SOLVER_V_ID);
-  }
 
-  private void stubContainers() {
     when(azure.getEventResourcesContainer()).thenReturn("event-resources");
     when(azure.getSubmissionsContainer()).thenReturn("submissions");
     when(azure.getScoringLogsContainer()).thenReturn("scoring-logs");
@@ -84,9 +91,9 @@ class ScoringServiceTest {
 
   @Test
   void scoreSubmission_withSuccessfulSolverRun_setsScoreAndStatus() {
-    stubContainers();
     when(subRepo.findById(SUB_ID)).thenReturn(Optional.of(sub));
     when(teamRepo.findById(TEAM_ID)).thenReturn(Optional.of(team));
+    when(eventRepo.findHackathonIdByEventId(EVENT_ID)).thenReturn(Optional.of(HACK_ID));
     when(solverVRepo.findById(SOLVER_V_ID)).thenReturn(Optional.of(solverVersion));
     when(lvlFileRepo.findByLevelId(LVL_ID)).thenReturn(List.of());
 
@@ -111,9 +118,9 @@ class ScoringServiceTest {
 
   @Test
   void scoreSubmission_withSolverFailure_marksFailedAndLogsReason() {
-    stubContainers();
     when(subRepo.findById(SUB_ID)).thenReturn(Optional.of(sub));
     when(teamRepo.findById(TEAM_ID)).thenReturn(Optional.of(team));
+    when(eventRepo.findHackathonIdByEventId(EVENT_ID)).thenReturn(Optional.of(HACK_ID));
     when(solverVRepo.findById(SOLVER_V_ID)).thenReturn(Optional.of(solverVersion));
     when(lvlFileRepo.findByLevelId(LVL_ID)).thenReturn(List.of());
 
@@ -136,10 +143,10 @@ class ScoringServiceTest {
 
   @Test
   void scoreSubmission_downloadLevelInputsWhenLevelFilesExist() {
-    stubContainers();
     LevelFile inputFile = new LevelFile(LVL_ID, "input.txt", "events/.../input.txt", "TXT");
     when(subRepo.findById(SUB_ID)).thenReturn(Optional.of(sub));
     when(teamRepo.findById(TEAM_ID)).thenReturn(Optional.of(team));
+    when(eventRepo.findHackathonIdByEventId(EVENT_ID)).thenReturn(Optional.of(HACK_ID));
     when(solverVRepo.findById(SOLVER_V_ID)).thenReturn(Optional.of(solverVersion));
     when(lvlFileRepo.findByLevelId(LVL_ID)).thenReturn(List.of(inputFile));
 
@@ -162,8 +169,12 @@ class ScoringServiceTest {
     when(subRepo.findById(SUB_ID)).thenReturn(Optional.empty());
     assertThatThrownBy(() -> scoringService.scoreSubmission(SUB_ID))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("wasnt found");
+        .hasMessageContaining("not found");
 
     verify(subRepo, never()).save(any());
+
+    assertThat(azure.getEventResourcesContainer()).isEqualTo("event-resources");
+    assertThat(azure.getSubmissionsContainer()).isEqualTo("submissions");
+    assertThat(azure.getScoringLogsContainer()).isEqualTo("scoring-logs");
   }
 }

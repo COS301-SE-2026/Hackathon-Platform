@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.hackathon.platform.dto.ScoringLogResponse;
 import com.hackathon.platform.dto.SubmissionResponse;
 import com.hackathon.platform.model.Submission;
-import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.UserRepository;
 import com.hackathon.platform.scoring.ScoringService;
 import com.hackathon.platform.scoring.SubmissionQueryService;
@@ -24,7 +23,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -44,7 +42,6 @@ class ScoringControllerTest {
   private static final UUID EVENT_ID = UUID.fromString("c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
   private static final Long SUB_ID = 1L;
   private static final Long LEVEL_ID = 2L;
-  private static final int LIMIT = 5;
 
   @Test
   void scoreSubmission_returns200WithUpdatedSubmission() throws Exception {
@@ -92,21 +89,6 @@ class ScoringControllerTest {
 
     mockMvc
         .perform(get("/api/scoring/teams/{teamId}/levels/{levelId}/submissions", TEAM_ID, LEVEL_ID))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").isArray());
-  }
-
-  @Test
-  void getRecentSubmissions_returnRecentSubmissions() throws Exception {
-    UUID userId = UUID.randomUUID();
-    User user = new User();
-    user.setUserId(userId);
-    when(subQueryS.getRecentSubmissions(userId, LIMIT)).thenReturn(List.of());
-    mockMvc
-        .perform(
-            get("/api/scoring/admin/recentsubmissions/{limit}", LIMIT)
-                .principal(
-                    new UsernamePasswordAuthenticationToken(userId, null, user.getAuthorities())))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray());
   }
