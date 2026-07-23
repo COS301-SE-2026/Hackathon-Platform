@@ -16,7 +16,7 @@ public class ScoringJobProducer{
     private final StringRedisTemplate redis;
     private final ScoringQueueProperties properties;
     private static final Logger logger = LoggerFactory.getLogger(ScoringJobProducer.class);
-    private SubmissionRepository subRepo;
+    private final SubmissionRepository subRepo;
 
     public String enqueue(Long submissionId){
         setQueue(submissionId);

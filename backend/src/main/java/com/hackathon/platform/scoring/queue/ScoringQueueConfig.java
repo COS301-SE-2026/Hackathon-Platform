@@ -59,7 +59,7 @@ public class ScoringQueueConfig{
         StreamMessageListenerContainer<String, MapRecord<String,String,String>> container = StreamMessageListenerContainer.create(connection, options);
 
         for(int i=0; i<properties.getConcurrency(); i++){
-            String name = "worker-"+1;
+            String name = "worker-"+i;
             container.receive(Consumer.from(properties.getConsumerKey(), name),StreamOffset.create(properties.getStreamKey(), ReadOffset.lastConsumed()), consumer);
 
         }
