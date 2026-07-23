@@ -194,4 +194,10 @@ public class EventService {
     }
     return eventRepository.findByHackathon(hackathonId);
   }
+
+  public Event getEventById(UUID eventId) {
+    return eventRepository
+        .findById(eventId)
+        .orElseThrow(() -> new RuntimeException("The event could not be found"));
+  }
 }

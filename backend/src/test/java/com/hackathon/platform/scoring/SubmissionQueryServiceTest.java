@@ -2,6 +2,8 @@ package com.hackathon.platform.scoring;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class SubmissionQueryServiceTest {
@@ -38,6 +41,7 @@ class SubmissionQueryServiceTest {
   private static final UUID TEAM_ID = UUID.randomUUID();
   private static final Long LEVEL_ID = 1L;
   private static final Long SOLVER_V_ID = 2L;
+  private static final int LIMIT = 5;
 
   @BeforeEach
   void setUp() {
@@ -61,12 +65,39 @@ class SubmissionQueryServiceTest {
   }
 
   @Test
+  void getRecentSubmissions_returnsCorrect() {
+    UUID id = UUID.randomUUID();
+    Submission old = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
+    Submission newer = buildSubmission(2L, Instant.parse("2026-02-01T00:00:00Z"));
+    when(subRepo.getRecentSubmissions(eq(id), any(Pageable.class))).thenReturn(List.of(old, newer));
+    List<SubmissionResponse> r = subQueryService.getRecentSubmissions(eq(id), LIMIT);
+
+    assertThat(r).hasSize(2);
+    assertThat(r.get(0).getSubmissionId()).isEqualTo(1L);
+    assertThat(r.get(1).getSubmissionId()).isEqualTo(2L);
+  }
+
+  @Test
   void getHistoryForTeam_doesNotEagerlyLoadLogs() {
     Submission sub = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
 
     when(subRepo.findByTeamId(TEAM_ID)).thenReturn(List.of(sub));
 
     List<SubmissionResponse> hist = subQueryService.getHistoryForTeam(TEAM_ID);
+
+    assertThat(hist).hasSize(1);
+    assertThat(hist.get(0).getScoringLog()).isNull();
+
+    verifyNoInteractions(scoringLogRepo);
+  }
+
+  @Test
+  void getRecentSubmission_doesntLoadLogs() {
+    UUID id = UUID.randomUUID();
+    Submission sub = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
+    when(subRepo.getRecentSubmissions(eq(id), any(Pageable.class))).thenReturn(List.of(sub));
+
+    List<SubmissionResponse> hist = subQueryService.getRecentSubmissions(id, LIMIT);
 
     assertThat(hist).hasSize(1);
     assertThat(hist.get(0).getScoringLog()).isNull();

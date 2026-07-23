@@ -3,16 +3,20 @@ package com.hackathon.platform.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.repository.HackathonRepository;
 import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +31,7 @@ class FileMetadataServiceTest {
   @Mock private LevelFileRepository levelFileRepository;
   @Mock private SolverVersionRepository solverVersionRepository;
   @Mock private SubmissionRepository submissionRepository;
+  @Mock private HackathonRepository hackathonRepository;
 
   private FileMetadataService fileMetadataService;
 
@@ -41,7 +46,8 @@ class FileMetadataServiceTest {
   @BeforeEach
   void setUp() {
     fileMetadataService =
-        new FileMetadataService(levelFileRepository, solverVersionRepository, submissionRepository);
+        new FileMetadataService(
+            levelFileRepository, solverVersionRepository, submissionRepository, hackathonRepository);
   }
 
   @Test
@@ -75,6 +81,7 @@ class FileMetadataServiceTest {
     Submission firstSave =
         new Submission(TEAM_ID, LEVEL_ID, SOLVER_VERSION_ID, "pending", "pending");
     firstSave.setId(SUBMISSION_ID);
+    firstSave.setEventId(EVENT_ID);
 
     when(submissionRepository.save(any(Submission.class)))
         .thenReturn(firstSave)
@@ -118,6 +125,7 @@ class FileMetadataServiceTest {
                 + SUBMISSION_ID
                 + "/source/archive.zip");
     assertThat(result.getStatus()).isEqualTo("QUEUED");
+    assertThat(result.getEventId()).isEqualTo(EVENT_ID);
   }
 
   @Test
@@ -188,6 +196,89 @@ class FileMetadataServiceTest {
 
     assertThat(resultLevelOne.getOutputStorageKey())
         .isNotEqualTo(resultLevelTwo.getOutputStorageKey());
+  }
+
+  @Test
+  void updateProblemStatementStorageKey_updatesAndReturnsHackathon() {
+    Hackathon hackathon = new Hackathon();
+    hackathon.setHackathonId(EVENT_ID);
+    hackathon.setName("Test Hackathon");
+
+    when(hackathonRepository.findById(EVENT_ID)).thenReturn(Optional.of(hackathon));
+    when(hackathonRepository.save(any(Hackathon.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Hackathon result =
+        fileMetadataService.updateProblemStatementStorageKey(
+            EVENT_ID, "hackathons/.../problem/spec.pdf");
+
+    assertThat(result.getProblemStatementStorageKey())
+        .isEqualTo("hackathons/.../problem/spec.pdf");
+    verify(hackathonRepository).save(hackathon);
+  }
+
+  @Test
+  void updateProblemStatementStorageKey_throwsWhenHackathonNotFound() {
+    when(hackathonRepository.findById(EVENT_ID)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(
+            () ->
+                fileMetadataService.updateProblemStatementStorageKey(
+                    EVENT_ID, "hackathons/.../problem/spec.pdf"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Hackathon not found");
+
+    verify(hackathonRepository, never()).save(any());
+  }
+
+  @Test
+  void listLevelFiles_returnsFilesForLevel() {
+    LevelFile fileA = new LevelFile(LEVEL_ID, "a.pdf", "hackathons/.../a.pdf", "PDF");
+    LevelFile fileB = new LevelFile(LEVEL_ID, "b.pdf", "hackathons/.../b.pdf", "PDF");
+    when(levelFileRepository.findByLevelId(LEVEL_ID)).thenReturn(List.of(fileA, fileB));
+
+    List<LevelFile> result = fileMetadataService.listLevelFiles(LEVEL_ID);
+
+    assertThat(result).containsExactly(fileA, fileB);
+  }
+
+  @Test
+  void getLevelFile_returnsFileWhenFound() {
+    LevelFile file = new LevelFile(LEVEL_ID, "test.pdf", "events/.../test.pdf", "PDF");
+    when(levelFileRepository.findById(10L)).thenReturn(Optional.of(file));
+
+    LevelFile result = fileMetadataService.getLevelFile(10L);
+
+    assertThat(result).isEqualTo(file);
+  }
+
+  @Test
+  void getLevelFile_throwsWhenNotFound() {
+    when(levelFileRepository.findById(99L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> fileMetadataService.getLevelFile(99L))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Level file not found");
+  }
+
+  @Test
+  void deleteLevelFile_deletesWhenFileExists() {
+    when(levelFileRepository.existsById(10L)).thenReturn(true);
+
+    fileMetadataService.deleteLevelFile(10L);
+
+    verify(levelFileRepository).deleteById(10L);
+  }
+
+  @Test
+  void deleteLevelFile_throwsWhenNotFound() {
+    when(levelFileRepository.existsById(99L)).thenReturn(false);
+
+    assertThatThrownBy(() -> fileMetadataService.deleteLevelFile(99L))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Level file not found");
+
+    verify(levelFileRepository, never()).deleteById(any());
   }
 
   @Test

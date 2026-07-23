@@ -1,38 +1,135 @@
 <div class="participant-shell">
-  <nav class="navbar">
+  <nav class="navbar" aria-label="Main navigation">
     <div class="navbar-left">
-      <div class="brand">
-        <span class="brand-h">Hackathon</span>
-        <span class="brand-p">Platform</span>
+      <div class="logo">
+        <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform Logo" />
       </div>
-      <span class="user-badge">{{ userName }}</span>
     </div>
-    <div class="navbar-links">
-      <a routerLink="/participant/home" routerLinkActive="active">Home</a>
-      <a routerLink="/participant/events" routerLinkActive="active">My Events</a>
-      <button class="logout-btn" (click)="logout()">Logout</button>
+
+    <div class="navbar-right">
+      <div class="navbar-links">
+        <a routerLink="/participant/home" routerLinkActive="active">Home</a>
+        <a routerLink="/participant/events" routerLinkActive="active">My Events</a>
+      </div>
+
+        <div class="user-menu">
+      <button
+        type="button"
+         class="user-menu-btn"
+         (click)="toggleUserMenu()"
+         (keydown.enter)="toggleUserMenu()"
+        (keydown.space)="toggleUserMenu()">
+
+        <div class="user-info">
+          <i class="pi pi-user user-icon"></i>
+          <span>{{ userName }}</span>
+        </div>
+          <i class="pi pi-chevron-down"></i>
+      </button>
+
+      @if (userMenuOpen) {
+
+      <div class="user-dropdown">
+        <button type="button" (click)="logout()">
+          <i class="pi pi-sign-out"></i>
+          <span>Logout</span>
+        </button>
+
+      </div>
+
+      }
+
+
+    </div>
+
+    </div>   
+    
+    <div class="mobile-menu-btn">
+      <p-button 
+        icon="pi pi-bars" 
+        styleClass="hamburger-btn"
+        (click)="sidebarVisible = true"
+        (keydown.enter)="sidebarVisible = true"
+        (keydown.space)="sidebarVisible = true"
+      ></p-button>
     </div>
   </nav>
 
-  <div class="event-body">
-    <aside class="sidebar">
-      <p class="event-label">Participant</p>
-      <ul class="sidebar-nav">
-        <li><a routerLink="overview" routerLinkActive="active">Overview</a></li>
-        <li><a routerLink="team" routerLinkActive="active">My team</a></li>
-        <li><a routerLink="submit" routerLinkActive="active">Submit</a></li>
+  <p-drawer 
+    [(visible)]="sidebarVisible" 
+    [position]="'right'"
+    [baseZIndex]="10000"
+    styleClass="mobile-drawer"
+  >
+    <div class="drawer-content">
+      <div class="drawer-user">
+        <div class="drawer-avatar">
+          <i class="pi pi-user"></i>
+        </div>
+        <span class="drawer-username">{{ userName }}</span>
+      
+        <button class="drawer-close-btn" (click)="sidebarVisible = false">
+            <i class="pi pi-times"></i>
+        </button>
+      </div>
+    
 
-        <!-- hide pages that are not integrated yet.
-        <li><a routerLink="rules" routerLinkActive="active">Problems &amp; Rules</a></li>
-        <li><a routerLink="submissions" routerLinkActive="active">Submission history</a></li>
-        <li><a routerLink="leaderboard" routerLinkActive="active">Leaderboard</a></li>
-        <li><a routerLink="forum" routerLinkActive="active">Q&amp;A forum</a></li>
-        -->
-      </ul>
-    </aside>
+      <nav class="drawer-nav" aria-label="Mobile navigation">
+        <a routerLink="/participant/home" routerLinkActive="active" (click)="sidebarVisible = false">
+          Home
+        </a>
+        <a routerLink="/participant/events" routerLinkActive="active" (click)="sidebarVisible = false">
+          My Events
+        </a>
+      </nav>
 
-    <main class="event-content">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
+      <div class="drawer-footer">
+        <button class="drawer-logout-btn" (click)="logout()">
+          <i class="pi pi-sign-out"></i> Logout
+        </button>
+      </div>
+    </div>
+  </p-drawer>
+
+  <main class="event-content">
+    <router-outlet></router-outlet>
+  </main>
+
+
+  <footer class="site-footer">
+  © 2026 Hackathon Platform. All rights reserved.
+</footer>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
