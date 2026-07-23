@@ -1,0 +1,103 @@
+<div class = "style-guide">
+    <header class = "guide-hero">
+        <div class = "hero-content">
+            <div class = "hero-badge">Version 2 | Demo 2</div>
+            <h1 class = "hero-title">Brand Style Guide<br><span class = "highlight">&amp; Design System</span></h1>
+            <div class = "hero-meta">
+                <span>Updated July 2026</span>
+
+            </div>
+        </div>
+    <div class = "hero-visual">
+        <div class = "floating-cubes">
+            <div class = "cube cube-1"></div>
+            <div class = "cube cube-2"></div>
+            <div class = "cube cube-3"></div>
+            <div class = "cube cube-4"></div>
+        </div>
+    </div>
+    </header>
+    <button class = "menu-toggle" (click) = "isMenuOpen = !isMenuOpen" aria-label ="Toggle navigation">
+        <span></span><span></span><span></span>
+    </button>
+
+    <nav class = "guide-nav" [class.open] = "isMenuOpen">
+        <div class = "nav-logo">Style Guide</div>
+        <ul class = "nav-list">
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('brand-foundation')" [class.active] = "activeSection === 'brand-foundation'">
+                    <span class = "nav-icon">B</span> Brand Foundation
+                </a>
+            </li>
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('colour-palette')" [class.active] = "activeSection === 'colour-palette'">
+                    <span class = "nav-icon">C</span> Colour Palette
+                </a>
+            </li>
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('typography')" [class.active] = "activeSection === 'typography'">
+                    <span class = "nav-icon">T</span> Typography
+                </a>
+            </li>
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('logo-iconography')" [class.active] = "activeSection === 'logo-iconography'">
+                    <span class = "nav-icon">L</span> Logo & Iconography
+                </a>
+            </li>
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('design-tokens')" [class.active] = "activeSection === 'design-tokens'">
+                    <span class = "nav-icon">D</span> Design Tokens
+                </a>
+            </li>
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('components')" [class.active] = "activeSection === 'components'">
+                    <span class = "nav-icon">M</span> Components
+                </a>
+            </li>
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('layout-spacing')" [class.active] = "activeSection === 'layout-spacing'">
+                    <span class = "nav-icon">S</span> Layout and Spacing
+                </a>
+            </li>
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('accessibility')" [class.active] = "activeSection === 'accessibility'">
+                    <span class = "nav-icon">A</span> Accessibility
+                </a>
+            </li>
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('voice-tone')" [class.active] = "activeSection === 'voice-tone'">
+                    <span class = "nav-icon">V</span> Voice and Tone
+                </a>
+            </li>
+            <li class = "nav-item">
+                <a (click) = "scrollToSection('changelog')" [class.active] = "activeSection === 'changelog'">
+                    <span class = "nav-icon">H</span> Changelog
+                </a>
+            </li>
+        </ul>
+        <div class = "nav-footer">
+            <small>2026 Hackathon Platform</small>
+        </div>
+    </nav>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+</div>
