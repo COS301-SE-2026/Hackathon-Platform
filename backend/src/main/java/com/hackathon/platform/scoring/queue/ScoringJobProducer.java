@@ -12,11 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class ScoringJobProducer{
-    private final StringRedisTemplate redis;
-    private final ScoringQueueProperties properties;
-    private static final Logger logger = LoggerFactory.getLogger(ScoringJobProducer.class);
-    private final SubmissionRepository subRepo;
+public class ScoringJobProducer {
+  private final StringRedisTemplate redis;
+  private final ScoringQueueProperties properties;
+  private static final Logger logger = LoggerFactory.getLogger(ScoringJobProducer.class);
+  private SubmissionRepository subRepo;
 
   public String enqueue(Long submissionId) {
     setQueue(submissionId);
