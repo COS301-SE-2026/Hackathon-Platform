@@ -70,7 +70,7 @@ export class EventDetailsComponent {
     this.eventService.getEventById(this.eventId).subscribe({
       next: event => {
         this.event = this.toEventView(event);
-        this.hackathonId = event.hackathon;
+        this.hackathonId = event.hackathon ?? '';
         this.loading = false;
 
         this.change.markForCheck();

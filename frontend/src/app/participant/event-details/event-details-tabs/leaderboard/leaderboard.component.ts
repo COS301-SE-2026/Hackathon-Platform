@@ -1,4 +1,4 @@
-import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, inject, ChangeDetectorRef, OnDestroy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { LeaderboardEntry, LeaderboardService } from '../../../../services/leaderboard.service';
@@ -15,10 +15,12 @@ interface LeaderboardInfo extends LeaderboardEntry {
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',
 })
-export class LeaderboardComponent {
+export class LeaderboardComponent implements OnDestroy {
   private readonly leaderboardService = inject(LeaderboardService);
   private readonly teamService = inject(TeamService);
   private readonly change = inject(ChangeDetectorRef);
+  private readonly zone = inject(NgZone);
+  private eventSource?: EventSource;
   private eventID = '';
 
   @Input({ required: true })
@@ -29,7 +31,8 @@ export class LeaderboardComponent {
 
     this.eventID = value;
     this.loadMyTeam();
-    this.loadLeaderboard();
+    this.loadLeaderboard(true);
+    this.connectToLeaderboardUpdates();
   }
 
   get eventId(): string {
@@ -43,7 +46,7 @@ export class LeaderboardComponent {
 
   leaderboard: LeaderboardInfo[] = [];
 
-  loadLeaderboard(): void {
+  loadLeaderboard(showSpinner = true): void {
     if (!this.eventID) {
       this.errorMsg = "The event ID is missing";
       this.loading = false;
@@ -52,9 +55,12 @@ export class LeaderboardComponent {
       return;
     }
 
-    this.loading = true;
+    if (showSpinner) {
+      this.loading = true;
+      this.leaderboardAvailable = false;
+    }
+
     this.errorMsg = '';
-    this.leaderboardAvailable = false;
     this.change.detectChanges();
 
     this.leaderboardService.getEventLeaderboard(this.eventId).subscribe({
@@ -77,6 +83,20 @@ export class LeaderboardComponent {
       },
     });
   }
+
+connectToLeaderboardUpdates(): void {
+  this.eventSource?.close();
+  this.eventSource = this.leaderboardService.connectToEventLeaderboard(this.eventId);
+  this.eventSource.addEventListener('leaderboard-update', event => {
+    this.zone.run(() => {
+      this.loadLeaderboard(false);
+    });
+  });
+
+  this.eventSource.onerror = () => {
+    console.warn('lost connection to the leaderboard, browser will automatically retry connection.');
+  };
+}
 
 get topThree(): LeaderboardInfo[] {
      return this.leaderboard.slice(0, 3);
@@ -118,6 +138,10 @@ getInitials(name: string): string {
         this.change.detectChanges();
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.eventSource?.close();
   }
 
 }

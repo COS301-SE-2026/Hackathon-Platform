@@ -38,8 +38,8 @@
     @if (isSavingOrder) {
       <div class="info-banner">Saving new order...</div>
     }
-    @if (errorMsg) {
-      <div class="error-banner">{{ errorMsg }}</div>
+    @if (errorMessage) {
+      <div class="error-banner">{{ errorMessage }}</div>
     }
 
     @if (isLoading) {
@@ -83,8 +83,8 @@
     <div class="modal-card" (click)="$event.stopPropagation()" (keydown.escape)="$event.stopPropagation()">
       <h2 class="modal-title">{{ editingLevel ? 'Edit Level' : 'Add New Level' }}</h2>
 
-      @if (modalErr) {
-        <p class="error-banner">{{ modalErr }}</p>
+      @if (modalError) {
+        <p class="error-banner">{{ modalError }}</p>
       }
 
       <div class="form-group">

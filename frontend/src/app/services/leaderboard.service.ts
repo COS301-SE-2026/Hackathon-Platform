@@ -22,4 +22,8 @@ export class LeaderboardService {
     getLevelLeaderboard(eventId: string, levelId: number): Observable<LeaderboardEntry[]> {
         return this.http.get<LeaderboardEntry[]>(`${this.baseUrl}/events/${eventId}/levels/${levelId}/leaderboard`);
     }
+
+    connectToEventLeaderboard(eventId: string) : EventSource {
+        return new EventSource(`${this.baseUrl}/events/${eventId}/leaderboard/update`);
+    }
 }
