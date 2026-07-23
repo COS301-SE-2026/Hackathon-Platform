@@ -2,6 +2,17 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface LevelFileResponse {
+  id: number;
+  levelId: number;
+  fileName: string;
+  updatedAt: string;
+  storageKey: string;
+  fileType: string;
+  fileSize?: number;
+  contentType?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class StorageService {
   private readonly http = inject(HttpClient);
@@ -11,6 +22,18 @@ export class StorageService {
     return this.http.get<{ url: string }>(
       `${this.baseUrl}/events/${eventId}/levels/${levelId}/files/${filename}`
     );
+  }
+
+  listLevelFiles(hackathonId: string, levelId: string | number) : Observable<LevelFileResponse[]> {
+    return this.http.get<LevelFileResponse[]>(
+      `${this.http.get<LevelFileResponse[]>(`${this.baseUrl}/hackathons/${hackathonId}/levels/${levelId}/files`)}`
+    )
+  }
+
+  deleteLevelFile(hackathonId: string, levelId: string | number, fileId: string | number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/hackathons/${hackathonId}/levels/${levelId}/files`
+    )
   }
 
   uploadSubmissionOutput(

@@ -15,7 +15,6 @@ export interface EventRequest {
 
 export interface EventResponse {
   eventId: string;
-  hackathon: string;
   createdByUserId: string;
   name: string;
   registrationKey?: string;
