@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.RedisStreamCommands.XClaimOptions;
 import java.time.Duration;
+import org.springframework.scheduling.annotation.Scheduled;
 
 @Component
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class ScoringJobReclaimer {
         return redis.opsForStream();
     }
 
+    @Scheduled(fixedDelayString= "${scoring.queue.pending-min-idle-ms:60000}")
     public void reclaim(){
         PendingMessages p = streamOps().pending(properties.getStreamKey(), properties.getConsumerKey(), Range.unbounded(), 100);
         if(p.isEmpty()){
