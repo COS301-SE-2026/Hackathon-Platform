@@ -3,11 +3,11 @@ package com.hackathon.platform.scoring.queue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import io.lettuce.core.models.stream.PendingMessage;
-import static org.springframework.data.domain.Range.unbounded;
+import org.springframework.data.domain.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StreamOperations;
+import org.springframework.data.redis.connection.stream.PendingMessages;
 
 @Component
 @RequiredArgsConstructor
@@ -21,8 +21,8 @@ public class ScoringJobReclaimer {
         return redis.opsForStream();
     }
 
-    public void reclaimStuckJob(){
-        PendingMessage p = redis.opsForStream().pending(properties.getStreamKey(), properties.getConsumerKey(), unbounded(), 100);
+    public void reclaim(){
+        PendingMessages p = streamOps().pending(properties.getStreamKey(), properties.getConsumerKey(), Range.unbounded(), 100);
         if(p.isEmpty()){
             return;
         }
