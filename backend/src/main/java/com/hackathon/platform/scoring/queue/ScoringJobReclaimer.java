@@ -22,6 +22,7 @@ public class ScoringJobReclaimer {
     private final StringRedisTemplate redis;
     private final ScoringQueueProperties properties;
     private static final Logger logger = LoggerFactory.getLogger(ScoringJobReclaimer.class);
+    private final ScoringJobConsumer consumer;
 
     private StreamOperations<String,String, String> streamOps(){
         return redis.opsForStream();
@@ -38,6 +39,11 @@ public class ScoringJobReclaimer {
             return;
         }
 
+        logger.warn("Reclaiming {} stale sorcing job {}", stale.size(), stale);
+
         List<MapRecord<String, String, String>> claimed = streamOps().claim(properties.getStreamKey(), properties.getConsumerKey(), "reclaimer", XClaimOptions.minIdle(Duration.ofMillis(properties.getPendingMinIdleMs())).ids(stale));
+        for(MapRecord<String,String, String> record:claimed){
+            consumer.onMessage(record);
+        }
     }
 }
