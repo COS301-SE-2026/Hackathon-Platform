@@ -3,9 +3,7 @@ package com.hackathon.platform.dto;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Response shape for a team's scoring log.
- */
+/** Response shape for a team's scoring log. */
 public class ScoringLogResponse {
 
   private UUID teamId;

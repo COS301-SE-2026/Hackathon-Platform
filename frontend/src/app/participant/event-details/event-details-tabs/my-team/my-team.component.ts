@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, Input, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
@@ -29,6 +29,21 @@ export class MyTeamComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
 
+  private eventID = '';
+
+  @Input({ required: true })
+  set eventId(value: string) {
+    if (!value || value === this.eventID) {
+      return;
+    }
+    this.eventID = value;
+    this.loadUserTeam();
+  }
+
+  get eventId(): string {
+    return this.eventID;
+  }
+
   teamIdToJoin = '';
   newTeamName = '';
 
@@ -44,6 +59,9 @@ export class MyTeamComponent implements OnInit {
   currentUserId = '';
   isTeamLead = false;
 
+  /** Set when the user already belongs to an approved team, but for a different event. */
+  teamBelongsToOtherEvent = false;
+
   team = {
     name: '',
     teamId: '',
@@ -55,7 +73,6 @@ export class MyTeamComponent implements OnInit {
   ngOnInit(): void {
     const user = this.authService.getUser();
     this.currentUserId = user?.userId || '';
-    this.loadUserTeam();
   }
 
   loadUserTeam(): void {
@@ -63,13 +80,21 @@ export class MyTeamComponent implements OnInit {
     this.teamService.getMyTeam().subscribe({
       next: (response) => {
         this.isLoadingTeam = false;
-        if (response) {
+
+        if (response && response.eventId === this.eventID) {
           this.hasTeam = true;
+          this.teamBelongsToOtherEvent = false;
           this.team.teamId = response.teamId;
           this.team.name = response.teamName;
           this.loadTeamMembers(response.teamId);
+        } else if (response) {
+          // The user already belongs to a team, but it's for a different event.
+          this.hasTeam = false;
+          this.teamBelongsToOtherEvent = true;
+          this.resetTeamState();
         } else {
           this.hasTeam = false;
+          this.teamBelongsToOtherEvent = false;
           this.resetTeamState();
         }
       },
@@ -78,6 +103,7 @@ export class MyTeamComponent implements OnInit {
         console.error('Error loading team:', error);
         if (error.status === 204) {
           this.hasTeam = false;
+          this.teamBelongsToOtherEvent = false;
           this.resetTeamState();
         } else {
           this.errorMessage = 'Could not load your team. Please refresh.';
@@ -129,7 +155,7 @@ export class MyTeamComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.teamService.createTeam({ teamName: this.newTeamName.trim() }).subscribe({
+    this.teamService.createTeam({ teamName: this.newTeamName.trim(), eventId: this.eventID }).subscribe({
       next: () => {
         this.isLoading = false;
         this.createTeamDialogVisible = false;
@@ -250,6 +276,19 @@ openRequestToJoinDialog(): void {
   this.leaveTeamDialogVisible = false;
   this.leaveCurrentTeam();
 }
+
+  copyJoinCode(): void {
+    if (!this.team.teamId) return;
+
+    navigator.clipboard.writeText(this.team.teamId).then(
+      () => {
+        this.successMessage = 'Join code copied to clipboard.';
+      },
+      () => {
+        this.errorMessage = 'Could not copy the join code. Please copy it manually.';
+      }
+    );
+  }
 
   getInitials(name: string): string {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);

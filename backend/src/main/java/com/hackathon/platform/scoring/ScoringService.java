@@ -63,7 +63,6 @@ public class ScoringService {
    * @param submissionId the submission we are scoring
    * @return new submission with score and status set
    */
-
   public Submission scoreSubmission(Long submissionId) {
     Submission sub = markAsScoring(submissionId);
 
@@ -134,14 +133,18 @@ public class ScoringService {
   }
 
   @Transactional
-  public Submission markAsScoring(Long submissionId){
-    Submission sub = submissionRepo.findById(submissionId).orElseThrow(() -> new IllegalArgumentException("Submission wasnt found "+submissionId));
+  public Submission markAsScoring(Long submissionId) {
+    Submission sub =
+        submissionRepo
+            .findById(submissionId)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Submission wasnt found " + submissionId));
     sub.setStatus("SCORING");
     return submissionRepo.save(sub);
   }
 
   @Transactional
-  public void saveResult(Submission sub){
+  public void saveResult(Submission sub) {
     submissionRepo.save(sub);
   }
 
@@ -169,8 +172,7 @@ public class ScoringService {
 
     Optional<ScoringLog> old =
         scoringLogRepo.findByTeamIdAndEventIdAndLevelId(teamId, eventId, levelId);
-    ScoringLog metaData =
-        old.orElseGet(() -> new ScoringLog(teamId, eventId, levelId, storageKey));
+    ScoringLog metaData = old.orElseGet(() -> new ScoringLog(teamId, eventId, levelId, storageKey));
     metaData.setSubmissionCount(metaData.getSubmissionCount() + 1);
     metaData.setLastUpdatedAt(Instant.now());
     scoringLogRepo.save(metaData);
@@ -246,11 +248,7 @@ public class ScoringService {
   }
 
   private String buildFailedStringBlock(
-      Long submissionId,
-      UUID eventId,
-      UUID teamId,
-      Submission sub,
-      SolverExecutionException e) {
+      Long submissionId, UUID eventId, UUID teamId, Submission sub, SolverExecutionException e) {
     StringBuilder sb = new StringBuilder();
     sb.append(
         String.format(

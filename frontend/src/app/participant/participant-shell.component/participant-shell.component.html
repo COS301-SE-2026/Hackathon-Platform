@@ -12,19 +12,35 @@
         <a routerLink="/participant/events" routerLinkActive="active">My Events</a>
       </div>
 
-     <div class="user-menu">
-  <p-button 
-    styleClass="user-menu-btn"
-    (click)="menu.toggle($event)"
-     (keydown.enter)="menu.toggle($event)"
-    (keydown.space)="menu.toggle($event)"
-  >
-    <i class="pi pi-user" style="margin-right: 8px;"></i>
-    {{ userName }}
-    <i class="pi pi-chevron-down" style="margin-left: 6px; font-size: 12px;"></i>
-  </p-button>
-  <p-menu #menu [model]="menuItems" [popup]="true"></p-menu>
-</div>
+        <div class="user-menu">
+      <button
+        type="button"
+         class="user-menu-btn"
+         (click)="toggleUserMenu()"
+         (keydown.enter)="toggleUserMenu()"
+        (keydown.space)="toggleUserMenu()">
+
+        <div class="user-info">
+          <i class="pi pi-user user-icon"></i>
+          <span>{{ userName }}</span>
+        </div>
+          <i class="pi pi-chevron-down"></i>
+      </button>
+
+      @if (userMenuOpen) {
+
+      <div class="user-dropdown">
+        <button type="button" (click)="logout()">
+          <i class="pi pi-sign-out"></i>
+          <span>Logout</span>
+        </button>
+
+      </div>
+
+      }
+
+
+    </div>
 
     </div>   
     

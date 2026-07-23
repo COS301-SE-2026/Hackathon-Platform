@@ -20,7 +20,7 @@ public class ScoringJobConsumer implements StreamListener<String,MapRecord<Strin
 
     @Override
     public void onMessage(MapRecord<String, String, String> msg) {
-        String submission = msg.getValue().get("SubmissionId");
+        String submission = msg.getValue().get("submissionId");
         Long submissionId = submission != null ? Long.valueOf(submission) : null;
 
         if (submissionId == null) {

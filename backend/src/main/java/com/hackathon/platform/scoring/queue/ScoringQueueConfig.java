@@ -17,6 +17,7 @@ import org.springframework.data.redis.stream.StreamMessageListenerContainer.Stre
 import java.time.Duration;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.StreamOffset;
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 @RequiredArgsConstructor
@@ -26,14 +27,26 @@ public class ScoringQueueConfig{
     private final ScoringQueueProperties properties;
     private final ScoringJobConsumer consumer;
 
+    @PostConstruct
     public void createConsumerGroup(){
         try{redis.opsForStream().createGroup(properties.getStreamKey(), ReadOffset.from("0"), properties.getConsumerKey());
                 logger.info("Created consumer group {} on stream no. {}", properties.getConsumerKey(), properties.getStreamKey());
     } catch (Exception e){
-            if(e.getMessage()!=null && e.getMessage().contains("BUSYGROUP")){
+            if(isBusyGroupError(e)){
                 logger.info("Consumer group {} exists", properties.getConsumerKey());
             }else{ throw e;}
         }}
+
+    private boolean isBusyGroupError(Throwable e){
+        Throwable curr = e;
+        while(curr!=null){
+            if(curr.getMessage()!=null & curr.getMessage().contains("BUSYGROUP")){
+                return true;
+            }
+            curr = curr.getCause();
+        }
+        return false;
+    }
 
     @Bean(destroyMethod = "shutdown")
     public ExecutorService scoringStreamExecutor(){
@@ -46,7 +59,7 @@ public class ScoringQueueConfig{
         StreamMessageListenerContainer<String, MapRecord<String,String,String>> container = StreamMessageListenerContainer.create(connection, options);
 
         for(int i=0; i<properties.getConcurrency(); i++){
-            String name = "worker-"+1;
+            String name = "worker-"+i;
             container.receive(Consumer.from(properties.getConsumerKey(), name),StreamOffset.create(properties.getStreamKey(), ReadOffset.lastConsumed()), consumer);
 
         }
