@@ -121,13 +121,9 @@ public class ScoringService {
     saveResult(sub);
     appendToScoringLog(teamId, eventId, sub.getLevelId(), logString);
 
-    if("SCORED".equalsIgnoreCase(sub.getStatus())) {
+    if ("SCORED".equalsIgnoreCase(sub.getStatus())) {
       leaderboardUpdateService.pushLeaderboardUpdate(
-        eventId,
-        sub.getLevelId(),
-        teamId,
-        sub.getId()
-      );
+          eventId, sub.getLevelId(), teamId, sub.getId());
     }
     return sub;
   }
