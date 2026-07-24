@@ -81,13 +81,6 @@ jobs:
           name: backend-surefire-reports
           path: backend/target/surefire-reports/
 
-      - name: Upload test coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: backend-coverage
-          path: backend/target/site/jacoco/
-
   # Front end - Build + Unit Tests
   #Install Angular dependancies, runs Karma/Jasmine unit tests and builds the app
 
@@ -149,12 +142,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-
-      - name: Download backend coverage
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-coverage
-          path: backend/target/site/jacoco/
 
       - name: SonarCloud Scans
         uses: SonarSource/sonarcloud-github-action@v2
