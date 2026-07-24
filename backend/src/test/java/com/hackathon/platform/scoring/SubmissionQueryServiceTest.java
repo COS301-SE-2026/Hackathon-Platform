@@ -70,7 +70,7 @@ class SubmissionQueryServiceTest {
     Submission old = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
     Submission newer = buildSubmission(2L, Instant.parse("2026-02-01T00:00:00Z"));
     when(subRepo.getRecentSubmissions(eq(id), any(Pageable.class))).thenReturn(List.of(old, newer));
-    List<SubmissionResponse> r = subQueryService.getRecentSubmissions(eq(id), LIMIT);
+    List<SubmissionResponse> r = subQueryService.getRecentSubmissions(id, LIMIT);
 
     assertThat(r).hasSize(2);
     assertThat(r.get(0).getSubmissionId()).isEqualTo(1L);
