@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -12,81 +14,138 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.hackathon.platform.config.AzureBlobConfig;
 import com.hackathon.platform.model.LevelFile;
+import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
-import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.scoring.queue.ScoringJobProducer;
 import com.hackathon.platform.service.FileMetadataService;
+import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
-import com.hackathon.platform.shared.security.JwtAuthFilter;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Unit tests for {@link StorageController} using MockMvc. Security filters are disabled via
- * addFilters=false so tests focus on controller logic only.
- */
-@WebMvcTest(StorageController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc
+@Transactional
 class StorageControllerTest {
 
-  @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-  @MockBean private StorageService storageService;
-  @MockBean private AzureBlobConfig config;
-  @MockBean private FileMetadataService fileMetadataService;
-  @MockBean private SolverVersionRepository solverVersionRepository;
-  @MockBean private JwtAuthFilter jwtAuthFilter;
-  @MockBean private UserRepository userRepository;
-  @MockBean private PasswordEncoder passwordEncoder;
-  @MockBean private AuthenticationProvider authenticationProvider;
+    @MockBean
+    private StorageService storageService;
+    
+    @MockBean
+    private AzureBlobConfig config;
+    
+    @MockBean
+    private FileMetadataService fileMetadataService;
+    
+    @MockBean
+    private SolverVersionRepository solverVersionRepository;
+    
+    @MockBean
+    private EventRepository eventRepository;
+    
+    @MockBean
+    private ScoringJobProducer producer;
+    
+    @MockBean
+    private HackathonService hackathonService;
 
-  private static final String HACKATHON_ID = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
-  private static final String TEAM_ID = "d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14";
-  private static final String UPLOADED_BY = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
-  private static final String LEVEL_ID = "1";
-  private static final String SUBMISSION_ID = "1";
-  private static final String BLOB_URL = "https://hackathonplatform.blob.core.windows.net/test";
-  private static final String PRESIGNED_URL =
-      "https://hackathonplatform.blob.core.windows.net/test?sv=...";
-  private static final String CONTAINER = "event-resources";
+    private static final String EVENT_ID = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
+    private static final String HACKATHON_ID = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
+    private static final String TEAM_ID = "d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14";
+    private static final String UPLOADED_BY = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
+    private static final Long LEVEL_ID = 1L;
+    private static final Long SUBMISSION_ID = 1L;
+    private static final String BLOB_URL = "https://hackathonplatform.blob.core.windows.net/test";
+    private static final String PRESIGNED_URL = "https://hackathonplatform.blob.core.windows.net/test?sv=...";
+    private static final String CONTAINER = "event-resources";
+    private static final String SUBMISSIONS_CONTAINER = "submissions";
 
-  @Test
-  void uploadLevelFile_returns200WithStorageKeyAndBlobUrl() throws Exception {
-    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
-    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+    private UsernamePasswordAuthenticationToken adminAuth;
+    private UsernamePasswordAuthenticationToken participantAuth;
 
-    LevelFile saved = new LevelFile(1L, "test.txt", "hackathons/.../test.txt", "TXT");
-    saved.setId(1L);
-    when(fileMetadataService.saveLevelFile(
-            any(), anyString(), anyString(), anyString(), any(), any()))
-        .thenReturn(saved);
+    @BeforeEach
+    void setUp() {
+        // Create admin user
+        User adminUser = User.builder()
+                .userId(UUID.fromString(UPLOADED_BY))
+                .firstName("Admin")
+                .lastName("User")
+                .email("admin@test.com")
+                .passwordHash("hash")
+                .status("ACTIVE")
+                .role(Role.builder().roleId(1).name("ADMIN").build())
+                .build();
 
-    MockMultipartFile file =
-        new MockMultipartFile("file", "test.txt", "text/plain", "hello".getBytes());
+        // Create participant user
+        User participantUser = User.builder()
+                .userId(UUID.fromString(TEAM_ID))
+                .firstName("Participant")
+                .lastName("User")
+                .email("participant@test.com")
+                .passwordHash("hash")
+                .status("ACTIVE")
+                .role(Role.builder().roleId(2).name("PARTICIPANT").build())
+                .build();
 
-    mockMvc
-        .perform(
-            multipart(
-                    "/api/storage/hackathons/{hackathonId}/levels/{levelId}/files",
-                    HACKATHON_ID,
-                    LEVEL_ID)
-                .file(file)
-                .param("fileType", "TXT"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.storageKey").exists())
-        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL))
-        .andExpect(jsonPath("$.id").value("1"));
-  }
+        // Create authentication tokens
+        adminAuth = new UsernamePasswordAuthenticationToken(
+                adminUser, 
+                null, 
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+        );
+        
+        participantAuth = new UsernamePasswordAuthenticationToken(
+                participantUser, 
+                null, 
+                List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT"))
+        );
+    }
+
+    @Test
+    void uploadLevelFile_returns200WithStorageKeyAndBlobUrl() throws Exception {
+        when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+        when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+        LevelFile saved = new LevelFile(LEVEL_ID, "test.txt", "hackathons/.../test.txt", "TXT");
+        saved.setId(1L);
+        when(fileMetadataService.saveLevelFile(
+                any(), anyString(), anyString(), anyString(), any(), any()))
+                .thenReturn(saved);
+
+        MockMultipartFile file =
+                new MockMultipartFile("file", "test.txt", "text/plain", "hello".getBytes());
+
+        mockMvc.perform(
+                multipart("/api/storage/hackathons/{hackathonId}/levels/{levelId}/files",
+                        HACKATHON_ID, LEVEL_ID)
+                        .file(file)
+                        .param("fileType", "TXT")
+                        .with(authentication(adminAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.storageKey").exists())
+                .andExpect(jsonPath("$.blobUrl").value(BLOB_URL))
+                .andExpect(jsonPath("$.id").value("1"));
+    }
 
   @Test
   void uploadLevelFile_returnsErrorWhenNoFileProvided() throws Exception {
