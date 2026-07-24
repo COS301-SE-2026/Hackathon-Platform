@@ -2,7 +2,7 @@
 -- Please log an issue at https://github.com/pgadmin-org/pgadmin4/issues/new/choose if you find any bugs, including reproduction steps.
 
 CREATE TABLE roles (
-	role_id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	role_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	name VARCHAR(50) NOT NULL UNIQUE,
 	description TEXT
 );
