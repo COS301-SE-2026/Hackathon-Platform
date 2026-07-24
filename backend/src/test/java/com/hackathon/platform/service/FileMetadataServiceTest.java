@@ -70,7 +70,26 @@ class FileMetadataServiceTest {
 
     SolverVersion result =
         fileMetadataService.saveSolverVersion(
-            EVENT_ID, UPLOADED_BY, "events/.../solver.py", 1, "solver.py", 2048L);
+            EVENT_ID, UPLOADED_BY, "events/.../solver.py", 1, "solver.py", 2048L, null);
+
+    assertThat(result).isEqualTo(expected);
+    verify(solverVersionRepository).save(any(SolverVersion.class));
+  }
+
+  @Test
+  void saveSolverVersion_withNotes_savesAndReturnsSolverVersion() {
+    SolverVersion expected = new SolverVersion(EVENT_ID, UPLOADED_BY, "events/.../solver.py");
+    when(solverVersionRepository.save(any(SolverVersion.class))).thenReturn(expected);
+
+    SolverVersion result =
+        fileMetadataService.saveSolverVersion(
+            EVENT_ID,
+            UPLOADED_BY,
+            "events/.../solver.py",
+            1,
+            "solver.py",
+            2048L,
+            "Initial version");
 
     assertThat(result).isEqualTo(expected);
     verify(solverVersionRepository).save(any(SolverVersion.class));
