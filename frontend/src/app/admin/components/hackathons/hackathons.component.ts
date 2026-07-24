@@ -90,7 +90,10 @@ export class HackathonsComponent implements OnInit {
                 hackathon.eventCount = events.length;
                 this.change.markForCheck();
             },
-            error: () => {}
+            error: () => {
+                hackathon.eventCount = 0;
+                this.change.markForCheck();
+            }
         });
     });
  }

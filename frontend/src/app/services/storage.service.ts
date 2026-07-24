@@ -32,7 +32,7 @@ export class StorageService {
 
   deleteLevelFile(hackathonId: string, levelId: string | number, fileId: string | number): Observable<void> {
     return this.http.delete<void>(
-      `${this.baseUrl}/hackathons/${hackathonId}/levels/${levelId}/files`
+      `${this.baseUrl}/hackathons/${hackathonId}/levels/${levelId}/files/${fileId}`
     )
   }
 

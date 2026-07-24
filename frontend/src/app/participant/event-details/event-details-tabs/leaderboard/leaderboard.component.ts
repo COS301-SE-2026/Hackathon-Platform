@@ -87,7 +87,7 @@ export class LeaderboardComponent implements OnDestroy {
 connectToLeaderboardUpdates(): void {
   this.eventSource?.close();
   this.eventSource = this.leaderboardService.connectToEventLeaderboard(this.eventId);
-  this.eventSource.addEventListener('leaderboard-update', event => {
+  this.eventSource.addEventListener('leaderboard-update', () => {
     this.zone.run(() => {
       this.loadLeaderboard(false);
     });
