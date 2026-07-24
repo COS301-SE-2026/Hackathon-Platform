@@ -8,7 +8,7 @@ import { semantic } from '@primeuix/themes/aura/base';
     selector: 'app-brand-style-guide',
     standalone: true ,
     imports: [CommonModule, RouterModule],
-    templateUrl: './branding-style-guide.component.html',
+    templateUrl: './brand-style-guide.component.html',
     styleUrls: ['./brand-style-guide.component.scss']
 })
 
