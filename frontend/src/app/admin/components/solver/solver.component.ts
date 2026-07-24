@@ -31,7 +31,6 @@ export class SolverComponent implements OnInit{
     @ViewChild('uploadForm') uploadFormRef!: ElementRef<HTMLElement>;
     selectedFile: File | null = null;
     selectedFileName  = '';
-    versionLabel  = '';
     changeNotes ='';
     hackathonId ='';
     isUploading = false;
@@ -80,8 +79,8 @@ onDropFile(event: DragEvent):void{
 }
 
 onUploadAndActivate(): void{
-    if (!this.selectedFile  || !this.versionLabel.trim()){
-        alert("Please select a solver file and provide a version label. ");
+    if (!this.selectedFile){
+        alert("Please select a solver file.");
         return;
     }
     if (!this.hackathonId){
@@ -89,31 +88,20 @@ onUploadAndActivate(): void{
         return;
     }
 
-    if (!/^v?\d+\.\d+\.\d+$/.test(this.versionLabel) && !/^\d+$/.test(this.versionLabel)) {
-        alert("Please enter a valid version format (e.g., v1.2.2 or 1)");
-        return;
-    }
-
     this.isUploading = true;
     this.uploadError ='';
-
-    let versionNumber = this.versionLabel.replace(/^v/, '');
-
-    if (versionNumber.includes('.')) {
-        versionNumber = versionNumber.split('.')[0];
-    }
 
     this.storageService.uploadHackathonSolver(
         this.hackathonId,
         this.selectedFile,
-        versionNumber
+        this.changeNotes
     ).subscribe({
         next: (response) => {
             console.log('Solver uploaded successfully:', response);
             this.isUploading = false;
 
             this.versionHistory.unshift({
-                version: this.versionLabel,
+                version: `v${response.version}`,
                 uploaded: new Date().toLocaleString('en-ZA',{month: 'short', day:'2-digit',hour:'2-digit',minute: '2-digit'}),
                 runs:0,
                 avgRuntime:'-',
@@ -121,9 +109,11 @@ onUploadAndActivate(): void{
                 status:'Active'
 
             });
+
+    alert(`Solver v${response.version} uploaded and activated successfully.`);
+
     this.selectedFile= null;
     this.selectedFileName ='';
-    this.versionLabel = '';
     this.changeNotes= '';
         },
         error: (error) => {
