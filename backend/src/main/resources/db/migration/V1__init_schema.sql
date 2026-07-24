@@ -14,7 +14,7 @@ CREATE TABLE permissions (
 );
 
 CREATE TABLE rolepermissions (
-	role_id SMALLINT NOT NULL,
+	role_id INT NOT NULL,
 	permission_id SMALLINT NOT NULL,
 	PRIMARY KEY (role_id, permission_id),
 
@@ -35,7 +35,7 @@ CREATE TABLE users (
 	last_name VARCHAR(100) NOT NULL,
 	email VARCHAR(255) NOT NULL UNIQUE,
 	password_hash TEXT NOT NULL,
-	role_id SMALLINT NOT NULL,
+	role_id INT NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
 
