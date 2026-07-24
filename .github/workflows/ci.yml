@@ -130,7 +130,6 @@ jobs:
           name: frontend-build
           path: frontend/dist/
 
-  SonarCloud
   # Scans backend and frontend, posts quality gate result to PR
 
   sonarcloud:
