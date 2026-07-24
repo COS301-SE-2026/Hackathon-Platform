@@ -147,35 +147,59 @@ class StorageControllerTest {
                 .andExpect(jsonPath("$.id").value("1"));
     }
 
-  @Test
-  void uploadLevelFile_returnsErrorWhenNoFileProvided() throws Exception {
-    mockMvc
-        .perform(
-            multipart(
-                    "/api/storage/hackathons/{hackathonId}/levels/{levelId}/files",
-                    HACKATHON_ID,
-                    LEVEL_ID)
-                .param("fileType", "TXT"))
-        .andExpect(status().is5xxServerError());
-  }
+    @Test
+    void uploadLevelFile_returnsErrorWhenNoFileProvided() throws Exception {
+        mockMvc.perform(
+                multipart("/api/storage/hackathons/{hackathonId}/levels/{levelId}/files",
+                        HACKATHON_ID, LEVEL_ID)
+                        .param("fileType", "TXT")
+                        .with(authentication(adminAuth)))
+                .andExpect(status().is5xxServerError());
+    }
 
-  @Test
-  void getLevelFileUrl_returns200WithPresignedUrl() throws Exception {
-    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
-    when(config.getSasExpiryMinutes()).thenReturn(60);
-    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
-        .thenReturn(PRESIGNED_URL);
+    @Test
+    void getLevelFileUrl_returns200WithPresignedUrl() throws Exception {
+        when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+        when(config.getSasExpiryMinutes()).thenReturn(60);
+        when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+                .thenReturn(PRESIGNED_URL);
 
-    mockMvc
-        .perform(
-            get(
-                "/api/storage/hackathons/{hackathonId}/levels/{levelId}/files/{filename}",
-                HACKATHON_ID,
-                LEVEL_ID,
-                "test.txt"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
-  }
+        mockMvc.perform(
+                get("/api/storage/hackathons/{hackathonId}/levels/{levelId}/files/{filename}",
+                        HACKATHON_ID, LEVEL_ID, "test.txt")
+                        .with(authentication(participantAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
+    }
+
+    @Test
+    void listLevelFiles_returns200WithFileList() throws Exception {
+        List<LevelFile> files = Collections.singletonList(
+                new LevelFile(LEVEL_ID, "test.txt", "hackathons/.../test.txt", "TXT")
+        );
+        when(fileMetadataService.listLevelFiles(any())).thenReturn(files);
+
+        mockMvc.perform(
+                get("/api/storage/hackathons/{hackathonId}/levels/{levelId}/files",
+                        HACKATHON_ID, LEVEL_ID)
+                        .with(authentication(participantAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].fileName").value("test.txt"));
+    }
+
+    @Test
+    void deleteLevelFile_returns204WhenSuccessful() throws Exception {
+        LevelFile file = new LevelFile(LEVEL_ID, "test.txt", "hackathons/.../test.txt", "TXT");
+        file.setId(1L);
+        when(fileMetadataService.getLevelFile(any())).thenReturn(file);
+
+        mockMvc.perform(
+                delete("/api/storage/hackathons/{hackathonId}/levels/{levelId}/files/{fileId}",
+                        HACKATHON_ID, LEVEL_ID, 1L)
+                        .with(authentication(adminAuth)))
+                .andExpect(status().isNoContent());
+    }
 
   @Test
   void uploadSolver_returns200WithStorageKeyAndVersion() throws Exception {
@@ -380,5 +404,5 @@ class StorageControllerTest {
                 LEVEL_ID))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
-  }
+  } 
 }
