@@ -52,13 +52,15 @@ public class FileMetadataService {
       String storageKey,
       Integer versionNumber,
       String fileName,
-      Long fileSize) {
+      Long fileSize,
+      String notes) {
     SolverVersion solverVersion = new SolverVersion(hackathonId, uploadedBy, storageKey);
     solverVersion.setVersionNumber(versionNumber);
     solverVersion.setFileName(fileName);
     solverVersion.setFileSize(fileSize);
     solverVersion.setIsActive(true);
     solverVersion.setUploadedAt(Instant.now());
+    solverVersion.setNotes(notes);
 
     SolverVersion saved = solverVersionRepository.save(solverVersion);
     log.info(

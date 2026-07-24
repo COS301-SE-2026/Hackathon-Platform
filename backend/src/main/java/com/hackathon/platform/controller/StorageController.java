@@ -141,12 +141,10 @@ public class StorageController {
   }
 
   /**
-   * Uploads a solver file for a specific event and version. The returned storageKey maps to
-   * solverversion.storage_key in the database. Automatically deactivates all previous solver
-   * versions for this event before saving the new active one.
+   * Uploads a solver file for a specific event.Automatically
+   * deactivates all previous solver versions for this event before saving the new active one.
    *
    * @param hackathonId the event UUID
-   * @param version the solver version number
    * @param file the uploaded solver file
    * @param uploadedBy UUID of the admin uploading the solver
    * @param notes optional release notes for this solver version
@@ -156,7 +154,6 @@ public class StorageController {
   // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadSolver(
       @PathVariable String hackathonId,
-      @RequestParam("version") int version,
       @RequestParam("file") MultipartFile file,
       @AuthenticationPrincipal User currentUser,
       @RequestParam(value = "notes", required = false) String notes) {
@@ -165,12 +162,21 @@ public class StorageController {
       throw new StorageException("You must be logged in as an admin to upload a solver");
     }
 
-    String storageKey = BlobPath.solverFile(hackathonId, version, file.getOriginalFilename());
+    UUID hackathonUuid = UUID.fromString(hackathonId);
+
+    int nextVersion =
+        solverVersionRepository
+            .findFirstByHackathonIdOrderByVersionNumberDesc(hackathonUuid)
+            .map(sv -> sv.getVersionNumber() + 1)
+            .orElse(1);
+
+    String storageKey =
+        BlobPath.solverFile(hackathonId, nextVersion, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
 
     // Deactivate all previous solver versions for this event
     solverVersionRepository
-        .findByHackathonId(UUID.fromString(hackathonId))
+        .findByHackathonId(hackathonUuid)
         .forEach(
             sv -> {
               sv.setIsActive(false);
@@ -179,18 +185,13 @@ public class StorageController {
 
     SolverVersion saved =
         fileMetadataService.saveSolverVersion(
-            UUID.fromString(hackathonId),
+            hackathonUuid,
             currentUser.getUserId(),
             storageKey,
-            version,
+            nextVersion,
             file.getOriginalFilename(),
-            file.getSize());
-
-    // Set notes separately since saveSolverVersion doesn't take it
-    if (notes != null) {
-      saved.setNotes(notes);
-      solverVersionRepository.save(saved);
-    }
+            file.getSize(),
+            notes);
 
     return ResponseEntity.ok(
         Map.of(
@@ -201,7 +202,7 @@ public class StorageController {
             "blobUrl",
             blobUrl,
             "version",
-            String.valueOf(version)));
+            String.valueOf(nextVersion)));
   }
 
   /**
