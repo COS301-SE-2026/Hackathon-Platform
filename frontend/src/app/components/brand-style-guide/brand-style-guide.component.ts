@@ -173,7 +173,7 @@ export class BrandStyleGuideComponent  {
     
 
     } 
-    // Safe: hex is validated against regex before being used
+    //  @ts-ignore - Safe: hex is validated against regex before being used
        return this.sanitizer.bypassSecurityTrustHtml(html);
 
 } 
