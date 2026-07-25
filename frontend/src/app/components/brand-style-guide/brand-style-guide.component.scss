@@ -39,8 +39,8 @@
 .hero-badge{
     display:inline-block;
     padding:4px 16px;
-    background:rgba(161,191,36,0.2);
-    color:#FFFFFF;
+    background:#A1BF24;
+    color:#13192D;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -239,8 +239,8 @@
 }
 
 .nav-item a:active{
-    background:rgba(25, 131, 194, 0.08);
-    color:#FFFFFF;
+    background:rgba(25, 131, 194, 0.25);
+    color:#13192D;
 }
 
 .nav-item a .nav-icon{
@@ -960,7 +960,7 @@
 }
 
 .grid-col{
-    background: rgba(25, 131, 194, 0.15);
+    background: rgba(25, 131, 194, 0.25);
     padding: 8px;
     text-align: center;
     font-size: 0.65rem;
