@@ -63,7 +63,7 @@ public class StorageController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, String>> uploadLevelFile(
       @PathVariable String hackathonId,
-      @PathVariable Long levelId,
+      @PathVariable short levelId,
       @RequestParam("file") MultipartFile file,
       @RequestParam("fileType") String fileType) {
 

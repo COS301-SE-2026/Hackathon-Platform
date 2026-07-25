@@ -13,14 +13,14 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
   List<Submission> findByTeamId(UUID teamId);
 
-  List<Submission> findByLevelId(Long levelId);
+  List<Submission> findByLevelId(short levelId);
 
   Optional<Submission> findByIdAndTeamId(Long id, UUID teamId);
 
   @Query(
       "SELECT s FROM Submission s WHERE s.teamId = :teamId AND s.levelId = :levelId ORDER BY s.submittedAt DESC")
   List<Submission> findLatestByTeamAndLevel(
-      @Param("teamId") UUID teamId, @Param("levelId") Long levelId);
+      @Param("teamId") UUID teamId, @Param("levelId") short levelId);
 
   @Query("SELECT s FROM Submission s WHERE s.status = :status ORDER BY s.submittedAt ASC")
   List<Submission> findByStatusOrderBySubmittedAtAsc(@Param("status") String status);
@@ -48,7 +48,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
         """,
       nativeQuery = true)
   List<LeaderboardEntry> findLeaderboardByEventIdAndLevelId(
-      @Param("eventId") UUID eventId, @Param("levelId") Long levelId);
+      @Param("eventId") UUID eventId, @Param("levelId") short levelId);
 
   @Query(
       value =

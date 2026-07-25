@@ -71,7 +71,7 @@ public class Submission {
   // Constructor with required fields
   public Submission(
       UUID teamId,
-      Long levelId,
+      short levelId,
       Long solverVersionId,
       String sourceCodeStorageKey,
       String outputStorageKey) {
@@ -107,11 +107,11 @@ public class Submission {
     this.eventId = eventId;
   }
 
-  public Long getLevelId() {
+  public short getLevelId() {
     return levelId;
   }
 
-  public void setLevelId(Long levelId) {
+  public void setLevelId(short levelId) {
     this.levelId = levelId;
   }
 

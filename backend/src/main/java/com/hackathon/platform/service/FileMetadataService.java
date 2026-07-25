@@ -29,7 +29,7 @@ public class FileMetadataService {
 
   @Transactional
   public LevelFile saveLevelFile(
-      Long levelId,
+      short levelId,
       String fileName,
       String storageKey,
       String fileType,
