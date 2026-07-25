@@ -160,21 +160,5 @@ export class BrandStyleGuideComponent  {
             element.scrollIntoView({behavior:'smooth',block:'start'});
         }
     }
-    getColorPreview(hex: string): SafeHtml {
-        const isValidHex = /^#[0-9A-Fa-f]{6}$/.test(hex);
 
-        let html:string;
-        if(!isValidHex){
-        html = '<span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:#e7eaf0;border:1px solid #e7eaf0;"></span>';
-        
-    }else{
-        html =  '<span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:' + hex + ';border:1px solid #e7eaf0;"></span>';
-
-    
-
-    } 
-    //  @ts-ignore - Safe: hex is validated against regex before being used
-       return this.sanitizer.bypassSecurityTrustHtml(html);
-
-} 
 }
