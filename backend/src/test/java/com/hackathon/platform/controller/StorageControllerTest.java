@@ -201,53 +201,100 @@ class StorageControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-  @Test
-  void uploadSolver_returns200WithStorageKeyAndVersion() throws Exception {
-    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
-    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
-    when(solverVersionRepository.findByHackathonId(any())).thenReturn(Collections.emptyList());
+    @Test
+    void uploadSolver_returns200WithStorageKeyAndVersion() throws Exception {
+        when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+        when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+        when(solverVersionRepository.findFirstByHackathonIdOrderByVersionNumberDesc(any()))
+                .thenReturn(Optional.empty());
 
-    SolverVersion saved =
-        new SolverVersion(
-            UUID.fromString(HACKATHON_ID),
-            UUID.fromString(UPLOADED_BY),
-            "hackathons/.../solver.py");
-    saved.setId(1L);
-    when(fileMetadataService.saveSolverVersion(
-            any(), any(), anyString(), any(), anyString(), any()))
-        .thenReturn(saved);
+        SolverVersion saved = new SolverVersion(
+                UUID.fromString(HACKATHON_ID),
+                UUID.fromString(UPLOADED_BY),
+                "hackathons/.../solver.py");
+        saved.setId(1L);
+        when(fileMetadataService.saveSolverVersion(
+                any(), any(), anyString(), any(), anyString(), any(), any()))
+                .thenReturn(saved);
 
-    MockMultipartFile file =
-        new MockMultipartFile("file", "solver.py", "text/plain", "solver code".getBytes());
+        MockMultipartFile file =
+                new MockMultipartFile("file", "solver.py", "text/plain", "solver code".getBytes());
 
-    mockMvc
-        .perform(
-            multipart("/api/storage/hackathons/{hackathonId}/solver", HACKATHON_ID)
-                .file(file)
-                .param("version", "1")
-                .param("uploadedBy", UPLOADED_BY)
-                .param("notes", "Initial version"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.storageKey").exists())
-        .andExpect(jsonPath("$.version").value("1"))
-        .andExpect(jsonPath("$.solverVersionId").value("1"));
-  }
+        mockMvc.perform(
+                multipart("/api/storage/hackathons/{hackathonId}/solver", HACKATHON_ID)
+                        .file(file)
+                        .param("notes", "Initial version")
+                        .with(authentication(adminAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.storageKey").exists())
+                .andExpect(jsonPath("$.version").value("1"))
+                .andExpect(jsonPath("$.solverVersionId").value("1"));
+    }
 
-  @Test
-  void uploadBrandingAsset_returns200WithStorageKey() throws Exception {
-    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
-    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+    @Test
+    void uploadBrandingAsset_returns200WithStorageKey() throws Exception {
+        when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+        when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
 
-    MockMultipartFile file =
-        new MockMultipartFile("file", "logo.png", "image/png", "imagedata".getBytes());
+        MockMultipartFile file =
+                new MockMultipartFile("file", "logo.png", "image/png", "imagedata".getBytes());
 
-    mockMvc
-        .perform(
-            multipart("/api/storage/hackathons/{hackathonId}/branding", HACKATHON_ID).file(file))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.storageKey").exists())
-        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
-  }
+        mockMvc.perform(
+                multipart("/api/storage/hackathons/{hackathonId}/branding", HACKATHON_ID)
+                        .file(file)
+                        .with(authentication(adminAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.storageKey").exists())
+                .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+    }
+
+    @Test
+    void uploadProblemStatement_returns200WithStorageKey() throws Exception {
+        when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+        when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+        MockMultipartFile file =
+                new MockMultipartFile("file", "problem.pdf", "application/pdf", "pdfdata".getBytes());
+
+        mockMvc.perform(
+                multipart("/api/storage/hackathons/{hackathonId}/problem-statement", HACKATHON_ID)
+                        .file(file)
+                        .with(authentication(adminAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.storageKey").exists())
+                .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+    }
+
+    @Test
+    void uploadProblemStatement_returnsErrorWhenNotPdf() throws Exception {
+        MockMultipartFile file =
+                new MockMultipartFile("file", "problem.txt", "text/plain", "textdata".getBytes());
+
+        mockMvc.perform(
+                multipart("/api/storage/hackathons/{hackathonId}/problem-statement", HACKATHON_ID)
+                        .file(file)
+                        .with(authentication(adminAuth)))
+                .andExpect(status().is5xxServerError());
+    }
+
+    @Test
+    void getProblemStatementUrl_returns200WithPresignedUrl() throws Exception {
+        com.hackathon.platform.model.Hackathon hackathon = new com.hackathon.platform.model.Hackathon();
+        hackathon.setProblemStatementStorageKey("hackathons/.../problem.pdf");
+        
+        when(hackathonService.getHackathonById(any())).thenReturn(hackathon);
+        when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+        when(config.getSasExpiryMinutes()).thenReturn(60);
+        when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+                .thenReturn(PRESIGNED_URL);
+
+        mockMvc.perform(
+                get("/api/storage/hackathons/{hackathonId}/problem-statement", HACKATHON_ID)
+                        .with(authentication(participantAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value(PRESIGNED_URL))
+                .andExpect(jsonPath("$.storageKey").exists());
+    }
 
   @Test
   void uploadSubmission_returns200WithBothStorageKeysAndSubmissionId() throws Exception {
@@ -404,5 +451,5 @@ class StorageControllerTest {
                 LEVEL_ID))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
-  } 
+  }   
 }
