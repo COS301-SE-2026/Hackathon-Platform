@@ -1,24 +1,30 @@
 <div class="leaderboard-page">
-   @if (leaderboardAvailable) {
+   @if (loading) {
+    <div class="no-page">
+        <h2>Leaderboard Loading...</h2>
+        <i class="pi pi-spin pi-spinner empty-icon"></i>
+    </div>
+   } @else if (leaderboardAvailable && leaderboard.length > 0) {
  <div class="leaderboard-header">
 
      <h1 class="leaderboard-title">Current Standings</h1>
 
       <p class="leaderboard-prompt">See how your team ranks against the competition.</p>
-
+        @if (myTeam; as currentTeam) {
         <div class="my-team-summary">
 
-            <div class="team-rank">#{{ myTeam.rank }}</div>
+            <div class="team-rank">#{{ currentTeam.rank }}</div>
 
             <div class="team-info">
 
-            <h2 class="team-name">{{ myTeam.name }}<span class="team-tag"> — Your Team</span></h2>
+            <h2 class="team-name">{{ currentTeam.name }}<span class="team-tag"> — Your Team</span></h2>
                
-            <p class="team-score">{{ myTeam.score}} pts</p>
+            <p class="team-score">{{ currentTeam.score}} pts</p>
             
           </div>
 
      </div>
+    }
 
  </div>
 
@@ -89,7 +95,7 @@
 
     </div>
 
-    <p-table [value]="leaderboard" class="leaderboard-table" [paginator]="true" [rows]="10" >>
+    <p-table [value]="leaderboard" class="leaderboard-table" [paginator]="true" [rows]="10" >
 
         <ng-template pTemplate="header">
 
@@ -103,7 +109,7 @@
 
         <ng-template  pTemplate="body" let-team>
 
-         <tr [class.current-team]="team.name === myTeam.name">
+         <tr [class.current-team]="currTeamId && team.teamId === currTeamId">
 
              <td>{{ team.rank }}</td>
 

@@ -1,4 +1,4 @@
-import {Component, inject, OnInit } from '@angular/core';
+import {Component, ChangeDetectorRef, inject, OnInit } from '@angular/core';
 import {CommonModule } from '@angular/common';
 import {RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -12,13 +12,11 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { TextareaModule } from 'primeng/textarea';
 
-interface Hackathon {
-    id : string;
-    name : string;
-    description : string;
-    status : 'active' | 'upcoming' | 'completed'; 
-    eventCount : number;
+import { HackathonService, HackathonRequest, HackathonResponse } from '../../../services/hackathon.service';
+import { EventService } from '../../../services/event.service';
 
+interface HackathonVm extends HackathonResponse {
+    eventCount: number;
 }
 
 @Component ({
@@ -43,12 +41,17 @@ interface Hackathon {
 export class HackathonsComponent implements OnInit {
  private readonly router = inject(Router);
  private readonly messageService = inject(MessageService);
+ private readonly hackathonService = inject(HackathonService);
+ private readonly eventService = inject(EventService);
+ private readonly change = inject(ChangeDetectorRef);
 
 
- hackathons: Hackathon[]= [];
+ hackathons: HackathonVm[]= [];
  isLoading = true;
+ isSaving = false;
+ errorMessage = '';
  showDialog = false;
- editingHackathon : Hackathon | null = null;
+ editingHackathon : HackathonVm | null = null;
 
 
  newHackathon = {
@@ -63,11 +66,36 @@ export class HackathonsComponent implements OnInit {
 
  loadHackathons(): void {
     this.isLoading = true;
+    this.errorMessage = '';
 
-    this.hackathons = [];
-    this.isLoading = false;
+    this.hackathonService.getAllHacathons().subscribe({
+        next: (hackathons) => {
+            this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0 }));
+            this.isLoading = false;
+            this.change.markForCheck();
+            this.loadEventCounts();
+        },
+        error: (err) => {
+            this.errorMessage = err.error?.message || 'the hackathons failed to load.';
+            this.isLoading = false;
+            this.change.markForCheck();
+        }
+    });
+ }
 
-   
+ private loadEventCounts(): void {
+    this.hackathons.forEach((hackathon) => {
+        this.eventService.getEventsForHackathon(hackathon.hackathonId).subscribe({
+            next: (events) => {
+                hackathon.eventCount = events.length;
+                this.change.markForCheck();
+            },
+            error: () => {
+                hackathon.eventCount = 0;
+                this.change.markForCheck();
+            }
+        });
+    });
  }
 
  openCreateDialog(): void {
@@ -80,11 +108,11 @@ export class HackathonsComponent implements OnInit {
         this.showDialog =  true;
  }
 
- openEditDialog(hackathon: Hackathon):void {
+ openEditDialog(hackathon: HackathonVm):void {
     this.editingHackathon = hackathon;
     this.newHackathon = {
         name: hackathon.name,
-        description: hackathon.description,
+        description: hackathon.description || '',
 
     };
     this.showDialog = true;
@@ -99,38 +127,63 @@ export class HackathonsComponent implements OnInit {
         });
         return;
     }
-    if (this.editingHackathon){
-        const index = this.hackathons.findIndex(h => h.id === this.editingHackathon!.id);
-        if(index !== -1){
-            this.hackathons[index] = {
-                ...this.hackathons[index],
-                name: this.newHackathon.name,
-                description: this.newHackathon.description,
-
-            };
-        }
-
-    this.messageService.add({severity: 'success', summary:'Success', detail:'Hackathon updated successfully'});
- } else {
-    const newHackathon: Hackathon = {
-                id: Date.now().toString(),
-                name: this.newHackathon.name,
-                description: this.newHackathon.description,
-                status: 'upcoming',
-                eventCount: 0
-
+    
+    this.isSaving = true;
+    const req: HackathonRequest = {
+        name: this.newHackathon.name.trim(),
+        description: this.newHackathon.description?.trim() || undefined
     };
-    this.hackathons.unshift(newHackathon);
-    this.messageService.add({severity: 'success', summary:'Success', detail:'Hackathon created successfully'});
 
+    const save$ = this.editingHackathon
+        ? this.hackathonService.updateHackathon(this.editingHackathon.hackathonId, req)
+        : this.hackathonService.createHackathon(req);
+
+    save$.subscribe({
+        next: (saved) => {
+            this.isSaving = false;
+            if(this.editingHackathon) {
+                const index = this.hackathons.findIndex(h => h.hackathonId === this.editingHackathon!.hackathonId);
+                if(index !== -1) {
+                    this.hackathons[index] = { ...this.hackathons[index], ...saved };
+                }
+                this.messageService.add({severity: 'success', summary:'Success', detail: 'The hackathon was updated successfully'});
+            } else {
+                this.hackathons.unshift({ ...saved, eventCount: 0 });
+                this.messageService.add({severity: 'success', summary:'Success', detail: 'The hackathon was created successfully'})
+            }
+            this.showDialog = false;
+            this.change.markForCheck();
+        },
+        error: (err) => {
+            this.isSaving = false;
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: err.error?.message || 'Failed to save hackathon'
+            });
+            this.change.markForCheck();
+        }
+    });
  }
- this.showDialog = false;
- }
- deleteHackathon(id: string): void {
-    if(confirm('Are you sure you want to delete this hackathon?')){
-        this.hackathons = this.hackathons.filter(h => h.id !== id);
-        this.messageService.add({severity: 'success', summary:'Success', detail:'Hackathon deleted successfully'});
+ deleteHackathon(hackathonId: string): void {
+    if(!confirm('Are you sure you want to delete this hackathon?')){
+        return;
     }
+    this.hackathonService.deleteHackathon(hackathonId).subscribe({
+        next: () => {
+            this.hackathons = this.hackathons.filter(h => h.hackathonId !== hackathonId);
+            this.messageService.add({severity: 'success', summary:'Success', detail: 'The hackathon was deleted successfully'})
+            this.change.markForCheck();
+        },
+        error: (err) => {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: err.error?.message || 'Failed to delete hackathon'
+            });
+            this.change.markForCheck();
+        }
+    });
  }
 navigateToEvents(hackathonId: string): void {
     this.router.navigate(['/admin/hackathons', hackathonId, 'events']);
@@ -147,7 +200,7 @@ navigateToManage(hackathonId: string): void {
 }
 
 navigateToLevels(hackathonId: string): void {
-    const hackathon = this.hackathons.find(h => h.id === hackathonId);
+    const hackathon = this.hackathons.find(h => h.hackathonId === hackathonId);
     this.router.navigate(['/admin/hackathons', hackathonId, 'levels'],{
     state: {hackathonName: hackathon?.name || ''}
     });
@@ -158,16 +211,4 @@ navigateToSolver(hackathonId: string): void {
     this.router.navigate(['/admin/hackathons', hackathonId, 'solver']);
 
 }
-
-
-getStatusClass(status: string): string {
-    switch (status){
-        case 'active': return 'status-active';
-        case 'upcoming': return 'status-upcoming';
-        case 'completed': return 'status-completed';
-        default: return '';
-    }
-}
-
-
 }

@@ -31,18 +31,12 @@ export class SolverComponent implements OnInit{
     @ViewChild('uploadForm') uploadFormRef!: ElementRef<HTMLElement>;
     selectedFile: File | null = null;
     selectedFileName  = '';
-    versionLabel  = '';
     changeNotes ='';
     hackathonId ='';
     isUploading = false;
     uploadError = '';
 
-    versionHistory: SolverVersion[] = [
-        {version: 'v1.2.1', uploaded: 'Apr 22, 09:12', runs: 4123, avgRuntime: '2.3s', errorRate: '3.2%', status: 'Active'},
-        {version: 'v1.2.0', uploaded: 'Apr 18, 10:12', runs: 9845, avgRuntime: '2.6s', errorRate: '4.8%', status: 'Inactive'}
-
-
-    ];
+    versionHistory: SolverVersion[] = [];
 
 scrollToUploadForm(): void{
     this.uploadFormRef?.nativeElement.scrollIntoView({behavior:'smooth',block: 'center'});
@@ -85,8 +79,8 @@ onDropFile(event: DragEvent):void{
 }
 
 onUploadAndActivate(): void{
-    if (!this.selectedFile  || !this.versionLabel.trim()){
-        alert("Please select a solver file and provide a version label. ");
+    if (!this.selectedFile){
+        alert("Please select a solver file.");
         return;
     }
     if (!this.hackathonId){
@@ -100,14 +94,14 @@ onUploadAndActivate(): void{
     this.storageService.uploadHackathonSolver(
         this.hackathonId,
         this.selectedFile,
-        this.versionLabel
+        this.changeNotes
     ).subscribe({
         next: (response) => {
             console.log('Solver uploaded successfully:', response);
             this.isUploading = false;
 
             this.versionHistory.unshift({
-                version: this.versionLabel,
+                version: `v${response.version}`,
                 uploaded: new Date().toLocaleString('en-ZA',{month: 'short', day:'2-digit',hour:'2-digit',minute: '2-digit'}),
                 runs:0,
                 avgRuntime:'-',
@@ -115,9 +109,11 @@ onUploadAndActivate(): void{
                 status:'Active'
 
             });
+
+    alert(`Solver v${response.version} uploaded and activated successfully.`);
+
     this.selectedFile= null;
     this.selectedFileName ='';
-    this.versionLabel = '';
     this.changeNotes= '';
         },
         error: (error) => {
@@ -152,6 +148,8 @@ onUploadAndActivate(): void{
 
 loadSolverVersions(): void {
     console.log('Loading solver for hackathon:',this.hackathonId);
+    // TODO: Implement API call to fetch version history
+
 }
 
 }

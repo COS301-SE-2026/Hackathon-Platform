@@ -4,30 +4,43 @@
 
 <div class="no-team-page">
 
+    @if (successMessage) {<p class="page-message success">{{ successMessage }}</p>}
+    @if (errorMessage) {<p class="page-message error">{{ errorMessage }}</p>}
+
     <i class="pi pi-users empty-icon"></i>
 
-    <h2>You're currently not part of a team</h2>
+    @if (teamBelongsToOtherEvent) {
 
-    <p>Join an existing team or create your own team to collaborate during this hackathon.</p>
+        <h2>You're already part of a team</h2>
 
-    <div class="team-buttons">
+        <p>You can only belong to one team at a time, and your current team isn't registered for this event. Leave it first if you'd like to create or join a team here.</p>
 
-        <button
-            pButton
-            label="Create Team"
-            class="create-team-btn"
-            (click)="openCreateTeamDialog()"
-            >
-        </button>
+    } @else {
 
-        <button
-            pButton
-            label="Request to Join"
-            class="join-team-btn"
-            (click)="openRequestToJoinDialog()">
-        </button>
+        <h2>You're currently not part of a team</h2>
 
-    </div>
+        <p>Join an existing team or create your own team to collaborate during this hackathon.</p>
+
+        <div class="team-buttons">
+
+            <button
+                pButton
+                label="Create Team"
+                class="create-team-btn"
+                (click)="openCreateTeamDialog()"
+                >
+            </button>
+
+            <button
+                pButton
+                label="Request to Join"
+                class="join-team-btn"
+                (click)="openRequestToJoinDialog()">
+            </button>
+
+        </div>
+
+    }
 
 </div>
 
@@ -36,6 +49,9 @@
 @else {
 
 <div class="my-team-page">
+
+    @if (successMessage) {<p class="page-message success">{{ successMessage }}</p>}
+    @if (errorMessage) {<p class="page-message error">{{ errorMessage }}</p>}
 
     <div class="team-page-header">
 
@@ -69,7 +85,8 @@
                     pButton
                     icon="pi pi-copy"
                     label="Copy"
-                    class="copy-code-btn">
+                    class="copy-code-btn"
+                    (click)="copyJoinCode()">
                 </button>
 
             </div>

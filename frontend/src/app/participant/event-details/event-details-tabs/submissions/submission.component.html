@@ -5,10 +5,24 @@
         <p class="submission-prompt">Select a level below to view its requirements and upload your solution.</p>
     </div>
 
+    @if (teamError) {
+        <div class="empty-history">{{ teamError }}</div>
+    }
+
+    @if (levelsLoading) {
+        <div class="empty-history">
+            <i class="pi pi-spin pi-spinner"></i> Loading levels...
+        </div>
+    } @else if (levelsError) {
+        <div class="empty-history">{{ levelsError }}</div>
+    } @else if (levels.length === 0) {
+        <div class="empty-history">No levels have been published for this event yet.</div>
+    } @else {
+
     <p-tabs
         [(value)]="activeLevel"
         scrollable>
-        
+
         <p-tablist>
 
          @for (level of levels; track level.id) {
@@ -28,7 +42,7 @@
                         <div class="level-header">
 
                             <div class="level-info">
-                                <div class="level-number">{{ level.id }}</div>
+                                <div class="level-number">{{ level.levelNumber }}</div>
                                 <h2 class="level-name">{{ level.name }}</h2>
                             </div>
 
@@ -36,7 +50,8 @@
                                 pButton
                                 type="button"
                                 label="Download Level Files"
-                                class="download-level-btn">
+                                class="download-level-btn"
+                                (click)="downloadLevelFiles(level.id)">
                             </button>
 
                         </div>
@@ -118,7 +133,7 @@
                                             mode="advanced"
                                             [multiple]="false"
                                             [customUpload]="true"
-                                            accept=".txt"
+                                            accept=".json"
                                             [auto]="false"                                      
                                             (onSelect)="onSolutionSelected($event)"
                                             >
@@ -152,13 +167,13 @@
 
                                                     } @else {
                                                         <i class="pi pi-cloud-upload upload-icon"></i>
-                                                        <h4 class="drop-title">Drag and drop your TXT here</h4>
+                                                        <h4 class="drop-title">Drag and drop your JSON here</h4>
                                                          <p class="drop-subtitle">or click to browse files</p>
 
                                                         <button
                                                             pButton
                                                             type="button"
-                                                            label="Choose TXT File"
+                                                            label="Choose JSON File"
                                                             class="choose-file-btn"
                                                             (click)="solutionUploader.choose()">
                                                         </button>
@@ -173,14 +188,28 @@
                                     </div>
                                 </div>
 
+                                @if (submitError) {
+                                    <div class="empty-history">{{ submitError }}</div>
+                                }
+                                @if (submitSuccess) {
+                                    <div class="empty-history">{{ submitSuccess }}</div>
+                                }
+
                                 <div class="submit-bar">
-                                    <span class="submit-message">Upload ZIP and TXT files to enable submission</span>
+                                    <span class="submit-message">
+                                        @if (!teamId) {
+                                            Join a team for this event to enable submission
+                                        } @else {
+                                            Upload ZIP and TXT files to enable submission
+                                        }
+                                    </span>
                                     <button
                                         pButton
                                         type="button"
-                                        label="Submit Solution"
+                                        [label]="submitting ? 'Submitting...' : 'Submit Solution'"
                                         class="submit-btn"
-                                        [disabled]="!canSubmit">
+                                        [disabled]="!canSubmit"
+                                        (click)="submitSolution(sourceUploader, solutionUploader)">
                                     </button>
                                 </div>
                         </div>
@@ -195,6 +224,8 @@
 
     </p-tabs>
 
+    }
+
     <div class="submission-history">
 
         <div class="history-header">
@@ -206,14 +237,24 @@
                 type="button"
                 icon="pi pi-refresh"
                 label="Refresh"
-                class="refresh-btn">
+                class="refresh-btn"
+                [disabled]="historyLoading || !teamId"
+                (click)="loadHistory()">
             </button>
 
         </div>
 
         <p class="history-description"> Uploaded solutions are processed by the solver after submission. Refresh this section periodically to view updated scores. Solver logs are available for download and can assist with debugging failed submissions.</p>
 
-        @if (submissionHistory.length > 0) {
+        @if (historyLoading) {
+
+            <div class="empty-history"><i class="pi pi-spin pi-spinner"></i> Loading submission history...</div>
+
+        } @else if (historyError) {
+
+            <div class="empty-history">{{ historyError }}</div>
+
+        } @else if (submissionHistory.length > 0) {
 
             <p-table
                 [value]="submissionHistory"
@@ -235,17 +276,18 @@
                     let-submission>
 
                     <tr>
-                        <td>{{ submission.uploadedAt }}</td>
-                        <td>Level {{ submission.level }}</td>
-                        <td><span class="status-badge" [ngClass]="submission.status.toLowerCase()"> {{ submission.status }}</span></td>
-                        <td>{{ submission.score ?? '--' }}</td>
+                        <td>{{ formatDate(submission.submittedAt) }}</td>
+                        <td>Level {{ submission.levelId }}</td>
+                        <td><span class="status-badge" [ngClass]="statusClass(submission.status)"> {{ statusLabel(submission.status) }}</span></td>
+                        <td>{{ submission.status === 'SCORED' ? submission.score : '--' }}</td>
                         <td>
                             <button
                                 pButton
                                 type="button"
                                 label="Log"
                                 icon="pi pi-download"
-                                class="log-btn">
+                                class="log-btn"
+                                (click)="downloadLog(submission)">
                             </button>
                         </td>
                     </tr>

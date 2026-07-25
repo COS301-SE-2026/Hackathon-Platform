@@ -59,47 +59,47 @@ public final class BlobPath {
    * Storage key for a submission output file (the artifact graded by the solver). Stored in:
    * submissions.output_storage_key
    *
-   * @param hackathonId the hackathon UUID
+   * @param eventId the event UUID
    * @param teamId the team UUID
    * @param submissionId the submission ID
    * @param filename the original filename
    * @return storage key string
    */
   public static String submissionOutput(
-      String hackathonId, String teamId, String levelId, String submissionId, String filename) {
+      String eventId, String teamId, String levelId, String submissionId, String filename) {
     return String.format(
         "submissions/%s/%s/levels/%s/%s/output/%s",
-        hackathonId, teamId, levelId, submissionId, sanitise(filename));
+        eventId, teamId, levelId, submissionId, sanitise(filename));
   }
 
   /**
    * Storage key for a submission source code ZIP archive. Stored in:
    * submissions.source_code_storage_key
    *
-   * @param hackathonId the hackathon UUID
+   * @param eventId the event UUID
    * @param teamId the team UUID
    * @param submissionId the submission ID
    * @param filename the original filename
    * @return storage key string
    */
   public static String submissionSourceArchive(
-      String hackathonId, String teamId, String levelId, String submissionId, String filename) {
+      String eventId, String teamId, String levelId, String submissionId, String filename) {
     return String.format(
         "submissions/%s/%s/levels/%s/%s/source/%s",
-        hackathonId, teamId, levelId, submissionId, sanitise(filename));
+        eventId, teamId, levelId, submissionId, sanitise(filename));
   }
 
   /**
-   * Storage key for a scoring log file. One file per team per level per hackathon — new submissions
-   * to the same level append to this file. Stored in: scoringlogs.storage_key
+   * Storage key for a scoring log file. One file per team per level per event - new submissions to
+   * the same level append to this file. Stored in: scoringlogs.storage_key
    *
-   * @param hackathonId the hackathon UUID
+   * @param eventId the event UUID
    * @param teamId the team UUID
    * @param levelId the level ID
    * @return storage key string
    */
-  public static String scoringLog(String hackathonId, String teamId, String levelId) {
-    return String.format("logs/%s/%s/%s/scoring_log.txt", hackathonId, teamId, levelId);
+  public static String scoringLog(String eventId, String teamId, String levelId) {
+    return String.format("logs/%s/%s/%s/scoring_log.txt", eventId, teamId, levelId);
   }
 
   /**

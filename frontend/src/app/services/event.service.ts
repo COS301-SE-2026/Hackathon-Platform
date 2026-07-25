@@ -15,6 +15,7 @@ export interface EventRequest {
 
 export interface EventResponse {
   eventId: string;
+  hackathon?: string;
   createdByUserId: string;
   name: string;
   registrationKey?: string;
@@ -41,6 +42,14 @@ export class EventService {
     return this.http.get<EventResponse[]>(`${this.baseUrl}/admin/events`);
   }
 
+  getEvent(eventId: string):Observable<EventResponse> {
+    return this.http.get<EventResponse>(`${this.baseUrl}/admin/events/${eventId}`)
+  }
+
+  getEventsForHackathon(hackathonId: string): Observable<EventResponse[]> {
+    return this.http.get<EventResponse[]>(`${this.baseUrl}/hackathon/${hackathonId}/events`)
+  }
+
   getOpenEvents(): Observable<EventResponse[]> {
     return this.http.get<EventResponse[]>(`${this.baseUrl}/events/open`);
   }
@@ -51,6 +60,10 @@ export class EventService {
 
   getCompletedEvents(): Observable<EventResponse[]> {
     return this.http.get<EventResponse[]>(`${this.baseUrl}/events/completed`);
+  }
+
+  getEventById(eventId: string): Observable<EventResponse> {
+    return this.http.get<EventResponse>(`${this.baseUrl}/events/${eventId}`);
   }
 
   patchEventStatus(eventId: string, visibility?: string, status?: string, registrationKey?: string): Observable<EventResponse> {

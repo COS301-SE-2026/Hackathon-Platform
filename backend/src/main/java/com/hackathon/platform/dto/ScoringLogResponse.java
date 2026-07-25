@@ -3,30 +3,27 @@ package com.hackathon.platform.dto;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Response shape for a team's scoring log. Contains metadata about the log file plus the full text
- * content downloaded from blob storage.
- */
+/** Response shape for a team's scoring log. */
 public class ScoringLogResponse {
 
   private UUID teamId;
-  private UUID hackathonId;
+  private UUID eventId;
   private String storageKey;
   private int submissionCount;
   private Instant lastUpdatedAt;
-  private String logContent; // full text of the log file from blob
+  private String logContent;
 
   public ScoringLogResponse() {}
 
   public ScoringLogResponse(
       UUID teamId,
-      UUID hackathonId,
+      UUID eventId,
       String storageKey,
       int submissionCount,
       Instant lastUpdatedAt,
       String logContent) {
     this.teamId = teamId;
-    this.hackathonId = hackathonId;
+    this.eventId = eventId;
     this.storageKey = storageKey;
     this.submissionCount = submissionCount;
     this.lastUpdatedAt = lastUpdatedAt;
@@ -41,12 +38,12 @@ public class ScoringLogResponse {
     this.teamId = teamId;
   }
 
-  public UUID getHackathonId() {
-    return hackathonId;
+  public UUID getEventId() {
+    return eventId;
   }
 
-  public void setHackathonId(UUID hackathonId) {
-    this.hackathonId = hackathonId;
+  public void setEventId(UUID eventId) {
+    this.eventId = eventId;
   }
 
   public String getStorageKey() {

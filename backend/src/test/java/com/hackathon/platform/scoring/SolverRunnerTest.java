@@ -50,7 +50,7 @@ class SolverRunnerTest {
             "print('{\"score\": 85.5, \"status\": \"SCORED\", "
                 + "\"messages\": [\"validated ok\"]}')");
 
-    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null);
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null, 1L);
 
     assertThat(outcome.getResult().getScore()).isEqualByComparingTo(new BigDecimal("85.5"));
     assertThat(outcome.getResult().getStatus()).isEqualTo("SCORED");
@@ -65,7 +65,7 @@ class SolverRunnerTest {
                 + "print('checking constraints')\n"
                 + "print('{\"score\": 10, \"status\": \"SCORED\", \"messages\": []}')");
 
-    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null);
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null, 1L);
 
     assertThat(outcome.getResult().getScore()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(outcome.getStdout()).contains("starting validation");
@@ -75,7 +75,7 @@ class SolverRunnerTest {
   void run_withNonZeroExitCode_throwsSolverExecutionException() throws IOException {
     Path script = writeScript("import sys\nsys.exit(1)");
 
-    assertThatThrownBy(() -> solverRunner.run(script, outputFile, null))
+    assertThatThrownBy(() -> solverRunner.run(script, outputFile, null, 1L))
         .isInstanceOf(SolverExecutionException.class)
         .hasFieldOrPropertyWithValue("errorType", "SOLVER_CRASH");
   }
@@ -84,7 +84,7 @@ class SolverRunnerTest {
   void run_withMalformedFinalLine_throwsWithMalformedOutputType() throws IOException {
     Path script = writeScript("print('not json at all')");
 
-    assertThatThrownBy(() -> solverRunner.run(script, outputFile, null))
+    assertThatThrownBy(() -> solverRunner.run(script, outputFile, null, 1L))
         .isInstanceOf(SolverExecutionException.class)
         .hasFieldOrPropertyWithValue("errorType", "MALFORMED_OUTPUT");
   }
@@ -93,7 +93,7 @@ class SolverRunnerTest {
   void run_withInvalidStatusValue_normalisesToFailed() throws IOException {
     Path script = writeScript("print('{\"score\": 0, \"status\": \"BANANA\"}')");
 
-    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null);
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null, 1L);
 
     assertThat(outcome.getResult().getStatus()).isEqualTo("FAILED");
     assertThat(outcome.getResult().getErrorType()).isEqualTo("MALFORMED_OUTPUT");
@@ -110,7 +110,7 @@ class SolverRunnerTest {
 
     Path script = writeScript("import time\ntime.sleep(10)");
 
-    assertThatThrownBy(() -> fastTimeoutRunner.run(script, outputFile, null))
+    assertThatThrownBy(() -> fastTimeoutRunner.run(script, outputFile, null, 1L))
         .isInstanceOf(SolverExecutionException.class)
         .hasFieldOrPropertyWithValue("errorType", "TIMEOUT");
   }
@@ -125,10 +125,36 @@ class SolverRunnerTest {
                 + "inputs = sys.argv[2]\n"
                 + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"out=\" + out, \"inputs=\" + inputs]}))");
 
-    SolverRunOutcome outcome = solverRunner.run(script, outputFile, levelInputs);
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, levelInputs, 2L);
 
     assertThat(outcome.getResult().getMessages().get(0)).contains(outputFile.toString());
     assertThat(outcome.getResult().getMessages().get(1)).contains(levelInputs.toString());
+  }
+
+  @Test
+  void run_passesLevelId_asThirdArgumentToScript() throws IOException {
+    Path script =
+        writeScript(
+            "import sys, json\n"
+                + "level_id = sys.argv[3]\n"
+                + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"levelId=\" + level_id]}))");
+
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null, 7L);
+
+    assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("levelId=7");
+  }
+
+  @Test
+  void run_withNullLevelId_passesEmptyStringArgument() throws IOException {
+    Path script =
+        writeScript(
+            "import sys, json\n"
+                + "level_id = sys.argv[3]\n"
+                + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"levelId=[\" + level_id + \"]\"]}))");
+
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null, null);
+
+    assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("levelId=[]");
   }
 
   private Path writeScript(String body) throws IOException {

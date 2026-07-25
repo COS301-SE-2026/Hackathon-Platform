@@ -5,7 +5,7 @@ import { AuthGuard } from './guards/auth.guard';
 
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+ { path: '', loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)},
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
   {path: 'style-guide', loadComponent: () => import('./components/brand-style-guide/brand-style-guide.component').then( m => m.BrandStyleGuideComponent),},
@@ -66,5 +66,5 @@ export const routes: Routes = [
       { path: '', redirectTo: 'home', pathMatch: 'full' }
     ]
   },
-  { path: '**', redirectTo: 'login' }
+ { path: '**', redirectTo: '' }
 ];

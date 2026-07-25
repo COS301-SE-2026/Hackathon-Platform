@@ -3,8 +3,10 @@ package com.hackathon.platform.controller;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.service.EventService;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,5 +35,10 @@ public class ParticipantEventController {
   @GetMapping("/completed")
   public ResponseEntity<List<Event>> getUserCompletedEvents() {
     return ResponseEntity.ok(eventService.getUserCompletedEvents());
+  }
+
+  @GetMapping("/{eventId}")
+  public ResponseEntity<Event> getEventById(@PathVariable UUID eventId) {
+    return ResponseEntity.ok(eventService.getEventById(eventId));
   }
 }
