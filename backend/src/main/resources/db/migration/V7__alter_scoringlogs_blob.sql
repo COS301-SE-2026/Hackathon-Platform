@@ -8,7 +8,7 @@ ALTER TABLE scoringlogs
 ALTER TABLE scoringlogs
     ADD COLUMN team_id  UUID NOT NULL DEFAULT gen_random_uuid(),
     ADD COLUMN event_id UUID NOT NULL DEFAULT gen_random_uuid(),
-    ADD COLUMN level_id SMALLINT NOT NULL DEFAULT 0,
+    ADD COLUMN level_id BIGINT NOT NULL DEFAULT 0,
     ADD COLUMN storage_key VARCHAR(500) NOT NULL DEFAULT '',
     ADD COLUMN submission_count INT NOT NULL DEFAULT 0,
     ADD COLUMN last_updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP;
