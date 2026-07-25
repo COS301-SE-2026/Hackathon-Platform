@@ -40,7 +40,7 @@
     display:inline-block;
     padding:4px 16px;
     background:rgba(161,191,36,0.2);
-    color:#A1BF24;
+    color:#FFFFFF;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -240,7 +240,7 @@
 
 .nav-item a:active{
     background:rgba(25, 131, 194, 0.08);
-    color:#1983C2;
+    color:#FFFFFF;
 }
 
 .nav-item a .nav-icon{
@@ -291,10 +291,10 @@
     display: inline-block;
     font-size: 0.75rem;
     font-weight: 700;
-    color:#1983C2;
+    color:#FFFFFF;
     letter-spacing: 0.05rem;
     text-transform: uppercase;
-    background-color:rgba(25, 131, 194, 0.08) ;
+    background-color:#1983C2 ;
     padding:2px 12px;
     border-radius: 12px;
     margin-bottom: 8px;
@@ -816,7 +816,7 @@
 }
 .btn-demo.btn-primary{
     background: #1983C2;
-    color:#FFFFFF
+    color:#FFFFFF;
 }
 .btn-demo.btn-primary:hover{
     background: #146A9D;
@@ -871,30 +871,30 @@
     font-weight: 600;
 }
 .badge.badge-active {
-    background: rgba(38, 139, 66, 0.12);
-    color:#268B42;
+    background: #268B42;
+    color:#FFFFFF;
 }
 
 .badge.badge-upcoming {
-    background: rgba(25, 131, 194, 0.12);
-    color:#1983C2;
+    background: #1983C2;
+    color:#FFFFFF;
 }
 .badge.badge-completed {
-    background: rgba(58, 67, 87, 0.12);
-    color:#3A4357;
+    background: #3A4357;
+    color:#FFFFFF;
 }
 .badge.badge-ended {
-    background: rgba(192, 57, 43, 0.12);
-    color:#C0392B;
+    background: #C0392B;
+    color:#FFFFFF;
 }
 
 .badge.badge-success {
-    background: rgba(38, 139, 66, 0.12);
-    color:#268B42;
+    background: #268B42;
+    color:#FFFFFF;
 }
 .badge.badge-error {
-    background: rgba(192, 57, 43, 0.12);
-    color:#C0392B;
+    background: #C0392B;
+    color:#FFFFFF;
 }
 
 .input-demo{
@@ -960,12 +960,12 @@
 }
 
 .grid-col{
-    background: rgba(25, 131, 194, 0.1);
+    background: rgba(25, 131, 194, 0.15);
     padding: 8px;
     text-align: center;
     font-size: 0.65rem;
     border-radius: 4px;
-    color:#1983C2;
+    color:#13192D;
     font-weight: 600;
 }
 .width-demo{
@@ -1043,28 +1043,28 @@
 
 
 .breakpoint-bar.mobile{
-    background:rgba(25, 131, 194, 0.1);
-    color:#1983C2;
+    background:#1983C2;
+    color:#FFFFFF;
     flex:1;
 
 } 
 
 
 .breakpoint-bar.tablet{
-    background: rgba(1, 142, 154, 0.1);
-    color:#018E9A;
+    background: #018E9A;
+    color:#FFFFFF;
     flex:2;
 }
 
 .breakpoint-bar.desktop{
-    background:rgba(38, 139, 66, 0.1);
-    color:#268B42;
+    background:#268B42;
+    color:#FFFFFF;
     flex:3;
 }
 
 .breakpoint-bar.wide{
-    background:rgba(161, 191, 36, 0.1) ;
-    color:#7A8F1A;
+    background:#A1BF24 ;
+    color:#13192D;
     flex:4;
 }
 .accessibility-grid{
