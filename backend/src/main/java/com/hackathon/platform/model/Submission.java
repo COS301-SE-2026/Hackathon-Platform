@@ -27,7 +27,7 @@ public class Submission {
   private UUID eventId;
 
   @Column(name = "level_id", nullable = false)
-  private Long levelId;
+  private short levelId;
 
   @Column(name = "solver_version_id", nullable = false)
   private Long solverVersionId;
