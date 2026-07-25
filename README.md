@@ -16,6 +16,16 @@
 
 [![codecov](https://codecov.io/gh/COS301-SE-2026/Hackathon-Platform/graph/badge.svg?token=4O5Z04RGNW)](https://codecov.io/gh/COS301-SE-2026/Hackathon-Platform)
 
+[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=bugs)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+
+
 ## Functional Requirements: [View the Software Requirements Specification (SRS)](./docs/SRS.pdf)
 ## GitHub Project Board: [View the Project Board](https://github.com/orgs/COS301-SE-2026/projects/54)
 
