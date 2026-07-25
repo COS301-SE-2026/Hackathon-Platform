@@ -35,8 +35,8 @@ class FileMetadataServiceTest {
 
   private FileMetadataService fileMetadataService;
 
-  private static final short LEVEL_ID = 1; 
-  private static final Long LEVEL_ID_LONG = 1L; 
+  private static final short LEVEL_ID = 1;
+  private static final Long LEVEL_ID_LONG = 1L;
   private static final String EVENT_ID_STR = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
   private static final UUID EVENT_ID = UUID.fromString(EVENT_ID_STR);
   private static final UUID UPLOADED_BY = UUID.randomUUID();
@@ -56,7 +56,7 @@ class FileMetadataServiceTest {
 
   @Test
   void saveLevelFile_savesAndReturnsLevelFile() {
-    LevelFile expected = new LevelFile((long)LEVEL_ID, "test.pdf", "events/.../test.pdf", "PDF");
+    LevelFile expected = new LevelFile((long) LEVEL_ID, "test.pdf", "events/.../test.pdf", "PDF");
     when(levelFileRepository.save(any(LevelFile.class))).thenReturn(expected);
 
     LevelFile result =
@@ -114,7 +114,7 @@ class FileMetadataServiceTest {
         fileMetadataService.saveSubmission(
             EVENT_ID_STR,
             TEAM_ID,
-            LEVEL_ID,  
+            LEVEL_ID,
             SOLVER_VERSION_ID,
             "output.txt",
             512L,
@@ -164,7 +164,7 @@ class FileMetadataServiceTest {
         fileMetadataService.saveSubmission(
             EVENT_ID_STR,
             TEAM_ID,
-            LEVEL_ID,  
+            LEVEL_ID,
             SOLVER_VERSION_ID,
             "my_output.txt",
             512L,
@@ -179,7 +179,8 @@ class FileMetadataServiceTest {
 
   @Test
   void saveSubmission_differentLevelIdsProduceDifferentStorageKeys() {
-    Submission firstSaveA = new Submission(TEAM_ID, (short)1, SOLVER_VERSION_ID, "pending", "pending");
+    Submission firstSaveA =
+        new Submission(TEAM_ID, (short) 1, SOLVER_VERSION_ID, "pending", "pending");
     firstSaveA.setId(SUBMISSION_ID);
     when(submissionRepository.save(any(Submission.class)))
         .thenReturn(firstSaveA)
@@ -189,7 +190,7 @@ class FileMetadataServiceTest {
         fileMetadataService.saveSubmission(
             EVENT_ID_STR,
             TEAM_ID,
-            (short)1,  
+            (short) 1,
             SOLVER_VERSION_ID,
             "output.txt",
             512L,
@@ -198,7 +199,8 @@ class FileMetadataServiceTest {
             4096L,
             "application/zip");
 
-    Submission firstSaveB = new Submission(TEAM_ID, (short)2, SOLVER_VERSION_ID, "pending", "pending");
+    Submission firstSaveB =
+        new Submission(TEAM_ID, (short) 2, SOLVER_VERSION_ID, "pending", "pending");
     firstSaveB.setId(SUBMISSION_ID);
     when(submissionRepository.save(any(Submission.class)))
         .thenReturn(firstSaveB)
@@ -208,7 +210,7 @@ class FileMetadataServiceTest {
         fileMetadataService.saveSubmission(
             EVENT_ID_STR,
             TEAM_ID,
-            (short)2, 
+            (short) 2,
             SOLVER_VERSION_ID,
             "output.txt",
             512L,
@@ -319,7 +321,8 @@ class FileMetadataServiceTest {
     when(levelFileRepository.findByLevelIdAndFileName(LEVEL_ID_LONG, "missing.pdf"))
         .thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> fileMetadataService.getLevelFileStorageKey(LEVEL_ID_LONG, "missing.pdf"))
+    assertThatThrownBy(
+            () -> fileMetadataService.getLevelFileStorageKey(LEVEL_ID_LONG, "missing.pdf"))
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("Level file not found");
   }

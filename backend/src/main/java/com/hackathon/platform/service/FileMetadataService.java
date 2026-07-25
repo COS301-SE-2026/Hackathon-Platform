@@ -35,7 +35,7 @@ public class FileMetadataService {
       String fileType,
       Long fileSize,
       String contentType) {
-    LevelFile levelFile = new LevelFile((long)levelId, fileName, storageKey, fileType);
+    LevelFile levelFile = new LevelFile((long) levelId, fileName, storageKey, fileType);
     levelFile.setFileSize(fileSize);
     levelFile.setContentType(contentType);
     levelFile.setUpdatedAt(Instant.now());
