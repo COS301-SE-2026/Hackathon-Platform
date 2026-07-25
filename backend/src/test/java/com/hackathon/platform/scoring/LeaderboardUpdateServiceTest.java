@@ -19,8 +19,9 @@ class LeaderboardUpdateServiceTest {
     }
 
     @Test
-    void pushLeaderboardUpdate_WithNoSubscribers_completeNormally() {
+    void pushLeaderboardUpdate_WithSubscribers_completeNormally() {
+        SseEmitter emitter = service.subscribe(EVENT_ID);
         service.pushLeaderboardUpdate(EVENT_ID, 1L, FIRST_TEAM, 40L);
-        assertThat(true).isTrue();
+        assertThat(emitter).isNotNull();
     }
 }
