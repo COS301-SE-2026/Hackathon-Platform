@@ -13,7 +13,7 @@ import { DomSanitizer, SafeHtml} from '@angular/platform-browser';
 })
 
 export class BrandStyleGuideComponent  {
-    private sanitizer = inject(DomSanitizer);
+    private readonly sanitizer = inject(DomSanitizer);
 
     colours = {
         primary: [
@@ -161,9 +161,16 @@ export class BrandStyleGuideComponent  {
         }
     }
     getColorPreview(hex: string): SafeHtml {
+        const isValidHex = /^#[0-9A-Fa-f]{6}$/.test(hex);
+        if(!isValidHex){
         return this.sanitizer.bypassSecurityTrustHtml(
             '<span style = "display : inline-block; width:24px ; height: 24px; border-radius: 4px; background:'+ hex+';border:1px solid #e7eaf0; "></span>'
         );
     }
-   
+    return this.sanitizer.bypassSecurityTrustHtml(
+        '<span style="display:inline-block;width:24px;height:24px;border-radius:4px;background:' + hex + ';border:1px solid #e7eaf0;"></span>'
+
+    );
+
+} 
 }
