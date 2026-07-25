@@ -85,6 +85,24 @@ class LeaderboardServiceTest {
         assertThat(res.get(1).getLastScoredAt()).isEqualTo(SCORED_AT);
     }
 
+    @Test
+    void getEventLeaderboard_returnsEmptyListWhenThereAreNoEntries() {
+        when(submissionRepo.findLeaderboardByEventId(EVENT_ID)).thenReturn(List.of());
+
+        List<LeaderboardEntryResponse> res = leaderService.getEventLeaderboard(EVENT_ID);
+
+        assertThat(res).isEmpty();
+    }
+
+    @Test
+    void getLeaderboard_returnsEmptyListWhenThereAreNoEntries() {
+        when(submissionRepo.findLeaderboardByEventIdAndLevelId(EVENT_ID, LVL_ID)).thenReturn(List.of());
+
+        List<LeaderboardEntryResponse> res = leaderService.getLeaderboard(EVENT_ID, LVL_ID);
+
+        assertThat(res).isEmpty();
+    }
+
     private static LeaderboardEntry entry(UUID teamId, String teamName, String score, Instant lastScoredAt) {
         return new TestLeaderboardEntry(teamId, teamName, new BigDecimal(score), lastScoredAt);
     }
