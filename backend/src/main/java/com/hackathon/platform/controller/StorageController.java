@@ -142,8 +142,8 @@ public class StorageController {
   }
 
   /**
-   * Uploads a solver file for a specific event. Automatically
-   * deactivates all previous solver versions for this event before saving the new active one.
+   * Uploads a solver file for a specific event. Automatically deactivates all previous solver
+   * versions for this event before saving the new active one.
    *
    * @param hackathonId the event UUID
    * @param file the uploaded solver file
@@ -171,8 +171,7 @@ public class StorageController {
             .map(sv -> sv.getVersionNumber() + 1)
             .orElse(1);
 
-    String storageKey =
-        BlobPath.solverFile(hackathonId, nextVersion, file.getOriginalFilename());
+    String storageKey = BlobPath.solverFile(hackathonId, nextVersion, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
 
     // Deactivate all previous solver versions for this event

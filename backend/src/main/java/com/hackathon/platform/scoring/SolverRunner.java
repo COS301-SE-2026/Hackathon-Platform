@@ -33,7 +33,8 @@ public class SolverRunner {
    * @param solverPath this is the path to the solver .py file on the local disk
    * @param outputPath This is the path to the participants output file on the local disk
    * @param levelInput The directory that contains the relevent level's files
-   * @param levelId The numeric id of the level being scored (per hackathon), passed through to the solver
+   * @param levelId The numeric id of the level being scored (per hackathon), passed through to the
+   *     solver
    * @return The result from the grader, with raw process output for logging purposes
    */
   public SolverRunOutcome run(Path solverPath, Path outputPath, Path levelInput, Long levelId) {

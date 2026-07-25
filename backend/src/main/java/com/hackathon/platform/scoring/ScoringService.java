@@ -80,7 +80,7 @@ public class ScoringService {
                 () ->
                     new IllegalArgumentException(
                         "No solver version could be found for the submission"));
-    
+
     Level level =
         levelRepo
             .findById(sub.getLevelId().shortValue())
@@ -107,8 +107,7 @@ public class ScoringService {
               sub.getOutputFileName() != null ? sub.getOutputFileName() : "output");
       Path levelInputDir = downloadLvlInputs(sub.getLevelId(), tempDir);
       SolverRunOutcome outcome =
-          solverRunner.run(
-              solverScript, outputFile, levelInputDir, (long) level.getLevelNumber());
+          solverRunner.run(solverScript, outputFile, levelInputDir, (long) level.getLevelNumber());
       applySuccessResult(sub, outcome);
       logString = buildLogString(submissionId, eventId, teamId, sub, outcome);
     } catch (SolverExecutionException e) {
@@ -131,13 +130,9 @@ public class ScoringService {
     saveResult(sub);
     appendToScoringLog(teamId, eventId, sub.getLevelId(), logString);
 
-    if("SCORED".equalsIgnoreCase(sub.getStatus())) {
+    if ("SCORED".equalsIgnoreCase(sub.getStatus())) {
       leaderboardUpdateService.pushLeaderboardUpdate(
-        eventId,
-        sub.getLevelId(),
-        teamId,
-        sub.getId()
-      );
+          eventId, sub.getLevelId(), teamId, sub.getId());
     }
     return sub;
   }

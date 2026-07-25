@@ -72,7 +72,8 @@
 //     team.setCreatedByUserId(UUID.randomUUID());
 //     team.setEventId(EVENT_ID);
 
-//     solverVersion = new SolverVersion(UUID.randomUUID(), UUID.randomUUID(), "events/.../solver.py");
+//     solverVersion = new SolverVersion(UUID.randomUUID(), UUID.randomUUID(),
+// "events/.../solver.py");
 //     solverVersion.setId(SOLVER_V_ID);
 //   }
 

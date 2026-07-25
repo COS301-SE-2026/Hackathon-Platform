@@ -47,7 +47,10 @@ class FileMetadataServiceTest {
   void setUp() {
     fileMetadataService =
         new FileMetadataService(
-            levelFileRepository, solverVersionRepository, submissionRepository, hackathonRepository);
+            levelFileRepository,
+            solverVersionRepository,
+            submissionRepository,
+            hackathonRepository);
   }
 
   @Test
@@ -231,8 +234,7 @@ class FileMetadataServiceTest {
         fileMetadataService.updateProblemStatementStorageKey(
             EVENT_ID, "hackathons/.../problem/spec.pdf");
 
-    assertThat(result.getProblemStatementStorageKey())
-        .isEqualTo("hackathons/.../problem/spec.pdf");
+    assertThat(result.getProblemStatementStorageKey()).isEqualTo("hackathons/.../problem/spec.pdf");
     verify(hackathonRepository).save(hackathon);
   }
 

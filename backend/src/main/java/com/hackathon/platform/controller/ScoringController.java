@@ -137,7 +137,9 @@ public class ScoringController {
     return ResponseEntity.ok(leaderboardService.getEventLeaderboard(eventId));
   }
 
-  @GetMapping(value = "/events/{eventId}/leaderboard/update", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @GetMapping(
+      value = "/events/{eventId}/leaderboard/update",
+      produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public SseEmitter updateEventLeaderboard(@PathVariable UUID eventId) {
     return leaderboardUpdateService.subscribe(eventId);
