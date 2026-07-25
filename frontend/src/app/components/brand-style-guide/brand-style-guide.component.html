@@ -113,6 +113,14 @@
                         <div class = "brand-icon">M</div>
                         <h3>Tone (Situational)</h3>
                         <table>
+                            <thead>
+                                <tr>
+                                    <th>Context</th>
+                                    <th>Tone</th>
+                                    <th>Example</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                             <tr>
                             <td><strong>Celebration</strong></td>
                             <td>Warm, energetic</td>
@@ -128,6 +136,7 @@
                             <td>Encouraging</td>
                             <td>"No events yet. Create your first event."</td>
                             </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -466,19 +475,19 @@
                 <div class = "input-demo">
                     <div class = "input-group">
                         <label for = "default-input">Default Input</label>
-                        <input type = "text" placeholder ="Enter text ..." class = "input-preview"/>
+                        <input id = "default-input" type = "text" placeholder ="Enter text ..." class = "input-preview"/>
                     </div>
                     <div class = "input-group">
                         <label for = "focused-input">Focused Input</label>
-                        <input type = "text" placeholder ="Enter text ..." class = "input-preview input-focus" value="Focused"/>
+                        <input id = "focused-input" type = "text" placeholder ="Enter text ..." class = "input-preview input-focus" value="Focused"/>
                     </div>
                     <div class = "input-group">
                         <label for = "error-input">Error Input</label>
-                        <input type = "text" placeholder ="Enter text ..." class = "input-preview input-error" value="Invalid"/>
+                        <input id = "error-input" type = "text" placeholder ="Enter text ..." class = "input-preview input-error" value="Invalid"/>
                     </div>
                     <div class = "input-group">
                         <label for = "disabled-input">Disabled Input</label>
-                        <input type = "text" placeholder ="Enter text ..." class = "input-preview input-disabled" value="Disabled" disabled/>
+                        <input id = "disabled-input" type = "text" placeholder ="Enter text ..." class = "input-preview input-disabled" value="Disabled" disabled/>
                     </div>
                 </div>
             </div>
@@ -610,21 +619,37 @@
                     <div class = "voice-card">
                         <h3>UI Copy Examples</h3>
                         <table>
-                            <tr><td><strong>Button Labels</strong></td><td>Use action verbs: "Create Event", "Save Changes"</td></tr>
+                            <thead>
+                            <tr>
+                                <th>Element</th>
+                                <th>Example</th>
+                            </tr>
+                            </thead>
+                            <tbody>  
+                                <td><strong>Button Labels</strong></td><td>Use action verbs: "Create Event", "Save Changes"</td></tr>
                             <tr><td><strong>Errors</strong></td><td>"We couldn't save your changes.Please check your connection."</td></tr>
                             <tr><td><strong>Empty States</strong></td><td>"No events yet. Create your first event to get started."</td></tr>
                             <tr><td><strong>Success</strong></td><td>"Event created successfully!"</td></tr>
+                            </tbody>
                         </table>
                     </div>
                     <div class = "voice-card">
                         <h3>Tone by Context</h3>
                         <table>
+                              <thead>
+                            <tr>
+                                <th>Context</th>
+                                <th>Tone</th>
+                            </tr>
+                            </thead>
+                            <tbody>
                             <tr><td><strong>Onboarding</strong></td><td>Welcoming, encouraging</td></tr>
                             <tr><td><strong>Creation</strong></td><td>Empowering</td></tr>
                             <tr><td><strong>Editing</strong></td><td>Neutral, focused</td></tr>
                             <tr><td><strong>Deletion</strong></td><td>Clear, careful</td></tr>
                             <tr><td><strong>Error</strong></td><td>Calm, helpful</td></tr>
                             <tr><td><strong>Success</strong></td><td>Warm, celebratory</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
