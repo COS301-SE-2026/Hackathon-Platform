@@ -3,6 +3,7 @@ package com.hackathon.platform.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -120,7 +121,7 @@ class StorageControllerTest {
     LevelFile saved = new LevelFile(LEVEL_ID, "test.txt", "hackathons/.../test.txt", "TXT");
     saved.setId(1L);
     when(fileMetadataService.saveLevelFile(
-            any(), anyString(), anyString(), anyString(), any(), any()))
+            anyShort(), anyString(), anyString(), anyString(), anyLong(), anyString()))
         .thenReturn(saved);
 
     MockMultipartFile file =
@@ -223,7 +224,7 @@ class StorageControllerTest {
             "hackathons/.../solver.py");
     saved.setId(1L);
     when(fileMetadataService.saveSolverVersion(
-            any(), any(), anyString(), any(), anyString(), any(), any()))
+            any(), any(), anyString(), anyInt(), anyString(), anyLong(), anyString()))
         .thenReturn(saved);
 
     MockMultipartFile file =
@@ -327,21 +328,22 @@ class StorageControllerTest {
     Submission saved =
         new Submission(
             UUID.fromString(TEAM_ID),
-            LEVEL_ID,
+            LEVEL_ID.shortValue(),
             1L,
             "submissions/.../levels/1/.../6/source/archive.zip",
             "submissions/.../levels/1/.../6/output/output.txt");
     saved.setId(6L);
+
     when(fileMetadataService.saveSubmission(
             anyString(),
             any(),
-            any(),
-            any(),
-            anyString(),
+            anyShort(),
             any(),
             anyString(),
+            anyLong(),
             anyString(),
-            any(),
+            anyString(),
+            anyLong(),
             anyString()))
         .thenReturn(saved);
 

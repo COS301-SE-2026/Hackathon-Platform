@@ -16,7 +16,7 @@ public class LeaderboardService {
   private final SubmissionRepository subRepo;
 
   @Transactional(readOnly = true)
-  public List<LeaderboardEntryResponse> getLeaderboard(UUID eventId, Long levelId) {
+  public List<LeaderboardEntryResponse> getLeaderboard(UUID eventId, short levelId) {
     List<LeaderboardEntry> entries = subRepo.findLeaderboardByEventIdAndLevelId(eventId, levelId);
     List<LeaderboardEntryResponse> leaderboard = new ArrayList<>(entries.size());
 

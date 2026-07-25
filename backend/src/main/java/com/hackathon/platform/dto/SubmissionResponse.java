@@ -64,7 +64,7 @@ public class SubmissionResponse {
     return levelId;
   }
 
-  public void setLevelId(Long levelId) {
+  public void setLevelId(short levelId) {
     this.levelId = levelId;
   }
 

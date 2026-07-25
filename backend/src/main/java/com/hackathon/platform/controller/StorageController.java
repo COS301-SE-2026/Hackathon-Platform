@@ -296,7 +296,7 @@ public class StorageController {
       @PathVariable String teamId,
       @RequestParam("outputFile") MultipartFile outputFile,
       @RequestParam("sourceFile") MultipartFile sourceFile,
-      @RequestParam("levelId") Long levelId) {
+      @RequestParam("levelId") short levelId) {
 
     UUID hackathonId =
         eventRepository

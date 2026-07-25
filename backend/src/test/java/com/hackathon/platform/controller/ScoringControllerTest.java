@@ -59,7 +59,7 @@ class ScoringControllerTest {
   private static final UUID EVENT_ID = UUID.fromString("c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
   private static final UUID USER_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
   private static final Long SUBMISSION_ID = 1L;
-  private static final Long LEVEL_ID = 2L;
+  private static final short LEVEL_ID = 2;
   private static final int LIMIT = 5;
   private static final String RECORD_ID = "record-123";
 
@@ -184,7 +184,7 @@ class ScoringControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].submissionId").value(SUBMISSION_ID))
-        .andExpect(jsonPath("$[0].levelId").value(LEVEL_ID));
+        .andExpect(jsonPath("$[0].levelId").value((int) LEVEL_ID));
   }
 
   @Test

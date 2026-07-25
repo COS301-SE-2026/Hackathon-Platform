@@ -1,7 +1,7 @@
 ALTER TABLE levelfiles
     ADD COLUMN IF NOT EXISTS file_size BIGINT,
     ADD COLUMN IF NOT EXISTS content_type VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS file_type VARCHAR(20);
+    ADD COLUMN IF NOT EXISTS file_type VARCHAR(20) NOT NULL;
 
 ALTER TABLE solverversion
     ADD COLUMN IF NOT EXISTS version_number INT,

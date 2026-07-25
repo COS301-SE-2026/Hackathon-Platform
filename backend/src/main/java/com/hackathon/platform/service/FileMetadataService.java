@@ -35,7 +35,7 @@ public class FileMetadataService {
       String fileType,
       Long fileSize,
       String contentType) {
-    LevelFile levelFile = new LevelFile(levelId, fileName, storageKey, fileType);
+    LevelFile levelFile = new LevelFile((long)levelId, fileName, storageKey, fileType);
     levelFile.setFileSize(fileSize);
     levelFile.setContentType(contentType);
     levelFile.setUpdatedAt(Instant.now());
@@ -75,7 +75,7 @@ public class FileMetadataService {
   public Submission saveSubmission(
       String eventId,
       UUID teamId,
-      Long levelId,
+      short levelId,
       Long solverVersionId,
       String outputFileName,
       Long outputFileSize,

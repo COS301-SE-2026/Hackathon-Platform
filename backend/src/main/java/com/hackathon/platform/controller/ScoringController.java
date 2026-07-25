@@ -85,7 +85,7 @@ public class ScoringController {
   @GetMapping("/teams/{teamId}/levels/{levelId}/submissions")
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<List<SubmissionResponse>> getTeamLevelHistory(
-      @PathVariable UUID teamId, @PathVariable Long levelId) {
+      @PathVariable UUID teamId, @PathVariable short levelId) {
     return ResponseEntity.ok(submissionQueryService.getHistoryForTeamAndLevel(teamId, levelId));
   }
 
@@ -126,7 +126,7 @@ public class ScoringController {
   @GetMapping("/events/{eventId}/levels/{levelId}/leaderboard")
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<List<LeaderboardEntryResponse>> getLeaderboard(
-      @PathVariable UUID eventId, @PathVariable Long levelId) {
+      @PathVariable UUID eventId, @PathVariable short levelId) {
     return ResponseEntity.ok(leaderboardService.getLeaderboard(eventId, levelId));
   }
 

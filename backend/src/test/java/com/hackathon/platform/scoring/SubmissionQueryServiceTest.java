@@ -39,7 +39,7 @@ class SubmissionQueryServiceTest {
   private SubmissionQueryService subQueryService;
 
   private static final UUID TEAM_ID = UUID.randomUUID();
-  private static final Long LEVEL_ID = 1L;
+  private static final short LEVEL_ID = 1;
   private static final Long SOLVER_V_ID = 2L;
   private static final int LIMIT = 5;
 

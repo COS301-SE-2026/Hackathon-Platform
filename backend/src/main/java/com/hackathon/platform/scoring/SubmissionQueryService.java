@@ -48,7 +48,7 @@ public class SubmissionQueryService {
 
   /** Submissions for a team based on a specific level, ordered by most recent first. */
   @Transactional(readOnly = true)
-  public List<SubmissionResponse> getHistoryForTeamAndLevel(UUID teamId, Long levelId) {
+  public List<SubmissionResponse> getHistoryForTeamAndLevel(UUID teamId, short levelId) {
     return submissionRepo.findLatestByTeamAndLevel(teamId, levelId).stream()
         .map(s -> toResponse(s, false))
         .collect(Collectors.toList());
@@ -120,7 +120,7 @@ public class SubmissionQueryService {
     if (incLog && sub.getEventId() != null) {
       Optional<ScoringLog> metaData =
           scoringLogRepo.findByTeamIdAndEventIdAndLevelId(
-              sub.getTeamId(), sub.getEventId(), sub.getLevelId());
+              sub.getTeamId(), sub.getEventId(), (long) sub.getLevelId());
       if (metaData.isPresent()) {
         log = toLogResponse(metaData.get());
       }

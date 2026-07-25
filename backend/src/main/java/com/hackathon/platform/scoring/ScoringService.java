@@ -83,7 +83,7 @@ public class ScoringService {
 
     Level level =
         levelRepo
-            .findById(sub.getLevelId().shortValue())
+            .findById(sub.getLevelId())
             .orElseThrow(() -> new IllegalArgumentException("Level could not be found"));
 
     UUID eventId = sub.getEventId();
@@ -128,11 +128,11 @@ public class ScoringService {
     }
 
     saveResult(sub);
-    appendToScoringLog(teamId, eventId, sub.getLevelId(), logString);
+    appendToScoringLog(teamId, eventId, (long) sub.getLevelId(), logString);
 
     if ("SCORED".equalsIgnoreCase(sub.getStatus())) {
       leaderboardUpdateService.pushLeaderboardUpdate(
-          eventId, sub.getLevelId(), teamId, sub.getId());
+          eventId, (long) sub.getLevelId(), teamId, sub.getId());
     }
     return sub;
   }
@@ -192,8 +192,8 @@ public class ScoringService {
     return target;
   }
 
-  private Path downloadLvlInputs(Long levelId, Path tempDir) throws IOException {
-    List<LevelFile> files = levelFRepo.findByLevelId(levelId);
+  private Path downloadLvlInputs(short levelId, Path tempDir) throws IOException {
+    List<LevelFile> files = levelFRepo.findByLevelId((long) levelId);
     if (files.isEmpty()) {
       return null;
     }
