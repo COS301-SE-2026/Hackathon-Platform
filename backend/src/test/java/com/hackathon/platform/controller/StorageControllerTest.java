@@ -423,21 +423,51 @@ class StorageControllerTest {
                 .andExpect(status().is5xxServerError());
     }
 
-  @Test
-  void getScoringLogUrl_returns200WithPresignedUrl() throws Exception {
-    when(config.getScoringLogsContainer()).thenReturn("scoring-logs");
-    when(config.getSasExpiryMinutes()).thenReturn(60);
-    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
-        .thenReturn(PRESIGNED_URL);
+    @Test
+    void getScoringLogUrl_returns200WithPresignedUrl() throws Exception {
+        when(config.getScoringLogsContainer()).thenReturn("scoring-logs");
+        when(config.getSasExpiryMinutes()).thenReturn(60);
+        when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+                .thenReturn(PRESIGNED_URL);
 
-    mockMvc
-        .perform(
-            get(
-                "/api/storage/hackathons/{hackathonId}/teams/{teamId}/levels/{levelId}",
-                HACKATHON_ID,
-                TEAM_ID,
-                LEVEL_ID))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
-  }  
+        mockMvc.perform(
+                get("/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}",
+                        EVENT_ID, TEAM_ID, LEVEL_ID)
+                        .with(authentication(participantAuth)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
+    }
+
+    @Test
+    void uploadLevelFile_returns403WhenCallerIsNotAdmin() throws Exception {
+        MockMultipartFile file =
+                new MockMultipartFile("file", "test.txt", "text/plain", "hello".getBytes());
+
+        mockMvc.perform(
+                multipart("/api/storage/hackathons/{hackathonId}/levels/{levelId}/files",
+                        HACKATHON_ID, LEVEL_ID)
+                        .file(file)
+                        .param("fileType", "TXT")
+                        .with(authentication(participantAuth)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void uploadSubmission_returns403WhenCallerIsAdminNotParticipant() throws Exception {
+        MockMultipartFile outputFile =
+                new MockMultipartFile("outputFile", "output.txt", "text/plain", "output data".getBytes());
+        MockMultipartFile sourceFile =
+                new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
+
+        mockMvc.perform(
+                multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions",
+                        EVENT_ID, TEAM_ID)
+                        .file(outputFile)
+                        .file(sourceFile)
+                        .param("levelId", "1")
+                        .with(authentication(adminAuth)))
+                .andExpect(status().isForbidden());
+    }
+
+    
 }
