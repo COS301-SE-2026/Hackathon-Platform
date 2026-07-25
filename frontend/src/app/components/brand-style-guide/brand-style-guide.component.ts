@@ -1,8 +1,8 @@
-import { Component, inject, OnInit} from '@angular/core';
+import { Component, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule} from '@angular/router';
 import { DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import { semantic } from '@primeuix/themes/aura/base';
+
 
 @Component ({
     selector: 'app-brand-style-guide',
@@ -12,7 +12,7 @@ import { semantic } from '@primeuix/themes/aura/base';
     styleUrls: ['./brand-style-guide.component.scss']
 })
 
-export class BrandStyleGuideComponent implements OnInit {
+export class BrandStyleGuideComponent  {
     private sanitizer = inject(DomSanitizer);
 
     colours = {
@@ -132,7 +132,7 @@ export class BrandStyleGuideComponent implements OnInit {
     {pair: '#FFFFFF on #062951', ratio:'14.5:1',compliance:'AAA'}
     ];
 
-    activeSection : string ='brand-foundation';
+    activeSection ='brand-foundation';
     isMenuOpen = false;
 
     sections = [
@@ -165,7 +165,5 @@ export class BrandStyleGuideComponent implements OnInit {
             '<span style = "display : inline-block; width:24px ; height: 24px; border-radius: 4px; background:'+ hex+';border:1px solid #e7eaf0; "></span>'
         );
     }
-    ngOnInit(): void {
-        
-    }
+   
 }
