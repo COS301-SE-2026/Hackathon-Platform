@@ -239,7 +239,7 @@
 }
 
 .nav-item a:active{
-    background:rgba(25, 131, 194, 0.4);
+    background:rgba(25, 131, 194, 0.65);
     color:#FFFFFF;
 }
 
@@ -815,7 +815,7 @@
     font-size: 1rem;
 }
 .btn-demo.btn-primary{
-    background: #1983C2;
+    background: #0F527A;
     color:#FFFFFF;
 }
 .btn-demo.btn-primary:hover{
@@ -843,7 +843,7 @@
 }
 
 .btn-demo.btn-success{
-    background:#268B42;
+    background:#1A5C2E;
     color:#FFFFFF;
 }
 .btn-demo.btn-success:hover{
@@ -871,29 +871,29 @@
     font-weight: 600;
 }
 .badge.badge-active {
-    background: #268B42;
+    background: #1A5C2E;
     color:#FFFFFF;
 }
 
 .badge.badge-upcoming {
-    background: #1983C2;
+    background: #0F527A;
     color:#FFFFFF;
 }
 .badge.badge-completed {
-    background: #3A4357;
+    background: #2A3342;
     color:#FFFFFF;
 }
 .badge.badge-ended {
-    background: #C0392B;
+    background: #8A2A1F;
     color:#FFFFFF;
 }
 
 .badge.badge-success {
-    background: #268B42;
+    background: #1A5C2E;
     color:#FFFFFF;
 }
 .badge.badge-error {
-    background: #C0392B;
+    background: #8A2A1F;
     color:#FFFFFF;
 }
 
@@ -1043,7 +1043,7 @@
 
 
 .breakpoint-bar.mobile{
-    background:#1983C2;
+    background:#0F527A;
     color:#FFFFFF;
     flex:1;
 
@@ -1051,13 +1051,13 @@
 
 
 .breakpoint-bar.tablet{
-    background: #018E9A;
+    background: #016B75;
     color:#FFFFFF;
     flex:2;
 }
 
 .breakpoint-bar.desktop{
-    background:#268B42;
+    background:#1A5C2E;
     color:#FFFFFF;
     flex:3;
 }
