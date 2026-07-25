@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -179,8 +180,10 @@ export class LevelsComponent implements OnInit {
           ...saved, files: existing?.files || [], filesLoaded: existing?.filesLoaded || false
         };
       });
-    } catch (err: any) {
-      this.errorMessage = err.error?.message || 'Failed to save the new level order, undoing changes...';
+    } catch (err: unknown) {
+      this.errorMessage = err instanceof HttpErrorResponse 
+        ? err.error?.message || 'Failed to save the new level order, undoing changes...'
+        : 'Failed to save the new level order, changes will be reverted...';
       this.levels = previousOrder;
     } finally {
       this.isSavingOrder = false;
@@ -273,7 +276,7 @@ export class LevelsComponent implements OnInit {
               this.isLoadingFiles = false;
               this.change.markForCheck();
             },
-            error: (err: any) => {
+            error: (err: HttpErrorResponse) => {
               this.isLoadingFiles = false;
               this.fileError = err.error?.message || 'Failed to loead files for this level';
               this.change.markForCheck();
@@ -296,7 +299,7 @@ export class LevelsComponent implements OnInit {
         this.activeLevel!.files = this.activeLevel!.files.filter((f) => f.id !== file.id);
         this.change.markForCheck();
       },
-      error: (err: any) => {
+      error: (err: HttpErrorResponse) => {
         this.fileError = err.error?.message || 'The files failed to be removed';
         this.change.markForCheck();
       }
@@ -348,7 +351,7 @@ onFileSelected(event: Event):void{
         this.closeLevelModal();
         this.change.markForCheck();
       },
-      error: (err: any) => {
+      error: (err: HttpErrorResponse) => {
         this.isSavingLevel = false;
         this.modalError = err.error?.message || 'The level failed to delete';
         this.change.markForCheck();

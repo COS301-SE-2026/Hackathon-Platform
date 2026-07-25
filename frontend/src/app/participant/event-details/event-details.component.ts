@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { OverviewTabComponent } from './event-details-tabs/overview/overview.component';
@@ -75,8 +75,7 @@ export class EventDetailsComponent {
 
         this.change.markForCheck();
       },
-      error: error => {
-        this.eventError = "Event details could not be loaded.", error;
+      error: () => {
         this.eventError = "The event could not be loaded.";
         this.loading = false;
       },
