@@ -1,12 +1,14 @@
 package com.hackathon.platform.scoring;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.ScoringLog;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.repository.LevelFileRepository;
+import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.ScoringLogRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
@@ -50,11 +52,13 @@ public class ScoringService {
   private final SubmissionRepository submissionRepo;
   private final SolverVersionRepository solverVRepo;
   private final LevelFileRepository levelFRepo;
+  private final LevelRepository levelRepo;
   private final ScoringLogRepository scoringLogRepo;
   private final TeamRepository teamRepo;
   private final StorageService storageService;
   private final AzureBlobConfig blobConfig;
   private final SolverRunner solverRunner;
+  private final LeaderboardUpdateService leaderboardUpdateService;
 
   /**
    * Scores the submission, can be recalled, each call appends a new log to the teams log file.
@@ -62,7 +66,6 @@ public class ScoringService {
    * @param submissionId the submission we are scoring
    * @return new submission with score and status set
    */
-
   public Submission scoreSubmission(Long submissionId) {
     Submission sub = markAsScoring(submissionId);
 
@@ -77,6 +80,11 @@ public class ScoringService {
                 () ->
                     new IllegalArgumentException(
                         "No solver version could be found for the submission"));
+
+    Level level =
+        levelRepo
+            .findById(sub.getLevelId())
+            .orElseThrow(() -> new IllegalArgumentException("Level could not be found"));
 
     UUID eventId = sub.getEventId();
     UUID teamId = team.getTeamId();
@@ -98,7 +106,8 @@ public class ScoringService {
               tempDir,
               sub.getOutputFileName() != null ? sub.getOutputFileName() : "output");
       Path levelInputDir = downloadLvlInputs(sub.getLevelId(), tempDir);
-      SolverRunOutcome outcome = solverRunner.run(solverScript, outputFile, levelInputDir);
+      SolverRunOutcome outcome =
+          solverRunner.run(solverScript, outputFile, levelInputDir, (long) level.getLevelNumber());
       applySuccessResult(sub, outcome);
       logString = buildLogString(submissionId, eventId, teamId, sub, outcome);
     } catch (SolverExecutionException e) {
@@ -119,19 +128,28 @@ public class ScoringService {
     }
 
     saveResult(sub);
-    appendToScoringLog(teamId, eventId, sub.getLevelId(), logString);
+    appendToScoringLog(teamId, eventId, (long) sub.getLevelId(), logString);
+
+    if ("SCORED".equalsIgnoreCase(sub.getStatus())) {
+      leaderboardUpdateService.pushLeaderboardUpdate(
+          eventId, (long) sub.getLevelId(), teamId, sub.getId());
+    }
     return sub;
   }
 
   @Transactional
-  public Submission markAsScoring(Long submissionId){
-    Submission sub = submissionRepo.findById(submissionId).orElseThrow(() -> new IllegalArgumentException("Submission wasnt found "+submissionId));
+  public Submission markAsScoring(Long submissionId) {
+    Submission sub =
+        submissionRepo
+            .findById(submissionId)
+            .orElseThrow(
+                () -> new IllegalArgumentException("Submission wasnt found " + submissionId));
     sub.setStatus("SCORING");
     return submissionRepo.save(sub);
   }
 
   @Transactional
-  public void saveResult(Submission sub){
+  public void saveResult(Submission sub) {
     submissionRepo.save(sub);
   }
 
@@ -159,8 +177,7 @@ public class ScoringService {
 
     Optional<ScoringLog> old =
         scoringLogRepo.findByTeamIdAndEventIdAndLevelId(teamId, eventId, levelId);
-    ScoringLog metaData =
-        old.orElseGet(() -> new ScoringLog(teamId, eventId, levelId, storageKey));
+    ScoringLog metaData = old.orElseGet(() -> new ScoringLog(teamId, eventId, levelId, storageKey));
     metaData.setSubmissionCount(metaData.getSubmissionCount() + 1);
     metaData.setLastUpdatedAt(Instant.now());
     scoringLogRepo.save(metaData);
@@ -175,8 +192,8 @@ public class ScoringService {
     return target;
   }
 
-  private Path downloadLvlInputs(Long levelId, Path tempDir) throws IOException {
-    List<LevelFile> files = levelFRepo.findByLevelId(levelId);
+  private Path downloadLvlInputs(short levelId, Path tempDir) throws IOException {
+    List<LevelFile> files = levelFRepo.findByLevelId((long) levelId);
     if (files.isEmpty()) {
       return null;
     }
@@ -236,11 +253,7 @@ public class ScoringService {
   }
 
   private String buildFailedStringBlock(
-      Long submissionId,
-      UUID eventId,
-      UUID teamId,
-      Submission sub,
-      SolverExecutionException e) {
+      Long submissionId, UUID eventId, UUID teamId, Submission sub, SolverExecutionException e) {
     StringBuilder sb = new StringBuilder();
     sb.append(
         String.format(

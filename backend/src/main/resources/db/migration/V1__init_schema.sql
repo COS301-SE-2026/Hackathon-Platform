@@ -2,7 +2,7 @@
 -- Please log an issue at https://github.com/pgadmin-org/pgadmin4/issues/new/choose if you find any bugs, including reproduction steps.
 
 CREATE TABLE roles (
-	role_id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	role_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	name VARCHAR(50) NOT NULL UNIQUE,
 	description TEXT
 );
@@ -14,7 +14,7 @@ CREATE TABLE permissions (
 );
 
 CREATE TABLE rolepermissions (
-	role_id SMALLINT NOT NULL,
+	role_id INT NOT NULL,
 	permission_id SMALLINT NOT NULL,
 	PRIMARY KEY (role_id, permission_id),
 
@@ -35,7 +35,7 @@ CREATE TABLE users (
 	last_name VARCHAR(100) NOT NULL,
 	email VARCHAR(255) NOT NULL UNIQUE,
 	password_hash TEXT NOT NULL,
-	role_id SMALLINT NOT NULL,
+	role_id INT NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	status VARCHAR(30) NOT NULL DEFAULT 'ACTIVE',
 
@@ -179,8 +179,8 @@ CREATE TABLE levels (
 );
 
 CREATE TABLE levelfiles (
-	id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	level_id SMALLINT NOT NULL,
+	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	level_id BIGINT NOT NULL,
 	file_name TEXT NOT NULL,
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	storage_key TEXT NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE levelfiles (
 );
 
 CREATE TABLE solverversion (
-	id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	event_id UUID NOT NULL,
 	uploaded_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	uploaded_by UUID NOT NULL,
@@ -219,7 +219,7 @@ CREATE TABLE submissions (
 	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	team_id UUID NOT NULL,
 	level_id SMALLINT NOT NULL,
-	solver_version_id SMALLINT NOT NULL,
+	solver_version_id BIGINT NOT NULL,
 	score NUMERIC(10,2) NOT NULL DEFAULT 0,
 	status VARCHAR(20) NOT NULL DEFAULT 'QUEUED',
 	submitted_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

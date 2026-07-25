@@ -90,8 +90,8 @@ public final class BlobPath {
   }
 
   /**
-   * Storage key for a scoring log file. One file per team per level per event - new submissions
-   * to the same level append to this file. Stored in: scoringlogs.storage_key
+   * Storage key for a scoring log file. One file per team per level per event - new submissions to
+   * the same level append to this file. Stored in: scoringlogs.storage_key
    *
    * @param eventId the event UUID
    * @param teamId the team UUID

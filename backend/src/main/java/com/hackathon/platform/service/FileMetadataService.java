@@ -10,8 +10,8 @@ import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
 import com.hackathon.platform.storage.BlobPath;
 import java.time.Instant;
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,16 +27,15 @@ public class FileMetadataService {
   private final SubmissionRepository submissionRepository;
   private final HackathonRepository hackathonRepository;
 
-
   @Transactional
   public LevelFile saveLevelFile(
-      Long levelId,
+      short levelId,
       String fileName,
       String storageKey,
       String fileType,
       Long fileSize,
       String contentType) {
-    LevelFile levelFile = new LevelFile(levelId, fileName, storageKey, fileType);
+    LevelFile levelFile = new LevelFile((long) levelId, fileName, storageKey, fileType);
     levelFile.setFileSize(fileSize);
     levelFile.setContentType(contentType);
     levelFile.setUpdatedAt(Instant.now());
@@ -53,13 +52,15 @@ public class FileMetadataService {
       String storageKey,
       Integer versionNumber,
       String fileName,
-      Long fileSize) {
+      Long fileSize,
+      String notes) {
     SolverVersion solverVersion = new SolverVersion(hackathonId, uploadedBy, storageKey);
     solverVersion.setVersionNumber(versionNumber);
     solverVersion.setFileName(fileName);
     solverVersion.setFileSize(fileSize);
     solverVersion.setIsActive(true);
     solverVersion.setUploadedAt(Instant.now());
+    solverVersion.setNotes(notes);
 
     SolverVersion saved = solverVersionRepository.save(solverVersion);
     log.info(
@@ -74,7 +75,7 @@ public class FileMetadataService {
   public Submission saveSubmission(
       String eventId,
       UUID teamId,
-      Long levelId,
+      short levelId,
       Long solverVersionId,
       String outputFileName,
       Long outputFileSize,

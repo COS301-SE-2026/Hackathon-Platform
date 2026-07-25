@@ -120,8 +120,8 @@
     <div class="modal-card" (click)="$event.stopPropagation()" (keydown.escape)="$event.stopPropagation()">
       <h2 class="modal-title">Manage Files &ndash; {{ activeLevel?.name }}</h2>
 
-      @if (filesError) {
-        <p class="error-banner">{{ filesError }}</p>
+      @if (fileError) {
+        <p class="error-banner">{{ fileError }}</p>
       }
 
       @if (isLoadingFiles) {

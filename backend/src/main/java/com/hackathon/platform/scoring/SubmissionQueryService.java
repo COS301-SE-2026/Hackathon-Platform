@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,15 +48,15 @@ public class SubmissionQueryService {
 
   /** Submissions for a team based on a specific level, ordered by most recent first. */
   @Transactional(readOnly = true)
-  public List<SubmissionResponse> getHistoryForTeamAndLevel(UUID teamId, Long levelId) {
+  public List<SubmissionResponse> getHistoryForTeamAndLevel(UUID teamId, short levelId) {
     return submissionRepo.findLatestByTeamAndLevel(teamId, levelId).stream()
         .map(s -> toResponse(s, false))
         .collect(Collectors.toList());
   }
 
   @Transactional(readOnly = true)
-  public List<SubmissionResponse> getRecentSubmissions(int limit) {
-    return submissionRepo.getRecentSubmissions(limit).stream()
+  public List<SubmissionResponse> getRecentSubmissions(UUID userId, int limit) {
+    return submissionRepo.getRecentSubmissions(userId, PageRequest.of(0, limit)).stream()
         .map(s -> toResponse(s, false))
         .collect(Collectors.toList());
   }
@@ -119,7 +120,7 @@ public class SubmissionQueryService {
     if (incLog && sub.getEventId() != null) {
       Optional<ScoringLog> metaData =
           scoringLogRepo.findByTeamIdAndEventIdAndLevelId(
-              sub.getTeamId(), sub.getEventId(), sub.getLevelId());
+              sub.getTeamId(), sub.getEventId(), (long) sub.getLevelId());
       if (metaData.isPresent()) {
         log = toLogResponse(metaData.get());
       }
