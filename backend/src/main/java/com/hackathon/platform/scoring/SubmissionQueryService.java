@@ -62,7 +62,7 @@ public class SubmissionQueryService {
   }
 
   /**
-   * All the details for 1 submissions, this includes a teams complete scoring log from the blob
+   * All the details for 1 submissions, this includes this submission's own scoring log from blob
    * storage. A team can only view their own feedback.
    */
   @Transactional(readOnly = true)
@@ -94,33 +94,55 @@ public class SubmissionQueryService {
   }
 
   /**
-   * Gets the scoring log for a team according to level from the blob storage. This is all the
-   * submissions that the team has made to a specific level.
+   * Gets the scoring log for exactly one submission, scoped to the owning team so a participant
+   * can't view another team's feedback by guessing IDs.
    */
   @Transactional(readOnly = true)
-  public ScoringLogResponse getTeamScoringLog(UUID teamId, UUID eventId, Long levelId) {
-    Optional<ScoringLog> metaData =
-        scoringLogRepo.findByTeamIdAndEventIdAndLevelId(teamId, eventId, levelId);
-    if (metaData.isEmpty()) {
-      return null;
-    }
-    return toLogResponse(metaData.get());
+  public ScoringLogResponse getScoringLogForSubmission(Long submissionId, UUID teamId) {
+    Submission sub =
+        submissionRepo
+            .findByIdAndTeamId(submissionId, teamId)
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "The submission could not be for this team: " + submissionId));
+    return scoringLogRepo
+        .findBySubmissionId(sub.getId())
+        .map(this::toLogResponse)
+        .orElse(null);
   }
 
-  /** Returns only the meta data for all levels a team has submitted to in a specific event. */
+  /** Admin variant: the scoring log for any submission regardless of team. */
+  @Transactional(readOnly = true)
+  public ScoringLogResponse getScoringLogForSubmissionAsAdmin(Long submissionId) {
+    return scoringLogRepo.findBySubmissionId(submissionId).map(this::toLogResponse).orElse(null);
+  }
+
+  /**
+   * Every log a team has for a level in an event, one per submission, most recent submission
+   * first.
+   */
+  @Transactional(readOnly = true)
+  public List<ScoringLogResponse> getLevelLogsForTeam(UUID teamId, UUID eventId, Long levelId) {
+    return scoringLogRepo
+        .findByTeamIdAndEventIdAndLevelIdOrderByCreatedAtDesc(teamId, eventId, levelId)
+        .stream()
+        .map(this::toLogResponseMetaDataOnly)
+        .collect(Collectors.toList());
+  }
+
+  /** Returns only the meta data for every scoring log a team has across an event. */
   @Transactional(readOnly = true)
   public List<ScoringLogResponse> getAllLevelLogsForTeam(UUID teamId, UUID eventId) {
     return scoringLogRepo.findByTeamIdAndEventId(teamId, eventId).stream()
-        .map(this::toLogResponseMetDataOnly)
+        .map(this::toLogResponseMetaDataOnly)
         .collect(Collectors.toList());
   }
 
   private SubmissionResponse toResponse(Submission sub, boolean incLog) {
     ScoringLogResponse log = null;
-    if (incLog && sub.getEventId() != null) {
-      Optional<ScoringLog> metaData =
-          scoringLogRepo.findByTeamIdAndEventIdAndLevelId(
-              sub.getTeamId(), sub.getEventId(), (long) sub.getLevelId());
+    if (incLog) {
+      Optional<ScoringLog> metaData = scoringLogRepo.findBySubmissionId(sub.getId());
       if (metaData.isPresent()) {
         log = toLogResponse(metaData.get());
       }
@@ -142,11 +164,11 @@ public class SubmissionQueryService {
   private ScoringLogResponse toLogResponse(ScoringLog metaData) {
     String content = downloadLogContent(metaData.getStorageKey());
     return new ScoringLogResponse(
+        metaData.getSubmissionId(),
         metaData.getTeamId(),
         metaData.getEventId(),
         metaData.getStorageKey(),
-        metaData.getSubmissionCount(),
-        metaData.getLastUpdatedAt(),
+        metaData.getCreatedAt(),
         content);
   }
 
@@ -160,13 +182,13 @@ public class SubmissionQueryService {
     }
   }
 
-  private ScoringLogResponse toLogResponseMetDataOnly(ScoringLog MD) {
+  private ScoringLogResponse toLogResponseMetaDataOnly(ScoringLog metaData) {
     return new ScoringLogResponse(
-        MD.getTeamId(),
-        MD.getEventId(),
-        MD.getStorageKey(),
-        MD.getSubmissionCount(),
-        MD.getLastUpdatedAt(),
+        metaData.getSubmissionId(),
+        metaData.getTeamId(),
+        metaData.getEventId(),
+        metaData.getStorageKey(),
+        metaData.getCreatedAt(),
         null);
   }
 }

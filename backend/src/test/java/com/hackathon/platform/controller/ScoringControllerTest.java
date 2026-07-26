@@ -227,10 +227,10 @@ class ScoringControllerTest {
   void getSubmissionDetail_returnsFullFeedbackWithLogs() throws Exception {
     ScoringLogResponse log =
         new ScoringLogResponse(
+            SUBMISSION_ID,
             TEAM_ID,
             EVENT_ID,
-            "logs/event/team/level/scoring_log.txt",
-            1,
+            "logs/event/team/level/" + SUBMISSION_ID + "/scoring_log.txt",
             Instant.now(),
             "malformed output on row 2 - MALFORMED_OUTPUT");
 

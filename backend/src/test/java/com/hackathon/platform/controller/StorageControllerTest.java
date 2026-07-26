@@ -467,10 +467,11 @@ class StorageControllerTest {
     mockMvc
         .perform(
             get(
-                    "/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}",
+                    "/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}",
                     EVENT_ID,
                     TEAM_ID,
-                    LEVEL_ID)
+                    LEVEL_ID,
+                    SUBMISSION_ID)
                 .with(authentication(participantAuth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
