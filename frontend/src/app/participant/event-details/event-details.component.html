@@ -21,7 +21,7 @@
 
 <div class="event-content">
 
-    @if (activeTab === 'overview') {<app-overview/> }
+    @if (activeTab === 'overview') {<app-overview [event]="event" />}
 
     @if (activeTab === 'rules') {<app-rules/>}
 
