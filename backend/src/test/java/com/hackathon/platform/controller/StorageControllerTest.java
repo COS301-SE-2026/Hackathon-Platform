@@ -67,7 +67,8 @@ class StorageControllerTest {
   private static final String TEAM_ID = "d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14";
   private static final String UPLOADED_BY = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
   private static final Long LEVEL_ID = 1L;
-  private static final Long SUBMISSION_ID = 1L;
+
+  private static final Long SUBMISSION_ID = 100L;
   private static final String BLOB_URL = "https://hackathonplatform.blob.core.windows.net/test";
   private static final String PRESIGNED_URL =
       "https://hackathonplatform.blob.core.windows.net/test?sv=...";
@@ -159,7 +160,7 @@ class StorageControllerTest {
   void getLevelFileUrl_returns200WithPresignedUrl() throws Exception {
     when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
     when(config.getSasExpiryMinutes()).thenReturn(60);
-    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt(), anyString()))
         .thenReturn(PRESIGNED_URL);
 
     mockMvc
@@ -299,7 +300,7 @@ class StorageControllerTest {
     when(hackathonService.getHackathonById(any())).thenReturn(hackathon);
     when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
     when(config.getSasExpiryMinutes()).thenReturn(60);
-    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt(), anyString()))
         .thenReturn(PRESIGNED_URL);
 
     mockMvc
