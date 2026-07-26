@@ -15,6 +15,7 @@ class LeaderboardUpdateServiceTest {
     @Test
     void subscribe_returnsSseEmitter() {
         SseEmitter emitter = service.subscribe(EVENT_ID);
+
         assertThat(emitter).isNotNull();
     }
 
@@ -22,6 +23,16 @@ class LeaderboardUpdateServiceTest {
     void pushLeaderboardUpdate_WithSubscribers_completeNormally() {
         SseEmitter emitter = service.subscribe(EVENT_ID);
         service.pushLeaderboardUpdate(EVENT_ID, 1L, FIRST_TEAM, 40L);
+
+        assertThat(emitter).isNotNull();
+    }
+
+    @Test
+    void pushLeaderboardUpdate_forDifferentEvent_completesNormally() {
+        UUID otherEvent = UUID.fromString("123e4567-e89b-12d3-a456-426614174002");
+        SseEmitter emitter = service.subscribe(otherEvent);
+        service.pushLeaderboardUpdate(EVENT_ID, 1L, FIRST_TEAM, 40L);
+
         assertThat(emitter).isNotNull();
     }
 }
