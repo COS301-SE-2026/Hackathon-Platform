@@ -90,8 +90,15 @@ class BlobPathTest {
 
   @Test
   void scoringLog_returnsCorrectPath() {
-    String result = BlobPath.scoringLog(HACKATHON_ID, TEAM_ID, LEVEL_ID);
-    assertEquals("logs/hackathon-123/team-789/level-456/scoring_log.txt", result);
+    String result = BlobPath.scoringLog(HACKATHON_ID, TEAM_ID, LEVEL_ID, SUBMISSION_ID);
+    assertEquals("logs/hackathon-123/team-789/level-456/sub-101/scoring_log.txt", result);
+  }
+
+  @Test
+  void scoringLog_differentSubmissionsProduceDifferentPaths() {
+    String subOne = BlobPath.scoringLog(HACKATHON_ID, TEAM_ID, LEVEL_ID, "1");
+    String subTwo = BlobPath.scoringLog(HACKATHON_ID, TEAM_ID, LEVEL_ID, "2");
+    assertFalse(subOne.equals(subTwo));
   }
 
   @Test

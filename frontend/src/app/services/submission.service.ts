@@ -5,11 +5,11 @@ import { Observable } from 'rxjs';
 export type SubmissionStatus = 'QUEUED' | 'SCORING' | 'SCORED' | 'FAILED';
 
 export interface ScoringLogResponse {
+  submissionId: number;
   teamId: string;
   eventId: string;
   storageKey: string;
-  submissionCount: number;
-  lastUpdatedAt: string;
+  createdAt: string;
   logContent: string | null;
 }
 
