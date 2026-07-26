@@ -9,7 +9,6 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
-/** Metadata record for a team's scoring log file in blob storage. */
 @Entity
 @Table(name = "scoringlogs", schema = "public")
 public class ScoringLog {
@@ -18,6 +17,9 @@ public class ScoringLog {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
+
+  @Column(name = "submission_id", nullable = false, unique = true)
+  private Long submissionId;
 
   @Column(name = "team_id", nullable = false)
   private UUID teamId;
@@ -31,18 +33,13 @@ public class ScoringLog {
   @Column(name = "storage_key", nullable = false)
   private String storageKey;
 
-  @Column(name = "submission_count", nullable = false)
-  private int submissionCount = 0;
-
-  @Column(name = "last_updated_at", nullable = false)
-  private Instant lastUpdatedAt = Instant.now();
-
   @Column(name = "created_at", nullable = false)
   private Instant createdAt = Instant.now();
 
   public ScoringLog() {}
 
-  public ScoringLog(UUID teamId, UUID eventId, Long levelId, String storageKey) {
+  public ScoringLog(Long submissionId, UUID teamId, UUID eventId, Long levelId, String storageKey) {
+    this.submissionId = submissionId;
     this.teamId = teamId;
     this.eventId = eventId;
     this.levelId = levelId;
@@ -55,6 +52,14 @@ public class ScoringLog {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public Long getSubmissionId() {
+    return submissionId;
+  }
+
+  public void setSubmissionId(Long submissionId) {
+    this.submissionId = submissionId;
   }
 
   public UUID getTeamId() {
@@ -87,22 +92,6 @@ public class ScoringLog {
 
   public void setStorageKey(String storageKey) {
     this.storageKey = storageKey;
-  }
-
-  public int getSubmissionCount() {
-    return submissionCount;
-  }
-
-  public void setSubmissionCount(int submissionCount) {
-    this.submissionCount = submissionCount;
-  }
-
-  public Instant getLastUpdatedAt() {
-    return lastUpdatedAt;
-  }
-
-  public void setLastUpdatedAt(Instant lastUpdatedAt) {
-    this.lastUpdatedAt = lastUpdatedAt;
   }
 
   public Instant getCreatedAt() {
