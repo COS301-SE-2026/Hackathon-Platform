@@ -2,8 +2,6 @@
 ALTER TABLE hackathon
 ADD COLUMN IF NOT EXISTS problem_statement_storage_key TEXT;
 
-
-
 ALTER TABLE submissions ADD COLUMN IF NOT EXISTS event_id UUID;
 
 UPDATE submissions s
@@ -44,7 +42,13 @@ END $$;
 ALTER TABLE scoringlogs ALTER COLUMN event_id SET NOT NULL;
 
 ALTER TABLE scoringlogs
+    DROP CONSTRAINT IF EXISTS uq_scoringlogs_team_event_level;
+
+ALTER TABLE scoringlogs
     ADD CONSTRAINT uq_scoringlogs_team_event_level UNIQUE (team_id, event_id, level_id);
+
+ALTER TABLE scoringlogs
+    DROP CONSTRAINT IF EXISTS fk_scoringlogs_event_id;
 
 ALTER TABLE scoringlogs
     ADD CONSTRAINT fk_scoringlogs_event_id
