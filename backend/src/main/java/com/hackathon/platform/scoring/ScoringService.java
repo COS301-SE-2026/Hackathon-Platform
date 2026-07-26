@@ -1,12 +1,14 @@
 package com.hackathon.platform.scoring;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.ScoringLog;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.repository.LevelFileRepository;
+import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.ScoringLogRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
@@ -50,6 +52,7 @@ public class ScoringService {
   private final SubmissionRepository submissionRepo;
   private final SolverVersionRepository solverVRepo;
   private final LevelFileRepository levelFRepo;
+  private final LevelRepository levelRepo;
   private final ScoringLogRepository scoringLogRepo;
   private final TeamRepository teamRepo;
   private final StorageService storageService;
@@ -78,6 +81,11 @@ public class ScoringService {
                     new IllegalArgumentException(
                         "No solver version could be found for the submission"));
 
+    Level level =
+        levelRepo
+            .findById(sub.getLevelId())
+            .orElseThrow(() -> new IllegalArgumentException("Level could not be found"));
+
     UUID eventId = sub.getEventId();
     UUID teamId = team.getTeamId();
 
@@ -98,7 +106,8 @@ public class ScoringService {
               tempDir,
               sub.getOutputFileName() != null ? sub.getOutputFileName() : "output");
       Path levelInputDir = downloadLvlInputs(sub.getLevelId(), tempDir);
-      SolverRunOutcome outcome = solverRunner.run(solverScript, outputFile, levelInputDir);
+      SolverRunOutcome outcome =
+          solverRunner.run(solverScript, outputFile, levelInputDir, (long) level.getLevelNumber());
       applySuccessResult(sub, outcome);
       logString = buildLogString(submissionId, eventId, teamId, sub, outcome);
     } catch (SolverExecutionException e) {
@@ -119,11 +128,11 @@ public class ScoringService {
     }
 
     saveResult(sub);
-    appendToScoringLog(teamId, eventId, sub.getLevelId(), logString);
+    appendToScoringLog(teamId, eventId, (long) sub.getLevelId(), logString);
 
     if ("SCORED".equalsIgnoreCase(sub.getStatus())) {
       leaderboardUpdateService.pushLeaderboardUpdate(
-          eventId, sub.getLevelId(), teamId, sub.getId());
+          eventId, (long) sub.getLevelId(), teamId, sub.getId());
     }
     return sub;
   }
@@ -183,8 +192,8 @@ public class ScoringService {
     return target;
   }
 
-  private Path downloadLvlInputs(Long levelId, Path tempDir) throws IOException {
-    List<LevelFile> files = levelFRepo.findByLevelId(levelId);
+  private Path downloadLvlInputs(short levelId, Path tempDir) throws IOException {
+    List<LevelFile> files = levelFRepo.findByLevelId((long) levelId);
     if (files.isEmpty()) {
       return null;
     }

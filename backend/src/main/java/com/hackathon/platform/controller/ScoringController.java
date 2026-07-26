@@ -14,6 +14,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +50,7 @@ public class ScoringController {
    * @return the updated submission with score/status set
    */
   @PostMapping("/submissions/{submissionId}/score")
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> scoreSubmission(@PathVariable Long submissionId) {
     String record = scoringJobProducer.enqueue(submissionId);
     return ResponseEntity.accepted()
@@ -69,6 +71,7 @@ public class ScoringController {
    * @param teamId the team UUID
    */
   @GetMapping("/teams/{teamId}/submissions")
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<List<SubmissionResponse>> getTeamHistory(@PathVariable UUID teamId) {
     return ResponseEntity.ok(submissionQueryService.getHistoryForTeam(teamId));
   }
@@ -80,12 +83,14 @@ public class ScoringController {
    * @param levelId the level ID
    */
   @GetMapping("/teams/{teamId}/levels/{levelId}/submissions")
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<List<SubmissionResponse>> getTeamLevelHistory(
-      @PathVariable UUID teamId, @PathVariable Long levelId) {
+      @PathVariable UUID teamId, @PathVariable short levelId) {
     return ResponseEntity.ok(submissionQueryService.getHistoryForTeamAndLevel(teamId, levelId));
   }
 
   @GetMapping("/admin/recentsubmissions/{limit}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<SubmissionResponse>> getRecentSubmissions(
       @PathVariable int limit, @AuthenticationPrincipal User user) {
     return ResponseEntity.ok(submissionQueryService.getRecentSubmissions(user.getUserId(), limit));
@@ -100,6 +105,7 @@ public class ScoringController {
    * @param submissionId the submission ID
    */
   @GetMapping("/teams/{teamId}/submissions/{submissionId}")
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<SubmissionResponse> getSubmissionDetail(
       @PathVariable UUID teamId, @PathVariable Long submissionId) {
     return ResponseEntity.ok(submissionQueryService.getSubmissionDetail(submissionId, teamId));
@@ -111,18 +117,21 @@ public class ScoringController {
    * @param submissionId the submission ID
    */
   @GetMapping("/admin/submissions/{submissionId}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<SubmissionResponse> getSubmissionDetailForAdmin(
       @PathVariable Long submissionId) {
     return ResponseEntity.ok(submissionQueryService.getSubmissionDetailForAdmin(submissionId));
   }
 
   @GetMapping("/events/{eventId}/levels/{levelId}/leaderboard")
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<List<LeaderboardEntryResponse>> getLeaderboard(
-      @PathVariable UUID eventId, @PathVariable Long levelId) {
+      @PathVariable UUID eventId, @PathVariable short levelId) {
     return ResponseEntity.ok(leaderboardService.getLeaderboard(eventId, levelId));
   }
 
   @GetMapping("/events/{eventId}/leaderboard")
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<List<LeaderboardEntryResponse>> getEventLeaderboard(
       @PathVariable UUID eventId) {
     return ResponseEntity.ok(leaderboardService.getEventLeaderboard(eventId));
@@ -131,6 +140,7 @@ public class ScoringController {
   @GetMapping(
       value = "/events/{eventId}/leaderboard/update",
       produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public SseEmitter updateEventLeaderboard(@PathVariable UUID eventId) {
     return leaderboardUpdateService.subscribe(eventId);
   }

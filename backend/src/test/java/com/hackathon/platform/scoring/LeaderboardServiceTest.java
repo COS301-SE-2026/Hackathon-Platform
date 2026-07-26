@@ -23,7 +23,7 @@ class LeaderboardServiceTest {
     private static final UUID EVENT_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
     private static final UUID FIRST_TEAM =UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
     private static final UUID SECOND_TEAM = UUID.fromString("123e4567-e89b-12d3-a456-426614174002");
-    private static final Long LVL_ID = 1L;
+    private static final Short LVL_ID = 1;
     private static final Instant SCORED_AT = Instant.parse("2026-01-01T10:00:00Z");
 
     @BeforeEach
