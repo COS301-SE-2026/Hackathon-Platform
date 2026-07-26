@@ -1,0 +1,142 @@
+
+.submission-history {
+    margin-top: 20px;
+}
+
+.history-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-title {
+   margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: var(--text-dark);
+}
+
+.history-description {
+    margin-bottom: 30px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+
+.history-content {
+    margin-top: 32px;
+}
+
+:host ::ng-deep .submission-table {
+    border: 1px solid var(--border-silver);
+    background: var(--background-white);
+}
+
+
+:host ::ng-deep .submission-table th {
+    padding: 16px 24px;
+    background: var(--background-light-gray);
+    border-bottom: 1px solid var(--border-silver);
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-dark);
+}
+
+:host ::ng-deep .submission-table td {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border-silver);
+    font-size: 13px;
+    color: var(--text-dark);
+    vertical-align: middle;
+}
+
+.status-badge {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 100px;
+    height: 30px;
+    padding: 0 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 0;
+}
+
+.status-badge.completed {
+    background: #e8f8ef;
+    color: var(--status-success);
+}
+
+.status-badge.processing {
+    background: #fff6dd;
+    color: var(--status-warning);
+}
+
+.status-badge.failed {
+    background: #fdeaea;
+    color: var(--status-error);
+}
+
+.secondary-btn {
+  background-color: transparent;
+  color: #1983c2;
+  border: 2px solid #1983c2;
+  border-radius: 9px;
+  padding: 10px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  max-width: 120px;
+  height: 44px;
+  text-transform: uppercase;
+
+}
+
+ .empty-history {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+
+    i {
+        color: var(--accent-bright-blue);
+        font-size: 18px;
+    }
+ }
+
+:host ::ng-deep .p-paginator {
+    padding: 14px 18px;
+    background: var(--background-white);
+    border: 1px solid var(--border-silver);
+    border-top: none;
+    border-radius: 0;
+}
+
+:host ::ng-deep .p-paginator * {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+
+:host ::ng-deep .p-paginator-page.p-paginator-page-selected {
+    background: var(--accent-bright-blue) !important;
+    border-radius: 50%;
+    color: var(--background-white) !important;
+}
+
+:host ::ng-deep .p-paginator-rpp-dropdown {
+    display: none;
+}

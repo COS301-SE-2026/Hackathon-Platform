@@ -1,8 +1,8 @@
 <div class="submission-page">
 
     <div class="submission-header">
-        <h1 class="submission-title">Upload Your Solution</h1>
-        <p class="submission-prompt">Select a level below to view its requirements and upload your solution.</p>
+        <h1 class="submission-title">Submit Solution</h1>
+        <p class="submission-prompt">Select a level below to view its requirements and submit your solution.</p>
     </div>
 
     @if (teamError) {
@@ -47,11 +47,10 @@
                             </div>
 
                             <button
-                                pButton
                                 type="button"
-                                label="Download Level Files"
-                                class="download-level-btn"
+                                class="secondary-btn"
                                 (click)="downloadLevelFiles(level.id)">
+                                Download Level Files
                             </button>
 
                         </div>
@@ -93,13 +92,13 @@
                                                         <h4 class="selected-file-name">{{ formatFileName(sourceArchive.name) }}</h4>
                                                         <p class="drop-subtitle"> Click or drag a new file to replace</p>
 
-                                                        <button
-                                                            pButton
-                                                            type="button"
-                                                            label="Replace ZIP File"
-                                                            class="choose-file-btn"
-                                                            (click)="sourceUploader.choose()">
-                                                        </button>
+                                                       <button
+                                                        type="button"
+                                                        class="secondary-btn"
+                                                        (click)="sourceUploader.choose()">
+                                                        Replace ZIP File
+                                                    </button>
+                                                        
                                                     } 
                                                     
                                                     @else {
@@ -109,11 +108,10 @@
 
                                                         <p class="drop-subtitle">or click to browse files</p>
                                                         <button
-                                                            pButton
                                                             type="button"
-                                                            label="Choose ZIP File"
-                                                            class="choose-file-btn"
+                                                            class="secondary-btn"
                                                             (click)="sourceUploader.choose()">
+                                                            Choose ZIP File
                                                         </button>
                                                     }
 
@@ -158,11 +156,10 @@
                                                         <p class="drop-subtitle">Click or drag a new file to replace </p>
 
                                                         <button
-                                                            pButton
                                                             type="button"
-                                                            label="Replace Output File"
-                                                            class="choose-file-btn"
+                                                            class="secondary-btn"
                                                             (click)="solutionUploader.choose()">
+                                                            Replace JSON File
                                                         </button>
 
                                                     } @else {
@@ -170,12 +167,11 @@
                                                         <h4 class="drop-title">Drag and drop your JSON here</h4>
                                                          <p class="drop-subtitle">or click to browse files</p>
 
-                                                        <button
-                                                            pButton
+                                                      <button
                                                             type="button"
-                                                            label="Choose JSON File"
-                                                            class="choose-file-btn"
+                                                            class="secondary-btn"
                                                             (click)="solutionUploader.choose()">
+                                                            Choose JSON File
                                                         </button>
                                                     }
 
@@ -200,16 +196,15 @@
                                         @if (!teamId) {
                                             Join a team for this event to enable submission
                                         } @else {
-                                            Upload ZIP and TXT files to enable submission
+                                            Upload both files to enable submission
                                         }
                                     </span>
                                     <button
-                                        pButton
                                         type="button"
-                                        [label]="submitting ? 'Submitting...' : 'Submit Solution'"
-                                        class="submit-btn"
+                                        class="primary-btn"
                                         [disabled]="!canSubmit"
                                         (click)="submitSolution(sourceUploader, solutionUploader)">
+                                        {{ submitting ? 'Submitting...' : 'Submit Solution' }}
                                     </button>
                                 </div>
                         </div>
@@ -226,77 +221,6 @@
 
     }
 
-    <div class="submission-history">
+   
 
-        <div class="history-header">
-
-            <h2 class="history-title">Submission History</h2>
-
-            <button
-                pButton
-                type="button"
-                icon="pi pi-refresh"
-                label="Refresh"
-                class="refresh-btn"
-                [disabled]="historyLoading || !teamId"
-                (click)="loadHistory()">
-            </button>
-
-        </div>
-
-        <p class="history-description"> Uploaded solutions are processed by the solver after submission. Refresh this section periodically to view updated scores. Solver logs are available for download and can assist with debugging failed submissions.</p>
-
-        @if (historyLoading) {
-
-            <div class="empty-history"><i class="pi pi-spin pi-spinner"></i> Loading submission history...</div>
-
-        } @else if (historyError) {
-
-            <div class="empty-history">{{ historyError }}</div>
-
-        } @else if (submissionHistory.length > 0) {
-
-            <p-table
-                [value]="submissionHistory"
-                class="submission-table" [paginator]="true" [rows]="10">
-
-                <ng-template pTemplate="header">
-
-                    <tr>
-                        <th scope="col">Uploaded</th>
-                        <th scope="col">Level</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Score</th>
-                        <th scope="col"></th>
-                    </tr>
-
-                </ng-template>
-
-                <ng-template pTemplate="body"
-                    let-submission>
-
-                    <tr>
-                        <td>{{ formatDate(submission.submittedAt) }}</td>
-                        <td>Level {{ submission.levelId }}</td>
-                        <td><span class="status-badge" [ngClass]="statusClass(submission.status)"> {{ statusLabel(submission.status) }}</span></td>
-                        <td>{{ submission.status === 'SCORED' ? submission.score : '--' }}</td>
-                        <td>
-                            <button
-                                pButton
-                                type="button"
-                                label="Log"
-                                icon="pi pi-download"
-                                class="log-btn"
-                                (click)="downloadLog(submission)">
-                            </button>
-                        </td>
-                    </tr>
-
-                </ng-template>
-
-            </p-table>
-
-        } @else { <div class="empty-history">No submissions yet</div> }
-
-    </div>
 </div>

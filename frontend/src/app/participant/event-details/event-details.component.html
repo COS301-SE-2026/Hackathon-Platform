@@ -7,7 +7,9 @@
 
   <button [class.active]="activeTab === 'rules'" (click)="activeTab='rules'">Rules</button>
 
-  <button [class.active]="activeTab === 'submissions'" (click)="activeTab='submissions'"> Submissions</button>
+  <button [class.active]="activeTab === 'submissions'" (click)="activeTab='submissions'"> Upload Solution</button>
+
+   <button [class.active]="activeTab === 'submission-history'" (click)="activeTab='submission-history'"> Submission History</button>
 
   <button [class.active]="activeTab === 'team'" (click)="activeTab='team'"> My Team</button>
 
@@ -26,6 +28,8 @@
     @if (activeTab === 'submissions' && eventId && hackathonId) { <app-submissions [eventId]="eventId"[hackathonId]="hackathonId"/>
     }
 
+    @if (activeTab === 'submission-history' && eventId && hackathonId) {<app-submission-history [eventId]="eventId" />}
+    
     @if (activeTab === 'team' && eventId) {<app-my-team [eventId]="eventId"/>}
 
     @if (activeTab === 'leaderboard' && eventId) { <app-leaderboard [eventId]="eventId"/>}
