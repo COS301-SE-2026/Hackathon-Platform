@@ -37,10 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Scores a single submission in the following order:
  *
- * <p>1. Looks for the submission, solver version, levels input files. 2. Downloads the solver
+ * 1. Looks for the submission, solver version, levels input files. 2. Downloads the solver
  * script, participants output file, level input from blob storage. 3. calls the SolverRunner with a
- * hard timeout. 4. adds score and status to the submission. 5. adds the scoring log to the team's
- * log file in blob storage and updates the meta data in the scoringlogs table.
+ * hard timeout. 4. adds score and status to the submission. 5. writes a scoring log for this
+ * submission to blob storage and records its metadata in the scoringlogs table.
  */
 @Service
 @RequiredArgsConstructor
@@ -61,8 +61,7 @@ public class ScoringService {
   private final LeaderboardUpdateService leaderboardUpdateService;
 
   /**
-   * Scores the submission, can be recalled, each call appends a new log to the teams log file.
-   *
+   * Scores the submission, can be recalled (e.g. admin re-scoring after a solver hotfix).
    * @param submissionId the submission we are scoring
    * @return new submission with score and status set
    */
@@ -128,7 +127,7 @@ public class ScoringService {
     }
 
     saveResult(sub);
-    appendToScoringLog(teamId, eventId, (long) sub.getLevelId(), logString);
+    writeScoringLog(submissionId, teamId, eventId, (long) sub.getLevelId(), logString);
 
     if ("SCORED".equalsIgnoreCase(sub.getStatus())) {
       leaderboardUpdateService.pushLeaderboardUpdate(
@@ -154,32 +153,21 @@ public class ScoringService {
   }
 
   @Transactional
-  public void appendToScoringLog(UUID teamId, UUID eventId, Long levelId, String logString) {
+  public void writeScoringLog(
+      Long submissionId, UUID teamId, UUID eventId, Long levelId, String logString) {
     String storageKey =
-        BlobPath.scoringLog(eventId.toString(), teamId.toString(), levelId.toString());
-    String content = "";
-    if (storageService.exists(blobConfig.getScoringLogsContainer(), storageKey)) {
-      try (InputStream in =
-          storageService.download(blobConfig.getScoringLogsContainer(), storageKey)) {
-        content = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-      } catch (IOException e) {
-        logger.warn(
-            "The existing scoring log {} could not be read, starting fresh: {}",
-            storageKey,
-            e.getMessage());
-      }
-    }
+        BlobPath.scoringLog(
+            eventId.toString(), teamId.toString(), levelId.toString(), submissionId.toString());
 
-    String newContent = content + logString;
-    byte[] contentBytes = newContent.getBytes(StandardCharsets.UTF_8);
+    byte[] contentBytes = logString.getBytes(StandardCharsets.UTF_8);
     storageService.uploadBytes(
         blobConfig.getScoringLogsContainer(), storageKey, contentBytes, "text/plain");
 
-    Optional<ScoringLog> old =
-        scoringLogRepo.findByTeamIdAndEventIdAndLevelId(teamId, eventId, levelId);
-    ScoringLog metaData = old.orElseGet(() -> new ScoringLog(teamId, eventId, levelId, storageKey));
-    metaData.setSubmissionCount(metaData.getSubmissionCount() + 1);
-    metaData.setLastUpdatedAt(Instant.now());
+    Optional<ScoringLog> existing = scoringLogRepo.findBySubmissionId(submissionId);
+    ScoringLog metaData =
+        existing.orElseGet(() -> new ScoringLog(submissionId, teamId, eventId, levelId, storageKey));
+    metaData.setStorageKey(storageKey);
+    metaData.setCreatedAt(Instant.now());
     scoringLogRepo.save(metaData);
   }
 
