@@ -156,6 +156,31 @@
     gap : 16px;
 }
 
+.upload-hint {
+    font-size: 0.8rem;
+    color: #6b7385;
+    margin-bottom: 8px;
+}
+
+.upload-filename {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #3a4357;
+    word-break: break-all;
+}
+
+.upload-error {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #d32f2f;
+}
+
+.upload-success {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #2e7d32;
+}
+
 ::ng-deep {
     .p-dialog .p-dialog-content{
         padding: 24px;
