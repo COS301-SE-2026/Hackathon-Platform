@@ -57,14 +57,7 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/actuator/health")
                     .permitAll()
-                    .requestMatchers("/api/storage/**")
-                    .permitAll()
-                    .requestMatchers("/api/scoring/**")
-                    .permitAll()
-                    .requestMatchers("/api/admin/**")
-                    .hasRole("ADMIN")
-                    .anyRequest()
-                    .authenticated())
+                    .anyRequest().authenticated())
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }
