@@ -1,9 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-overview',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './overview.component.html',
-  styleUrl: './overview.component.css',
+  styleUrl: './overview.component.scss'
 })
-export class OverviewTabComponent {}
+export class OverviewTabComponent {
+
+  @Input({ required: true }) event!: {
+    name: string;
+    description: string;
+    prizePool: string;
+    startDate: string;
+    endDate: string;
+    teamSize: number;
+    visibility: string;
+  };
+
+}

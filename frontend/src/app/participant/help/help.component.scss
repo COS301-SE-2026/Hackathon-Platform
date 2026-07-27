@@ -1,0 +1,148 @@
+
+.help-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px;
+}
+
+.help-banner {
+    padding: 80px 32px;
+    background-color: var(--primary-dark-navy);
+    border-radius: 14px;
+}
+
+.banner-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.banner-label {
+    display: inline-block;
+    color: var(--accent-lime-green);
+    font-size: 18px;
+    font-weight: 600;
+    padding: 8px 18px;
+    margin-bottom: 20px;
+  
+}
+
+.banner-content h1 {
+    color: var(--background-white);
+    font-size: 52px;
+    line-height: 60px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.banner-description {
+    max-width: 760px;
+    margin: 0 auto 40px;
+    color: var(--text-muted);
+    font-size: 18px;
+    line-height: 32px;
+}
+
+.help-docs {
+    max-width: 900px;
+    padding: 40px;
+    margin: 48px auto 0;
+    text-align: center;
+}
+
+
+.section-description {
+    max-width: 700px;
+    margin: 0 auto 32px;
+    color: var(--text-muted);
+    font-size: 17px;
+    line-height: 30px;
+}
+
+:host ::ng-deep .open-guide-btn.p-button {
+    min-width: 150px;
+    height: 44px;
+    padding: 0 20px;
+    background: var(--accent-bright-blue) !important;
+    border: 1px solid var(--accent-bright-blue) !important;
+    border-radius: 14px !important;
+    color: var(--background-white) !important;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+
+.help-faq {
+    max-width: 900px;
+    margin: 64px auto 0;
+    padding: 40px;
+}
+
+.faq-header {
+    margin: 0 auto 48px;
+    text-align: center;
+}
+
+.docs-label,.faq-label {
+    display: inline-block;
+    padding: 8px 18px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.docs-label {
+    color: var(--accent-teal);
+    background: rgba(1, 142, 154, 0.12);
+}
+
+.faq-label {
+    color: var(--accent-bright-blue);
+    background: rgba(25, 131, 194, 0.12);
+}
+
+.faq-description {
+    color: var(--text-muted);
+    font-size: 17px;
+    line-height: 30px;
+}
+
+.docs-header h2,.faq-header h2 {
+    margin: 0 0 20px;
+    color: var(--primary-dark-navy);
+    font-size: 36px;
+}
+:host ::ng-deep .p-accordionpanel {
+    margin-bottom: 18px;
+    border: 1px solid var(--border-silver);
+    background: var(--background-white);
+    
+}
+
+:host ::ng-deep .p-accordionheader-toggle {
+    min-height: 82px;
+    padding: 0 28px;
+    background: var(--background-white) !important;
+    color: var(--text-dark) !important;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+:host ::ng-deep .p-accordioncontent-content {
+    padding: 0 28px 28px;
+}
+
+:host ::ng-deep .p-accordioncontent-content p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 28px;
+}
+
+
+:host ::ng-deep .p-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}

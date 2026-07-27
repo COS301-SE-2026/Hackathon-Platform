@@ -23,19 +23,18 @@
 
         <div class="team-buttons">
 
-            <button
-                pButton
-                label="Create Team"
-                class="create-team-btn"
-                (click)="openCreateTeamDialog()"
-                >
+           <button
+                type="button"
+                class="primary-btn"
+                (click)="openCreateTeamDialog()">
+                Create Team
             </button>
 
             <button
-                pButton
-                label="Request to Join"
-                class="join-team-btn"
+                type="button"
+                class="secondary-btn"
                 (click)="openRequestToJoinDialog()">
+                Request To Join
             </button>
 
         </div>
@@ -61,12 +60,12 @@
             <p class="team-page-prompt">Manage your team for this hackathon.</p>
         </div>
 
-        <button
-            pButton
-            label="Leave Team"
-            icon="pi pi-sign-out"
-            class="leave-team-btn"
+       <button
+            type="button"
+            class="secondary-btn"
             (click)="leaveTeamDialogVisible = true">
+            <i class="pi pi-sign-out"></i>
+            Leave Team
         </button>
 
     </div>
@@ -81,12 +80,12 @@
 
                  <div class="join-code-display">{{ team.teamId }}</div>
 
-                <button
-                    pButton
-                    icon="pi pi-copy"
-                    label="Copy"
-                    class="copy-code-btn"
+               <button
+                    type="button"
+                    class="secondary-btn"
                     (click)="copyJoinCode()">
+                    <i class="pi pi-copy"></i>
+                    Copy
                 </button>
 
             </div>
@@ -97,14 +96,14 @@
 
             <div class="section-header">
 
-                <h3 class="team-members-section-title">Members</h3>
+                <h3 class="team-members-section-title">Team Members</h3>
 
                 <button
-                    pButton
-                    icon="pi pi-refresh"
-                    label="Refresh"
-                    class="refresh-team-btn"
+                    type="button"
+                    class="secondary-btn"
                     (click)="refreshTeamMembers()">
+                    <i class="pi pi-refresh"></i>
+                    Refresh
                 </button>
 
             </div>
@@ -181,19 +180,19 @@
             <div class="request-actions">
 
                 <button
-                    pButton
-                    label="Approve"
-                    class="approve-request-btn"
+                     type="button"
+                    class="success-btn"
                     (click)="approveRequest(request.userId)"
                     [disabled]="isLoading">
+                    Approve
                 </button>
 
                 <button
-                    pButton
-                    label="Reject"
-                    class="reject-request-btn"
+                     type="button"
+                    class="danger-btn"
                     (click)="rejectRequest(request.userId)"
                     [disabled]="isLoading">
+                    Reject
                 </button>
 
             </div>
@@ -238,18 +237,18 @@
     <div class="team-dialog-buttons">
 
         <button
-            pButton
-            label="Cancel"
-            class="team-dialog-secondary-btn"
+         type="button"
+            class="secondary-btn"
             (click)="createTeamDialogVisible = false">
+            Cancel
         </button>
 
         <button
-            pButton
-            label="Create Team"
-            class="team-dialog-primary-btn"
+            type="button"
+            class="primary-btn"
             (click)="onCreateTeam()"
             [disabled]="!newTeamName.trim() || isLoading">
+            Create Team
         </button>
 
     </div>
@@ -280,18 +279,17 @@
     <div class="team-dialog-buttons">
 
         <button
-            pButton
-            label="Cancel"
-            class="team-dialog-secondary-btn"
+             type="button"
+            class="secondary-btn"
             (click)="requestToJoinDialogVisible = false">
+            Cancel
         </button>
 
         <button
-            pButton
-            label="Send Request"
-            class="team-dialog-primary-btn"
+            class="primary-btn"
             (click)="joinTeam()"
             [disabled]="!teamIdToJoin.trim() || isLoading">
+            Send Request
         </button>
 
     </div>
@@ -312,18 +310,18 @@
     <div class="team-dialog-buttons">
 
         <button
-            pButton
-            label="Cancel"
-            class="team-dialog-secondary-btn"
+            type="button"
+            class="secondary-btn "
             (click)="leaveTeamDialogVisible = false">
+            Cancel
         </button>
 
-        <button
-            pButton
-            label="Leave Team"
-            class="team-dialog-leave-btn"
+            <button
+            type="button"
+            class="danger-btn"
             (click)="confirmLeaveTeam()"
             [disabled]="isLoading">
+            Leave Team
         </button>
     </div>
 

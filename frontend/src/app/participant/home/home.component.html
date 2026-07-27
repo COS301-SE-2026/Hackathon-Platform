@@ -58,17 +58,15 @@
 
           <div class="active-actions">
             <button
-              pButton
-              label="Go to Event"
-              class="go-event-btn"
+              class="primary-btn"
               (click)="goToEvent(event)">
+              Go to Event
             </button>
 
-            <button
-              pButton
-               label="View Team"
-               class="manage-team-btn"
-                (click)="goToMyTeam(event)">
+             <button
+              class="secondary-btn"
+              (click)="goToMyTeam(event)">
+              View Team
             </button>
           </div>
 
@@ -198,17 +196,17 @@
           </div>
 
           <div class="event-actions">
-          <p-button
-              label="Learn More"
-              class="view-event-btn"
-              (onClick)="goToEvent(event)">
-          </p-button>
+          <button
+              class="secondary-btn"
+              (click)="goToEvent(event)">
+              View Event
+            </button>
 
-          <p-button
-              label="Register"
-              class="register-btn"
-              (onClick)="createTeamForEvent(event)">
-          </p-button>
+        <button
+              class="primary-btn"
+              (click)="createTeamForEvent(event)">
+              Register
+            </button>
           </div>
         </div>
       }
