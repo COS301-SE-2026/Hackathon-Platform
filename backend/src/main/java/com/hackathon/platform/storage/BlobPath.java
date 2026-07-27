@@ -91,13 +91,15 @@ public final class BlobPath {
 
   /**
    * Storage key for a scoring log file. One file per submission.
+   *
    * @param eventId the event UUID
    * @param teamId the team UUID
    * @param levelId the level ID
    * @param submissionId the submission ID
    * @return storage key string
    */
-  public static String scoringLog(String eventId, String teamId, String levelId, String submissionId) {
+  public static String scoringLog(
+      String eventId, String teamId, String levelId, String submissionId) {
     return String.format(
         "logs/%s/%s/%s/%s/scoring_log.txt", eventId, teamId, levelId, submissionId);
   }

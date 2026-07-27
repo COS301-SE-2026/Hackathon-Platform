@@ -156,8 +156,7 @@ class ScoringServiceTest {
     scoringService.scoreSubmission(SUB_ID);
 
     ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
-    verify(storageS)
-        .uploadBytes(eq("scoring-logs"), keyCaptor.capture(), any(), eq("text/plain"));
+    verify(storageS).uploadBytes(eq("scoring-logs"), keyCaptor.capture(), any(), eq("text/plain"));
 
     // the key must be scoped to this submission id, so re-scoring another submission never
     // touches this one's blob
