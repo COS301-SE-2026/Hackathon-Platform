@@ -92,4 +92,17 @@ export class SubmissionService {
       {}
     );
   }
+
+  /**
+   * Admin-only: re-enqueues every submission for every event under a hackathon onto the async
+   * scoring queue, e.g. after a solver hotfix.
+   */
+  rescoreHackathon(
+    hackathonId: string
+  ): Observable<{ hackathonId: string; queuedCount: number; status: string }> {
+    return this.http.post<{ hackathonId: string; queuedCount: number; status: string }>(
+      `${this.scoringUrl}/admin/hackathons/${hackathonId}/rescore`,
+      {}
+    );
+  }
 }

@@ -91,6 +91,28 @@ public class ScoringController {
     return ResponseEntity.ok(submissionQueryService.getHistoryForTeamAndLevel(teamId, levelId));
   }
 
+
+
+  /**
+   * Admin bulk rescore: re-enqueues every submission for every event under a hackathon (e.g. after
+   * a solver hotfix)
+   * @param hackathonId the hackathon whose submissions should be rescored
+   */
+  @PostMapping("/admin/hackathons/{hackathonId}/rescore")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, Object>> rescoreHackathon(@PathVariable UUID hackathonId) {
+    List<String> records = scoringJobProducer.enqueueAllForHackathon(hackathonId);
+    return ResponseEntity.accepted()
+        .body(
+            Map.of(
+                "hackathonId",
+                hackathonId.toString(),
+                "queuedCount",
+                records.size(),
+                "status",
+                "QUEUED"));
+  }
+
   @GetMapping("/admin/recentsubmissions/{limit}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<SubmissionResponse>> getRecentSubmissions(
