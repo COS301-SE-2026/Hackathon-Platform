@@ -9,6 +9,7 @@ import { LeaderboardComponent } from './event-details-tabs/leaderboard/leaderboa
 import { ButtonModule } from 'primeng/button';
 import { TabsModule } from 'primeng/tabs';
 import { EventResponse, EventService } from '../../services/event.service';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-event-details',
@@ -31,6 +32,7 @@ export class EventDetailsComponent {
 
   private readonly route = inject(ActivatedRoute);
   private readonly eventService = inject(EventService);
+  private readonly storageService = inject(StorageService);
   private readonly change = inject(ChangeDetectorRef);
 
   activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'overview';
@@ -39,6 +41,9 @@ export class EventDetailsComponent {
 
   loading = false;
   eventError = '';
+
+  downloadingProblemStatement = false;
+  problemStatementError = '';
 
   event = {
     name: '',
@@ -95,6 +100,33 @@ export class EventDetailsComponent {
       teamSize: event.teamSizeLimit,
       visibility: event.visibility,
     };
+  }
+
+  downloadProblemStatement(): void {
+    if (!this.hackathonId || this.downloadingProblemStatement) {
+      return;
+    }
+
+    this.downloadingProblemStatement = true;
+    this.problemStatementError = '';
+
+    this.storageService.getProblemStatementUrl(this.hackathonId).subscribe({
+      next: ({ url }) => {
+        this.downloadingProblemStatement = false;
+        const link = document.createElement('a');
+        link.href = url;
+        link.click();
+        this.change.markForCheck();
+      },
+      error: (err) => {
+        this.downloadingProblemStatement = false;
+        this.problemStatementError =
+          err.status === 404
+            ? 'No problem statement has been uploaded for this hackathon yet.'
+            : 'The problem statement could not be downloaded.';
+        this.change.markForCheck();
+      },
+    });
   }
 
   private formatDate(date: Date): string {

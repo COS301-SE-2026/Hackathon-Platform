@@ -23,10 +23,16 @@
 
                 <button
                 pButton
-                label="Download Problem Statement"
+                [label]="downloadingProblemStatement ? 'Downloading...' : 'Download Problem Statement'"
+                [disabled]="downloadingProblemStatement"
+                (click)="downloadProblemStatement()"
                 class="download-btn">
                 </button>
         </div>
+
+        @if (problemStatementError) {
+          <p class="problem-statement-error">{{ problemStatementError }}</p>
+        }
 
         </div>
 

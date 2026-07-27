@@ -65,6 +65,12 @@ line-height: 1.5;
   flex-wrap: wrap;
 }
 
+.problem-statement-error {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-light);
+}
+
 :host ::ng-deep .banner-buttons .p-button {
   min-width: 150px;
   height: 44px;
