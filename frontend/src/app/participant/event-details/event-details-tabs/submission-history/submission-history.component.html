@@ -1,0 +1,65 @@
+
+ <div class="submission-history">
+
+        <div class="history-header">
+
+            <h2 class="history-title">Submission History</h2>
+
+        </div>
+
+       <p class="history-description"> View your submission history, track scoring progress, and download solver logs to review failed or completed submissions.</p>
+
+        @if (historyLoading) {
+
+            <div class="empty-history"><i class="pi pi-spin pi-spinner"></i> Loading submission history...</div>
+
+        } @else if (historyError) {
+
+            <div class="empty-history">{{ historyError }}</div>
+
+        } @else if (submissionHistory.length > 0) {
+
+            <p-table
+                [value]="submissionHistory"
+                class="submission-table" [paginator]="true" [rows]="10">
+
+                <ng-template pTemplate="header">
+
+                    <tr>
+                        <th scope="col">Uploaded</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Score</th>
+                        <th scope="col"></th>
+                    </tr>
+
+                </ng-template>
+
+                <ng-template pTemplate="body"
+                    let-submission>
+
+                    <tr>
+                        <td>{{ formatDate(submission.submittedAt) }}</td>
+                        <td>Level {{ submission.levelId }}</td>
+                        <td><span class="status-badge" [ngClass]="statusClass(submission.status)"> {{ statusLabel(submission.status) }}</span></td>
+                        <td>{{ submission.status === 'SCORED' ? submission.score : '--' }}</td>
+                        <td>
+
+                         <button
+                            type="button"
+                            class="secondary-btn"
+                            (click)="downloadLog(submission)">
+                            <i class="pi pi-download"></i>
+                            Log
+                        </button>
+
+                        </td>
+                    </tr>
+
+                </ng-template>
+
+            </p-table>
+
+        } @else { <div class="empty-history">No submissions yet</div> }
+
+    </div>

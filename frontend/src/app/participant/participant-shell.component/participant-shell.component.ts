@@ -2,14 +2,13 @@ import { Component, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { ButtonModule } from 'primeng/button';
-import { DrawerModule } from 'primeng/drawer';
+
 
 
 @Component({
   selector: 'app-participant-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule, ButtonModule, DrawerModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './participant-shell.component.html',
   styleUrls: ['./participant-shell.component.scss']
 })
