@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {ButtonModule} from 'primeng/button';
@@ -34,6 +34,7 @@ interface Submissions {
 export class DashboardComponent implements OnInit{
   private readonly eventService = inject(EventService);
   private readonly submissionService = inject(SubmissionService);
+  private readonly change = inject(ChangeDetectorRef);
 
   allEvents: Events[] = [];
   recentSubmissions: Submissions[] = [];
@@ -60,6 +61,7 @@ export class DashboardComponent implements OnInit{
       next: submissions => {
         this.recentSubmissions = submissions.map(sub => this.toDashboardSubmission(sub));
         this.submissionLoading = false;
+        this.change.markForCheck();
       },
       error: () => {
         this.submissionError = 'The recent submissions could not be loaded.';
