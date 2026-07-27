@@ -27,8 +27,20 @@
             <h1>Solver management</h1>
             <p class = "page-subtitle">Entelect Challenge 2026</p>
         </div>
-        <button class = "btn-primary" (click) = "scrollToUploadForm()">Upload new version</button>
+        <div class = "page-header-actions">
+            <button class = "btn-secondary" [disabled] = "isRescoring" (click) = "rescoreAllSubmissions()">
+                {{ isRescoring ? 'Queuing rescore…' : 'Rescore all submissions' }}
+            </button>
+            <button class = "btn-primary" (click) = "scrollToUploadForm()">Upload new version</button>
+        </div>
     </div>
+
+    @if (rescoreSuccessMessage) {
+        <p class = "rescore-message rescore-success">{{ rescoreSuccessMessage }}</p>
+    }
+    @if (rescoreError) {
+        <p class = "rescore-message rescore-error">{{ rescoreError }}</p>
+    }
 
     <div class = "upload-card">
         <h2 class = "card-title">Upload solver version</h2>
