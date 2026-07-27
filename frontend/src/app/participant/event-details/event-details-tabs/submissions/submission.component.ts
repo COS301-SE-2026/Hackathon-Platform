@@ -203,7 +203,11 @@ export class SubmissionsComponent {
           this.storageService
             .getLevelFileUrl(this.hackathonID, String(levelId), file.fileName)
             .subscribe({
-              next: res => window.open(res.url, '_blank'),
+              next: res => {
+                const link = document.createElement('a');
+                link.href = res.url;
+                link.click();
+              },
               error: () => alert(`"${file.fileName}" could not be downloaded.`),
             });
         });

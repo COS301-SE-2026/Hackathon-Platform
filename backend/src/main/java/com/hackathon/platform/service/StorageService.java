@@ -43,6 +43,19 @@ public interface StorageService {
   String generatePresignedUrl(String containerName, String storageKey, int expiryMinutes);
 
   /**
+   * Same as {@link #generatePresignedUrl(String, String, int)}, but forces the browser to save the
+   * file under {@code downloadFileName} instead of deriving a name from the storage key.
+   *
+   * @param containerName the Azure blob container name
+   * @param storageKey full storage key path
+   * @param expiryMinutes how long the URL remains valid
+   * @param downloadFileName the filename the browser should save the file as
+   * @return presigned SAS URL with a Content-Disposition override
+   */
+  String generatePresignedUrl(
+      String containerName, String storageKey, int expiryMinutes, String downloadFileName);
+
+  /**
    * Opens an InputStream for a blob (used internally by the scoring worker).
    *
    * @param containerName the Azure blob container name

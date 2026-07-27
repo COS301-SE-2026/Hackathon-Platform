@@ -105,7 +105,7 @@ public class StorageController {
     String storageKey = BlobPath.levelFile(hackathonId, levelId, filename);
     String url =
         storageService.generatePresignedUrl(
-            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
+            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes(), filename);
     return ResponseEntity.ok(Map.of("url", url));
   }
 
@@ -271,7 +271,10 @@ public class StorageController {
 
     String url =
         storageService.generatePresignedUrl(
-            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
+            config.getEventResourcesContainer(),
+            storageKey,
+            config.getSasExpiryMinutes(),
+            "problem_statement.pdf");
     return ResponseEntity.ok(Map.of("url", url, "storageKey", storageKey));
   }
 
@@ -398,18 +401,22 @@ public class StorageController {
   // Scoring Logs
 
   /**
-   * Returns a presigned SAS URL for downloading a scoring log.
+   * Returns a presigned SAS URL for downloading a single submission's scoring log.
    *
    * @param eventId the event UUID
    * @param teamId the team ID
    * @param levelId the level ID
+   * @param submissionId the submission ID
    * @return presigned download URL
    */
-  @GetMapping("/events/{eventId}/teams/{teamId}/levels/{levelId}")
+  @GetMapping("/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}")
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getScoringLogUrl(
-      @PathVariable String eventId, @PathVariable String teamId, @PathVariable String levelId) {
-    String storageKey = BlobPath.scoringLog(eventId, teamId, levelId);
+      @PathVariable String eventId,
+      @PathVariable String teamId,
+      @PathVariable String levelId,
+      @PathVariable String submissionId) {
+    String storageKey = BlobPath.scoringLog(eventId, teamId, levelId, submissionId);
     String url =
         storageService.generatePresignedUrl(
             config.getScoringLogsContainer(), storageKey, config.getSasExpiryMinutes());

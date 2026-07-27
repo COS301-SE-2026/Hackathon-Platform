@@ -26,6 +26,126 @@
      padding: 8px 14px;
     color: #c3d4e8;
     font-size: 0.86rem;
+
+.banner-left {
+  flex: 1;
+}
+
+.leave-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--background-white);
+  font-size: 14px;
+  font-weight: 700;
+
+  i {font-size: 16px;}
+}
+
+.event-title {
+  margin-bottom: 18px;
+  font-size: 36px;
+  text-transform: uppercase;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--background-white);
+}
+
+.event-description {
+  max-width: 700px;
+  margin-bottom: 36px;
+ font-size: 16px;
+ font-weight: 400;
+line-height: 1.5;
+  color: var(--text-light);
+}
+
+.banner-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.problem-statement-error {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+:host ::ng-deep .banner-buttons .p-button {
+  min-width: 150px;
+  height: 44px;
+  padding: 0 20px;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: 0;
+}
+
+:host ::ng-deep .register-btn {
+  background: var(--accent-bright-blue);
+  border: 1px solid var(--accent-bright-blue);
+  color: var(--background-white);
+}
+
+:host ::ng-deep .download-btn {
+  background: transparent;
+  border: 2px solid var(--background-white);
+  color: var(--background-white);
+}
+
+:host ::ng-deep .register-btn:hover {
+  background: var(--accent-bright-blue) !important;
+  border-color: var(--accent-bright-blue) !important;
+  color: var(--background-white) !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .download-btn:hover {
+  background: transparent !important;
+  color: var(--background-white) !important;
+  border: 2px solid var(--background-white);
+  box-shadow: none !important;
+}
+
+.banner-right {
+  width: 270px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.info-card {
+display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 20px;
+  background: transparent;
+  border: 1px solid var(--border-silver);
+}
+
+.info-icon {
+  flex-shrink: 0;
+  font-size: 20px;
+  color: var(--background-white);
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.info-content .label {
+ font-size: 12px;
     font-weight: 500;
     font-family: inherit;
     transition: background-color 0.15s, color 0.15s;
