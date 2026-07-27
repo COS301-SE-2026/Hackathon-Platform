@@ -8,6 +8,8 @@ export const routes: Routes = [
  { path: '', loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)},
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
+  {path: 'style-guide', loadComponent: () => import('./components/brand-style-guide/brand-style-guide.component').then( m => m.BrandStyleGuideComponent),},
+  
   {
     path: 'admin',
     component: AdminShellComponent,
@@ -58,9 +60,8 @@ export const routes: Routes = [
     component: ParticipantShellComponent,
     children: [
       { path: 'home', loadComponent: () => import('./participant/home/home.component').then(m => m.HomeComponent) },
+      {path: 'help',loadComponent: () =>import('./participant/help/help.component').then(m => m.HelpComponent) },
       {path: 'events/:eventId', loadComponent: () => import('./participant/event-details/event-details.component').then(m => m.EventDetailsComponent)},
-      { path: 'submissions', loadComponent: () => import('./participant/submission-history/submissionhistory.component').then(m => m.SubmissionHistoryComponent) },
-      { path: 'submit', loadComponent: () => import('./participant/submit/submit.component').then(m => m.SubmitComponent) },
       { path: '', redirectTo: 'home', pathMatch: 'full' }
     ]
   },

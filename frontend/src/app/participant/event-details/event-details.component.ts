@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { OverviewTabComponent } from './event-details-tabs/overview/overview.component';
 import { RulesTabComponent } from './event-details-tabs/rules/rules.component';
 import { SubmissionsComponent } from './event-details-tabs/submissions/submission.component';
+import { SubmissionHistoryComponent } from './event-details-tabs/submission-history/submission-history.component';
 import { MyTeamComponent } from './event-details-tabs/my-team/my-team.component';
 import { LeaderboardComponent } from './event-details-tabs/leaderboard/leaderboard.component';
 import { ButtonModule } from 'primeng/button';
@@ -22,7 +23,7 @@ import { StorageService } from '../../services/storage.service';
       RulesTabComponent,
       SubmissionsComponent,
       MyTeamComponent,
-      LeaderboardComponent, 
+      LeaderboardComponent, SubmissionHistoryComponent
     ],
   templateUrl: './event-details.component.html',
   styleUrls: ['./event-details.component.scss']
