@@ -7,7 +7,7 @@ import { TableModule } from 'primeng/table';
 import { LevelService, LevelResponse } from '../../../../services/level.service';
 import { TeamService } from '../../../../services/team.service';
 import { StorageService } from '../../../../services/storage.service';
-import { SubmissionService, SubmissionResponse } from '../../../../services/submission.service';
+import { SubmissionService } from '../../../../services/submission.service';
 
 @Component({
   selector: 'app-submissions',
@@ -68,9 +68,6 @@ export class SubmissionsComponent {
   submitError = '';
   submitSuccess = '';
 
-  submissionHistory: SubmissionResponse[] = [];
-  historyLoading = false;
-  historyError = '';
 
   loadLevels(): void {
     this.levelsLoading = true;
@@ -104,7 +101,6 @@ export class SubmissionsComponent {
         this.teamLoading = false;
         if (team && team.eventId === this.eventID) {
           this.teamId = team.teamId;
-          this.loadHistory();
         } else {
           this.teamId = null;
           this.teamError = 'Join or create a team for this event before submitting a solution.';
@@ -120,28 +116,7 @@ export class SubmissionsComponent {
     });
   }
 
-  loadHistory(): void {
-    if (!this.teamId) {
-      return;
-    }
-
-    this.historyLoading = true;
-    this.historyError = '';
-    this.change.detectChanges();
-
-    this.submissionService.getTeamHistory(this.teamId).subscribe({
-      next: history => {
-        this.submissionHistory = history;
-        this.historyLoading = false;
-        this.change.detectChanges();
-      },
-      error: () => {
-        this.historyError = 'Submission history could not be loaded.';
-        this.historyLoading = false;
-        this.change.detectChanges();
-      },
-    });
-  }
+  
 
   onSourceSelected(event: { files: File[] }): void {
     const file = event.files[0];
@@ -202,7 +177,6 @@ export class SubmissionsComponent {
           this.submitSuccess = 'Your solution was uploaded and queued for scoring.';
           this.removeSourceFile(sourceUploader);
           this.removeSolutionFile(solutionUploader);
-          this.loadHistory();
           this.change.detectChanges();
           
         },
@@ -229,7 +203,11 @@ export class SubmissionsComponent {
           this.storageService
             .getLevelFileUrl(this.hackathonID, String(levelId), file.fileName)
             .subscribe({
-              next: res => window.open(res.url, '_blank'),
+              next: res => {
+                const link = document.createElement('a');
+                link.href = res.url;
+                link.click();
+              },
               error: () => alert(`"${file.fileName}" could not be downloaded.`),
             });
         });
@@ -240,52 +218,7 @@ export class SubmissionsComponent {
 
   }
 
-  downloadLog(submission: SubmissionResponse): void {
-    if (!this.teamId) return;
 
-    this.submissionService.getSubmissionDetail(this.teamId, submission.submissionId).subscribe({
-      next: detail => {
-        const content = detail.scoringLog?.logContent ?? 'No log is available for this submission yet.';
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `submission-${submission.submissionId}-log.txt`;
-        link.click();
-        URL.revokeObjectURL(url);
-      },
-      error: () => alert('The log could not be downloaded.'),
-    });
-  }
-
-  statusLabel(status: string): string {
-    switch (status) {
-      case 'SCORED': return 'Completed';
-      case 'FAILED': return 'Failed';
-      case 'SCORING': return 'Scoring';
-      case 'QUEUED': return 'Queued';
-      default: return status;
-    }
-  }
-
-  statusClass(status: string): string {
-    switch (status) {
-      case 'SCORED': return 'completed';
-      case 'FAILED': return 'failed';
-      default: return 'processing';
-    }
-  }
-
-  formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleString('en-ZA', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-  }
 
   formatFileName(fileName: string): string {
 

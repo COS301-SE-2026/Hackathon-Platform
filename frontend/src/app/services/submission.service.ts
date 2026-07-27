@@ -5,11 +5,11 @@ import { Observable } from 'rxjs';
 export type SubmissionStatus = 'QUEUED' | 'SCORING' | 'SCORED' | 'FAILED';
 
 export interface ScoringLogResponse {
+  submissionId: number;
   teamId: string;
   eventId: string;
   storageKey: string;
-  submissionCount: number;
-  lastUpdatedAt: string;
+  createdAt: string;
   logContent: string | null;
 }
 
@@ -93,6 +93,19 @@ export class SubmissionService {
   scoreSubmission(submissionId: number): Observable<{ submissionId: string; status: string; recordId: string }> {
     return this.http.post<{ submissionId: string; status: string; recordId: string }>(
       `${this.scoringUrl}/submissions/${submissionId}/score`,
+      {}
+    );
+  }
+
+  /**
+   * Admin-only: re-enqueues every submission for every event under a hackathon onto the async
+   * scoring queue, e.g. after a solver hotfix.
+   */
+  rescoreHackathon(
+    hackathonId: string
+  ): Observable<{ hackathonId: string; queuedCount: number; status: string }> {
+    return this.http.post<{ hackathonId: string; queuedCount: number; status: string }>(
+      `${this.scoringUrl}/admin/hackathons/${hackathonId}/rescore`,
       {}
     );
   }

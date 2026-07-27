@@ -60,9 +60,8 @@ export const routes: Routes = [
     component: ParticipantShellComponent,
     children: [
       { path: 'home', loadComponent: () => import('./participant/home/home.component').then(m => m.HomeComponent) },
+      {path: 'help',loadComponent: () =>import('./participant/help/help.component').then(m => m.HelpComponent) },
       {path: 'events/:eventId', loadComponent: () => import('./participant/event-details/event-details.component').then(m => m.EventDetailsComponent)},
-      { path: 'submissions', loadComponent: () => import('./participant/submission-history/submissionhistory.component').then(m => m.SubmissionHistoryComponent) },
-      { path: 'submit', loadComponent: () => import('./participant/submit/submit.component').then(m => m.SubmitComponent) },
       { path: '', redirectTo: 'home', pathMatch: 'full' }
     ]
   },

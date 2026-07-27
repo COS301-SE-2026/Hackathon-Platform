@@ -1,6 +1,7 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.LeaderboardEntryResponse;
+import com.hackathon.platform.dto.ScoringLogResponse;
 import com.hackathon.platform.dto.SubmissionResponse;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.scoring.LeaderboardService;
@@ -44,7 +45,8 @@ public class ScoringController {
   /**
    * Triggers scoring for a submission: runs the active solver against the submission's output file
    * and persists score, status and logs. Safe to call again later (e.g. admin-triggered re-scoring
-   * after a solver hotfix) - old log entries are preserved, not overwritten.
+   * after a solver hotfix) - it only overwrites this submission's own log, no other submission's
+   * log is touched.
    *
    * @param submissionId the submission to score
    * @return the updated submission with score/status set
@@ -89,6 +91,28 @@ public class ScoringController {
     return ResponseEntity.ok(submissionQueryService.getHistoryForTeamAndLevel(teamId, levelId));
   }
 
+
+
+  /**
+   * Admin bulk rescore: re-enqueues every submission for every event under a hackathon (e.g. after
+   * a solver hotfix)
+   * @param hackathonId the hackathon whose submissions should be rescored
+   */
+  @PostMapping("/admin/hackathons/{hackathonId}/rescore")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, Object>> rescoreHackathon(@PathVariable UUID hackathonId) {
+    List<String> records = scoringJobProducer.enqueueAllForHackathon(hackathonId);
+    return ResponseEntity.accepted()
+        .body(
+            Map.of(
+                "hackathonId",
+                hackathonId.toString(),
+                "queuedCount",
+                records.size(),
+                "status",
+                "QUEUED"));
+  }
+
   @GetMapping("/admin/recentsubmissions/{limit}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<SubmissionResponse>> getRecentSubmissions(
@@ -97,8 +121,8 @@ public class ScoringController {
   }
 
   /**
-   * Full feedback for a single submission, including score, status and every scoring log entry
-   * (e.g. malformed output, rule violations, validation failures). Scoped to the owning team so a
+   * Full feedback for a single submission, including score, status and its scoring log (e.g.
+   * malformed output, rule violations, validation failures). Scoped to the owning team so a
    * participant can't view another team's feedback by guessing IDs.
    *
    * @param teamId the team UUID
@@ -112,6 +136,21 @@ public class ScoringController {
   }
 
   /**
+   * Just the scoring log for a single submission (score/status not included). Scoped to the owning
+   * team so a participant can't view another team's log by guessing IDs.
+   *
+   * @param teamId the team UUID
+   * @param submissionId the submission ID
+   */
+  @GetMapping("/teams/{teamId}/submissions/{submissionId}/log")
+  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
+  public ResponseEntity<ScoringLogResponse> getSubmissionLog(
+      @PathVariable UUID teamId, @PathVariable Long submissionId) {
+    ScoringLogResponse log = submissionQueryService.getScoringLogForSubmission(submissionId, teamId);
+    return log != null ? ResponseEntity.ok(log) : ResponseEntity.notFound().build();
+  }
+
+  /**
    * Admin variant: full feedback for any submission regardless of team, for support/auditing.
    *
    * @param submissionId the submission ID
@@ -121,6 +160,19 @@ public class ScoringController {
   public ResponseEntity<SubmissionResponse> getSubmissionDetailForAdmin(
       @PathVariable Long submissionId) {
     return ResponseEntity.ok(submissionQueryService.getSubmissionDetailForAdmin(submissionId));
+  }
+
+  /**
+   * Admin variant: just the scoring log for any submission regardless of team.
+   *
+   * @param submissionId the submission ID
+   */
+  @GetMapping("/admin/submissions/{submissionId}/log")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ScoringLogResponse> getSubmissionLogForAdmin(
+      @PathVariable Long submissionId) {
+    ScoringLogResponse log = submissionQueryService.getScoringLogForSubmissionAsAdmin(submissionId);
+    return log != null ? ResponseEntity.ok(log) : ResponseEntity.notFound().build();
   }
 
   @GetMapping("/events/{eventId}/levels/{levelId}/leaderboard")
