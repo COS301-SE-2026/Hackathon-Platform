@@ -5,6 +5,7 @@ import { RouterModule,Router, ActivatedRoute } from '@angular/router';
 import {ButtonModule} from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import {StorageService} from '../../../services/storage.service';
+import {SubmissionService} from '../../../services/submission.service';
 
 interface SolverVersion {
     version : string;
@@ -27,6 +28,7 @@ export class SolverComponent implements OnInit{
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly storageService = inject(StorageService);
+    private readonly submissionService = inject(SubmissionService);
 
     @ViewChild('uploadForm') uploadFormRef!: ElementRef<HTMLElement>;
     selectedFile: File | null = null;
@@ -35,6 +37,10 @@ export class SolverComponent implements OnInit{
     hackathonId ='';
     isUploading = false;
     uploadError = '';
+
+    isRescoring = false;
+    rescoreError = '';
+    rescoreSuccessMessage = '';
 
     versionHistory: SolverVersion[] = [];
 
@@ -124,6 +130,32 @@ onUploadAndActivate(): void{
     });
 
   
+}
+
+rescoreAllSubmissions(): void {
+    if (!this.hackathonId) {
+        alert('Hackathon ID not available.');
+        return;
+    }
+    if (!confirm('Rescore all submissions for this hackathon? This will re-queue every submission across every event for async rescoring.')) {
+        return;
+    }
+
+    this.isRescoring = true;
+    this.rescoreError = '';
+    this.rescoreSuccessMessage = '';
+
+    this.submissionService.rescoreHackathon(this.hackathonId).subscribe({
+        next: (response) => {
+            this.isRescoring = false;
+            this.rescoreSuccessMessage = `${response.queuedCount} submission(s) queued for rescoring.`;
+        },
+        error: (error) => {
+            console.error('Rescore failed:', error);
+            this.isRescoring = false;
+            this.rescoreError = error.error?.message || 'Rescore failed. Please try again';
+        }
+    });
 }
 
   goBack(): void {
