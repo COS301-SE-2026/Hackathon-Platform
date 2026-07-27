@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common'; 
 import { AuthService } from '../../services/auth.service';
@@ -47,6 +47,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly eventService = inject(EventService);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly change = inject(ChangeDetectorRef);
 
   userFirstName = '';
   isLoadingEvents = false;
@@ -129,11 +130,13 @@ get filteredOpenEvents(): OpenEventView[] {
       next: (events) => {
         this.isLoadingEvents = false;
         this.openEvents = events.map((event) => this.toOpenEventView(event));
+        this.change.markForCheck();
 },
       error: (error) => {
         this.isLoadingEvents = false;
         console.error('Error loading open events:', error);
         this.errorMessage = 'Could not load open events.';
+        this.change.markForCheck();
       }
     });
   }
@@ -159,6 +162,7 @@ get filteredOpenEvents(): OpenEventView[] {
         this.activeEvents = [];
       
       }
+      this.change.markForCheck();
     },
     
     error: (err) => {
@@ -167,7 +171,7 @@ get filteredOpenEvents(): OpenEventView[] {
       console.error('Error loading active events:', err);
       this.errorMessage = 'Could not load your active events. Please refresh the page';
       this.activeEvents = [];
-     
+      this.change.markForCheck();     
     }
   });
   }
