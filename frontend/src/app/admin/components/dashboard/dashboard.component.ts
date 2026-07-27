@@ -49,6 +49,88 @@ export class DashboardComponent implements OnInit{
 
   ngOnInit(): void {
     this.loadEvents();
+    this.loadRecentSubmissions();
+  }
+
+  private loadRecentSubmissions(): void {
+    this.submissionLoading = true;
+    this.submissionError = '';
+
+    this.submissionService.getResentSubmission(20).subscribe({
+      next: submissions => {
+        this.recentSubmissions = submissions.map(sub => this.toDashboardSubmission(sub));
+        this.submissionLoading = false;
+      },
+      error: () => {
+        this.submissionError = 'The recent submissions could not be loaded.';
+        this.submissionLoading = false;
+      }
+    });
+  }
+
+  private toDashboardSubmission(sub: SubmissionResponse): Submissions {
+    return{
+      submissionId: sub.submissionId,
+  team: this.shortId(sub.teamId),
+  event: 'Event',
+  level: `Level ${sub.levelId}`,
+  score: sub.score === null || sub.score === undefined
+    ? '-'
+    : Number(sub.score).toFixed(2),
+  status: this.formatStatus(sub.status),
+  statusClass: this.getSubmissionStatusClass(sub.status),
+  time: this.formatRelativeTime(sub.submittedAt),
+    };
+  }
+
+  private getSubmissionStatusClass(status: string): string {
+    switch (status?.toUpperCase()) {
+      case 'SCORED':
+        return 'scored';
+      case 'FAILED':
+        return 'error';
+      case 'QEUED':
+      case 'SCORING':
+        return 'pending';
+      default:
+        return 'pending';
+    }
+  }
+
+  private formatRelativeTime(value: string): string {
+    const submittedAt = new Date(value);
+    
+    if(Number.isNaN(submittedAt.getTime())) {
+      return 'unknown';
+    }
+
+    const diffMin = Math.max(0, Math.floor((Date.now() - submittedAt.getTime()) / 60000));
+
+    if(diffMin < 1) {
+      return 'just now';
+    }
+
+    if (diffMin < 60) {
+      return `${diffMin}m ago`;
+    }
+
+    const diffHour = Math.floor(diffMin / 60);
+
+    if (diffHour < 24) {
+      return `${diffHour}h ago`;
+    }
+
+    const diffDays = Math.floor(diffHour / 24);
+
+    return `${diffDays}d ago`;
+  }
+
+  private shortId(value: string): string {
+    if(!value) {
+      return '-';
+    }
+
+    return value.slice(0,8);
   }
 
   private loadEvents(): void {
