@@ -91,11 +91,10 @@ public class ScoringController {
     return ResponseEntity.ok(submissionQueryService.getHistoryForTeamAndLevel(teamId, levelId));
   }
 
-
-
   /**
    * Admin bulk rescore: re-enqueues every submission for every event under a hackathon (e.g. after
    * a solver hotfix)
+   *
    * @param hackathonId the hackathon whose submissions should be rescored
    */
   @PostMapping("/admin/hackathons/{hackathonId}/rescore")
@@ -146,7 +145,8 @@ public class ScoringController {
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<ScoringLogResponse> getSubmissionLog(
       @PathVariable UUID teamId, @PathVariable Long submissionId) {
-    ScoringLogResponse log = submissionQueryService.getScoringLogForSubmission(submissionId, teamId);
+    ScoringLogResponse log =
+        submissionQueryService.getScoringLogForSubmission(submissionId, teamId);
     return log != null ? ResponseEntity.ok(log) : ResponseEntity.notFound().build();
   }
 

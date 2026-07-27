@@ -105,7 +105,10 @@ public class StorageController {
     String storageKey = BlobPath.levelFile(hackathonId, levelId, filename);
     String url =
         storageService.generatePresignedUrl(
-            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes(), filename);
+            config.getEventResourcesContainer(),
+            storageKey,
+            config.getSasExpiryMinutes(),
+            filename);
     return ResponseEntity.ok(Map.of("url", url));
   }
 
