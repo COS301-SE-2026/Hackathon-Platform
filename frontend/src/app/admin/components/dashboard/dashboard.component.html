@@ -11,33 +11,37 @@
     <div class = "stats-grid">
       <div class = "stat-card">
         <p class = "stat-label"> Active events</p>
-        <p class = "stat-value purple">4</p>
+        <p class = "stat-value purple">{{ activeEvents }}</p>
       </div>
        <div class = "stat-card">
         <p class = "stat-label">Total Participants</p>
-        <p class = "stat-value green">1,234</p>
+        <p class = "stat-value green">{{ totalParticipants }}</p>
        </div>
         <div class = "stat-card">
         <p class = "stat-label">Submissions today</p>
-        <p class = "stat-value orange">456</p>
+        <p class = "stat-value orange">{{ submissionsToday }}</p>
         </div>
     </div>
 
         <div class = "section">
           <h2 class = "section-title">All events</h2>
           <div class ="events-list-card">
-            @if (allEvents.length === 0){
-              <div class = "empty-state">No events created yet</div>
+            @if (eventLoading){
+              <div class = "empty-state">Loading events...</div>
+            } @else if (eventError){
+            <div class="empty-state">{{ eventError }}</div>
+            } @else if (allEvents.length === 0) {
+              <div class="empty-state">No events have been loaded yet</div>
             } @else {
-            @for (event of allEvents; track event.name){
-              <div class = "event-item">
-                <div>
-                  <p class = "event-name">{{ event.name}}</p>
-                  <p class = "event-meta">{{ event.teams}} teams &middot; ends in {{ event.endsIn }}</p>
+              @for (events of allEvents; track events.eventId) {
+                <div class="event-item">
+                  <div>
+                    <p class="event-name">{{ events.name }}</p>
+                    <p class="event-meta">{{ events.meta }} &middot; {{ events.timeLabel }}</p>
+                  </div>
                 </div>
-              </div>
+              }
             }
-          }
           </div>
         </div>
 

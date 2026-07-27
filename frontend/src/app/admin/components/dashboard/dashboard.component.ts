@@ -1,7 +1,28 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {ButtonModule} from 'primeng/button';
+
+import { EventResponse, EventService } from '../../../services/event.service';
+import { SubmissionResponse, SubmissionService } from '../../../services/submission.service';
+
+interface Events {
+  eventId: string;
+  name: string;
+  meta: string;
+  timeLabel: string;
+}
+
+interface Submissions {
+  submissionId: number;
+  team: string;
+  event: string;
+  level: string;
+  score: string;
+  status: string;
+  statusClass: string;
+  time: string;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -10,16 +31,103 @@ import {ButtonModule} from 'primeng/button';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
-  allEvents = [
-    { name: 'Entelect Challenge 2024', teams: 324, endsIn: '2d 4h' },
-    { name: 'ML Hackathon Q2',         teams: 128, endsIn: '5d'    },
-    { name: 'Internal Dev Challenge',  teams: 12,  endsIn: '10d'   },
-    { name: 'Spring Code Sprint',      teams: 56,  endsIn: '14d'   },
-  ];
+export class DashboardComponent implements OnInit{
+  private readonly eventService = inject(EventService);
+  private readonly submissionService = inject(SubmissionService);
 
-  recentSubmissions = [
-    { team: 'ByteForce',    event: 'Entelect Challenge', level: 'Level 2', score: 400, status: 'Scored', time: '2m ago' },
-    { team: 'NullPointers', event: 'Entelect Challenge', level: 'Level 1', score: 200, status: 'Error',  time: '2m ago' },
-  ];
+  allEvents: Events[] = [];
+  recentSubmissions: Submissions[] = [];
+
+  activeEvents = 0
+  totalParticipants = 1234; //WIP
+  submissionsToday = 12; //WIP
+
+  eventLoading = false;
+  submissionLoading = false;
+  eventError = '';
+  submissionError = '';
+
+  ngOnInit(): void {
+    this.loadEvents();
+  }
+
+  private loadEvents(): void {
+    this.eventLoading = true;
+    this.eventError = '';
+
+    this.eventService.getMyEvents().subscribe({
+      next: events => {
+        this.activeEvents = events.filter(event => this.isActiveEvent(event)).length;
+        this.allEvents = events.map(event => this.toDashboardEvent(event));
+        this.eventLoading = false;
+      },
+      error: () => {
+        this.eventError = "Could not load events."
+        this.eventLoading = false;
+      }
+    });
+  }
+
+  private isActiveEvent(event: EventResponse): boolean {
+    const status = event.status?.toLocaleUpperCase();
+    return status === 'ACTIVE' || status ==='ONGOING';
+  }
+
+  private toDashboardEvent(event: EventResponse): Events {
+    return {
+      eventId: event.eventId,
+      name: event.name,
+      meta: `${this.formatStatus(event.status)} · ${event.visibility} · team limit ${event.teamSizeLimit}`,
+      timeLabel: this.getEventTimeLabel(event),
+    }
+  }
+
+  private formatStatus(status: string) : string {
+    if(!status) {
+      return 'Unknown';
+    }
+
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  }
+
+  private getEventTimeLabel(event: EventResponse): string {
+    const start = new Date(event.startDateTime);
+
+    if(Number.isNaN(start.getTime())) {
+      return 'date unavailable';
+    }
+
+    const end = new Date(start.getTime() + Number(event.duration || 0) * 60 * 60 * 1000);
+    const now = Date.now();
+
+    if (now < start.getTime()) {
+      return `starts in ${this.formatDuration(start.getTime() - now)}`;
+    }
+    if (now < end.getTime()) {
+      return `end in ${this.formatDuration(end.getTime() - now)}`
+    }
+
+    return 'ended';
+  }
+
+  private formatDuration(ms: number): string {
+    const totMin = Math.max(0, Math.floor(ms/60000));
+    const days = Math.floor(totMin / 1440);
+    const hours = Math.floor((totMin % 1440) / 60);
+    const min = totMin % 60;
+
+    if (days > 0 && hours > 0) {
+      return `${days}d ${hours}h`;
+    }
+
+    if (days > 0) {
+      return `${days}d`;
+    }
+
+    if (hours > 0) {
+      return `${hours}h`;
+    }
+
+    return `${min}m`;
+  }
 }

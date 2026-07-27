@@ -85,6 +85,10 @@ export class SubmissionService {
     );
   }
 
+  getResentSubmission(limit = 20): Observable<SubmissionResponse[]> {
+    return this.http.get<SubmissionResponse[]>(`${this.scoringUrl}/admin/recentSubmissions/${limit}`);
+  }
+
   /** Manually (re-)triggers scoring for a submission, e.g. after a solver hotfix. */
   scoreSubmission(submissionId: number): Observable<{ submissionId: string; status: string; recordId: string }> {
     return this.http.post<{ submissionId: string; status: string; recordId: string }>(
