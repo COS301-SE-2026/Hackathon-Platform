@@ -1,4 +1,4 @@
-import { Component, Input, inject, OnInit } from '@angular/core';
+import { Component, Input,ChangeDetectorRef , inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
@@ -28,6 +28,7 @@ export class MyTeamComponent implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly change = inject(ChangeDetectorRef);
 
   private eventID = '';
 
@@ -97,6 +98,7 @@ export class MyTeamComponent implements OnInit {
           this.teamBelongsToOtherEvent = false;
           this.resetTeamState();
         }
+        this.change.markForCheck();
       },
       error: (error) => {
         this.isLoadingTeam = false;
@@ -108,6 +110,7 @@ export class MyTeamComponent implements OnInit {
         } else {
           this.errorMessage = 'Could not load your team. Please refresh.';
         }
+        this.change.markForCheck();
       }
     });
   }
@@ -126,6 +129,7 @@ export class MyTeamComponent implements OnInit {
         if (this.isTeamLead) {
           this.loadPendingRequests(teamId);
         }
+        this.change.markForCheck();
       },
       error: (error) => {
         console.error('Error loading team members:', error);
@@ -138,6 +142,7 @@ export class MyTeamComponent implements OnInit {
     this.teamService.getJoinRequests(teamId).subscribe({
       next: (requests) => {
         this.pendingRequests = requests.map(r => this.toDisplayMember(r));
+        this.change.markForCheck();
       },
       error: (error) => {
         console.error('Error loading join requests:', error);
@@ -162,6 +167,7 @@ export class MyTeamComponent implements OnInit {
         this.successMessage = `Team "${this.newTeamName.trim()}" created successfully!`;
         this.newTeamName = '';
         this.loadUserTeam();
+        this.change.markForCheck();
       },
       error: (error) => {
         this.isLoading = false;
@@ -173,6 +179,7 @@ export class MyTeamComponent implements OnInit {
         } else {
           this.errorMessage = error.error?.message || 'Failed to create team. Please try again.';
         }
+        this.change.markForCheck();
       }
     });
   }
@@ -207,6 +214,7 @@ openRequestToJoinDialog(): void {
         this.successMessage = 'Join request sent! Waiting for the team lead to approve.';
         this.teamIdToJoin = '';
         this.requestToJoinDialogVisible = false;
+        this.change.markForCheck();
       },
       error: (error) => {
         this.isLoading = false;
@@ -222,6 +230,7 @@ openRequestToJoinDialog(): void {
         } else {
           this.errorMessage = error.error?.message || 'Failed to send join request.';
         }
+        this.change.markForCheck();
       }
     });
   }
@@ -242,11 +251,13 @@ openRequestToJoinDialog(): void {
         this.isLoading = false;
         this.successMessage = approve ? 'Member approved!' : 'Request rejected.';
         this.loadTeamMembers(this.team.teamId);
+        this.change.markForCheck();
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Error processing join request:', error);
         this.errorMessage = error.error?.message || 'Failed to process request.';
+        this.change.markForCheck();
       }
     });
   }
@@ -263,11 +274,13 @@ openRequestToJoinDialog(): void {
         this.successMessage = 'You have left the team.';
         this.hasTeam = false;
         this.resetTeamState();
+        this.change.markForCheck();
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Error leaving team:', error);
         this.errorMessage = error.error?.message || 'Failed to leave team.';
+        this.change.markForCheck();
       }
     });
   }

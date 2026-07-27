@@ -192,7 +192,6 @@ public class ScoringController {
   @GetMapping(
       value = "/events/{eventId}/leaderboard/update",
       produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public SseEmitter updateEventLeaderboard(@PathVariable UUID eventId) {
     return leaderboardUpdateService.subscribe(eventId);
   }
