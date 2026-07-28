@@ -82,4 +82,8 @@ export class EventService {
       `${this.baseUrl}/admin/events/${eventId}/status`
     );
   }
+
+  createEventForHackathon(hackathonId: string, eventData: EventRequest): Observable<EventResponse> {
+    return this.http.post<EventResponse>(`${this.baseUrl}/hackathon/${hackathonId}/events`, eventData);
+  }
 }
