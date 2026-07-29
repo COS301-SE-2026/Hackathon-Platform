@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 
 export interface EventRequest {
   name: string;
@@ -33,7 +32,7 @@ export interface EventResponse {
 })
 export class EventService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/api`;
+  private readonly baseUrl = 'http://localhost:8080/api';
 
   createEvent(eventData: EventRequest): Observable<EventResponse> {
     return this.http.post<EventResponse>(`${this.baseUrl}/admin/events`, eventData);
@@ -82,5 +81,9 @@ export class EventService {
     return this.http.get<{ eventId: string; status: string; visibility: string }>(
       `${this.baseUrl}/admin/events/${eventId}/status`
     );
+  }
+
+  createEventForHackathon(hackathonId: string, eventData: EventRequest): Observable<EventResponse> {
+    return this.http.post<EventResponse>(`${this.baseUrl}/hackathon/${hackathonId}/events`, eventData);
   }
 }

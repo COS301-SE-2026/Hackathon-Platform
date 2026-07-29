@@ -106,10 +106,7 @@ public class SubmissionQueryService {
                 () ->
                     new IllegalArgumentException(
                         "The submission could not be for this team: " + submissionId));
-    return scoringLogRepo
-        .findBySubmissionId(sub.getId())
-        .map(this::toLogResponse)
-        .orElse(null);
+    return scoringLogRepo.findBySubmissionId(sub.getId()).map(this::toLogResponse).orElse(null);
   }
 
   /** Admin variant: the scoring log for any submission regardless of team. */
@@ -119,8 +116,7 @@ public class SubmissionQueryService {
   }
 
   /**
-   * Every log a team has for a level in an event, one per submission, most recent submission
-   * first.
+   * Every log a team has for a level in an event, one per submission, most recent submission first.
    */
   @Transactional(readOnly = true)
   public List<ScoringLogResponse> getLevelLogsForTeam(UUID teamId, UUID eventId, Long levelId) {

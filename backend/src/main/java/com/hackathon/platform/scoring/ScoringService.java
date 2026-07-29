@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Scores a single submission in the following order:
  *
- * 1. Looks for the submission, solver version, levels input files. 2. Downloads the solver
+ * <p>1. Looks for the submission, solver version, levels input files. 2. Downloads the solver
  * script, participants output file, level input from blob storage. 3. calls the SolverRunner with a
  * hard timeout. 4. adds score and status to the submission. 5. writes a scoring log for this
  * submission to blob storage and records its metadata in the scoringlogs table.
@@ -62,6 +62,7 @@ public class ScoringService {
 
   /**
    * Scores the submission, can be recalled (e.g. admin re-scoring after a solver hotfix).
+   *
    * @param submissionId the submission we are scoring
    * @return new submission with score and status set
    */
@@ -165,7 +166,8 @@ public class ScoringService {
 
     Optional<ScoringLog> existing = scoringLogRepo.findBySubmissionId(submissionId);
     ScoringLog metaData =
-        existing.orElseGet(() -> new ScoringLog(submissionId, teamId, eventId, levelId, storageKey));
+        existing.orElseGet(
+            () -> new ScoringLog(submissionId, teamId, eventId, levelId, storageKey));
     metaData.setStorageKey(storageKey);
     metaData.setCreatedAt(Instant.now());
     scoringLogRepo.save(metaData);
