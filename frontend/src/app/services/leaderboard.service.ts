@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface LeaderboardEntry {
     rank: number;
@@ -13,7 +14,7 @@ export interface LeaderboardEntry {
 @Injectable({ providedIn: 'root' })
 export class LeaderboardService {
     private readonly http = inject(HttpClient);
-    private readonly baseUrl = 'http://localhost:8080/api/scoring';
+    private readonly baseUrl = `${environment.apiUrl}/api/scoring`;
 
     getEventLeaderboard(eventId: string): Observable<LeaderboardEntry[]> {
         return this.http.get<LeaderboardEntry[]>(`${this.baseUrl}/events/${eventId}/leaderboard`);
