@@ -37,3 +37,25 @@ test.describe('Login', () => {
         await expect(page).toHaveURL(/\/participant\/home/);
     });
 });
+
+test.describe('register', () => {
+    test('register user', async ({ page }) => {
+        const register = new RegisterPage(page);
+        await register.goto();
+        await register.register({
+            firstName: 'Varun',
+            lastName: 'Dhawan',
+            email: `narednraModi@india.com`,
+            password: 'BharatMata1941',
+            confirmPassword: 'BharatMata1941'
+        });
+        await expect(page).toHaveURL(/\/participant\/home/);
+    });
+
+    test('goes to sign in from link', async ({ page }) => {
+        const register = new RegisterPage(page);
+        await register.goto();
+        await register.signinLink.click();
+        await expect(page).toHaveURL(/\/login/);
+    });
+});
