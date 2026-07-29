@@ -1,8 +1,8 @@
-import {text, expect} from '@playwright/test'
+import {test, expect} from '@playwright/test'
 import * as path from 'path';
 import {AdminHackathonsPage} from './pages/admin-hackathons.page';
 
-test.use ({storageState: path.resolve(_dirname,'../playwright/.auth/admin.json')});
+test.use ({storageState: path.resolve(__dirname,'../playwright/.auth/admin.json')});
 
 test.describe('Admin: Hackathons', () => {
     test('creates a new hackathon',async ({page})=>{
@@ -10,13 +10,14 @@ test.describe('Admin: Hackathons', () => {
         const name = `E2E hackathon ${Date.now()}`;
 
         await hackathons.goto();
-        await hackathons.createHackathon(name, 'Created by Playwrite e2e test');
+        await hackathons.createHackathon(name, 'Created by Playwright e2e test');
         await hackathons.expectHackathonVisible(name);
     });
 
     test('creates a hackathon with problem statement',async ({page})=>{
         const hackathons = new AdminHackathonsPage(page);
         const name = `E2E hackathon PDF ${Date.now()}`;
+        const pdfPath = path.resolve(__dirname,'fixtures/sample.pdf');
 
         await hackathons.goto();
         await hackathons.createHackathon(name, 'With problem statement',pdfPath);
@@ -26,7 +27,7 @@ test.describe('Admin: Hackathons', () => {
     test('edits an existing hackathon',async ({page})=>{
         const hackathons = new AdminHackathonsPage(page);
         const name = `E2E Edit Test ${Date.now()}`;
-        const editedName = `${name}(edited)`;
+        const editedName = `${name} (edited)`;
 
         await hackathons.goto();
         await hackathons.createHackathon(name, 'Original description');
@@ -61,15 +62,15 @@ test.describe('Admin: Hackathons', () => {
         await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/events$);
         await page.goBack();
 
-        await hackathons.navigateToEvents(name);
-        await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/create$);
+        await hackathons.navigateToCreateEvent(name);
+        await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/events\/create$/);
         await page.goBack();
 
-        await hackathons.navigateToEvents(name);
+        await hackathons.navigateToLevels(name);
         await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/levels$);
         await page.goBack();
 
-        await hackathons.navigateToEvents(name);
+        await hackathons.navigateToSolver(name);
         await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/solver$);
         await page.goBack();
 
@@ -84,7 +85,7 @@ test.describe('Admin: Hackathons', () => {
         await hackathons.goto();
         const count = await hackathons.getHackathonCount();
         if(count > 0){
-            const names = await hackathons.getHackathonCount();
+            const names = await hackathons.getHackathonNames();
             for (const name of names){
                 page.once('dialog',dialog => dialog.accept());
                 await hackathons.deleteHackathon(name);
