@@ -34,3 +34,60 @@ jobs:
           login-server: ${{ env.REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and push(backend)
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: docker/backend.Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/backend:${{ steps.tag.outputs.tag }}
+            ${{ env.REGISTRY }}/backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push(frontend)
+        uses: docker/build-and-push-action@v6
+        with:
+          context: frontend
+          file: docker/frontend.Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/frontend:${{ steps.tag.outputs.tag }}
+            ${{ env.REGISTRY }}/frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Azure container
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build-and-push
+    environment: production
+    steps:
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_LOGIN }}
+
+      - name: Deploy backend
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
+          containerAppName: hackathon-backend
+          imageToDeploy: ${{ env.REGISTRY }}/backend:${{ needs.build-and-push.outputs.image-tag }}
+
+      - name: Deploy frontend
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
+          containerAppName: hackathon-frontend
+          imageToDeploy: ${{ env.REGISTRY }}//frontend:${{ needs.build-and-push.image-tag }}
+
+      - name: Check health after deploy
+        run: |
+          sleep 20
+          BACKEND_URL=$(az containerapp show --name hackathon-backend \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          curl -f "https://${BACKEND_URL}/actuator/health" || exit 1
