@@ -27,10 +27,6 @@ jobs:
       - name: Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Image tag
-        id: tag
-        run: echo "tag=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-
       - name: Compute image tag
         id: tag
         run: echo "tag=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
