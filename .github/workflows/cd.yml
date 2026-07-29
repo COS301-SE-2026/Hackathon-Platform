@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  REGISTRY: hackathonplatformcr.azure.io
+  REGISTRY: hackathonplatformcr.azurecr.io
   RESOURCE_GROUP: hackathon-platform-rg
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
     name: Build and Push
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    output:
+    outputs:
       image-tag: ${{ steps.tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +48,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Build and push(frontend)
-        uses: docker/build-and-push-action@v6
+        uses: docker/build-push-action@v6
         with:
           context: frontend
           file: docker/frontend.Dockerfile
@@ -82,7 +82,7 @@ jobs:
         with:
           resourceGroup: ${{ env.RESOURCE_GROUP }}
           containerAppName: hackathon-frontend
-          imageToDeploy: ${{ env.REGISTRY }}//frontend:${{ needs.build-and-push.image-tag }}
+          imageToDeploy: ${{ env.REGISTRY }}/frontend:${{ needs.build-and-push.outputs.image-tag }}
 
       - name: Check health after deploy
         run: |
