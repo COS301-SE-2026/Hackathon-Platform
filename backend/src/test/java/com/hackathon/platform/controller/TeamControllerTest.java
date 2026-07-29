@@ -87,7 +87,7 @@ class TeamControllerTest {
     event.setDuration(4000);
     event.setStartDateTime(OffsetDateTime.now().plusDays(7));
     event.setTeamSizeLimit((short) 3);
-    event.setHackathon(savedHackathon);
+    event.setHackathon(savedHackathon.getHackathonId());
 
     Event savedEvent = eventRepository.saveAndFlush(event);
     eventId = savedEvent.getEventId();

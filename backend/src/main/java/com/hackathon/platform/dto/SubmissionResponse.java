@@ -9,7 +9,7 @@ public class SubmissionResponse {
 
   private Long submissionId;
   private UUID teamId;
-  private Long levelId;
+  private short levelId;
   private Long solverVersionId;
   private BigDecimal score;
   private String status;
@@ -23,7 +23,7 @@ public class SubmissionResponse {
   public SubmissionResponse(
       Long submissionId,
       UUID teamId,
-      Long levelId,
+      short levelId,
       Long solverVersionId,
       BigDecimal score,
       String status,
@@ -60,11 +60,11 @@ public class SubmissionResponse {
     this.teamId = teamId;
   }
 
-  public Long getLevelId() {
+  public short getLevelId() {
     return levelId;
   }
 
-  public void setLevelId(Long levelId) {
+  public void setLevelId(short levelId) {
     this.levelId = levelId;
   }
 

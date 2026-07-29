@@ -34,6 +34,16 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
 
     steps:
       - name: Checkout code
@@ -62,7 +72,7 @@ jobs:
           SPRING_FLYWAY_ENABLED: true
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        run: mvn clean verify -e -Dtest="!AdminEventControllerTest","!TeamControllerTest","!AuthControllerTest","!StorageControllerIntegrationTest"
+        run: mvn clean verify -e
 
       - name: Upload surefire reports
         uses: actions/upload-artifact@v4
@@ -70,13 +80,6 @@ jobs:
         with:
           name: backend-surefire-reports
           path: backend/target/surefire-reports/
-
-      - name: Upload test coverage report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: backend-coverage
-          path: backend/target/site/jacoco/
 
   # Front end - Build + Unit Tests
   #Install Angular dependancies, runs Karma/Jasmine unit tests and builds the app
@@ -119,36 +122,4 @@ jobs:
         with:
           name: frontend-build
           path: frontend/dist/
-
-  #SonarCloud
-  # Scans backend and frontend, posts quality gate result to PR
-
-  #sonarcloud:
-  #  name: SonarCloud Analysis
-  #  runs-on: ubuntu-latest
-  #  needs: [ backend, frontend ]
-
-   # steps:
-    #  - name: Checkout code
-     #   uses: actions/checkout@v4
-      #  with:
-       #   fetch-depth: 0
-
-      #- name: Set up Java 21
-       # uses: actions/setup-java@v4
-        #with:
-         # java-version: '21'
-          #distribution: 'temurin'
-          #cache: maven
-
-      #- name: Download backend coverage
-       # uses: actions/download-artifact@v4
-        #with:
-         # name: backend-coverage
-          #path: backend/target/site/jacoco/
-
-      #- name: SonarCloud Scans
-       # uses: SonarSource/sonarcloud-github-action@v2
-        #env:
-         # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          #SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          

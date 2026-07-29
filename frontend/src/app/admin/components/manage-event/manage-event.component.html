@@ -1,12 +1,17 @@
 <div class="manage-event-page">
+
+   <div class = "back-navigation" >
+      <button class = "back-btn" (click) = "goBack()">
+      </button>
+    </div>
   <div class="page-header">
     <div>
-      <h1>Manage Event</h1>
-      <p class="page-subtitle">Edit event details or change status</p>
+      <h1>Manage Hackathon</h1>
+      <p class="page-subtitle">Edit hackathon details and upload resources</p>
     </div>
     <div class="header-actions">
-      <button class="btn-secondary" (click)="goBack()">Back to Events</button>
-      <button class="btn-danger" (click)="deleteEvent()">Delete Event</button>
+      <button class="btn-secondary" (click)="goBack()">Back to Hackathons</button>
+      <button class="btn-danger" (click)="deleteHackathon()">Delete Hackathon</button>
     </div>
   </div>
 
@@ -20,7 +25,7 @@
       <div class="success-message">{{ successMessage }}</div>
     }
 
-    <form (ngSubmit)="updateEvent()" class="event-form">
+    <form (ngSubmit)="updateHackathon()" class="event-form">
       <div class="form-section">
         <h2 class="section-heading">Basic Information</h2>
 
@@ -34,16 +39,14 @@
             <label for="startDate">Start date & time *</label>
             <input id="startDate" type="datetime-local" [(ngModel)]="form.startDate" name="startDate" required />
           </div>
-          <div class="form-group">
-            <label for="duration">Duration (hours) *</label>
-            <input id="duration" type="number" [(ngModel)]="form.duration" name="duration" min="1" required />
+
+            <div class="form-group">
+            <label for="endDate">End date & time *</label>
+            <input id="endDate" type="datetime-local" [(ngModel)]="form.endDate" name="endDate" required />
           </div>
+
         </div>
 
-        <div class="form-group">
-          <label for="teamSizeLimit">Team size limit *</label>
-          <input id="teamSizeLimit" type="number" [(ngModel)]="form.teamSizeLimit" name="teamSizeLimit" min="1" required />
-        </div>
 
         <div class="form-group">
           <label for="description">Description</label>
@@ -63,17 +66,10 @@
             <span class="toggle-desc">Registration key required</span>
           </button>
         </div>
-
-        @if (form.visibility === 'PRIVATE') {
-          <div class="form-group" style="margin-top: 16px;">
-            <label for="registrationKey">Registration Key *</label>
-            <input id="registrationKey" type="text" [(ngModel)]="form.registrationKey" name="registrationKey" placeholder="Enter registration key" required />
-          </div>
-        }
       </div>
 
       <div class="form-section">
-        <h2 class="section-heading">Event Status</h2>
+        <h2 class="section-heading">Hackathon Status</h2>
         <div class="form-row">
           <div class="form-group">
             <label for="status">Status</label>
@@ -94,9 +90,9 @@
       </div>
 
       <div class="form-section">
-        <h2 class="section-heading">Event Resources</h2>
+        <h2 class="section-heading">Hackathon Resources</h2>
         <div class="form-group">
-          <label for="problemStatementFile">Problem Statement PDF (for participants)</label>
+          <label for="problemStatementFile">Problem Statement PDF</label>
           <div
             class="file-upload-area"
             role="button"

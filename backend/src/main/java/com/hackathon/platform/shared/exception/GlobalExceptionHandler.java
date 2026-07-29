@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
@@ -110,5 +111,18 @@ public class GlobalExceptionHandler {
                 "status", 500,
                 "error", ex.getMessage(),
                 "timestamp", LocalDateTime.now().toString()));
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(
+            Map.of(
+                "status",
+                403,
+                "error",
+                "Access denied",
+                "timestamp",
+                LocalDateTime.now().toString()));
   }
 }

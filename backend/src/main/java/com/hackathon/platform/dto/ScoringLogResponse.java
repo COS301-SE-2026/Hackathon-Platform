@@ -3,34 +3,39 @@ package com.hackathon.platform.dto;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Response shape for a team's scoring log. Contains metadata about the log file plus the full text
- * content downloaded from blob storage.
- */
+/** Response shape for a single submission's scoring log. */
 public class ScoringLogResponse {
 
+  private Long submissionId;
   private UUID teamId;
-  private UUID hackathonId;
+  private UUID eventId;
   private String storageKey;
-  private int submissionCount;
-  private Instant lastUpdatedAt;
-  private String logContent; // full text of the log file from blob
+  private Instant createdAt;
+  private String logContent;
 
   public ScoringLogResponse() {}
 
   public ScoringLogResponse(
+      Long submissionId,
       UUID teamId,
-      UUID hackathonId,
+      UUID eventId,
       String storageKey,
-      int submissionCount,
-      Instant lastUpdatedAt,
+      Instant createdAt,
       String logContent) {
+    this.submissionId = submissionId;
     this.teamId = teamId;
-    this.hackathonId = hackathonId;
+    this.eventId = eventId;
     this.storageKey = storageKey;
-    this.submissionCount = submissionCount;
-    this.lastUpdatedAt = lastUpdatedAt;
+    this.createdAt = createdAt;
     this.logContent = logContent;
+  }
+
+  public Long getSubmissionId() {
+    return submissionId;
+  }
+
+  public void setSubmissionId(Long submissionId) {
+    this.submissionId = submissionId;
   }
 
   public UUID getTeamId() {
@@ -41,12 +46,12 @@ public class ScoringLogResponse {
     this.teamId = teamId;
   }
 
-  public UUID getHackathonId() {
-    return hackathonId;
+  public UUID getEventId() {
+    return eventId;
   }
 
-  public void setHackathonId(UUID hackathonId) {
-    this.hackathonId = hackathonId;
+  public void setEventId(UUID eventId) {
+    this.eventId = eventId;
   }
 
   public String getStorageKey() {
@@ -57,20 +62,12 @@ public class ScoringLogResponse {
     this.storageKey = storageKey;
   }
 
-  public int getSubmissionCount() {
-    return submissionCount;
+  public Instant getCreatedAt() {
+    return createdAt;
   }
 
-  public void setSubmissionCount(int submissionCount) {
-    this.submissionCount = submissionCount;
-  }
-
-  public Instant getLastUpdatedAt() {
-    return lastUpdatedAt;
-  }
-
-  public void setLastUpdatedAt(Instant lastUpdatedAt) {
-    this.lastUpdatedAt = lastUpdatedAt;
+  public void setCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
   }
 
   public String getLogContent() {

@@ -23,8 +23,11 @@ public class Submission {
   @Column(name = "team_id", nullable = false)
   private UUID teamId;
 
+  @Column(name = "event_id", nullable = false)
+  private UUID eventId;
+
   @Column(name = "level_id", nullable = false)
-  private Long levelId;
+  private short levelId;
 
   @Column(name = "solver_version_id", nullable = false)
   private Long solverVersionId;
@@ -68,7 +71,7 @@ public class Submission {
   // Constructor with required fields
   public Submission(
       UUID teamId,
-      Long levelId,
+      short levelId,
       Long solverVersionId,
       String sourceCodeStorageKey,
       String outputStorageKey) {
@@ -96,11 +99,19 @@ public class Submission {
     this.teamId = teamId;
   }
 
-  public Long getLevelId() {
+  public UUID getEventId() {
+    return eventId;
+  }
+
+  public void setEventId(UUID eventId) {
+    this.eventId = eventId;
+  }
+
+  public short getLevelId() {
     return levelId;
   }
 
-  public void setLevelId(Long levelId) {
+  public void setLevelId(short levelId) {
     this.levelId = levelId;
   }
 

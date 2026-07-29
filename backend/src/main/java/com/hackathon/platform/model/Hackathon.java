@@ -5,10 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,11 +14,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "hackathon", schema = "public")
 public class Hackathon {
-
-  @Getter
-  @Setter
-  @OneToMany(mappedBy = "hackathon")
-  private List<Event> events;
 
   @Setter
   @Getter
@@ -43,4 +36,9 @@ public class Hackathon {
   @Getter
   @Column(name = "description")
   private String description;
+
+  @Setter
+  @Getter
+  @Column(name = "problem_statement_storage_key")
+  private String problemStatementStorageKey;
 }

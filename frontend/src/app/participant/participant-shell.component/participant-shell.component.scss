@@ -1,120 +1,121 @@
+
+:host {
+    display: block;
+    font-family: 'Inter', -apple-system, sans-serif;
+}
+
 .participant-shell {
-  min-height : 100vh;
-  background-color: #0d1b3e;
-  display: flex ;
-  flex-direction: column  ;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f4f6f9;
 }
 
-
-.navbar {
-  display : flex;
-  align-items: center;
-  justify-content  : space-between ;
-  background-color: #132248;
-  padding : 0 28px;
-  height: 68px;
-  flex-shrink: 0 ;
+.topnav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 28px;
+margin-bottom: 30px;
+    background: #0c1830;
 }
 
-.navbar-left { display: flex; align-items: center; gap: 14px; }
+.topnav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-badge {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #a1bf24;
+    color: #13192d;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
 
 .brand {
-  font-size : 1.3rem;
-  font-weight: 700 ;
-  .brand-h { color: #ffffff; }
-  .brand-p { color: #5fae11; margin-left: 6px; }
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.01em;
+  .brand-accent {color: #a1bf24;}
 }
 
-.user-badge {
-  border : 1px solid #e2e8f0;
-  border-radius: 20px ;
-  padding  : 4px 16px;
-  font-size: 0.85rem;
-  //color: #e2e8f0;
-  background-color : #ffffff ;
-  color: #1e293b ;
-}
-
-.navbar-links {
-  display: flex ;
-  gap : 36px;
+.topnav-links {
+ display: flex;
+ gap: 30px;
 
   a {
-    color: #cbd5e1 ;
-    font-size : 0.95rem;
-    font-weight : 500;
-    text-decoration: none;
-    padding-bottom : 3px;
-    border-bottom : 2px solid transparent;
-    transition : color 0.15s, border-color 0.15s ;
+ padding: 6px 2px;
+ color: #a9b4c7;
+ text-decoration: none;
+ font-size: 0.9rem;
+  font-weight: 500;
+   border-bottom: 2px solid transparent;
+ transition: color .15s, border-color .15s;
 
-    &:hover, &.active { color: #ffffff; border-bottom-color: #5fae11; }
-  }
-}
-
-
-.event-body { display: flex; flex: 1; }
-
-
-.sidebar {
-  width: 178px;
-  background-color : #132248;
-  padding : 22px 14px ;
-  flex-shrink: 0  ;
-
-  .event-label {
-    font-size: 0.7rem ;
-    font-weight : 600;
-    color: #94a3b8;
-    letter-spacing  : 0.07em;
-    margin-bottom: 14px ;
-  }
-
-  .sidebar-nav {
-    list-style: none ;
-    display : flex;
-    flex-direction: column;
-    gap : 2px;
-
-    a {
-      display: block ;
-      color: #cbd5e1;
-      font-size : 0.875rem;
-      padding: 8px 10px  ;
-      border-radius: 6px;
-      text-decoration : none ;
-      transition: background-color 0.15s ;
-
-      &:hover, &.active {
-        background-color: rgba(255, 255, 255, 0.12);
-        color: #ffffff;
-      }
+ &:hover,&.active {
+ color: #fff;
+ border-bottom-color: #1983c2;
+        }
     }
-  }
 }
 
+.topnav-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
 
-.event-content {
-  flex: 1 ;
-  padding : 28px 30px;
-  color: #ffffff ;
-  overflow-y : auto;
-  background-color: #1a3a6b ;
+.participant-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: #1983c2;
+    color: white;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+}
+
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #018e9a;
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 700;
 }
 
 .logout-btn {
-  background-color: transparent;
-  border: 1px solid #ef4444;
-  color: #ef4444;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-left: 20px;
-  &:hover {
-    background-color: #ef4444;
-    color: white;
-  }
+    padding: 6px 14px;
+    border: 1px solid #c0392b;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color .15s, color .15s;
+      background: transparent;
+    color: #c0392b;
+    font-family: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+
+    &:hover {
+        background: #c0392b;
+        color: white;
+    }
 }
+
+.participant-content {
+    flex: 1;
+}
+

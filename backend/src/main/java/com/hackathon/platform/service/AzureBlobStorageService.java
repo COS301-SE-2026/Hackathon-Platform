@@ -76,14 +76,30 @@ public class AzureBlobStorageService implements StorageService {
   /** {@inheritDoc} */
   @Override
   public String generatePresignedUrl(String containerName, String storageKey, int expiryMinutes) {
+    return generatePresignedUrl(containerName, storageKey, expiryMinutes, null);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String generatePresignedUrl(
+      String containerName, String storageKey, int expiryMinutes, String downloadFileName) {
     try {
       BlobClient blobClient = getBlobClient(containerName, storageKey);
       BlobSasPermission permission = new BlobSasPermission().setReadPermission(true);
       BlobServiceSasSignatureValues sasValues =
           new BlobServiceSasSignatureValues(
               OffsetDateTime.now().plusMinutes(expiryMinutes), permission);
+
+      if (downloadFileName != null && !downloadFileName.isBlank()) {
+        sasValues.setContentDisposition("attachment; filename=\"" + downloadFileName + "\"");
+      }
+
       String sasToken = blobClient.generateSas(sasValues);
-      LOG.debug("Generated presigned URL: container={} storageKey={}", containerName, storageKey);
+      LOG.debug(
+          "Generated presigned URL: container={} storageKey={} downloadFileName={}",
+          containerName,
+          storageKey,
+          downloadFileName);
       return blobClient.getBlobUrl() + "?" + sasToken;
     } catch (Exception e) {
       LOG.error(
