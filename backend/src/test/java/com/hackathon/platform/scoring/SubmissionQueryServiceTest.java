@@ -185,6 +185,22 @@ class SubmissionQueryServiceTest {
   }
 
   @Test
+  void getSubmissionDetail_whenLogDownloadFails_throwsStorageException() {
+    Submission sub = buildSubmission(5L, Instant.parse("2026-01-01T00:00:00Z"));
+    ScoringLog log = buildScoringLog(5L, "log-key-123");
+
+    when(subRepo.findByIdAndTeamId(5L, TEAM_ID)).thenReturn(Optional.of(sub));
+    when(scoringLogRepo.findBySubmissionId(5L)).thenReturn(Optional.of(log));
+    when(azureBlob.getScoringLogsContainer()).thenReturn("container");
+    when(storageService.download(eq("container"), eq("log-key-123")))
+        .thenThrow(new StorageException("Download failed"));
+
+    assertThatThrownBy(() -> subQueryService.getSubmissionDetail(5L, TEAM_ID))
+        .isInstanceOf(StorageException.class)
+        .hasMessageContaining("Download failed");
+  }
+
+  @Test
   void getSubmissionDetails_forWrongTeam_throwsIllegalArgumentException() {
     when(subRepo.findByIdAndTeamId(5L, TEAM_ID)).thenReturn(Optional.empty());
 
@@ -211,6 +227,51 @@ class SubmissionQueryServiceTest {
     assertThat(res.getScoringLog()).isNotNull();
     assertThat(res.getScoringLog().getLogContent()).isEqualTo(logContent);
   }
+
+  @Test
+  void getSubmissionDetailForAdmin_throwsExceptionWhenSubmissionNotFound() {
+    when(subRepo.findById(99L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> subQueryService.getSubmissionDetailForAdmin(99L))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("The following submission could not be found: ");
+  }
+
+  @Test
+  void getSubmissionDetailForAdmin_whenLogDownloadFails_throwsStorageException() {
+    Submission sub = buildSubmission(9L, Instant.parse("2026-01-01T00:00:00Z"));
+    ScoringLog log = buildScoringLog(9L, "admin-log-key");
+
+    when(subRepo.findById(9L)).thenReturn(Optional.of(sub));
+    when(scoringLogRepo.findBySubmissionId(9L)).thenReturn(Optional.of(log));
+    when(azureBlob.getScoringLogsContainer()).thenReturn("container");
+    when(storageService.download(eq("container"), eq("admin-log-key")))
+        .thenThrow(new StorageException("Download failed"));
+
+    assertThatThrownBy(() -> subQueryService.getSubmissionDetailForAdmin(9L))
+        .isInstanceOf(StorageException.class)
+        .hasMessageContaining("Download failed");
+  }
+
+  @Test
+  void getScoringLogForSubmission_returnsLogWhenExists() throws IOException {
+    Submission sub = buildSubmission(7L, Instant.parse("2026-01-01T00:00:00Z"));
+    ScoringLog log = buildScoringLog(7L, "log-key-789");
+    String logContent = "Scoring log content";
+
+    when(subRepo.findByIdAndTeamId(7L, TEAM_ID)).thenReturn(Optional.of(sub));
+    when(scoringLogRepo.findBySubmissionId(7L)).thenReturn(Optional.of(log));
+    when(azureBlob.getScoringLogsContainer()).thenReturn("container");
+    when(storageService.download(eq("container"), eq("log-key-789")))
+        .thenReturn(new ByteArrayInputStream(logContent.getBytes()));
+
+    ScoringLogResponse result = subQueryService.getScoringLogForSubmission(7L, TEAM_ID);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getSubmissionId()).isEqualTo(7L);
+    assertThat(result.getLogContent()).isEqualTo(logContent);
+  }
+
 
   private Submission buildSubmission(Long id, Instant submittedAt) {
     Submission sub =
