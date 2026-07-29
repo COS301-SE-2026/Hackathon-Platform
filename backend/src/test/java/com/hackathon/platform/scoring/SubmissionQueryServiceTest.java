@@ -272,6 +272,70 @@ class SubmissionQueryServiceTest {
     assertThat(result.getLogContent()).isEqualTo(logContent);
   }
 
+  @Test
+  void getScoringLogForSubmission_returnsNullWhenNoLogExists() {
+    Submission sub = buildSubmission(7L, Instant.parse("2026-01-01T00:00:00Z"));
+
+    when(subRepo.findByIdAndTeamId(7L, TEAM_ID)).thenReturn(Optional.of(sub));
+    when(scoringLogRepo.findBySubmissionId(7L)).thenReturn(Optional.empty());
+
+    ScoringLogResponse result = subQueryService.getScoringLogForSubmission(7L, TEAM_ID);
+
+    assertThat(result).isNull();
+  }
+
+  @Test
+  void getScoringLogForSubmission_throwsExceptionWhenSubmissionNotFound() {
+    when(subRepo.findByIdAndTeamId(7L, TEAM_ID)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> subQueryService.getScoringLogForSubmission(7L, TEAM_ID))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("The submission could not be for this team: ");
+  }
+
+  @Test
+  void getScoringLogForSubmission_whenLogDownloadFails_throwsStorageException() {
+    Submission sub = buildSubmission(7L, Instant.parse("2026-01-01T00:00:00Z"));
+    ScoringLog log = buildScoringLog(7L, "log-key-789");
+
+    when(subRepo.findByIdAndTeamId(7L, TEAM_ID)).thenReturn(Optional.of(sub));
+    when(scoringLogRepo.findBySubmissionId(7L)).thenReturn(Optional.of(log));
+    when(azureBlob.getScoringLogsContainer()).thenReturn("container");
+    when(storageService.download(eq("container"), eq("log-key-789")))
+        .thenThrow(new StorageException("Download failed"));
+
+    assertThatThrownBy(() -> subQueryService.getScoringLogForSubmission(7L, TEAM_ID))
+        .isInstanceOf(StorageException.class)
+        .hasMessageContaining("Download failed");
+  }
+
+  @Test
+  void getScoringLogForSubmissionAsAdmin_returnsLogWhenExists() throws IOException {
+    ScoringLog log = buildScoringLog(8L, "admin-log-key-456");
+    String logContent = "Admin scoring log";
+
+    when(scoringLogRepo.findBySubmissionId(8L)).thenReturn(Optional.of(log));
+    when(azureBlob.getScoringLogsContainer()).thenReturn("container");
+    when(storageService.download(eq("container"), eq("admin-log-key-456")))
+        .thenReturn(new ByteArrayInputStream(logContent.getBytes()));
+
+    ScoringLogResponse result = subQueryService.getScoringLogForSubmissionAsAdmin(8L);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getSubmissionId()).isEqualTo(8L);
+    assertThat(result.getLogContent()).isEqualTo(logContent);
+  }
+
+  @Test
+  void getScoringLogForSubmissionAsAdmin_returnsNullWhenNoLogExists() {
+    when(scoringLogRepo.findBySubmissionId(8L)).thenReturn(Optional.empty());
+
+    ScoringLogResponse result = subQueryService.getScoringLogForSubmissionAsAdmin(8L);
+
+    assertThat(result).isNull();
+  }
+
+  
 
   private Submission buildSubmission(Long id, Instant submittedAt) {
     Submission sub =
