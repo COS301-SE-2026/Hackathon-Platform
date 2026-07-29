@@ -335,7 +335,74 @@ class SubmissionQueryServiceTest {
     assertThat(result).isNull();
   }
 
-  
+  @Test
+  void getScoringLogForSubmissionAsAdmin_whenLogDownloadFails_throwsStorageException() {
+    ScoringLog log = buildScoringLog(8L, "admin-log-key-456");
+
+    when(scoringLogRepo.findBySubmissionId(8L)).thenReturn(Optional.of(log));
+    when(azureBlob.getScoringLogsContainer()).thenReturn("container");
+    when(storageService.download(eq("container"), eq("admin-log-key-456")))
+        .thenThrow(new StorageException("Download failed"));
+
+    assertThatThrownBy(() -> subQueryService.getScoringLogForSubmissionAsAdmin(8L))
+        .isInstanceOf(StorageException.class)
+        .hasMessageContaining("Download failed");
+  }
+
+  @Test
+  void getLevelLogsForTeam_returnsLogsMetadataOnly() {
+    ScoringLog log1 = buildScoringLog(1L, "key1");
+    ScoringLog log2 = buildScoringLog(2L, "key2");
+
+    when(scoringLogRepo.findByTeamIdAndEventIdAndLevelIdOrderByCreatedAtDesc(
+        TEAM_ID, EVENT_ID, 1L))
+        .thenReturn(List.of(log1, log2));
+
+    List<ScoringLogResponse> result = 
+        subQueryService.getLevelLogsForTeam(TEAM_ID, EVENT_ID, 1L);
+
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0).getSubmissionId()).isEqualTo(1L);
+    assertThat(result.get(0).getLogContent()).isNull();
+  }
+
+  @Test
+  void getLevelLogsForTeam_returnsEmptyListWhenNoLogs() {
+    when(scoringLogRepo.findByTeamIdAndEventIdAndLevelIdOrderByCreatedAtDesc(
+        TEAM_ID, EVENT_ID, 1L))
+        .thenReturn(List.of());
+
+    List<ScoringLogResponse> result = 
+        subQueryService.getLevelLogsForTeam(TEAM_ID, EVENT_ID, 1L);
+
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  void getAllLevelLogsForTeam_returnsAllLogsMetadataOnly() {
+    ScoringLog log1 = buildScoringLog(1L, "key1");
+    ScoringLog log2 = buildScoringLog(2L, "key2");
+
+    when(scoringLogRepo.findByTeamIdAndEventId(TEAM_ID, EVENT_ID))
+        .thenReturn(List.of(log1, log2));
+
+    List<ScoringLogResponse> result = 
+        subQueryService.getAllLevelLogsForTeam(TEAM_ID, EVENT_ID);
+
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0).getLogContent()).isNull();
+  }
+
+  @Test
+  void getAllLevelLogsForTeam_returnsEmptyListWhenNoLogs() {
+    when(scoringLogRepo.findByTeamIdAndEventId(TEAM_ID, EVENT_ID))
+        .thenReturn(List.of());
+
+    List<ScoringLogResponse> result = 
+        subQueryService.getAllLevelLogsForTeam(TEAM_ID, EVENT_ID);
+
+    assertThat(result).isEmpty();
+  }
 
   private Submission buildSubmission(Long id, Instant submittedAt) {
     Submission sub =
