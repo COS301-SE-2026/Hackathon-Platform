@@ -64,5 +64,59 @@ class ScoringJobProducerTest {
         IllegalArgumentException.class, () -> producer.enqueue(99L));
   }
 
-  
+  @Test
+  void enqueueAllForHackathon_enqueuesAllSubmissionsWithActiveSolverVersion() {
+    ScoringQueueProperties props = new ScoringQueueProperties();
+    props.setStreamKey("scoring:jobs");
+    
+    producer = new ScoringJobProducer(redisTemplate, props, submissionRepo, solverVersionRepo);
+    
+    UUID hackathonId = UUID.randomUUID();
+    Long activeSolverVersionId = 1L;
+    Long submissionId1 = 100L;
+    Long submissionId2 = 101L;
+    
+    com.hackathon.platform.model.SolverVersion solverVersion = 
+        new com.hackathon.platform.model.SolverVersion();
+    solverVersion.setId(activeSolverVersionId);
+    
+    when(solverVersionRepo.findByHackathonIdAndIsActiveTrue(hackathonId))
+        .thenReturn(Optional.of(solverVersion));
+    
+    Submission sub1 = new Submission();
+    sub1.setId(submissionId1);
+    Submission sub2 = new Submission();
+    sub2.setId(submissionId2);
+    
+    when(submissionRepo.findById(submissionId1)).thenReturn(Optional.of(sub1));
+    when(submissionRepo.findById(submissionId2)).thenReturn(Optional.of(sub2));
+    when(submissionRepo.findIdsByHackathonId(hackathonId))
+        .thenReturn(java.util.List.of(submissionId1, submissionId2));
+    when(redisTemplate.opsForStream()).thenReturn((StreamOperations) streamOps);
+    when(streamOps.add(eq(props.getStreamKey()), any(Map.class)))
+        .thenReturn(RecordId.of("1-1"))
+        .thenReturn(RecordId.of("1-2"));
+
+    java.util.List<String> records = producer.enqueueAllForHackathon(hackathonId);
+
+    assertThat(records).hasSize(2);
+    verify(submissionRepo).updateSolverVersionForHackathon(hackathonId, activeSolverVersionId);
+    verify(submissionRepo).save(sub1);
+    verify(submissionRepo).save(sub2);
+    verify(streamOps, times(2)).add(eq(props.getStreamKey()), any(Map.class));
+  }
+
+  @Test
+  void enqueueAllForHackathon_throwsWhenNoActiveSolverVersion() {
+    ScoringQueueProperties props = new ScoringQueueProperties();
+    producer = new ScoringJobProducer(redisTemplate, props, submissionRepo, solverVersionRepo);
+    
+    UUID hackathonId = UUID.randomUUID();
+    
+    when(solverVersionRepo.findByHackathonIdAndIsActiveTrue(hackathonId))
+        .thenReturn(Optional.empty());
+
+    org.junit.jupiter.api.Assertions.assertThrows(
+        IllegalStateException.class, () -> producer.enqueueAllForHackathon(hackathonId));
+  }
 }
