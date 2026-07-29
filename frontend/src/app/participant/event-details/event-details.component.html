@@ -24,7 +24,7 @@
 
 <div class="event-content">
 
-    @if (activeTab === 'overview') {<app-overview [event]="event" />}
+    @if (activeTab === 'overview') {<app-overview [event]="event" [hackathonId]="hackathonId" /> }
 
     @if (activeTab === 'rules') {<app-rules/>}
 
