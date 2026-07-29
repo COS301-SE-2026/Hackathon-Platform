@@ -1,24 +1,32 @@
 
-.event-banner {
-  background: var(--primary-dark-navy);
-  margin: -28px -30px 40px;
-  width: calc(100% + 60px);
+.event-subnav {
+    background-color: #062951;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.banner-content,
-.event-body {
-  max-width: 869px;
-  margin: 0 auto;
+.event-subnav-inner {
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    height: 52px;
+    overflow-x: auto;
 }
 
-.banner-content {
-  padding: 48px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 64px;
+.event-tabs {
+    display: flex;
+    gap: 6px;
 }
 
+.event-tabs button {
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+     padding: 8px 14px;
+    color: #c3d4e8;
+    font-size: 0.86rem;
+}
 
 .banner-left {
   flex: 1;
@@ -63,6 +71,12 @@ line-height: 1.5;
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
+}
+
+.problem-statement-error {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-light);
 }
 
 :host ::ng-deep .banner-buttons .p-button {
@@ -134,48 +148,29 @@ display: flex;
 .info-content .label {
  font-size: 12px;
     font-weight: 500;
-    line-height: 1.3;
-    letter-spacing: .08em;
-    color: var(--text-muted);
+    font-family: inherit;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover {
+        background-color: #0a3a6b;
+        color: #ffffff;
+    }
+
 }
 
-.info-content .value {
-  margin-top: 4px;
-  font-size: 16px;
-font-weight: 600;
-line-height: 1.3;
-  color: var(--background-white);
+.event-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 28px 60px;
 }
 
+@media (max-width: 900px) {
 
+    .event-subnav-inner {
+        padding: 0 20px;
+    }
 
-:host ::ng-deep .p-tabs,
-:host ::ng-deep .p-tablist,
-:host ::ng-deep .p-tabpanels {
-  background: var(--background-white);
-}
-
-:host ::ng-deep .p-tablist {
-  border-bottom: 2px solid var(--border-silver);
-}
-
-:host ::ng-deep .p-tab {
-  padding: 18px 22px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--primary-dark-navy); 
-}
-
-:host ::ng-deep .p-tablist-active-bar {
-  background: var(--accent-lime-green);
-  height: 3px;
-}
-
-
-:host ::ng-deep .p-tabpanels {
-  padding: 0;
-}
-
-:host ::ng-deep .p-tabpanel {
-  padding: 0;
+    .event-content {
+        padding: 24px 20px 40px;
+    }
 }

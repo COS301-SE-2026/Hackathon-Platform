@@ -38,6 +38,24 @@
     }
 }
 
+.page-header-actions{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rescore-message{
+    margin: -14px 0 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.rescore-success{
+    color: #157a4a;
+}
+.rescore-error{
+    color: #c0392b;
+}
+
 .btn-primary{
     background-color: #146a9d;
     color:#ffffff;

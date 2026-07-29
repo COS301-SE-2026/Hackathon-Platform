@@ -6,8 +6,11 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
@@ -28,6 +31,18 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   @Query(
       "SELECT s FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId ORDER BY s.submittedAt DESC")
   List<Submission> getRecentSubmissions(@Param("userId") UUID userId, Pageable pageeable);
+
+  @Query(
+      "SELECT s.id FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.hackathon = :hackathonId")
+  List<Long> findIdsByHackathonId(@Param("hackathonId") UUID hackathonId);
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  @Modifying
+  @Query(
+      "UPDATE Submission s SET s.solverVersionId = :solverVersionId WHERE s.id IN "
+          + "(SELECT s2.id FROM Submission s2, Event e WHERE s2.eventId = e.eventId AND e.hackathon = :hackathonId)")
+  int updateSolverVersionForHackathon(
+      @Param("hackathonId") UUID hackathonId, @Param("solverVersionId") Long solverVersionId);
 
   @Query(
       value =

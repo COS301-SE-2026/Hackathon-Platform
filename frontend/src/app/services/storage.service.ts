@@ -114,6 +114,12 @@ uploadHackathonProblemStatement(hackathonId: string, file: File): Observable<{st
   return this.http.post<{storageKey: string; blobUrl: string}>(`${this.baseUrl}/hackathons/${hackathonId}/problem-statement`,formData);
 }
 
+  getProblemStatementUrl(hackathonId: string): Observable<{ url: string; storageKey: string }> {
+    return this.http.get<{ url: string; storageKey: string }>(
+      `${this.baseUrl}/hackathons/${hackathonId}/problem-statement`
+    );
+  }
+
   uploadHackathonSolver(
     hackathonId: string,
     file: File,

@@ -92,6 +92,10 @@ export class CreateEventComponent implements OnInit {
       return;
     }
 
+    if(!this.hackathonId) {
+      this.errorMessage = 'The hackathon ID is missing, make sure you are creating an event from a hackathon.';
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -110,7 +114,7 @@ export class CreateEventComponent implements OnInit {
 
     console.log('Sending event data to backend:', eventData);
 
-    this.eventService.createEvent(eventData).subscribe({
+    this.eventService.createEventForHackathon(this.hackathonId, eventData).subscribe({
       next: (response) => {
         console.log('Event created successfully:', response);
         this.isLoading = false;

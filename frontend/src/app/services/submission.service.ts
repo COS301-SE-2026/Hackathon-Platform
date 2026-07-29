@@ -86,10 +86,27 @@ export class SubmissionService {
     );
   }
 
+  getResentSubmission(limit = 20): Observable<SubmissionResponse[]> {
+    return this.http.get<SubmissionResponse[]>(`${this.scoringUrl}/admin/recentsubmissions/${limit}`);
+  }
+
   /** Manually (re-)triggers scoring for a submission, e.g. after a solver hotfix. */
   scoreSubmission(submissionId: number): Observable<{ submissionId: string; status: string; recordId: string }> {
     return this.http.post<{ submissionId: string; status: string; recordId: string }>(
       `${this.scoringUrl}/submissions/${submissionId}/score`,
+      {}
+    );
+  }
+
+  /**
+   * Admin-only: re-enqueues every submission for every event under a hackathon onto the async
+   * scoring queue, e.g. after a solver hotfix.
+   */
+  rescoreHackathon(
+    hackathonId: string
+  ): Observable<{ hackathonId: string; queuedCount: number; status: string }> {
+    return this.http.post<{ hackathonId: string; queuedCount: number; status: string }>(
+      `${this.scoringUrl}/admin/hackathons/${hackathonId}/rescore`,
       {}
     );
   }

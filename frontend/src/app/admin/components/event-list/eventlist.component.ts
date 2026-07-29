@@ -1,4 +1,4 @@
-import { Component, inject, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
@@ -23,6 +23,7 @@ export class EventlistComponent implements OnInit {
   private readonly eventService = inject(EventService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly change = inject(ChangeDetectorRef);
 
   hackathonId = '';
   searchQuery = '';
@@ -60,10 +61,12 @@ export class EventlistComponent implements OnInit {
       next: (events) => {
         this.events = events;
         this.isLoading = false;
+        this.change.markForCheck();
       },
       error: (error) => {
         console.error('not loading events', error);
         this.isLoading = false;
+        this.change.markForCheck();
       }
     });
   }
