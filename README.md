@@ -10,6 +10,8 @@
 
 [![Lighthouse CI](https://github.com/COS301-SE-2026/Hackathon-Platform/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/COS301-SE-2026/Hackathon-Platform/actions/workflows/lighthouse.yml)
 
+[![CD](https://github.com/COS301-SE-2026/Hackathon-Platform/actions/workflows/cd.yml/badge.svg)](https://github.com/COS301-SE-2026/Hackathon-Platform/actions/workflows/cd.yml)
+
 ![GitHub Issues](https://img.shields.io/github/issues/COS301-SE-2026/Hackathon-Platform)
 
 ![GitHub Requirements](https://img.shields.io/badge/requirements-documented-brightgreen)
@@ -24,6 +26,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
 [![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+
 ![Uptime Robot status](https://img.shields.io/uptimerobot/status/m803607544-ceb280e95680d2fadcf7d787)
 ![Azure Container Apps](https://img.shields.io/badge/Hosted%20on-Azure%20Container%20Apps-0078D4?logo=microsoftazure&logoColor=white)
 
