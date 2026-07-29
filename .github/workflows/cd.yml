@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  REGISTRY: hackathonplatformcr.azurecr.io
+  REGISTRY: hackathonplatformacr.azurecr.io
   RESOURCE_GROUP: hackathon-platform-rg
 
 jobs:
