@@ -83,14 +83,22 @@ export default defineConfig({
       cwd: './frontend',
       url: 'http://localhost:4200',
       reuseExistingServer: !process.env.CI,
-      timeout: 120_00,
+      timeout: 120_000,
     },
     {
-      command: process.platform === 'win32' ? '.\\mvnw.cmd spring-boot:run' : './mvnw spring-boot:run',
+      command: 'mvn spring-boot:run',
       cwd: './backend',
+      env: {
+        ...process.env,
+        AZURE_STORAGE_CONNECTION_STRING: process.env.AZURE_STORAGE_CONNECTION_STRING,
+        JWT_SECRET: process.env.JWT_SECRET,
+        SPRING_DATASOURCE_URL: process.env.SPRING_DATASOURCE_URL,
+        SPRING_DATASOURCE_USERNAME: process.env.SPRING_DATASOURCE_USERNAME,
+        SPRING_DATASOURCE_PASSWORD: process.env.SPRING_DATASOURCE_PASSWORD
+      },
       url: 'http://localhost:8080/actuator/health',
       reuseExistingServer: !process.env.CI,
-      timeout: 180_00,
+      timeout: 300_000,
     },
   ],
 });
