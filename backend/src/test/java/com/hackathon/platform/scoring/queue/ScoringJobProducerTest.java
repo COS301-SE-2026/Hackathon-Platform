@@ -1,8 +1,16 @@
 package com.hackathon.platform.scoring.queue;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,15 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.connection.stream.RecordId;
 import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ScoringJobProducerTest {
@@ -35,7 +34,7 @@ class ScoringJobProducerTest {
   void enqueue_marksSubmissionQueued_beforePushingToStream() {
     ScoringQueueProperties props = new ScoringQueueProperties();
     props.setStreamKey("scoring:jobs");
-    
+
     producer = new ScoringJobProducer(redisTemplate, props, submissionRepo, solverVersionRepo);
 
     Submission sub = new Submission();
@@ -43,8 +42,7 @@ class ScoringJobProducerTest {
     sub.setStatus("PENDING");
     when(submissionRepo.findById(42L)).thenReturn(Optional.of(sub));
     when(redisTemplate.opsForStream()).thenReturn((StreamOperations) streamOps);
-    when(streamOps.add(eq(props.getStreamKey()), any(Map.class)))
-        .thenReturn(RecordId.of("1-1"));
+    when(streamOps.add(eq(props.getStreamKey()), any(Map.class))).thenReturn(RecordId.of("1-1"));
 
     producer.enqueue(42L);
 
@@ -57,7 +55,7 @@ class ScoringJobProducerTest {
   void enqueue_throwsIfSubmissionMissing() {
     ScoringQueueProperties props = new ScoringQueueProperties();
     producer = new ScoringJobProducer(redisTemplate, props, submissionRepo, solverVersionRepo);
-    
+
     when(submissionRepo.findById(99L)).thenReturn(Optional.empty());
 
     org.junit.jupiter.api.Assertions.assertThrows(
@@ -68,26 +66,26 @@ class ScoringJobProducerTest {
   void enqueueAllForHackathon_enqueuesAllSubmissionsWithActiveSolverVersion() {
     ScoringQueueProperties props = new ScoringQueueProperties();
     props.setStreamKey("scoring:jobs");
-    
+
     producer = new ScoringJobProducer(redisTemplate, props, submissionRepo, solverVersionRepo);
-    
+
     UUID hackathonId = UUID.randomUUID();
     Long activeSolverVersionId = 1L;
     Long submissionId1 = 100L;
     Long submissionId2 = 101L;
-    
-    com.hackathon.platform.model.SolverVersion solverVersion = 
+
+    com.hackathon.platform.model.SolverVersion solverVersion =
         new com.hackathon.platform.model.SolverVersion();
     solverVersion.setId(activeSolverVersionId);
-    
+
     when(solverVersionRepo.findByHackathonIdAndIsActiveTrue(hackathonId))
         .thenReturn(Optional.of(solverVersion));
-    
+
     Submission sub1 = new Submission();
     sub1.setId(submissionId1);
     Submission sub2 = new Submission();
     sub2.setId(submissionId2);
-    
+
     when(submissionRepo.findById(submissionId1)).thenReturn(Optional.of(sub1));
     when(submissionRepo.findById(submissionId2)).thenReturn(Optional.of(sub2));
     when(submissionRepo.findIdsByHackathonId(hackathonId))
@@ -110,9 +108,9 @@ class ScoringJobProducerTest {
   void enqueueAllForHackathon_throwsWhenNoActiveSolverVersion() {
     ScoringQueueProperties props = new ScoringQueueProperties();
     producer = new ScoringJobProducer(redisTemplate, props, submissionRepo, solverVersionRepo);
-    
+
     UUID hackathonId = UUID.randomUUID();
-    
+
     when(solverVersionRepo.findByHackathonIdAndIsActiveTrue(hackathonId))
         .thenReturn(Optional.empty());
 
