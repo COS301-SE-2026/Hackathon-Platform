@@ -26,6 +26,9 @@ jobs:
 
       - name: Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          use: true
 
       - name: Compute image tag
         id: tag
