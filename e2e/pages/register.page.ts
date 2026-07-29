@@ -29,4 +29,23 @@ export class RegisterPage {
         })
 
     }
+
+    async goto() {
+        await this.page.goto('/register');
+    }
+
+    async register(opts:{
+        firstName: string;
+        lastName: string;
+        email: string;
+        password: string;
+        confirmPassword: string;
+    }){
+        await this.firstName.fill(opts.firstName);
+        await this.lastName.fill(opts.lastName);
+        await this.email.fill(opts.email);
+        await this.password.fill(opts.password);
+        await this.confirmPassword.fill(opts.confirmPassword ?? opts.password);
+        await this.createAccBtn.click();
+    }
 }
