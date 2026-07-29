@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface LevelFileResponse {
   id: number;
@@ -31,7 +32,7 @@ export function inferLevelFileType(fileName: string): string {
 @Injectable({ providedIn: 'root' })
 export class StorageService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/storage';
+  private readonly baseUrl = `${environment.apiUrl}/api/storage`;
 
   getLevelFileUrl(hackathonId: string, levelId: string, filename: string): Observable<{ url: string }> {
     return this.http.get<{ url: string }>(

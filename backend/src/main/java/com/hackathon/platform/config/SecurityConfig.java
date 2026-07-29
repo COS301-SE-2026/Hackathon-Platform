@@ -57,10 +57,6 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/actuator/health")
                     .permitAll()
-                    .requestMatchers("/api/storage/**")
-                    .permitAll()
-                    .requestMatchers("/api/scoring/**")
-                    .permitAll()
                     .requestMatchers("/api/admin/**")
                     .hasRole("ADMIN")
                     .anyRequest()
@@ -74,7 +70,13 @@ public class SecurityConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
 
-    config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:80"));
+    config.setAllowedOrigins(
+        List.of(
+            "http://localhost:4200",
+            "http://localhost:80",
+            "https://hackathonplatform.co.za",
+            "https://www.hackathonplatform.co.za",
+            "https://hackathon-frontend.braveplant-5c6a3fc5.italynorth.azurecontainerapps.io"));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);
