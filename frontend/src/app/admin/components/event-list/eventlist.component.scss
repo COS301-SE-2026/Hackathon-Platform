@@ -1,30 +1,40 @@
-.events-page { color: #ffffff; }
+:host{
+  display : block;
+  font-family: 'Inter' , -apple-system, sans-serif;
+}
 
-.page-header {
+.events-page{
+  min-height : 100vh;
+  background-color: transparent;
+}
+
+.content{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.page-header{
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 22px;
 
-  h1 { font-size: 1.5rem; font-weight: 700; }
-  .page-subtitle { color: #94a3b8; font-size: 0.875rem; margin-top: 2px; }
+  h1{
+    font-size: 1.55rem;
+    font-weight: 700;
+    color:#13192d ;
+    letter-spacing: -0.01em;
+  }
+
+  .page-subtitle {
+    color:#6b7588;
+    font-size: 0.9rem;
+    margin-top: 3px;
+  }
 }
 
-.btn-primary {
-  background-color: #2563eb;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  &:hover { background-color: #1d4ed8; }
-}
-
-
-.filters-bar {
+.filters-bar{
   display: flex;
   gap: 10px;
   margin-bottom: 18px;
@@ -33,86 +43,88 @@
 
 .search-input {
   flex: 1;
-  min-width: 180px;
-  padding: 10px 14px;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px;
-  background-color: #ffffff;
-  color: #1e293b;
-  font-size: 0.875rem;
-  outline: none;
-  &::placeholder { color: #94a3b8; }
-  &:focus { border-color: #2563eb; }
+  min-width: 200px;
 }
 
-.filter-select {
-  padding: 10px 34px 10px 14px;
-  border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 8px;
-  background-color: #1a3a6b;
-  color: #e2e8f0;
-  font-size: 0.875rem;
-  appearance: none;
-  outline: none;
-  cursor: pointer;
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  &:focus { border-color: #2563eb; }
+.loading {
+  text-align: center;
+  padding: 60px 0;
+  color: #6b7588;
+  font-size: 0.95rem;
 }
 
-.table-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  overflow: hidden;
+.event-name{
+  font-weight : 600;
+  color: #13192d;
+  font-size: 0.9rem;
+}
 
-  table { width: 100%; border-collapse: collapse; }
-  thead tr { border-bottom: 1px solid #e2e8f0; }
+.empty-row{
+  text-align: center;
+  color: #8089a0;
+  padding : 30px 0;
 
-  th {
-    text-align: left;
-    padding: 11px 16px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+}
+
+.back-navigation {
+    margin-bottom: 16px;
+}
+
+.back-btn{
+    background: none;
+    border: none;
+    color:#1983c2;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding:8px 0 ;
+    font-family: inherit;
+    transition: color 0.15s;
+
+    &:hover {
+        color:#146a9d;
+        text-decoration: underline;
+    }
+}
+
+
+::ng-deep{
+  .events-table {
+    border-radius: 14px;
+    overflow: hidden;
   }
+.events-table .p-datatable-table-container{
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(19,25,45,0.04);
+}
 
-  td {
-    padding: 15px 16px;
+.events-table .p-datatable-thead > tr >th {
+  background-color: #ffffff;
+  color :#6b7588;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 18px;
+  border-bottom : 1px solid #e7eaf0;
+}
+
+.events-table .p-datatable-tbody >tr {
+  background-color : #ffffff;
+  >td {
+    padding: 14px 18px;
     font-size: 0.875rem;
-    color: #334155;
-    border-bottom: 1px solid #f1f5f9;
-    vertical-align: middle;
+    color: #3a4357;
+    border-bottom: 1px solid #f1f3f7;
   }
 
-  tbody tr:last-child td { border-bottom: none; }
+  &:hover > td {
+    background-color: #f9fafc;
+  }
+
+  &:last-child > td {
+    border-bottom: none;
+  }
 }
-
-.event-name { font-weight: 500; color: #1e293b; }
-.event-type { font-size: 0.77rem; color: #64748b; margin-top: 2px; }
-
-.status-badge {
-  display: inline-block;
-  padding: 3px 12px;
-  border-radius: 12px;
-  font-size: 0.78rem;
-  font-weight: 500;
-
-  &.live     { background: rgba(22,163,74,0.15);  color: #15803d; }
-  &.upcoming { background: rgba(37,99,235,0.12);  color: #1d4ed8; }
-  &.ended    { background: rgba(220,38,38,0.12);  color: #dc2626; }
-}
-
-.btn-manage {
-  background-color: #2563eb;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  padding: 7px 14px;
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  &:hover { background-color: #1d4ed8; }
 }

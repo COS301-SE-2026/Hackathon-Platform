@@ -1,0 +1,86 @@
+
+<div class="event-subnav">
+ <div class="event-subnav-inner">
+
+  <div class="event-tabs">
+  <button [class.active]="activeTab === 'overview'" (click)="activeTab='overview'">Overview</button>
+
+  <button [class.active]="activeTab === 'rules'" (click)="activeTab='rules'">Rules</button>
+
+  <button [class.active]="activeTab === 'submissions'" (click)="activeTab='submissions'"> Upload Solution</button>
+
+   <button [class.active]="activeTab === 'submission-history'" (click)="activeTab='submission-history'"> Submission History</button>
+
+  <button [class.active]="activeTab === 'team'" (click)="activeTab='team'"> My Team</button>
+        <div class="banner-buttons">
+                <button
+                pButton
+                label="Register"
+                class="register-btn">
+                </button>
+
+                <button
+                pButton
+                [label]="downloadingProblemStatement ? 'Downloading...' : 'Download Problem Statement'"
+                [disabled]="downloadingProblemStatement"
+                (click)="downloadProblemStatement()"
+                class="download-btn">
+                </button>
+        </div>
+
+        @if (problemStatementError) {
+          <p class="problem-statement-error">{{ problemStatementError }}</p>
+        }
+
+        </div>
+
+        <div class="banner-right">
+
+        <div class="info-card">
+                <i class="pi pi-trophy info-icon"></i>
+                <div class="info-content">
+                    <span class="label">Prize Pool</span>
+                    <span class="value">{{ event.prizePool }}</span>
+                </div>
+
+        </div>
+
+        <div class="info-card">
+                <i class="pi pi-calendar info-icon"></i>
+                <div class="info-content">
+                    <span class="label">Start Date</span>
+                    <span class="value">{{ event.startDate }}</span>
+                </div>
+        </div>
+
+        <div class="info-card">
+                <i class="pi pi-clock info-icon"></i>
+                <div class="info-content">
+                    <span class="label">End Date</span>
+                    <span class="value">{{ event.endDate }}</span>
+                </div>
+        </div>
+
+        </div>
+
+  <button [class.active]="activeTab === 'leaderboard'" (click)="activeTab='leaderboard'">Leaderboard</button>
+  </div>
+
+</div>
+
+<div class="event-content">
+
+    @if (activeTab === 'overview') {<app-overview [event]="event" />}
+
+    @if (activeTab === 'rules') {<app-rules/>}
+
+    @if (activeTab === 'submissions' && eventId && hackathonId) { <app-submissions [eventId]="eventId"[hackathonId]="hackathonId"/>
+    }
+
+    @if (activeTab === 'submission-history' && eventId && hackathonId) {<app-submission-history [eventId]="eventId" />}
+    
+    @if (activeTab === 'team' && eventId) {<app-my-team [eventId]="eventId"/>}
+
+    @if (activeTab === 'leaderboard' && eventId) { <app-leaderboard [eventId]="eventId"/>}
+
+</div>

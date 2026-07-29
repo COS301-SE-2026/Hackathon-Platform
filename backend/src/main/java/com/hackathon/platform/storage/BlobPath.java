@@ -11,13 +11,13 @@ public final class BlobPath {
   /**
    * Storage key for a level input file. Stored in: levelfiles.storage_key
    *
-   * @param eventId the event UUID
+   * @param hackathonId the hackathon UUID
    * @param levelId the level ID
    * @param filename the original filename
    * @return storage key string
    */
-  public static String levelFile(String eventId, String levelId, String filename) {
-    return String.format("events/%s/levels/%s/%s", eventId, levelId, sanitise(filename));
+  public static String levelFile(String hackathonId, String levelId, String filename) {
+    return String.format("hackathons/%s/levels/%s/%s", hackathonId, levelId, sanitise(filename));
   }
 
   /**
@@ -35,24 +35,24 @@ public final class BlobPath {
   /**
    * Storage key for a solver version file. Stored in: solverversion.storage_key
    *
-   * @param eventId the event UUID
+   * @param hackathonId the hackathon UUID
    * @param version the solver version number
    * @param filename the original filename
    * @return storage key string
    */
-  public static String solverFile(String eventId, int version, String filename) {
-    return String.format("events/%s/solver/v%d/%s", eventId, version, sanitise(filename));
+  public static String solverFile(String hackathonId, int version, String filename) {
+    return String.format("hackathons/%s/solver/v%d/%s", hackathonId, version, sanitise(filename));
   }
 
   /**
-   * Storage key for an event problem statement.
+   * Storage key for an hackathon problem statement.
    *
-   * @param eventId the event UUID
+   * @param hackathonId the hackathon UUID
    * @param filename the original filename
    * @return storage key string
    */
-  public static String problemStatement(String eventId, String filename) {
-    return String.format("events/%s/problem/%s", eventId, sanitise(filename));
+  public static String problemStatement(String hackathonId, String filename) {
+    return String.format("hackathons/%s/problem/%s", hackathonId, sanitise(filename));
   }
 
   /**
@@ -66,9 +66,10 @@ public final class BlobPath {
    * @return storage key string
    */
   public static String submissionOutput(
-      String eventId, String teamId, String submissionId, String filename) {
+      String eventId, String teamId, String levelId, String submissionId, String filename) {
     return String.format(
-        "submissions/%s/%s/%s/output/%s", eventId, teamId, submissionId, sanitise(filename));
+        "submissions/%s/%s/levels/%s/%s/output/%s",
+        eventId, teamId, levelId, submissionId, sanitise(filename));
   }
 
   /**
@@ -82,21 +83,25 @@ public final class BlobPath {
    * @return storage key string
    */
   public static String submissionSourceArchive(
-      String eventId, String teamId, String submissionId, String filename) {
+      String eventId, String teamId, String levelId, String submissionId, String filename) {
     return String.format(
-        "submissions/%s/%s/%s/source/%s", eventId, teamId, submissionId, sanitise(filename));
+        "submissions/%s/%s/levels/%s/%s/source/%s",
+        eventId, teamId, levelId, submissionId, sanitise(filename));
   }
 
   /**
-   * Storage key for a scoring log file.
+   * Storage key for a scoring log file. One file per submission.
    *
    * @param eventId the event UUID
+   * @param teamId the team UUID
+   * @param levelId the level ID
    * @param submissionId the submission ID
-   * @param filename the log filename
    * @return storage key string
    */
-  public static String scoringLog(String eventId, String submissionId, String filename) {
-    return String.format("logs/%s/%s/%s", eventId, submissionId, sanitise(filename));
+  public static String scoringLog(
+      String eventId, String teamId, String levelId, String submissionId) {
+    return String.format(
+        "logs/%s/%s/%s/%s/scoring_log.txt", eventId, teamId, levelId, submissionId);
   }
 
   /**

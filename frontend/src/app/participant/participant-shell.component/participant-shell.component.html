@@ -1,38 +1,35 @@
 <div class="participant-shell">
-  <nav class="navbar">
-    <div class="navbar-left">
-      <div class="brand">
-        <span class="brand-h">Hackathon</span>
-        <span class="brand-p">Platform</span>
-      </div>
-      <span class="user-badge">{{ userName }}</span>
-    </div>
-    <div class="navbar-links">
-      <a routerLink="/participant/home" routerLinkActive="active">Home</a>
-      <a routerLink="/participant/events" routerLinkActive="active">My Events</a>
-      <button class="logout-btn" (click)="logout()">Logout</button>
-    </div>
-  </nav>
 
-  <div class="event-body">
-    <aside class="sidebar">
-      <p class="event-label">Participant</p>
-      <ul class="sidebar-nav">
-        <li><a routerLink="overview" routerLinkActive="active">Overview</a></li>
-        <li><a routerLink="team" routerLinkActive="active">My team</a></li>
-        <li><a routerLink="submit" routerLinkActive="active">Submit</a></li>
+<nav class="topnav">
 
-        <!-- hide pages that are not integrated yet.
-        <li><a routerLink="rules" routerLinkActive="active">Problems &amp; Rules</a></li>
-        <li><a routerLink="submissions" routerLinkActive="active">Submission history</a></li>
-        <li><a routerLink="leaderboard" routerLinkActive="active">Leaderboard</a></li>
-        <li><a routerLink="forum" routerLinkActive="active">Q&amp;A forum</a></li>
-        -->
-      </ul>
-    </aside>
-
-    <main class="event-content">
-      <router-outlet></router-outlet>
-    </main>
+<div class="topnav-left">
+<div class="logo-badge">H</div>
+  <span class="brand"> Hackathon <span class="brand-accent">Platform</span></span>
   </div>
+
+<div class="topnav-links">
+
+ <a routerLink="/participant/home" routerLinkActive="active">Home</a>
+
+
+<a routerLink="/participant/help" routerLinkActive="active">Help</a>
+
+</div>
+
+ <div class="topnav-right">
+
+<span class="participant-pill">Participant</span>
+
+ <div class="avatar-circle">{{ userName.charAt(0).toUpperCase() }} </div>
+
+<button class="logout-btn" (click)="logout()">  Logout</button>
+
+ </div>
+
+</nav>
+
+ <main class="participant-content">
+        <router-outlet></router-outlet>
+  </main>
+
 </div>

@@ -1,0 +1,131 @@
+<div class = "hackathons-page">
+    <div class = "page-header">
+        <h1>Hackathons</h1>
+        <p class = "page-subtitle"> Manage all your hackathons and create events for each</p>
+    </div>
+    <p-button label = "+ New Hackathon" (onClick) = "openCreateDialog()" />
+
+    @if (errorMessage) {
+        <div class="error-banner">{{ errorMessage }}</div>
+    }
+
+@if (isLoading){
+    <div class = "loading">Loading hackathons...</div>
+
+} @else {
+    <div class = "hackathons-grid">
+        @for (hackathon of hackathons; track hackathon.hackathonId){
+            <div class = "hackathon-card">
+                <div class = "hackathon-header">
+                    <h3 class = "hackathon-name">{{hackathon.name}}</h3>
+                </div>
+
+                <p class = "hackathon-description">{{hackathon.description}}</p>
+
+                <div class = "hackathon-stats">
+                    <span>{{hackathon.eventCount}} events</span>
+                </div>
+
+                <div class = "hackathon-actions">
+                    <p-button 
+                    label = "View Events"
+                    (onClick) = "navigateToEvents(hackathon.hackathonId)"
+                    styleClass = "p-button-primary" />
+
+                    <p-button 
+                    label = "+ Create Event"
+                    (onClick) = "navigateToCreateEvent(hackathon.hackathonId)"
+                    styleClass = "p-button-success" />
+
+                     <p-button 
+                    label = "Levels"
+                    (onClick) = "navigateToLevels(hackathon.hackathonId)"
+                    styleClass = "p-button-secondary" />
+
+                    <p-button 
+                    label = "Solver"
+                    (onClick) = "navigateToSolver(hackathon.hackathonId)"
+                    styleClass = "p-button-secondary" />
+
+
+                     <p-button 
+                    label = "Edit"
+                    (onClick) = "openEditDialog(hackathon)"
+                    styleClass = "p-button-secondary" />
+
+                    <p-button 
+                    label = "Delete"
+                    (onClick) = "deleteHackathon(hackathon.hackathonId)"
+                    styleClass = "p-button-danger" />
+
+                </div>
+            </div>
+        } 
+        @if (hackathons.length === 0) {
+            <div class = "empty-state">
+                <p>No hackathons created yet</p>
+                <p-button label = "Create your first hackathon" (onClick) = "openCreateDialog()"/>
+            </div>
+        }
+    </div>
+}
+</div>
+ 
+
+
+<p-dialog 
+[(visible)] = "showDialog"
+[modal] = "true"
+[style] = "{width : '500px'}"
+[header] = "editingHackathon ? 'Edit Hackathon' : 'Create New Hackathon' ">
+
+<div class = "dialog-content">
+    <div class = "form-group">
+        <label for = "hackathonName">Hackathon Name *</label>
+        <input id = "hackathonName" pInputText [(ngModel)] = "newHackathon.name" placeholder = "Enter hackathon name" />
+
+    </div>
+    <div class = "form-group">
+        <label for = "hackathonDescription">Description</label>
+        <textarea id = "hackathonDescription" pTextarea [(ngModel)] = "newHackathon.description" rows = "3" placeholder = "Enter description"></textarea>
+    </div>
+
+    <div class = "form-group">
+        <label for = "problemStatementFile">Problem Statement (PDF)</label>
+
+        @if (editingHackathon?.problemStatementStorageKey && !problemStatementFileName) {
+            <p class = "upload-hint">A problem statement is already uploaded. Choose a new file to replace it.</p>
+        }
+
+        <input
+            id = "problemStatementFile"
+            type = "file"
+            accept = "application/pdf"
+            (change) = "onProblemStatementFileSelected($event)" />
+
+        @if (problemStatementFileName) {
+            <p class = "upload-filename">{{ problemStatementFileName }} will be uploaded when you save.</p>
+        }
+
+        @if (problemStatementUploadError) {
+            <p class = "upload-error">{{ problemStatementUploadError }}</p>
+        }
+        @if (problemStatementUploadSuccess) {
+            <p class = "upload-success">Problem statement uploaded successfully.</p>
+        }
+    </div>
+</div>
+
+
+<ng-template #footer>
+    <p-button label = "Cancel" (onClick) = "showDialog = false" styleClass = "p-button-secondary" [disabled] = "isSaving" />
+    <p-button
+        [label] = "isSaving ? 'Saving...' : (problemStatementFile ? 'Save & Upload' : 'Save')"
+        [disabled] = "isSaving"
+        (onClick) = "saveHackathon()"
+        styleClass = "p-button-primary" />
+    
+</ng-template>
+</p-dialog>
+
+<p-toast position = "top-right"/>

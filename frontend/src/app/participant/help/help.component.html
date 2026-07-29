@@ -1,0 +1,98 @@
+<div class="help-page">
+
+ <div class="help-content">
+
+ <section class="help-banner">
+
+ <div class="banner-content">
+
+  <span class="banner-label">Help Center</span>
+
+    <h1>How can we help you?</h1>
+
+   <p class="banner-description">Welcome to the help menu, find answers to frequently asked questions.</p>
+
+     
+  </div>
+
+ </section>
+
+
+<section class="help-docs">
+<div class="docs-header">
+ <span class="docs-label">Documentation</span>
+    <h2>User Guide</h2>
+</div>
+
+ <p class="section-description">The complete user guide for organizers and participants.</p>
+
+<button pButton type="button"
+    class="open-guide-btn"
+    (click)="openUserGuide()">
+    <span>Open User Guide</span>
+</button>
+
+</section>
+
+<section class="help-faq">
+
+<div class="faq-header">
+<span class="faq-label">FAQ</span>
+<h2>Frequently Asked Questions</h2>
+
+<p class="faq-description">Quick answers to the questions participants ask most often.</p>
+
+</div>
+
+<p-accordion>
+
+<p-accordion-panel value="0">
+    <p-accordion-header>How do I join an event?</p-accordion-header>
+        <p-accordion-content>
+        <p>Browse the open events and click the Register button before the registration deadline.Once accepted, the event will appear in your Active Events carousel.</p>
+        </p-accordion-content>
+</p-accordion-panel>
+
+<p-accordion-panel value="1">
+    <p-accordion-header>How do I create or join a team?</p-accordion-header>
+    <p-accordion-content>
+        <p>Navigate to the Teams section inside your event by clicking the View Team button. From there you can create a new team or join an existing one.</p>
+        </p-accordion-content>
+</p-accordion-panel>
+
+<p-accordion-panel value="2">
+    <p-accordion-header>How do I submit my solution?</p-accordion-header>
+        <p-accordion-content>
+        <p>Click Go to Event, open the Submissions tab, upload your source archive and solution output, then submit before the event deadline.</p>
+        </p-accordion-content>
+</p-accordion-panel>
+
+<p-accordion-panel value="3">
+    <p-accordion-header>Can I submit multiple times?</p-accordion-header>
+        <p-accordion-content>
+        <p>Yes. You may upload new submissions until the submission deadline. Your latest valid submission for each level is used forthe final results.</p>
+        </p-accordion-content>
+</p-accordion-panel>
+
+<p-accordion-panel value="4">
+    <p-accordion-header>How are submissions graded?</p-accordion-header>
+        <p-accordion-content>
+        <p>The platform automatically evaluates your submission using the organizer's solver and generates a score along with a feedback log.</p>
+        </p-accordion-content>
+</p-accordion-panel>
+
+<p-accordion-panel value="5">
+    <p-accordion-header>Where can I view my submission history?</p-accordion-header>
+        <p-accordion-content>
+        <p>Open your event, navigate to the Submissions page, and scroll down to view your submission history.</p>
+        </p-accordion-content>
+</p-accordion-panel>
+
+</p-accordion>
+
+</section>
+
+
+</div>
+
+</div>

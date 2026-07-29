@@ -25,7 +25,7 @@ public class Team {
   @Column(name = "created_by_user_id", nullable = false)
   private UUID createdByUserId;
 
-  @Column(name = "event_id", nullable = true)
+  @Column(name = "event_id", nullable = false)
   private UUID eventId;
 
   @Column(name = "created_at", nullable = false)
@@ -33,6 +33,21 @@ public class Team {
 
   @Column(name = "status", nullable = false, length = 30)
   private String status = "ACTIVE";
+
+  @Column(name = "join_code", nullable = false, length = 6, unique = true)
+  private String joinCode = generateJoinCode();
+
+  private static String generateJoinCode() {
+    return java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
+  }
+
+  public String getJoinCode() {
+    return joinCode;
+  }
+
+  public void setJoinCode(String joinCode) {
+    this.joinCode = joinCode;
+  }
 
   /** Default constructor. */
   public Team() {}
