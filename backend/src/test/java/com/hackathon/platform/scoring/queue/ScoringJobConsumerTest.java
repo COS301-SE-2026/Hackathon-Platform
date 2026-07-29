@@ -59,4 +59,42 @@ class ScoringJobConsumerTest {
     verify(redisTemplate, never()).opsForStream();
   }
 
+  @Test
+  void onMessage_acksAndDrops_malformedRecordMissingSubmissionId() {
+    ScoringQueueProperties props = new ScoringQueueProperties();
+    props.setConsumerKey("scoring-group");
+    
+    consumer = new ScoringJobConsumer(redisTemplate, props, scoringService);
+    when(redisTemplate.opsForStream()).thenReturn((StreamOperations) streamOps);
+
+    MapRecord<String, String, String> record =
+        MapRecord.create("scoring:jobs", Map.<String, String>of()).withId(RecordId.of("1-1"));
+
+    consumer.onMessage(record);
+
+    verifyNoInteractions(scoringService);
+
+    verify(streamOps).acknowledge(eq(props.getConsumerKey()), eq(record));
+    
+  }
+
+  @Test
+  void onMessage_handlesNullSubmissionId() {
+    ScoringQueueProperties props = new ScoringQueueProperties();
+    props.setConsumerKey("scoring-group");
+    
+    consumer = new ScoringJobConsumer(redisTemplate, props, scoringService);
+
+    MapRecord<String, String, String> record =
+        MapRecord.create("scoring:jobs", Map.of("submissionId", "invalid")).withId(RecordId.of("1-1"));
+
+    org.junit.jupiter.api.Assertions.assertThrows(
+        NumberFormatException.class, () -> consumer.onMessage(record));
+
+    verifyNoInteractions(scoringService);
+    verify(redisTemplate, never()).opsForStream();
+
+  }
+
+
 }
