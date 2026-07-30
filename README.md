@@ -2,6 +2,8 @@
 
 ![Logo](./docs/logo.png)
 
+# Live Site: [hackathonplatform.co.za](hackathonplatform.co.za)
+
 ### A cloud-agnostic, full-stack event management platform that is pupose-build for deterministic optimization challenges. This platform automates the entire hackathons lifecycle, from highly configurable event setups, particpant registaritons and team formation to execution. Submission are dynamically queued and processed by a scalable pool of parallel scoring workers, this allows the official grading solver to evaluate, score and log outputs in ral-time to drive dynamic live leaderboards. Engineered with a modular Spring Boot backend and a desktop-first, mobile-friendly Angular frontend. The system also supports dymanic runtime solver updates by the event orgranisers and scales scales such that it can handle peak submission spikes near competition deadlines.
 
 ## Badges
@@ -36,8 +38,13 @@
 ## Documentation
 
 - [API Service Contract](./docs/API%20Service%20Contract.pdf)
-- [Brand Style Guide](./docs/Brand%20Style%20Guide.pdf)
+- [Brand Style Guide](./docs/_Brand%20Style%20Guide-%20Version%202.pdf)
 - [Wireframes](./docs/Wireframes/Wire%20frames.pdf)
+- [Coding Standards](./docs/Coding%20Standards/Coding%20Standards.pdf)
+- [SAS](./docs/SAS.pdf)
+- [Testing Policy](./docs/Testing%20Policy.pdf)
+- [User Manual](./docs/User%20Manual%20Hackathon%20Platform.pdf)
+- [Brand Style Guide web page](https://hackathonplatform.co.za/style-guide)
 
 ---
 
