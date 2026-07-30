@@ -9,3 +9,15 @@ VALUES (
     'ACTIVE',
     CURRENT_TIMESTAMP
 );
+
+INSERT INTO users (user_id, first_name, last_name, email, password_hash, role_id, status, created_at)
+VALUES (
+           gen_random_uuid(),
+           'Demo',
+           'Part',
+           'part@demo.com',
+           '$2a$12$iYAkoSnsfznsydYnEFICruFHxnlo/PQx4KV9mc8tkpSGQl58lW33q',
+           (SELECT role_id FROM roles WHERE name = 'PARTICIPANT' LIMIT 1),
+    'ACTIVE',
+            CURRENT_TIMESTAMP
+    );

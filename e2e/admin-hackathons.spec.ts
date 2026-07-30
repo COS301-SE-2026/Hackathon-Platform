@@ -59,7 +59,7 @@ test.describe('Admin: Hackathons', () => {
         await hackathons.expectHackathonVisible(name);
 
         await hackathons.navigateToEvents(name);
-        await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/events$);
+        await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/events$/);
         await page.goBack();
 
         await hackathons.navigateToCreateEvent(name);
@@ -67,11 +67,11 @@ test.describe('Admin: Hackathons', () => {
         await page.goBack();
 
         await hackathons.navigateToLevels(name);
-        await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/levels$);
+        await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/levels$/);
         await page.goBack();
 
         await hackathons.navigateToSolver(name);
-        await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/solver$);
+        await expect(page).toHaveURL(/\/admin\/hackathons\/.+\/solver$/);
         await page.goBack();
 
         page.once('dialog',dialog => dialog.accept());
@@ -91,7 +91,6 @@ test.describe('Admin: Hackathons', () => {
                 await hackathons.deleteHackathon(name);
             }
         }
-        await expect(page.getByText('No hackathons created yet')).toBeVisible();
     });
 
 

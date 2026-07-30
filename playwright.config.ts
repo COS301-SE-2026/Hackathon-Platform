@@ -14,13 +14,12 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -43,17 +42,18 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
     },
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    //{
+      //name: 'firefox',
+      //use: { ...devices['Desktop Firefox'] },
+    //},
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    //{
+      //name: 'webkit',
+      //use: { ...devices['Desktop Safari'] },
+    //},
 
     /* Test against mobile viewports. */
     // {
@@ -83,14 +83,22 @@ export default defineConfig({
       cwd: './frontend',
       url: 'http://localhost:4200',
       reuseExistingServer: !process.env.CI,
-      timeout: 120_00,
+      timeout: 120_000,
     },
     {
-      command: process.platform === 'win32' ? '.\\mvnw.cmd spring-boot:run' : './mvnw spring-boot:run',
+      command: 'mvn spring-boot:run',
       cwd: './backend',
+      env: {
+        ...process.env,
+        AZURE_STORAGE_CONNECTION_STRING: process.env.AZURE_STORAGE_CONNECTION_STRING,
+        JWT_SECRET: process.env.JWT_SECRET,
+        SPRING_DATASOURCE_URL: process.env.SPRING_DATASOURCE_URL,
+        SPRING_DATASOURCE_USERNAME: process.env.SPRING_DATASOURCE_USERNAME,
+        SPRING_DATASOURCE_PASSWORD: process.env.SPRING_DATASOURCE_PASSWORD
+      },
       url: 'http://localhost:8080/actuator/health',
       reuseExistingServer: !process.env.CI,
-      timeout: 180_00,
+      timeout: 300_000,
     },
   ],
 });

@@ -14,7 +14,7 @@ export class AdminLevelsPage {
 
     constructor(page: Page){
         this.page = page;
-        this.addLevelButton = page.getByRole('button',{name: '+Add New Level'});
+        this.addLevelButton = page.getByRole('button',{name: '+ Add New Level'}).first();
         this.levelNameInput = page.locator('#levelName');
         this.levelNumberInput = page.locator('#levelNumber');
         this.levelDescriptionInput = page.locator('#levelDescription');
@@ -66,9 +66,7 @@ export class AdminLevelsPage {
     async expectLevelVisible(name:string){
         await expect(this.levelRow(name)).toBeVisible();
     }
-    async expectLevelNotVisible(name:string){
-        await expect(this.levelRow(name)).toHaveCount(0);
-    }
+    
     async getLevelCount(): Promise<number>{
         return await this.page.locator('.level-card').count();
     }
