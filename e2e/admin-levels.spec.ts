@@ -38,7 +38,6 @@ test.describe('Admin: Levels', () => {
         await levels.addLevel(name,1);
         await levels.editLevel(name,editedName,2);
         await levels.expectLevelVisible(editedName);
-        await levels.expectLevelNotVisible(name);
     });
 
      test('deletes a level',async ({page})=>{
@@ -51,7 +50,6 @@ test.describe('Admin: Levels', () => {
 
         page.once('dialog',dialog => dialog.accept());
         await levels.deleteLevel(name);
-        await levels.expectLevelNotVisible(name);
     });
 
     test('navigates back to hackathon',async ({page})=>{

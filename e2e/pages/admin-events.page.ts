@@ -2,6 +2,7 @@ import {Page,Locator,expect} from '@playwright/test';
 
 export class AdminEventsPage {
     readonly page: Page;
+    private hackathonId?: string;
     readonly newEventButton: Locator;
     readonly searchInput: Locator;
     readonly statusFilter: Locator;
@@ -35,6 +36,7 @@ export class AdminEventsPage {
         
     }
     async goto(hackathonId?: string){
+        this.hackathonId = hackathonId;
         if (hackathonId){
             await this.page.goto(`/admin/hackathons/${hackathonId}/events`);   
         }else {
@@ -53,15 +55,18 @@ export class AdminEventsPage {
     }
 
     async createEvent(name:string, startDate: string, duration:number, teamSize: number, description = ''){
-        await this.newEventButton.click();
+        if (!this.hackathonId) {
+            throw new Error('AdminEventsPage.createEvent() requires goto(hackathonId) to have been called first.');
+        }
+        await this.page.goto(`/admin/hackathons/${this.hackathonId}/events/create`);
         await this.eventNameInput.fill(name);
         await this.startDateInput.fill(startDate);
         await this.durationInput.fill(duration.toString());
         await this.teamSizeInput.fill(teamSize.toString());
         if (description) await this.descriptionInput.fill(description);
         await this.saveButton.click();
+        await this.page.waitForURL(/\/admin\/hackathons\/.+\/events$/);
         await this.waitForLoad();
-
     }
     async searchEvents(query:string){
         await this.searchInput.fill(query);

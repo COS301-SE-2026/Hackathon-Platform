@@ -33,7 +33,10 @@ export class AdminHackathonsPage {
     }
 
     card(name:string): Locator{
-        return this.page.locator('.hackathon-card').filter({hasText:name});
+        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return this.page.locator('.hackathon-card').filter({
+            has: this.page.locator('.hackathon-name', { hasText: new RegExp(`^${escaped}$`) }),
+        });
     }
 
     async createHackathon(name:string, description ='', problemStatementPath?: string){
@@ -63,18 +66,19 @@ export class AdminHackathonsPage {
 
     async navigateToEvents (name: string) {
         await this.card(name).getByRole('button',{name:'View Events'}).click();
-        
+        await this.page.waitForURL(/\/admin\/hackathons\/.+\/events$/);
     }
     async navigateToCreateEvent (name: string) {
         await this.card(name).getByRole('button',{name:'+ Create Event'}).click();
-        
+        await this.page.waitForURL(/\/admin\/hackathons\/.+\/events\/create$/);
     }
     async navigateToLevels (name: string) {
         await this.card(name).getByRole('button',{name:'Levels'}).click();
-        
+        await this.page.waitForURL(/\/admin\/hackathons\/.+\/levels$/);
     }
     async navigateToSolver (name: string) {
-        await this.card(name).getByRole('button',{name:'Solver'}).click();  
+        await this.card(name).getByRole('button',{name:'Solver'}).click();
+        await this.page.waitForURL(/\/admin\/hackathons\/.+\/solver$/);
     }
 
     async expectHackathonVisible (name: string) {

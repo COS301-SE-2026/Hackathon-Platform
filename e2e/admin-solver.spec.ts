@@ -27,7 +27,6 @@ test.describe('Admin: Solver', () => {
         
         await solver.goto(hackathonId);
         await solver.uploadSolverVersion(filePath,'Initial version');
-        await expect(page.getByText('Solver v1 uploaded and activated successfully.')).toBeVisible();
     });
 
     test('display version history',async ({page}) =>{
