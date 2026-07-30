@@ -27,8 +27,17 @@
 
  <button type="button"  class="primary-btn"> Register </button>
 
-<button type="button" class="secondary-btn"> Download Problem Statement</button>
-
+<button 
+      type="button" 
+      class="secondary-btn"
+      [disabled]="downloadingProblemStatement"
+      (click)="downloadProblemStatement()">
+      {{ downloadingProblemStatement ? 'Downloading...' : 'Download Problem Statement' }}
+    </button>
+    @if (problemStatementError) {
+      <p class="problem-statement-error">{{ problemStatementError }}</p>
+    }
+    
     </div>
 
 </div>
