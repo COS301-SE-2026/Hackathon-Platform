@@ -12,65 +12,19 @@
    <button [class.active]="activeTab === 'submission-history'" (click)="activeTab='submission-history'"> Submission History</button>
 
   <button [class.active]="activeTab === 'team'" (click)="activeTab='team'"> My Team</button>
-        <div class="banner-buttons">
-                <button
-                pButton
-                label="Register"
-                class="register-btn">
-                </button>
+          <button [class.active]="activeTab === 'leaderboard'" (click)="activeTab='leaderboard'">Leaderboard</button>
 
-                <button
-                pButton
-                [label]="downloadingProblemStatement ? 'Downloading...' : 'Download Problem Statement'"
-                [disabled]="downloadingProblemStatement"
-                (click)="downloadProblemStatement()"
-                class="download-btn">
-                </button>
+      
         </div>
 
-        @if (problemStatementError) {
-          <p class="problem-statement-error">{{ problemStatementError }}</p>
-        }
-
-        </div>
-
-        <div class="banner-right">
-
-        <div class="info-card">
-                <i class="pi pi-trophy info-icon"></i>
-                <div class="info-content">
-                    <span class="label">Prize Pool</span>
-                    <span class="value">{{ event.prizePool }}</span>
-                </div>
-
-        </div>
-
-        <div class="info-card">
-                <i class="pi pi-calendar info-icon"></i>
-                <div class="info-content">
-                    <span class="label">Start Date</span>
-                    <span class="value">{{ event.startDate }}</span>
-                </div>
-        </div>
-
-        <div class="info-card">
-                <i class="pi pi-clock info-icon"></i>
-                <div class="info-content">
-                    <span class="label">End Date</span>
-                    <span class="value">{{ event.endDate }}</span>
-                </div>
-        </div>
-
-        </div>
-
-  <button [class.active]="activeTab === 'leaderboard'" (click)="activeTab='leaderboard'">Leaderboard</button>
+    
   </div>
 
 </div>
 
 <div class="event-content">
 
-    @if (activeTab === 'overview') {<app-overview [event]="event" />}
+    @if (activeTab === 'overview') {<app-overview [event]="event" [hackathonId]="hackathonId" /> }
 
     @if (activeTab === 'rules') {<app-rules/>}
 
@@ -83,4 +37,4 @@
 
     @if (activeTab === 'leaderboard' && eventId) { <app-leaderboard [eventId]="eventId"/>}
 
-</div>
+</div> 
