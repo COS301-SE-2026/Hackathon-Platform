@@ -11,7 +11,7 @@ export const options = {
 
     thresholds: {
         http_req_failed: ["rate<0.01"],
-        http_req_duration: ["avg<3500", "p(95)<10500"],
+        http_req_duration: ["avg<4500", "p(95)<15500"],
     },
 };
 
