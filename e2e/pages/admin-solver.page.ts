@@ -13,7 +13,7 @@ export class AdminSolverPage {
     constructor(page: Page){
         this.page = page;
         this.uploadButton = page.getByRole('button',{name:'Upload new version'});
-        this.dropZone = page.locator('.drop-zone');
+        this.dropZone = page.locator('#fileInput');
         this.changeNotesInput = page.locator('#changeNotes');
         this.uploadActivateButton = page.getByRole('button',{name: 'Upload & activate'});
         this.backButton = page.getByRole('button',{name: 'Back to Hackathon'});
