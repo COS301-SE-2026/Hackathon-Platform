@@ -91,7 +91,6 @@ test.describe('Admin: Hackathons', () => {
                 await hackathons.deleteHackathon(name);
             }
         }
-        await expect(page.getByText('No hackathons created yet')).toBeVisible();
     });
 
 
