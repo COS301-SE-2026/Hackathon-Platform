@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
@@ -107,7 +106,8 @@ class SubmissionQueryServiceTest {
   void getRecentSubmissions_returnsCorrect() {
     Submission old = buildSubmission(1L, Instant.parse("2026-01-01T00:00:00Z"));
     Submission newer = buildSubmission(2L, Instant.parse("2026-02-01T00:00:00Z"));
-    when(subRepo.getRecentSubmissions(eq(USER_ID), any(Pageable.class))).thenReturn(List.of(old, newer));
+    when(subRepo.getRecentSubmissions(eq(USER_ID), any(Pageable.class)))
+        .thenReturn(List.of(old, newer));
     List<SubmissionResponse> r = subQueryService.getRecentSubmissions(USER_ID, LIMIT);
 
     assertThat(r).hasSize(2);
@@ -354,12 +354,10 @@ class SubmissionQueryServiceTest {
     ScoringLog log1 = buildScoringLog(1L, "key1");
     ScoringLog log2 = buildScoringLog(2L, "key2");
 
-    when(scoringLogRepo.findByTeamIdAndEventIdAndLevelIdOrderByCreatedAtDesc(
-        TEAM_ID, EVENT_ID, 1L))
+    when(scoringLogRepo.findByTeamIdAndEventIdAndLevelIdOrderByCreatedAtDesc(TEAM_ID, EVENT_ID, 1L))
         .thenReturn(List.of(log1, log2));
 
-    List<ScoringLogResponse> result = 
-        subQueryService.getLevelLogsForTeam(TEAM_ID, EVENT_ID, 1L);
+    List<ScoringLogResponse> result = subQueryService.getLevelLogsForTeam(TEAM_ID, EVENT_ID, 1L);
 
     assertThat(result).hasSize(2);
     assertThat(result.get(0).getSubmissionId()).isEqualTo(1L);
@@ -368,12 +366,10 @@ class SubmissionQueryServiceTest {
 
   @Test
   void getLevelLogsForTeam_returnsEmptyListWhenNoLogs() {
-    when(scoringLogRepo.findByTeamIdAndEventIdAndLevelIdOrderByCreatedAtDesc(
-        TEAM_ID, EVENT_ID, 1L))
+    when(scoringLogRepo.findByTeamIdAndEventIdAndLevelIdOrderByCreatedAtDesc(TEAM_ID, EVENT_ID, 1L))
         .thenReturn(List.of());
 
-    List<ScoringLogResponse> result = 
-        subQueryService.getLevelLogsForTeam(TEAM_ID, EVENT_ID, 1L);
+    List<ScoringLogResponse> result = subQueryService.getLevelLogsForTeam(TEAM_ID, EVENT_ID, 1L);
 
     assertThat(result).isEmpty();
   }
@@ -383,11 +379,9 @@ class SubmissionQueryServiceTest {
     ScoringLog log1 = buildScoringLog(1L, "key1");
     ScoringLog log2 = buildScoringLog(2L, "key2");
 
-    when(scoringLogRepo.findByTeamIdAndEventId(TEAM_ID, EVENT_ID))
-        .thenReturn(List.of(log1, log2));
+    when(scoringLogRepo.findByTeamIdAndEventId(TEAM_ID, EVENT_ID)).thenReturn(List.of(log1, log2));
 
-    List<ScoringLogResponse> result = 
-        subQueryService.getAllLevelLogsForTeam(TEAM_ID, EVENT_ID);
+    List<ScoringLogResponse> result = subQueryService.getAllLevelLogsForTeam(TEAM_ID, EVENT_ID);
 
     assertThat(result).hasSize(2);
     assertThat(result.get(0).getLogContent()).isNull();
@@ -395,11 +389,9 @@ class SubmissionQueryServiceTest {
 
   @Test
   void getAllLevelLogsForTeam_returnsEmptyListWhenNoLogs() {
-    when(scoringLogRepo.findByTeamIdAndEventId(TEAM_ID, EVENT_ID))
-        .thenReturn(List.of());
+    when(scoringLogRepo.findByTeamIdAndEventId(TEAM_ID, EVENT_ID)).thenReturn(List.of());
 
-    List<ScoringLogResponse> result = 
-        subQueryService.getAllLevelLogsForTeam(TEAM_ID, EVENT_ID);
+    List<ScoringLogResponse> result = subQueryService.getAllLevelLogsForTeam(TEAM_ID, EVENT_ID);
 
     assertThat(result).isEmpty();
   }
