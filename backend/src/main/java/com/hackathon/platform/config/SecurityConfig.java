@@ -55,6 +55,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login")
                     .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/scoring/events/*/leaderboard/update")
+                    .permitAll()
                     .requestMatchers("/actuator/health")
                     .permitAll()
                     .requestMatchers("/api/admin/**")
