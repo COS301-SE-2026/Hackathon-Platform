@@ -41,11 +41,3 @@ jobs:
       - name: Run Lighthouse CI
         working-directory: frontend
         run: lhci autorun --config=lighthouserc.json
-
-      - name: Upload Lighthouse report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: lighthouse-report
-          path: frontend/.lighthouseci/
-          retention-days: 14
