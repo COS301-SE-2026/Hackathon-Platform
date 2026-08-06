@@ -40,11 +40,16 @@ public class TeamController {
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
+  @GetMapping("/my-teams")
+  public ResponseEntity<List<TeamResponse>> getMyTeams(@AuthenticationPrincipal User currUser){
+    return ResponseEntity.ok(teamService.getMyTeams(currUser.getUserId()));
+  }
+
   /** Get the authenticated user's approved team, if any. */
   @GetMapping("/my-team")
-  public ResponseEntity<TeamResponse> getMyTeam(@AuthenticationPrincipal User currentUser) {
+  public ResponseEntity<TeamResponse> getMyTeamForEvent(@AuthenticationPrincipal User currentUser) {
     return teamService
-        .getMyTeam(currentUser.getUserId())
+        .getMyTeamForEvent(currentUser.getUserId(), eventId)
         .map(ResponseEntity::ok)
         .orElseGet(() -> ResponseEntity.noContent().build());
   }
@@ -52,10 +57,14 @@ public class TeamController {
   /** Request to join a team. */
   @PostMapping("/{teamId}/join-requests")
   public ResponseEntity<Void> requestToJoin(
-      @PathVariable UUID teamId, @AuthenticationPrincipal User currentUser) {
-    teamService.requestToJoinTeam(teamId, currentUser.getUserId());
+          @PathVariable UUID teamId,
+          @RequestBody(required = false) JoinTeamRequest req,
+          @AuthenticationPrincipal User currUser){
+
+    String regKey = req = null ? null : req.getRegistrationKey();
+    teamService.requestToJoinTeam(teamId, currUser.getUserId(), regKey);
     return ResponseEntity.status(HttpStatus.CREATED).build();
-  }
+}
 
   /** View pending join requests for a team. Only the team creator should use this. */
   @GetMapping("/{teamId}/join-requests")
