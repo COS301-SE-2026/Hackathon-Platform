@@ -15,24 +15,28 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.hackathon.platform.model.Event;
+import com.hackathon.platform.repository.EventRepository;
 
 /** Service for standalone team management operations. */
 @Service
 public class TeamService {
 
-  private static final int TEAM_SIZE_LIMIT = 4;
+  private static final int MAX_JOIN_CODE_GENERATION_ATTEMPTS = 5;
 
   private final TeamRepository teamRepository;
   private final TeamMemberRepository teamMemberRepository;
   private final UserRepository userRepository;
+  private final EventRepository eventRepo;
 
   public TeamService(
       TeamRepository teamRepository,
       TeamMemberRepository teamMemberRepository,
-      UserRepository userRepository) {
+      UserRepository userRepository, EventRepository eventRepo) {
     this.teamRepository = teamRepository;
     this.teamMemberRepository = teamMemberRepository;
     this.userRepository = userRepository;
+    this.eventRepo = eventRepo;
   }
 
   /** Create a new standalone team and add the creator as an approved leader. */
@@ -93,30 +97,43 @@ public class TeamService {
 
   /** Request to join a team by creating a pending membership. */
   @Transactional
-  public void requestToJoinTeam(UUID teamId, UUID currentUserId) {
+  public void requestToJoinTeam(UUID teamId, UUID currentUserId, String regKey) {
     Team team =
         teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+    joinTeamInternal(team, currentUserId, regKey);
+  }
 
-    if (!"ACTIVE".equals(team.getStatus())) {
-      throw new RuntimeException("Team is not active");
+  @Transactional
+  public void requestToJoinTeamByCode(String joinCode, UUID currUser, String regKey){
+    Team team = teamRepository.findByJoinCode(normalizeJoinCode(joinCode)).orElseThrow(() -> new RuntimeException("No team found for that join code"));
+    joinTeamInternal(team, currUser, regKey);
+  }
+
+  private void joinTeamInternal(Team team, UUID currUser, String regKey){
+    if(!"ACTIVE".equals(team.getStatus())){
+      throw new RuntimeException("Team isnt active");
     }
 
-    if (teamMemberRepository.findByTeamIdAndUserId(teamId, currentUserId).isPresent()) {
-      throw new RuntimeException("Already requested or member");
+    Event event = eventRepo.findById(team.getEventId()).orElseThrow(() -> new RuntimeException("Event does not exist"));
+    assertEventAcceptsRegistrations(event);
+    assertRegistrationKeyMatches(event, regKey);
+
+    if(teamMemberRepository.findByTeamIdAndUserId(team.getTeamId(), currUser).isPresent()){
+      throw new RuntimeException("You already requested or are a member for this team");
     }
 
-    if (!teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED").isEmpty()) {
-      throw new RuntimeException("You are already a member of a team");
+    if(!teamMemberRepository.findByUserIdAndStatusAndEventId(currUser, "APPROVED", event.getEventId()).isEmpty()){
+      throw new RuntimeException("Youre already on a team for this event. Leave that team to join a new team");
     }
 
-    long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
-    if (approvedCount >= TEAM_SIZE_LIMIT) {
+    long approvedCount = teamMemberRepository.countByTeamIdAndStatus(team.getTeamId(), "APPROVED");
+    if(approvedCount >= event.getTeamSizeLimit()){
       throw new RuntimeException("Team is full");
     }
 
     TeamMember member = new TeamMember();
-    member.setTeamId(teamId);
-    member.setUserId(currentUserId);
+    member.setTeamId(team.getTeamId());
+    member.setUserId(currUser);
     member.setStatus("PENDING");
     teamMemberRepository.save(member);
   }
@@ -142,15 +159,16 @@ public class TeamService {
     }
 
     if (approve) {
-      if (!teamMemberRepository.findByUserIdAndStatus(userIdToApprove, "APPROVED").isEmpty()) {
-        throw new RuntimeException("User is already an approved member of another team");
+      Event event = eventRepo.findById(team.getEventId()).orElseThrow(() -> new RuntimeException("Event not found"));
+
+      if(!teamMemberRepository.findByUserIdAndStatusAndEventId(userIdToApprove, "APPROVED", event.getEventId()).isEmpty()){
+        throw new RuntimeException("Youre already an approved member for another team for this event");
       }
 
-      long currentSize = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
-      if (currentSize >= TEAM_SIZE_LIMIT) {
+      long currSize = teamRepository.countByTeamIdAndStatus(teamId, "APPROVED");
+      if(currSize >= event.getTeamSizeLimit()){
         throw new RuntimeException("Team is full");
       }
-
       pendingRequest.setStatus("APPROVED");
     } else {
       pendingRequest.setStatus("REJECTED");
