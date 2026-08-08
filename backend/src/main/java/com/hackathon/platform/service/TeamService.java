@@ -74,19 +74,20 @@ public class TeamService {
   }
 
   /** Get the authenticated user's approved team, if they have one. */
-  public Optional<TeamResponse> getMyTeam(UUID currentUserId) {
-    List<TeamMember> members =
-        teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED");
+  public List<TeamResponse> getMyTeams(UUID currentUserId) {
+    List<TeamMember> teams = teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED");
+    return teams.stream().map(m -> teamRepository.findBy(m.getTeamId()).orElseThrow(() -> new RuntimeException("Team not fund"))).map(this::toTeamResponse).collect(Collectors.toList());
+  }
 
-    if (members.isEmpty()) {
+
+  public Optional<TeamResponse> getMyTeamForEvent(UUID currUser, UUID eventId){
+    List<TeamMember> members = teamMemberRepository.findByUserIdAndEventId(currUser, "APPROVED", eventId);
+
+    if(members.isEmpty()){
       return Optional.empty();
     }
 
-    Team team =
-        teamRepository
-            .findById(members.get(0).getTeamId())
-            .orElseThrow(() -> new RuntimeException("Team not found"));
-
+    Team team = teamRepository.findById(members.get(0).getTeamId()).orElseThrow(() -> newRuntimeException("Team not found"));
     return Optional.of(toTeamResponse(team));
   }
 
