@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.hackathon.platform.model.Event;
@@ -91,7 +93,7 @@ public class TeamService {
       return Optional.empty();
     }
 
-    Team team = teamRepository.findById(members.get(0).getTeamId()).orElseThrow(() -> newRuntimeException("Team not found"));
+    Team team = teamRepository.findById(members.get(0).getTeamId()).orElseThrow(() -> new RuntimeException("Team not found"));
     return Optional.of(toTeamResponse(team));
   }
 
@@ -253,6 +255,37 @@ public class TeamService {
     response.setCreatedByUserId(team.getCreatedByUserId());
     response.setCreatedAt(team.getCreatedAt());
     response.setStatus(team.getStatus());
+    response.setJoinCode(team.getJoinCode());
     return response;
+  }
+
+  private void assertEventAcceptsRegistrations(Event event){
+    if("COMPLETED".equals(event.getStatus()) || "CANCELLED".equals(event.getStatus())){
+      throw new RuntimeException("This event is no longer accepting registrations");
+    }
+  }
+
+  private void assertRegistrationKeyMatches(Event event, String suppliedKey){
+    if(!"PRIVATE".equals(event.getVisibility())){
+      return;
+    }
+    if(suppliedKey == null || suppliedKey.isBlank() || !suppliedKey.equals(event.getRegistrationKey())){
+      throw new RuntimeException("A valid registration key is required for this event");
+    }
+  }
+
+  private Team saveTeamRetryingJoinCodeCollissions(Team team){
+    for(int attempt=0; attempt < MAX_JOIN_CODE_GENERATION_ATTEMPTS; attempt++){
+      try{
+        return teamRepository.save(team);
+      } catch (DataIntegrityViolationException e){
+        team.regenJoinCode();
+      }
+    }
+    throw new RuntimeException("could not generate join code");
+  }
+
+  private String normalizeJoinCode(String joinCode){
+    return joinCode == null ? "" : joinCode.trim().toUpperCase();
   }
 }
