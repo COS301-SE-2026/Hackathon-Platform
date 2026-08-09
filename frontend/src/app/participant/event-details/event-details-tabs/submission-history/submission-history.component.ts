@@ -4,6 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TeamService } from '../../../../services/team.service';
 import { SubmissionService, SubmissionResponse } from '../../../../services/submission.service';
+import { LevelService } from '../../../../services/level.service';
 
 @Component({
   selector: 'app-submission-history',
@@ -16,9 +17,11 @@ export class SubmissionHistoryComponent {
   
 private readonly teamService = inject(TeamService);
 private readonly submissionService = inject(SubmissionService);
+private readonly levelService = inject(LevelService);
  private readonly change = inject(ChangeDetectorRef);
 
 private eventID = '';
+private hackathonID = '';
 
 @Input({ required: true })
 set eventId(value: string) {
@@ -34,6 +37,20 @@ get eventId(): string {
   return this.eventID;
 }
 
+@Input({ required: true })
+set hackathonId(value: string) {
+  if (!value || value === this.hackathonID) {
+    return;
+  }
+
+  this.hackathonID = value;
+  this.loadLevels();
+}
+
+get hackathonId(): string {
+  return this.hackathonID;
+}
+
 teamId: string | null = null;
 teamLoading = false;
 teamError = '';
@@ -42,9 +59,29 @@ submissionHistory: SubmissionResponse[] = [];
 historyLoading = true;
 historyError = '';
 
+levelNumberByLevelId: Record<number, number> = {};
 
 
 
+
+  loadLevels(): void {
+    this.levelService.getLevels(this.hackathonID).subscribe({
+      next: levels => {
+        this.levelNumberByLevelId = {};
+        levels.forEach(level => {
+          this.levelNumberByLevelId[level.id] = level.levelNumber;
+        });
+        this.change.detectChanges();
+      },
+      error: () => {
+        //fall back to showing the level id if levelno dont work.
+      },
+    });
+  }
+
+  levelNumber(levelId: number): number | string {
+    return this.levelNumberByLevelId[levelId] ?? levelId;
+  }
 
   loadMyTeam(): void {
     this.teamLoading = true;
