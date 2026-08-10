@@ -8,6 +8,7 @@ import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.scoring.queue.ScoringJobProducer;
+import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
@@ -46,6 +47,7 @@ public class StorageController {
   private final EventRepository eventRepository;
   private final ScoringJobProducer producer;
   private final HackathonService hackathonService;
+  private final EventService eventService;
 
   // Event Resources
 
@@ -208,21 +210,67 @@ public class StorageController {
             String.valueOf(nextVersion)));
   }
 
+  // Event Branding helpers
+
+  private static final List<String> ALLOWED_IMAGE_TYPES =
+      List.of("image/png", "image/jpeg", "image/webp", "image/svg+xml");
+
+  private static void validateImage(MultipartFile file) {
+    if (file == null || file.isEmpty()) {
+
+      throw new StorageException("No file provided");
+    }
+    
+    String contentType = file.getContentType();
+    if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase())) {
+
+      throw new StorageException(
+          "Branding asset must be an image (PNG, JPEG, WEBP or SVG). Received: " + contentType);
+    }
+  }
+
   /**
-   * Uploads a branding asset (logo, banner) for a specific event.
+   * Uploads/replaces the banner image for a specific event.
    *
-   * @param hackathonId the event UUID
-   * @param file the uploaded image file
+   * @param eventId the event UUID
+   * @param file the uploaded banner image
    * @return storageKey and blobUrl
    */
-  @PostMapping("/hackathons/{hackathonId}/branding")
+  @PostMapping("/events/{eventId}/banner")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Map<String, String>> uploadBrandingAsset(
-      @PathVariable String hackathonId, @RequestParam("file") MultipartFile file) {
-    String storageKey = BlobPath.brandingAsset(hackathonId, file.getOriginalFilename());
+  public ResponseEntity<Map<String, String>> uploadEventBanner(
+      @PathVariable String eventId, @RequestParam("file") MultipartFile file) {
+    validateImage(file);
+
+    String storageKey = BlobPath.eventBanner(eventId, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
+
+    eventService.updateEventBanner(UUID.fromString(eventId), storageKey);
+
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
   }
+
+  /**
+   * Uploads/replaces the brand logo image for a specific event.
+   *
+   * @param eventId the event UUID
+   * @param file the uploaded logo image
+   * @return storageKey and blobUrl
+   */
+  @PostMapping("/events/{eventId}/logo")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, String>> uploadEventLogo(
+      @PathVariable String eventId, @RequestParam("file") MultipartFile file) {
+    validateImage(file);
+
+    String storageKey = BlobPath.eventLogo(eventId, file.getOriginalFilename());
+    String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
+
+    eventService.updateEventLogo(UUID.fromString(eventId), storageKey);
+
+    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+  }
+
 
   /**
    * Uploads the problem statement PDF for a hackathon. The returned storageKey is saved to
