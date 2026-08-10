@@ -21,9 +21,15 @@ class BlobPathTest {
   }
 
   @Test
-  void brandingAsset_returnsCorrectPath() {
-    String result = BlobPath.brandingAsset(HACKATHON_ID, "logo.png");
-    assertEquals("events/hackathon-123/branding/logo.png", result);
+  void eventBanner_returnsCorrectPath() {
+    String result = BlobPath.eventBanner(HACKATHON_ID, "banner.png");
+    assertEquals("events/hackathon-123/branding/banner/banner.png", result);
+  }
+
+  @Test
+  void eventLogo_returnsCorrectPath() {
+    String result = BlobPath.eventLogo(HACKATHON_ID, "logo.png");
+    assertEquals("events/hackathon-123/branding/logo/logo.png", result);
   }
 
   @Test

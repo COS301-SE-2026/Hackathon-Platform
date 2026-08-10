@@ -5,6 +5,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -14,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.SolverVersion;
@@ -22,6 +26,7 @@ import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.scoring.queue.ScoringJobProducer;
+import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
@@ -57,6 +62,8 @@ class StorageControllerTest {
   @MockBean private SolverVersionRepository solverVersionRepository;
 
   @MockBean private EventRepository eventRepository;
+
+  @MockBean private EventService eventService;
 
   @MockBean private ScoringJobProducer producer;
 
@@ -244,7 +251,25 @@ class StorageControllerTest {
   }
 
   @Test
-  void uploadBrandingAsset_returns200WithStorageKey() throws Exception {
+  void uploadEventBanner_returns200WithStorageKey() throws Exception {
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "banner.png", "image/png", "imagedata".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .file(file)
+                .with(authentication(adminAuth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.storageKey").exists())
+        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+  }
+
+  @Test
+  void uploadEventLogo_returns200WithStorageKey() throws Exception {
     when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
     when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
 
@@ -253,7 +278,7 @@ class StorageControllerTest {
 
     mockMvc
         .perform(
-            multipart("/api/storage/hackathons/{hackathonId}/branding", HACKATHON_ID)
+            multipart("/api/storage/events/{eventId}/logo", EVENT_ID)
                 .file(file)
                 .with(authentication(adminAuth)))
         .andExpect(status().isOk())
