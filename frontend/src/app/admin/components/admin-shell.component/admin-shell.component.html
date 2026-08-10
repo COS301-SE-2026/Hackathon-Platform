@@ -1,28 +1,62 @@
 <div class = "admin-shell">
-
-    <nav class = "topnav">
-        <div class = "topnav-left">
-            <div class = "logo-badge">H</div>
-            <span class = "brand">Hackathon <span class = "brand-accent">Platform</span></span>
-
+    <aside class = "sidebar">
+        <div class = "sidebar-brand">
+            <span class = "brand-line1">Hackathon</span>
+            <span class = "brand-line2">Platform</span>
         </div>
 
-        <div class = "topnav-links">
-            <a routerLink = "/admin/dashboard" routerLinkActive = "active">Dashboard</a>
-            <a routerLink = "/admin/hackathons" routerLinkActive = "active">Hackathons</a>
-            <a routerLink = "/admin/events" routerLinkActive = "active">Events</a>
-
-
+        <nav class = "sidebar-nav">
+            <a routerLink = "/admin/dashboard" routerLinkActive = "active" >
+                <i class = "pi pi-home"></i><span>Home</span>
+            </a>
+            <a routerLink = "/admin/hackathons" routerLinkActive = "active" >
+                <i class = "pi pi-th-large"></i><span>Hackathons</span>
+            </a>
+            <a routerLink = "/admin/participants" routerLinkActive = "active" >
+                <i class = "pi pi-users"></i><span>Participants</span>
+            </a>
+            <a routerLink = "/admin/events" routerLinkActive = "active" >
+                <i class = "pi pi-calendar"></i><span>Events</span>
+            </a>
+            <a routerLink = "/admin/teams" routerLinkActive = "active" >
+                <i class = "pi pi-user-plus"></i><span>Teams</span>
+            </a>
+            <a routerLink = "/admin/submissions" routerLinkActive = "active">
+                <i class = "pi pi-code"></i><span>Submissions</span>
+            </a>
+            <a routerLink = "/admin/announcements" routerLinkActive = "active" >
+                <i class = "pi pi-megaphone"></i><span>Announcements</span>
+            </a>
+            <a routerLink = "/admin/reports" routerLinkActive = "active">
+                <i class = "pi pi-chart-bar"></i><span>Reports</span>
+            </a>
+            <a routerLink = "/admin/settings" routerLinkActive = "active" >
+                <i class = "pi pi-cog"></i><span>Settings</span>
+            </a>
+        </nav>
+        <div class = "sidebar-footer">
+            <button class = "sidebar-logout" (click) = "logout()">
+                <i class = "pi pi-sign-out"></i><span>Logout</span>
+            </button>
         </div>
-        <div class = "topnav-right">
-            <span class = "admin-pill">Admin</span>
-            <div class = "avatar-circle">A</div>
-            <button class = "logout-btn" (click) = "logout()">Logout</button>
-        </div>
-    </nav>
+    </aside>
+    <div class = "admin-main">
+        <header class = "topbar">
+            <div class = "topbar-left">
+                <ng-content select = "[topbarLeft]"></ng-content>
+            </div>
 
-
-    <main class = "admin-content">
-        <router-outlet></router-outlet>
-    </main>
+            <div class = "topbar-right">
+                <div class = "avatar-circle"><i class = "pi pi-user"></i></div>
+                <div class = "user-info">
+                    <span class = "user-name">{{ userName }}</span>
+                    <span class = "user-role">{{ userRole }}</span>
+                </div>
+                <i class = "pi pi-chevron-down topbar-chevron"></i>
+            </div>
+        </header>
+        <main class = "admin-content">
+            <router-outlet></router-outlet>
+        </main>
+    </div>
 </div>
