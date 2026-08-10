@@ -399,7 +399,87 @@ class StorageControllerTest {
         .andExpect(status().isForbidden());
   }
 
+  @Test
+  void deleteEventBanner_returns204AndDeletesBlobWhenBannerExists() throws Exception {
+    Event event = new Event();
+    String storageKey = "events/" + EVENT_ID + "/branding/banner/banner.png";
+    event.setBannerStorageKey(storageKey);
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
 
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+
+    verify(storageService, times(1)).delete(CONTAINER, storageKey);
+    verify(eventService, times(1)).updateEventBanner(UUID.fromString(EVENT_ID), null);
+  }
+
+  @Test
+  void deleteEventBanner_returns204WithoutDeletingWhenNoBannerExists() throws Exception {
+    Event event = new Event();
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+
+    verify(storageService, never()).delete(anyString(), anyString());
+    verify(eventService, never()).updateEventBanner(any(), any());
+  }
+
+  @Test
+  void deleteEventBanner_returns403WhenCallerIsNotAdmin() throws Exception {
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void deleteEventLogo_returns204AndDeletesBlobWhenLogoExists() throws Exception {
+    Event event = new Event();
+    String storageKey = "events/" + EVENT_ID + "/branding/logo/logo.png";
+    event.setLogoStorageKey(storageKey);
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+
+    verify(storageService, times(1)).delete(CONTAINER, storageKey);
+    verify(eventService, times(1)).updateEventLogo(UUID.fromString(EVENT_ID), null);
+  }
+
+  @Test
+  void deleteEventLogo_returns204WithoutDeletingWhenNoLogoExists() throws Exception {
+    Event event = new Event();
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+
+    verify(storageService, never()).delete(anyString(), anyString());
+    verify(eventService, never()).updateEventLogo(any(), any());
+  }
+
+  @Test
+  void deleteEventLogo_returns403WhenCallerIsNotAdmin() throws Exception {
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/logo", EVENT_ID)
+                .with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
+  }
 
   @Test
   void uploadProblemStatement_returns200WithStorageKey() throws Exception {
