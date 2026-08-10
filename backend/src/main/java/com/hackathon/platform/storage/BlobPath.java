@@ -21,15 +21,25 @@ public final class BlobPath {
   }
 
   /**
-   * Storage key for an event branding asset (logo, banner). Stored in: events.branding_storage_key
-   * (might be added later).
+   * Storage key for an event's banner image. Stored in: events.banner_storage_key
    *
    * @param eventId the event UUID
    * @param filename the original filename
    * @return storage key string
    */
-  public static String brandingAsset(String eventId, String filename) {
-    return String.format("events/%s/branding/%s", eventId, sanitise(filename));
+  public static String eventBanner(String eventId, String filename) {
+    return String.format("events/%s/branding/banner/%s", eventId, sanitise(filename));
+  }
+
+  /**
+   * Storage key for an event's logo image. Stored in: events.logo_storage_key
+   *
+   * @param eventId the event UUID
+   * @param filename the original filename
+   * @return storage key string
+   */
+  public static String eventLogo(String eventId, String filename) {
+    return String.format("events/%s/branding/logo/%s", eventId, sanitise(filename));
   }
 
   /**
@@ -93,7 +103,7 @@ public final class BlobPath {
    * Storage key for a scoring log file. One file per submission.
    *
    * @param eventId the event UUID
-   * @param teamId the team UUID
+   * @param teamId the team ID
    * @param levelId the level ID
    * @param submissionId the submission ID
    * @return storage key string
