@@ -287,6 +287,61 @@ class StorageControllerTest {
   }
 
   @Test
+  void getEventBannerUrl_returnsPresignedUrl() throws Exception {
+    Event event = new Event();
+    event.setBannerStorageKey("events/" + EVENT_ID + "/branding/banner/banner.png");
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+        .thenReturn(BLOB_URL);
+
+    mockMvc
+        .perform(
+            get("/api/storage/events/{eventId}/banner", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.url").value(BLOB_URL));
+  }
+
+  @Test
+  void getEventBannerUrl_returns204WhenNoBannerUploaded() throws Exception {
+    Event event = new Event();
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+
+    mockMvc
+        .perform(
+            get("/api/storage/events/{eventId}/banner", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void getEventLogoUrl_returnsPresignedUrl() throws Exception {
+    Event event = new Event();
+    event.setLogoStorageKey("events/" + EVENT_ID + "/branding/logo/logo.png");
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+        .thenReturn(BLOB_URL);
+
+    mockMvc
+        .perform(
+            get("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.url").value(BLOB_URL));
+  }
+
+  @Test
+  void getEventLogoUrl_returns204WhenNoLogoUploaded() throws Exception {
+    Event event = new Event();
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+
+    mockMvc
+        .perform(
+            get("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+  }
+
+
+  @Test
   void uploadProblemStatement_returns200WithStorageKey() throws Exception {
     when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
     when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
