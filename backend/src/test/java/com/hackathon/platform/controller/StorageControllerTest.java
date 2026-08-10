@@ -340,6 +340,66 @@ class StorageControllerTest {
         .andExpect(status().isNoContent());
   }
 
+  @Test
+  void uploadEventBanner_returns500WhenContentTypeNotAnImage() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "banner.pdf", "application/pdf", "notanimage".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .file(file)
+                .with(authentication(adminAuth)))
+        .andExpect(status().is5xxServerError());
+  }
+
+  @Test
+  void uploadEventBanner_returns500WhenFileMissing() throws Exception {
+    mockMvc
+        .perform(multipart("/api/storage/events/{eventId}/banner", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().is5xxServerError());
+  }
+
+  @Test
+  void uploadEventBanner_returns403WhenCallerIsNotAdmin() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "banner.png", "image/png", "imagedata".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .file(file)
+                .with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void uploadEventLogo_returns500WhenContentTypeNotAnImage() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "logo.pdf", "application/pdf", "notanimage".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/logo", EVENT_ID)
+                .file(file)
+                .with(authentication(adminAuth)))
+        .andExpect(status().is5xxServerError());
+  }
+
+  @Test
+  void uploadEventLogo_returns403WhenCallerIsNotAdmin() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "logo.png", "image/png", "imagedata".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/logo", EVENT_ID)
+                .file(file)
+                .with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
+  }
+
+
 
   @Test
   void uploadProblemStatement_returns200WithStorageKey() throws Exception {
