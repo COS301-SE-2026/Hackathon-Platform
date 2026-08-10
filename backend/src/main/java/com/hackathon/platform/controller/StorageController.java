@@ -271,6 +271,73 @@ public class StorageController {
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
   }
 
+  /**
+   * Returns a presigned SAS URL for an event's banner image, for display on the frontend.
+   *
+   * @param eventId the event UUID
+   * @return presigned download URL and storage key
+   */
+  @GetMapping("/events/{eventId}/banner")
+  public ResponseEntity<Map<String, String>> getEventBannerUrl(@PathVariable String eventId) {
+    String storageKey = eventService.getEventById(UUID.fromString(eventId)).getBannerStorageKey();
+    if (storageKey == null) {
+      return ResponseEntity.noContent().build();
+    }
+    String url =
+        storageService.generatePresignedUrl(
+            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
+    return ResponseEntity.ok(Map.of("url", url, "storageKey", storageKey));
+  }
+
+  /**
+   * Returns a presigned SAS URL for an event's brand logo image, for display on the frontend.
+   *
+   * @param eventId the event UUID
+   * @return presigned download URL and storage key
+   */
+  @GetMapping("/events/{eventId}/logo")
+  public ResponseEntity<Map<String, String>> getEventLogoUrl(@PathVariable String eventId) {
+    String storageKey = eventService.getEventById(UUID.fromString(eventId)).getLogoStorageKey();
+    if (storageKey == null) {
+      return ResponseEntity.noContent().build();
+    }
+    String url =
+        storageService.generatePresignedUrl(
+            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
+    return ResponseEntity.ok(Map.of("url", url, "storageKey", storageKey));
+  }
+
+  /**
+   * Deletes an event's banner image, removing both the blob and clearing the storage key.
+   *
+   * @param eventId the event UUID
+   */
+  @DeleteMapping("/events/{eventId}/banner")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> deleteEventBanner(@PathVariable String eventId) {
+    String storageKey = eventService.getEventById(UUID.fromString(eventId)).getBannerStorageKey();
+    if (storageKey != null) {
+      storageService.delete(config.getEventResourcesContainer(), storageKey);
+      eventService.updateEventBanner(UUID.fromString(eventId), null);
+    }
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Deletes an event's brand logo image, removing both the blob and clearing the storage key.
+   *
+   * @param eventId the event UUID
+   */
+  @DeleteMapping("/events/{eventId}/logo")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> deleteEventLogo(@PathVariable String eventId) {
+    String storageKey = eventService.getEventById(UUID.fromString(eventId)).getLogoStorageKey();
+    if (storageKey != null) {
+      storageService.delete(config.getEventResourcesContainer(), storageKey);
+      eventService.updateEventLogo(UUID.fromString(eventId), null);
+    }
+    return ResponseEntity.noContent().build();
+  }
 
   /**
    * Uploads the problem statement PDF for a hackathon. The returned storageKey is saved to
