@@ -11,7 +11,7 @@ import { LevelService, LevelRequest, LevelResponse } from '../../../services/lev
 import { StorageService, LevelFileResponse } from '../../../services/storage.service';
 import { HackathonService } from '../../../services/hackathon.service';
 
-/** A level plus its lazily-loaded file list, used only by this component's view. */
+
 interface UiLevel extends LevelResponse {
   files: LevelFileResponse[];
   filesLoaded: boolean;
@@ -210,10 +210,6 @@ export class LevelsComponent implements OnInit {
     this.editingLevel = null;
   }
 
-  closeFilesModal(): void{
-    this.showFilesModal = false;
-    this.activeLevel = null;
-  }
 
   saveLevel(): void {
     if (!this.modalForm.name.trim()){
@@ -222,7 +218,7 @@ export class LevelsComponent implements OnInit {
     }
 
     if(!this.modalForm.levelNumber || this.modalForm.levelNumber <= 0) {
-      this.modalError = 'The level number must be greater than 0'
+      this.modalError = 'The level number must be greater than 0';
       return;
     }
 
@@ -256,7 +252,7 @@ export class LevelsComponent implements OnInit {
       },
       error: (err) => {
         this.isSavingLevel = false;
-        this.modalError = err.error?.message || 'the level failed to save'
+        this.modalError = err.error?.message || 'The level failed to save';
         this.change.markForCheck();
       }
     });
@@ -278,14 +274,14 @@ export class LevelsComponent implements OnInit {
             },
             error: (err: HttpErrorResponse) => {
               this.isLoadingFiles = false;
-              this.fileError = err.error?.message || 'Failed to loead files for this level';
+              this.fileError = err.error?.message || 'Failed to load files for this level';
               this.change.markForCheck();
             }
           });
         }
     }
     
-    closeManageFilesModal(): void {
+    closeFilesModal(): void {
         this.showFilesModal = false;
         this.activeLevel = null;
     }
@@ -337,7 +333,7 @@ onFileSelected(event: Event):void{
   deleteLevel() : void {
     if (!this.editingLevel) return;
 
-    if(!confirm(`Are you sure you want to delte "${this.editingLevel.name}"? This action is not reversable.`)) {
+    if(!confirm(`Are you sure you want to delete "${this.editingLevel.name}"? This action is not reversible.`)) {
       return;
     }
 
