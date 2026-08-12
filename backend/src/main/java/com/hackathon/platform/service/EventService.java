@@ -219,7 +219,7 @@ public class EventService {
     event.setLogoStorageKey(storageKey);
     return eventRepository.save(event);
   }
-}
+
   public ScoringPauseResponse setScoringPaused(UUID eventId, boolean paused) {
     Event event =
         eventRepository
