@@ -2,6 +2,7 @@ package com.hackathon.platform.service;
 
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
+import com.hackathon.platform.dto.ScoringPauseResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRepository;
@@ -199,5 +200,16 @@ public class EventService {
     return eventRepository
         .findById(eventId)
         .orElseThrow(() -> new RuntimeException("The event could not be found"));
+  }
+
+  public ScoringPauseResponse setScoringPaused(UUID eventId, boolean paused) {
+    Event event =
+        eventRepository
+            .findById(eventId)
+            .orElseThrow(() -> new RuntimeException("Event could not be found"));
+    event.setScoringPaused(paused);
+    eventRepository.save(event);
+
+    return new ScoringPauseResponse(eventId, paused);
   }
 }
