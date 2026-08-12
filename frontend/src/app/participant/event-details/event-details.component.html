@@ -31,8 +31,8 @@
     @if (activeTab === 'submissions' && eventId && hackathonId) { <app-submissions [eventId]="eventId"[hackathonId]="hackathonId"/>
     }
 
-    @if (activeTab === 'submission-history' && eventId && hackathonId) {<app-submission-history [eventId]="eventId" />}
-    
+    @if (activeTab === 'submission-history' && eventId && hackathonId) {<app-submission-history [eventId]="eventId" [hackathonId]="hackathonId" />}
+
     @if (activeTab === 'team' && eventId) {<app-my-team [eventId]="eventId"/>}
 
     @if (activeTab === 'leaderboard' && eventId) { <app-leaderboard [eventId]="eventId"/>}

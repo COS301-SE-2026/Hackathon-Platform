@@ -51,6 +51,28 @@ public class Event {
   @Column(nullable = false, length = 30)
   private String status;
 
+  @Column(name = "banner_storage_key", columnDefinition = "TEXT", nullable = true)
+  private String bannerStorageKey;
+
+  @Column(name = "logo_storage_key", columnDefinition = "TEXT", nullable = true)
+  private String logoStorageKey;
+
+  public String getBannerStorageKey() {
+    return bannerStorageKey;
+  }
+
+  public void setBannerStorageKey(String bannerStorageKey) {
+    this.bannerStorageKey = bannerStorageKey;
+  }
+
+  public String getLogoStorageKey() {
+    return logoStorageKey;
+  }
+
+  public void setLogoStorageKey(String logoStorageKey) {
+    this.logoStorageKey = logoStorageKey;
+  }
+
   @Column(name = "scoring_paused", nullable = false)
   private boolean scoringPaused = false;
 
