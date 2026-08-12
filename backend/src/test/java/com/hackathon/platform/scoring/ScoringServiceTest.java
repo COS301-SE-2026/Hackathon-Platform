@@ -254,4 +254,41 @@ class ScoringServiceTest {
 
     verify(subRepo, never()).save(any());
   }
+
+  @Test
+  void isScoringPaused_whenEventIsPaused_returnsTrue() {
+    Event event = new Event();
+    event.setScoringPaused(true);
+
+    when(subRepo.findById(SUB_ID)).thenReturn(Optional.of(sub));
+    when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
+
+    boolean paused = scoringService.isScoringPaused(SUB_ID);
+    assertThat(paused).isTrue();
+  }
+
+  @Test
+  void isScoringPaused_whenEventIsPaused_returnsFalse() {
+    Event event = new Event();
+    event.setScoringPaused(false);
+
+    when(subRepo.findById(SUB_ID)).thenReturn(Optional.of(sub));
+    when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
+
+    boolean paused = scoringService.isScoringPaused(SUB_ID);
+    assertThat(paused).isFalse();
+  }
+
+  @Test
+  void isScoringPaused_whenSubmissionDoesNotExist_throwsException() {
+    when(subRepo.findById(SUB_ID)).thenReturn(Optional.empty());
+    assertThatThrownBy(() -> scoringService.isScoringPaused(SUB_ID)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Submission was not found");
+  }
+
+  @Test
+  void isScoringPaused_whenEventDoesNotExist_throwsException() {
+    when(subRepo.findById(SUB_ID)).thenReturn(Optional.of(sub));
+    when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.empty());
+    assertThatThrownBy(() -> scoringService.isScoringPaused(SUB_ID)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Could not find the event");
+  }
 }
