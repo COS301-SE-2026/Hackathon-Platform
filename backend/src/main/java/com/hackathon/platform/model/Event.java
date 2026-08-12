@@ -72,6 +72,8 @@ public class Event {
   public void setLogoStorageKey(String logoStorageKey) {
     this.logoStorageKey = logoStorageKey;
   }
+  @Column(name = "scoring_paused", nullable = false)
+  private boolean scoringPaused = false;
 
   public UUID getEventId() {
     return eventId;
@@ -151,5 +153,14 @@ public class Event {
 
   public void setStatus(String status) {
     this.status = status;
+  }
+}
+
+  public boolean getScoringPaused() {
+    return scoringPaused;
+  }
+
+  public void setScoringPaused(boolean scoringPaused) {
+    this.scoringPaused = scoringPaused;
   }
 }
