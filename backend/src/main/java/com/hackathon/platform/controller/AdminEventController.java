@@ -2,6 +2,7 @@ package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
+import com.hackathon.platform.dto.ScoringPauseResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.service.EventService;
@@ -71,5 +72,17 @@ public class AdminEventController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<EventStatusResponse> getEventStatus(@PathVariable("id") UUID eventId) {
     return ResponseEntity.ok(eventService.getEventStatus(eventId));
+  }
+
+  @PatchMapping("/{id}/scoring/pause")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ScoringPauseResponse> pauseScoring(@PathVariable("id") UUID eventId) {
+    return ResponseEntity.ok(eventService.setScoringPaused(eventId, true));
+  }
+
+  @PatchMapping("/{id}/scoring/resume")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ScoringPauseResponse> resumeScoring(@PathVariable("id") UUID eventId) {
+    return ResponseEntity.ok(eventService.setScoringPaused(eventId, false));
   }
 }
