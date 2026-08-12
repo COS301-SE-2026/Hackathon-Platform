@@ -12,12 +12,14 @@ import static org.mockito.Mockito.when;
 
 import com.hackathon.platform.config.AzureBlobConfig;
 import com.hackathon.platform.model.Level;
+import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.ScoringLog;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.repository.LevelFileRepository;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.ScoringLogRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
@@ -49,6 +51,7 @@ class ScoringServiceTest {
   @Mock private AzureBlobConfig azure;
   @Mock private SolverRunner solverRunner;
   @Mock private LeaderboardUpdateService leaderboardUpdateService;
+  @Mock private EventRepository eventRepo;
 
   private ScoringService scoringService;
 
@@ -76,7 +79,8 @@ class ScoringServiceTest {
             storageS,
             azure,
             solverRunner,
-            leaderboardUpdateService);
+            leaderboardUpdateService,
+            eventRepo);
 
     sub = new Submission(TEAM_ID, LVL_ID, SOLVER_V_ID, "src/code.zip", "out/output.txt");
     sub.setId(SUB_ID);
