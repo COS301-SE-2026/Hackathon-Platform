@@ -220,7 +220,7 @@ public class StorageController {
 
       throw new StorageException("No file provided");
     }
-    
+
     String contentType = file.getContentType();
     if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase())) {
 

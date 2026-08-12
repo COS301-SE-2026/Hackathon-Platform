@@ -356,7 +356,9 @@ class StorageControllerTest {
   @Test
   void uploadEventBanner_returns500WhenFileMissing() throws Exception {
     mockMvc
-        .perform(multipart("/api/storage/events/{eventId}/banner", EVENT_ID).with(authentication(adminAuth)))
+        .perform(
+            multipart("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .with(authentication(adminAuth)))
         .andExpect(status().is5xxServerError());
   }
 

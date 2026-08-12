@@ -492,5 +492,4 @@ class EventServiceTest {
 
     verify(eventRepository, never()).save(any(Event.class));
   }
-  
 }
