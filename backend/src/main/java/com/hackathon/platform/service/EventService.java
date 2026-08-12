@@ -200,22 +200,4 @@ public class EventService {
         .findById(eventId)
         .orElseThrow(() -> new RuntimeException("The event could not be found"));
   }
-
-  public Event updateEventBanner(UUID eventId, String storageKey) {
-    Event event =
-        eventRepository
-            .findById(eventId)
-            .orElseThrow(() -> new RuntimeException("The event could not be found"));
-    event.setBannerStorageKey(storageKey);
-    return eventRepository.save(event);
-  }
-
-  public Event updateEventLogo(UUID eventId, String storageKey) {
-    Event event =
-        eventRepository
-            .findById(eventId)
-            .orElseThrow(() -> new RuntimeException("The event could not be found"));
-    event.setLogoStorageKey(storageKey);
-    return eventRepository.save(event);
-  }
 }
