@@ -1,19 +1,19 @@
 package com.hackathon.platform.scoring;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.ScoringLog;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.Team;
-import com.hackathon.platform.model.Event;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.ScoringLogRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
-import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.service.StorageService;
 import com.hackathon.platform.storage.BlobPath;
@@ -284,8 +284,14 @@ public class ScoringService {
   }
 
   public boolean isScoringPaused(Long subId) {
-    Submission sub = submissionRepo.findById(subId).orElseThrow(() -> new IllegalArgumentException("Submission was not found " + subId));
-    Event event = eventRepo.findById(sub.getEventId()).orElseThrow(() -> new IllegalArgumentException("Could not find the event"));
+    Submission sub =
+        submissionRepo
+            .findById(subId)
+            .orElseThrow(() -> new IllegalArgumentException("Submission was not found " + subId));
+    Event event =
+        eventRepo
+            .findById(sub.getEventId())
+            .orElseThrow(() -> new IllegalArgumentException("Could not find the event"));
 
     return event.getScoringPaused();
   }

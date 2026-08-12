@@ -203,7 +203,10 @@ public class EventService {
   }
 
   public ScoringPauseResponse setScoringPaused(UUID eventId, boolean paused) {
-    Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event could not be found"));
+    Event event =
+        eventRepository
+            .findById(eventId)
+            .orElseThrow(() -> new RuntimeException("Event could not be found"));
     event.setScoringPaused(paused);
     eventRepository.save(event);
 

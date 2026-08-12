@@ -11,15 +11,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.hackathon.platform.config.AzureBlobConfig;
-import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.ScoringLog;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.Team;
-import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.ScoringLogRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
@@ -282,13 +282,17 @@ class ScoringServiceTest {
   @Test
   void isScoringPaused_whenSubmissionDoesNotExist_throwsException() {
     when(subRepo.findById(SUB_ID)).thenReturn(Optional.empty());
-    assertThatThrownBy(() -> scoringService.isScoringPaused(SUB_ID)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Submission was not found");
+    assertThatThrownBy(() -> scoringService.isScoringPaused(SUB_ID))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Submission was not found");
   }
 
   @Test
   void isScoringPaused_whenEventDoesNotExist_throwsException() {
     when(subRepo.findById(SUB_ID)).thenReturn(Optional.of(sub));
     when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.empty());
-    assertThatThrownBy(() -> scoringService.isScoringPaused(SUB_ID)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Could not find the event");
+    assertThatThrownBy(() -> scoringService.isScoringPaused(SUB_ID))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Could not find the event");
   }
 }

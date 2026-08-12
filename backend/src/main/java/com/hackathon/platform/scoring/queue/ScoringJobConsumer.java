@@ -30,7 +30,7 @@ public class ScoringJobConsumer
     }
     try {
       logger.info("got submission {} from record {}", submissionId, msg.getId());
-      if(scorer.isScoringPaused(submissionId)) {
+      if (scorer.isScoringPaused(submissionId)) {
         logger.info("Scoring is paused for submission {}, leaving job queued", submissionId);
         return;
       }
