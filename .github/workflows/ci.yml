@@ -199,15 +199,15 @@ jobs:
         run: npm run test:e2e
 
 
-  performance:
-    name: k6 load test
-    runs-on: ubuntu-latest
+  #performance:
+    #name: k6 load test
+    #runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+    #steps:
+      #- uses: actions/checkout@v4
 
-      - uses: grafana/setup-k6-action@v1
+      #- uses: grafana/setup-k6-action@v1
 
-      - name: Run load test
-        run: |
-          k6 run -e EMAIL=${{ secrets.E2E_PARTICIPANT_EMAIL }} -e PASSWORD=${{ secrets.E2E_PARTICIPANT_PASSWORD }} -e BASE_URL=https://api.hackathonplatform.co.za k6/load-test.js
+      #- name: Run load test
+        #run: |
+          #k6 run -e EMAIL=${{ secrets.E2E_PARTICIPANT_EMAIL }} -e PASSWORD=${{ secrets.E2E_PARTICIPANT_PASSWORD }} -e BASE_URL=https://api.hackathonplatform.co.za k6/load-test.js

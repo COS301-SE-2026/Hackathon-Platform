@@ -388,4 +388,108 @@ class EventServiceTest {
 
     verify(eventRepository).findById(randomEventId);
   }
+
+  @Test
+  void getEventById_withValidId_returnsEvent() {
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    Event result = eventService.getEventById(eventId);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getEventId()).isEqualTo(eventId);
+    assertThat(result.getName()).isEqualTo("Test Hackathon");
+    verify(eventRepository).findById(eventId);
+  }
+
+  @Test
+  void getEventById_withInvalidId_throwsRuntimeException() {
+    UUID randomEventId = UUID.randomUUID();
+    when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> eventService.getEventById(randomEventId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("The event could not be found");
+
+    verify(eventRepository).findById(randomEventId);
+  }
+
+  @Test
+  void updateEventBanner_withValidId_setsStorageKeyAndSaves() {
+    String storageKey = "events/" + eventId + "/branding/banner/banner.png";
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.updateEventBanner(eventId, storageKey);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getBannerStorageKey()).isEqualTo(storageKey);
+    verify(eventRepository).findById(eventId);
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void updateEventBanner_withNullStorageKey_clearsBanner() {
+    event.setBannerStorageKey("events/" + eventId + "/branding/banner/old.png");
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.updateEventBanner(eventId, null);
+
+    assertThat(result.getBannerStorageKey()).isNull();
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void updateEventBanner_withInvalidId_throwsRuntimeException() {
+    UUID randomEventId = UUID.randomUUID();
+    when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> eventService.updateEventBanner(randomEventId, "some-key"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("The event could not be found");
+
+    verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void updateEventLogo_withValidId_setsStorageKeyAndSaves() {
+    String storageKey = "events/" + eventId + "/branding/logo/logo.png";
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.updateEventLogo(eventId, storageKey);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getLogoStorageKey()).isEqualTo(storageKey);
+    verify(eventRepository).findById(eventId);
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void updateEventLogo_withNullStorageKey_clearsLogo() {
+    event.setLogoStorageKey("events/" + eventId + "/branding/logo/old.png");
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.updateEventLogo(eventId, null);
+
+    assertThat(result.getLogoStorageKey()).isNull();
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void updateEventLogo_withInvalidId_throwsRuntimeException() {
+    UUID randomEventId = UUID.randomUUID();
+    when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> eventService.updateEventLogo(randomEventId, "some-key"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("The event could not be found");
+
+    verify(eventRepository, never()).save(any(Event.class));
+  }
 }

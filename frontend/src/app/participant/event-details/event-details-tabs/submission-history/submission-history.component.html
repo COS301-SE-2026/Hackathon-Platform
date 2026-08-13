@@ -40,7 +40,7 @@
 
                     <tr>
                         <td>{{ formatDate(submission.submittedAt) }}</td>
-                        <td>Level {{ submission.levelId }}</td>
+                        <td>Level {{ levelNumber(submission.levelId) }}</td>
                         <td><span class="status-badge" [ngClass]="statusClass(submission.status)"> {{ statusLabel(submission.status) }}</span></td>
                         <td>{{ submission.status === 'SCORED' ? submission.score : '--' }}</td>
                         <td>
