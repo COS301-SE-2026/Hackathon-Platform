@@ -330,7 +330,9 @@ onFileSelected(event: Event):void{
     }
   }
 
-  deleteLevel() : void {
+  deleteLevel(level?: UiLevel) : void {
+    const targetLevel = level || this.editingLevel;
+    if (!targetLevel) return;
     if (!this.editingLevel) return;
 
     if(!confirm(`Are you sure you want to delete "${this.editingLevel.name}"? This action is not reversible.`)) {
@@ -344,12 +346,19 @@ onFileSelected(event: Event):void{
       next: () => {
         this.isSavingLevel = false;
         this.levels = this.levels.filter((l) => l.id !== levelId);
+        if (this.editingLevel){
         this.closeLevelModal();
+        }
         this.change.markForCheck();
       },
       error: (err: HttpErrorResponse) => {
         this.isSavingLevel = false;
+
+        if (this.editingLevel){
         this.modalError = err.error?.message || 'The level failed to delete';
+        }else {
+         this.errorMessage = err.error?.message || 'The level failed to delete'; 
+        }
         this.change.markForCheck();
       }
     });

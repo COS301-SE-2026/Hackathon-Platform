@@ -1,28 +1,21 @@
 <div class = "admin-shell">
-    <aside class = "sidebar">
-        <div class = "sidebar-brand">
+    <header class = "topbar">
+        <div class = "topbar-left">
+            <div class = "brand">
             <span class = "brand-line1">Hackathon</span>
             <span class = "brand-line2">Platform</span>
         </div>
+        </div>
 
-        <nav class = "sidebar-nav">
+        <nav class = "topbar-nav">
             <a routerLink = "/admin/dashboard" routerLinkActive = "active" >
                 <i class = "pi pi-home"></i><span>Home</span>
             </a>
             <a routerLink = "/admin/hackathons" routerLinkActive = "active" >
                 <i class = "pi pi-th-large"></i><span>Hackathons</span>
             </a>
-            <a routerLink = "/admin/participants" routerLinkActive = "active" >
-                <i class = "pi pi-users"></i><span>Participants</span>
-            </a>
             <a routerLink = "/admin/events" routerLinkActive = "active" >
                 <i class = "pi pi-calendar"></i><span>Events</span>
-            </a>
-            <a routerLink = "/admin/teams" routerLinkActive = "active" >
-                <i class = "pi pi-user-plus"></i><span>Teams</span>
-            </a>
-            <a routerLink = "/admin/submissions" routerLinkActive = "active">
-                <i class = "pi pi-code"></i><span>Submissions</span>
             </a>
             <a routerLink = "/admin/announcements" routerLinkActive = "active" >
                 <i class = "pi pi-megaphone"></i><span>Announcements</span>
@@ -34,29 +27,30 @@
                 <i class = "pi pi-cog"></i><span>Settings</span>
             </a>
         </nav>
-        <div class = "sidebar-footer">
-            <button class = "sidebar-logout" (click) = "logout()">
-                <i class = "pi pi-sign-out"></i><span>Logout</span>
-            </button>
-        </div>
-    </aside>
-    <div class = "admin-main">
-        <header class = "topbar">
-            <div class = "topbar-left">
-                <ng-content select = "[topbarLeft]"></ng-content>
-            </div>
+        
 
             <div class = "topbar-right">
+                <button class = "topbar-notifications">
+                    <i class = "pi pi-bell"></i>
+                    <span class = "notification-badge"></span>
+                </button>
                 <div class = "avatar-circle"><i class = "pi pi-user"></i></div>
                 <div class = "user-info">
                     <span class = "user-name">{{ userName }}</span>
                     <span class = "user-role">{{ userRole }}</span>
                 </div>
                 <i class = "pi pi-chevron-down topbar-chevron"></i>
+                <button class = "topbar-logout" (click) = "logout()">
+                    <i class = "pi pi-sign-out"></i>
+                    <span>Logout</span>
+
+                </button>
             </div>
         </header>
-        <main class = "admin-content">
+        <main class = "admin-main">
+        <div class = "admin-content">
             <router-outlet></router-outlet>
+        </div>
         </main>
-    </div>
 </div>
+

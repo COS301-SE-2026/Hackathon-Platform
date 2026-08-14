@@ -7,150 +7,175 @@
     min-height: 100vh;
     display: flex;
     background-color : #f4f6f9;
-
-}
-
-.sidebar{
-    width: 220px;
-    flex-shrink: 0;
-    background-color: #0c1830;
-    min-height: 100vh;
-    display: flex;
     flex-direction: column;
-    position : sticky;
-    top:0;
-    align-self: flex-start;
-}
-
-.sidebar-brand{
-    display: flex;
-    flex-direction: column;
-    line-height: 1.15;
-    padding : 26px 24px 22px;
-    .brand-line1 {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #ffffff;
-        letter-spacing: -0.01em;
-    }
-
-    .brand-line2 {
-        font-size: 1.35rem;
-        font-weight: 800;
-        color: #d6e64a;
-        letter-spacing: -0.01em;
-    }
-}
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding : 8px 14px;
-    flex :1;
-
-    a {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 12px;
-        border-radius: 8px;
-        color: #8b96ab;
-        font-size: 0.92rem;
-        font-weight: 500;
-        text-decoration: none;
-        transition: background-color 0.15s, color 0.15s;
-
-        .pi{
-            font-size: 0.95rem;
-            width: 18px;
-            text-align:center;
-        }
-
-        &:hover {
-            background-color: rgba(255, 255, 255, 0.06);
-            color: #ffffff;
-        }
-
-        &.active {
-            background-color: #16213e;
-            color: #ffffff;
-            font-weight: 600;
-        }
-    }
-}
-.sidebar-footer {
-    padding: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.sidebar-logout{
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    color: #8b96ab;
-    font-size: 0.92rem;
-    font-weight: 500;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.15s, color 0.15s;
-    font-family: inherit;
-
-    .pi {
-        font-size: 0.95rem;
-        width: 18px;
-        text-align:center;
-    }
-
-
-    &:hover {
-        background-color: rgba(192, 57, 43, 0.15);
-        color: #e0685b;
-    }
 
 }
-.admin-main{
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
 
-.topbar {
+.topbar{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24px;
-    height: 64px;
-    background-color: #ffffff;
-    border-bottom: 1px solid #e6e9ef;
+    padding: 0 32px;
+    height: 72px;
+    background: linear-gradient(135deg,#0c1830 0%, #1a2a4a 100%);
+    border-bottom: 2px solid rgba(214,230,74,0.3);
+    flex-shrink: 0;
+    position: sticky;
+    top:0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.topbar-left{
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
 }
 
-.topbar-left {
+.brand{
+    display:flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+
+.brand-line1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+}
+
+.brand-line2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #d6e64a;
+    letter-spacing: -0.01em;
+}
+}
+
+.topbar-notifications {
+    position: relative;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    .pi {
+        font-size: 1.2rem;
+    }
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+    }
+
+    
+    .notification-badge{
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #e74c3c;
+    color:  white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
+    justify-content: center;
+    border: 2px solid #0c1830;
+    }
 }
+
+.topbar-nav {
+    display: flex;
+    align-items: center;
+    gap:2px;
+    flex:1;
+    padding:0 24px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar{
+        display:none;
+    }
+}
+
+a {
+    display:flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    position: relative;
+
+    .pi{
+        font-size: 1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    &:hover {
+        background-color: rgba(255,255,255,0.08);
+        color:#ffffff;
+        transform: translateY(-1px);
+    }
+
+    &.active {
+        background-color: rgba(214,230,74,0.15);
+        color: #d6e64a;
+        font-weight: 600;
+    
+
+    &::after {
+        content: '';
+        position:absolute;
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60%;
+        height: 3px;
+        background: #d6e64a;
+        border-radius: 2px;
+    }
+
+    }
+}
+
 
 .topbar-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
+    flex-shrink: 0;
 }   
 
 .avatar-circle {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background-color: #e2e6ed;
+    background: linear-gradient(135deg, #2d4a7a, #1a2a4a);
+    border: 2px solid rgba(214, 230, 74, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.95rem;
-    color: #8b96ab;
+    font-size: 1rem;
+    color: #d6e64a;
+
+    .pi{
+        font-size: 1.1rem;
+    }
 }
 
 .user-info {
@@ -159,21 +184,61 @@
     line-height: 1.2;
 
     .user-name {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #1a2540;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #ffffff;
     }
 
     .user-role {
-        font-size: 0.76rem;
-        color: #8b96ab;
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.6);
     }
 }
 
 .topbar-chevron{
-    color: #8b96ab;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
     font-size: 0.75rem;
-    margin-left: 2px;
+    margin-left: -4px;
+    transition: transform 0.2s ease;
+
+    &:hover{
+        color:#ffffff;
+    }
+}
+
+.topbar-logout{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.05);
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: inherit;
+    border: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    .pi{
+        font-size: 0.95rem;
+    }
+
+    &:hover{
+        background: rgba(192,57,43,0.2);
+        border-color: rgba(192,57,43,0.3);
+        color: #e0685b;
+        transform: translateY(-1px);
+    }
+}
+.admin-main{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 .admin-content {
    max-width: 1440px;
@@ -183,3 +248,86 @@
     background-color: #f4f6f9;
     flex: 1;
 }
+
+@media (max-width: 1200px){
+    .topbar{
+        padding: 0 20px;
+    }
+    .topbar-nav a span {
+        display:none;
+    }
+
+    .topbar-nav a {
+        padding: 8px 14px;
+    }
+}
+
+@media (max-width: 992px){
+    .topbar{
+        padding: 0 16px;
+        height: 64px;
+    }
+    .brand .brand-line1,
+    .brand .brand-line2{
+        font-size: 1.1rem;
+    }
+
+    .topbar-nav {
+        padding: 0 12px;
+    }
+
+    .user-info{
+        display: none;
+    }
+    .topbar-logout span{
+        display: none;
+    }
+
+    .topbar-logout{
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 768px){
+    .topbar{
+        flex-wrap: wrap;
+        height: auto;
+        padding: 12px 16px;
+        gap: 8px;
+    }
+    .topbar-nav{
+        order:3;
+        width: 100%;
+        padding: 4px 0;
+        overflow-x: auto;
+        gap: 2px;
+    }
+
+    .topbar-nav a {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+
+        .pi{
+            font-size: 0.9rem;
+            width: 18px;
+        }
+        span{
+            display: none;
+        }
+    }
+
+    .topbar-notifications{
+    padding: 6px;
+}
+
+.avatar-circle{
+    width: 34px;
+    height: 34px;
+
+}
+
+.admin-content{
+    padding: 16px;
+}
+}
+
