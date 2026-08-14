@@ -14,10 +14,13 @@ import { TextareaModule } from 'primeng/textarea';
 
 import { HackathonService, HackathonRequest, HackathonResponse } from '../../../services/hackathon.service';
 import { EventService } from '../../../services/event.service';
+import { LevelService } from '../../../services/level.service'; 
 import { StorageService } from '../../../services/storage.service';
 
 interface HackathonVm extends HackathonResponse {
     eventCount: number;
+    levelCount: number;
+    participantCount: number | null;
 }
 
 @Component ({
@@ -44,6 +47,7 @@ export class HackathonsComponent implements OnInit {
  private readonly messageService = inject(MessageService);
  private readonly hackathonService = inject(HackathonService);
  private readonly eventService = inject(EventService);
+ private readonly levelService = inject(LevelService);
  private readonly storageService = inject(StorageService);
  private readonly change = inject(ChangeDetectorRef);
 
@@ -54,12 +58,17 @@ export class HackathonsComponent implements OnInit {
  errorMessage = '';
  showDialog = false;
  editingHackathon : HackathonVm | null = null;
+ searchTerm = '';
 
  problemStatementFile: File | null = null;
  problemStatementFileName = '';
  problemStatementUploadError = '';
  problemStatementUploadSuccess = false;
 
+ hackathonImageFile: File | null = null;
+ hackathonImageFileName = '';
+ hackathonImageUploadError= '';
+  hackathonImageUploadSuccess = false;
 
  newHackathon = {
     name : '',
@@ -75,12 +84,13 @@ export class HackathonsComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.hackathonService.getAllHacathons().subscribe({
+    this.hackathonService.getAllHackathons().subscribe({
         next: (hackathons) => {
-            this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0 }));
+            this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0, levelCount: 0, participantCount: null}));
             this.isLoading = false;
             this.change.markForCheck();
             this.loadEventCounts();
+            this.loadLevelCounts();
         },
         error: (err) => {
             this.errorMessage = err.error?.message || 'the hackathons failed to load.';
@@ -105,6 +115,22 @@ export class HackathonsComponent implements OnInit {
     });
  }
 
+ private loadLevelCounts(): void {
+    this.hackathons.forEach((hackathon) => {
+        this.levelService.getLevels(hackathon.hackathonId).subscribe({
+            next: (levels) => {
+                hackathon.levelCount = levels.length;
+                this.change.markForCheck();
+            },
+            error: () => {
+                hackathon.levelCount =0;
+                this.change.markForCheck();
+            }
+        });
+
+    });
+ }
+
  openCreateDialog(): void {
     this.editingHackathon = null;
     this.newHackathon = {
@@ -112,7 +138,7 @@ export class HackathonsComponent implements OnInit {
         description:'',
 
         };
-        this.resetProblemStatementUploadState();
+        this.resetUploadState();
         this.showDialog =  true;
  }
 
@@ -123,15 +149,21 @@ export class HackathonsComponent implements OnInit {
         description: hackathon.description || '',
 
     };
-    this.resetProblemStatementUploadState();
+    this.resetUploadState();
     this.showDialog = true;
  }
 
- private resetProblemStatementUploadState(): void {
+ private resetUploadState(): void {
     this.problemStatementFile = null;
     this.problemStatementFileName = '';
     this.problemStatementUploadError = '';
     this.problemStatementUploadSuccess = false;
+
+    this.hackathonImageFile = null;
+    this.hackathonImageFileName = '';
+    this.hackathonImageUploadError = '';
+    this.hackathonImageUploadSuccess = false;
+
  }
 
  onProblemStatementFileSelected(event: Event): void {
@@ -143,10 +175,40 @@ export class HackathonsComponent implements OnInit {
             input.value = '';
             return;
         }
+
+        if (file.size > 10* 1024* 1024){
+            this.problemStatementUploadError = 'The problem statement must be under 10MB.'
+            input.value = '';
+            return;
+        }
         this.problemStatementFile = file;
         this.problemStatementFileName = file.name;
         this.problemStatementUploadError = '';
         this.problemStatementUploadSuccess = false;
+    }
+ }
+
+ onHackathonImageFileSelected(event:Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.[0]){
+        const file = input.files[0];
+        const allowedTypes = ['image/png','image/jpeg'];
+        if (!allowedTypes.includes(file.type)){
+            this.hackathonImageUploadError = 'The hackathon image must be a PNG, JPG or JPEG file.';
+            input.value = '';
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024){
+            this.hackathonImageUploadError = 'The hackathon image must be under 5MG.';
+            input.value = '';
+            return;
+
+        }
+        this.hackathonImageFile = file;
+        this.hackathonImageFileName = file.name;
+        this.hackathonImageUploadError ='';
+        this.hackathonImageUploadSuccess= false;
     }
  }
 
@@ -213,6 +275,8 @@ export class HackathonsComponent implements OnInit {
     this.isSaving = true;
     this.problemStatementUploadError = '';
     this.problemStatementUploadSuccess = false;
+    this.hackathonImageUploadError= '';
+    this.hackathonImageUploadSuccess = false;
     const req: HackathonRequest = {
         name: this.newHackathon.name.trim(),
         description: this.newHackathon.description?.trim() || undefined
@@ -230,22 +294,13 @@ export class HackathonsComponent implements OnInit {
                     this.hackathons[index] = { ...this.hackathons[index], ...saved };
                 }
             } else {
-                this.hackathons.unshift({ ...saved, eventCount: 0 });
+                this.hackathons.unshift({ ...saved, eventCount: 0, levelCount:0, participantCount: null });
             }
             this.change.markForCheck();
 
-            if (this.problemStatementFile) {
-                this.uploadProblemStatement(saved.hackathonId);
-            } else {
-                this.isSaving = false;
-                this.showDialog = false;
-                this.messageService.add({
-                    severity: 'success',
-                    summary:'Success',
-                    detail: this.editingHackathon ? 'The hackathon was updated successfully' : 'The hackathon was created successfully'
-                });
-                this.change.markForCheck();
-            }
+            this.handlePostSaveUploads(saved.hackathonId);
+                    
+            
         },
         error: (err) => {
             this.isSaving = false;
@@ -257,6 +312,79 @@ export class HackathonsComponent implements OnInit {
             this.change.markForCheck();
         }
     });
+ }
+
+ private handlePostSaveUploads(hackathonId: string): void {
+    const finish = (successMessage: string) => {
+        this.isSaving = false;
+        this.showDialog = false;
+        this.messageService.add({severity: 'success', summary: 'Success', detail: successMessage});
+        this.change.markForCheck();
+
+    };
+ 
+ const uploadProblemStatementIfNeeded = () =>{
+    if (!this.problemStatementFile){
+        finish(this.editingHackathon ? 'The hackathon was updated successfully': 'The hackathon was created successfully');
+        return;
+    }
+ 
+
+ const renamedFile = new File([this.problemStatementFile], 'problem_statement.pdf',{
+    type: this.problemStatementFile.type,
+
+ });
+
+ this.storageService.uploadHackathonProblemStatement(hackathonId,renamedFile).subscribe({
+    next: (resp) => {
+        this.problemStatementUploadSuccess = true;
+        this.problemStatementFile = null;
+        this.problemStatementFileName ='';
+
+        const index = this.hackathons.findIndex(h => h.hackathonId === hackathonId);
+        if (index !== -1){
+            this.hackathons[index].problemStatementStorageKey = resp.storageKey;
+
+        }
+        finish('The hackathon and problem statement were saved successfully');
+    
+    },
+    error: (err) =>{
+        this.problemStatementUploadError = err.error?.message || 'Failed to upload the problem statement.';
+        this.messageService.add ({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'The hackathon was saved, but the problem statement failed to upload. Try uploading it again.',
+
+        });
+        this.isSaving = false;
+        this.showDialog = false;
+        this.change.markForCheck();
+    },
+ });
+};
+if (this.hackathonImageFile){
+    this.storageService.uploadHackathonImage(hackathonId, this.hackathonImageFile).subscribe({
+        next:() =>{
+            this.hackathonImageUploadSuccess =true;
+            this.hackathonImageFile = null;
+            uploadProblemStatementIfNeeded();
+        },
+        error: (err) =>{
+        this.hackathonImageUploadError = err.error?.message || 'Failed to upload the hackathon image.';
+        this.messageService.add ({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'The hackathon was saved, but the image failed to upload. Try uploading it again.',
+
+        });
+        uploadProblemStatementIfNeeded();
+    },
+
+    });
+}else {
+    uploadProblemStatementIfNeeded();
+}
  }
  deleteHackathon(hackathonId: string): void {
     if(!confirm('Are you sure you want to delete this hackathon?')){
@@ -277,6 +405,10 @@ export class HackathonsComponent implements OnInit {
             this.change.markForCheck();
         }
     });
+ }
+
+ navigateToHackathon(hackathonId: string):void {
+    this.router.navigate(['/admin/hackathons',hackathonId]);
  }
 navigateToEvents(hackathonId: string): void {
     this.router.navigate(['/admin/hackathons', hackathonId, 'events']);
