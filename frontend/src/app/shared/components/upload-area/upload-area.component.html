@@ -1,0 +1,53 @@
+<div
+ class="upload-area"
+  [class.upload-area-dragging]="isDragging"
+  [class.upload-area-disabled]="disabled"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+>
+  <label class="upload-content">
+
+    <input
+      type="file"
+      [accept]="accept"
+      [disabled]="disabled"
+      (change)="onFileSelected($event)"
+      class="upload-input"
+    />
+
+    <i class="pi pi-upload upload-icon" aria-hidden="true"></i>
+
+    <div class="upload-text">
+
+      <div class="upload-action">
+     <span class="upload-browse">{{ browseText }}</span>
+
+      <span class="upload-drag-drop">{{ dragDropText }}</span>
+
+      </div>
+
+      <span class="upload-help">{{ helpText }}</span>
+
+      @if (selectedFile) {
+        <div class="upload-file">{{ formatFileName(selectedFile.name) }}</div>
+      } @else {
+
+        <span class="upload-file upload-file-empty">No file selected</span>
+      }
+
+    </div>
+
+    @if (selectedFile) {
+      <button
+        type="button"
+        class="upload-remove"
+        aria-label="Remove selected file"
+        (click)="removeFile($event)"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    }
+
+  </label>
+</div>
