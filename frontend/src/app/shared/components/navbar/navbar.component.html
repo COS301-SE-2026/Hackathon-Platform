@@ -1,0 +1,244 @@
+<nav class="navbar">
+
+ <div class="navbar-logo">
+ <a routerLink="/"><img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform"/></a>
+ </div>
+
+
+  <div class="navbar-links">
+
+@for (link of visibleLinks; track link.route) {
+ <a
+  class="navbar-link"
+  [routerLink]="link.route"
+  routerLinkActive="navbar-link-active"
+  [routerLinkActiveOptions]="{ exact: true }"
+>
+  {{ link.label }}
+</a>
+}
+
+ @if (moreLinks.length > 0) {
+ <div class="navbar-more">
+
+<button
+ type="button"
+class="navbar-more-button"
+(click)="toggleMoreMenu()"
+[attr.aria-expanded]="showMoreMenu"
+>
+ <span>More</span>
+
+<i class="pi pi-chevron-down" aria-hidden="true"></i>
+</button>
+
+@if (showMoreMenu) {
+<div class="navbar-menu more-menu">
+
+ @for (link of moreLinks; track link.route) {
+ <a class="navbar-menu-item"
+[routerLink]="link.route"
+(click)="closeMenus()">
+{{ link.label }}</a>
+}
+
+</div>
+}
+
+</div>
+}
+
+</div>
+
+
+ 
+<div class="navbar-profile">
+
+<button
+type="button"
+class="navbar-profile-button"
+(click)="toggleProfileMenu()"
+[attr.aria-expanded]="showProfileMenu"
+aria-label="Open user menu"
+>
+<span class="navbar-profile-avatar">{{ initials }}</span>
+
+<span class="navbar-profile-name"[title]="firstName">{{ firstName }}</span>
+
+<i class="pi pi-chevron-down navbar-profile-chevron" aria-hidden="true"></i>
+ </button>
+
+
+@if (showProfileMenu) {
+<div class="navbar-menu profile-menu">
+
+  <div class="profile-menu-header">
+
+  <span class="profile-menu-avatar">{{ initials }}</span>
+
+   <div class="profile-menu-name-container">
+
+  <span class="profile-menu-name" [title]="fullName">{{ fullName }} </span>
+
+  @if (profileSubtitle) {
+   <span class="profile-menu-subtitle"> {{ profileSubtitle }} </span>
+     }
+
+</div>
+
+</div>
+
+
+   @if (profileMenuItems.length > 0) {
+  <div class="profile-menu-divider"></div>
+
+   @for (item of profileMenuItems; track item.label) {
+   <a class="profile-menu-item" [routerLink]="item.route" (click)="closeMenus()">
+    <i class="pi {{ item.icon }}" aria-hidden="true" ></i>
+
+  <span>{{ item.label }}</span>
+    </a>
+    }
+   }
+
+
+   <div class="profile-menu-divider"></div>
+
+ <button
+  type="button"
+   class="profile-menu-item profile-menu-item-danger"
+  (click)="onLogout()"
+   >
+   <i class="pi pi-sign-out" aria-hidden="true"></i>
+
+  <span>Logout</span>
+  </button>
+
+</div>
+}
+
+  </div>
+
+
+  
+<button
+  type="button"
+class="navbar-menu-button"
+(click)="toggleSidebar()"
+[attr.aria-expanded]="showSidebar"
+aria-label="Open navigation menu"
+  >
+    <i class="pi pi-bars" aria-hidden="true" ></i>
+</button>
+
+</nav>
+
+@if (showSidebar) {
+
+<div class="sidebar-overlay" (click)="closeSidebar()"
+></div>
+
+<aside
+    class="sidebar"
+    aria-label="Navigation menu"
+  >
+
+  <div class="sidebar-header">
+
+  <div class="sidebar-profile">
+
+  <span class="sidebar-profile-avatar">
+          {{ initials }}
+   </span>
+
+    <div class="sidebar-profile-info">
+
+   <span class="sidebar-profile-name" [title]="fullName" >{{ fullName }} </span>
+
+   @if (profileSubtitle) {
+   <span class="sidebar-profile-subtitle"> {{ profileSubtitle }}  </span>
+     }
+
+   </div>
+
+   </div>
+
+
+  <button
+    type="button"
+     class="sidebar-close"
+     (click)="closeSidebar()"
+     aria-label="Close navigation menu"
+    >
+    <i class="pi pi-times"aria-hidden="true" ></i>
+ </button>
+
+ </div>
+
+    <div class="sidebar-section">
+
+      <span class="sidebar-section-title">
+        Navigation
+      </span>
+
+      <nav class="sidebar-links">
+
+        @for (link of links; track link.route) {
+        <a
+        class="sidebar-link"
+        [routerLink]="link.route"
+        routerLinkActive="sidebar-link-active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       (click)="closeSidebar()"
+      >
+      {{ link.label }}
+     </a>
+        }
+
+      </nav>
+
+    </div>
+   
+ @if (profileMenuItems.length > 0) {
+
+  <div class="sidebar-divider"></div>
+
+   <div class="sidebar-section">
+
+    <span class="sidebar-section-title">Account</span>
+
+   <nav class="sidebar-profile-links">
+
+    @for (item of profileMenuItems; track item.label) {
+    <a
+    class="sidebar-link"
+    [routerLink]="item.route"
+  routerLinkActive="sidebar-link-active"
+  [routerLinkActiveOptions]="{ exact: true }"
+  (click)="closeSidebar()"
+>
+  {{ item.label }}
+</a>
+    }
+
+  </nav>
+
+      </div>
+
+    }
+
+<div class="sidebar-footer">
+
+ <button
+   type="button"
+   class="sidebar-logout"
+    (click)="onLogout()"
+      >
+<i class="pi pi-sign-out" aria-hidden="true"></i>
+
+<span>Logout</span>
+</button>
+ </div>
+
+</aside>
+}
