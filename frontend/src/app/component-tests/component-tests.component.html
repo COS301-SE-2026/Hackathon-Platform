@@ -1,0 +1,95 @@
+
+<app-navbar
+  [links]="navbarLinks"
+  firstName="John"
+  lastName="Bobby"
+  profileSubtitle="Level 7"
+  [profileMenuItems]="profileMenuItems"
+  (logout)="onLogout()"
+></app-navbar>
+
+
+<div class="component-tests">
+
+  <div class="component-group buttons-group">
+    <h2>Buttons</h2>
+
+    <div class="test-row">
+    <app-button variant="primary">Register Now</app-button>
+    <app-button variant="secondary">Download Problem Statement</app-button>
+    <app-button variant="danger"> Delete Team</app-button>
+    <app-button variant="ghost">Ghost Button</app-button>
+    <app-button variant="success">Success Button</app-button>
+
+    </div>
+  </div>
+
+
+  <div class="component-row">
+
+    <div class="component-group input-group">
+      <h2>Input</h2>
+
+      <div class="form-field">
+      <app-input placeholder="Enter join code"></app-input>
+      </div>
+    </div>
+
+
+    <div class="component-group search-group">
+      <h2>Search Bar</h2>
+
+      <div class="form-field">
+      <app-search-bar
+       placeholder="Search events..."
+      ></app-search-bar>
+      </div>
+    </div>
+
+    <div class="component-group dropdown-group">
+      <h2>Dropdown</h2>
+
+      <div class="form-field">
+        <app-dropdown
+        [options]="['All Visibility', 'Public', 'Private']"
+        value="All Visibility"
+        ></app-dropdown>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="component-group upload-group">
+    <h2>Upload Area</h2>
+
+    <div class="upload-preview">
+     <app-upload-area
+       accept=".zip"
+       helpText="Only .zip files allowed"
+      (fileSelected)="onFileSelected($event)"
+      ></app-upload-area>
+    </div>
+  </div>
+
+  <div class="component-group loader-group">
+   <h2>Loader</h2>
+
+  <div class="loader-preview">
+    <app-loader message="Loading..."></app-loader>
+  </div>
+</div>
+
+
+
+<div class="component-group toast-group">
+  <h2>Toast</h2>
+
+  <div class="test-row">
+  <app-button variant="success"(click)="showSuccessToast()">Success Toast</app-button>
+  <app-button variant="primary" (click)="showInfoToast()"> Info Toast</app-button>
+  <app-button variant="danger" (click)="showErrorToast()"> Error Toast</app-button>
+
+  </div>
+</div>
+</div>
