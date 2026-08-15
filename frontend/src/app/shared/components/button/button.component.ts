@@ -7,5 +7,5 @@ import { Component, Input } from '@angular/core';
   styleUrl: './button.component.scss'
 })
 export class ButtonComponent {
-  @Input() variant: 'primary' | 'secondary' | 'danger' = 'primary';
+  @Input() variant: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success' = 'primary';
 }
