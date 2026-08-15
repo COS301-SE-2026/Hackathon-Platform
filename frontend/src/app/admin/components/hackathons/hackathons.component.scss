@@ -30,6 +30,117 @@
     }
 }
 
+.btn-create-hackathon{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #1c5fd9;
+    color:#ffffff;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 20px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+
+    &:hover:not(:disabled){
+        background-color: #164bb0;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.toolbar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.search-box{
+    position: relative;
+    flex: 1;
+    max-width: 460px;
+    display: flex;
+    align-items: center;
+
+    .search-icon{
+        position: absolute;
+        left: 15px;
+        color: #a3aabb;
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
+
+    input{
+        width: 100%;
+        padding: 11px 14px 11px 38px;
+        border: 1.5px solid #dfe3ea;
+        border-radius: 9px;
+        background-color: #ffffff;
+        color:#13192d;
+        font-size: 0.88rem;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.15s;
+
+        &::placeholder{
+            color:#a3aabb;
+        }
+
+        &:focus {
+            border-color: #1983c2;
+        }
+    }
+}
+
+.toolbar-right{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.hackathon-count{
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #3a4357;
+    white-space: nowrap;
+}
+.view-toggle{
+    display: flex;
+    border: 1.5px solid #dfe3ea;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.view-toggle-btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: #ffffff;
+    color: #8089a0;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+
+    &.active {
+        background-color: #eaf4fb;
+        color:#1983c2;
+    }
+    &:not(.active):hover{
+        background-color: #f4f6f9;
+    }
+}
 .loading {
     text-align: center;
     padding: 60px 0;
@@ -39,14 +150,14 @@
 
 .hackathons-grid{
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
 }
 
 .hackathon-card{
     background-color: #ffffff;
     border-radius: 14px;
-    padding: 24px;
+    padding: 22px;
     border: 1px solid #e7eaf0;
     box-shadow: 0 1px 2px rgba(19,25,45,0.04);
     transition: box-shadow 0.15s, transform 0.15s;
@@ -57,66 +168,121 @@
     }
 }
 
-.hackathon-header{
-    display : flex;
+.hackathon-logo {
+    display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background-color: #eaf4fb;
+    color:#146a9d;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 14px;
 }
+
+
 
 .hackathon-name{
     font-size: 1.1rem;
     font-weight: 700;
     color: #13192d;
     margin:0;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 3px 12px;
-    border-radius: 12px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-
-    &.status-active {
-        background-color: #e8f5e9;
-        color: #1b5e20;
-    }
-
-        &.status-upcoming {
-        background-color: #e3f2fd;
-        color: #0d47a1;
-    }
-
-        &.status-completed {
-        background-color: #f5f5f5;
-        color: #424242;
-    }
-
-}
-
-.hackathons-description{
-    color:#6b7588;
-    font-size: 0.9rem;
-    margin: 8px 0 12px 0;
-    line-height: 1.4;
+    padding-bottom:  16px;
+    margin:0 0 16px;
 }
 
 
 .hackathon-stats{
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #f1f3f7;
-    color:#6b7588;
-    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    gap: 22px;
+    border-bottom: 1px solid #f1f3f7;
 }
 
 .hackathon-actions{
     display: flex;
     gap: 8px;
-    margin-top: 16px;
-    flex-wrap: wrap;
+    
+}
+
+.stat{
+    display: flex;
+    flex-direction: column;
+
+    .stat-value{
+        font-size: 1rem;
+        font-weight: 700;
+        color:#13192d;
+    }
+    
+    .stat-label {
+        font-size: 0.72rem;
+        color: #8089a0;
+        margin-top: 1px;
+    }
+}
+
+.btn-view-hackathon{
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background-color: #1c5fd9;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s;
+
+    .pi {
+        font-size: 0.78rem;
+    }
+
+    &:hover {
+        background-color: #164bb0;
+    }
+}
+
+.icon-btn{
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    flex-shrink: 0;
+
+    .pi{
+        font-size: 0.82rem;
+    }
+}
+
+.icon-btn-edit{
+    border : 1.5px solid #1983c2;
+    color: #146a9d;
+    &:hover {
+        background-color: #eaf4fb;
+    }
+}
+
+.icon-btn-delete{
+    border: 1.5px solid #e0a099;
+    color: #c0392b;
+    &:hover {
+        background-color: #fdf1ef;
+    }
 }
 .empty-state{
     grid-column: 1/ -1;
@@ -135,8 +301,15 @@
 
 }
 
+.dialog-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color:#13192d;
+    margin: 0 0 16px;
+}
+
 .form-group{
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 
     label{
         display: block;
@@ -149,13 +322,75 @@
         width: 100%;
     }
 }
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+.drop-zone {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap : 16px;
+    border: 1.5px dashed #b9d6ea;
+    border-radius: 10px;
+    padding: 18px 20px;
+    text-align: left;
+    color: #424242;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background-color: #f7fafc;
+    width: 100%;
+    transition: border-color 0.15s, background-color 0.15s;
+
+    &:hover {
+        border-color: #1983c2;
+        background-color: #f4f6f9;
+    }
 }
 
+.drop-zone-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+}
+
+.drop-zone-icon{
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: 1.5px solid #b9d6ea;
+    background-color: #eef6fb;
+    color:#1983c2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.drop-zone-text{
+    p{
+        margin: 0;
+        font-size: 0.85rem;
+        color: #4a5469;
+
+    }
+}
+
+.drop-zone-cta{
+    color:#1983c2;
+    font-weight: 700;
+}
+
+.drop-zone-hint{
+    color: #8089a0 !important;
+    font-size: 0.76rem !important;
+    margin-top: 3px !important;
+}
+
+.drop-zone-filename{
+    font-size: 0.82rem;
+    color: #8089a0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
 .upload-hint {
     font-size: 0.8rem;
     color: #6b7385;
@@ -181,16 +416,41 @@
     color: #2e7d32;
 }
 
-::ng-deep {
-    .p-dialog .p-dialog-content{
-        padding: 24px;
+.btn-cancel {
+    background-color: #ffffff;
+    color: #3a4357;
+    border: 1.5px solid #dfe3ea;
+    border-radius: 9px;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s;
+
+    &:hover:not(:disabled){
+        background-color: #f4f6f9;
     }
 
+    &:disabled{
+        opacity:0.6;
+        cursor: not-allowed;
+    }
+}
+::ng-deep {
+    .p-dialog .p-dialog-header{
+        padding: 20px 24px ;
+        font-weight: 700;
+    }
+    .p-dialog .p-dialog-content{
+        padding: 0 24px 24px;
+    }
     .p-dialog .p-dialog-footer{
         display: flex;
         justify-content: flex-end;
         gap: 10px;
         padding: 16px 24px;
+        border-top: 1px solid #f1f3f7;
     }
 }
 
@@ -199,21 +459,20 @@
         grid-template-columns: 1fr;
     }
 
-    .form-row{
-        grid-template-columns: 1fr;
-    }
-
     .page-header{
         flex-direction: column;
         gap:16px;
 
     }
-
-    .hackathon-actions{
+    .toolbar{
         flex-direction: column;
+        align-items: stretch;
+    }
+    .search-box{
+        max-width: none;
     }
 
-    .hackathon-actions p-button {
-        width: 100%;
+    .toolbar-right{
+        justify-content: space-between;
     }
 }
