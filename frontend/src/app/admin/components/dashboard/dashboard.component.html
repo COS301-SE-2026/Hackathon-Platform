@@ -2,24 +2,46 @@
   <main class = "content">
     <div class = "page-header">
       <div>
-        <h1>Admin dashboard</h1>
-        <p class = "page-subtitle">Overview of all events</p>
+        <h1>Welcome back, Admin! 👋</h1>
+        <p class = "page-subtitle">Here's what's happening with your hackathons.</p>
       </div>
-      <p-button label ="+ New Event" routerLink = "/admin/hackathons"/>
     </div>
 
     <div class = "stats-grid">
       <div class = "stat-card">
+        <div class = "stat-icon stat-icon-blue"><i class = "pi pi-calendar"></i></div>
+        <div>
+          <p class = "stat-value">{{ activeEvents }}</p>
         <p class = "stat-label"> Active events</p>
-        <p class = "stat-value purple">{{ activeEvents }}</p>
+        <a routerLink = "/admin/events" class = "stat-link">View all events <i class = "pi pi-arrow-right"></i></a>
+        </div>
       </div>
+
        <div class = "stat-card">
-        <p class = "stat-label">Total Participants</p>
-        <p class = "stat-value green">{{ totalParticipants }}</p>
+        <div class = "stat-icon stat-icon-olive"><i class = "pi pi-users"></i></div>
+        <div>
+          <p class = "stat-value">{{ activeParticipants }}</p>
+        <p class = "stat-label">Active Participants</p>
+        <a routerLink = "/admin/participants" class = "stat-link">View all participants <i class = "pi pi-arrow-right"></i></a>
+        </div>
        </div>
+
         <div class = "stat-card">
-        <p class = "stat-label">Submissions today</p>
-        <p class = "stat-value orange">{{ submissionsToday }}</p>
+          <div class = "stat-icon stat-icon-green"><i class = "pi pi-users"></i></div>
+        <div>
+          <p class = "stat-value">{{ teamsCount }}</p>
+        <p class = "stat-label">Teams</p>
+        <a routerLink = "/admin/teams" class = "stat-link">View all teams <i class = "pi pi-arrow-right"></i></a>
+        </div>
+        </div>
+
+        <div class = "stat-card">
+          <div class = "stat-icon stat-icon-teal"><i class = "pi pi-code"></i></div>
+        <div>
+          <p class = "stat-value">{{ submissionsCount}}</p>
+        <p class = "stat-label">Submissions</p>
+        <a routerLink = "/admin/submissions" class = "stat-link">View all submissions <i class = "pi pi-arrow-right"></i></a>
+        </div>
         </div>
     </div>
 
@@ -45,8 +67,104 @@
           </div>
         </div>
 
+        <div class = "panels-row">
+          <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">Active Events</h2>
+              <a routerLink = "/admin/events" class = "btn-view-all">View All</a>
+            </div>
+
+            @if (eventLoading){
+              <div class = "empty-state">Loading events...</div>
+            } @else if (eventError){
+              <div class = "empty-state">{{ eventError}}</div>
+            } @else if (allEvents.length === 0 ){
+              <div class = "empty-state">No events have been loaded yet</div>
+            } @else {
+              <div class = "event-rows">
+                @for (event of allEvents; track event.eventId){
+                  <div class = "event-row">
+                    <div class = "event-logo"> {{event.logoInitial}}</div>
+                      <div class = "event-row-info">
+                        <p class = "event-row-name">{{event.name}}</p>
+                          <p class = "event-row-meta"><i class = "pi pi-calendar"></i>{{event.dateRangeLabel}}</p>                     
+                     </div>
+                     <span class = "pill" [ngClass] = "event.statusPill.toLowerCase()">{{event.statusPill}}</span>
+                     <span class = "event-row-participants"><i class = "pi pi-users"></i>{{event.participantsLabel}} participants</span>
+                  </div>
+                }
+              </div>
+              <a routerLink = "/admin/events" class = "panel-footer-link">View all events <i class = "pi pi-arrow-right"></i></a>
+            }
+          </div>
+
+          <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">Active Participants</h2>
+              <a routerLink = "/admin/participants" class = "btn-view-all">View All</a>
+            </div>
+
+            <div class = "participant-rows">
+              @for (p of activeParticipantRows; track p.email){
+                <div class = "participant-row">
+                  <div class = "avatar-badge">{{ p.initials}}</div>
+                  <div class = "participant-row-info">
+                    <p class = "participant-row-name"> {{p.name}}</p>
+                    <p class = "participant-row-email"> {{p.email}}</p>
+                  </div>
+                  <div class = "participant-row-points">
+                    <p class = "points-value">{{ p.points}}</p>
+                    <p class = "points-label">Points</p>
+                  </div>
+                </div>
+              }
+            </div>
+            <a routerLink = "/admin/participants" class = "panel-footer-link">View all participants <i class = "pi pi-arrow-right"></i></a>
+          </div>
+
+          <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">Teams Overview</h2>
+              <a routerLink = "/admin/teams" class = "btn-view-all">View All</a>
+            </div>
+
+            <div class = "donut-wrap">
+              <svg viewBox = "0 0 42 42" class = "donut-chart">
+                <circle class = "donut-ring" cx = "21" cy="21" r ="15.9" fill = "transparent" stroke = "#eef0f4" stroke-width = "5"></circle>
+                @for (seg of teamSizeSegments; track seg.label){
+                  <circle class = "donut-segment {{seg.colorClass}}" cx = "21" cy="21" r ="15.9" fill = "transparent" stroke = "#eef0f4" stroke-width = "5" transform = "rotate(-90 21 21)"
+                [attr.stroke-dasharray] = "seg.percent + ' ' + (100 - seg.percent)"
+                [attr.stroke-dashoffset] = "-seg.offset"></circle>
+                }
+              </svg>
+              <div class = "donut-center">
+                <p class = "donut-total">{{teamsCount}}</p>
+                <p class = "donut-label">Total Teams</p>
+              </div>
+            </div>
+
+            <div class = "team-size-legend">
+              @for (seg of teamSizeSegments; track seg.label){
+                <div class = "legend-row">
+                  <span class = "legend-dot {{seg.colorClass}}"></span>
+                </div>
+                <p class = "legend-label">{{seg.label}}</p>
+                <p class = "legend-sub">{{seg.count}} teams ({{seg.percent}}%)</p>
+              </div>
+             </div>
+              }
+            </div>
+            <a routerLink = "/admin/teams" class = "panel-footer-link">View all teams <i class = "pi pi-arrow-right"></i></a>
+          </div> 
+      
+
+
         <div class = "section">
+          <div class = "panel-header">
           <h2 class = "section-title">Recent submissions</h2>
+          <a routerLink = "/admin/submissions" class = "btn-view-all">View All</a>
+          </div> 
+        
           <div class = "table-card">
             @if (recentSubmissions.length === 0){
               <div class = "empty-state">No submissions yet</div>
@@ -56,24 +174,30 @@
                 <tr>
                   <th>Team</th>
                   <th>Event</th>
-                  <th>Level</th>
-                  <th>Score</th>
+                  <th>Challenge</th>
                   <th>Status</th>
-                  <th>Time</th>
+                  <th>Submitted At</th>
                 </tr>
               </thead>
               <tbody>
                 @for (sub of recentSubmissions; track sub.team){
                   <tr>
-                    <td> {{ sub.team }}</td>
+                    <td> 
+                      <div class = "table-team-cell">
+                        <span class = "avatar-badge small">{{sub.teamInitials}}</span>
+        
+                      {{ sub.team }}
+                      </div>
+                    
+                    </td>
                     <td> {{ sub.event }}</td>
-                    <td> {{ sub.level }}</td>
-                    <td> {{ sub.score }}</td>
-                    <td>
+                    <td> {{ sub.challenge }}</td>
+                    <td> 
                       <span class = "status-badge" [ngClass] = "sub.status.toLowerCase()">
-                        {{ sub.status }}
+                        {{sub.status}}
                       </span>
                     </td>
+                    
                     <td>
                       {{ sub.time}}
                     </td>
@@ -82,8 +206,53 @@
                 }
               </tbody>
             </table>
+            <a routerLink = "/admin/submissions" class = "panel-footer-link table-footer-link">View all submissions <i class = "pi pi-arrow-right"></i></a>
           }
           </div>
+        </div>
+
+        <div class = "panels-row panels-row-2">
+          <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">Recent Announcements</h2>
+               <a routerLink = "/admin/announcements" class = "btn-view-all">View All</a>
+            </div>
+            <div class = "announcement-rows">
+              @for (a of recentAnnouncements; track a.title){
+                <div class = "announcement-row">
+                  <span class = "announcement-icon"><i class = "pi pi-megaphone"></i></span>
+                  <div class = "announcement-info">
+                    <p class = "announcement-title">{{a.title}}</p>
+                    <p class = "announcement-body">{{a.body}}</p>
+                  </div>
+                  <span class = "announcement-date">{{a.date}}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+
+          <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">System Notifications</h2>
+               <a routerLink = "/admin/settings" class = "btn-view-all">View All</a>
+            </div>
+            <div class = "notification-rows">
+              @for (n of systemNotifications; track n.title){
+                <div class = "notification-row">
+                  <span class = "notification-icon" [ngClass] = "n.icon">
+                    <i class = "pi" [ngClass] = "n.icon === 'success' ? 'pi-check' : (n.icon === 'warning' ? 'pi-exclamation-triangle' : 'pi-info-circle')"></i>
+                  </span>
+                  <div class = "notification-info">
+                    <p class = "notification-title">{{n.title}}</p>
+                    <p class = "notification-body">{{n.body}}</p>
+                  </div>
+                  <span class = "notification-time">{{n.time}}</span>
+                </div>
+              }
+            </div>
+          </div>
+
         </div>
 
   </main>
