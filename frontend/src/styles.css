@@ -97,12 +97,15 @@
 --shadow-lg: 0 8px 16px rgba(19, 25, 45, 0.10);
 --shadow-xl: 0 16px 32px rgba(19, 25, 45, 0.14);
 
+/* ---------- Overlays ---------- */
+
+--overlay-bg: rgba(19, 25, 45, 0.45);
 
 /* ---------- Layout ---------- */
 
---sidebar-width: 272px;
---sidebar-width-collapsed: 80px;
 --content-max-width: 1200px;
+--sidebar-width-mobile: 360px;
+--navbar-height: 80px;
 --page-padding-x: 32px;
 --page-padding-y: 32px;
 --section-gap: 24px;
@@ -110,6 +113,12 @@
 --component-gap: 16px;
 --card-padding: 24px;
 
+/* ---------- Z-Index ---------- */
+
+--z-navbar: 10;
+--z-overlay: 20;
+--z-drawer: 30;
+--z-modal: 40;
 
 /* ---------- MOTION ---------- */
 
