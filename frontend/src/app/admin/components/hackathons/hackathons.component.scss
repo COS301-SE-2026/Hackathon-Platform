@@ -438,21 +438,74 @@
     }
 }
 ::ng-deep {
-    .p-dialog .p-dialog-header{
-        padding: 20px 24px ;
+    .p-dialog {
+        --p-dialog-background: #ffffff;
+        --p-dialog-color: #13192d;
+        --p-dialog-border-color: #e7eaf0;
+        background: #ffffff;
+        color: #13192d;
+    
+    .p-dialog-header{
+        --p-dialog-header-background:#ffffff;
+        background: #ffffff;
+        color: #13192d;
+        padding: 20px 24px;
         font-weight: 700;
+    
+    .p-dialog-title{
+        color: #13192d;
     }
-    .p-dialog .p-dialog-content{
-        padding: 0 24px 24px;
-    }
-    .p-dialog .p-dialog-footer{
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        padding: 16px 24px;
-        border-top: 1px solid #f1f3f7;
+
+    .p-dialog-header-icon{
+        color: #6b7588;
+
+        &:hover{
+            background: #f4f6f9;
+            color: #13192d;
+        }
     }
 }
+.p-dialog-content{
+    --p-dialog-content-background : #ffffff;
+    background: #ffffff;
+    color: #13192d;
+    padding: 0 24px 24px;
+}
+
+.p-dialog-footer{
+    --p-dialog-footer-background: #ffffff;
+    background: #ffffff;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #f1f3f7;
+}
+
+    .p-inputtext, .p-textarea, textarea{
+        --p-inputtext-background: #ffffff;
+        --p-inputtext-color: #13192d;
+        --p-inputtext-border-color: #dfe3ea;
+        --p-inputtext-placeholder-color: #a3aabb;
+        background: #ffffff !important;
+        color: #13192d !important;
+        border: 1.5px solid #dfe3ea !important;
+
+        &::placeholder{
+            color: #a3aabb !important;
+        }
+
+        &:enabled:focus{
+            --p-inputtext-focus-border-color: #1983c2;
+            border-color: #1983c2 !important;
+        }
+    }
+}
+
+.p-dialog-mask{
+    background: rgba(19,25,45,0.5);
+     }
+  }
 
 @media(max-width: 768px){
     .hackathons-grid{
