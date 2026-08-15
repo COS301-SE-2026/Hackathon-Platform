@@ -21,7 +21,7 @@ export class HackathonService {
     private readonly http = inject(HttpClient);
     private readonly baseUrl = `${environment.apiUrl}/api/hackathon`;
 
-    getAllHacathons(): Observable<HackathonResponse[]> {
+    getAllHackathons(): Observable<HackathonResponse[]> {
         return this.http.get<HackathonResponse[]>(this.baseUrl);
     }
 

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { HackathonsComponent } from '../admin/components/hackathons/hackathons.component';
+
 
 export interface LevelFileResponse {
   id: number;
@@ -32,9 +32,16 @@ export function inferLevelFileType(fileName: string): string {
 
 @Injectable({ providedIn: 'root' })
 export class StorageService {
-    uploadHackathonImage<HackathonsComponent extends HackathonsComponent>(hackathonId: string, arg1: this, hackathonImageFile: File) {
-        throw new Error('Method not implemented.');
-    }
+    
+  uploadHackathonImage(hackathonId : string, file: File): Observable<{storageKey: string; blobUrl : string}>{
+    const formData = new FormData();
+    formData.append('file',file);
+    formData.append('hackathonId',hackathonId);
+
+    return this.http.post<{storageKey: string; blobUrl: string}>(
+      `${this.baseUrl}/hackathons/${hackathonId}/image`, formData
+    );
+  }
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/api/storage`;
 
