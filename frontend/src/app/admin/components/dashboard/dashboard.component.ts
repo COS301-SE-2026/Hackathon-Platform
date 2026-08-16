@@ -9,25 +9,57 @@ import { SubmissionResponse, SubmissionService } from '../../../services/submiss
 interface Events {
   eventId: string;
   name: string;
-  meta: string;
-  timeLabel: string;
+  logoInitial: string;
+  dateRangeLabel: string;
+  statusPill: 'Live' | 'Upcoming' |'Ended';
+  participantsLabel: string;
+
 }
 
 interface Submissions {
   submissionId: number;
   team: string;
+  teamInitials: string;
   event: string;
   level: string;
   score: string;
   status: string;
   statusClass: string;
+  challenge: string;
+  time: string;
+}
+interface ParticipantRow {
+  initials: string;
+  name: string;
+  email: string;
+  points: number;
+}
+
+interface TeamSizeSegment{
+  label: string;
+  count: number;
+  percent: number;
+  offset:number;
+  colorClass: string;
+}
+
+interface AnnouncementRow{
+  title: string;
+  body: string;
+  date: string;
+
+}
+interface NotificationRow {
+  icon: 'success' | 'warning' | 'info';
+  title: string;
+  body: string;
   time: string;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule,ButtonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -40,14 +72,34 @@ export class DashboardComponent implements OnInit{
   recentSubmissions: Submissions[] = [];
 
   activeEvents = 0
-  totalParticipants = 1234; //WIP
-  submissionsToday = 12; //WIP
+  activeParticipants = 1234; 
+  teamsCount = 156;
+  submissionsCount = 12; 
 
   eventLoading = false;
   submissionLoading = false;
   eventError = '';
   submissionError = '';
 
+  activeParticipantRows: ParticipantRow[]=[
+   {initials:'TC', name: 'Team CodeCrafters', email: 'codecrafters@example.com',points: 320},
+   {initials:'TC', name: 'Dev storm', email: 'devStorm@example.com',points: 389},
+  ];
+
+  teamSizeSegments: TeamSizeSegment[]=[
+    {label: 'Solo', count: 32, percent:20, offset:0, colorClass: 'seg-solo'},
+    {label: '2 - 3 members', count: 32, percent:20, offset:20, colorClass: 'seg-small'},
+  ];
+
+  recentAnnouncements: AnnouncementRow[]=[
+    {title:'New challenge added', body:"Check out the new AI challenge", date:'May 16,2026'},
+    {title:'Maintenance Notice', body:"Platform maintenance on May 20,2026 from 12:00 PM", date:'May 19,2026'},
+  ];
+
+  systemNotifications: NotificationRow[]=[
+    {icon: 'success', title: 'All systems operational', body: 'Last checked 2 min ago', time:'Just now'},
+    {icon: 'warning', title: 'High submission volume', body: 'Submissions are 35% higher than usual', time:'Just now'},
+  ]
   ngOnInit(): void {
     this.loadEvents();
     this.loadRecentSubmissions();
@@ -71,11 +123,14 @@ export class DashboardComponent implements OnInit{
   }
 
   private toDashboardSubmission(sub: SubmissionResponse): Submissions {
+    const team = this.shortId(sub.teamId);
     return{
       submissionId: sub.submissionId,
-  team: this.shortId(sub.teamId),
+  team,
+  teamInitials: team.slice(0,2).toUpperCase(),
   event: 'Event',
   level: `Level ${sub.levelId}`,
+  challenge: `Level ${sub.levelId}`,
   score: sub.score === null || sub.score === undefined
     ? '-'
     : Number(sub.score).toFixed(2),
@@ -144,6 +199,7 @@ export class DashboardComponent implements OnInit{
         this.activeEvents = events.filter(event => this.isActiveEvent(event)).length;
         this.allEvents = events.map(event => this.toDashboardEvent(event));
         this.eventLoading = false;
+        this.change.markForCheck();
       },
       error: () => {
         this.eventError = "Could not load events."
@@ -161,8 +217,11 @@ export class DashboardComponent implements OnInit{
     return {
       eventId: event.eventId,
       name: event.name,
-      meta: `${this.formatStatus(event.status)} · ${event.visibility} · team limit ${event.teamSizeLimit}`,
-      timeLabel: this.getEventTimeLabel(event),
+      logoInitial: event.name?.charAt(0)?.toUpperCase() || '?',
+      dateRangeLabel: this.formatDateRange(event),
+      statusPill: this.getStatusPill(event),
+      participantsLabel: '—',
+
     }
   }
 
@@ -173,8 +232,20 @@ export class DashboardComponent implements OnInit{
 
     return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
   }
+  private getStatusPill(event:EventResponse): 'Live'|'Upcoming' |'Ended'{
+    const start = new Date(event.startDateTime);
+    if (Number.isNaN(start.getTime())){
+      return 'Upcoming';
+    }
+    const end = new Date(start.getTime() + Number(event.duration || 0)* 60 * 60 * 1000);
+    const now = Date.now();
 
-  private getEventTimeLabel(event: EventResponse): string {
+    if(now < start.getTime()) return "Upcoming";
+    if(now < end.getTime()) return "Live";
+    return 'Ended';
+  }
+
+  private formatDateRange(event: EventResponse): string {
     const start = new Date(event.startDateTime);
 
     if(Number.isNaN(start.getTime())) {
@@ -182,36 +253,11 @@ export class DashboardComponent implements OnInit{
     }
 
     const end = new Date(start.getTime() + Number(event.duration || 0) * 60 * 60 * 1000);
-    const now = Date.now();
-
-    if (now < start.getTime()) {
-      return `starts in ${this.formatDuration(start.getTime() - now)}`;
-    }
-    if (now < end.getTime()) {
-      return `end in ${this.formatDuration(end.getTime() - now)}`
-    }
-
-    return 'ended';
+    const startLabel = start.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const endLabel = end.toLocaleDateString('en-US',{month:'short',day:'numeric', year:'numeric'});
+    
+    return `${startLabel} \u2013 ${endLabel}`
   }
 
-  private formatDuration(ms: number): string {
-    const totMin = Math.max(0, Math.floor(ms/60000));
-    const days = Math.floor(totMin / 1440);
-    const hours = Math.floor((totMin % 1440) / 60);
-    const min = totMin % 60;
-
-    if (days > 0 && hours > 0) {
-      return `${days}d ${hours}h`;
-    }
-
-    if (days > 0) {
-      return `${days}d`;
-    }
-
-    if (hours > 0) {
-      return `${hours}h`;
-    }
-
-    return `${min}m`;
-  }
+  
 }
