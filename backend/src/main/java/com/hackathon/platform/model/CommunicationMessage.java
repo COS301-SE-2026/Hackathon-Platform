@@ -13,7 +13,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "communication_channels")
+@Table(name = "communication_messages")
 @Getter
 @Setter
 @NoArgsConstructor
