@@ -21,18 +21,26 @@ export class CreateEventComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   hackathonId ='';
+  hackathonName ='';
+
+  private readonly DEFAULT_TEAM_SIZE_LIMIT = 4;
 
   form = {
     eventName: '',
-    startDate: '2024-12-01T09:00',
+    startDate: '',
+    startTime: '',
     duration: 48,
     teamSizeLimit: 4,
     visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
     bannerFile: null as File | null,
     bannerFileName: '',
     description: '',
-    registrationKey: ''
+    registrationKey: '',
+    rules: ''
   };
+
+  readonly descriptionMaxLength = 1000;
+  readonly rulesMaxLength  = 2000;
 
   isLoading = false;
   errorMessage = '';
@@ -82,6 +90,11 @@ export class CreateEventComponent implements OnInit {
       return;
     }
 
+    if (!this.form.startTime) {
+      this.errorMessage = 'Please select a start time';
+      return;
+    }
+
     if (this.form.teamSizeLimit < 1) {
       this.errorMessage = 'Team size limit must be at least 1';
       return;
@@ -92,14 +105,24 @@ export class CreateEventComponent implements OnInit {
       return;
     }
 
+    if (this.form.visibility === 'PRIVATE' && !this.form.registrationKey.trim()){
+      this.errorMessage = 'Please enter a registration key for a private event.'
+      return;
+    }
+
     if(!this.hackathonId) {
       this.errorMessage = 'The hackathon ID is missing, make sure you are creating an event from a hackathon.';
+      return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    const startDateTime = new Date(this.form.startDate);
+    const startDateTime = new Date(`${this.form.startDate}T${this.form.startTime}`);
+    if (Number.isNaN(startDateTime.getTime())){
+      this.errorMessage = 'Please enter a valid start date and time';
+      return;
+    }
     
     const eventData: EventRequest = {
       name: this.form.eventName,
