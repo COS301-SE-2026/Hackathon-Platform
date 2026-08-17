@@ -12,14 +12,15 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 /** REST controller for standalone team management endpoints. */
 @RestController
@@ -47,7 +48,7 @@ public class TeamController {
 
   /** Get the authenticated user's approved team, if any. */
   @GetMapping("/my-team")
-  public ResponseEntity<TeamResponse> getMyTeamForEvent(@AuthenticationPrincipal User currentUser) {
+  public ResponseEntity<TeamResponse> getMyTeamForEvent(@RequestParam UUID eventId, @AuthenticationPrincipal User currentUser) {
     return teamService
         .getMyTeamForEvent(currentUser.getUserId(), eventId)
         .map(ResponseEntity::ok)
@@ -58,13 +59,16 @@ public class TeamController {
   @PostMapping("/{teamId}/join-requests")
   public ResponseEntity<Void> requestToJoin(
           @PathVariable UUID teamId,
-          @RequestBody(required = false) JoinTeamRequest req,
           @AuthenticationPrincipal User currUser){
-
-    String regKey = req = null ? null : req.getRegistrationKey();
-    teamService.requestToJoinTeam(teamId, currUser.getUserId(), regKey);
+    teamService.requestToJoinTeam(teamId, currUser.getUserId());
     return ResponseEntity.status(HttpStatus.CREATED).build();
 }
+
+  @PostMapping("/join/{joinCode}")
+  public ResponseEntity<Void> requestToJoinByCode(@PathVariable String joinCode, @AuthenticationPrincipal User currUser){
+    teamService.requestToJoinTeamByCode(joinCode, currUser.getUserId());
+    return ResponseEntity.status(HttpStatus.CREATED).build();
+  }
 
   /** View pending join requests for a team. Only the team creator should use this. */
   @GetMapping("/{teamId}/join-requests")
