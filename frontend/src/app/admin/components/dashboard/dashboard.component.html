@@ -2,7 +2,7 @@
   <main class = "content">
     <div class = "page-header">
       <div>
-        <h1>Welcome back, Admin! 👋</h1>
+        <h1>Welcome back, Admin! </h1>
         <p class = "page-subtitle">Here's what's happening with your hackathons.</p>
       </div>
     </div>
@@ -12,7 +12,7 @@
         <div class = "stat-icon stat-icon-blue"><i class = "pi pi-calendar"></i></div>
         <div>
           <p class = "stat-value">{{ activeEvents }}</p>
-        <p class = "stat-label"> Active events</p>
+        <p class = "stat-label">Active events</p>
         <a routerLink = "/admin/events" class = "stat-link">View all events <i class = "pi pi-arrow-right"></i></a>
         </div>
       </div>
@@ -59,7 +59,7 @@
                 <div class="event-item">
                   <div>
                     <p class="event-name">{{ events.name }}</p>
-                    <p class="event-meta">{{ events.meta }} &middot; {{ events.timeLabel }}</p>
+                    <p class="event-meta">{{ events.meta }}</p>
                   </div>
                 </div>
               }
@@ -147,15 +147,14 @@
               @for (seg of teamSizeSegments; track seg.label){
                 <div class = "legend-row">
                   <span class = "legend-dot {{seg.colorClass}}"></span>
-                </div>
                 <p class = "legend-label">{{seg.label}}</p>
                 <p class = "legend-sub">{{seg.count}} teams ({{seg.percent}}%)</p>
               </div>
-             </div>
               }
             </div>
             <a routerLink = "/admin/teams" class = "panel-footer-link">View all teams <i class = "pi pi-arrow-right"></i></a>
           </div> 
+        </div>
       
 
 
@@ -252,7 +251,6 @@
               }
             </div>
           </div>
-
         </div>
 
   </main>
