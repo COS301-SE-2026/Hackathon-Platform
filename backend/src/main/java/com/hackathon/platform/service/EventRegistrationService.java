@@ -8,6 +8,8 @@ import com.hackathon.platform.repository.EventRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EventRegistrationService {
@@ -43,5 +45,17 @@ public class EventRegistrationService {
         EventRegistration save = eventRegistrationRepo.save(reg);
 
         return toResponse(save);
+    }
+
+    public boolean isRegistered(UUID event, UUID user){
+        return eventRegistrationRepo.existsByEventIdAndUserId(event, user);
+    }
+
+    public List<EventRegistrationResponse> getMyRegistrations(UUID user){
+        return eventRegistrationRepo.findByUserId(user).stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    private EventRegistrationResponse toResponse(EventRegistration reg){
+        return new EventRegistrationResponse(reg.getRegistrationId(), reg.getEventId(), reg.getRegisteredAt());
     }
 }
