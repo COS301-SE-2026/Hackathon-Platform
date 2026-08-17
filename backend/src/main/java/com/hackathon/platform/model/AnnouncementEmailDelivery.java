@@ -20,19 +20,19 @@ import lombok.NoArgsConstructor;
 public class AnnouncementEmailDelivery {
     @Id
     @Column(name = "message_id", nullable = false)
-    private UUID message_id;
+    private UUID messageId;
 
     @Id
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "recipient_id", nullable = false, length = 255)
-    private String recipientId;
+    @Column(name = "recipient_email", nullable = false, length = 255)
+    private String recipientEmail;
 
     @Column(name = "delivery_status", nullable = false, length = 20)
     private String deliveryStatus = "PENDING";
 
-    @Column(name = "attemp_count", nullable = false)
+    @Column(name = "attempt_count", nullable = false)
     private int attemptCount;
 
     @Column(name = "last_error", columnDefinition = "TEXT")
