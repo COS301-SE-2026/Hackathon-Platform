@@ -24,8 +24,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, UUID> {
   List<TeamMember> findByUserIdAndStatus(UUID userId, String status);
 
   @Query(
-          "SELECT tm FROM TeamMember tm JOIN Team t ON tm.teamId = t.teamId WHERE tm.userId = :userId AND tm.status = :status AND t.eventId = :eventId")
+      "SELECT tm FROM TeamMember tm JOIN Team t ON tm.teamId = t.teamId WHERE tm.userId = :userId AND tm.status = :status AND t.eventId = :eventId")
   List<TeamMember> findByUserIdAndStatusAndEventId(
-          @Param("userId") UUID userId, @Param("status") String status, @Param("eventId") UUID eventId);
-
+      @Param("userId") UUID userId, @Param("status") String status, @Param("eventId") UUID eventId);
 }

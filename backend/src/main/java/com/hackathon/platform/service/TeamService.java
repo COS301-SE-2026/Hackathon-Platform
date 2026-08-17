@@ -3,9 +3,11 @@ package com.hackathon.platform.service;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
+import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.TeamMember;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.TeamMemberRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.repository.UserRepository;
@@ -13,12 +15,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.hackathon.platform.model.Event;
-import com.hackathon.platform.repository.EventRepository;
 
 /** Service for standalone team management operations. */
 @Service
@@ -34,7 +33,8 @@ public class TeamService {
   public TeamService(
       TeamRepository teamRepository,
       TeamMemberRepository teamMemberRepository,
-      UserRepository userRepository, EventRepository eventRepo) {
+      UserRepository userRepository,
+      EventRepository eventRepo) {
     this.teamRepository = teamRepository;
     this.teamMemberRepository = teamMemberRepository;
     this.userRepository = userRepository;
@@ -82,18 +82,28 @@ public class TeamService {
   /** Get the authenticated user's approved team, if they have one. */
   public List<TeamResponse> getMyTeams(UUID currentUserId) {
     List<TeamMember> teams = teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED");
-    return teams.stream().map(m -> teamRepository.findBy(m.getTeamId()).orElseThrow(() -> new RuntimeException("Team not fund"))).map(this::toTeamResponse).collect(Collectors.toList());
+    return teams.stream()
+        .map(
+            m ->
+                teamRepository
+                    .findBy(m.getTeamId())
+                    .orElseThrow(() -> new RuntimeException("Team not fund")))
+        .map(this::toTeamResponse)
+        .collect(Collectors.toList());
   }
 
+  public Optional<TeamResponse> getMyTeamForEvent(UUID currUser, UUID eventId) {
+    List<TeamMember> members =
+        teamMemberRepository.findByUserIdAndEventId(currUser, "APPROVED", eventId);
 
-  public Optional<TeamResponse> getMyTeamForEvent(UUID currUser, UUID eventId){
-    List<TeamMember> members = teamMemberRepository.findByUserIdAndEventId(currUser, "APPROVED", eventId);
-
-    if(members.isEmpty()){
+    if (members.isEmpty()) {
       return Optional.empty();
     }
 
-    Team team = teamRepository.findById(members.get(0).getTeamId()).orElseThrow(() -> new RuntimeException("Team not found"));
+    Team team =
+        teamRepository
+            .findById(members.get(0).getTeamId())
+            .orElseThrow(() -> new RuntimeException("Team not found"));
     return Optional.of(toTeamResponse(team));
   }
 
@@ -106,30 +116,39 @@ public class TeamService {
   }
 
   @Transactional
-  public void requestToJoinTeamByCode(String joinCode, UUID currUser, String regKey){
-    Team team = teamRepository.findByJoinCode(normalizeJoinCode(joinCode)).orElseThrow(() -> new RuntimeException("No team found for that join code"));
+  public void requestToJoinTeamByCode(String joinCode, UUID currUser, String regKey) {
+    Team team =
+        teamRepository
+            .findByJoinCode(normalizeJoinCode(joinCode))
+            .orElseThrow(() -> new RuntimeException("No team found for that join code"));
     joinTeamInternal(team, currUser, regKey);
   }
 
-  private void joinTeamInternal(Team team, UUID currUser, String regKey){
-    if(!"ACTIVE".equals(team.getStatus())){
+  private void joinTeamInternal(Team team, UUID currUser, String regKey) {
+    if (!"ACTIVE".equals(team.getStatus())) {
       throw new RuntimeException("Team isnt active");
     }
 
-    Event event = eventRepo.findById(team.getEventId()).orElseThrow(() -> new RuntimeException("Event does not exist"));
+    Event event =
+        eventRepo
+            .findById(team.getEventId())
+            .orElseThrow(() -> new RuntimeException("Event does not exist"));
     assertEventAcceptsRegistrations(event);
     assertRegistrationKeyMatches(event, regKey);
 
-    if(teamMemberRepository.findByTeamIdAndUserId(team.getTeamId(), currUser).isPresent()){
+    if (teamMemberRepository.findByTeamIdAndUserId(team.getTeamId(), currUser).isPresent()) {
       throw new RuntimeException("You already requested or are a member for this team");
     }
 
-    if(!teamMemberRepository.findByUserIdAndStatusAndEventId(currUser, "APPROVED", event.getEventId()).isEmpty()){
-      throw new RuntimeException("Youre already on a team for this event. Leave that team to join a new team");
+    if (!teamMemberRepository
+        .findByUserIdAndStatusAndEventId(currUser, "APPROVED", event.getEventId())
+        .isEmpty()) {
+      throw new RuntimeException(
+          "Youre already on a team for this event. Leave that team to join a new team");
     }
 
     long approvedCount = teamMemberRepository.countByTeamIdAndStatus(team.getTeamId(), "APPROVED");
-    if(approvedCount >= event.getTeamSizeLimit()){
+    if (approvedCount >= event.getTeamSizeLimit()) {
       throw new RuntimeException("Team is full");
     }
 
@@ -161,14 +180,20 @@ public class TeamService {
     }
 
     if (approve) {
-      Event event = eventRepo.findById(team.getEventId()).orElseThrow(() -> new RuntimeException("Event not found"));
+      Event event =
+          eventRepo
+              .findById(team.getEventId())
+              .orElseThrow(() -> new RuntimeException("Event not found"));
 
-      if(!teamMemberRepository.findByUserIdAndStatusAndEventId(userIdToApprove, "APPROVED", event.getEventId()).isEmpty()){
-        throw new RuntimeException("Youre already an approved member for another team for this event");
+      if (!teamMemberRepository
+          .findByUserIdAndStatusAndEventId(userIdToApprove, "APPROVED", event.getEventId())
+          .isEmpty()) {
+        throw new RuntimeException(
+            "Youre already an approved member for another team for this event");
       }
 
       long currSize = teamRepository.countByTeamIdAndStatus(teamId, "APPROVED");
-      if(currSize >= event.getTeamSizeLimit()){
+      if (currSize >= event.getTeamSizeLimit()) {
         throw new RuntimeException("Team is full");
       }
       pendingRequest.setStatus("APPROVED");
@@ -259,33 +284,35 @@ public class TeamService {
     return response;
   }
 
-  private void assertEventAcceptsRegistrations(Event event){
-    if("COMPLETED".equals(event.getStatus()) || "CANCELLED".equals(event.getStatus())){
+  private void assertEventAcceptsRegistrations(Event event) {
+    if ("COMPLETED".equals(event.getStatus()) || "CANCELLED".equals(event.getStatus())) {
       throw new RuntimeException("This event is no longer accepting registrations");
     }
   }
 
-  private void assertRegistrationKeyMatches(Event event, String suppliedKey){
-    if(!"PRIVATE".equals(event.getVisibility())){
+  private void assertRegistrationKeyMatches(Event event, String suppliedKey) {
+    if (!"PRIVATE".equals(event.getVisibility())) {
       return;
     }
-    if(suppliedKey == null || suppliedKey.isBlank() || !suppliedKey.equals(event.getRegistrationKey())){
+    if (suppliedKey == null
+        || suppliedKey.isBlank()
+        || !suppliedKey.equals(event.getRegistrationKey())) {
       throw new RuntimeException("A valid registration key is required for this event");
     }
   }
 
-  private Team saveTeamRetryingJoinCodeCollissions(Team team){
-    for(int attempt=0; attempt < MAX_JOIN_CODE_GENERATION_ATTEMPTS; attempt++){
-      try{
+  private Team saveTeamRetryingJoinCodeCollissions(Team team) {
+    for (int attempt = 0; attempt < MAX_JOIN_CODE_GENERATION_ATTEMPTS; attempt++) {
+      try {
         return teamRepository.save(team);
-      } catch (DataIntegrityViolationException e){
+      } catch (DataIntegrityViolationException e) {
         team.regenJoinCode();
       }
     }
     throw new RuntimeException("could not generate join code");
   }
 
-  private String normalizeJoinCode(String joinCode){
+  private String normalizeJoinCode(String joinCode) {
     return joinCode == null ? "" : joinCode.trim().toUpperCase();
   }
 }

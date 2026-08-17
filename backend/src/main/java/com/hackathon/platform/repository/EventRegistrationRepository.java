@@ -7,7 +7,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EventRegistrationRepository extends JpaRepository<EventRegistration, UUID> {
-    boolean existsByEventIdAndUserId(UUID eventId, UUID userId);
-    Optional<EventRegistration> findEventIdAndUserId(UUID eventId, UUID userId);
-    List<EventRegistration> findByUserId(UUID userId);
+  boolean existsByEventIdAndUserId(UUID eventId, UUID userId);
+
+  Optional<EventRegistration> findEventIdAndUserId(UUID eventId, UUID userId);
+
+  List<EventRegistration> findByUserId(UUID userId);
 }

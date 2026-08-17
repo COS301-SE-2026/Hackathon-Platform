@@ -12,15 +12,15 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 /** REST controller for standalone team management endpoints. */
 @RestController
@@ -42,13 +42,14 @@ public class TeamController {
   }
 
   @GetMapping("/my-teams")
-  public ResponseEntity<List<TeamResponse>> getMyTeams(@AuthenticationPrincipal User currUser){
+  public ResponseEntity<List<TeamResponse>> getMyTeams(@AuthenticationPrincipal User currUser) {
     return ResponseEntity.ok(teamService.getMyTeams(currUser.getUserId()));
   }
 
   /** Get the authenticated user's approved team, if any. */
   @GetMapping("/my-team")
-  public ResponseEntity<TeamResponse> getMyTeamForEvent(@RequestParam UUID eventId, @AuthenticationPrincipal User currentUser) {
+  public ResponseEntity<TeamResponse> getMyTeamForEvent(
+      @RequestParam UUID eventId, @AuthenticationPrincipal User currentUser) {
     return teamService
         .getMyTeamForEvent(currentUser.getUserId(), eventId)
         .map(ResponseEntity::ok)
@@ -58,14 +59,14 @@ public class TeamController {
   /** Request to join a team. */
   @PostMapping("/{teamId}/join-requests")
   public ResponseEntity<Void> requestToJoin(
-          @PathVariable UUID teamId,
-          @AuthenticationPrincipal User currUser){
+      @PathVariable UUID teamId, @AuthenticationPrincipal User currUser) {
     teamService.requestToJoinTeam(teamId, currUser.getUserId());
     return ResponseEntity.status(HttpStatus.CREATED).build();
-}
+  }
 
   @PostMapping("/join/{joinCode}")
-  public ResponseEntity<Void> requestToJoinByCode(@PathVariable String joinCode, @AuthenticationPrincipal User currUser){
+  public ResponseEntity<Void> requestToJoinByCode(
+      @PathVariable String joinCode, @AuthenticationPrincipal User currUser) {
     teamService.requestToJoinTeamByCode(joinCode, currUser.getUserId());
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }

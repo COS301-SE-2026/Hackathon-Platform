@@ -1,8 +1,8 @@
 package com.hackathon.platform.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 /** DTO for team creation request payload. */
 public class CreateTeamRequest {
