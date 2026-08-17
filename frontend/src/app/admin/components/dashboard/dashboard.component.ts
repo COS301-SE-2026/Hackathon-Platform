@@ -13,7 +13,7 @@ interface Events {
   dateRangeLabel: string;
   statusPill: 'Live' | 'Upcoming' |'Ended';
   participantsLabel: string;
-
+  meta: string;
 }
 
 interface Submissions {
@@ -221,6 +221,7 @@ export class DashboardComponent implements OnInit{
       dateRangeLabel: this.formatDateRange(event),
       statusPill: this.getStatusPill(event),
       participantsLabel: '—',
+      meta: event.description || 'No description',
 
     }
   }
