@@ -1,4 +1,4 @@
-<nav class="navbar">
+<nav class="navbar" aria-label="Main navigation">
 
  <div class="navbar-logo">
  <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform" />
@@ -181,7 +181,7 @@ aria-label="Open navigation menu"
         Navigation
       </span>
 
-      <nav class="sidebar-links">
+      <nav class="sidebar-links" aria-label="Sidebar navigation">
 
         @for (link of links; track link.route) {
         <a
@@ -207,7 +207,7 @@ aria-label="Open navigation menu"
 
     <span class="sidebar-section-title">Account</span>
 
-   <nav class="sidebar-profile-links">
+   <nav class="sidebar-profile-links" aria-label="Profile navigation">
 
     @for (item of profileMenuItems; track item.label) {
     <a

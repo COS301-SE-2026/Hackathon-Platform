@@ -1,5 +1,7 @@
+<label [for]="id" class="sr-only">{{ label }}</label>
+
 <div class="dropdown">
-  <select [value]="value" [disabled]="disabled" aria-label="Select an option" (change)="onSelectionChange($event)"
+  <select [value]="value" [disabled]="disabled" (change)="onSelectionChange($event)"
   >
     @for (option of options; track option) {
       <option [value]="option">{{ option }}</option>

@@ -4,7 +4,7 @@
 
 <ng-template #header let-columns>
 
-<tr> @for (column of columns; track column.field) {<th>{{ column.header }}</th>}</tr>
+<tr> @for (column of columns; track column.field) {<th scope="col">{{ column.header }}</th>}</tr>
 
  </ng-template>
 

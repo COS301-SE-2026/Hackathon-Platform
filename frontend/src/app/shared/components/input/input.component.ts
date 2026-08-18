@@ -9,4 +9,7 @@ import { Component, Input } from '@angular/core';
 export class InputComponent {
   @Input() placeholder = '';
   @Input() disabled = false;
+  @Input() id = 'input';
+  @Input() label = 'Text input';
+  
 }

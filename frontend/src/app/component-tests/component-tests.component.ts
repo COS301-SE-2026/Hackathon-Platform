@@ -44,7 +44,7 @@ export class ComponentTestsComponent {
   mediumModal = false;
   currentPage = 1;
   
-  private toast = inject(ToastService);
+  private readonly toast = inject(ToastService);
 
   columns = [
   { field: 'name', header: 'Event Name' },

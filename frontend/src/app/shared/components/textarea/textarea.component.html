@@ -1,5 +1,7 @@
 <div class="textarea-wrapper">
 
+<label [for]="id" class="sr-only">{{ label }}</label>
+
 <textarea class="textarea" [(ngModel)]="value" [attr.placeholder]="placeholder" [attr.maxlength]="maxLength" [attr.rows]="rows"></textarea>
 
 <div class="textarea-counter">{{ characterCount }} / {{ maxLength }}</div>

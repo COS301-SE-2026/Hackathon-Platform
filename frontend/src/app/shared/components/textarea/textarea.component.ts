@@ -12,7 +12,8 @@ export class TextareaComponent {
   @Input() placeholder = '';
   @Input() maxLength = 1000;
   @Input() rows = 6;
-
+  @Input() id = 'textarea';
+  @Input() label = 'Text area';
   value = '';
 
   get characterCount(): number {
