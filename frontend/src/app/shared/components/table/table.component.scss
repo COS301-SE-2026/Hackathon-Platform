@@ -1,0 +1,97 @@
+.table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+
+  background-color: var(--white);
+
+  border: 1px solid var(--light-gray);
+
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-sm);
+}
+
+:host ::ng-deep .table-wrapper .p-datatable {
+  width: 100%;
+
+  border: none;
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-thead > tr > th {
+  padding: var(--space-4) var(--space-6);
+
+  background-color: var(--off-white);
+
+  border: none;
+
+  border-bottom: 1px solid var(--light-gray);
+
+  text-align: left;
+  white-space: nowrap;
+
+    color: var(--black);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-small);
+
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-small);
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-tbody > tr {
+  background-color: var(--white);
+
+  transition: background-color var(--duration-normal) var(--easing-standard);
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-tbody > tr:hover {
+  background-color: var(--bright-blue-bg);
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-tbody > tr > td {
+  padding: var(--space-4) var(--space-6);
+
+  border: none;
+  border-bottom: 1px solid var(--light-gray);
+
+  color: var(--dark-gray);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  vertical-align: middle;
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-tbody > tr:last-child > td {
+  border-bottom: none;
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-tbody > tr > td:empty {
+  color: var(--mid-gray);
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-loading-icon {
+  color: var(--bright-blue);
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-mask {
+  background-color: var(--overlay-bg);
+}
+
+:host ::ng-deep .table-wrapper .p-datatable-tbody > tr > td[colspan] {
+  padding: var(--space-12) var(--space-6);
+
+  color: var(--dark-gray);
+  text-align: center;
+}
+
+@media (max-width: 767px) {:host ::ng-deep .table-wrapper .p-datatable-thead > tr > th, :host ::ng-deep .table-wrapper .p-datatable-tbody > tr > td {
+    padding: var(--space-3) var(--space-4);
+  }
+}
