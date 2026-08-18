@@ -6,6 +6,8 @@ export interface TableColumn {
   header: string;
 }
 
+export type TableRow = Record<string, unknown>;
+
 @Component({
   selector: 'app-table',
   standalone: true,
@@ -16,7 +18,7 @@ export interface TableColumn {
 export class TableComponent {
   @Input() columns: TableColumn[] = [];
   
-  @Input() data: any[] = [];
+  @Input() data: TableRow[] = [];
 
   @Input() loading = false;
 
