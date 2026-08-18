@@ -135,8 +135,7 @@ aria-label="Open navigation menu"
 
 @if (showSidebar) {
 
-<div class="sidebar-overlay" (click)="closeSidebar()"
-></div>
+<button type="button" class="sidebar-overlay" aria-label="Close sidebar" (click)="closeSidebar()"></button>
 
 <aside
     class="sidebar"
