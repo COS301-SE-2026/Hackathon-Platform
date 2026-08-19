@@ -175,19 +175,25 @@
     <div class="toast-preview">
       <app-button
         variant="success"
-        (click)="showSuccessToast()">
+        (click)="showSuccessToast()"
+         (keydown)="null"
+        (keyup)="null">
         Success Toast
       </app-button>
 
       <app-button
         variant="primary"
-        (click)="showInfoToast()">
+        (click)="showInfoToast()"
+          (keydown)="null"
+          (keyup)="null">
         Info Toast
       </app-button>
 
       <app-button
         variant="danger"
-        (click)="showErrorToast()">
+        (click)="showErrorToast()"
+          (keydown)="null"
+          (keyup)="null">
         Error Toast
       </app-button>
     </div>
@@ -201,19 +207,25 @@
     <div class="modal-preview">
       <app-button
         variant="primary"
-        (click)="openSmallModal()">
+        (click)="openSmallModal()"
+        (keydown)="null"
+        (keyup)="null">
         Small Modal
       </app-button>
 
       <app-button
         variant="primary"
-        (click)="openMediumModal()">
+        (click)="openMediumModal()"
+         (keydown)="null"
+        (keyup)="null">
         Medium Modal
       </app-button>
 
       <app-button
         variant="primary"
-        (click)="openLargeModal()">
+        (click)="openLargeModal()"
+         (keydown)="null"
+       (keyup)="null">
        large Modal
       </app-button>
     </div>
