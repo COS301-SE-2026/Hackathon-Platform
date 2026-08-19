@@ -28,8 +28,8 @@ public class SolverExecutionConfig {
   private int maxOutputBytes;
 
   /** Deny-by-default allow-list of environment variable names passed into solver process */
-  @Value("${scoring.solver.allowed-env-keys:PATH,HOME,LANG,LC_ALL}")
-  private String allowedEnvKeysRaw = "PATH,HOME,LANG,LC_ALL";
+  @Value("${scoring.solver.allowed-env-keys:PATH,HOME,LANG,LC_ALL,SystemRoot}")
+  private String allowedEnvKeysRaw = "PATH,HOME,LANG,LC_ALL,SystemRoot";
 
   /** Max address space the solver may allocate */
   @Value("${scoring.solver.memory-limit-mb:512}")
