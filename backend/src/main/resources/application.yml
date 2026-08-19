@@ -14,6 +14,9 @@ scoring:
     python-executable: ${SOLVER_PYTHON_EXECUTABLE:python}
     workdir: ${SOLVER_WORKDIR:/tmp/hackathon-scoring}
     max-output-bytes: 1048576
+    allowed-env-keys: ${SOLVER_ALLOWED_ENV_KEYS:PATH,HOME,LANG,LC_ALL}
+    memory-limit-mb: ${SOLVER_MEMORY_LIMIT_MB:512}
+    cpu-limit-seconds: ${SOLVER_CPU_LIMIT_SECONDS:30}
   queue:
     stream-key: scoring:jobs
     consumer-group: scoring-workers
