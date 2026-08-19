@@ -124,8 +124,8 @@ public class EventService {
       throw new IllegalArgumentException("Visibility must be one of "+ALLOWED_VISIBILITIES);
     }
 
-    if(req.getStatus()!= null && !ALLOWED_STATUSES.contains(req.getStatus())){
-      throw new IllegalArgumentException("Status must be one of "+ALLOWED_STATUSES);
+    if(req.getStatus() != null){
+      assertValidStatusTransition(event.getStatus(), req.getStatus());
     }
 
     event.setCreatedByUserId(getCurrentAdminId());
@@ -162,6 +162,7 @@ public class EventService {
       event.setVisibility(visibility);
     }
     if (status != null) {
+      assertValidStatusTransition(event.getStatus(), status);
       event.setStatus(status);
     }
 
