@@ -1,0 +1,29 @@
+<div class="table-wrapper">
+
+<p-table [value]="data" [columns]="columns" [loading]="loading"  [tableStyle]="{ 'min-width': '100%' }" >
+
+<ng-template #header let-columns>
+
+<tr> @for (column of columns; track column.field) {<th scope="col">{{ column.header }}</th>}</tr>
+
+ </ng-template>
+
+<ng-template #body let-rowData let-columns="columns">
+
+<tr> @for (column of columns; track column.field) {<td>{{ rowData[column.field] }}</td> }</tr>
+
+</ng-template>
+
+<ng-template #emptymessage>
+
+<tr>
+
+<td [attr.colspan]="columns.length"> {{ emptyMessage }}</td>
+
+ </tr>
+
+</ng-template>
+
+</p-table>
+
+</div>

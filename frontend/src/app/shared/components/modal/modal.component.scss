@@ -1,0 +1,153 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background-color: var(--overlay-bg);
+  z-index: var(--z-modal);
+}
+
+
+
+.modal {
+  position: static;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+
+  width: 100%;
+  max-height: 90vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+}
+
+
+
+.modal--small {
+  max-width: 440px;
+}
+
+.modal--medium {
+  max-width: 600px;
+}
+
+.modal--large {
+  max-width: 780px;
+}
+
+
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+
+  padding: var(--space-6);
+}
+
+.modal-header h2 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-h3);
+  color: var(--black);
+}
+
+
+
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: var(--radius-md);
+
+  background-color: transparent;
+  color: var(--dark-navy);
+
+  font-size: 18px;
+
+  transition: background-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+}
+
+.modal-close:hover {
+  background-color: var(--light-gray);
+}
+
+.modal-close:focus-visible {
+  outline: 2px solid var(--bright-blue);
+  outline-offset: 2px;
+}
+
+
+
+.modal-body {
+  flex: 1;
+  min-height: 0;
+
+  padding: var(--space-6);
+
+  overflow-y: auto;
+}
+
+
+
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  flex-shrink: 0;
+
+  padding: var(--space-6);
+}
+
+
+
+:host ::ng-deep [modal-footer-left], :host ::ng-deep [modal-footer-right] {
+  display: flex;
+  align-items: center;
+}
+
+:host ::ng-deep [modal-footer-right] {
+  margin-left: auto;
+  gap: var(--space-4);
+}
+
+
+
+
+@media (max-width: 767px) {
+  .modal-overlay {
+    padding: var(--space-4);
+  }
+
+  .modal {
+    max-height: 92vh;
+  }
+
+  .modal-header,.modal-body, .modal-footer {
+    padding: var(--space-4);
+  }
+
+  .modal-header h2 {
+    font-size: var(--font-size-h3);
+  }
+}

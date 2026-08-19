@@ -1,0 +1,7 @@
+<div class="pagination">
+
+  <p-paginator  [first]="(currentPage - 1) * itemsPerPage" [rows]="itemsPerPage" [totalRecords]="totalItems" [pageLinkSize]="5" [showFirstLastIcon]="false" (onPageChange)="onPageChange($event)"></p-paginator>
+
+  <div class="pagination-summary">Showing {{ firstItem }} to {{ lastItem }} of {{ totalItems }} {{ itemLabel }}</div>
+
+</div>
