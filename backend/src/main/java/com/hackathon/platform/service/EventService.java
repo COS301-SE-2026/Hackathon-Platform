@@ -11,13 +11,15 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import java.util.Set;
 
 @Service
 public class EventService {
   private final EventRepository eventRepository;
   private final HackathonRepository hackathonRepository;
-
-  // public static final String CREATEDUSER = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11";
+  private static final Set<String>  ALLOWED_STATUSES = Set.of("UPCOMING", "ACTIVE", "COMPLETED", "CANCELED");
+  private static final Set<String> TERMINAL_STATUSES = Set.of("COMPLETED", "CANCELED");
+  private static final Set<String> ALLOWED_VISIBILITIES = Set.of("PUBLC", "PRIVATE");
 
   public EventService(EventRepository eventRepository, HackathonRepository hackathonRepository) {
     this.eventRepository = eventRepository;
@@ -58,6 +60,14 @@ public class EventService {
 
     if (req.getStatus() == null || req.getStatus().isBlank()) {
       throw new IllegalArgumentException("Event status is required.");
+    }
+
+    if(!ALLOWED_VISIBILITIES.contains(req.getVisibility())){
+      throw new IllegalArgumentException("Visibility must be one of "+ALLOWED_VISIBILITIES);
+    }
+
+    if(!ALLOWED_STATUSES.contains(req.getStatus())){
+      throw new IllegalArgumentException("Status must be one of "+ALLOWED_STATUSES);
     }
 
     if ("PRIVATE".equals(req.getVisibility())
