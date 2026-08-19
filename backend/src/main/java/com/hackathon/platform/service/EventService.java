@@ -120,6 +120,14 @@ public class EventService {
             .findById(eventId)
             .orElseThrow(() -> new RuntimeException("Event not found"));
 
+    if(req.getVisibility() != null && !ALLOWED_VISIBILITIES.contains(req.getVisibility())){
+      throw new IllegalArgumentException("Visibility must be one of "+ALLOWED_VISIBILITIES);
+    }
+
+    if(req.getStatus()!= null && !ALLOWED_STATUSES.contains(req.getStatus())){
+      throw new IllegalArgumentException("Status must be one of "+ALLOWED_STATUSES);
+    }
+
     event.setCreatedByUserId(getCurrentAdminId());
     event.setName(req.getName());
     event.setRegistrationKey(req.getRegistrationKey());
@@ -148,6 +156,9 @@ public class EventService {
             .orElseThrow(() -> new RuntimeException("Event not found"));
 
     if (visibility != null) {
+      if(!ALLOWED_STATUSES.contains(visibility)){
+        throw new IllegalArgumentException("Visibility must be one of "+ALLOWED_STATUSES);
+      }
       event.setVisibility(visibility);
     }
     if (status != null) {
@@ -239,5 +250,14 @@ public class EventService {
     eventRepository.save(event);
 
     return new ScoringPauseResponse(eventId, paused);
+  }
+
+  private void assertValidStatusTransition(String currStat, String newStat){
+    if(!ALLOWED_STATUSES.contains(newStat)){
+      throw new IllegalArgumentException("New status must be one of "+ALLOWED_STATUSES);
+    }
+    if(currStat != null && TERMINAL_STATUSES.contains(currStat) && !newStat.equals(currStat)){
+      throw new IllegalArgumentException("Event is " + currStat+" it cant change to "+newStat);
+    }
   }
 }
