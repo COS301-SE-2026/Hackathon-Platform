@@ -1,103 +1,114 @@
-<div class = "events-page">
-  <main class = "content">
-
-    @if (hackathonId){
+<div class = "page">
+ 
+    @if (ishackathonScoped){
      <div class = "back-navigation">
        <button class = "back-btn" (click) = "goBack()">
+        <i class = "pi pi-arrow-left"></i> Back to Hackathons
       </button>
      </div>
-    }
       
-    <div class = "page-header">
+    <div class = "hackathon-header-card">
       <div>
-        <h1>Events</h1>
-        <p class = "page-subtitle">All hackathon events on this platform</p>
+        <h1>{{ hackathon?.name || 'Loading...'}}</h1>
+        <p class = "hackathon-description">{{hackathon?.description}}</p>
       </div>
-      <p-button label = "+ New Event" routerLink = "/admin/hackathons"/>
+
+      <div>
+        <div class = "stat">
+          <i class = "pi pi-clone"></i>
+          <div>
+            <p class = "stat-value">{{levelCount}}</p>
+            <p class = "stat-label">Levels</p>
+          </div>
+          <div class = "stat">
+          <i class = "pi pi-calendar"></i>
+          <div>
+            <p class = "stat-value">{{eventCount}}</p>
+            <p class = "stat-label">Events</p>
+          </div>
+          <div class = "stat">
+          <i class = "pi pi-users"></i>
+          <div>
+            <p class = "stat-value">{{participantCount ?? '—'}}</p>
+            <p class = "stat-label">Participants</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class = "filters-bar">
-      <label for = "searchInput" class = "sr-only">Search events</label>
-      <input pInputText
-      id = "searchInput"
-      type = "text"
-      class = "search-input"
-      placeholder="Search events..."
-      [(ngModel)] = "searchQuery"/>
-
-      <p-select 
-      [options] = "statusOptions"
-      [(ngModel)] = "statusFilter"
-      optionValue = "value"
-      optionLabel = "label"
-      placeholder = "All statuses"
-      [showClear] = "true"/>
-
-       <p-select 
-      [options] = "visibilityOptions"
-      [(ngModel)] = "visibilityFilter"
-      optionValue = "value"
-      optionLabel = "label"
-      placeholder = "All visibility"
-      [showClear] = "true"/>
-    </div>
-
-    @if (isLoading){
-      <div class = "loading">Loading events...</div>
-
-    }@else {
-      <p-table [value] = "filteredEvents" styleClass = "events-table" [rowHover] = "true">
-        <ng-template #header>
-          <tr>
-            <th scope = "col">Event</th>
-            <th scope = "col">Dates</th>
-            <th scope = "col">Teams</th>
-            <th scope = "col">Visibility</th>
-            <th scope = "col">Status</th>
-            <th scope = "col">Actions</th>
-          </tr>
-        </ng-template>
-
-        <ng-template #body let-event>
-          <tr>
-            <td><p class ="event-name"> {{ event.name}}</p></td>
-            <td>{{ event.startDateTime | date:'MMM d'}} &ndash; {{event.startDateTime | date:'MMM d, y'}}</td>
-            <td>{{event.teamSizeLimit}}</td>
-            <td>{{event.visibility}}</td>
-            <td>
-              <p-tag [value] = "event.status" [severity] = "statusSeverity(event.status)"/>
-            </td>
-            <td>
-              <div class = "action-buttons">
-              <p-button
-              label = "Manage &amp; Edit"
-              size = "small"
-              [routerLink] = "['/admin/events',event.eventId,'manage']"
-              styleClass = "p-button-primary"/>
-
-              <p-button
-              label = "Levels"
-              size = "small"
-              [routerLink] = "['/admin/events',event.eventId,'levels']"
-              styleClass = "p-button-secondary"/>
-
-              <p-button
-              label = "Solver"
-              size = "small"
-              [routerLink] = "['/admin/events',event.eventId,'solver']"
-              styleClass = "p-button-primary"/>
-
-              </div>
-
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template #emptymessage>
-          <tr>
-            <td colspan = "6" class = "empty-row">No events match you filter.</td>
-          </tr>
-        </ng-template>
-      </p-table>
-    }
-  </main>
+    <div class = "hackathon-tabs">
+      <a routerLink = "/admin/hackathons/{{ hackathonId}}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId}}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId}}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
+      
 </div>
+
+}
+
+<main class = "content">
+  <div class = "page-header">
+    <div>
+      <h2>{{isHackathonScoped ? 'Events Management' : 'All Events'}}</h2>
+      <p class = "page-subtitle">
+        {{isHackathonScoped ? 'View and manage all events for this hackathon.' : 'View events across every hackathon on the platform.'}}
+      </p>
+    </div>
+    @if (isHackathonScoped){
+      <button type = "button" class = "btn-create-event" (click) = "navigateToCreateEvent()">
+        + Create Event
+      </button>
+    }
+  </div>
+
+  @if (isHackathonScoped){
+    <div class = "toolbar">
+      <div class = "search-box">
+        <i class = "pi pi-search search-icon"></i>
+        <input type = "text" placeholder = "Search events..." aria-label = "Search events"/>
+      </div>
+      <div class = "filter-select">
+        <select aria-label = "Filter by status">
+          <option>All Events</option>
+          <option>Live</option>
+          <option>Upcoming</option>
+          <option>Completed</option>
+          <option>Cancelled</option>
+        </select>
+        <i class = "pi pi-chevron-down filter-chevron"></i>
+      </div>
+    </div>
+    @if (errorMessage){
+      <div class = "error-banner">{{errorMessage}}</div>
+    }
+    <div class = "events-table">
+      <div class = "events-table-header">
+        <span>Event Name</span>
+        <span>Type</span>
+        <span>Status</span>
+        <span>Dates</span>
+        <span>Action</span>
+      </div>
+
+      @if (isLoading){
+        <div class = "empty-state">Loading events...</div>
+      } @else if (events.length === 0){
+        <div class = "empty-state">No events created yet for this hackathon.</div>
+      } @else {
+        @for (event of events; track event.eventId){
+          <div class = "event-row">
+            <div class = "event-name-cell">
+              <span class = "event-logo">{{event.logoInitial}}</span>
+              <span class = "event-name">{{event.name}}</span>
+            </div>
+            <span class = "type-pill">{{event.visibility}}</span>
+            <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
+            <span class = "dates-cell">{{event.dateRangeLabel}}</span>
+            <button type = "button" class = "btn-view-event" (click) = "navigateToViewEvent(event.eventId)">View Event</button>
+
+          </div>
+        }
+      }
+    </div>
+  } 
+</main>
+      </div>
