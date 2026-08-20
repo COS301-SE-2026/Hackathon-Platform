@@ -1,6 +1,6 @@
 <div class = "events-page">
  
-    @if (ishackathonScoped){
+    @if (isHackathonScoped){
      <div class = "back-navigation">
        <button class = "back-btn" (click) = "goBack()">
         <i class = "pi pi-arrow-left"></i> Back to Hackathons
@@ -10,21 +10,24 @@
     <div class = "hackathon-header-card">
       <div>
         <h1>{{ hackathon?.name || 'Loading...'}}</h1>
-        <p class = "hackathon-description">{{hackathon?.description}}</p>
+        <p class = "hackathon-description">{{hackathon?.description || ''}}</p>
       </div>
 
       <div>
+        <div class = "hackathon-stats">
         <div class = "stat">
           <i class = "pi pi-clone"></i>
           <div>
             <p class = "stat-value">{{levelCount}}</p>
             <p class = "stat-label">Levels</p>
           </div>
+        </div>
           <div class = "stat">
           <i class = "pi pi-calendar"></i>
           <div>
             <p class = "stat-value">{{eventCount}}</p>
             <p class = "stat-label">Events</p>
+          </div>
           </div>
           <div class = "stat">
           <i class = "pi pi-users"></i>
@@ -37,10 +40,10 @@
     </div>
 
     <div class = "hackathon-tabs">
-      <a routerLink = "/admin/hackathons/{{ hackathonId}}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
-      <a routerLink = "/admin/hackathons/{{ hackathonId}}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
-      <a routerLink = "/admin/hackathons/{{ hackathonId}}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
-      <a routerLink = "/admin/hackathons/{{hackathonId}}/announcements" routerLinkActive = "active"><i class = "pi pi-megaphone"></i>Announcements</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
+      <a routerLink = "/admin/hackathons/{{hackathonId }}/announcements" routerLinkActive = "active"><i class = "pi pi-megaphone"></i>Announcements</a>
       
 </div>
 
@@ -73,7 +76,7 @@
           <option>Live</option>
           <option>Upcoming</option>
           <option>Completed</option>
-          <option>Cancelled</option>
+          <option>Canceled</option>
         </select>
         <i class = "pi pi-chevron-down filter-chevron"></i>
       </div>
