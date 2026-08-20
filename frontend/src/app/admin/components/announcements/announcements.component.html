@@ -109,7 +109,7 @@
                                     <i class = "pi pi-star-fill pin-icon" aria-label = "Pinned"></i>
                                 }
                                 <h3 class = "announcement-title">{{ a.title}}</h3>
-                                <span class = "status-badge" [ngClass] = "a.status.toLowerCase()">{{a.status | titleCase}}</span>
+                                <span class = "status-badge" [ngClass] = "a.status.toLowerCase()">{{a.status | titlecase}}</span>
                             </div>
                             <p class = "announcement-message">{{a.message}}</p>
                             <div class = "announcement-meta">
@@ -143,7 +143,7 @@
     }
     <div class = "about-levels-card">
         <span class = "about-levels-icon"><i class = "pi pi-info-circle"></i></span>
-    </div>
+    <div>
     <p class = "about-levels-title">About Announcements</p>
     <p class = "about-levels-text">Announcements notify every participant, team, or judge and assigned to this hackathon. Pinned announcements always appear first, and scheduled announcements post automatically at the chosen time.</p>
 </div>
@@ -173,11 +173,12 @@
                     <option value="ALL">All participants</option>
                     <option value="TEAMS">Registered teams</option>
                     <option value="MENTORS">Mentors</option>
+                </select>
             </div>
 
             <div class = "form-group">
                 <label>Delivery</label>
-                <div class = "radio-option">
+                <div class = "radio-row">
                     <label class = "radio-option">
                         <input type = "radio" name ="sendOption" value = "now" [(ngModel)] = "modalForm.sendOption"/>
                         Post immediately
@@ -191,7 +192,7 @@
 
             @if (modalForm.sendOption === 'schedule'){
                 <div class = "form-group">
-                    <label for = "scheduleFor">Scheduled date &amp; time</label>
+                    <label for = "scheduledFor">Scheduled date &amp; time</label>
                     <input id = "scheduledFor" type = "datetime-local" [(ngModel)] = "modalForm.scheduledFor"/>
                 </div>
             }
