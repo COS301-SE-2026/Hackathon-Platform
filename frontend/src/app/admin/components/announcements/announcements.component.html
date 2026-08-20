@@ -113,7 +113,7 @@
                             </div>
                             <p class = "announcement-message">{{a.message}}</p>
                             <div class = "announcement-meta">
-                                <span class = "meta-item"><i class = "pi pi-users"></i>{{ a.audience === 'ALL' ? 'All participants' : (a.audience === 'TEAMS' ? 'Registered teams' : 'Judges & mentors') }}</span>
+                                <span class = "meta-item"><i class = "pi pi-users"></i>{{ a.audience === 'ALL' ? 'All participants' : (a.audience === 'TEAMS' ? 'Registered teams' : 'Mentors') }}</span>
                                 @if (a.status === 'PUBLISHED'){
                                     <span class = "meta-item"><i class = "pi pi-check-circle"></i>Posted {{a.publishedAt}}</span>
                                 }
@@ -141,5 +141,40 @@
             }
         </div>
     }
-
+    <div class = "about-levels-card">
+        <span class = "about-levels-icon"><i class = "pi pi-info-circle"></i></span>
+    </div>
+    <p class = "about-levels-title">About Announcements</p>
+    <p class = "about-levels-text">Announcements notify every participant, team, or judge and assigned to this hackathon. Pinned announcements always appear first, and scheduled announcements post automatically at the chosen time.</p>
 </div>
+</div>
+</main>
+</div>
+
+@if (showAnnouncementModal){
+    <div class = "modal-overlay" (click) = "closeModal()" (keydown.escape)="closeModal()" tabindex="-1">
+        <div class = "modal-card" (click) = "$event.stopPropagation()" (keydown.escape) = "$event.stopPropagation()">
+            <h2 class = "modal-title">{{editingAnnouncement ? 'Edit Announcement' : 'New Announcement'}}</h2>
+
+            @if (modalError){
+                <p class = "error-banner">{{modalError}}</p>
+            }
+            <div class = "form-group">
+                <label for = "announcementTitle">Title</label>
+                <input id = "announcementTitle" type = "text" [(ngModel)] = "modalForm.title" placeholder = "e.g. Level 3 now open"/>
+            </div>
+            <div class = "form-group">
+                <label for = "announcementMessage">Message</label>
+                <textarea id = "announcementMessage" rows = "4" [(ngModel)] = "modalForm.message" placeholder = "What do you want to tell participants?"></textarea>
+            </div>
+            <div class = "form-group">
+                <label for = "announcementAudience">Audience</label>
+                <select id = "announcementAudience"  [(ngModel)] = "modalForm.audience">
+                    <option value="ALL">All participants</option>
+                    <option value="TEAMS">Registered teams</option>
+                    <option value="MENTORS">Mentors</option>
+            </div>
+
+        </div>
+    </div>
+}
