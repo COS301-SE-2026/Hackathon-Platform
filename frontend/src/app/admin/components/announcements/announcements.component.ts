@@ -95,4 +95,26 @@ export class AnnouncementsComponent implements OnInit{
         this.loadAnnouncements();
     }
 
+    private loadHackathonSummary(): void {
+        this.hackathonService.getHackathon(this.hackathonId).subscribe ({
+            next: (hackathon) =>{
+                this.hackathonName = hackathon.name;
+                this.hackathonDescription = (hackathon as any).description || '';
+                this.levelsCount = (hackathon as any).levelsCount || 0;
+                this.eventsCount = (hackathon as any).eventsCount || 0;
+                this.participantsCount = (hackathon as any).participantsCount || 0;
+                this.change.markForCheck();
+            },
+            error: () => {
+                this.change.markForCheck();
+            }
+        });
+    }
+
+    loadAnnouncements(): void{
+        this.isLoading = true;
+        this.errorMessage = '';
+        console.log('Loading announcements for hackathon:',this,this.hackathonId);
+        this.isLoading = false;
+    }
 }
