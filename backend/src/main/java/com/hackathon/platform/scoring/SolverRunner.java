@@ -51,28 +51,28 @@ public class SolverRunner {
       pythonCommand.add(levelInput != null ? levelInput.toAbsolutePath().toString() : "");
       pythonCommand.add(levelId != null ? levelId.toString() : "");
 
-      // Wrap in a shell so we can apply ulimits
-      List<String> command;
-      if (isUnixLike()){
-        command = new ArrayList<>();
-        command.add("/bin/sh");
-        command.add("-c");
-        command.add(
-            "ulimit -v "
-                + (solverConfig.getMemoryLimitMb() * 1024L)
-                + " -t "
-                + solverConfig.getCpuLimitSeconds()
-                + "; exec \"$@\"");
-        command.add("solver-run");
-        command.addAll(pythonCommand);  
+      // Wrap in a shell so we can apply ulimits. Temp commented out and added pythonCommand straight to command until we see deployment
+      List<String> command = pythonCommand;
+      // if (isUnixLike()){
+      //   command = new ArrayList<>();
+      //   command.add("/bin/sh");
+      //   command.add("-c");
+      //   command.add(
+      //       "ulimit -v "
+      //           + (solverConfig.getMemoryLimitMb() * 1024L)
+      //           + " -t "
+      //           + solverConfig.getCpuLimitSeconds()
+      //           + "; exec \"$@\"");
+      //   command.add("solver-run");
+      //   command.addAll(pythonCommand);  
           
 
-      } else {
-        logger.warn(
-          "Non-Unix OS detected - running solver without ulimit-based CPU/memory limits");
-        command = pythonCommand;
+      // } else {
+      //   logger.warn(
+      //     "Non-Unix OS detected - running solver without ulimit-based CPU/memory limits");
+      //   command = pythonCommand;
 
-      }
+      // }
 
 
       ProcessBuilder builder = new ProcessBuilder(command);
@@ -178,10 +178,10 @@ public class SolverRunner {
     }
   }
 
-  private boolean isUnixLike() {
-    String os = System.getProperty("os.name", "").toLowerCase();
-    return !os.contains("win");
-  }
+  // private boolean isUnixLike() {
+  //   String os = System.getProperty("os.name", "").toLowerCase();
+  //   return !os.contains("win");
+  // }
 
   private String truncate(String text, int maxLen) {
     return text.length() <= maxLen ? text : text.substring(0, maxLen) + "...";

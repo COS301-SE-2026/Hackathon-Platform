@@ -31,13 +31,15 @@ public class SolverExecutionConfig {
   @Value("${scoring.solver.allowed-env-keys:PATH,HOME,LANG,LC_ALL,SystemRoot}")
   private String allowedEnvKeysRaw = "PATH,HOME,LANG,LC_ALL,SystemRoot";
 
-  /** Max address space the solver may allocate */
-  @Value("${scoring.solver.memory-limit-mb:512}")
-  private int memoryLimitMb = 512;
+  //temporary commented out until deployment confirmation
 
-  /** Max CPU time in seconds that the solver process may consume*/
-  @Value("${scoring.solver.cpu-limit-seconds:30}")
-  private int cpuLimitSeconds = 30;
+  // /** Max address space the solver may allocate */
+  // @Value("${scoring.solver.memory-limit-mb:512}")
+  // private int memoryLimitMb = 512;
+
+  // /** Max CPU time in seconds that the solver process may consume*/
+  // @Value("${scoring.solver.cpu-limit-seconds:30}")
+  // private int cpuLimitSeconds = 30;
 
   public List<String> getAllowedEnvKeys(){
     return Arrays.stream(allowedEnvKeysRaw.split(","))

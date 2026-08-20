@@ -34,8 +34,8 @@ class SolverRunnerTest {
     setField(config, "workDir", tempDir.resolve("scratch").toString());
     setField(config, "maxOutputBytes", 1024 * 1024);
     setField(config, "allowedEnvKeysRaw", "PATH,HOME,LANG,LC_ALL,SystemRoot");
-    setField(config, "memoryLimitMb", 512);
-    setField(config, "cpuLimitSeconds", 30);
+    // setField(config, "memoryLimitMb", 512);
+    // setField(config, "cpuLimitSeconds", 30);
 
     solverRunner = new SolverRunner(config);
 
@@ -191,35 +191,35 @@ class SolverRunnerTest {
 
   }
 
-  @Test
-  void run_thatExceedsMemoryLimit_isKilledOnUnixOrSucceedsOnWindowsFallback() throws IOException{
-    SolverExecutionConfig lowMemConfig = new SolverExecutionConfig();
-    setField(lowMemConfig, "timeoutSeconds", 5);
-    setField(lowMemConfig, "pythonExecutable", "python");
-    setField(lowMemConfig, "workDir", tempDir.resolve("scratch3").toString());
-    setField(lowMemConfig, "maxOutputBytes", 1024 * 1024);
-    setField(lowMemConfig, "allowedEnvKeysRaw", "PATH,HOME,LANG,LC_ALL,SystemRoot");
-    setField(lowMemConfig, "memoryLimitMb", 64);
-    setField(lowMemConfig, "cpuLimitSeconds", 30);
-    SolverRunner lowMemRunner = new SolverRunner(lowMemConfig);
+  // @Test
+  // void run_thatExceedsMemoryLimit_isKilledOnUnixOrSucceedsOnWindowsFallback() throws IOException{
+  //   SolverExecutionConfig lowMemConfig = new SolverExecutionConfig();
+  //   setField(lowMemConfig, "timeoutSeconds", 5);
+  //   setField(lowMemConfig, "pythonExecutable", "python");
+  //   setField(lowMemConfig, "workDir", tempDir.resolve("scratch3").toString());
+  //   setField(lowMemConfig, "maxOutputBytes", 1024 * 1024);
+  //   setField(lowMemConfig, "allowedEnvKeysRaw", "PATH,HOME,LANG,LC_ALL,SystemRoot");
+  //   setField(lowMemConfig, "memoryLimitMb", 64);
+  //   setField(lowMemConfig, "cpuLimitSeconds", 30);
+  //   SolverRunner lowMemRunner = new SolverRunner(lowMemConfig);
 
-    Path script =
-        writeScript(
-          "data = bytearray(500 * 1024 * 1024)\n"
-                + "print('{\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"allocated ok\"]}')");
+  //   Path script =
+  //       writeScript(
+  //         "data = bytearray(500 * 1024 * 1024)\n"
+  //               + "print('{\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"allocated ok\"]}')");
     
-    boolean windows = System.getProperty("os.name", "").toLowerCase().contains("win");
-    if (windows) {
-      SolverRunOutcome outcome = lowMemRunner.run(script, outputFile, null, 1L);
-      assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("allocated ok");
+  //   boolean windows = System.getProperty("os.name", "").toLowerCase().contains("win");
+  //   if (windows) {
+  //     SolverRunOutcome outcome = lowMemRunner.run(script, outputFile, null, 1L);
+  //     assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("allocated ok");
 
-    } else {
-      assertThatThrownBy(() -> lowMemRunner.run(script, outputFile, null, 1L))
-          .isInstanceOf(SolverExecutionException.class)
-          .hasFieldOrPropertyWithValue("errorType", "SOLVER_CRASH");
-    }
+  //   } else {
+  //     assertThatThrownBy(() -> lowMemRunner.run(script, outputFile, null, 1L))
+  //         .isInstanceOf(SolverExecutionException.class)
+  //         .hasFieldOrPropertyWithValue("errorType", "SOLVER_CRASH");
+  //   }
 
-  }
+  // }
 
 
 
