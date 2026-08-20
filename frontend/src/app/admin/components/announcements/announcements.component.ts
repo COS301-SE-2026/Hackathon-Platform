@@ -152,4 +152,24 @@ export class AnnouncementsComponent implements OnInit{
         this.showAnnouncementModal =false;
         this.editingAnnouncement = null;
     }
+
+    saveAnnouncement(): void {
+        if (!this.modalForm.title.trim()){
+            this.modalError = 'The announcement title is required';
+            return;
+        }
+        if (!this.modalForm.title.trim()){
+            this.modalError = 'The announcement message is required';
+            return;
+        }
+        if (this.modalForm.sendOption === 'schedule' && !this.modalForm.scheduledFor){
+            this.modalError = 'Please choose a date and time to schedule this announcement';
+            return;
+        }
+        this.isSaving = true;
+        this.modalError = '';
+
+        this.isSaving = false;
+        this.closeModal();
+    }
 }
