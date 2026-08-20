@@ -48,4 +48,21 @@
         </div>
     </div>
 
+    <main class = "content">
+    <div class = "page-header">
+        <div>
+            <h1>Announcements</h1>
+            <p class = "page-subtitle">Post updates and notify participants about this hackathon.</p>
+        </div>
+        <div class = "page-header-actions">
+            <button type = "button"  class = "btn-create-announcement"  (click) = "openCreateModal()">
+                + New Announcement
+            </button>
+            <div class = "search-box">
+                <input type = "text" [(ngModel)] = "searchTerm" placeholder="Search announcements..." aria-label="Search announcements"/>
+                <i class = "pi pi-search search-icon"></i>
+            </div>
+        </div>
+    </div>
+
 </div>
