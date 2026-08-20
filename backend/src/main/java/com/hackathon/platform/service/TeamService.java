@@ -91,7 +91,7 @@ public class TeamService {
         .map(
             m ->
                 teamRepository
-                    .findBy(m.getTeamId())
+                    .findById(m.getTeamId())
                     .orElseThrow(() -> new RuntimeException("Team not fund")))
         .map(this::toTeamResponse)
         .collect(Collectors.toList());
@@ -99,7 +99,7 @@ public class TeamService {
 
   public Optional<TeamResponse> getMyTeamForEvent(UUID currUser, UUID eventId) {
     List<TeamMember> members =
-        teamMemberRepository.findByUserIdAndEventId(currUser, "APPROVED", eventId);
+        teamMemberRepository.findByUserIdAndStatusAndEventId(currUser, "APPROVED", eventId);
 
     if (members.isEmpty()) {
       return Optional.empty();
