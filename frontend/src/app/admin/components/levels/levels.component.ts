@@ -39,6 +39,14 @@ export class LevelsComponent implements OnInit {
   isLoading = true;
   isSavingOrder = false;
   errorMessage = '';
+  hackathonDescription ='';
+  eventsCount = 0;
+  participantsCount = 0;
+  
+
+  get levelsCount(): number {
+    return this.levels.length;
+  }
 
   showLevelModal = false;
   showFilesModal = false;
@@ -78,6 +86,9 @@ export class LevelsComponent implements OnInit {
     this.hackathonService.getHackathon(this.hackathonId).subscribe({
       next: (hackathon) => {
         this.hackathonName = hackathon.name;
+        this.hackathonDescription = (hackathon as any).description || '';
+        this.eventsCount = (hackathon as any).eventSCount || '';
+        this.participantsCount = (hackathon as any).participantsCount|| 0 ;
         this.change.markForCheck();
       },
       error: () => {
