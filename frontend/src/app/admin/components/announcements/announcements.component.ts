@@ -172,4 +172,25 @@ export class AnnouncementsComponent implements OnInit{
         this.isSaving = false;
         this.closeModal();
     }
+
+    togglePin(announcement: AnnouncementResponse): void {
+        announcement.pinned = !announcement.pinned;
+    }
+
+    deleteAnnouncement(announcement: AnnouncementResponse): void {
+        if (!confirm(`Delete "${announcement.title}" ? This action is not reversible.`)){
+            return;
+        }
+        this.announcements = this.announcements.filter((a) => a.id !== announcement.id);
+    }
+
+    goBack(): void {
+    if (this.hackathonId){
+         this.router.navigate(['/admin/hackathons', this.hackathonId]);
+
+    }else {
+        this.router.navigate(['/admin/hackathons']);
+    }
+   
+  }
 }
