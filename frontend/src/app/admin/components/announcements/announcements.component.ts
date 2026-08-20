@@ -117,4 +117,39 @@ export class AnnouncementsComponent implements OnInit{
         console.log('Loading announcements for hackathon:',this,this.hackathonId);
         this.isLoading = false;
     }
+
+    openCreateModal(): void {
+        this.editingAnnouncement = null;
+        this.modalError = '';
+        this.modalForm = {
+            title: '',
+            message: '',
+            audience: 'ALL',
+            sendOption: 'now',
+            scheduledFor: '',
+            pinned: false,
+            notifyByEmail: true
+        };
+        this.showAnnouncementModal = true;
+    }
+
+    openEditModal(announcement: AnnouncementResponse): void {
+        this.editingAnnouncement = announcement;
+        this.modalError = '';
+        this.modalForm = {
+            title: announcement.title,
+            message: announcement.message,
+            audience: announcement.audience,
+            sendOption: announcement.status === 'SCHEDULED'?'schedule' : 'now',
+            scheduledFor: announcement.scheduledFor || '',
+            pinned: announcement.pinned,
+            notifyByEmail: true
+
+        };
+        this.showAnnouncementModal =true;
+    }
+    closeModal():void {
+        this.showAnnouncementModal =false;
+        this.editingAnnouncement = null;
+    }
 }
