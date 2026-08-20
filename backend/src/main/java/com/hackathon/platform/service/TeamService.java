@@ -114,10 +114,10 @@ public class TeamService {
 
   /** Request to join a team by creating a pending membership. */
   @Transactional
-  public void requestToJoinTeam(UUID teamId, UUID currentUserId, String regKey) {
+  public void requestToJoinTeam(UUID teamId, UUID currentUserId) {
     Team team =
         teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
-    joinTeamInternal(team, currentUserId, regKey);
+    joinTeamInternal(team, currentUserId);
   }
 
   @Transactional
@@ -126,10 +126,10 @@ public class TeamService {
         teamRepository
             .findByJoinCode(normalizeJoinCode(joinCode))
             .orElseThrow(() -> new RuntimeException("No team found for that join code"));
-    joinTeamInternal(team, currUser, regKey);
+    joinTeamInternal(team, currUser);
   }
 
-  private void joinTeamInternal(Team team, UUID currUser, String regKey) {
+  private void joinTeamInternal(Team team, UUID currUser) {
     if (!"ACTIVE".equals(team.getStatus())) {
       throw new RuntimeException("Team isnt active");
     }
@@ -139,7 +139,7 @@ public class TeamService {
             .findById(team.getEventId())
             .orElseThrow(() -> new RuntimeException("Event does not exist"));
     assertEventAcceptsRegistrations(event);
-    assertRegistrationKeyMatches(event, regKey);
+    assertUserIsRegisteredForEvent(event.getEventId(), currUser);
 
     if (teamMemberRepository.findByTeamIdAndUserId(team.getTeamId(), currUser).isPresent()) {
       throw new RuntimeException("You already requested or are a member for this team");
@@ -197,7 +197,7 @@ public class TeamService {
             "Youre already an approved member for another team for this event");
       }
 
-      long currSize = teamRepository.countByTeamIdAndStatus(teamId, "APPROVED");
+      long currSize = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
       if (currSize >= event.getTeamSizeLimit()) {
         throw new RuntimeException("Team is full");
       }
@@ -292,17 +292,6 @@ public class TeamService {
   private void assertEventAcceptsRegistrations(Event event) {
     if ("COMPLETED".equals(event.getStatus()) || "CANCELLED".equals(event.getStatus())) {
       throw new RuntimeException("This event is no longer accepting registrations");
-    }
-  }
-
-  private void assertRegistrationKeyMatches(Event event, String suppliedKey) {
-    if (!"PRIVATE".equals(event.getVisibility())) {
-      return;
-    }
-    if (suppliedKey == null
-        || suppliedKey.isBlank()
-        || !suppliedKey.equals(event.getRegistrationKey())) {
-      throw new RuntimeException("A valid registration key is required for this event");
     }
   }
 
