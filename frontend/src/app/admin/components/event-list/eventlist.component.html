@@ -38,6 +38,7 @@
         </div>
       </div>
     </div>
+    </div>
 
     <div class = "hackathon-tabs">
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
@@ -58,7 +59,7 @@
       </p>
     </div>
     @if (isHackathonScoped){
-      <button type = "button" class = "btn-create-event" (click) = "navigateToCreateEvent()">
+      <button type = "button" class = "btn-create-event" (click) = "navigateToCreateEvents()">
         + Create Event
       </button>
     }
@@ -115,4 +116,4 @@
     </div>
   } 
 </main>
-      </div>
+</div>
