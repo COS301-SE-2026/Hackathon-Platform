@@ -1,0 +1,12 @@
+<label [for]="id" class="sr-only">{{ label }}</label>
+
+<div class="dropdown">
+  <select [id]="id" [value]="value" [disabled]="disabled" (change)="onSelectionChange($event)"
+  >
+    @for (option of options; track option) {
+      <option [value]="option">{{ option }}</option>
+    }
+  </select>
+
+  <i class="pi pi-chevron-down dropdown-icon" aria-hidden="true"></i>
+</div>

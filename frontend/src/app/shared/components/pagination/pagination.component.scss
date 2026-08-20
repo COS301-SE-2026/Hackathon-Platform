@@ -1,0 +1,98 @@
+.pagination {
+  width: 100%;
+  display: flex;
+  
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+
+:host ::ng-deep .pagination .p-paginator {
+  display: flex;
+
+  align-items: center;
+  
+  justify-content: center;
+
+  gap: var(--space-2);
+
+  padding: 0;
+
+  background-color: transparent;
+  border: none;
+}
+
+
+:host ::ng-deep .pagination .p-paginator-page, :host ::ng-deep .pagination .p-paginator-prev, :host ::ng-deep .pagination .p-paginator-next {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-md);
+
+  background-color: var(--white);
+  color: var(--dark-navy);
+
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+
+  transition: background-color var(--duration-fast) var(--easing-standard), border-color var(--duration-fast) var(--easing-standard), color var(--duration-fast) var(--easing-standard);
+}
+
+
+:host ::ng-deep .pagination .p-paginator-page:not(.p-disabled):hover, :host ::ng-deep .pagination .p-paginator-prev:not(.p-disabled):hover, :host ::ng-deep .pagination .p-paginator-next:not(.p-disabled):hover {
+  background-color: var(--bright-blue-bg);
+  border-color: var(--bright-blue);
+  color: var(--bright-blue);
+}
+
+
+:host ::ng-deep .pagination .p-paginator-page.p-paginator-page-selected {
+  background-color: var(--bright-blue);
+
+  border-color: var(--bright-blue);
+
+  color: var(--white);
+
+  font-weight: var(--font-weight-semibold);
+}
+
+
+:host ::ng-deep .pagination .p-paginator-prev.p-disabled, :host ::ng-deep .pagination .p-paginator-next.p-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+.pagination-summary {
+  font-size: var(--font-size-small);
+
+  font-weight: var(--font-weight-medium);
+
+  line-height: var(--line-height-small);
+
+  color: var(--dark-gray)
+  ;
+  text-align: center;
+}
+
+
+@media (max-width: 767px) {
+  :host ::ng-deep .pagination .p-paginator {
+    gap: var(--space-1);
+  }
+
+  :host ::ng-deep .pagination .p-paginator-page,:host ::ng-deep .pagination .p-paginator-prev, :host ::ng-deep .pagination .p-paginator-next {
+    width: 32px;
+
+    height: 32px;
+  }
+}
