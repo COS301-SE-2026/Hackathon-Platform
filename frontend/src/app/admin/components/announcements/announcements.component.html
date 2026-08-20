@@ -87,4 +87,59 @@
         <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'DRAFT'" (click) = "statusFilter = 'DRAFT'">Drafts</button>
     </div>
 
+    @if (errorMessage){
+        <div class = "error-banner">{{errorMessage}}</div>
+    }
+    @if (isLoading){
+        <div class = "empty-state">Loading...</div>
+    } @else {
+        <div class = "announcements-list">
+            @if (filteredAnnouncements.length === 0){
+                <div class = "empty-state">
+                    <span class = "empty-state-icon"><i class = "pi pi-megaphone"></i></span>
+                    <p class = "empty-state-title">No announcements yet.</p>
+                    <p class = "empty-state-subtitle">Create your first announcement to notify participants.</p>
+                </div>
+            }@else{
+                @for (a of filteredAnnouncements; track a.id){
+                    <div class = "announcement-card">
+                        <div class = "announcement-main">
+                            <div class = "announcement-title-row">
+                                @if (a.pinned){
+                                    <i class = "pi pi-star-fill pin-icon" aria-label = "Pinned"></i>
+                                }
+                                <h3 class = "announcement-title">{{ a.title}}</h3>
+                                <span class = "status-badge" [ngClass] = "a.status.toLowerCase()">{{a.status | titleCase}}</span>
+                            </div>
+                            <p class = "announcement-message">{{a.message}}</p>
+                            <div class = "announcement-meta">
+                                <span class = "meta-item"><i class = "pi pi-users"></i>{{ a.audience === 'ALL' ? 'All participants' : (a.audience === 'TEAMS' ? 'Registered teams' : 'Judges & mentors') }}</span>
+                                @if (a.status === 'PUBLISHED'){
+                                    <span class = "meta-item"><i class = "pi pi-check-circle"></i>Posted {{a.publishedAt}}</span>
+                                }
+                                @if (a.status === 'SCHEDULED'){
+                                    <span class = "meta-item"><i class = "pi pi-clock"></i>Scheduled for {{a.scheduledFor}}</span>
+                                }
+                                @if (a.status === 'DRAFT'){
+                                    <span class = "meta-item"><i class = "pi pi-file-edit"></i>Last edited {{a.createdAt}}</span>
+                                }
+                            </div>
+                        </div>
+                        <div class = "announcement-actions">
+                            <button type = "button" class = "icon-btn" [class.icon-btn-active] = "a.pinned" aria-label = "Pin announcement" (click) = "togglePin(a)">
+                                <i class = "pi" [ngClass] = "a.pinned ? 'pi-star-fill' : 'pi-star'"></i>
+                            </button>
+                            <button type = "button" class = "icon-btn icon-btn-edit" aria-label = "Edit announcement" (click) = "openEditModal(a)">
+                                <i class =  "pi pi-pencil"></i>
+                            </button>
+                            <button type = "button" class = "icon-btn icon-btn-delete"  aria-label = "Delete announcement" (click) = "deleteAnnouncement(a)">
+                                <i class = "pi pi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+
 </div>
