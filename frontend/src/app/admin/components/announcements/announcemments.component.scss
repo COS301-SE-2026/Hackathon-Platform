@@ -1,0 +1,148 @@
+@use "../../shared/admin-nav" as nav;
+
+:host{
+    display: block;
+    font-family: 'Inter', -apple-system, sans-serif;
+
+}
+.page{
+    min-height: 100vh;
+    background-color: #f4f6f9;
+}
+
+@include nav.admin-nav-chrome;
+
+    .back-btn{
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: none;
+        border: none;
+        color:#425066;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 8px 0;
+        font-family: inherit;
+        transition: color 0.15s;
+
+        i{
+            font-size: 0.85rem;
+        }
+
+        &:hover{
+            color:#146a9d;
+            text-decoration: underline;
+        }
+    }
+
+.hackathon-header {
+    max-width: 1180px;
+    margin: 12px auto 20px;
+    padding : 24px 28px;
+    background-color: #ffffff;
+    border: 1px solid #e7eaf0;
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(19, 25, 45, 0.04);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+
+}
+
+.hackathon-header-info{
+    h1{
+        margin: 0;
+        font-size: 1.65rem;
+        font-weight: 700;
+        color:#13192d;
+        letter-spacing: -0.01em;
+    }
+}
+
+.hackathon-header-subtitle{
+    margin: 4px 0 0 ;
+    color:#6b7588;
+    font-size: 0.9rem;
+}
+
+.hackathon-header-stats{
+    display: flex;
+    align-items: center;
+    gap: 36px;
+}
+
+.stat-item{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    i{
+        font-size: 1.15rem;
+        color:#13192d;
+    }
+}
+
+.stat-item-text{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+.stat-value{
+    font-size: 1.05rem;
+    font-weight: 700;
+    color:#13192d;
+}
+
+.stat-label{
+    font-size: 0.78rem;
+    color: #8089a0;
+}
+
+.event-subnav{
+    max-width: 1180px;
+    margin: 0 auto 24px;
+    background-color: #ffffff;
+    border: 1px solid #e7eaf0;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(19, 25, 45, 0.04);
+    padding: 0 24px;
+}
+
+.event-subnav-inner{
+    display: flex;
+    align-items: center;
+}
+.event-tabs{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+
+    a{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 16px 14px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #6b7588;
+        text-decoration: none;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+        transition: color 0.15s, border-color 0.15s;
+
+        i{
+            font-size: 0.9rem;
+        }
+
+        &:hover{
+            color: #3a4357;
+        }
+        &.active{
+            color: #1983c2;
+            border-bottom-color: #1983c2;
+        }
+    }
+}
