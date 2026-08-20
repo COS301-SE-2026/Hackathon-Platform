@@ -146,3 +146,32 @@
         }
     }
 }
+.content{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px 60px;
+}
+
+.page-header{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 26px;
+
+    h1{
+        font-size: 1.55rem;
+        font-weight: 700;
+        color:#13192d;
+        letter-spacing: -0.01em;
+    }
+    .page-subtitle{
+        color:#6b7588;
+        font-size: 0.9rem;
+        margin-top: 3px;
+    }
+}
+.page-header-actions{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
