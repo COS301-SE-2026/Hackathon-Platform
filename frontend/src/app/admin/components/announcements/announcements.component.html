@@ -175,6 +175,45 @@
                     <option value="MENTORS">Mentors</option>
             </div>
 
+            <div class = "form-group">
+                <label>Delivery</label>
+                <div class = "radio-option">
+                    <label class = "radio-option">
+                        <input type = "radio" name ="sendOption" value = "now" [(ngModel)] = "modalForm.sendOption"/>
+                        Post immediately
+                    </label>
+                    <label class = "radio-option">
+                        <input type = "radio" name ="sendOption" value = "schedule" [(ngModel)] = "modalForm.sendOption"/>
+                        Schedule for later
+                    </label>
+                </div>
+            </div>
+
+            @if (modalForm.sendOption === 'schedule'){
+                <div class = "form-group">
+                    <label for = "scheduleFor">Scheduled date &amp; time</label>
+                    <input id = "scheduledFor" type = "datetime-local" [(ngModel)] = "modalForm.scheduledFor"/>
+                </div>
+            }
+
+            <div class = "checkbox-group">
+                <label class = "checkbox-option">
+                    <input type = "checkbox" [(ngModel)] = "modalForm.pinned"/>
+                    Pin to top of the list
+                </label>
+
+                <label class = "checkbox-option">
+                    <input type = "checkbox" [(ngModel)] = "modalForm.notifyByEmail"/>
+                    Notify participants by email
+                </label>
+            </div>
+
+            <div class = "modal-actions">
+                <button class = "btn-cancel" (click) = "closeModal()" [disabled] = "isSaving">Cancel</button>
+                <button class = "btn-save" (click) = "saveAnnouncement()" [disabled] = "isSaving">
+                    {{isSaving ? 'Saving...' : (editingAnnouncement ? 'Save changes': (modalForm.sendOption === 'schedule' ? 'Schedule announcement' : 'Post announcement'))}}
+                </button>
+            </div>
         </div>
     </div>
 }
