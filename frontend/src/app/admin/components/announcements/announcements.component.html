@@ -80,4 +80,11 @@
         </div>
     </div>
 
+    <div class = "filter-tabs">
+        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'ALL'" (click) = "statusFilter = 'ALL'">All</button>
+        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'PUBLISHED'" (click) = "statusFilter = 'PUBLISHED'">Published</button>
+        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'SCHEDULED'" (click) = "statusFilter = 'SCHEDULED'">Scheduled</button>
+        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'DRAFT'" (click) = "statusFilter = 'DRAFT'">Drafts</button>
+    </div>
+
 </div>
