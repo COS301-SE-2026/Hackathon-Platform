@@ -1,22 +1,52 @@
 <div class = "page">
 
   <div class = "back-navigation">
-    <button class = "btn-secondary" (click) = "goBack()">Back to Hackathon</button>
+    <button class = "back-btn" (click) = "goBack()">
+      <i class = "pi pi-arrow-left"></i>
+      Back to Hackathons</button>
   </div>
-  <div class = "event-subnav">
-    <div class = "event-subnav-inner">
-      <span class = "event-tag">{{ hackathonName || 'Loading...' }}</span>
-      <div class ="event-tabs">
-        <a routerLink = "Overview" routerLinkActive = "active">Overview &amp; live ops</a>
-        <a routerLink = "Levels" routerLinkActive = "active">Levels &amp; files</a>
-        <a routerLink = "Solver" routerLinkActive = "active">Solver</a>
-        <a routerLink = "Registrations" routerLinkActive = "active">Registrations</a>
-        <a routerLink = "Teams" routerLinkActive = "active">Teams</a>
-        <a routerLink = "Submissions" routerLinkActive = "active">Submissions</a>   
-        <a routerLink = "Analytics" routerLinkActive = "active">Analytics</a>
-      </div>
+
+  <div class = "hackathon-header">
+        <div class = "hackathon-header-info">
+            <h1>{{hackathonName || 'Loading...'}}</h1>
+            <p class = "hackathon-header-subtitle">{{hackathonDescription}}</p>
+        </div>
+        <div class = "hackathon-header-stats">
+            <div class = "stat-item">
+                <i class = "pi pi-clone"></i>
+                <div class = "stat-item-text">
+                    <span class = "stat-value">{{levelsCount}}</span>
+                    <span class = "stat-label">Levels</span>
+                </div>
+            </div>
+            <div class = "stat-item">
+                <i class = "pi pi-calendar"></i>
+                <div class = "stat-item-text">
+                    <span class = "stat-value">{{eventsCount}}</span>
+                    <span class = "stat-label">Events</span>
+                </div>
+            </div>
+            <div class = "stat-item">
+                <i class = "pi pi-users"></i>
+                <div class = "stat-item-text">
+                    <span class = "stat-value">{{participantsCount | number}}</span>
+                    <span class = "stat-label">Participants</span>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>  
+
+    <div class = "event-subnav">
+        <div class = "event-subnav-inner">
+            <div class = "event-tabs">
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/announcements" routerLinkActive = "active"><i class = "pi pi-megaphone"></i>Announcements</a>
+            </div>
+        </div>
+    </div>
+
 
   <main class = "content">
     <div class = "page-header">
