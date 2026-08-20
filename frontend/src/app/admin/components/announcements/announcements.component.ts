@@ -68,6 +68,31 @@ export class AnnouncementsComponent implements OnInit{
     get filteredAnnouncements(): AnnouncementResponse[]{
         const term = this.searchTerm.trim().toLowerCase();
         return this.announcements
+        .filter((a) => this.statusFilter === 'ALL' || a.status === this.statusFilter)
+        .filter((a) => !term || a.title.toLowerCase().includes(term) || a.message.toLowerCase().includes(term))
+        .sort((a,b) => Number(b.pinned)- Number(a.pinned));
+    }
+
+    get publishedCount(): number {
+        return this.announcements.filter((a)=>a.status === 'PUBLISHED').length;
+    }
+    get scheduledCount(): number {
+        return this.announcements.filter((a)=>a.status === 'SCHEDULED').length;
+    }
+    get draftCount(): number {
+        return this.announcements.filter((a)=>a.status === 'DRAFT').length;
+    }
+
+    ngOnInit(): void {
+        this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
+
+        if (!this.hackathonId){
+            this.errorMessage = 'There was no hackathon ID provided';
+            this.isLoading = false;
+            return;
+        }
+        this.loadHackathonSummary();
+        this.loadAnnouncements();
     }
 
 }
