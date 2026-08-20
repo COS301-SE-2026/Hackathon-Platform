@@ -59,7 +59,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
             COALESCE(best.score, CAST(0 AS NUMERIC)) AS "bestScore",
             best.submitted_at AS "lastScoredAt"
         FROM teams team
-            LEFT JOIN BestSubmissions best ON team.team_id = best.team_id WHERE team.event_id = :eventId AND team.status = 'ACTIVE' ORDER BY "bestScore" DESC
+            LEFT JOIN BestSubmissions best ON team.team_id = best.team_id WHERE team.event_id = :eventId AND team.status = 'ACTIVE' ORDER BY "bestScore" DESC, "lastScoredAt" ASC NULLS LAST
         """,
       nativeQuery = true)
   List<LeaderboardEntry> findLeaderboardByEventIdAndLevelId(

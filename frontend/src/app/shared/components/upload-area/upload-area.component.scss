@@ -1,0 +1,112 @@
+.upload-area {
+  position: relative;
+  width: 100%;
+  background-color: var(--white);
+  border: 1px solid var(--teal);
+  border-radius: var(--radius-md);
+}
+
+.upload-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 88px;
+  padding: var(--space-4) var(--space-6);
+  cursor: pointer;
+}
+
+.upload-input {
+  display: none;
+}
+
+.upload-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  color: var(--teal);
+  border: 1px solid var(--teal);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-h3);
+}
+
+.upload-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.upload-action {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.upload-browse {
+  color: var(--bright-blue);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+.upload-drag-drop {
+  color: var(--dark-gray);
+  font-size: var(--font-size-small);
+}
+
+.upload-help {
+  color: var(--dark-gray);
+  font-size: var(--font-size-small);
+}
+
+.upload-file {
+  min-height: 24px;
+  color: var(--teal);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+}
+
+.upload-file-empty {
+  color: var(--dark-gray);
+  font-weight: var(--font-weight-regular);
+}
+
+.upload-remove {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--dark-gray);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+}
+
+.upload-area-dragging {
+  border-color: var(--bright-blue);
+  background-color: var(--bright-blue-bg);
+}
+
+.upload-area-disabled {
+  background-color: var(--light-gray);
+}
+
+.upload-area-disabled .upload-content {
+  cursor: not-allowed;
+}
+
+.upload-area-disabled .upload-icon {
+  color: var(--mid-gray);
+  border-color: var(--mid-gray);
+}

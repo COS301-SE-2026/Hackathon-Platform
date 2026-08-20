@@ -1,0 +1,16 @@
+:host {
+  --p-toast-width: 360px;
+  --p-toast-border-radius: var(--radius-md);
+
+  --p-toast-success-background: var(--green-bg);
+  --p-toast-success-border-color: var(--green);
+  --p-toast-success-color: var(--green);
+
+  --p-toast-info-background: var(--bright-blue-bg);
+  --p-toast-info-border-color: var(--bright-blue);
+  --p-toast-info-color: var(--bright-blue);
+
+  --p-toast-error-background: var(--red-bg);
+  --p-toast-error-border-color: var(--red);
+  --p-toast-error-color: var(--red);
+}
