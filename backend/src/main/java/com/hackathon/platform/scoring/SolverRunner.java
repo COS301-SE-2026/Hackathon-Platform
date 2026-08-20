@@ -51,7 +51,8 @@ public class SolverRunner {
       pythonCommand.add(levelInput != null ? levelInput.toAbsolutePath().toString() : "");
       pythonCommand.add(levelId != null ? levelId.toString() : "");
 
-      // Wrap in a shell so we can apply ulimits. Temp commented out and added pythonCommand straight to command until we see deployment
+      // Wrap in a shell so we can apply ulimits. Temp commented out and added pythonCommand
+      // straight to command until we see deployment
       List<String> command = pythonCommand;
       // if (isUnixLike()){
       //   command = new ArrayList<>();
@@ -64,8 +65,7 @@ public class SolverRunner {
       //           + solverConfig.getCpuLimitSeconds()
       //           + "; exec \"$@\"");
       //   command.add("solver-run");
-      //   command.addAll(pythonCommand);  
-          
+      //   command.addAll(pythonCommand);
 
       // } else {
       //   logger.warn(
@@ -74,17 +74,16 @@ public class SolverRunner {
 
       // }
 
-
       ProcessBuilder builder = new ProcessBuilder(command);
       builder.directory(tempDir.toFile());
       builder.redirectErrorStream(false);
 
-      //Deny-by-default
+      // Deny-by-default
       builder.environment().clear();
-      for (String key : solverConfig.getAllowedEnvKeys()){
+      for (String key : solverConfig.getAllowedEnvKeys()) {
         String value = System.getenv(key);
         if (value != null) {
-          builder.environment().put(key,value);
+          builder.environment().put(key, value);
         }
       }
 

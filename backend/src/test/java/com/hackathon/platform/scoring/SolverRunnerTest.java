@@ -161,7 +161,7 @@ class SolverRunnerTest {
   }
 
   @Test
-  void run_doesNotExposeUnallowedEnvironmentVariables_toSolverProcess() throws IOException{
+  void run_doesNotExposeUnallowedEnvironmentVariables_toSolverProcess() throws IOException {
 
     Path script =
         writeScript(
@@ -171,24 +171,23 @@ class SolverRunnerTest {
                 + "leaked = sorted(k for k in os.environ if k.upper() not in allowed_upper)\n"
                 + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", "
                 + "\"messages\": [\"leaked=\" + \",\".join(leaked)]}))");
-    
+
     SolverRunOutcome outcome = solverRunner.run(script, outputFile, null, 1L);
 
     assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("leaked=");
   }
 
   @Test
-  void run_stillExposesAllowListedEnvironmentVariables_toSolverProcess() throws IOException{
-    Path script = 
+  void run_stillExposesAllowListedEnvironmentVariables_toSolverProcess() throws IOException {
+    Path script =
         writeScript(
             "import os, json\n"
                 + "present = 'PATH' in os.environ\n"
                 + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"pathPresent=\" + str(present)]}))");
-    
+
     SolverRunOutcome outcome = solverRunner.run(script, outputFile, null, 1L);
 
     assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("pathPresent=True");
-
   }
 
   // @Test
@@ -206,8 +205,9 @@ class SolverRunnerTest {
   //   Path script =
   //       writeScript(
   //         "data = bytearray(500 * 1024 * 1024)\n"
-  //               + "print('{\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"allocated ok\"]}')");
-    
+  //               + "print('{\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"allocated
+  // ok\"]}')");
+
   //   boolean windows = System.getProperty("os.name", "").toLowerCase().contains("win");
   //   if (windows) {
   //     SolverRunOutcome outcome = lowMemRunner.run(script, outputFile, null, 1L);
@@ -220,8 +220,6 @@ class SolverRunnerTest {
   //   }
 
   // }
-
-
 
   private Path writeScript(String body) throws IOException {
     Path script = Files.createTempFile(tempDir, "solver-", ".py");

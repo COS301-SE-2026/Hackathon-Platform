@@ -31,7 +31,7 @@ public class SolverExecutionConfig {
   @Value("${scoring.solver.allowed-env-keys:PATH,HOME,LANG,LC_ALL,SystemRoot}")
   private String allowedEnvKeysRaw = "PATH,HOME,LANG,LC_ALL,SystemRoot";
 
-  //temporary commented out until deployment confirmation
+  // temporary commented out until deployment confirmation
 
   // /** Max address space the solver may allocate */
   // @Value("${scoring.solver.memory-limit-mb:512}")
@@ -41,11 +41,10 @@ public class SolverExecutionConfig {
   // @Value("${scoring.solver.cpu-limit-seconds:30}")
   // private int cpuLimitSeconds = 30;
 
-  public List<String> getAllowedEnvKeys(){
+  public List<String> getAllowedEnvKeys() {
     return Arrays.stream(allowedEnvKeysRaw.split(","))
         .map(String::strip)
         .filter(s -> !s.isEmpty())
         .toList();
   }
-
 }
