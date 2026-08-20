@@ -36,6 +36,7 @@ export class AnnouncementsComponent implements OnInit{
      private readonly router = inject(Router);
      private readonly route = inject(ActivatedRoute);
      private readonly change = inject(ChangeDetectorRef);
+     private readonly hackathonService = inject(HackathonService);
 
     hackathonId = '';
     hackathonName ='';
@@ -114,7 +115,7 @@ export class AnnouncementsComponent implements OnInit{
     loadAnnouncements(): void{
         this.isLoading = true;
         this.errorMessage = '';
-        console.log('Loading announcements for hackathon:',this,this.hackathonId);
+        console.log('Loading announcements for hackathon:',this.hackathonId);
         this.isLoading = false;
     }
 
@@ -158,7 +159,7 @@ export class AnnouncementsComponent implements OnInit{
             this.modalError = 'The announcement title is required';
             return;
         }
-        if (!this.modalForm.title.trim()){
+        if (!this.modalForm.message.trim()){
             this.modalError = 'The announcement message is required';
             return;
         }
