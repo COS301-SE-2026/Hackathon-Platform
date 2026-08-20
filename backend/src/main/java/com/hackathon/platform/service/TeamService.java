@@ -7,10 +7,6 @@ import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.TeamMember;
 import com.hackathon.platform.model.User;
-import com.hackathon.platform.repository.EventRepository;
-import com.hackathon.platform.repository.TeamMemberRepository;
-import com.hackathon.platform.repository.TeamRepository;
-import com.hackathon.platform.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +14,11 @@ import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.hackathon.platform.repository.TeamRepository;
+import com.hackathon.platform.repository.TeamMemberRepository;
+import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.EventRegistrationRepository;
 
 /** Service for standalone team management operations. */
 @Service
@@ -29,16 +30,18 @@ public class TeamService {
   private final TeamMemberRepository teamMemberRepository;
   private final UserRepository userRepository;
   private final EventRepository eventRepo;
+  private final EventRegistrationRepository eventRegistrationRepository;
 
   public TeamService(
-      TeamRepository teamRepository,
-      TeamMemberRepository teamMemberRepository,
-      UserRepository userRepository,
-      EventRepository eventRepo) {
+          TeamRepository teamRepository,
+          TeamMemberRepository teamMemberRepository,
+          UserRepository userRepository,
+          EventRepository eventRepo, EventRegistrationRepository eventRegistrationRepository) {
     this.teamRepository = teamRepository;
     this.teamMemberRepository = teamMemberRepository;
     this.userRepository = userRepository;
     this.eventRepo = eventRepo;
+    this.eventRegistrationRepository = eventRegistrationRepository;
   }
 
   /** Create a new standalone team and add the creator as an approved leader. */
@@ -50,33 +53,35 @@ public class TeamService {
       throw new RuntimeException("Team name is required");
     }
 
-    boolean nameExists =
-        teamRepository.findAll().stream()
-            .anyMatch(team -> teamName.equalsIgnoreCase(team.getTeamName()));
-
-    if (nameExists) {
-      throw new RuntimeException("Team name already exists");
+    if(request.getEventId() == null){
+      throw new RuntimeException("Event id is required");
     }
 
-    if (!teamMemberRepository.findByUserIdAndStatus(currentUserId, "APPROVED").isEmpty()) {
-      throw new RuntimeException("You are already a member of a team");
+    Event event = eventRepo.findById(request.getEventId()).orElseThrow(() -> new RuntimeException("Event not found"));
+
+    assertEventAcceptsRegistrations(event);
+    assertUserIsRegisteredForEvent(event.getEventId(), currentUserId);
+
+    if(teamRepository.existsByEventIdAndTeamName(currentUserId, teamName)){
+      throw new RuntimeException("Team name is in use, please choose a new team name");
+    }
+
+    if(!teamMemberRepository.findByUserIdAndStatusAndEventId(currentUserId, "APPROVED", event.getEventId()).isEmpty()){
+      throw new RuntimeException("You're already part of a team for this event");
     }
 
     Team team = new Team();
     team.setTeamName(teamName);
     team.setCreatedByUserId(currentUserId);
     team.setStatus("ACTIVE");
-    team.setEventId(request.getEventId());
+    team.setEventId(event.getEventId());
 
-    Team savedTeam = teamRepository.save(team);
-
+    Team svdName = saveTeamRetryingJoinCodeCollissions(team);
     TeamMember member = new TeamMember();
-    member.setTeamId(savedTeam.getTeamId());
+    member.setTeamId(svdName.getTeamId());
     member.setUserId(currentUserId);
     member.setStatus("APPROVED");
-    teamMemberRepository.save(member);
-
-    return toTeamResponse(savedTeam);
+    return toTeamResponse(svdName);
   }
 
   /** Get the authenticated user's approved team, if they have one. */
@@ -314,5 +319,11 @@ public class TeamService {
 
   private String normalizeJoinCode(String joinCode) {
     return joinCode == null ? "" : joinCode.trim().toUpperCase();
+  }
+
+  private void assertUserIsRegisteredForEvent(UUID eventId, UUID userId){
+    if(!eventRegistrationRepository.existsByEventIdAndUserId(eventId, userId)){
+      throw new RuntimeException("You need to register for this event first");
+    }
   }
 }
