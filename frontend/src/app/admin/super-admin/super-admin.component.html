@@ -49,5 +49,48 @@
             </form>
         </div>
 
+        <div class = "panel-card">
+            <div class = "panel-header">
+                <div>
+                    <h2 class = "panel-title">Pending Approvals</h2>
+                    <p class = "panel-subtitle">Approve or reject new user registrations</p>
+                </div>
+                <span class = "pending-badge">{{pendingCount}} pending</span>
+            </div>
+            <div class = "table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (pendingApprovals.length === 0){
+                            <tr>
+                                <td colspan = "4" class = "empty-cell">No pending approvals.</td>
+                            </tr>
+                        }@else {
+                            @for (row of pendingApprovals; track row.username){
+                                <tr>
+                                    <td class = "username-cell">{{row.username}}</td>
+                                    <td>{{row.email}}</td>
+                                    <td><span class = "role-pill user">{{row.role}}</span></td>
+                                    <td>
+                                        <div class = "action-buttons">
+                                            <button type = "button" class = "btn-approve" (click) = "approveUser(row)">Approve</button>
+                                            <button type = "button" class = "btn-reject" (click) = "rejectUser(row)">Reject</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </main>
 </div>
