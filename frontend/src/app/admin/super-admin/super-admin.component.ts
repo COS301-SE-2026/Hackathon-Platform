@@ -58,4 +58,8 @@ export class SuperAdminComponent{
     createAdminError = '';
     createAdminSuccess = '';
 
+    get pendingCount(): number {
+        return this.pendingApprovals.length;
+    }
+
 }
