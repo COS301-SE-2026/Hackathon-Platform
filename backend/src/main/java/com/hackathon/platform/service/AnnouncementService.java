@@ -17,6 +17,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class AnnouncementService {
     private final AnnouncementEmailDeliveryRepository emailDeliveryRepo;
     private final UserRepository userRepo;
     private final AnnouncementAccessService announcementAccessService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public CreateAnnouncementResponse createAnnouncement(UUID eventId, UUID adminId, CreateAnnouncementRequest req) {
@@ -47,6 +49,8 @@ public class AnnouncementService {
         if (!deliveries.isEmpty()) {
             emailDeliveryRepo.saveAll(deliveries);
         }
+
+        eventPublisher.publishEvent(new AnnouncementCreatedEvent(eventId, savedMessage.getMessageId()));
 
         AnnouncementResponse announcementResponse = toResponse(savedMessage, eventId);
 
