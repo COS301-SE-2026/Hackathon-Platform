@@ -212,15 +212,7 @@ confirmRegistration(): void {
     return;
   }
 
-  if (this.selectedEvent.visibility === 'PRIVATE') {
-
-    // TODO: Backend registration with registration key
-
-  } else {
-
-    // TODO: Backend registration
-
-  }
+  // Registration needs to be connected to backend.
 }
 
 

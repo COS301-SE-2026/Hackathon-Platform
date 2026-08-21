@@ -57,9 +57,6 @@
   margin-bottom: var(--section-gap);
 }
 
-.active-event-card {
-  min-height: 321px;
-}
 
 .empty-active-card {
   display: flex;
@@ -141,6 +138,7 @@
 .active-event-card {
   width: 100%;
   display: block;
+  min-height: 321px;
 }
 
 
