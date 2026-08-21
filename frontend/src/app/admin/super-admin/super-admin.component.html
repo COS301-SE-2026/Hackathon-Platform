@@ -7,20 +7,20 @@
             <span class = "super-admin-tag">Super Admin</span>
         </div>
         <button type = "button" class ="logout-btn" (click) = "logout()">
-            <i class = "pi pi-sign-out"></i>Logout
+            <i class = "pi pi-sign-out"></i> Logout
         </button>
     </header>
 
     <main class = "super-admin-content">
         <div class = "page-header">
             <h1>User Management</h1>
-            <p class = "page-subtitle">Logged is as: <string>{{loggedInAsName}}</string></p>
+            <p class = "page-subtitle">Logged in as: <strong>{{loggedInAsName}}</strong></p>
         </div>
 
         <div class = "panel-card">
             <div class = "panel-header">
                 <div>
-                    <h2 class = "panel-title">Create AdminA Account</h2>
+                    <h2 class = "panel-title">Create Admin Account</h2>
                     <p class = "panel-subtitle">Create a new administrator login for this platform.</p>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                         <label for = "selectUser">Select User</label>
                         <select id = "selectUser" [(ngModel)] = "selectedUsername" name = "selectUser">
                             @for (user of allUsers; track user.username){
-                                <option [value] = "user.username">{{user.username}}({{user.role}})</option>
+                                <option [value] = "user.username">{{user.username}} ({{user.role}})</option>
                             }
                         </select>
                     </div>
@@ -125,7 +125,34 @@
 
                 </div>
             </div>
-        </div>
 
+            <div class = "panel-card">
+                <div class = "panel-header">
+                    <h2 class = "panel-title">All Users</h2>
+                </div>
+
+                <div class = "table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (user of allUsers; track user.username){
+                            <tr>
+                                <td class = "username-cell">{{user.username}}</td>
+                                <td>{{user.email}}</td>
+                                <td><span class = "role-pill" [ngClass] = "user.roleClass">{{user.role}}</span></td>
+                                <td><span class = "status-pill" [ngClass] = "user.status.toLowerCase()">{{user.status}}</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                    </table>
+                </div>
+            </div>
     </main>
 </div>
