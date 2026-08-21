@@ -51,7 +51,80 @@ public class EventInsightsResponse {
 
     }
 
-    
+    public UUID getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(UUID eventId) {
+        this.eventId = eventId;
+    }
+
+    public long getActiveTeams() {
+        return activeTeams;
+    }
+
+    public void setActiveTeams(long activeTeams) {
+        this.activeTeams = activeTeams;
+    }
+
+    public long getApprovedParticipants() {
+        return approvedParticipants;
+    }
+
+    public void setApprovedParticipants(long approvedParticipants) {
+        this.approvedParticipants = approvedParticipants;
+    }
+
+    public long getTotalSubmissions() {
+        return totalSubmissions;
+    }
+
+    public void setTotalSubmissions(long totalSubmissions) {
+        this.totalSubmissions = totalSubmissions;
+    }
+
+    public long getSubmissionsLastHour() {
+        return submissionsLastHour;
+    }
+
+    public void setSubmissionsLastHour(long submissionsLastHour) {
+        this.submissionsLastHour = submissionsLastHour;
+    }
+
+    public Map<String, Long> getSubmissionsByStatus() {
+        return submissionsByStatus;
+    }
+
+    public void setSubmissionsByStatus(Map<String, Long> submissionsByStatus) {
+        this.submissionsByStatus = submissionsByStatus;
+    }
+
+    public Double getErrorRate() {
+        return errorRate;
+    }
+
+    public void setErrorRate(Double errorRate) {
+        this.errorRate = errorRate;
+
+    }
+
+    public List<SubmissionRateBucket> getSubmissionRate() {
+        return submissionRate;
+    }
+
+    public void setSubmissionRate(List<SubmissionRateBucket> submissionRate) {
+        this.submissionRate = submissionRate;
+    }
+
+    public List<LevelScoreStats> getScoreDistributionByLevel() {
+        return scoreDistributionByLevel;
+    }
+
+    public void setScoreDistributionByLevel(List<LevelScoreStats> scoreDistributionByLevel) {
+        this.scoreDistributionByLevel = scoreDistributionByLevel;
+    }
+
+
 
 
 }
