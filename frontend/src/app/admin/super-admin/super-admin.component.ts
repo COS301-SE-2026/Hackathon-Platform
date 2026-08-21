@@ -42,7 +42,7 @@ export class SuperAdminComponent{
         {username: 'example3', email: 'admin1234@example.com', role:'Mentor', roleClass:'mentor',status: 'Active'}
 
     ];
-    roleOptions = ['admin','superAdmin','mentor'];
+    roleOptions = ['Admin','Super Admin','Mentor'];
     selectedUsername = this.allUsers[0]?.username??'';
     selectedRole = this.roleOptions[0];
 
@@ -89,7 +89,13 @@ export class SuperAdminComponent{
             const user = this.allUsers.find((u)=> u.username === this.selectedUsername);
             if (user){
                 user.role = this.selectedRole;
-                user.roleClass = this.selectedRole.toLowerCase() as UserRow['roleClass'];
+                const roleMap: {[key:string]: UserRow['roleClass']} = {
+                    'Admin': 'admin',
+                    'Super Admin': 'superAdmin',
+                    'Mentor':'mentor'
+
+                };
+                user.roleClass = roleMap[this.selectedRole] || 'mentor';
             }
             this.isAssigningRole = false;
             this.assignRoleMessage = `${this.selectedUsername} is now ${this.selectedRole}.`;
