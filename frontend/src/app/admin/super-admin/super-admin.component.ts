@@ -62,4 +62,39 @@ export class SuperAdminComponent{
         return this.pendingApprovals.length;
     }
 
+    approveUser(row: PendingApprovalRow): void {
+        this.pendingApprovals = this.pendingApprovals.filter((r)=> r.username !== row.username)
+        this.allUsers.push({
+            username: row.username,
+            email: row.email,
+            role: row.role,
+            roleClass: 'admin',
+            status: 'Active',
+
+        });
+    }
+
+    rejectUser(row: PendingApprovalRow): void {
+        if (!confirm(`Reject the registration for "${row.username}"?`)) return;
+        this.pendingApprovals = this.pendingApprovals.filter((r)=>r.username !== row.username);
+    }
+
+    assignRole():void {
+        if (!this.selectedUsername) return;
+
+        this.isAssigningRole = true;
+        this.assignRoleMessage ='';
+
+        setTimeout(()=>{
+            const user = this.allUsers.find((u)=> u.username === this.selectedUsername);
+            if (user){
+                user.role = this.selectedRole;
+                user.roleClass = this.selectedRole.toLowerCase() as UserRow['roleClass'];
+            }
+            this.isAssigningRole = false;
+            this.assignRoleMessage = `${this.selectedUsername} is now ${this.selectedRole}.`;
+            setTimeout(()=>(this.assignRoleMessage=''),4000);
+        },500);
+    }
 }
+
