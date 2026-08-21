@@ -72,7 +72,7 @@ public class LevelScoreStats {
     }
 
     public BigDecimal getAvgScore() {
-        return avgScoreScore;
+        return avgScore;
     }
 
     public void setAvgScore(BigDecimal avgScore) {
