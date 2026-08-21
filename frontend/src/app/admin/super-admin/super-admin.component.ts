@@ -96,5 +96,33 @@ export class SuperAdminComponent{
             setTimeout(()=>(this.assignRoleMessage=''),4000);
         },500);
     }
+
+    createAdminAccount(): void {
+        this.createAdminError ='';
+        this.createAdminSuccess = '';
+
+        if (!this.newAdmin.email.trim()){
+            this.createAdminError = 'Email is required.';
+            return;
+        }
+        if (this.newAdmin.password.length < 8){
+          this.createAdminError = 'Password must be at least 8 characters.';  
+          return;
+        }
+        if (this.newAdmin.password !== this.newAdmin.confirmPassword){
+          this.createAdminError = 'Passwords do not match.';
+          return;  
+        }
+
+        this.isCreatingAdmin = true;
+
+        setTimeout(()=>{
+            this.isCreatingAdmin = false;
+            this.createAdminSuccess =`Admin account created for ${this.newAdmin.email}.`;
+            this.newAdmin = { email: '',password:'',confirmPassword:''};
+            setTimeout(()=>(this.createAdminSuccess =''),5000);
+        },600);
+
+    }
 }
 
