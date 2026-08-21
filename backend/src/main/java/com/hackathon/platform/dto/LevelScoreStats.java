@@ -28,6 +28,55 @@ public class LevelScoreStats {
         this.minScore = minScore;
         this.maxScore = maxScore;
         this.avgScore = avgScore;
-        
+
     }
+
+    public short getLevelId() {
+        return levelId;
+    }
+
+    public void setLevelId(short levelId) {
+        this.levelId = levelId;
+    }
+
+    public String getLevelName() {
+        return levelName;
+    }
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
+    }
+
+    public long getScoredSubmissions() {
+        return scoredSubmissions;
+    }
+
+    public void setScoredSubmissions(long scoredSubmissions) {
+        this.scoredSubmissions = scoredSubmissions;
+    }
+
+    public BigDecimal getMinScore() {
+        return minScore;
+    }
+
+    public void setMinScore(BigDecimal minScore) {
+        this.minScore = minScore;
+    }
+
+    public BigDecimal getMaxScore() {
+        return maxScore;
+    }
+
+    public void setMaxScore(BigDecimal minScore) {
+        this.maxScore = maxScore;
+    }
+
+    public BigDecimal getAvgScore() {
+        return maxScore;
+    }
+
+    public void setAvgScore(BigDecimal minScore) {
+        this.maxScore = maxScore;
+    }
+
 }
