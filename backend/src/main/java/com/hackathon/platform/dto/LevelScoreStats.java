@@ -67,16 +67,16 @@ public class LevelScoreStats {
         return maxScore;
     }
 
-    public void setMaxScore(BigDecimal minScore) {
+    public void setMaxScore(BigDecimal maxScore) {
         this.maxScore = maxScore;
     }
 
     public BigDecimal getAvgScore() {
-        return maxScore;
+        return avgScoreScore;
     }
 
-    public void setAvgScore(BigDecimal minScore) {
-        this.maxScore = maxScore;
+    public void setAvgScore(BigDecimal avgScore) {
+        this.avgScore = avgScore;
     }
 
 }
