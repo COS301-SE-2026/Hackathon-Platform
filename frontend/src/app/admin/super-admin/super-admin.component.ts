@@ -124,5 +124,9 @@ export class SuperAdminComponent{
         },600);
 
     }
+    logout():void {
+        this.authService.logout();
+        this.router.navigate(['/login']);
+    }
 }
 
