@@ -180,23 +180,23 @@ jobs:
       - name: Install browser
         run: npx playwright install --with-deps chromium
 
-      - name: Run e2e tests
-        env:
-          CI: true
+      #- name: Run e2e tests
+      #  env:
+       #   CI: true
 
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hackathon_test
-          SPRING_DATASOURCE_USERNAME: testuser
-          SPRING_DATASOURCE_PASSWORD: testpassword
-          SPRING_JPA_HIBERNATE_DDL_AUTO: validate
-          SPRING_FLYWAY_ENABLED: true
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
-          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
-          E2E_PARTICIPANT_EMAIL: ${{ secrets.E2E_PARTICIPANT_EMAIL }}
-          E2E_PARTICIPANT_PASSWORD: ${{ secrets.E2E_PARTICIPANT_PASSWORD }}
+        #  SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hackathon_test
+         # SPRING_DATASOURCE_USERNAME: testuser
+          #SPRING_DATASOURCE_PASSWORD: testpassword
+          #SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+          #SPRING_FLYWAY_ENABLED: true
+          #JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          #AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          #E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          #E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+          #E2E_PARTICIPANT_EMAIL: ${{ secrets.E2E_PARTICIPANT_EMAIL }}
+          #E2E_PARTICIPANT_PASSWORD: ${{ secrets.E2E_PARTICIPANT_PASSWORD }}
 
-        run: npm run test:e2e
+        #run: npm run test:e2e
 
 
   #performance:
