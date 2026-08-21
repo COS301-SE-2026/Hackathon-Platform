@@ -16,37 +16,33 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 32px;
-    height: 72px;
-    background: linear-gradient(135deg,#0c1830 0%, #1a2a4a 100%);
-    border-bottom: 2px solid rgba(214,230,74,0.3);
+    height: 64px;
+    background-color: #0c1830;
     flex-shrink: 0;
     position: sticky;
     top:0;
     z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .topbar-left{
     display: flex;
     align-items: center;
-    flex-shrink: 0;
 }
 
 .brand{
     display:flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 0;
+    flex-direction: column;
+    line-height: 1.15;
 
 .brand-line1 {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #ffffff;
     letter-spacing: -0.01em;
 }
 
 .brand-line2 {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: 800;
     color: #d6e64a;
     letter-spacing: -0.01em;
@@ -57,14 +53,14 @@
     position: relative;
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.7);
+    color: #aab4c8;
     cursor: pointer;
     padding: 8px;
     border-radius: 8px;
-    transition: all 0.2s ease;
+    transition: background-color 0.15s, color 0.15s;
 
     .pi {
-        font-size: 1.2rem;
+        font-size: 1.05rem;
     }
 
     &:hover {
@@ -75,85 +71,67 @@
     
     .notification-badge{
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 4px;
+    right: 4px;
     background: #e74c3c;
     color:  white;
-    font-size: 0.65rem;
-    font-weight: 700;
     width: 18px;
     height: 18px;
     border-radius: 50%;
+    border: 2px solid #0c1830;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #0c1830;
     }
 }
 
 .topbar-nav {
     display: flex;
-    align-items: center;
-    gap:2px;
-    flex:1;
-    padding:0 24px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
+    align-items: stretch;
+    height: 100%;
+    gap: 28px;
+    margin-left: 40px;
 
-    &::-webkit-scrollbar{
-        display:none;
-    }
-}
+    
 
 a {
     display:flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    color: rgba(255,255,255,0.7);
-    font-size: 0.88rem;
-    font-weight: 500;
+    color: #aab4c8;
+    font-size: 0.82rem;
+    font-weight: 600;
     text-decoration: none;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+    transition: color 0.15s;
     position: relative;
 
     .pi{
-        font-size: 1rem;
-        width: 20px;
-        text-align: center;
+        font-size: 0.9rem;
     }
 
     &:hover {
-        background-color: rgba(255,255,255,0.08);
         color:#ffffff;
-        transform: translateY(-1px);
     }
 
     &.active {
-        background-color: rgba(214,230,74,0.15);
-        color: #d6e64a;
-        font-weight: 600;
-    
+        color: #ffffff;
+   
 
     &::after {
         content: '';
         position:absolute;
-        bottom: -2px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60%;
-        height: 3px;
+        right: 0;
+        left: 0;
+        bottom: 18px;
+        height: 2px;
         background: #d6e64a;
-        border-radius: 2px;
+        border-radius: 1px;
     }
 
     }
 }
 
-
+}
 .topbar-right {
     display: flex;
     align-items: center;
@@ -162,16 +140,15 @@ a {
 }   
 
 .avatar-circle {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2d4a7a, #1a2a4a);
-    border: 2px solid rgba(214, 230, 74, 0.5);
+    background-color:#378adb;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
-    color: #d6e64a;
+    flex-shrink: 0;
+    color: #0c1830;
 
     .pi{
         font-size: 1.1rem;
@@ -184,54 +161,48 @@ a {
     line-height: 1.2;
 
     .user-name {
-        font-size: 0.9rem;
-        font-weight: 600;
+        font-size: 0.82rem;
+        font-weight: 700;
         color: #ffffff;
     }
 
     .user-role {
-        font-size: 0.75rem;
-        color: rgba(255,255,255,0.6);
+        font-size: 0.72rem;
+        color: #aab4c8;
     }
 }
 
 .topbar-chevron{
-    color: rgba(255,255,255,0.5);
+    color: #aab4c8;
     cursor: pointer;
-    font-size: 0.75rem;
-    margin-left: -4px;
-    transition: transform 0.2s ease;
-
-    &:hover{
-        color:#ffffff;
-    }
+    font-size: 0.7rem;
 }
 
 .topbar-logout{
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255,255,255,0.05);
-    padding: 8px 16px;
+    background-color: transparent;
+    padding: 7px 12px;
     border-radius: 8px;
-    color: rgba(255,255,255,0.7);
-    font-size: 0.85rem;
-    font-weight: 500;
+    color: #aab4c8;
+    font-size: 0.8rem;
+    font-weight: 600;
     font-family: inherit;
     border: 1px solid rgba(255,255,255,0.08);
     cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+   
 
     .pi{
-        font-size: 0.95rem;
+        font-size: 0.85rem;
     }
 
     &:hover{
-        background: rgba(192,57,43,0.2);
+        background-color: rgba(192,57,43,0.15);
         border-color: rgba(192,57,43,0.3);
         color: #e0685b;
-        transform: translateY(-1px);
+    
     }
 }
 .admin-main{
@@ -262,72 +233,26 @@ a {
     }
 }
 
-@media (max-width: 992px){
-    .topbar{
-        padding: 0 16px;
-        height: 64px;
-    }
-    .brand .brand-line1,
-    .brand .brand-line2{
-        font-size: 1.1rem;
-    }
-
+@media (max-width: 900px){
+   
     .topbar-nav {
-        padding: 0 12px;
+        display: none;
     }
 
     .user-info{
         display: none;
     }
-    .topbar-logout span{
-        display: none;
-    }
-
-    .topbar-logout{
-        padding: 8px 12px;
-    }
+    
 }
 
-@media (max-width: 768px){
+@media (max-width: 500px){
     .topbar{
-        flex-wrap: wrap;
-        height: auto;
-        padding: 12px 16px;
-        gap: 8px;
+       
+        padding: 0px 16px;
     }
-    .topbar-nav{
-        order:3;
-        width: 100%;
-        padding: 4px 0;
-        overflow-x: auto;
-        gap: 2px;
+    .admin-content{
+        padding: 16px;
+    
     }
-
-    .topbar-nav a {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-
-        .pi{
-            font-size: 0.9rem;
-            width: 18px;
-        }
-        span{
-            display: none;
-        }
-    }
-
-    .topbar-notifications{
-    padding: 6px;
-}
-
-.avatar-circle{
-    width: 34px;
-    height: 34px;
-
-}
-
-.admin-content{
-    padding: 16px;
-}
 }
 
