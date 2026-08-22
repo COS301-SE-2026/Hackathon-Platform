@@ -35,14 +35,6 @@ interface ParticipantRow {
   points: number;
 }
 
-interface TeamSizeSegment{
-  label: string;
-  count: number;
-  percent: number;
-  offset:number;
-  colorClass: string;
-}
-
 interface AnnouncementRow{
   title: string;
   body: string;
@@ -54,6 +46,27 @@ interface NotificationRow {
   title: string;
   body: string;
   time: string;
+}
+interface SubmissionStatusSegment{
+  label: string;
+  count: number;
+  percent: number;
+  offset: number;
+  colorClass : string;
+}
+interface EventInsightsSummary{
+  activeTeams: number;
+  approvedParticipants: number;
+  submissionsLastHour: number;
+  errorRate: number;
+}
+
+interface ScoreLevelStat{
+  level: string;
+  min: number;
+  max: number;
+  avg: number;
+  count: number;
 }
 
 @Component({
@@ -86,11 +99,34 @@ export class DashboardComponent implements OnInit{
    {initials:'TC', name: 'Dev storm', email: 'devStorm@example.com',points: 389},
   ];
 
-  teamSizeSegments: TeamSizeSegment[]=[
-    {label: 'Solo', count: 32, percent:20, offset:0, colorClass: 'seg-solo'},
-    {label: '2 - 3 members', count: 32, percent:20, offset:20, colorClass: 'seg-small'},
+  submissionStatusSegments: SubmissionStatusSegment[]=[
+    {label : 'Queued', count:2, percent: 17, offset: 0, colorClass:'seg-solo'},
+    {label : 'Scoring', count:1, percent: 8, offset: 17, colorClass:'seg-small'},
+    {label : 'Scored', count:8, percent: 67, offset: 25, colorClass:'seg-medium'},
+    {label : 'Failed', count:1, percent: 8, offset: 92, colorClass:'seg-failed'},
   ];
 
+  eventInsights: EventInsightsSummary= {
+    activeTeams: 18,
+    approvedParticipants: 142,
+    submissionsLastHour: 5,
+    errorRate:8,
+  };
+
+  submissionTrend: {x:number; y:number}[]=[
+    {x:10, y:70},{x:56.7, y:53.3},{x:103.3, y:70},{x:150, y:36.7},
+    {x:196.7, y:53.3},{x:243.3, y:20},{x:290, y:36.7}
+  ];
+
+  submissionTrendPoints = '10,70 56.7,53.3 103.3,70 150,36.7 196.7,53.3 243.3,20 290,36.7';
+  submissionTrendArea = 'M10,70 L56.7,53.3 L103.3,70 L150,36.7 L196.7,53.3 L243.3,20 L290,36.7 L290,70 L10,70 Z';
+
+  scoreByLevel: ScoreLevelStat[]=[
+    {level: 'Level 1', min:40, max:95,avg:72,count:5},
+    {level: 'Level 2', min:55, max:98,avg:80,count:4},
+    {level: 'Level 3', min:30, max:88,avg:60,count:3},
+
+  ];
   recentAnnouncements: AnnouncementRow[]=[
     {title:'New challenge added', body:"Check out the new AI challenge", date:'May 16,2026'},
     {title:'Maintenance Notice', body:"Platform maintenance on May 20,2026 from 12:00 PM", date:'May 19,2026'},
