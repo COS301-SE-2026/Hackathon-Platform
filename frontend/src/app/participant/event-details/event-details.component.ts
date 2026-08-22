@@ -16,16 +16,10 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 
 import {EventResponse,EventService } from '../../services/event.service';
+import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util';
 
 import { StorageService } from '../../services/storage.service';
 
-interface EventTimer {
-  label: string;
-  days: string;
-  hours: string;
-  minutes: string;
-  seconds: string;
-}
 
 @Component({
   selector: 'app-event-details',
@@ -250,62 +244,13 @@ confirmRegistration(): void {
   }
 
   private tick(): void {
-    if (!this.event.startDateTime || !this.event.duration) {
-      return;
-    }
-
-    const now = new Date();
-
-    const start = new Date(this.event.startDateTime);
-
-    const end = new Date(
-      start.getTime() +
-      this.event.duration * 60 * 60 * 1000
-    );
-
-    let target: Date;
-    let label: string;
-
-    if (now < start) {
-      target = start;
-      label = 'Starts in';
-    } else {
-      target = end;
-      label = 'Time Remaining';
-    }
-
-    const diff = Math.max(
-      0,
-      target.getTime() - now.getTime()
-    );
-
-    const days = Math.floor(
-      diff / (1000 * 60 * 60 * 24)
-    );
-
-    const hours = Math.floor(
-      (diff % (1000 * 60 * 60 * 24)) /
-      (1000 * 60 * 60)
-    );
-
-    const minutes = Math.floor(
-      (diff % (1000 * 60 * 60)) /
-      (1000 * 60)
-    );
-
-    const seconds = Math.floor(
-      (diff % (1000 * 60)) /
-      1000
-    );
-
-    this.event.timer.label = label;
-    this.event.timer.days = String(days).padStart(2, '0');
-    this.event.timer.hours = String(hours).padStart(2, '0');
-    this.event.timer.minutes = String(minutes).padStart(2, '0');
-    this.event.timer.seconds = String(seconds).padStart(2, '0');
-
-    this.change.markForCheck();
+  if (!this.event.startDateTime || !this.event.duration) {
+    return;
   }
+  this.event.timer = calculateEventTimer( this.event.startDateTime, this.event.duration );
+
+  this.change.markForCheck();
+}
 
   private toEventView(event: EventResponse) {
     const start = new Date(event.startDateTime);

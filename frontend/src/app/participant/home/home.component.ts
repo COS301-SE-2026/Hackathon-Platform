@@ -10,14 +10,8 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ToastService } from '../../shared/components/toast/toast.service';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util';
 
-interface EventTimer {
-  label: string;
-  days: string;
-  hours: string;
-  minutes: string;
-  seconds: string;
-}
 
 interface OpenEventView {
   eventId: string;
@@ -279,38 +273,11 @@ confirmRegistration(): void {
     });
   }
 
-  private tick(): void {
-    const now = new Date();
-
-    this.activeEvents.forEach(event => {
-    const start = new Date(event.startDateTime);
-    const end = new Date(start.getTime() + event.duration * 60 * 60 * 1000);
-    
-    let target: Date;
-    let label: string;
-
-    if (now < start) {
-      target = start;
-      label = 'Starts in';
-    } else {
-      target = end;
-      label = 'Time Remaining';
-    }
-
-    const diff = Math.max(0, target.getTime() - now.getTime());
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    event.timer.label = label;
-    event.timer.days = String(days).padStart(2, '0');
-    event.timer.hours = String(hours).padStart(2, '0');
-    event.timer.minutes = String(minutes).padStart(2, '0');
-    event.timer.seconds = String(seconds).padStart(2, '0');
-    });
-
-    this.change.markForCheck();
-  }
+ private tick(): void {
+  this.activeEvents.forEach(event => {
+    event.timer = calculateEventTimer( event.startDateTime, event.duration );
+  });
+  this.change.markForCheck();
+}
 
 }
