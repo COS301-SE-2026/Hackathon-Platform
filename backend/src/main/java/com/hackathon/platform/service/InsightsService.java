@@ -62,5 +62,65 @@ public class InsightsService {
             activeEvents, events.size(), totalParticipants, submissionsToday);
     }
 
+    /**Dashboard stats for a single event */
+    public EventInsightsResponse getEventInsights(UUID eventId, int trendWindowMinutes) {
+
+        long activeTeams = teamRepository.countByEventIdAndStatus(eventId, "ACTIVE");
+        long approvedParticipants = countApprovedParticipants(eventId);
+
+        long totalSubmissions = submissionRepository.countByEventId(eventId);
+
+        Instant hourAgo = Instant.now().minus(Duration.ofHours(1));
+        long submissionLastHour =
+            submissionRepository.countByEventIdAndSubmittedAtAfter(eventId, hourAgo);
+        
+        Map<String, Long> submissionByStatus = new HashMap<>();
+        SUBMISSION_STATUSES.forEach(status -> submissionByStatus.put(status, 0L));
+        submissionRepository
+            .countByEventIdGroupByStatus(eventId)
+            .forEach(row -> submissionByStatus.put(row.getStatus(), row.getTotal()));
+        
+        long scored = submissionByStatus.getOrDefault("SCORED", 0L);
+        long failed = submissionByStatus.getOrDefault("FAILED", 0L);
+        long finished = scored + failed;
+        Double errorRate = finished == 0 ? null : (double) failed / finished;
+
+        Instant windowStart =
+            Instant.now().minus(Duration.ofMinutes(Math.max(1, trendWindowMinutes)));
+        List<SubmissionRateBucket> submissionRate =
+            submissionRepository.findSubmissionRateSince(eventId, windowStart).stream()
+                .map(row -> new SubmissionRateBucket(row.getBucketStart(), row.getCount()))
+                .collect(Collectors.toList());
+        
+        List<LevelScoreStats> scoreDistribution =
+            submissionRepository.findScoreDistributionByEventId(eventId).stream()
+                .map(
+                    row ->
+                        new LevelScoreStats(
+                            row.getLevelId(),
+                            row.getLevelName(),
+                            row.getScoredSubmissions(),
+                            row.getMinScore(),
+                            row.getMaxScore(),
+                            row.getAvgScore()
+                        )
+                )
+                .collect(Collectors.toList());
+            
+            return new EventInsightsResponse(
+                eventId,
+                activeTeams,
+                approvedParticipants,
+                totalSubmissions,
+                submissionLastHour,
+                submissionByStatus,
+                errorRate,
+                submissionRate,
+                scoreDistribution
+            );
+        
+    }
+
+
 
 }
