@@ -8,40 +8,20 @@ import { NavbarComponent } from '../shared/components/navbar/navbar.component';
 import { LoaderComponent } from '../shared/components/loader/loader.component';
 import { ToastService } from '../shared/components/toast/toast.service';
 import { CardComponent } from '../shared/components/card/card.component';
-import { StatCardComponent } from '../shared/components/stat-card/stat-card.component';
-import { ModalComponent } from '../shared/components/modal/modal.component';
 import { TextareaComponent } from '../shared/components/textarea/textarea.component';
-import { TabsComponent, TabItem } from '../shared/components/tabs/tabs.component';
 import { PaginationComponent } from '../shared/components/pagination/pagination.component';
 import { TableComponent } from '../shared/components/table/table.component';
 
 @Component({
   selector: 'app-component-tests',
   standalone: true,
-  imports: [
-    ButtonComponent,
-    InputComponent,
-    SearchBarComponent,
-    DropdownComponent,
-    UploadAreaComponent,
-    NavbarComponent,
-    LoaderComponent,
-    CardComponent,
-    StatCardComponent,
-    ModalComponent,
-    TextareaComponent,
-    TabsComponent,
-    PaginationComponent,
-    TableComponent
-  ],
+  imports: [ButtonComponent,InputComponent,SearchBarComponent,DropdownComponent,UploadAreaComponent,NavbarComponent,LoaderComponent,CardComponent,TextareaComponent,PaginationComponent,TableComponent],
   templateUrl: './component-tests.component.html',
   styleUrl: './component-tests.component.scss'
 })
 export class ComponentTestsComponent {
 
-  smallModal = false;
-  largeModal = false;
-  mediumModal = false;
+  
   currentPage = 1;
   
   private readonly toast = inject(ToastService);
@@ -116,70 +96,6 @@ events = [
     }
   ];
 
-  tabs: TabItem[] = [
- 
-  {
-    label: 'Overview',
-    icon: 'pi pi-list',
-    route: '/hackathons/123/overview'
-  },
-  {
-    label: 'Rules',
-    icon: 'pi pi-file',
-    route: '/hackathons/123/rules'
-  },
-  {
-    label: 'My Team',
-    icon: 'pi pi-users',
-    route: '/hackathons/123/team'
-  },
-  {
-    label: 'Submissions',
-    icon: 'pi pi-code',
-    route: '/hackathons/123/submissions'
-  },
-  {
-    label: 'Submissions History',
-    icon: 'pi pi-history',
-    route: '/hackathons/123/history'
-  },
-  {
-    label: 'Leaderboard',
-    icon: 'pi pi-trophy',
-    route: '/hackathons/123/leaderboard'
-  }
-
-];
-
-
-submissionLevelTabs: TabItem[] = [
-  {
-    label: 'Submission Levels',
-    type: 'label'
-  },
-  {
-    label: 'Level 1',
-    route: '/hackathons/123/submissions/level-1'
-  },
-  {
-    label: 'Level 2',
-    route: '/hackathons/123/submissions/level-2'
-  },
-  {
-    label: 'Level 3',
-    route: '/hackathons/123/submissions/level-3'
-  },
-  {
-    label: 'Level 4',
-    route: '/hackathons/123/submissions/level-4'
-  },
-  {
-    label: 'Level 5',
-    route: '/hackathons/123/submissions/level-5'
-  }
-];
-
-
 onPageChange(page: number): void {
   this.currentPage = page;
 
@@ -207,27 +123,5 @@ onPageChange(page: number): void {
   }
 
 
-  openSmallModal(): void {
-  this.smallModal = true;
-}
 
-closeSmallModal(): void {
-  this.smallModal = false;
-}
-
-openMediumModal(): void {
-  this.mediumModal = true;
-}
-
-closeMediumModal(): void {
-  this.mediumModal = false;
-}
-
-openLargeModal(): void {
-  this.largeModal = true;
-}
-
-closeLargeModal(): void {
-  this.largeModal = false;
-}
 }

@@ -11,41 +11,6 @@
 
 <div class="component-tests">
 
-  <!-- Stat Card Component -->
-  <div class="component-section stats-section">
-    <h2>Stat Card</h2>
-
-    <div class="stats-preview">
-      <app-stat-card
-        value="5"
-        label="Upcoming Events"
-        icon="pi pi-calendar"
-        iconBackground="bright-blue">
-      </app-stat-card>
-
-      <app-stat-card
-        value="12"
-        label="Submissions"
-        icon="pi pi-code"
-        iconBackground="teal">
-      </app-stat-card>
-
-      <app-stat-card
-        value="4"
-        label="Teams"
-        icon="pi pi-users"
-        iconBackground="lime-green">
-      </app-stat-card>
-
-      <app-stat-card
-        value="1,450"
-        label="Points Earned"
-        icon="pi pi-star"
-        iconBackground="orange">
-      </app-stat-card>
-    </div>
-  </div>
-
 
   <!-- Button Component -->
   <div class="component-section buttons-section">
@@ -199,39 +164,6 @@
     </div>
   </div>
 
-
-  <!-- Modal Component -->
-  <div class="component-section modal-section">
-    <h2>Modal</h2>
-
-    <div class="modal-preview">
-      <app-button
-        variant="primary"
-        (click)="openSmallModal()"
-        (keydown)="null"
-        (keyup)="null">
-        Small Modal
-      </app-button>
-
-      <app-button
-        variant="primary"
-        (click)="openMediumModal()"
-         (keydown)="null"
-        (keyup)="null">
-        Medium Modal
-      </app-button>
-
-      <app-button
-        variant="primary"
-        (click)="openLargeModal()"
-         (keydown)="null"
-       (keyup)="null">
-       large Modal
-      </app-button>
-    </div>
-  </div>
-
-
   <!-- Textarea Component -->
   <div class="component-section textarea-section">
     <h2>Textarea</h2>
@@ -305,89 +237,3 @@
 
 </div>
 
-
-<!-- ==================== MODAL TESTS ==================== -->
-
-<!-- Small Modal -->
-@if (smallModal) {
-  <app-modal
-    title="Request to Join"
-    size="small"
-    (closed)="closeSmallModal()">
-
-    <div modal-body>
-     
-    </div>
-
-    <div modal-footer-right>
-      <app-button variant="secondary" width="150px">
-        Cancel
-      </app-button>
-
-      <app-button variant="primary" width="150px">
-        Send Request
-      </app-button>
-    </div>
-
-  </app-modal>
-}
-
-
-<!-- Medium Modal -->
-@if (mediumModal) {
-  <app-modal
-    title="Create Event"
-    size="medium"
-    (closed)="closeMediumModal()">
-
-    <div modal-body>
-     
-
-    </div>
-
-    <div modal-footer-right>
-      <app-button variant="secondary" width="135px">
-        Cancel
-      </app-button>
-
-      <app-button variant="primary" width="135px">
-        Create Event
-      </app-button>
-    </div>
-
-  </app-modal>
-}
-
-
-<!-- Large Modal -->
-@if (largeModal) {
-  <app-modal
-    title="Edit Hackathon"
-    size="large"
-    footerLayout="split"
-    (closed)="closeLargeModal()">
-
-    <div modal-body>
-      
-      
-      
-    </div>
-
-    <div modal-footer-left>
-      <app-button variant="secondary" width="135px">
-        Delete
-      </app-button>
-    </div>
-
-    <div modal-footer-right>
-      <app-button variant="secondary" width="135px">
-        Cancel
-      </app-button>
-
-      <app-button variant="primary">
-        Save Changes
-      </app-button>
-    </div>
-
-  </app-modal>
-}
