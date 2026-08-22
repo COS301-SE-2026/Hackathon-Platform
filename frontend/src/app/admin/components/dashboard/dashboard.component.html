@@ -204,7 +204,32 @@
               }
             </svg>
           </div>
+
+          <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">Score Distribution by Level</h2>
+            </div>
+            <div class = "score-bars">
+              @for (lvl of scoreByLevel; track lvl.level){
+                <div class = "score-bar-row">
+                  <div class = "score-bar-top">
+                    <span class = "score-bar-level">{{lvl.level}}</span>
+                    <span class = "score-bar-count">{{lvl.count}} submissions</span>
+                  </div>
+                  <div class = "score-bar-track">
+                    <div class = "score-bar-fill" [style.width.%] = "lvl.avg"></div>
+                  </div>
+                  <div class = "score-bar-range">
+                    <span>Min {{lvl.min}}</span>
+                    <span class = "score-bar-avg">Avg {{lvl.avg}}</span>
+                    <span>Max {{lvl.max}}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
         </div>
+      </div>
       
 
 
