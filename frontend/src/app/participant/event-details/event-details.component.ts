@@ -9,11 +9,11 @@ import { MyTeamComponent } from './event-details-tabs/my-team/my-team.component'
 import { LeaderboardComponent } from './event-details-tabs/leaderboard/leaderboard.component';
 
 import { TabsComponent, TabItem} from '../../shared/components/tabs/tabs.component';
-
-import { ButtonComponent } from '../../shared/components/button/button.component';
-import { CardComponent } from '../../shared/components/card/card.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { ButtonComponent } from '../../shared/components/button/button.component';
+import { CardComponent } from '../../shared/components/card/card.component';
+
 
 import {EventResponse,EventService } from '../../services/event.service';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util';
@@ -27,16 +27,16 @@ import { StorageService } from '../../services/storage.service';
   imports: [
     CommonModule,
     OverviewTabComponent,
-    RulesTabComponent,
-    SubmissionsComponent,
-    MyTeamComponent,
     LeaderboardComponent,
     SubmissionHistoryComponent,
+    ModalComponent,
+    InputComponent,
     TabsComponent,
     ButtonComponent,
     CardComponent,
-    ModalComponent,
-    InputComponent
+    RulesTabComponent,
+    SubmissionsComponent,
+    MyTeamComponent
   ],
   templateUrl: './event-details.component.html',
   styleUrls: ['./event-details.component.scss']
@@ -45,10 +45,15 @@ import { StorageService } from '../../services/storage.service';
 export class EventDetailsComponent implements OnDestroy {
 
   private readonly route = inject(ActivatedRoute);
+
   private readonly router = inject(Router);
+
   private readonly eventService = inject(EventService);
+
   private readonly storageService = inject(StorageService);
+
   private readonly change = inject(ChangeDetectorRef);
+
   private timerInterval: ReturnType<typeof setInterval> | undefined;
 
   tabs: TabItem[] = [];
@@ -59,26 +64,41 @@ export class EventDetailsComponent implements OnDestroy {
   loading = false;
   eventError = '';
   downloadingProblemStatement = false;
+
   problemStatementError = '';
+
   registrationModal = false;
+
   registrationKey = '';
 
   event = {
     name: '',
     description: 'Not specified',
+
     prizePool: 'Not specified',
+
     startDate: '',
+
     endDate: '',
+
     teamSize: 0,
+
     visibility: '',
+
     startDateTime: '',
+
     duration: 0,
+
     timer: {
       label: '',
       days: '00',
+
       hours: '00',
+
       minutes: '00',
+
       seconds: '00'
+
     } as EventTimer
   };
 
@@ -174,38 +194,55 @@ confirmRegistration(): void {
   this.tabs = [
     {
       label: 'Overview',
+
       icon: 'pi pi-list',
+
       route: eventRoute,
+
       queryParams: { tab: 'overview' }
     },
+
     {
       label: 'Rules',
       icon: 'pi pi-file',
+
       route: eventRoute,
       queryParams: { tab: 'rules' }
     },
+
     {
       label: 'My Team',
+
       icon: 'pi pi-users',
       route: eventRoute,
+
       queryParams: { tab: 'team' }
     },
+
     {
       label: 'Submissions',
       icon: 'pi pi-code',
+
       route: eventRoute,
       queryParams: { tab: 'submissions' }
     },
     {
       label: 'Submissions History',
+
       icon: 'pi pi-history',
+
       route: eventRoute,
+
       queryParams: { tab: 'submission-history' }
     },
+
     {
       label: 'Leaderboard',
+
       icon: 'pi pi-trophy',
+
       route: eventRoute,
+
       queryParams: { tab: 'leaderboard' }
     }
   ];
@@ -217,14 +254,18 @@ confirmRegistration(): void {
     }
 
     this.downloadingProblemStatement = true;
+
     this.problemStatementError = '';
 
     this.storageService.getProblemStatementUrl(this.hackathonId).subscribe({
       next: ({ url }) => {
+
         this.downloadingProblemStatement = false;
 
         const link = document.createElement('a');
+
         link.href = url;
+
         link.click();
 
         this.change.markForCheck();
@@ -235,7 +276,9 @@ confirmRegistration(): void {
 
         this.problemStatementError =
           err.status === 404
+
             ? 'No problem statement has been uploaded for this hackathon yet.'
+            
             : 'The problem statement could not be downloaded.';
 
         this.change.markForCheck();
