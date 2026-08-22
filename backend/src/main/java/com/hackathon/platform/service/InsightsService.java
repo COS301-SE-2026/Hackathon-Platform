@@ -71,17 +71,17 @@ public class InsightsService {
         long totalSubmissions = submissionRepository.countByEventId(eventId);
 
         Instant hourAgo = Instant.now().minus(Duration.ofHours(1));
-        long submissionLastHour =
+        long submissionsLastHour =
             submissionRepository.countByEventIdAndSubmittedAtAfter(eventId, hourAgo);
         
-        Map<String, Long> submissionByStatus = new HashMap<>();
-        SUBMISSION_STATUSES.forEach(status -> submissionByStatus.put(status, 0L));
+        Map<String, Long> submissionsByStatus = new HashMap<>();
+        SUBMISSION_STATUSES.forEach(status -> submissionsByStatus.put(status, 0L));
         submissionRepository
             .countByEventIdGroupByStatus(eventId)
-            .forEach(row -> submissionByStatus.put(row.getStatus(), row.getTotal()));
+            .forEach(row -> submissionsByStatus.put(row.getStatus(), row.getTotal()));
         
-        long scored = submissionByStatus.getOrDefault("SCORED", 0L);
-        long failed = submissionByStatus.getOrDefault("FAILED", 0L);
+        long scored = submissionsByStatus.getOrDefault("SCORED", 0L);
+        long failed = submissionsByStatus.getOrDefault("FAILED", 0L);
         long finished = scored + failed;
         Double errorRate = finished == 0 ? null : (double) failed / finished;
 
@@ -112,13 +112,36 @@ public class InsightsService {
                 activeTeams,
                 approvedParticipants,
                 totalSubmissions,
-                submissionLastHour,
-                submissionByStatus,
+                submissionsLastHour,
+                submissionsByStatus,
                 errorRate,
                 submissionRate,
                 scoreDistribution
             );
         
+    }
+
+    private long countApprovedParticipants(UUID eventId) {
+        List<UUID> teamIds =
+            teamRepository.findByEventId(eventId).stream().map(Team::getTeamId).collect(Collectors.toList());
+
+        if (teamIds.isEmpty()) {
+            return 0;
+
+        }
+
+        return teamMemberRepository.countByTeamIdInAndStatus(teamIds, "APPROVED");
+
+    }
+
+    private boolean isActiveStatus(String status) {
+        if(status == null) {
+            return false;
+
+        }
+        String upper = status.toUpperCase();
+        return upper.equals("ACTIVE") || upper.equals("ONGOING");
+
     }
 
 
