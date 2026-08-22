@@ -4,7 +4,6 @@ import { AuthService } from '../../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse } from '../../services/event.service';
 import { CarouselModule, CarouselPageEvent } from 'primeng/carousel';
-import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -41,7 +40,6 @@ interface OpenEventView {
     CommonModule, 
     RouterModule, 
     CarouselModule, 
-    StatCardComponent, 
     CardComponent, 
     ButtonComponent,
     InputComponent, 
@@ -148,8 +146,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 }
 
 
-
-
   loadUsersActiveEvents(): void{
   
     this.isLoadingActiveEvents = true;
@@ -194,6 +190,31 @@ export class HomeComponent implements OnInit, OnDestroy {
   ]);
 }
 
+getEventTag(event: OpenEventView): string {
+  const now = new Date();
+  const start = new Date(event.startDateTime);
+  return now < start ? 'Starts Soon' : 'Live Now';
+}
+
+getDaysUntilStart(event: OpenEventView): string | null {
+  const now = new Date();
+  const start = new Date(event.startDateTime);
+
+  if (now >= start) { return null;  }
+
+  const today = new Date( now.getFullYear(), now.getMonth(), now.getDate());
+
+  const startDate = new Date( start.getFullYear(),start.getMonth(),start.getDate());
+
+  const diff = startDate.getTime() - today.getTime();
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+  if (days === 0) {return 'Starts Today'; }
+  if (days === 1) { return 'Starts in 1 day'; }
+
+  return `Starts in ${days} days`;
+
+}
 
 registerForEvent(event: OpenEventView): void {
   this.selectedEvent = event;
