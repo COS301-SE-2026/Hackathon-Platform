@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy,inject} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { OverviewTabComponent } from './event-details-tabs/overview/overview.component';
 import { RulesTabComponent } from './event-details-tabs/rules/rules.component';
 import { SubmissionsComponent } from './event-details-tabs/submissions/submission.component';

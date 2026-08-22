@@ -285,10 +285,12 @@
                    <span> 120+ Participants </span>
                 </div>
 
-                <div class="event-start-tag" *ngIf="getDaysUntilStart(event) !== null">
+                @if (getDaysUntilStart(event) !== null) {
+                <div class="event-start-tag">
                   <i class="pi pi-clock"></i>
-                   <span>{{ getDaysUntilStart(event) }}</span>
+                  <span>{{ getDaysUntilStart(event) }}</span>
                 </div>
+                }
 
               </div>
 

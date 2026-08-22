@@ -160,20 +160,24 @@
 
   <app-modal title="Register for Event"  size="small" footerLayout="center" (closed)="closeRegistrationModal()">
     <div modal-body>
+      
       <h3 class="registration-event-name">{{ event.name }}</h3>
 
       @if (event.visibility === 'PRIVATE') {
         <div class="registration-confirmation">
+
           <div class="confirmation-icon">
             <i class="pi pi-lock" aria-hidden="true"></i>
           </div>
           <div class="registration-content">
             <strong>Private Event</strong>
+
             <p> This event requires a registration key to continue.</p>
           </div>
 
         </div>
         <div class="registration-input">
+
           <app-input id="registration-key"  label="Registration Key"placeholder="Enter registration key" [(value)]="registrationKey"> </app-input>
         </div>
 
@@ -181,11 +185,15 @@
       @else {
         <div class="registration-confirmation">
           <div class="confirmation-icon">
+
             <i class="pi pi-check-circle" aria-hidden="true"> </i>
           </div>
+
           <div class="registration-content">
             <strong>Ready to Register?</strong>
+
             <p> You're about to register for this event. Continue when you're ready. </p>
+
           </div>
 
         </div>
@@ -195,8 +203,12 @@
     </div>
 
     <div modal-footer-right>
-      <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px"> Cancel</app-button>
-      <app-button variant="primary" (click)="confirmRegistration()" width="135px"> Register</app-button>
+      
+      <app-button variant="secondary" (click)="closeRegistrationModal()" 
+      width="135px" (keydown)="null" (keyup)="null"> Cancel</app-button>
+
+      <app-button variant="primary" (click)="confirmRegistration()" width="135px" 
+      (keydown)="null" (keyup)="null"> Register</app-button>
 
     </div>
 
