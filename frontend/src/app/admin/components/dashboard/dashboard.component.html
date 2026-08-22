@@ -187,6 +187,23 @@
             </div>
 
           </div>
+        <div class = "panels-row panels-row-2">
+          <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">Submissions per Minute</h2>
+              <span class = "trend-window">Last 60 min</span>
+            </div>
+            <svg viewBox = "0 0 300 80" class = "trend-svg" preserveAspectRatio = "none">
+              <line class = "trend-grid" x1 = "10" y1="16" x2="290" y2 ="16"></line>
+              <line class = "trend-grid" x1 = "10" y1="43" x2="290" y2 ="43"></line>
+              <line class = "trend-grid" x1 = "10" y1="70" x2="290" y2 ="70"></line>
+              <path class = "trend-area" [attr.d] ="submissionTrendArea"></path>
+              <polyline class = "trend-line" [attr.points] ="submissionTrendPoints"></polyline>
+              @for (pt of submissionTrend; track pt.x){
+                <circle class = "trend-dot" [attr.cx] = "pt.x" [attr.cy] ="pt.y" r="2.75"></circle>
+              }
+            </svg>
+          </div>
         </div>
       
 
