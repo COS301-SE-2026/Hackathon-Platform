@@ -143,17 +143,50 @@
               </div>
             </div>
 
-            <div class = "team-size-legend">
-              @for (seg of teamSizeSegments; track seg.label){
+            <div class = "status-legend">
+              @for (seg of SubmissionStatusSegments; track seg.label){
                 <div class = "legend-row">
                   <span class = "legend-dot {{seg.colorClass}}"></span>
                 <p class = "legend-label">{{seg.label}}</p>
                 <p class = "legend-sub">{{seg.count}} teams ({{seg.percent}}%)</p>
               </div>
-              }
+              } 
+        </div>
+
+        <div class = "section">
+          <h2 class = "section-title">Event Insights</h2>
+
+          <div class = "insights-strip">
+            <div class = "insight-mini-card">
+              <div class = "insight-mini-icon insight-icon-blue"><i class = "pi pi-users"></i></div>
+              <div>
+                <p class = "insight-mini-label">Active Teams</p>
+                <p class = "insight-mini-value">{{eventInsights.activeTeams}}</p>
+              </div>
             </div>
-            <a routerLink = "/admin/teams" class = "panel-footer-link">View all teams <i class = "pi pi-arrow-right"></i></a>
-          </div> 
+            <div class = "insight-mini-card">
+              <div class = "insight-mini-icon insight-icon-olive"><i class = "pi pi-check-circle"></i></div>
+              <div>
+                <p class = "insight-mini-label">Active Participants</p>
+                <p class = "insight-mini-value">{{eventInsights.approvedParticipants}}</p>
+              </div>
+            </div>
+            <div class = "insight-mini-card">
+              <div class = "insight-mini-icon insight-icon-teal"><i class = "pi pi-clock"></i></div>
+              <div>
+                <p class = "insight-mini-label">Submissions (Last Hour)</p>
+                <p class = "insight-mini-value">{{eventInsights.submissionsLastHour}}</p>
+              </div>
+            </div>
+            <div class = "insight-mini-card">
+              <div class = "insight-mini-icon insight-icon-red"><i class = "pi pi-exclamation-triangle"></i></div>
+              <div>
+                <p class = "insight-mini-label">Error Rate</p>
+                <p class = "insight-mini-value">{{eventInsights.errorRate}}%</p>
+              </div>
+            </div>
+
+          </div>
         </div>
       
 
