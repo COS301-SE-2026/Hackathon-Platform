@@ -124,34 +124,35 @@
 
           <div class = "panel-card">
             <div class = "panel-header">
-              <h2 class = "panel-title">Teams Overview</h2>
-              <a routerLink = "/admin/teams" class = "btn-view-all">View All</a>
+              <h2 class = "panel-title">Submission Status</h2>
+              <a routerLink = "/admin/submissions" class = "btn-view-all">View All</a>
             </div>
 
             <div class = "donut-wrap">
               <svg viewBox = "0 0 42 42" class = "donut-chart">
                 <circle class = "donut-ring" cx = "21" cy="21" r ="15.9" fill = "transparent" stroke = "#eef0f4" stroke-width = "5"></circle>
-                @for (seg of teamSizeSegments; track seg.label){
+                @for (seg of submissionStatusSegments; track seg.label){
                   <circle class = "donut-segment {{seg.colorClass}}" cx = "21" cy="21" r ="15.9" fill = "transparent" stroke = "#eef0f4" stroke-width = "5" transform = "rotate(-90 21 21)"
                 [attr.stroke-dasharray] = "seg.percent + ' ' + (100 - seg.percent)"
                 [attr.stroke-dashoffset] = "-seg.offset"></circle>
                 }
               </svg>
               <div class = "donut-center">
-                <p class = "donut-total">{{teamsCount}}</p>
-                <p class = "donut-label">Total Teams</p>
+                <p class = "donut-total">{{submissionsCount}}</p>
+                <p class = "donut-label">Total Submissions</p>
               </div>
             </div>
 
             <div class = "status-legend">
-              @for (seg of SubmissionStatusSegments; track seg.label){
+              @for (seg of submissionStatusSegments; track seg.label){
                 <div class = "legend-row">
                   <span class = "legend-dot {{seg.colorClass}}"></span>
                 <p class = "legend-label">{{seg.label}}</p>
-                <p class = "legend-sub">{{seg.count}} teams ({{seg.percent}}%)</p>
+                <p class = "legend-sub">{{seg.count}} submissions ({{seg.percent}}%)</p>
               </div>
               } 
         </div>
+          </div>
 
         <div class = "section">
           <h2 class = "section-title">Event Insights</h2>
@@ -167,7 +168,7 @@
             <div class = "insight-mini-card">
               <div class = "insight-mini-icon insight-icon-olive"><i class = "pi pi-check-circle"></i></div>
               <div>
-                <p class = "insight-mini-label">Active Participants</p>
+                <p class = "insight-mini-label">Approved Participants</p>
                 <p class = "insight-mini-value">{{eventInsights.approvedParticipants}}</p>
               </div>
             </div>
