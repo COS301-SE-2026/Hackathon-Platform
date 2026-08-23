@@ -9,20 +9,21 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AnnouncementEmailService {
-    private final JavaMailSender mail;
-    
-    @Value("${app.mail.from}")
-    private String from;
+  private final JavaMailSender mail;
 
-    public void sendAnnouncementEmail(String recipient, String reply, String title, String body, String severity) {
-        SimpleMailMessage msg = new SimpleMailMessage();
+  @Value("${app.mail.from}")
+  private String from;
 
-        msg.setFrom(from);
-        msg.setTo(recipient);
-        msg.setReplyTo(reply);
-        msg.setSubject(severity + ": " + title);
-        msg.setText(body);
+  public void sendAnnouncementEmail(
+      String recipient, String reply, String title, String body, String severity) {
+    SimpleMailMessage msg = new SimpleMailMessage();
 
-        mail.send(msg);
-    }
+    msg.setFrom(from);
+    msg.setTo(recipient);
+    msg.setReplyTo(reply);
+    msg.setSubject(severity + ": " + title);
+    msg.setText(body);
+
+    mail.send(msg);
+  }
 }

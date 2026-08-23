@@ -12,10 +12,11 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 public class AnnouncementUpdateService {
-    private static final long TIMEOUT_MS = 30L * 60L * 1000L;
-    private final Map<UUID, CopyOnWriteArrayList<SseEmitter>> eventSubscribers = new ConcurrentHashMap<>();
+  private static final long TIMEOUT_MS = 30L * 60L * 1000L;
+  private final Map<UUID, CopyOnWriteArrayList<SseEmitter>> eventSubscribers =
+      new ConcurrentHashMap<>();
 
-    public SseEmitter subscribe(UUID eventId) {
+  public SseEmitter subscribe(UUID eventId) {
     SseEmitter emitter = new SseEmitter(TIMEOUT_MS);
     eventSubscribers.computeIfAbsent(eventId, ignored -> new CopyOnWriteArrayList<>()).add(emitter);
     Runnable cleanup = () -> removeEmitter(eventId, emitter);
@@ -40,7 +41,14 @@ public class AnnouncementUpdateService {
       return;
     }
 
-    Map<String, Object> data = Map.of("eventId", eventId.toString(), "messageId", messageId.toString(), "occurredAt", Instant.now().toString());
+    Map<String, Object> data =
+        Map.of(
+            "eventId",
+            eventId.toString(),
+            "messageId",
+            messageId.toString(),
+            "occurredAt",
+            Instant.now().toString());
 
     for (SseEmitter emitter : emitters) {
       try {

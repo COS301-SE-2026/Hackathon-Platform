@@ -10,10 +10,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class AnnouncementResponse {
-    private UUID messageId;
-    private UUID eventId;
-    private String title;
-    private String body;
-    private String severity;
-    private Instant createdAt;
+  private UUID messageId;
+  private UUID eventId;
+  private String title;
+  private String body;
+  private String severity;
+  private Instant createdAt;
 }

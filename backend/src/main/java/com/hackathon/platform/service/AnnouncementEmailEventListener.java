@@ -9,11 +9,11 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 public class AnnouncementEmailEventListener {
-    private final AnnouncementEmailDeliveryService emailService;
+  private final AnnouncementEmailDeliveryService emailService;
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleAnnouncement(AnnouncementCreatedEvent event) {
-        emailService.processMessage(event.messageId());
-    }
+  @Async
+  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  public void handleAnnouncement(AnnouncementCreatedEvent event) {
+    emailService.processMessage(event.messageId());
+  }
 }

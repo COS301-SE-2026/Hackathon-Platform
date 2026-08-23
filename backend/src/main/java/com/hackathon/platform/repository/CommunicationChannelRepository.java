@@ -6,5 +6,5 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CommunicationChannelRepository extends JpaRepository<CommunicationChannel, UUID> {
-    Optional<CommunicationChannel> findByChannelTypeAndEventId(String channelType, UUID eventId);
+  Optional<CommunicationChannel> findByChannelTypeAndEventId(String channelType, UUID eventId);
 }

@@ -1,8 +1,8 @@
 package com.hackathon.platform.repository;
 
 import com.hackathon.platform.model.User;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,7 +26,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
    */
   boolean existsByEmail(String email);
 
-  @Query("""
+  @Query(
+      """
         SELECT DISTINCT u FROM User u WHERE u.status = 'ACTIVE'
           AND EXISTS (
             SELECT tm FROM TeamMember tm

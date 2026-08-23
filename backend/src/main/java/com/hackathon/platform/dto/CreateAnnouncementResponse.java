@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class CreateAnnouncementResponse {
-    private AnnouncementResponse announcement;
-    private int emailRecipientCount;
-    private String emailStatus;
+  private AnnouncementResponse announcement;
+  private int emailRecipientCount;
+  private String emailStatus;
 }
