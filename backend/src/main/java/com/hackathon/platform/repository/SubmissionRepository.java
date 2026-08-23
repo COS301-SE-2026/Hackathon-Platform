@@ -108,35 +108,31 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   long countByEventId(UUID eventId);
 
   @Query(
-    "SELECT COUNT(s) FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId AND s.submittedAt >= :since"
-  )
+      "SELECT COUNT(s) FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId AND s.submittedAt >= :since")
   long countByAdminSince(@Param("userId") UUID userId, @Param("since") Instant since);
 
   long countByEventIdAndSubmittedAtAfter(UUID eventId, Instant since);
 
   @Query(
-    "SELECT s.status AS status, COUNT(s) AS total FROM Submission s WHERE s.eventId = :eventId GROUP BY s.status"
-  )
+      "SELECT s.status AS status, COUNT(s) AS total FROM Submission s WHERE s.eventId = :eventId GROUP BY s.status")
   List<StatusCount> countByEventIdGroupByStatus(@Param("eventId") UUID eventId);
 
   @Query(
-    value =
-        """
+      value =
+          """
        SELECT date_trunc('minute', submitted_at) AS "bucketStart", COUNT(*) AS "count"
        FROM submissions
        WHERE event_id = :eventId AND submitted_at >= :since
        GROUP BY date_trunc('minute', submitted_at)
        ORDER BY "bucketStart" ASC
         """,
-    nativeQuery = true
-  )
+      nativeQuery = true)
   List<SubmissionRateRow> findSubmissionRateSince(
-    @Param("eventId") UUID eventId, @Param("since") Instant since
-  );
+      @Param("eventId") UUID eventId, @Param("since") Instant since);
 
   @Query(
-    value =
-        """
+      value =
+          """
        SELECT
             s.level_id AS "levelId",
             l.name AS "levelName",
@@ -150,21 +146,19 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
        GROUP BY s.level_id, l.name
        ORDER BY s.level_id ASC
         """,
-    nativeQuery = true
-  )
+      nativeQuery = true)
   List<LevelScoreRow> findScoreDistributionByEventId(@Param("eventId") UUID eventId);
 
   long countByEventIdAndStatus(UUID eventId, String status);
 
-  /**Projection for gtoup by status counts */
+  /** Projection for gtoup by status counts */
   interface StatusCount {
     String getStatus();
 
     long getTotal();
   }
 
-
-  /**Projection for the submission rate time series */
+  /** Projection for the submission rate time series */
   interface SubmissionRateRow {
 
     Instant getBucketStart();
@@ -172,7 +166,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     long getCount();
   }
 
-  /**Projection for the per level score distribution */
+  /** Projection for the per level score distribution */
   interface LevelScoreRow {
     short getLevelId();
 
@@ -186,7 +180,4 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     java.math.BigDecimal getAvgScore();
   }
-
-
-
 }
