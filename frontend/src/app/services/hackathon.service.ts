@@ -14,6 +14,9 @@ export interface HackathonResponse {
     description?: string;
     createdAt?: string;
     problemStatementStorageKey?: string;
+    levelsCount?: number;
+    eventsCount?: number;
+    participantsCount?: number;
 }
 
 @Injectable({ providedIn: 'root' })

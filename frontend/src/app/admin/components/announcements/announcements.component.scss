@@ -32,7 +32,7 @@
 
         &:hover{
             color:#146a9d;
-    
+
         }
     }
 
@@ -588,7 +588,7 @@
             border-color: #1983c2;
             background-color: #ffffff;
         }
-    }    
+    }
 }
 
 .radio-row{
@@ -657,6 +657,14 @@
         opacity: 0.6;
         cursor: not-allowed;
     }
+}
+
+.form-group-label{
+    display: block;
+    margin-bottom: 7px;
+    font-weight: 600;
+    font-size: 0.84rem;
+    color: #3a4357;
 }
 
 @media(max-width: 900px){

@@ -10,7 +10,7 @@
         <i class = "pi pi-times"></i>
       </button>
       </div>
-    
+
       @if (errorMessage){
         <div class = "error-message">
           {{errorMessage}}
@@ -23,23 +23,23 @@
 
         <div class = "form-group">
           <label for = "eventName">Event Name</label>
-          <input 
-          type = "text" 
-          id = "eventName" 
-          name = "eventName" 
-          [(ngModel)] = "form.eventName" 
+          <input
+          type = "text"
+          id = "eventName"
+          name = "eventName"
+          [(ngModel)] = "form.eventName"
           placeholder="Enter event name"
           required />
         </div>
 
-      
+
           <div class = "form-group">
-            <label>Event Image</label>
+            <span class = "form-group-label">Event image</span>
             <label for = "bannerFileInput" class = "sr-only">Upload event image</label>
             <button class = "drop-zone image-drop-zone" (click) = "triggerFileInput()"
             (keyup.enter) = "triggerFileInput()" (keyup.space) = "triggerFileInput()"
             (dragover) = "onDragOver($event)" (drop)="onDrop($event)" type="button">
-          
+
           <input  #fileInput id = "bannerFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg" (change) = "onFileSelected($event)"/>
           <span class = "drop-zone-icon-lg"><i class = "pi pi-image"></i></span>
           <p><span class = "drop-zone-cta">Click to upload</span> or drag and drop</p>
@@ -56,9 +56,9 @@
             <span class = "char-count">{{form.description.length}}/{{descriptionMaxLength}}</span>
             </div>
             <textarea
-            id = "description" 
-            [(ngModel)] = "form.description" 
-            name = "description" 
+            id = "description"
+            [(ngModel)] = "form.description"
+            name = "description"
             [maxlength] = "descriptionMaxLength"
             rows = "3"
             placeholder="Describe your event..."></textarea>
@@ -70,9 +70,9 @@
             <span class = "char-count">{{form.rules.length}}/{{rulesMaxLength}}</span>
             </div>
             <textarea
-            id = "rules" 
-            [(ngModel)] = "form.rules" 
-            name = "rules" 
+            id = "rules"
+            [(ngModel)] = "form.rules"
+            name = "rules"
             [maxlength] = "rulesMaxLength"
             rows = "3"
             placeholder="Enter the rules and requirements for participants..."></textarea>
@@ -84,33 +84,33 @@
         <div class = "form-row">
       <div class = "form-group">
               <label for = "startDate">Start Date</label>
-          
+
             <input
             type = "date"
-            id = "startDate" 
-            name = "startDate" 
-            [(ngModel)] = "form.startDate" 
+            id = "startDate"
+            name = "startDate"
+            [(ngModel)] = "form.startDate"
             required/>
         </div>
-     
+
         <div class = "form-group">
           <label for = "startTime">Start Time</label>
           <input
-          type = "time" 
-            id = "startTime" 
-            name = "startTime" 
-            [(ngModel)] = "form.startTime" 
+          type = "time"
+            id = "startTime"
+            name = "startTime"
+            [(ngModel)] = "form.startTime"
             required />
         </div>
       </div>
-      
+
         <div class = "form-group">
           <label for = "duration">Duration (hours)</label>
           <input
-          type = "number" 
-            id = "duration" 
-            name = "duration" 
-            [(ngModel)] = "form.duration" 
+          type = "number"
+            id = "duration"
+            name = "duration"
+            [(ngModel)] = "form.duration"
             required />
         </div>
 
@@ -158,11 +158,11 @@
         @if (form.visibility === 'PRIVATE'){
           <div class = "form-group" style = "margin-top: 16px; ">
             <label for = "registrationKey">Registration Key</label>
-            <input 
-            type = "text" 
-            id = "registrationKey" 
-            name = "registrationKey" 
-            [(ngModel)] = "form.registrationKey" 
+            <input
+            type = "text"
+            id = "registrationKey"
+            name = "registrationKey"
+            [(ngModel)] = "form.registrationKey"
             placeholder="Enter a registration key for private access"
             required />
           </div>

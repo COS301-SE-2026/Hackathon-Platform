@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import {ButtonModule} from 'primeng/button';
 
 import { EventResponse, EventService } from '../../../services/event.service';
 import { SubmissionResponse, SubmissionService } from '../../../services/submission.service';
@@ -85,9 +84,9 @@ export class DashboardComponent implements OnInit{
   recentSubmissions: Submissions[] = [];
 
   activeEvents = 0
-  activeParticipants = 1234; 
+  activeParticipants = 1234;
   teamsCount = 156;
-  submissionsCount = 12; 
+  submissionsCount = 12;
 
   eventLoading = false;
   submissionLoading = false;
@@ -192,7 +191,7 @@ export class DashboardComponent implements OnInit{
 
   private formatRelativeTime(value: string): string {
     const submittedAt = new Date(value);
-    
+
     if(Number.isNaN(submittedAt.getTime())) {
       return 'unknown';
     }
@@ -292,9 +291,9 @@ export class DashboardComponent implements OnInit{
     const end = new Date(start.getTime() + Number(event.duration || 0) * 60 * 60 * 1000);
     const startLabel = start.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     const endLabel = end.toLocaleDateString('en-US',{month:'short',day:'numeric', year:'numeric'});
-    
+
     return `${startLabel} \u2013 ${endLabel}`
   }
 
-  
+
 }

@@ -1,8 +1,7 @@
-import { Component, inject, OnInit} from '@angular/core';
+import { Component, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service';
 
 interface PendingApprovalRow {
@@ -29,7 +28,7 @@ interface UserRow {
 export class SuperAdminComponent{
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
-    
+
     loggedInAsName = 'Admin';
 
     pendingApprovals: PendingApprovalRow[] = [
@@ -89,7 +88,7 @@ export class SuperAdminComponent{
             const user = this.allUsers.find((u)=> u.username === this.selectedUsername);
             if (user){
                 user.role = this.selectedRole;
-                const roleMap: {[key:string]: UserRow['roleClass']} = {
+                const roleMap: Record<string, UserRow['roleClass']> = {
                     'Admin': 'admin',
                     'Super Admin': 'superAdmin',
                     'Mentor':'mentor'
@@ -112,12 +111,12 @@ export class SuperAdminComponent{
             return;
         }
         if (this.newAdmin.password.length < 8){
-          this.createAdminError = 'Password must be at least 8 characters.';  
+          this.createAdminError = 'Password must be at least 8 characters.';
           return;
         }
         if (this.newAdmin.password !== this.newAdmin.confirmPassword){
           this.createAdminError = 'Passwords do not match.';
-          return;  
+          return;
         }
 
         this.isCreatingAdmin = true;

@@ -22,7 +22,7 @@ interface UiLevel extends LevelResponse {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule,DragDropModule,ButtonModule],
   templateUrl: './levels.component.html',
-  styleUrls: ['./levels.component.scss'] 
+  styleUrls: ['./levels.component.scss']
 })
 
 export class LevelsComponent implements OnInit {
@@ -42,7 +42,7 @@ export class LevelsComponent implements OnInit {
   hackathonDescription ='';
   eventsCount = 0;
   participantsCount = 0;
-  
+
 
   get levelsCount(): number {
     return this.levels.length;
@@ -65,7 +65,7 @@ export class LevelsComponent implements OnInit {
     levelNumber: 1,
     description: ''
   }
-  
+
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
 
@@ -86,9 +86,9 @@ export class LevelsComponent implements OnInit {
     this.hackathonService.getHackathon(this.hackathonId).subscribe({
       next: (hackathon) => {
         this.hackathonName = hackathon.name;
-        this.hackathonDescription = (hackathon as any).description || '';
-        this.eventsCount = (hackathon as any).eventSCount || '';
-        this.participantsCount = (hackathon as any).participantsCount|| 0 ;
+        this.hackathonDescription = hackathon.description || '';
+        this.eventsCount = hackathon.eventsCount || 0;
+        this.participantsCount = hackathon.participantsCount|| 0 ;
         this.change.markForCheck();
       },
       error: () => {
@@ -135,7 +135,7 @@ export class LevelsComponent implements OnInit {
     this.isUploadingFile = true;
 
     const level = this.activeLevel;
-    const uploads = Array.from(files).map((file) => 
+    const uploads = Array.from(files).map((file) =>
     firstValueFrom(this.storageService.uploadLevelFile(this.hackathonId, level.id.toString(), file)));
 
     Promise.allSettled(uploads).then((results) => {
@@ -174,7 +174,7 @@ export class LevelsComponent implements OnInit {
       );
 
       const updated = await Promise.all(
-        this.levels.map((l, index) => 
+        this.levels.map((l, index) =>
           firstValueFrom(
             this.levelService.updateLevel(l.id, {
               name: l.name,
@@ -192,7 +192,7 @@ export class LevelsComponent implements OnInit {
         };
       });
     } catch (err: unknown) {
-      this.errorMessage = err instanceof HttpErrorResponse 
+      this.errorMessage = err instanceof HttpErrorResponse
         ? err.error?.message || 'Failed to save the new level order, undoing changes...'
         : 'Failed to save the new level order, changes will be reverted...';
       this.levels = previousOrder;
@@ -213,7 +213,7 @@ export class LevelsComponent implements OnInit {
     this.editingLevel = level;
     this.modalError = '';
     this.modalForm = { name: level.name, levelNumber: level.levelNumber, description: level.description || ''};
-    this.showLevelModal = true; 
+    this.showLevelModal = true;
   }
 
   closeLevelModal(): void {
@@ -291,7 +291,7 @@ export class LevelsComponent implements OnInit {
           });
         }
     }
-    
+
     closeFilesModal(): void {
         this.showFilesModal = false;
         this.activeLevel = null;
@@ -300,7 +300,7 @@ export class LevelsComponent implements OnInit {
     removeFile(file: LevelFileResponse): void {
     if(!this.activeLevel) return;
     if(!confirm(`Remove "${file.fileName}"?`)) return
-    
+
     this.storageService.deleteLevelFile(this.hackathonId, this.activeLevel.id, file.id).subscribe({
       next: () => {
         this.activeLevel!.files = this.activeLevel!.files.filter((f) => f.id !== file.id);
@@ -313,7 +313,7 @@ export class LevelsComponent implements OnInit {
     })
     }
 
-  
+
 
 onDropFile(event: DragEvent): void {
  event.preventDefault();
@@ -368,7 +368,7 @@ onFileSelected(event: Event):void{
         if (this.editingLevel){
         this.modalError = err.error?.message || 'The level failed to delete';
         }else {
-         this.errorMessage = err.error?.message || 'The level failed to delete'; 
+         this.errorMessage = err.error?.message || 'The level failed to delete';
         }
         this.change.markForCheck();
       }

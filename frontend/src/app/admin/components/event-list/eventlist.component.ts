@@ -56,7 +56,7 @@ export class EventlistComponent implements OnInit {
     }else {
       this.isLoading = false;
     }
-    
+
   }
 
   private loadHackathon(): void {
@@ -65,9 +65,6 @@ export class EventlistComponent implements OnInit {
         this.hackathon = hackathon;
         this.change.markForCheck();
       },
-      error: () => {
-
-      }
     });
   }
 
@@ -132,21 +129,21 @@ export class EventlistComponent implements OnInit {
       case 'CANCELED':
         return 'Canceled';
       default: return this.titleCase(status);
-        
+
     }
 
   }
 
   getStatusClass(status: string): EventRow['statusClass']{
     switch(status?.toLowerCase()){
-      case 'active': 
+      case 'active':
       case 'ongoing':
       return 'live';
-      case 'upcoming': 
+      case 'upcoming':
       return 'upcoming';
-      case 'completed': 
+      case 'completed':
       return 'completed';
-      case 'cancelled': 
+      case 'cancelled':
       return 'ended';
       default: return 'upcoming';
     }

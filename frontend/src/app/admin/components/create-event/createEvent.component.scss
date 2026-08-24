@@ -406,6 +406,14 @@ textarea{
 
 }
 
+.form-group-label{
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #3a4357;
+  margin-bottom: 7px;
+}
+
 
 @media (max-width : 600px){
     .form-row, .access-group {

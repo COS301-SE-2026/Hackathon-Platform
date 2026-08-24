@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -55,7 +54,7 @@ export class AnnouncementsComponent implements OnInit{
     editingAnnouncement: AnnouncementResponse | null = null;
     isSaving = false;
     modalError = '';
-    
+
     modalForm = {
         title: '',
         message: '',
@@ -100,10 +99,10 @@ export class AnnouncementsComponent implements OnInit{
         this.hackathonService.getHackathon(this.hackathonId).subscribe ({
             next: (hackathon) =>{
                 this.hackathonName = hackathon.name;
-                this.hackathonDescription = (hackathon as any).description || '';
-                this.levelsCount = (hackathon as any).levelsCount || 0;
-                this.eventsCount = (hackathon as any).eventsCount || 0;
-                this.participantsCount = (hackathon as any).participantsCount || 0;
+                this.hackathonDescription = hackathon.description || '';
+                this.levelsCount = hackathon.levelsCount || 0;
+                this.eventsCount = hackathon.eventsCount || 0;
+                this.participantsCount = hackathon.participantsCount || 0;
                 this.change.markForCheck();
             },
             error: () => {
@@ -192,6 +191,6 @@ export class AnnouncementsComponent implements OnInit{
     }else {
         this.router.navigate(['/admin/hackathons']);
     }
-   
+
   }
 }
