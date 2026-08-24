@@ -50,7 +50,7 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/components/solver/solver.component').then(m => m.SolverComponent),
       },
       {
-        path: "announcements",
+        path: "hackathons/:hackathonId/announcements",
         loadComponent: () => import ('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
       },
       {
