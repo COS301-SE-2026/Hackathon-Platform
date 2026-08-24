@@ -4,21 +4,14 @@ import { AuthService } from '../../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse } from '../../services/event.service';
 import { CarouselModule, CarouselPageEvent } from 'primeng/carousel';
-import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ToastService } from '../../shared/components/toast/toast.service';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util';
 
-interface EventTimer {
-  label: string;
-  days: string;
-  hours: string;
-  minutes: string;
-  seconds: string;
-}
 
 interface OpenEventView {
   eventId: string;
@@ -41,7 +34,6 @@ interface OpenEventView {
     CommonModule, 
     RouterModule, 
     CarouselModule, 
-    StatCardComponent, 
     CardComponent, 
     ButtonComponent,
     InputComponent, 
@@ -148,8 +140,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 }
 
 
-
-
   loadUsersActiveEvents(): void{
   
     this.isLoadingActiveEvents = true;
@@ -194,6 +184,31 @@ export class HomeComponent implements OnInit, OnDestroy {
   ]);
 }
 
+getEventTag(event: OpenEventView): string {
+  const now = new Date();
+  const start = new Date(event.startDateTime);
+  return now < start ? 'Starts Soon' : 'Live Now';
+}
+
+getDaysUntilStart(event: OpenEventView): string | null {
+  const now = new Date();
+  const start = new Date(event.startDateTime);
+
+  if (now >= start) { return null;  }
+
+  const today = new Date( now.getFullYear(), now.getMonth(), now.getDate());
+
+  const startDate = new Date( start.getFullYear(),start.getMonth(),start.getDate());
+
+  const diff = startDate.getTime() - today.getTime();
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+  if (days === 0) {return 'Starts Today'; }
+  if (days === 1) { return 'Starts in 1 day'; }
+
+  return `Starts in ${days} days`;
+
+}
 
 registerForEvent(event: OpenEventView): void {
   this.selectedEvent = event;
@@ -258,38 +273,11 @@ confirmRegistration(): void {
     });
   }
 
-  private tick(): void {
-    const now = new Date();
-
-    this.activeEvents.forEach(event => {
-    const start = new Date(event.startDateTime);
-    const end = new Date(start.getTime() + event.duration * 60 * 60 * 1000);
-    
-    let target: Date;
-    let label: string;
-
-    if (now < start) {
-      target = start;
-      label = 'Starts in';
-    } else {
-      target = end;
-      label = 'Time Remaining';
-    }
-
-    const diff = Math.max(0, target.getTime() - now.getTime());
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    event.timer.label = label;
-    event.timer.days = String(days).padStart(2, '0');
-    event.timer.hours = String(hours).padStart(2, '0');
-    event.timer.minutes = String(minutes).padStart(2, '0');
-    event.timer.seconds = String(seconds).padStart(2, '0');
-    });
-
-    this.change.markForCheck();
-  }
+ private tick(): void {
+  this.activeEvents.forEach(event => {
+    event.timer = calculateEventTimer( event.startDateTime, event.duration );
+  });
+  this.change.markForCheck();
+}
 
 }

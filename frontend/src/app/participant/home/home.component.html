@@ -1,17 +1,9 @@
 <div class="page-container">
 
   <div class="welcome-section">
-    <h1 class="welcome-title">Welcome back, {{ userFirstName }}!👋</h1>
+    <h1 class="welcome-title">Welcome back, {{ userFirstName }}!</h1>
     <p class="welcome-sub">Ready to build something amazing today?</p>
   </div>
-
-  <div class="statcard-section">
-    <app-stat-card value="5"  label="Events" icon="pi pi-calendar" iconBackground="bright-blue"></app-stat-card>
-    <app-stat-card value="12" label="Submissions" icon="pi pi-code" iconBackground="teal"></app-stat-card>
-    <app-stat-card value="4" label="Teams" icon="pi pi-users" iconBackground="green"></app-stat-card>
-    <app-stat-card value="1,450" label="Points Earned"  icon="pi pi-star" iconBackground="orange"></app-stat-card>
-  </div>
-
 
   @if (isLoadingActiveEvents){
 
@@ -60,8 +52,10 @@
                     <div class="event-main-info">
 
                       <div class="event-tag">
-                        <span class="tag-live">
-                        <span class="live-dot"></span>Live Now</span>
+                        <span class="event-status-tag" [class.tag-live]="getEventTag(event) === 'Live Now'"[class.tag-starting]="getEventTag(event) === 'Starts Soon'" >
+                          <span class="status-dot"></span>
+                          {{ getEventTag(event) }}
+                        </span>
                       </div>
 
                       <h3 class="event-name">{{ event.name }}</h3> 
@@ -251,23 +245,24 @@
 
                 <div class="event-heading">
 
-                  <h3 class="ev-name">  {{ event.name }} </h3>
+                  <h3 class="ev-name">  {{ event.name }}</h3>
 
                   <p class="event-tagline"> Build, compete, and innovate with developers from around the world. mpete, and innovate with developers from around the world and innovate with developers from around the world</p>
 
                 </div>
 
                 <div class="event-actions">
+                  
+                  <div class="event-action-button"><app-button variant="secondary" (click)="goToEvent(event)"width="100%" (keydown)="null" (keyup)="null"> View Event</app-button></div>
 
-                 <app-button variant="secondary" (click)="goToEvent(event)"width="135px" (keydown)="null" (keyup)="null"> View Event</app-button>
-
-                 <app-button variant="primary" (click)="registerForEvent(event)" width="135px" (keydown)="null"(keyup)="null"> Register </app-button>
+                  <div class="event-action-button"> <app-button variant="primary" (click)="registerForEvent(event)" width="100%" (keydown)="null"(keyup)="null"> Register </app-button></div>
+                
 
                 </div>
 
               </div>
 
-              
+
               <div class="event-meta-row">
 
                 <div class="meta-item event-dates">
@@ -277,18 +272,25 @@
 
                 <div class="meta-item visibility-meta">
                   <i [class]="event.visibility === 'PRIVATE'  ? 'pi pi-lock'  : 'pi pi-globe'"> </i>
-                  <span> {{ event.visibility }} </span>
+                  <span>  {{ event.visibility | titlecase }} </span>
                 </div>
 
                 <div class="meta-item prize-meta">
-                  <i class="pi pi-gift"></i>
-                  <span> R10 000 Prize Pool</span>
+                  <i class="pi pi-trophy"></i>
+                   <span> R10 000 Prize Pool</span>
                 </div>
 
                 <div class="meta-item participants-meta">
                   <i class="pi pi-users"></i>
-                  <span> 120+ Participants </span>
+                   <span> 120+ Participants </span>
                 </div>
+
+                @if (getDaysUntilStart(event) !== null) {
+                <div class="event-start-tag">
+                  <i class="pi pi-clock"></i>
+                  <span>{{ getDaysUntilStart(event) }}</span>
+                </div>
+                }
 
               </div>
 
