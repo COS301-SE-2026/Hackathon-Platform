@@ -14,7 +14,7 @@ import { TextareaModule } from 'primeng/textarea';
 
 import { HackathonService, HackathonRequest, HackathonResponse } from '../../../services/hackathon.service';
 import { EventService } from '../../../services/event.service';
-import { LevelService } from '../../../services/level.service'; 
+import { LevelService } from '../../../services/level.service';
 import { StorageService } from '../../../services/storage.service';
 
 interface HackathonVm extends HackathonResponse {
@@ -271,7 +271,7 @@ export class HackathonsComponent implements OnInit {
         this.problemStatementUploadError = 'The problem statement must be a PDF file.';
         return;
     }
-    
+
     this.isSaving = true;
     this.problemStatementUploadError = '';
     this.problemStatementUploadSuccess = false;
@@ -299,8 +299,8 @@ export class HackathonsComponent implements OnInit {
             this.change.markForCheck();
 
             this.handlePostSaveUploads(saved.hackathonId);
-                    
-            
+
+
         },
         error: (err) => {
             this.isSaving = false;
@@ -322,13 +322,13 @@ export class HackathonsComponent implements OnInit {
         this.change.markForCheck();
 
     };
- 
+
  const uploadProblemStatementIfNeeded = () =>{
     if (!this.problemStatementFile){
         finish(this.editingHackathon ? 'The hackathon was updated successfully': 'The hackathon was created successfully');
         return;
     }
- 
+
 
  const renamedFile = new File([this.problemStatementFile], 'problem_statement.pdf',{
     type: this.problemStatementFile.type,
@@ -347,7 +347,7 @@ export class HackathonsComponent implements OnInit {
 
         }
         finish('The hackathon and problem statement were saved successfully');
-    
+
     },
     error: (err) =>{
         this.problemStatementUploadError = err.error?.message || 'Failed to upload the problem statement.';
@@ -408,7 +408,7 @@ if (this.hackathonImageFile){
  }
 
  navigateToHackathon(hackathonId: string):void {
-    this.router.navigate(['/admin/hackathons',hackathonId]);
+    this.router.navigate(['/admin/hackathons',hackathonId, 'levels']);
  }
 navigateToEvents(hackathonId: string): void {
     this.router.navigate(['/admin/hackathons', hackathonId, 'events']);
