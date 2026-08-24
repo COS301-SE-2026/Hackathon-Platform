@@ -165,44 +165,21 @@ confirmRegistration(): void {
  private setTabs(): void {
   const eventRoute = `/participant/events/${this.eventId}`;
 
-  this.tabs = [
-    {
-      label: 'Overview',
-      icon: 'pi pi-list',
-      route: eventRoute,
-      queryParams: { tab: 'overview' }
-    },
-    {
-      label: 'Rules',
-      icon: 'pi pi-file',
-      route: eventRoute,
-      queryParams: { tab: 'rules' }
-    },
-    {
-      label: 'My Team',
-      icon: 'pi pi-users',
-      route: eventRoute,
-      queryParams: { tab: 'team' }
-    },
-    {
-      label: 'Submissions',
-      icon: 'pi pi-code',
-      route: eventRoute,
-      queryParams: { tab: 'submissions' }
-    },
-    {
-      label: 'Submissions History',
-      icon: 'pi pi-history',
-      route: eventRoute,
-      queryParams: { tab: 'submission-history' }
-    },
-    {
-      label: 'Leaderboard',
-      icon: 'pi pi-trophy',
-      route: eventRoute,
-      queryParams: { tab: 'leaderboard' }
-    }
+  const tabDef = [
+    ['Overview', 'pi pi-list', 'overview'],
+    ['Rules', 'pi pi-file', 'rules'],
+    ['My Team', 'pi pi-users', 'team'],
+    ['Submissions', 'pi pi-code', 'submissions'],
+    ['Submissions History', 'pi pi-history', 'submission-history'],
+    ['Leaderboard', 'pi pi-trophy', 'leaderboard']
   ];
+
+  this.tabs = tabDef.map(([label, icon, tab]) => ({
+    label,
+    icon,
+    route: eventRoute,
+    queryParams: { tab }
+  }));
 }
 
   downloadProblemStatement(): void {
