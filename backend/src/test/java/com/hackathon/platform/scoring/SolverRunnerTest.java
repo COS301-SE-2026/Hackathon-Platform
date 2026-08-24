@@ -33,6 +33,9 @@ class SolverRunnerTest {
     setField(config, "pythonExecutable", "python");
     setField(config, "workDir", tempDir.resolve("scratch").toString());
     setField(config, "maxOutputBytes", 1024 * 1024);
+    setField(config, "allowedEnvKeysRaw", "PATH,HOME,LANG,LC_ALL,SystemRoot");
+    // setField(config, "memoryLimitMb", 512);
+    // setField(config, "cpuLimitSeconds", 30);
 
     solverRunner = new SolverRunner(config);
 
@@ -156,6 +159,67 @@ class SolverRunnerTest {
 
     assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("levelId=[]");
   }
+
+  @Test
+  void run_doesNotExposeUnallowedEnvironmentVariables_toSolverProcess() throws IOException {
+
+    Path script =
+        writeScript(
+            "import os, json\n"
+                + "allowed = {'PATH', 'HOME', 'LANG', 'LC_ALL', 'SystemRoot'}\n"
+                + "allowed_upper = {a.upper() for a in allowed}\n"
+                + "leaked = sorted(k for k in os.environ if k.upper() not in allowed_upper)\n"
+                + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", "
+                + "\"messages\": [\"leaked=\" + \",\".join(leaked)]}))");
+
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null, 1L);
+
+    assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("leaked=");
+  }
+
+  @Test
+  void run_stillExposesAllowListedEnvironmentVariables_toSolverProcess() throws IOException {
+    Path script =
+        writeScript(
+            "import os, json\n"
+                + "present = 'PATH' in os.environ\n"
+                + "print(json.dumps({\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"pathPresent=\" + str(present)]}))");
+
+    SolverRunOutcome outcome = solverRunner.run(script, outputFile, null, 1L);
+
+    assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("pathPresent=True");
+  }
+
+  // @Test
+  // void run_thatExceedsMemoryLimit_isKilledOnUnixOrSucceedsOnWindowsFallback() throws IOException{
+  //   SolverExecutionConfig lowMemConfig = new SolverExecutionConfig();
+  //   setField(lowMemConfig, "timeoutSeconds", 5);
+  //   setField(lowMemConfig, "pythonExecutable", "python");
+  //   setField(lowMemConfig, "workDir", tempDir.resolve("scratch3").toString());
+  //   setField(lowMemConfig, "maxOutputBytes", 1024 * 1024);
+  //   setField(lowMemConfig, "allowedEnvKeysRaw", "PATH,HOME,LANG,LC_ALL,SystemRoot");
+  //   setField(lowMemConfig, "memoryLimitMb", 64);
+  //   setField(lowMemConfig, "cpuLimitSeconds", 30);
+  //   SolverRunner lowMemRunner = new SolverRunner(lowMemConfig);
+
+  //   Path script =
+  //       writeScript(
+  //         "data = bytearray(500 * 1024 * 1024)\n"
+  //               + "print('{\"score\": 1, \"status\": \"SCORED\", \"messages\": [\"allocated
+  // ok\"]}')");
+
+  //   boolean windows = System.getProperty("os.name", "").toLowerCase().contains("win");
+  //   if (windows) {
+  //     SolverRunOutcome outcome = lowMemRunner.run(script, outputFile, null, 1L);
+  //     assertThat(outcome.getResult().getMessages().get(0)).isEqualTo("allocated ok");
+
+  //   } else {
+  //     assertThatThrownBy(() -> lowMemRunner.run(script, outputFile, null, 1L))
+  //         .isInstanceOf(SolverExecutionException.class)
+  //         .hasFieldOrPropertyWithValue("errorType", "SOLVER_CRASH");
+  //   }
+
+  // }
 
   private Path writeScript(String body) throws IOException {
     Path script = Files.createTempFile(tempDir, "solver-", ".py");

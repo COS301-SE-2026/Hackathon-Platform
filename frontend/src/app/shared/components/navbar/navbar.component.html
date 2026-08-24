@@ -1,7 +1,7 @@
-<nav class="navbar">
+<nav class="navbar" aria-label="Main navigation">
 
  <div class="navbar-logo">
- <a routerLink="/"><img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform"/></a>
+ <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform" />
  </div>
 
 
@@ -135,8 +135,7 @@ aria-label="Open navigation menu"
 
 @if (showSidebar) {
 
-<div class="sidebar-overlay" (click)="closeSidebar()"
-></div>
+<button type="button" class="sidebar-overlay" aria-label="Close sidebar" (click)="closeSidebar()"></button>
 
 <aside
     class="sidebar"
@@ -181,7 +180,7 @@ aria-label="Open navigation menu"
         Navigation
       </span>
 
-      <nav class="sidebar-links">
+      <nav class="sidebar-links" aria-label="Sidebar navigation">
 
         @for (link of links; track link.route) {
         <a
@@ -207,7 +206,7 @@ aria-label="Open navigation menu"
 
     <span class="sidebar-section-title">Account</span>
 
-   <nav class="sidebar-profile-links">
+   <nav class="sidebar-profile-links" aria-label="Profile navigation">
 
     @for (item of profileMenuItems; track item.label) {
     <a

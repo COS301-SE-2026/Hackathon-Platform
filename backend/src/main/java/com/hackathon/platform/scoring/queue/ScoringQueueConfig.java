@@ -50,7 +50,7 @@ public class ScoringQueueConfig {
   private boolean isBusyGroupError(Throwable e) {
     Throwable curr = e;
     while (curr != null) {
-      if (curr.getMessage() != null & curr.getMessage().contains("BUSYGROUP")) {
+      if (curr.getMessage() != null && curr.getMessage().contains("BUSYGROUP")) {
         return true;
       }
       curr = curr.getCause();
@@ -72,6 +72,7 @@ public class ScoringQueueConfig {
         StreamMessageListenerContainerOptions.builder()
             .pollTimeout(Duration.ofMillis(properties.getPollTimeoutMs()))
             .executor(executor)
+            .errorHandler(t -> logger.error("Scoring stream listener error", t))
             .build();
     StreamMessageListenerContainer<String, MapRecord<String, String, String>> container =
         StreamMessageListenerContainer.create(connection, options);

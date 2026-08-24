@@ -1,0 +1,32 @@
+<div class="modal-overlay">
+
+<dialog class="modal" [class.modal--small]="size === 'small'" [class.modal--medium]="size === 'medium'" [class.modal--large]="size === 'large'" aria-labelledby="modal-title" >
+
+<div class="modal-header">
+
+<h2 id="modal-title">{{ title }} </h2>
+
+  
+<button type="button" class="modal-close" aria-label="Close modal" (click)="close()"> <i class="pi pi-times"></i></button>
+   
+</div>
+
+  
+<div class="modal-body">
+<ng-content select="[modal-body]"></ng-content>
+</div>
+
+ 
+<div
+  class="modal-footer"
+  [class.modal-footer--center]="footerLayout === 'center'"
+  [class.modal-footer--split]="footerLayout === 'split'"
+>
+  <ng-content select="[modal-footer-left]"></ng-content>
+
+  <ng-content select="[modal-footer-right]"></ng-content>
+</div>
+
+</dialog>
+
+</div>
