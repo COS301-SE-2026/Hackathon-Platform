@@ -165,7 +165,7 @@ class InsightsServiceTest {
 
     @Test
     void getEventInsights_computesErrorRateFromScoredAndFailedCounts() {
-        
+
         when(teamRepository.countByEventIdAndStatus(eventId, "ACTIVE")).thenReturn(1L);
         when(teamRepository.findByEventId(eventId)).thenReturn(Collections.emptyList());
         when(submissionRepository.countByEventId(eventId)).thenReturn(10L);
@@ -173,7 +173,7 @@ class InsightsServiceTest {
             .thenReturn(2L);
         
         SubmissionRepository.StatusCount scored = mockStatusCount("SCORED", 7L);
-        SubmissionRepository.StatusCount failed = mockStatusCount("FAILED", 7L);
+        SubmissionRepository.StatusCount failed = mockStatusCount("FAILED", 3L);
         when(submissionRepository.countByEventIdGroupByStatus(eventId))
             .thenReturn(List.of(scored, failed));
         when(submissionRepository.findSubmissionRateSince(eq(eventId), any(Instant.class)))
@@ -184,6 +184,71 @@ class InsightsServiceTest {
 
         assertThat(response.getErrorRate()).isEqualTo(0.3);
 
+    }
+
+    @Test
+    void getEventInsights_mapsScoreDistributionRowsToDtos() {
+        when(teamRepository.countByEventIdAndStatus(eventId, "ACTIVE")).thenReturn(0L);
+        when(teamRepository.findByEventId(eventId)).thenReturn(Collections.emptyList());
+        when(submissionRepository.countByEventId(eventId)).thenReturn(0L);
+        when(submissionRepository.countByEventIdAndSubmittedAtAfter(eq(eventId), any(Instant.class)))
+            .thenReturn(0L);
+        when(submissionRepository.countByEventIdGroupByStatus(eventId)).thenReturn(List.of());
+        when(submissionRepository.findSubmissionRateSince(eq(eventId), any(Instant.class)))
+            .thenReturn(List.of());
+
+        SubmissionRepository.LevelScoreRow row = mockLevelScoreRow();
+        when(submissionRepository.findScoreDistributionByEventId(eventId)).thenReturn(List.of(row));
+
+        EventInsightsResponse response = insightsService.getEventInsights(eventId, 60);
+
+        assertThat(response.getScoreDistributionByLevel()).hasSize(1);
+        assertThat(response.getScoreDistributionByLevel().get(0).getLevelName()).isEqualTo("Level 1");
+        assertThat(response.getScoreDistributionByLevel().get(0).getAvgScore())
+            .isEqualByComparingTo(new BigDecimal("55.5"));
+
+    }
+
+    @Test
+    void getEventInsights_usesRequestedTrendWindow() {
+
+        when(teamRepository.countByEventIdAndStatus(eventId, "ACTIVE")).thenReturn(0L);
+        when(teamRepository.findByEventId(eventId)).thenReturn(Collections.emptyList());
+        when(submissionRepository.countByEventId(eventId)).thenReturn(0L);
+        when(submissionRepository.countByEventIdAndSubmittedAtAfter(eq(eventId), any(Instant.class)))
+            .thenReturn(0L);
+        when(submissionRepository.countByEventIdGroupByStatus(eventId)).thenReturn(List.of());
+        when(submissionRepository.findScoreDistributionByEventId(eventId)).thenReturn(List.of());
+        when(submissionRepository.findSubmissionRateSince(eq(eventId), any(Instant.class)))
+            .thenReturn(List.of());
+
+        insightsService.getEventInsights(eventId, 120);
+
+        verify(submissionRepository).findSubmissionRateSince(eq(eventId), any(Instant.class));
+
+    }
+
+    private SubmissionRepository.StatusCount mockStatusCount(String status, long total) {
+
+        SubmissionRepository.StatusCount statusCount =
+            org.mockito.Mockito.mock(SubmissionRepository.StatusCount.class);
+        when(statusCount.getStatus()).thenReturn(status);
+        when(statusCount.getTotal()).thenReturn(total);
+        return statusCount;
+
+    }
+
+    private SubmissionRepository.LevelScoreRow mockLevelScoreRow() {
+        SubmissionRepository.LevelScoreRow row =
+            org.mockito.Mockito.mock(SubmissionRepository.LevelScoreRow.class);
+        when(row.getLevelId()).thenReturn((short) 1);
+        when(row.getLevelName()).thenReturn("Level 1");
+        when(row.getScoredSubmissions()).thenReturn(4L);
+        when(row.getMinScore()).thenReturn(new BigDecimal("10.0"));
+        when(row.getMaxScore()).thenReturn(new BigDecimal("100.0"));
+        when(row.getAvgScore()).thenReturn(new BigDecimal("55.5"));
+        return row;
+        
     }
 
 
