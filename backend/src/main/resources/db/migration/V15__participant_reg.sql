@@ -2,7 +2,7 @@ CREATE TABLE event_participants (
     registration_id UUID PRIMARY KEY,
     event_id UUID NOT NULL,
     user_id UUID NOT NULL,
-    registered_at TIMESTAMPZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    registered_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_event_participants_event_id
         FOREIGN KEY (event_id)

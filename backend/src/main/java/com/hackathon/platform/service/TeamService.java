@@ -121,7 +121,7 @@ public class TeamService {
   }
 
   @Transactional
-  public void requestToJoinTeamByCode(String joinCode, UUID currUser, String regKey) {
+  public void requestToJoinTeamByCode(String joinCode, UUID currUser) {
     Team team =
         teamRepository
             .findByJoinCode(normalizeJoinCode(joinCode))
