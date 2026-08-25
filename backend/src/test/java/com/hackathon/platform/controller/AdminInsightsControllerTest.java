@@ -36,4 +36,107 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class AdminInsightsControllerTest {
     
+    @Autowired private MockMvc mockMvc;
+
+    @MockBean private InsightsService insightsService;
+
+    private static final UUID EVENT_ID = UUID.fromString("c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
+    private static final UUID ADMIN_EVENT_ID = UUID.fromString("c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
+
+    private UsernamePasswordAuthenticationToken adminAuth;
+    private UsernamePasswordAuthenticationToken participantAuth;
+    private User adminUser;
+    private User participantUser;
+
+    @BeforeEach
+    void setUp(){
+        adminUser =
+            User.builder()
+                .userId(ADMIN_EVENT_ID)
+                .firstName("Admin")
+                .lastName("User")
+                .email("admin@test.com")
+                .passwordHash("hash")
+                .status("ACTIVE")
+                .role(Role.builder().roleId(1).name("ADMIN").build())
+                .build();
+
+        participantUser =
+            User.builder()
+                .userId(UUID.randomUUID())
+                .firstName("Participant")
+                .lastName("User")
+                .email("participant@test.com")
+                .passwordHash("hash")
+                .status("ACTIVE")
+                .role(Role.builder().roleId(2).name("PARTICIPANT").build())
+                .build();
+
+        adminAuth =
+            new UsernamePasswordAuthenticationToken(
+                adminUser, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+
+            );
+        
+        participantAuth =
+            new UsernamePasswordAuthenticationToken(
+                participantUser, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT"))
+
+            );
+
+    }
+
+    private AdminDashboardResponse sampleDashboard() {
+        return new AdminDashboardResponse(2L, 3L, 25L, 4L);
+
+    }
+
+    private EventInsightsResponse sampleEventInsights() {
+        Map<String, Long> byStatus =
+            Map.of("QUEUED", 1L, "SCORING", 1L, "SCORED", 7L, "FAILED", 3L);
+        List<SubmissionRateBucket> rate =
+            List.of(new SubmissionRateBucket(Instant.parse("2026-08-24T10:0:00Z"), 5L));
+        List<LevelScoreStats> distribution =
+            List.of(
+                new LevelScoreStats(
+                    (short) 1,
+                    "Level 1",
+                    7L,
+                    new BigDecimal("10.0"),
+                    new BigDecimal("100.0"),
+                    new BigDecimal("55.5")
+                )
+            );
+        
+        return new EventInsightsResponse(
+            EVENT_ID, 4L, 12L, 12L, 3L, byStatus, 0.3, rate, distribution
+        );
+    }
+
+    @Test
+    void getAdminDashboard_asAdmin_returns200WithBodyFromService() throws Exception {
+        when(insightsService.getAdminDashboard(ADMIN_EVENT_ID)).thenReturn(sampleDashboard());
+
+        mockMvc
+            .perform(get("/api/admin/dashboard").with(authentication(adminAuth)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.activeEvents").value(2))
+            .andExpect(jsonPath("$.totalEvents").value(3))
+            .andExpect(jsonPath("$.totalParticipants").value(25))
+            .andExpect(jsonPath("$.submissionsToday").value(4));
+
+    }
+
+    @Test
+    void getAdminDashboard_asParticipant_returns403Forbidden() throws Exception {
+        mockMvc
+            .perform(get("/api/admin/dashboard").with(authentication(participantAuth)))
+            .andExpect(status().isForbidden());
+
+    }
+
+    
+
+
+
 }
