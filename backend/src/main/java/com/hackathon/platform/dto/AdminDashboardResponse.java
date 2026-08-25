@@ -22,31 +22,15 @@ public class AdminDashboardResponse {
     return activeEvents;
   }
 
-  public void setActiveEvents(long activeEvents) {
-    this.activeEvents = activeEvents;
-  }
-
   public long getTotalEvents() {
     return totalEvents;
-  }
-
-  public void setTotalEvents(long totalEvents) {
-    this.totalEvents = totalEvents;
   }
 
   public long getTotalParticipants() {
     return totalParticipants;
   }
 
-  public void setTotalParticipants(long totalParticipants) {
-    this.totalParticipants = totalParticipants;
-  }
-
   public long getSubmissionsToday() {
     return submissionsToday;
-  }
-
-  public void setSubmissionsToday(long submissionsToday) {
-    this.submissionsToday = submissionsToday;
   }
 }

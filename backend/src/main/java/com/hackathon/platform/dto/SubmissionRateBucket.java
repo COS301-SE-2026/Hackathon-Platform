@@ -18,15 +18,7 @@ public class SubmissionRateBucket {
     return bucketStart;
   }
 
-  public void setBucketStart(Instant bucketStart) {
-    this.bucketStart = bucketStart;
-  }
-
   public long getCount() {
     return count;
-  }
-
-  public void setCount(long count) {
-    this.count = count;
   }
 }
