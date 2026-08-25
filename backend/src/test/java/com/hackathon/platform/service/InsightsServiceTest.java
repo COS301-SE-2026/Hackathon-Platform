@@ -117,7 +117,73 @@ class InsightsServiceTest {
         AdminDashboardResponse response = insightsService.getAdminDashboard(adminUserId);
 
         assertThat(response.getTotalParticipants()).isEqualTo(7L);
+
+    }
+
+    @Test
+    void getEventInsights_withNoTeams_returnsZeroParticipantsWithoutQueryingTeamMembers() {
+        when(teamRepository.countByEventIdAndStatus(eventId, "ACTIVE")).thenReturn(0L);
+        when(teamRepository.findByEventId(eventId)).thenReturn(Collections.emptyList());
+        when(submissionRepository.countByEventId(eventId)).thenReturn(0L);
+        when(submissionRepository.countByEventIdAndSubmittedAtAfter(eq(eventId), any(Instant.class)))
+            .thenReturn(0L);
+        when(submissionRepository.countByEventIdGroupByStatus(eventId)).thenReturn(List.of());
+        when(submissionRepository.findSubmissionRateSince(eq(eventId), any(Instant.class)))
+            .thenReturn(List.of());
+        when(submissionRepository.findScoreDistributionByEventId(eventId)).thenReturn(List.of());
+
+        EventInsightsResponse response = insightsService.getEventInsights(eventId, 60);
+
+        assertThat(response.getApprovedParticipants()).isZero();
+        verify(teamMemberRepository, org.mockito.Mockito.never())
+            .countByTeamIdInAndStatus(anyList(), any());
+
+    }
+
+    @Test
+    void getEventInsights_withNoFinishedSubmissions_errorRateIsNull() {
+
+        when(teamRepository.countByEventIdAndStatus(eventId, "ACTIVE")).thenReturn(2L);
+        when(teamRepository.findByEventId(eventId)).thenReturn(Collections.emptyList());
+        when(submissionRepository.countByEventId(eventId)).thenReturn(3L);
+        when(submissionRepository.countByEventIdAndSubmittedAtAfter(eq(eventId), any(Instant.class)))
+            .thenReturn(1L);
         
+        SubmissionRepository.StatusCount queued = mockStatusCount("QUEUED", 3L);
+        when(submissionRepository.countByEventIdGroupByStatus(eventId)).thenReturn(List.of(queued));
+        when(submissionRepository.findSubmissionRateSince(eq(eventId), any(Instant.class)))
+            .thenReturn(List.of());
+        when(submissionRepository.findScoreDistributionByEventId(eventId)).thenReturn(List.of());
+
+        EventInsightsResponse response = insightsService.getEventInsights(eventId, 60);
+
+        assertThat(response.getErrorRate()).isNull();
+        assertThat(response.getSubmissionsByStatus()).containsEntry("QUEUED", 3L);
+        assertThat(response.getSubmissionsByStatus()).containsEntry("SCORED", 0L);
+
+    }
+
+    @Test
+    void getEventInsights_computesErrorRateFromScoredAndFailedCounts() {
+        
+        when(teamRepository.countByEventIdAndStatus(eventId, "ACTIVE")).thenReturn(1L);
+        when(teamRepository.findByEventId(eventId)).thenReturn(Collections.emptyList());
+        when(submissionRepository.countByEventId(eventId)).thenReturn(10L);
+        when(submissionRepository.countByEventIdAndSubmittedAtAfter(eq(eventId), any(Instant.class)))
+            .thenReturn(2L);
+        
+        SubmissionRepository.StatusCount scored = mockStatusCount("SCORED", 7L);
+        SubmissionRepository.StatusCount failed = mockStatusCount("FAILED", 7L);
+        when(submissionRepository.countByEventIdGroupByStatus(eventId))
+            .thenReturn(List.of(scored, failed));
+        when(submissionRepository.findSubmissionRateSince(eq(eventId), any(Instant.class)))
+            .thenReturn(List.of());
+        when(submissionRepository.findScoreDistributionByEventId(eventId)).thenReturn(List.of());
+
+        EventInsightsResponse response = insightsService.getEventInsights(eventId, 60);
+
+        assertThat(response.getErrorRate()).isEqualTo(0.3);
+
     }
 
 
