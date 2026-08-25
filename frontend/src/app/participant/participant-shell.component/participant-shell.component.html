@@ -1,32 +1,15 @@
 <div class="participant-shell">
 
-<nav class="topnav">
+  <app-navbar
+    [links]="navbarLinks"
+    [firstName]="firstName"
+    [lastName]="lastName"
+    [profileSubtitle]="'Participant'"
 
-<div class="topnav-left">
-<div class="logo-badge">H</div>
-  <span class="brand"> Hackathon <span class="brand-accent">Platform</span></span>
-  </div>
-
-<div class="topnav-links">
-
- <a routerLink="/participant/home" routerLinkActive="active">Home</a>
+    (logout)="logout()"
+  ></app-navbar>
 
 
-<a routerLink="/participant/help" routerLinkActive="active">Help</a>
-
-</div>
-
- <div class="topnav-right">
-
-<span class="participant-pill">Participant</span>
-
- <div class="avatar-circle">{{ userName.charAt(0).toUpperCase() }} </div>
-
-<button class="logout-btn" (click)="logout()">  Logout</button>
-
- </div>
-
-</nav>
 
  <main class="participant-content">
         <router-outlet></router-outlet>

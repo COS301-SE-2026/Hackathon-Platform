@@ -8,6 +8,8 @@ import { Component, Input } from '@angular/core';
 })
 
 export class ButtonComponent {
+  @Input() width?: string; 
   @Input() variant: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success' = 'primary';
+  @Input() disabled = false;
 
 }

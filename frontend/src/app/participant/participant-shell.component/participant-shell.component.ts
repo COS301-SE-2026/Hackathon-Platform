@@ -1,49 +1,50 @@
-import { Component, inject, OnInit, HostListener } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 
 
 @Component({
   selector: 'app-participant-shell',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NavbarComponent],
   templateUrl: './participant-shell.component.html',
   styleUrls: ['./participant-shell.component.scss']
 })
 export class ParticipantShellComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  userName = '';
-  sidebarVisible = false;
-   userMenuOpen = false;
+  firstName = '';
+  lastName = '';
 
-  ngOnInit(): void {
-    const user = this.authService.getUser();
-    this.userName = user ? `${user.firstName}` : 'Participant';
-    
 
-  }
+   readonly navbarLinks = [
+    {
+      label: 'Home',
+      route: '/participant/home'
+    },
+    {
+      label: 'Upcoming Events',
+      route: ''
+    },
+    {
+      label: 'Help',
+      route: '/participant/help'
+    }
+  ];
 
-  toggleUserMenu(): void {
-  this.userMenuOpen = !this.userMenuOpen;
-  }
+ ngOnInit(): void {
+  const user = this.authService.getUser();
+
+  this.firstName = user?.firstName ?? 'Participant';
+  this.lastName = user?.lastName ?? '';
+ }
 
   logout(): void {
-    this.userMenuOpen = false;
     this.authService.logout();
     this.router.navigate(['/']);
   }
 
-
-@HostListener('window:resize')
-onResize(): void {
-
-  this.userMenuOpen = false;
-  if (window.innerWidth > 768 && this.sidebarVisible) {
-    this.sidebarVisible = false;
-  }
-}
 
 }

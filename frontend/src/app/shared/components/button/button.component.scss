@@ -1,6 +1,6 @@
 .button {
   padding: 10px var(--space-6);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   font-family: var(--font-family-base);
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
@@ -9,13 +9,11 @@
 
 }
 
-
 .button-primary {
   background-color: var(--bright-blue);
   color: var(--white);
   border: none;
 }
-
 
 .button-secondary {
   background-color: var(--white);
