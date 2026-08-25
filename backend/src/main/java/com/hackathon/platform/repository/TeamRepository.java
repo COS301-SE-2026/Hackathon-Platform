@@ -17,4 +17,8 @@ public interface TeamRepository extends JpaRepository<Team, UUID> {
   Optional<Team> findByJoinCode(String joinCode);
 
   List<Team> findByEventId(UUID eventId);
+
+  long countByEventId(UUID eventId);
+
+  long countByEventIdAndStatus(UUID eventId, String status);
 }
