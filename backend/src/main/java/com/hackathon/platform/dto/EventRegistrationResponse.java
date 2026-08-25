@@ -11,12 +11,16 @@ public class EventRegistrationResponse {
   private UUID regId;
   private UUID eventId;
   private Instant registeredAt;
+  private String dietaryReq;
+  private String allergies;
 
   public EventRegistrationResponse() {}
 
-  public EventRegistrationResponse(UUID regId, UUID eventId, Instant registeredAt) {
+  public EventRegistrationResponse(UUID regId, UUID eventId, Instant registeredAt, String dietaryReq, String allergies) {
     this.regId = regId;
     this.eventId = eventId;
     this.registeredAt = registeredAt;
+    this.dietaryReq = dietaryReq;
+    this.allergies = allergies;
   }
 }

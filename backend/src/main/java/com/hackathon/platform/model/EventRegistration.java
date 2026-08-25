@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import jakarta.persistence.PrePersist;
 
 @Entity
 @Table(name = "event_participants", schema = "public")
@@ -29,4 +30,17 @@ public class EventRegistration {
 
   @Column(name = "registered_at", nullable = false)
   private Instant registeredAt;
+
+  @Column(name = "dietary_requirements", columnDefinition = "TEXT")
+  private String dietaryReq;
+
+  @Column(name = "allergies", columnDefinition = "TEXT")
+  private String allergies;
+
+  @PrePersist
+  protected void onCreate(){
+    if(registeredAt == null){
+      registeredAt = Instant.now();
+    }
+  }
 }

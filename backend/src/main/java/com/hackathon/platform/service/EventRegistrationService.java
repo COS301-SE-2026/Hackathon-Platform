@@ -61,6 +61,6 @@ public class EventRegistrationService {
 
   private EventRegistrationResponse toResponse(EventRegistration reg) {
     return new EventRegistrationResponse(
-        reg.getRegistrationId(), reg.getEventId(), reg.getRegisteredAt());
+        reg.getRegistrationId(), reg.getEventId(), reg.getRegisteredAt(), reg.getDietaryReq(), reg.getAllergies());
   }
 }
