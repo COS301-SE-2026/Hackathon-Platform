@@ -41,7 +41,7 @@ class AdminInsightsControllerTest {
     @MockBean private InsightsService insightsService;
 
     private static final UUID EVENT_ID = UUID.fromString("c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
-    private static final UUID ADMIN_EVENT_ID = UUID.fromString("c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
+    private static final UUID ADMIN_USER_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
     private UsernamePasswordAuthenticationToken adminAuth;
     private UsernamePasswordAuthenticationToken participantAuth;
@@ -52,7 +52,7 @@ class AdminInsightsControllerTest {
     void setUp(){
         adminUser =
             User.builder()
-                .userId(ADMIN_EVENT_ID)
+                .userId(ADMIN_USER_ID)
                 .firstName("Admin")
                 .lastName("User")
                 .email("admin@test.com")
@@ -95,7 +95,7 @@ class AdminInsightsControllerTest {
         Map<String, Long> byStatus =
             Map.of("QUEUED", 1L, "SCORING", 1L, "SCORED", 7L, "FAILED", 3L);
         List<SubmissionRateBucket> rate =
-            List.of(new SubmissionRateBucket(Instant.parse("2026-08-24T10:0:00Z"), 5L));
+            List.of(new SubmissionRateBucket(Instant.parse("2026-08-24T10:00:00Z"), 5L));
         List<LevelScoreStats> distribution =
             List.of(
                 new LevelScoreStats(
@@ -115,7 +115,7 @@ class AdminInsightsControllerTest {
 
     @Test
     void getAdminDashboard_asAdmin_returns200WithBodyFromService() throws Exception {
-        when(insightsService.getAdminDashboard(ADMIN_EVENT_ID)).thenReturn(sampleDashboard());
+        when(insightsService.getAdminDashboard(ADMIN_USER_ID)).thenReturn(sampleDashboard());
 
         mockMvc
             .perform(get("/api/admin/dashboard").with(authentication(adminAuth)))
@@ -144,7 +144,7 @@ class AdminInsightsControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.eventId").value(EVENT_ID.toString()))
             .andExpect(jsonPath("$.activeTeams").value(4))
-            .andExpect(jsonPath("$approvedParticipants").value(12))
+            .andExpect(jsonPath("$.approvedParticipants").value(12))
             .andExpect(jsonPath("$.totalSubmissions").value(12))
             .andExpect(jsonPath("$.submissionsLastHour").value(3))
             .andExpect(jsonPath("$.submissionsByStatus.SCORED").value(7))
@@ -155,7 +155,43 @@ class AdminInsightsControllerTest {
             .andExpect(jsonPath("$.scoreDistributionByLevel[0].levelName").value("Level 1"));
     }
 
-    
+    @Test
+    void getEventInsights_asParticipant_returns403Forbidden() throws Exception {
+        mockMvc
+            .perform(
+                get("/api/admin/events/{id}/insights", EVENT_ID).with(authentication(participantAuth))
+            )
+            .andExpect(status().isForbidden());
+
+    }
+
+    @Test
+    void getEventInsights_withDefaultTrendWindow_passes60ToService() throws Exception {
+        when(insightsService.getEventInsights(eq(EVENT_ID), eq(60))).thenReturn(sampleEventInsights());
+
+        mockMvc
+            .perform(
+                get("/api/admin/events/{id}/insights", EVENT_ID).with(authentication(adminAuth))
+            )
+            .andExpect(status().isOk());
+
+
+
+    }
+
+    @Test
+    void getEventInsights_withCustomTrendWindow_passesParamToService() throws Exception {
+        when(insightsService.getEventInsights(eq(EVENT_ID), eq(15))).thenReturn(sampleEventInsights());
+
+        mockMvc
+            .perform(
+                get("/api/admin/events/{id}/insights", EVENT_ID)
+                    .param("trendWindowMinutes", "15")
+                    .with(authentication(adminAuth))
+            )
+            .andExpect(status().isOk());
+
+    }
 
 
 
