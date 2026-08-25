@@ -135,6 +135,26 @@ class AdminInsightsControllerTest {
 
     }
 
+    @Test
+    void getEventInsights_asAdmin_returns200WithBodyFromService() throws Exception {
+        when(insightsService.getEventInsights(eq(EVENT_ID), anyInt())).thenReturn(sampleEventInsights());
+
+        mockMvc
+            .perform(get("/api/admin/events/{id}/insights", EVENT_ID).with(authentication(adminAuth)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.eventId").value(EVENT_ID.toString()))
+            .andExpect(jsonPath("$.activeTeams").value(4))
+            .andExpect(jsonPath("$approvedParticipants").value(12))
+            .andExpect(jsonPath("$.totalSubmissions").value(12))
+            .andExpect(jsonPath("$.submissionsLastHour").value(3))
+            .andExpect(jsonPath("$.submissionsByStatus.SCORED").value(7))
+            .andExpect(jsonPath("$.submissionsByStatus.FAILED").value(3))
+            .andExpect(jsonPath("$.errorRate").value(0.3))
+            .andExpect(jsonPath("$.submissionRate", org.hamcrest.Matchers.hasSize(1)))
+            .andExpect(jsonPath("$.scoreDistributionByLevel", org.hamcrest.Matchers.hasSize(1)))
+            .andExpect(jsonPath("$.scoreDistributionByLevel[0].levelName").value("Level 1"));
+    }
+
     
 
 
