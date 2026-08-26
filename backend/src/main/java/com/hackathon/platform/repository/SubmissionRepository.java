@@ -1,6 +1,7 @@
 package com.hackathon.platform.repository;
 
 import com.hackathon.platform.model.Submission;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -103,4 +104,80 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   boolean existsByOutputStorageKey(String storageKey);
 
   boolean existsBySourceCodeStorageKey(String storageKey);
+
+  long countByEventId(UUID eventId);
+
+  @Query(
+      "SELECT COUNT(s) FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId AND s.submittedAt >= :since")
+  long countByAdminSince(@Param("userId") UUID userId, @Param("since") Instant since);
+
+  long countByEventIdAndSubmittedAtAfter(UUID eventId, Instant since);
+
+  @Query(
+      "SELECT s.status AS status, COUNT(s) AS total FROM Submission s WHERE s.eventId = :eventId GROUP BY s.status")
+  List<StatusCount> countByEventIdGroupByStatus(@Param("eventId") UUID eventId);
+
+  @Query(
+      value =
+          """
+       SELECT date_trunc('minute', submitted_at) AS "bucketStart", COUNT(*) AS "count"
+       FROM submissions
+       WHERE event_id = :eventId AND submitted_at >= :since
+       GROUP BY date_trunc('minute', submitted_at)
+       ORDER BY "bucketStart" ASC
+        """,
+      nativeQuery = true)
+  List<SubmissionRateRow> findSubmissionRateSince(
+      @Param("eventId") UUID eventId, @Param("since") Instant since);
+
+  @Query(
+      value =
+          """
+       SELECT
+            s.level_id AS "levelId",
+            l.name AS "levelName",
+            COUNT(*) AS "scoredSubmissions",
+            MIN(s.score) AS "minScore",
+            MAX(s.score) AS "maxScore",
+            AVG(s.score) AS "avgScore"
+       FROM submissions s
+       JOIN levels l ON l.id = s.level_id
+       WHERE s.event_id = :eventId AND s.status = 'SCORED'
+       GROUP BY s.level_id, l.name
+       ORDER BY s.level_id ASC
+        """,
+      nativeQuery = true)
+  List<LevelScoreRow> findScoreDistributionByEventId(@Param("eventId") UUID eventId);
+
+  long countByEventIdAndStatus(UUID eventId, String status);
+
+  /** Projection for gtoup by status counts */
+  interface StatusCount {
+    String getStatus();
+
+    long getTotal();
+  }
+
+  /** Projection for the submission rate time series */
+  interface SubmissionRateRow {
+
+    Instant getBucketStart();
+
+    long getCount();
+  }
+
+  /** Projection for the per level score distribution */
+  interface LevelScoreRow {
+    short getLevelId();
+
+    String getLevelName();
+
+    long getScoredSubmissions();
+
+    java.math.BigDecimal getMinScore();
+
+    java.math.BigDecimal getMaxScore();
+
+    java.math.BigDecimal getAvgScore();
+  }
 }
