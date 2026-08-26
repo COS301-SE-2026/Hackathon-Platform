@@ -11,7 +11,7 @@ export const routes: Routes = [
   {path: 'style-guide', loadComponent: () => import('./components/brand-style-guide/brand-style-guide.component').then( m => m.BrandStyleGuideComponent),},
   {
   path: 'component-tests', loadComponent: () =>import('./component-tests/component-tests.component').then(m => m.ComponentTestsComponent)},
-  
+
   {
     path: 'admin',
     component: AdminShellComponent,
@@ -48,6 +48,14 @@ export const routes: Routes = [
       {
         path: 'hackathons/:hackathonId/solver',
         loadComponent: () => import('./admin/components/solver/solver.component').then(m => m.SolverComponent),
+      },
+      {
+        path: "hackathons/:hackathonId/announcements",
+        loadComponent: () => import ('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
+      },
+      {
+        path: "settings",
+        loadComponent: () => import ('./admin/components/profile/admin-profile.component').then(m => m.AdminProfileComponent),
       },
       {
         path: '',

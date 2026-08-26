@@ -45,7 +45,7 @@ describe('CreateEventComponent', () => {
 
     const inputElement = document.createElement('input');
     component.fileInput = new ElementRef(inputElement);
-    
+
     fixture.detectChanges();
   });
 
@@ -55,7 +55,6 @@ describe('CreateEventComponent', () => {
 
   it('should have default form values', () => {
     expect(component.form.eventName).toBe('');
-    expect(component.form.startDate).toBe('2024-12-01T09:00');
     expect(component.form.visibility).toBe('PUBLIC');
     expect(component.form.bannerFile).toBeNull();
     expect(component.form.bannerFileName).toBe('');

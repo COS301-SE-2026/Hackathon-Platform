@@ -1,21 +1,49 @@
 <div class = "solver-page">
 
      <div class = "back-navigation" >
-      <button class = "btn-secondary" (click) = "goBack()">Back to Hackathon
+      <button class = "back-btn" (click) = "goBack()">
+        <i class = "pi pi-arrow-left"></i>
+        Back to Hackathon
       </button>
+    </div>
+
+    <div class = "hackathon-header">
+        <div class = "hackathon-header-info">
+            <h1>{{hackathonName || 'Loading...'}}</h1>
+            <p class = "hackathon-header-subtitle">{{hackathonDescription}}</p>
+        </div>
+        <div class = "hackathon-header-stats">
+            <div class = "stat-item">
+                <i class = "pi pi-clone"></i>
+                <div class = "stat-item-text">
+                    <span class = "stat-value">{{levelsCount}}</span>
+                    <span class = "stat-label">Levels</span>
+                </div>
+            </div>
+            <div class = "stat-item">
+                <i class = "pi pi-calendar"></i>
+                <div class = "stat-item-text">
+                    <span class = "stat-value">{{eventsCount}}</span>
+                    <span class = "stat-label">Events</span>
+                </div>
+            </div>
+            <div class = "stat-item">
+                <i class = "pi pi-users"></i>
+                <div class = "stat-item-text">
+                    <span class = "stat-value">{{participantsCount | number}}</span>
+                    <span class = "stat-label">Participants</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class = "event-subnav">
         <div class = "event-subnav-inner">
-            <span class = "event-tag">ENTELECT 2026</span>
             <div class = "event-tabs">
-                <a routerLink="Overview" routerLinkActive="active">Overview &amp; live ops</a>
-                <a routerLink="Levels" routerLinkActive="active">Levels &amp; files</a>
-                <a routerLink="Solver" routerLinkActive="active">Solver</a>
-                <a routerLink="Registrations" routerLinkActive="active">Registrations</a>
-                <a routerLink="Teams" routerLinkActive="active">Teams</a>
-                <a routerLink="Submissions" routerLinkActive="active">Submissions</a>   
-                <a routerLink="Analytics" routerLinkActive="active">Analytics</a>
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
+            <a routerLink = "/admin/hackathons/{{hackathonId }}/announcements" routerLinkActive = "active"><i class = "pi pi-megaphone"></i>Announcements</a>
             </div>
         </div>
     </div>
@@ -24,8 +52,8 @@
 <main class = "content">
     <div class = "page-header">
         <div>
-            <h1>Solver management</h1>
-            <p class = "page-subtitle">Entelect Challenge 2026</p>
+            <h1>Solver Management</h1>
+            <p class = "page-subtitle">Upload and manage solver versions for this hackathon.</p>
         </div>
         <div class = "page-header-actions">
             <button class = "btn-secondary" [disabled] = "isRescoring" (click) = "rescoreAllSubmissions()">
@@ -42,13 +70,14 @@
         <p class = "rescore-message rescore-error">{{ rescoreError }}</p>
     }
 
-    <div class = "upload-card">
-        <h2 class = "card-title">Upload solver version</h2>
-        <p class = "card-hint">Solver file (.py)</p>
 
+    <div class = "upload-card" >   
+        <h2 class = "card-title">Upload solver version</h2>
+
+        <div class = "upload-row" #uploadForm>
         <label for = "fileInput" class = "sr-only">Upload solver file</label>
         <button class = "drop-zone"
-        #uploadForm
+    
         (click) = "fileInput.click()"
         (keyup.enter) = "fileInput.click()"
         (keyup.space) = "fileInput.click()"
@@ -56,19 +85,35 @@
         (drop) = "onDropFile($event)"
         type = "button">
     <input #fileInput id = "fileInput" type = "file" style = "display:none" (change) = "onFileSelected($event)" accept=".py,.jar,.zip"/>
-    <span>{{ selectedFileName || '+ Drop solver file here or browse' }}</span>
-    
-    </button>
-    <div class = "form-row">
-        <div class = "form-group">
-            <label for = "changeNotes">Change notes</label>
-            <input id = "changeNotes" type = "text" [(ngModel)] = "changeNotes" placeholder = "What changed in this version?" />
+    <div class = "drop-zone-left">
+        <span class = "drop-zone-icon"><i class = "pi pi-upload"></i></span>
+        <div class = "drop-zone-text">
+            <p><span class = "drop-zone-cta">Click to upload</span> or drag and drop</p>
+            <p class = "drop-zone-hint">Only .py files are allowed.</p>
         </div>
     </div>
-    <button class = "btn-upload-activate" (click) = "onUploadAndActivate()">Upload &amp; activate</button>
+    <span class = "drop-zone-filename">{{ selectedFileName || 'No file selected' }}</span>
+    </button>
+
+    @if(uploadError){
+        <p class = "upload-error">{{uploadError}}</p>
+    }
+   
+        <div class = "form-group">
+            <label for = "changeNotes">Change notes (optional)</label>
+            <textarea id = "changeNotes"  rows= "4" [(ngModel)] = "changeNotes" placeholder = "What changed in this version?"></textarea>
+        </div>
+        </div>
+    
+
+    <div class = "upload-card-actions">
+    <button class = "btn-upload-activate" [disabled] = "isUploading" (click) = "onUploadAndActivate()">
+        {{ isUploading ? 'Uploading...' : 'Upload & activate'}}</button>
     </div>
+</div>
     
     <h2 class = "section-title">Version History</h2>
+    <p class = "section-subtitle">View and monitor all uploaded solver versions.</p>
     <div class = "table-card">
         <table>
             <thead>
@@ -79,6 +124,7 @@
                 <th scope ="col">Avg Runtime</th>      
                 <th scope ="col">Error Rate</th>
                 <th scope ="col">Status</th>
+                <th scope ="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -92,12 +138,22 @@
                     <td>
                         <span class = "status-badge" [ngClass] ="v.status.toLowerCase()">{{v.status}}</span>
                     </td>
+                    <td>
+                        <button class = "row-action-btn" type = "button" aria-label = "Row actions">
+                            <i class = "pi pi-ellipsis-v"></i>
+                        </button>
+                    </td>
                 </tr>
             }
             </tbody>
         </table>
         @if (versionHistory.length ===0){
-            <div class = "empty-state">No solver versions uploaded yet.</div>
+            
+            <div class = "empty-state">
+                <span class = "empty-state-icon"><i class = "pi pi-inbox"></i></span>
+                <p class = "empty-state-title">No solver versions uploaded yet.</p>
+                <p class = "empty-state-subtitle">Upload your first solver version to get started.</p>
+            </div>
         }
     </div>
 </main>
