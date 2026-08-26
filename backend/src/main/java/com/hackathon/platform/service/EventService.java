@@ -92,38 +92,30 @@ public class EventService {
   }
 
   /** Change event status/registration key/visibility */
-  public Event patchEventStatus(
-      UUID eventId, String visibility, String status, String registrationKey) {
-    Event event =
-        eventRepository
-            .findById(eventId)
-            .orElseThrow(() -> new RuntimeException("Event not found"));
+  public Event patchEventStatus(UUID eventId, String visibility, String status, String registrationKey) {
+    Event event = getEventById(eventId);
 
-    if (visibility != null) {
-      if(!ALLOWED_STATUSES.contains(visibility)){
-        throw new IllegalArgumentException("Visibility must be one of "+ALLOWED_STATUSES);
+    if(visibility != null){
+      if(!ALLOWED_VISIBILITIES.contains(visibility)){
+        throw new IllegalArgumentException("Invalid visibility: " + visibility);
       }
       event.setVisibility(visibility);
     }
-    if (status != null) {
+
+    if(status != null){
       assertValidStatusTransition(event.getStatus(), status);
       event.setStatus(status);
     }
 
-    if (!"PUBLIC".equals(event.getVisibility())
-        && registrationKey == null
-        && event.getRegistrationKey() == null) {
-      throw new RuntimeException("Registration key is required for private events");
-    }
-
-    if (registrationKey != null) {
-      event.setRegistrationKey(registrationKey);
-    }
-
-    if ("PUBLIC".equals(event.getVisibility())) {
+    if("PRIVATE".equals(event.getVisibility())){
+      if(registrationKey != null && !registrationKey.isBlank()){
+        event.setRegistrationKey(registrationKey.trim());
+      } else if (event.getRegistrationKey() != null && !event.getRegistrationKey().isBlank()){
+        throw new IllegalArgumentException("Registration key is required");
+      }
+    } else {
       event.setRegistrationKey(null);
     }
-
     return eventRepository.save(event);
   }
 
