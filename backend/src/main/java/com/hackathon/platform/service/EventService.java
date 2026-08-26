@@ -121,22 +121,13 @@ public class EventService {
 
   /** Get the event status, this includes: Status and Visibility */
   public EventStatusResponse getEventStatus(UUID eventId) {
-    Event event =
-        eventRepository
-            .findById(eventId)
-            .orElseThrow(() -> new RuntimeException("Event not found"));
-
+    Event event = getEventById(eventId);
+    refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
     return new EventStatusResponse(event.getEventId(), event.getStatus(), event.getVisibility());
   }
 
   public List<Event> getOpenEventsForParticipants() {
-    List<Event> ret =
-        eventRepository.findByVisibilityAndStatusIn(
-            "PUBLIC", List.of("UPCOMING", "ONGOING", "ACTIVE"));
-    ret.addAll(
-        eventRepository.findByVisibilityAndStatusIn(
-            "PRIVATE", List.of("UPCOMING", "ONGOING", "ACTIVE")));
-    return ret;
+    return eventRepository.findByVisibilityAndStatusIn("PUBLIC", List.of("UPCOMING", "ACTIVE"));
   }
 
   public List<Event> getUserActiveEvents() {
@@ -148,16 +139,15 @@ public class EventService {
   }
 
   public List<Event> getEventsByHackathonId(UUID hackathonId) {
-    if (!hackathonRepository.existsById(hackathonId)) {
-      throw new RuntimeException("this Hackathon wasnnt found");
-    }
+    requireHackathon(hackathonId);
     return eventRepository.findByHackathon(hackathonId);
   }
 
+  @Transactional
   public Event getEventById(UUID eventId) {
-    return eventRepository
-        .findById(eventId)
-        .orElseThrow(() -> new RuntimeException("The event could not be found"));
+    Event event = eventRepository.findById(eventId).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+    refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
+    return event;
   }
 
   public Event updateEventBanner(UUID eventId, String storageKey) {
@@ -211,6 +201,20 @@ public class EventService {
       return "ACTIVE";
     }
     return "UPCOMING";
+  }
+
+  @Transactional
+  public boolean refreshLifecycleStatus(Event event, OffsetDateTime now){
+    if("CANCELED".equals(event.getStatus())){
+      return false;
+    }
+    String next = calculateLifecycleStatus(event, now, event.getStatus());
+    if(!next.equals(event.getStatus())){
+      event.setStatus(next);
+      eventRepository.save(event);
+      return true;
+    }
+    return false;
   }
 
   private void validateEventReq(EventRequest req, boolean creating){
