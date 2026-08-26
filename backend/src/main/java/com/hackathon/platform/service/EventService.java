@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class EventService {
@@ -273,6 +276,80 @@ public class EventService {
     }
     if("PRIVATE".equals(req.getVisibility()) && (req.getRegistrationKey() == null || req.getRegistrationKey().isBlank())){
       throw new IllegalArgumentException("Registration key is required for private events");
+    }
+    validatePrize(req.getFirstPlacePrize(), "First place prize");
+    validatePrize(req.getSecondPlacePrize(), "Second place prize");
+    validatePrize(req.getThirdPlacePrize(), "Third place prize");
+    validatePrize(req.getTotalPrizePool(), "Total place prize");
+  }
+
+  private void validatePrize(BigDecimal value, String name){
+    if(value != null && value.signum() < 0){
+      throw new IllegalArgumentException("Prize must be greater than 0");
+    }
+  }
+
+  private void applyReq(Event event, EventRequest req, boolean creating){
+    if(req.getName() != null){
+      event.setName(req.getName());
+    }
+    if(req.getTeamSizeLimit() > 0){
+      event.setTeamSizeLimit(req.getTeamSizeLimit());
+    }
+    if(req.getStartDateTime() != null){
+      event.setStartDateTime(req.getStartDateTime());
+    }
+    if(req.getDuration() > 0){
+      event.setDuration(req.getDuration());
+    }
+    if(req.getVisibility() != null){
+      event.setVisibility(req.getVisibility());
+    }
+    if(req.getRegistrationKey() != null || "PUBLIC".equals(req.getVisibility())){
+      event.setRegistrationKey("PRIVATE".equals(event.getVisibility()) ? req.getRegistrationKey() : null);
+    }
+    if(req.getStatus() != null && !creating){
+      event.setStatus(req.getStatus());
+    }
+    if(req.getAllowedTech() != null){
+      event.setAllowedTech(req.getAllowedTech());
+    }
+    if(req.getRules() != null){
+      event.setRules(req.getRules());
+    }
+    if(req.getTagline() != null){
+      event.setTagline(req.getTagline());
+    }
+    if(req.getFirstPlacePrize() != null){
+      event.setFirstPlacePrize(req.getFirstPlacePrize());
+    }
+    if(req.getSecondPlacePrize() != null){
+      event.setSecondPlacePrize(req.getSecondPlacePrize());
+    }
+    if(req.getThirdPlacePrize() != null){
+      event.setThirdPlacePrize(req.getThirdPlacePrize());
+    }
+    if(req.getTotalPrizePool() != null){
+      event.setTotalPrizePool(req.getTotalPrizePool());
+    }
+    if(req.getFreezeTime() != null){
+      event.setLeaderboardFreezeDuration(req.getFreezeTime());
+    }
+    if(req.getInPerson() != null){
+      event.setInPerson(req.getInPerson());
+    }
+    if(event.getAllowedTech() == null){
+      event.setAllowedTech(new ArrayList<>());
+    }
+  }
+
+  private List<String> normalizeTech(List<String> tech){
+    return tech.stream().filter(java.util.Objects::nonNull).map(String::trim).filter(value -> !value.isBlank()).distinct().limit(100).collect(Collectors.toList());
+  }
+
+  private void requireHackathon(UUID id){
+    if(id == null || !hackathonRepository.existsById(id)){
+      throw new IllegalArgumentException("Hackathon not found");
     }
   }
 }
