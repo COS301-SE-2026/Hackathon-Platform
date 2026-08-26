@@ -12,18 +12,36 @@ import java.util.UUID;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.Set;
+import com.hackathon.platform.repository.EventRegistrationRepository;
+import com.hackathon.platform.repository.TeamRepository;
+import com.hackathon.platform.repository.SubmissionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Service
 public class EventService {
   private final EventRepository eventRepository;
   private final HackathonRepository hackathonRepository;
+  private final EventRegistrationRepository eventRegRepo;
+  private final TeamRepository teamRepo;
+  private final SubmissionRepository subRepo;
   private static final Set<String>  ALLOWED_STATUSES = Set.of("UPCOMING", "ACTIVE", "COMPLETED", "CANCELED");
   private static final Set<String> TERMINAL_STATUSES = Set.of("COMPLETED", "CANCELED");
   private static final Set<String> ALLOWED_VISIBILITIES = Set.of("PUBLC", "PRIVATE");
 
-  public EventService(EventRepository eventRepository, HackathonRepository hackathonRepository) {
+  @Autowired
+  public EventService(EventRepository eventRepository, HackathonRepository hackathonRepository, EventRegistrationRepository eventRegRepo, TeamRepository teamRepo, SubmissionRepository subRepo) {
     this.eventRepository = eventRepository;
     this.hackathonRepository = hackathonRepository;
+    this.eventRegRepo = eventRegRepo;
+    this.teamRepo = teamRepo;
+    this.subRepo = subRepo;
+  }
+
+  public EventService(EventRepository eventRepository, HackathonRepository hackathonRepository){
+    this(eventRepository, hackathonRepository, null, null, null);
   }
 
   private UUID getCurrentAdminId() {
@@ -32,74 +50,14 @@ public class EventService {
   }
 
   /** create event */
+  @Transactional
   public Event createEvent(EventRequest req) {
-
-    if (req == null) {
-      throw new IllegalArgumentException("Event request body cannot be null.");
-    }
-
-    if (req.getName() == null || req.getName().isBlank()) {
-      throw new IllegalArgumentException("Event name is required.");
-    }
-
-    if (req.getTeamSizeLimit() <= 0) {
-      throw new IllegalArgumentException("Team size must be greater than 0.");
-    }
-
-    if (req.getStartDateTime() == null) {
-      throw new IllegalArgumentException("Event start date is required.");
-    }
-
-    if (req.getDuration() <= 0) {
-      throw new IllegalArgumentException("Event duration must be greater than 0.");
-    }
-
-    if (req.getVisibility() == null || req.getVisibility().isBlank()) {
-      throw new IllegalArgumentException("Event visibility is required.");
-    }
-
-    if (req.getStatus() == null || req.getStatus().isBlank()) {
-      throw new IllegalArgumentException("Event status is required.");
-    }
-
-    if(!ALLOWED_VISIBILITIES.contains(req.getVisibility())){
-      throw new IllegalArgumentException("Visibility must be one of "+ALLOWED_VISIBILITIES);
-    }
-
-    if(!ALLOWED_STATUSES.contains(req.getStatus())){
-      throw new IllegalArgumentException("Status must be one of "+ALLOWED_STATUSES);
-    }
-
-    if ("PRIVATE".equals(req.getVisibility())
-        && (req.getRegistrationKey() == null || req.getRegistrationKey().isBlank())) {
-      throw new IllegalArgumentException("Registration key is required for private events.");
-    }
-
-    if (req.getHackathonId() == null) {
-      throw new IllegalArgumentException("HackathonId is required");
-    }
-
-    if (!hackathonRepository.existsById(req.getHackathonId())) {
-      throw new IllegalArgumentException("Hackathon not found for this id " + req.getHackathonId());
-    }
+    validateEventReq(req, true);
+    requireHackathon(req.getHackathonId());
 
     Event event = new Event();
     event.setCreatedByUserId(getCurrentAdminId());
-    event.setName(req.getName());
-    event.setTeamSizeLimit(req.getTeamSizeLimit());
-    event.setStartDateTime(req.getStartDateTime());
-    event.setDuration(req.getDuration());
-    event.setDescription(req.getDescription());
-    event.setVisibility(req.getVisibility());
-    event.setStatus(req.getStatus());
-    event.setHackathon(req.getHackathonId());
-
-    if ("PRIVATE".equals(req.getVisibility())) {
-      event.setRegistrationKey(req.getRegistrationKey());
-    } else {
-      event.setRegistrationKey(null);
-    }
-
+    event.setStatus(calculateLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC), req.getStatus()));
     return eventRepository.save(event);
   }
 
@@ -259,6 +217,62 @@ public class EventService {
     }
     if(currStat != null && TERMINAL_STATUSES.contains(currStat) && !newStat.equals(currStat)){
       throw new IllegalArgumentException("Event is " + currStat+" it cant change to "+newStat);
+    }
+  }
+
+  private String calculateLifecycleStatus(Event event, OffsetDateTime now, String reqStatus){
+    if("CANCELED".equals(reqStatus)){
+      return "CANCELED";
+    }
+    OffsetDateTime start = event.getStartDateTime();
+    OffsetDateTime end = start.plusSeconds(event.getDuration());
+    if(!now.isBefore(end)){
+      return "COMPLETED";
+    }
+    if(!now.isBefore(start)){
+      return "ACTIVE";
+    }
+    return "UPCOMING";
+  }
+
+  private void validateEventReq(EventRequest req, boolean creating){
+    if(req == null){
+      throw new IllegalArgumentException("Event request body cant be null");
+    }
+    if(creating && req.getHackathonId() == null){
+      throw new IllegalArgumentException("HackathonId is required");
+    }
+    if(creating || req.getName() != null){
+      if(req.getName() == null || req.getName().isBlank()){
+        throw new IllegalArgumentException("Name is required");
+      }
+    }
+    if(creating || req.getTeamSizeLimit() >0){
+      if(req.getTeamSizeLimit() <= 0){
+        throw new IllegalArgumentException("Team size limit must be greater than 0");
+      }
+    }
+    if(creating || req.getStartDateTime() != null){
+      if(req.getStartDateTime() == null){
+        throw new IllegalArgumentException("Start date is required");
+      }
+    }
+    if(creating || req.getDuration() >0){
+      if(req.getDuration() <=0){
+        throw new IllegalArgumentException("Duration is less than 0");
+      }
+    }
+    if(req.getVisibility() != null && !ALLOWED_VISIBILITIES.contains(req.getVisibility())){
+      throw new IllegalArgumentException("Visibility must be one of these: "+ALLOWED_VISIBILITIES);
+    }
+    if(req.getStatus() != null && !ALLOWED_STATUSES.contains(req.getStatus())){
+      throw new IllegalArgumentException("Status must be one of these: "+ALLOWED_STATUSES);
+    }
+    if(creating && req.getVisibility() == null){
+      throw new IllegalArgumentException("Visibility is required");
+    }
+    if("PRIVATE".equals(req.getVisibility()) && (req.getRegistrationKey() == null || req.getRegistrationKey().isBlank())){
+      throw new IllegalArgumentException("Registration key is required for private events");
     }
   }
 }
