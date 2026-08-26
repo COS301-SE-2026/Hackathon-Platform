@@ -57,7 +57,6 @@ public class EventService {
   public Event createEvent(EventRequest req) {
     validateEventReq(req, true);
     requireHackathon(req.getHackathonId());
-
     Event event = new Event();
     event.setCreatedByUserId(getCurrentAdminId());
     event.setStatus(calculateLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC), req.getStatus()));
@@ -75,36 +74,20 @@ public class EventService {
   }
 
   // update Entire event based on new event information receieved in req
+  @Transactional
   public Event putUpdateEvent(UUID eventId, EventRequest req) {
-    Event event =
-        eventRepository
-            .findById(eventId)
-            .orElseThrow(() -> new RuntimeException("Event not found"));
-
-    if(req.getVisibility() != null && !ALLOWED_VISIBILITIES.contains(req.getVisibility())){
-      throw new IllegalArgumentException("Visibility must be one of "+ALLOWED_VISIBILITIES);
+    Event event = getEventById(eventId);
+    validateEventReq(req, false);
+    if(req.getHackathonId() != null){
+      requireHackathon(req.getHackathonId());
+      event.setHackathon(req.getHackathonId());
     }
 
     if(req.getStatus() != null){
       assertValidStatusTransition(event.getStatus(), req.getStatus());
     }
 
-    event.setCreatedByUserId(getCurrentAdminId());
-    event.setName(req.getName());
-    event.setRegistrationKey(req.getRegistrationKey());
-    event.setTeamSizeLimit(req.getTeamSizeLimit());
-    event.setStartDateTime(req.getStartDateTime());
-    event.setDuration(req.getDuration());
-    event.setDescription(req.getDescription());
-    event.setVisibility(req.getVisibility());
-    event.setStatus(req.getStatus());
-    if (req.getHackathonId() != null) {
-      if (!hackathonRepository.existsById(req.getHackathonId())) {
-        throw new RuntimeException("Hackathon not found for id " + req.getHackathonId());
-      }
-      event.setHackathon(req.getHackathonId());
-    }
-
+    applyReq(event, req, false);
     return eventRepository.save(event);
   }
 
