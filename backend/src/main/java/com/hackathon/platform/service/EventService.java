@@ -130,6 +130,10 @@ public class EventService {
     return eventRepository.findByVisibilityAndStatusIn("PUBLIC", List.of("UPCOMING", "ACTIVE"));
   }
 
+  public List<Event> getPrivateEvents() {
+    return eventRepository.findByVisibilityAndStatusIn("PRIVATE", List.of("Upcoming", "ACTIVE"));
+  }
+
   public List<Event> getUserActiveEvents() {
     return eventRepository.findUserActiveEvents(getCurrentAdminId());
   }
