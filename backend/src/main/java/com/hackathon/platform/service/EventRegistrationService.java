@@ -24,7 +24,12 @@ public class EventRegistrationService {
   }
 
   @Transactional
-  public EventRegistrationResponse registerForEvent(UUID eventId, UUID userId, String key) {
+  public EventRegistrationResponse registerForEvent(UUID eventId, UUID userId, String regKey){
+    return registerForEvent(eventId, userId, regKey, null, null);
+  }
+
+  @Transactional
+  public EventRegistrationResponse registerForEvent(UUID eventId, UUID userId, String key, String dietaryReq, String allergies) {
     Event event =
         eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
     if ("COMPLETED".equals(event.getStatus()) || "CANCELLED".equals(event.getStatus())) {
@@ -44,6 +49,13 @@ public class EventRegistrationService {
     EventRegistration reg = new EventRegistration();
     reg.setEventId(eventId);
     reg.setUserId(userId);
+    if(event.isInPerson()){
+      reg.setDietaryReq(normalizeOptional(dietaryReq));
+      reg.setAllergies(allergies);
+    } else {
+      reg.setDietaryReq(null);
+      reg.setAllergies(null);
+    }
     EventRegistration save = eventRegistrationRepo.save(reg);
 
     return toResponse(save);
@@ -57,6 +69,14 @@ public class EventRegistrationService {
     return eventRegistrationRepo.findByUserId(user).stream()
         .map(this::toResponse)
         .collect(Collectors.toList());
+  }
+
+  private String normalizeOptional(String value){
+    if(value == null){
+      return null;
+    }
+    String trimmed = value.trim();
+    return trimmed.isBlank() ? null : trimmed;
   }
 
   private EventRegistrationResponse toResponse(EventRegistration reg) {
