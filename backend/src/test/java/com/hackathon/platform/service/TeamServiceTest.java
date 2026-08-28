@@ -119,9 +119,14 @@ class TeamServiceTest {
   void requestToJoinTeam_shouldSucceed_whenValid() {
     UUID teamId = UUID.randomUUID();
     Team team = new Team();
+    team.setTeamId(teamId);
+    team.setStatus("ACTIVE");
     team.setEventId(eventId);
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId)).thenReturn(Collections.emptyList());
     when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(0L);
     when(teamMemberRepository.save(any(TeamMember.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -133,13 +138,20 @@ class TeamServiceTest {
   @Test
   void requestToJoinTeam_shouldThrow_whenAlreadyRequested() {
     UUID teamId = UUID.randomUUID();
+    Team team = new Team();
+    team.setTeamId(teamId);
+    team.setStatus("ACTIVE");
+    team.setEventId(eventId);
+
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(new Team()));
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId))
         .thenReturn(Optional.of(new TeamMember()));
 
     assertThatThrownBy(() -> teamService.requestToJoinTeam(teamId, userId))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("Already requested or member");
+        .hasMessageContaining("You already requested or are a member for this team");
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
 
@@ -147,8 +159,12 @@ class TeamServiceTest {
   void requestToJoinTeam_shouldThrow_whenTeamFull() {
     UUID teamId = UUID.randomUUID();
     Team team = new Team();
+    team.setTeamId(teamId);
+    team.setStatus("ACTIVE");
     team.setEventId(eventId);
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
     when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(4L);
 
