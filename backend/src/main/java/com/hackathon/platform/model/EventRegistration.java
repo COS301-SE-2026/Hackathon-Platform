@@ -5,12 +5,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.PrePersist;
 
 @Entity
 @Table(name = "event_participants", schema = "public")
@@ -38,8 +38,8 @@ public class EventRegistration {
   private String allergies;
 
   @PrePersist
-  protected void onCreate(){
-    if(registeredAt == null){
+  protected void onCreate() {
+    if (registeredAt == null) {
       registeredAt = Instant.now();
     }
   }

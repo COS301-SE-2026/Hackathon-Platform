@@ -18,30 +18,48 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class SuperAdminInitializer implements ApplicationRunner {
-    private final UserRepository userRepo;
-    private final RoleRepository roleRepo;
-    private final PasswordEncoder paswrdEncoder;
+  private final UserRepository userRepo;
+  private final RoleRepository roleRepo;
+  private final PasswordEncoder paswrdEncoder;
 
-    @Value("${platform.superadmin.email:}") private String email;
-    @Value("${platform.superadmin.password:}") private String password;
-    @Value("${platform.superadmin.first-name:Platform}") private String firstName;
-    @Value("${platform.superadmin.last-name:SuperAdmin}") private String lastName;
+  @Value("${platform.superadmin.email:}")
+  private String email;
 
-    @Override
-    @Transactional
-    public void run(ApplicationArguments args){
-        if(email == null || email.isBlank() || password == null || password.isBlank()){
-            return;
-        }
+  @Value("${platform.superadmin.password:}")
+  private String password;
 
-        String emailFormatted = email.trim().toLowerCase(Locale.ROOT);
-        if(userRepo.existsByEmail(emailFormatted)){
-            return;
-        }
+  @Value("${platform.superadmin.first-name:Platform}")
+  private String firstName;
 
-        Role role = roleRepo.findByName("SUPERADMIN").orElseThrow(() -> new IllegalStateException("SUPERADMIN role not found"));
+  @Value("${platform.superadmin.last-name:SuperAdmin}")
+  private String lastName;
 
-        User user = User.builder().firstName(firstName.trim()).lastName(lastName).email(emailFormatted).passwordHash(paswrdEncoder.encode(password)).role(role).status("ACTIVE").build();
-        userRepo.save(user);
+  @Override
+  @Transactional
+  public void run(ApplicationArguments args) {
+    if (email == null || email.isBlank() || password == null || password.isBlank()) {
+      return;
     }
+
+    String emailFormatted = email.trim().toLowerCase(Locale.ROOT);
+    if (userRepo.existsByEmail(emailFormatted)) {
+      return;
+    }
+
+    Role role =
+        roleRepo
+            .findByName("SUPERADMIN")
+            .orElseThrow(() -> new IllegalStateException("SUPERADMIN role not found"));
+
+    User user =
+        User.builder()
+            .firstName(firstName.trim())
+            .lastName(lastName)
+            .email(emailFormatted)
+            .passwordHash(paswrdEncoder.encode(password))
+            .role(role)
+            .status("ACTIVE")
+            .build();
+    userRepo.save(user);
+  }
 }

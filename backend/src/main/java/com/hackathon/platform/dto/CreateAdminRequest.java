@@ -9,19 +9,17 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateAdminRequest {
-    @NotBlank
-    @Size(min = 2, max = 100)
-    private String firstName;
+  @NotBlank
+  @Size(min = 2, max = 100)
+  private String firstName;
 
-    @NotBlank
-    @Size(min = 2, max = 100)
-    private String lastName;
+  @NotBlank
+  @Size(min = 2, max = 100)
+  private String lastName;
 
-    @NotBlank
-    @Email
-    private String email;
+  @NotBlank @Email private String email;
 
-    @NotBlank
-    @Size(min = 2, max = 100)
-    private String password;
+  @NotBlank
+  @Size(min = 2, max = 100)
+  private String password;
 }

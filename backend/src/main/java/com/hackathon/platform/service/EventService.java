@@ -5,23 +5,23 @@ import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.dto.ScoringPauseResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.HackathonRepository;
-import java.util.List;
-import java.util.UUID;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import java.util.Set;
-import com.hackathon.platform.repository.EventRegistrationRepository;
-import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.repository.SubmissionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import com.hackathon.platform.repository.TeamRepository;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EventService {
@@ -30,12 +30,18 @@ public class EventService {
   private final EventRegistrationRepository eventRegRepo;
   private final TeamRepository teamRepo;
   private final SubmissionRepository subRepo;
-  private static final Set<String>  ALLOWED_STATUSES = Set.of("UPCOMING", "ACTIVE", "COMPLETED", "CANCELED");
+  private static final Set<String> ALLOWED_STATUSES =
+      Set.of("UPCOMING", "ACTIVE", "COMPLETED", "CANCELED");
   private static final Set<String> TERMINAL_STATUSES = Set.of("COMPLETED", "CANCELED");
   private static final Set<String> ALLOWED_VISIBILITIES = Set.of("PUBLC", "PRIVATE");
 
   @Autowired
-  public EventService(EventRepository eventRepository, HackathonRepository hackathonRepository, EventRegistrationRepository eventRegRepo, TeamRepository teamRepo, SubmissionRepository subRepo) {
+  public EventService(
+      EventRepository eventRepository,
+      HackathonRepository hackathonRepository,
+      EventRegistrationRepository eventRegRepo,
+      TeamRepository teamRepo,
+      SubmissionRepository subRepo) {
     this.eventRepository = eventRepository;
     this.hackathonRepository = hackathonRepository;
     this.eventRegRepo = eventRegRepo;
@@ -43,7 +49,7 @@ public class EventService {
     this.subRepo = subRepo;
   }
 
-  public EventService(EventRepository eventRepository, HackathonRepository hackathonRepository){
+  public EventService(EventRepository eventRepository, HackathonRepository hackathonRepository) {
     this(eventRepository, hackathonRepository, null, null, null);
   }
 
@@ -59,7 +65,8 @@ public class EventService {
     requireHackathon(req.getHackathonId());
     Event event = new Event();
     event.setCreatedByUserId(getCurrentAdminId());
-    event.setStatus(calculateLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC), req.getStatus()));
+    event.setStatus(
+        calculateLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC), req.getStatus()));
     return eventRepository.save(event);
   }
 
@@ -78,12 +85,12 @@ public class EventService {
   public Event putUpdateEvent(UUID eventId, EventRequest req) {
     Event event = getEventById(eventId);
     validateEventReq(req, false);
-    if(req.getHackathonId() != null){
+    if (req.getHackathonId() != null) {
       requireHackathon(req.getHackathonId());
       event.setHackathon(req.getHackathonId());
     }
 
-    if(req.getStatus() != null){
+    if (req.getStatus() != null) {
       assertValidStatusTransition(event.getStatus(), req.getStatus());
     }
 
@@ -92,25 +99,26 @@ public class EventService {
   }
 
   /** Change event status/registration key/visibility */
-  public Event patchEventStatus(UUID eventId, String visibility, String status, String registrationKey) {
+  public Event patchEventStatus(
+      UUID eventId, String visibility, String status, String registrationKey) {
     Event event = getEventById(eventId);
 
-    if(visibility != null){
-      if(!ALLOWED_VISIBILITIES.contains(visibility)){
+    if (visibility != null) {
+      if (!ALLOWED_VISIBILITIES.contains(visibility)) {
         throw new IllegalArgumentException("Invalid visibility: " + visibility);
       }
       event.setVisibility(visibility);
     }
 
-    if(status != null){
+    if (status != null) {
       assertValidStatusTransition(event.getStatus(), status);
       event.setStatus(status);
     }
 
-    if("PRIVATE".equals(event.getVisibility())){
-      if(registrationKey != null && !registrationKey.isBlank()){
+    if ("PRIVATE".equals(event.getVisibility())) {
+      if (registrationKey != null && !registrationKey.isBlank()) {
         event.setRegistrationKey(registrationKey.trim());
-      } else if (event.getRegistrationKey() != null && !event.getRegistrationKey().isBlank()){
+      } else if (event.getRegistrationKey() != null && !event.getRegistrationKey().isBlank()) {
         throw new IllegalArgumentException("Registration key is required");
       }
     } else {
@@ -149,7 +157,10 @@ public class EventService {
 
   @Transactional
   public Event getEventById(UUID eventId) {
-    Event event = eventRepository.findById(eventId).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+    Event event =
+        eventRepository
+            .findById(eventId)
+            .orElseThrow(() -> new IllegalArgumentException("Event not found"));
     refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
     return event;
   }
@@ -183,37 +194,37 @@ public class EventService {
     return new ScoringPauseResponse(eventId, paused);
   }
 
-  private void assertValidStatusTransition(String currStat, String newStat){
-    if(!ALLOWED_STATUSES.contains(newStat)){
-      throw new IllegalArgumentException("New status must be one of "+ALLOWED_STATUSES);
+  private void assertValidStatusTransition(String currStat, String newStat) {
+    if (!ALLOWED_STATUSES.contains(newStat)) {
+      throw new IllegalArgumentException("New status must be one of " + ALLOWED_STATUSES);
     }
-    if(currStat != null && TERMINAL_STATUSES.contains(currStat) && !newStat.equals(currStat)){
-      throw new IllegalArgumentException("Event is " + currStat+" it cant change to "+newStat);
+    if (currStat != null && TERMINAL_STATUSES.contains(currStat) && !newStat.equals(currStat)) {
+      throw new IllegalArgumentException("Event is " + currStat + " it cant change to " + newStat);
     }
   }
 
-  private String calculateLifecycleStatus(Event event, OffsetDateTime now, String reqStatus){
-    if("CANCELED".equals(reqStatus)){
+  private String calculateLifecycleStatus(Event event, OffsetDateTime now, String reqStatus) {
+    if ("CANCELED".equals(reqStatus)) {
       return "CANCELED";
     }
     OffsetDateTime start = event.getStartDateTime();
     OffsetDateTime end = start.plusSeconds(event.getDuration());
-    if(!now.isBefore(end)){
+    if (!now.isBefore(end)) {
       return "COMPLETED";
     }
-    if(!now.isBefore(start)){
+    if (!now.isBefore(start)) {
       return "ACTIVE";
     }
     return "UPCOMING";
   }
 
   @Transactional
-  public boolean refreshLifecycleStatus(Event event, OffsetDateTime now){
-    if("CANCELED".equals(event.getStatus())){
+  public boolean refreshLifecycleStatus(Event event, OffsetDateTime now) {
+    if ("CANCELED".equals(event.getStatus())) {
       return false;
     }
     String next = calculateLifecycleStatus(event, now, event.getStatus());
-    if(!next.equals(event.getStatus())){
+    if (!next.equals(event.getStatus())) {
       event.setStatus(next);
       eventRepository.save(event);
       return true;
@@ -221,43 +232,45 @@ public class EventService {
     return false;
   }
 
-  private void validateEventReq(EventRequest req, boolean creating){
-    if(req == null){
+  private void validateEventReq(EventRequest req, boolean creating) {
+    if (req == null) {
       throw new IllegalArgumentException("Event request body cant be null");
     }
-    if(creating && req.getHackathonId() == null){
+    if (creating && req.getHackathonId() == null) {
       throw new IllegalArgumentException("HackathonId is required");
     }
-    if(creating || req.getName() != null){
-      if(req.getName() == null || req.getName().isBlank()){
+    if (creating || req.getName() != null) {
+      if (req.getName() == null || req.getName().isBlank()) {
         throw new IllegalArgumentException("Name is required");
       }
     }
-    if(creating || req.getTeamSizeLimit() >0){
-      if(req.getTeamSizeLimit() <= 0){
+    if (creating || req.getTeamSizeLimit() > 0) {
+      if (req.getTeamSizeLimit() <= 0) {
         throw new IllegalArgumentException("Team size limit must be greater than 0");
       }
     }
-    if(creating || req.getStartDateTime() != null){
-      if(req.getStartDateTime() == null){
+    if (creating || req.getStartDateTime() != null) {
+      if (req.getStartDateTime() == null) {
         throw new IllegalArgumentException("Start date is required");
       }
     }
-    if(creating || req.getDuration() >0){
-      if(req.getDuration() <=0){
+    if (creating || req.getDuration() > 0) {
+      if (req.getDuration() <= 0) {
         throw new IllegalArgumentException("Duration is less than 0");
       }
     }
-    if(req.getVisibility() != null && !ALLOWED_VISIBILITIES.contains(req.getVisibility())){
-      throw new IllegalArgumentException("Visibility must be one of these: "+ALLOWED_VISIBILITIES);
+    if (req.getVisibility() != null && !ALLOWED_VISIBILITIES.contains(req.getVisibility())) {
+      throw new IllegalArgumentException(
+          "Visibility must be one of these: " + ALLOWED_VISIBILITIES);
     }
-    if(req.getStatus() != null && !ALLOWED_STATUSES.contains(req.getStatus())){
-      throw new IllegalArgumentException("Status must be one of these: "+ALLOWED_STATUSES);
+    if (req.getStatus() != null && !ALLOWED_STATUSES.contains(req.getStatus())) {
+      throw new IllegalArgumentException("Status must be one of these: " + ALLOWED_STATUSES);
     }
-    if(creating && req.getVisibility() == null){
+    if (creating && req.getVisibility() == null) {
       throw new IllegalArgumentException("Visibility is required");
     }
-    if("PRIVATE".equals(req.getVisibility()) && (req.getRegistrationKey() == null || req.getRegistrationKey().isBlank())){
+    if ("PRIVATE".equals(req.getVisibility())
+        && (req.getRegistrationKey() == null || req.getRegistrationKey().isBlank())) {
       throw new IllegalArgumentException("Registration key is required for private events");
     }
     validatePrize(req.getFirstPlacePrize(), "First place prize");
@@ -266,72 +279,79 @@ public class EventService {
     validatePrize(req.getTotalPrizePool(), "Total place prize");
   }
 
-  private void validatePrize(BigDecimal value, String name){
-    if(value != null && value.signum() < 0){
+  private void validatePrize(BigDecimal value, String name) {
+    if (value != null && value.signum() < 0) {
       throw new IllegalArgumentException("Prize must be greater than 0");
     }
   }
 
-  private void applyReq(Event event, EventRequest req, boolean creating){
-    if(req.getName() != null){
+  private void applyReq(Event event, EventRequest req, boolean creating) {
+    if (req.getName() != null) {
       event.setName(req.getName());
     }
-    if(req.getTeamSizeLimit() > 0){
+    if (req.getTeamSizeLimit() > 0) {
       event.setTeamSizeLimit(req.getTeamSizeLimit());
     }
-    if(req.getStartDateTime() != null){
+    if (req.getStartDateTime() != null) {
       event.setStartDateTime(req.getStartDateTime());
     }
-    if(req.getDuration() > 0){
+    if (req.getDuration() > 0) {
       event.setDuration(req.getDuration());
     }
-    if(req.getVisibility() != null){
+    if (req.getVisibility() != null) {
       event.setVisibility(req.getVisibility());
     }
-    if(req.getRegistrationKey() != null || "PUBLIC".equals(req.getVisibility())){
-      event.setRegistrationKey("PRIVATE".equals(event.getVisibility()) ? req.getRegistrationKey() : null);
+    if (req.getRegistrationKey() != null || "PUBLIC".equals(req.getVisibility())) {
+      event.setRegistrationKey(
+          "PRIVATE".equals(event.getVisibility()) ? req.getRegistrationKey() : null);
     }
-    if(req.getStatus() != null && !creating){
+    if (req.getStatus() != null && !creating) {
       event.setStatus(req.getStatus());
     }
-    if(req.getAllowedTech() != null){
+    if (req.getAllowedTech() != null) {
       event.setAllowedTech(req.getAllowedTech());
     }
-    if(req.getRules() != null){
+    if (req.getRules() != null) {
       event.setRules(req.getRules());
     }
-    if(req.getTagline() != null){
+    if (req.getTagline() != null) {
       event.setTagline(req.getTagline());
     }
-    if(req.getFirstPlacePrize() != null){
+    if (req.getFirstPlacePrize() != null) {
       event.setFirstPlacePrize(req.getFirstPlacePrize());
     }
-    if(req.getSecondPlacePrize() != null){
+    if (req.getSecondPlacePrize() != null) {
       event.setSecondPlacePrize(req.getSecondPlacePrize());
     }
-    if(req.getThirdPlacePrize() != null){
+    if (req.getThirdPlacePrize() != null) {
       event.setThirdPlacePrize(req.getThirdPlacePrize());
     }
-    if(req.getTotalPrizePool() != null){
+    if (req.getTotalPrizePool() != null) {
       event.setTotalPrizePool(req.getTotalPrizePool());
     }
-    if(req.getFreezeTime() != null){
+    if (req.getFreezeTime() != null) {
       event.setLeaderboardFreezeDuration(req.getFreezeTime());
     }
-    if(req.getInPerson() != null){
+    if (req.getInPerson() != null) {
       event.setInPerson(req.getInPerson());
     }
-    if(event.getAllowedTech() == null){
+    if (event.getAllowedTech() == null) {
       event.setAllowedTech(new ArrayList<>());
     }
   }
 
-  private List<String> normalizeTech(List<String> tech){
-    return tech.stream().filter(java.util.Objects::nonNull).map(String::trim).filter(value -> !value.isBlank()).distinct().limit(100).collect(Collectors.toList());
+  private List<String> normalizeTech(List<String> tech) {
+    return tech.stream()
+        .filter(java.util.Objects::nonNull)
+        .map(String::trim)
+        .filter(value -> !value.isBlank())
+        .distinct()
+        .limit(100)
+        .collect(Collectors.toList());
   }
 
-  private void requireHackathon(UUID id){
-    if(id == null || !hackathonRepository.existsById(id)){
+  private void requireHackathon(UUID id) {
+    if (id == null || !hackathonRepository.existsById(id)) {
       throw new IllegalArgumentException("Hackathon not found");
     }
   }

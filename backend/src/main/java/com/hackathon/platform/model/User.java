@@ -68,10 +68,9 @@ public class User implements UserDetails {
   /** Returns the role as spring security. It requires ROLE_ before hasRole() checks */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    if("SUPERADMIN".equals(role.getName())){
+    if ("SUPERADMIN".equals(role.getName())) {
       return List.of(
-              new SimpleGrantedAuthority("ROLE_SUPERADMIN"),
-              new SimpleGrantedAuthority("ROLE_ADMIN"));
+          new SimpleGrantedAuthority("ROLE_SUPERADMIN"), new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
     return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName()));
   }

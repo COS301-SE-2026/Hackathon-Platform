@@ -1,12 +1,20 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
+import com.hackathon.platform.repository.SubmissionRepository;
+import com.hackathon.platform.repository.TeamMemberRepository;
+import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.scoring.queue.ScoringJobProducer;
 import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.service.FileMetadataService;
@@ -14,13 +22,18 @@ import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
 import com.hackathon.platform.storage.BlobPath;
 import com.hackathon.platform.storage.StorageException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,19 +42,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.hackathon.platform.repository.EventRegistrationRepository;
-import com.hackathon.platform.repository.TeamRepository;
-import com.hackathon.platform.repository.TeamMemberRepository;
-import com.hackathon.platform.repository.LevelRepository;
-import com.hackathon.platform.repository.SubmissionRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import org.springframework.security.access.AccessDeniedException;
-import com.hackathon.platform.model.Event;
-import com.hackathon.platform.model.Team;
-import com.hackathon.platform.model.Level;
 
 /**
  * REST controller for all file upload and presigned download URL operations. All logic is delegated
@@ -67,7 +67,6 @@ public class StorageController {
   private final TeamMemberRepository teamMemberRepo;
   private final LevelRepository levelRepo;
   private final SubmissionRepository subRepo;
-
 
   // Event Resources
 
@@ -147,7 +146,9 @@ public class StorageController {
   @GetMapping("/hackathons/{hackathonId}/levels/{levelId}/files")
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<List<LevelFile>> listLevelFiles(
-      @PathVariable String hackathonId, @PathVariable Long levelId, @AuthenticationPrincipal User currUser) {
+      @PathVariable String hackathonId,
+      @PathVariable Long levelId,
+      @AuthenticationPrincipal User currUser) {
     requireEventStartedForParticipant(UUID.fromString(hackathonId), currUser);
     return ResponseEntity.ok(fileMetadataService.listLevelFiles(levelId));
   }
@@ -440,35 +441,43 @@ public class StorageController {
       @PathVariable String teamId,
       @RequestParam("outputFile") MultipartFile outputFile,
       @RequestParam("sourceFile") MultipartFile sourceFile,
-      @RequestParam("levelId") short levelId, @AuthenticationPrincipal User currUser) {
+      @RequestParam("levelId") short levelId,
+      @AuthenticationPrincipal User currUser) {
 
-
-    if(outputFile == null || outputFile.isEmpty()){
+    if (outputFile == null || outputFile.isEmpty()) {
       throw new StorageException("Output file is missing");
     }
-    if(sourceFile == null || sourceFile.isEmpty()){
+    if (sourceFile == null || sourceFile.isEmpty()) {
       throw new StorageException("Source file is missing");
     }
-    String fileName = sourceFile.getOriginalFilename() == null ? "" : sourceFile.getOriginalFilename().toLowerCase();
-    if(!fileName.endsWith(".zip")){
+    String fileName =
+        sourceFile.getOriginalFilename() == null
+            ? ""
+            : sourceFile.getOriginalFilename().toLowerCase();
+    if (!fileName.endsWith(".zip")) {
       throw new StorageException("Source code archive needs to be .zip");
     }
     UUID eventUUID = UUID.fromString(eventId);
     UUID teamUUID = UUID.fromString(teamId);
     Event event = eventService.getEventById(eventUUID);
     eventService.refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
-    if(!"ACTIVE".equals(event.getStatus())){
+    if (!"ACTIVE".equals(event.getStatus())) {
       throw new StorageException("You cant submit before the event starts");
     }
-    Team team = teamRepo.findById(teamUUID).orElseThrow(() -> new StorageException("Team not found"));
-    if(!eventUUID.equals(team.getEventId())){
+    Team team =
+        teamRepo.findById(teamUUID).orElseThrow(() -> new StorageException("Team not found"));
+    if (!eventUUID.equals(team.getEventId())) {
       throw new StorageException("Team doesnt exist");
     }
-    if(!teamMemberRepo.findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", eventUUID).stream().anyMatch(m -> teamUUID.equals(m.getTeamId()))){
+    if (!teamMemberRepo
+        .findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", eventUUID)
+        .stream()
+        .anyMatch(m -> teamUUID.equals(m.getTeamId()))) {
       throw new StorageException("You are not part of this team");
     }
-    Level lvl = levelRepo.findById(levelId).orElseThrow(() -> new StorageException("Level not found"));
-    if(!hackathonIdMatchesEvent(lvl.getHackathonId(), event.getHackathon())){
+    Level lvl =
+        levelRepo.findById(levelId).orElseThrow(() -> new StorageException("Level not found"));
+    if (!hackathonIdMatchesEvent(lvl.getHackathonId(), event.getHackathon())) {
       throw new StorageException("Level doesnt exist");
     }
 
@@ -536,8 +545,8 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
-      @PathVariable String filename, @AuthenticationPrincipal User currUser) {
-
+      @PathVariable String filename,
+      @AuthenticationPrincipal User currUser) {
 
     assertSubmissionAccess(eventId, teamId, submissionId, currUser);
     String storageKey = fileMetadataService.getSubmissionOutputStorageKey(submissionId);
@@ -562,7 +571,8 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
-      @PathVariable String filename, @AuthenticationPrincipal User currUser) {
+      @PathVariable String filename,
+      @AuthenticationPrincipal User currUser) {
 
     assertSubmissionAccess(eventId, teamId, submissionId, currUser);
     String storageKey = fileMetadataService.getSubmissionSourceStorageKey(submissionId);
@@ -589,7 +599,8 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable String levelId,
-      @PathVariable String submissionId, @AuthenticationPrincipal User currUser) {
+      @PathVariable String submissionId,
+      @AuthenticationPrincipal User currUser) {
 
     assertSubmissionAccess(eventId, teamId, Long.valueOf(submissionId), currUser);
     String storageKey = BlobPath.scoringLog(eventId, teamId, levelId, submissionId);
@@ -599,44 +610,66 @@ public class StorageController {
     return ResponseEntity.ok(Map.of("url", url));
   }
 
-  private void requireEventStartedForParticipant(UUID hackathon){
+  private void requireEventStartedForParticipant(UUID hackathon) {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    User currUser = auth != null && auth.getPrincipal() instanceof User ? (User) auth.getPrincipal() : null;
+    User currUser =
+        auth != null && auth.getPrincipal() instanceof User ? (User) auth.getPrincipal() : null;
     requireEventStartedForParticipant(hackathon, currUser);
   }
 
-  private void requireEventStartedForParticipant(UUID hackathon, User currUser){
-    boolean admin = currUser != null && currUser.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()) || "ROLE_SUPERADMIN".equals(a.getAuthority()));
-    if(admin){
+  private void requireEventStartedForParticipant(UUID hackathon, User currUser) {
+    boolean admin =
+        currUser != null
+            && currUser.getAuthorities().stream()
+                .anyMatch(
+                    a ->
+                        "ROLE_ADMIN".equals(a.getAuthority())
+                            || "ROLE_SUPERADMIN".equals(a.getAuthority()));
+    if (admin) {
       return;
     }
 
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-    boolean started = eventRepository.findByHackathon(hackathon).stream().anyMatch(event -> {
-      eventService.refreshLifecycleStatus(event, now);
-      return "ACTIVE".equals(event.getStatus());
-    });
-    if(!started){
+    boolean started =
+        eventRepository.findByHackathon(hackathon).stream()
+            .anyMatch(
+                event -> {
+                  eventService.refreshLifecycleStatus(event, now);
+                  return "ACTIVE".equals(event.getStatus());
+                });
+    if (!started) {
       throw new StorageException("You can only access resources when the event starts");
     }
   }
 
-  private void assertSubmissionAccess(String eventId, String teamId, Long submissionId, User currUser){
-    Submission sub = subRepo.findById(submissionId).orElseThrow(() -> new StorageException("Submission not found"));
-    if(!UUID.fromString(eventId).equals(sub.getEventId()) || !UUID.fromString(teamId).equals(sub.getTeamId())){
+  private void assertSubmissionAccess(
+      String eventId, String teamId, Long submissionId, User currUser) {
+    Submission sub =
+        subRepo
+            .findById(submissionId)
+            .orElseThrow(() -> new StorageException("Submission not found"));
+    if (!UUID.fromString(eventId).equals(sub.getEventId())
+        || !UUID.fromString(teamId).equals(sub.getTeamId())) {
       throw new StorageException("Submission not found");
     }
-    boolean admin = currUser != null && currUser.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-    if(admin){
+    boolean admin =
+        currUser != null
+            && currUser.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    if (admin) {
       return;
     }
-    boolean member = teamMemberRepo.findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", sub.getEventId()).stream().anyMatch(m -> m.getTeamId().equals(sub.getTeamId()));
-    if(!member){
+    boolean member =
+        teamMemberRepo
+            .findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", sub.getEventId())
+            .stream()
+            .anyMatch(m -> m.getTeamId().equals(sub.getTeamId()));
+    if (!member) {
       throw new AccessDeniedException("You dont have access to this event");
     }
   }
 
-  private boolean hackathonIdMatchesEvent(UUID levelHackathonId, UUID eventHackathonId){
+  private boolean hackathonIdMatchesEvent(UUID levelHackathonId, UUID eventHackathonId) {
     return levelHackathonId != null && levelHackathonId.equals(eventHackathonId);
   }
 }

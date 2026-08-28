@@ -14,19 +14,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class EventLifecycleService {
-    private final EventRepository eventRepo;
-    private final EventService eventService;
+  private final EventRepository eventRepo;
+  private final EventService eventService;
 
-    @Scheduled(fixedDelayString = "${events.lifecycle-refresh-ms:30000")
-    @Transactional
-    public void refreshStatuses(){
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        for(Event event : eventRepo.findAll()){
-            try{
-                eventService.refreshLifecycleStatus(event, now);
-            } catch (RuntimeException e){
-                log.error("Failed to refresh event lifecycle {}", event.getEventId(), e);
-            }
-        }
+  @Scheduled(fixedDelayString = "${events.lifecycle-refresh-ms:30000")
+  @Transactional
+  public void refreshStatuses() {
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    for (Event event : eventRepo.findAll()) {
+      try {
+        eventService.refreshLifecycleStatus(event, now);
+      } catch (RuntimeException e) {
+        log.error("Failed to refresh event lifecycle {}", event.getEventId(), e);
+      }
     }
+  }
 }

@@ -16,7 +16,8 @@ public class EventRegistrationResponse {
 
   public EventRegistrationResponse() {}
 
-  public EventRegistrationResponse(UUID regId, UUID eventId, Instant registeredAt, String dietaryReq, String allergies) {
+  public EventRegistrationResponse(
+      UUID regId, UUID eventId, Instant registeredAt, String dietaryReq, String allergies) {
     this.regId = regId;
     this.eventId = eventId;
     this.registeredAt = registeredAt;

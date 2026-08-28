@@ -1,22 +1,22 @@
 package com.hackathon.platform.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import java.util.List;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "events", schema = "public")
@@ -182,6 +182,7 @@ public class Event {
   public OffsetDateTime getEndDateTime() {
     return startDateTime == null ? null : startDateTime.plusSeconds(duration);
   }
+
   public int getDuration() {
     return duration;
   }
