@@ -39,6 +39,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.springframework.security.access.AccessDeniedException;
+import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Team;
+import com.hackathon.platform.model.Level;
 
 /**
  * REST controller for all file upload and presigned download URL operations. All logic is delegated
@@ -121,6 +124,8 @@ public class StorageController {
       @PathVariable String levelId,
       @PathVariable String filename) {
 
+    UUID hackathonUUID = UUID.fromString(hackathonId);
+    requireEventStartedForParticipant(hackathonUUID);
     String storageKey = BlobPath.levelFile(hackathonId, levelId, filename);
     String url =
         storageService.generatePresignedUrl(
@@ -142,7 +147,8 @@ public class StorageController {
   @GetMapping("/hackathons/{hackathonId}/levels/{levelId}/files")
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<List<LevelFile>> listLevelFiles(
-      @PathVariable String hackathonId, @PathVariable Long levelId) {
+      @PathVariable String hackathonId, @PathVariable Long levelId, @AuthenticationPrincipal User currUser) {
+    requireEventStartedForParticipant(UUID.fromString(hackathonId), currUser);
     return ResponseEntity.ok(fileMetadataService.listLevelFiles(levelId));
   }
 
@@ -393,7 +399,8 @@ public class StorageController {
   @GetMapping("/hackathons/{hackathonId}/problem-statement")
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getProblemStatementUrl(
-      @PathVariable String hackathonId) {
+      @PathVariable String hackathonId, @AuthenticationPrincipal User currUser) {
+    requireEventStartedForParticipant(UUID.fromString(hackathonId), currUser);
     String storageKey =
         hackathonService
             .getHackathonById(UUID.fromString(hackathonId))
@@ -433,7 +440,37 @@ public class StorageController {
       @PathVariable String teamId,
       @RequestParam("outputFile") MultipartFile outputFile,
       @RequestParam("sourceFile") MultipartFile sourceFile,
-      @RequestParam("levelId") short levelId) {
+      @RequestParam("levelId") short levelId, @AuthenticationPrincipal User currUser) {
+
+
+    if(outputFile == null || outputFile.isEmpty()){
+      throw new StorageException("Output file is missing");
+    }
+    if(sourceFile == null || sourceFile.isEmpty()){
+      throw new StorageException("Source file is missing");
+    }
+    String fileName = sourceFile.getOriginalFilename() == null ? "" : sourceFile.getOriginalFilename().toLowerCase();
+    if(!fileName.endsWith(".zip")){
+      throw new StorageException("Source code archive needs to be .zip");
+    }
+    UUID eventUUID = UUID.fromString(eventId);
+    UUID teamUUID = UUID.fromString(teamId);
+    Event event = eventService.getEventById(eventUUID);
+    eventService.refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
+    if(!"ACTIVE".equals(event.getStatus())){
+      throw new StorageException("You cant submit before the event starts");
+    }
+    Team team = teamRepo.findById(teamUUID).orElseThrow(() -> new StorageException("Team not found"));
+    if(!eventUUID.equals(team.getEventId())){
+      throw new StorageException("Team doesnt exist");
+    }
+    if(!teamMemberRepo.findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", eventUUID).stream().anyMatch(m -> teamUUID.equals(m.getTeamId()))){
+      throw new StorageException("You are not part of this team");
+    }
+    Level lvl = levelRepo.findById(levelId).orElseThrow(() -> new StorageException("Level not found"));
+    if(!hackathonIdMatchesEvent(lvl.getHackathonId(), event.getHackathon())){
+      throw new StorageException("Level doesnt exist");
+    }
 
     UUID hackathonId =
         eventRepository
@@ -499,8 +536,10 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
-      @PathVariable String filename) {
+      @PathVariable String filename, @AuthenticationPrincipal User currUser) {
 
+
+    assertSubmissionAccess(eventId, teamId, submissionId, currUser);
     String storageKey = fileMetadataService.getSubmissionOutputStorageKey(submissionId);
     String url =
         storageService.generatePresignedUrl(
@@ -523,8 +562,9 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
-      @PathVariable String filename) {
+      @PathVariable String filename, @AuthenticationPrincipal User currUser) {
 
+    assertSubmissionAccess(eventId, teamId, submissionId, currUser);
     String storageKey = fileMetadataService.getSubmissionSourceStorageKey(submissionId);
     String url =
         storageService.generatePresignedUrl(
@@ -549,7 +589,9 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable String levelId,
-      @PathVariable String submissionId) {
+      @PathVariable String submissionId, @AuthenticationPrincipal User currUser) {
+
+    assertSubmissionAccess(eventId, teamId, Long.valueOf(submissionId), currUser);
     String storageKey = BlobPath.scoringLog(eventId, teamId, levelId, submissionId);
     String url =
         storageService.generatePresignedUrl(
@@ -557,7 +599,7 @@ public class StorageController {
     return ResponseEntity.ok(Map.of("url", url));
   }
 
-  private void requireEventStartedParticipant(UUID hackathon){
+  private void requireEventStartedForParticipant(UUID hackathon){
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     User currUser = auth != null && auth.getPrincipal() instanceof User ? (User) auth.getPrincipal() : null;
     requireEventStartedForParticipant(hackathon, currUser);
