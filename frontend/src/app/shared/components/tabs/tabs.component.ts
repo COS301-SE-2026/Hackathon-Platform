@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { TabsModule } from 'primeng/tabs';
+import { RouterLink } from '@angular/router';
 
 export interface TabItem {
   label: string;
   route?: string;
+  queryParams?: Record<string, string>;
   icon?: string;
   type?: 'tab' | 'label';
 }
@@ -12,11 +12,14 @@ export interface TabItem {
 @Component({
   selector: 'app-tabs',
   standalone: true,
-  imports: [ TabsModule, RouterLink,RouterLinkActive],
+  imports: [RouterLink],
   templateUrl: './tabs.component.html',
   styleUrl: './tabs.component.scss'
 })
 export class TabsComponent {
+
   @Input() tabs: TabItem[] = [];
   @Input() ariaLabel = 'Page navigation';
+  @Input() activeTab = '';
+
 }

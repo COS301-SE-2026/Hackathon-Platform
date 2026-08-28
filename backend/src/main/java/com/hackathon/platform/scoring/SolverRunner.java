@@ -44,16 +44,49 @@ public class SolverRunner {
       Files.createDirectories(workingDir);
       tempDir = Files.createTempDirectory(workingDir, "run-");
 
-      List<String> command = new ArrayList<>();
-      command.add(solverConfig.getPythonExecutable());
-      command.add(solverPath.toAbsolutePath().toString());
-      command.add(outputPath.toAbsolutePath().toString());
-      command.add(levelInput != null ? levelInput.toAbsolutePath().toString() : "");
-      command.add(levelId != null ? levelId.toString() : "");
+      List<String> pythonCommand = new ArrayList<>();
+      pythonCommand.add(solverConfig.getPythonExecutable());
+      pythonCommand.add(solverPath.toAbsolutePath().toString());
+      pythonCommand.add(outputPath.toAbsolutePath().toString());
+      pythonCommand.add(levelInput != null ? levelInput.toAbsolutePath().toString() : "");
+      pythonCommand.add(levelId != null ? levelId.toString() : "");
+
+      // Wrap in a shell so we can apply ulimits. Temp commented out and added pythonCommand
+      // straight to command until we see deployment
+      List<String> command = pythonCommand;
+      // if (isUnixLike()){
+      //   command = new ArrayList<>();
+      //   command.add("/bin/sh");
+      //   command.add("-c");
+      //   command.add(
+      //       "ulimit -v "
+      //           + (solverConfig.getMemoryLimitMb() * 1024L)
+      //           + " -t "
+      //           + solverConfig.getCpuLimitSeconds()
+      //           + "; exec \"$@\"");
+      //   command.add("solver-run");
+      //   command.addAll(pythonCommand);
+
+      // } else {
+      //   logger.warn(
+      //     "Non-Unix OS detected - running solver without ulimit-based CPU/memory limits");
+      //   command = pythonCommand;
+
+      // }
 
       ProcessBuilder builder = new ProcessBuilder(command);
       builder.directory(tempDir.toFile());
       builder.redirectErrorStream(false);
+
+      // Deny-by-default
+      builder.environment().clear();
+      for (String key : solverConfig.getAllowedEnvKeys()) {
+        String value = System.getenv(key);
+        if (value != null) {
+          builder.environment().put(key, value);
+        }
+      }
+
       Process process = builder.start();
 
       StreamCapture output =
@@ -143,6 +176,11 @@ public class SolverRunner {
           e);
     }
   }
+
+  // private boolean isUnixLike() {
+  //   String os = System.getProperty("os.name", "").toLowerCase();
+  //   return !os.contains("win");
+  // }
 
   private String truncate(String text, int maxLen) {
     return text.length() <= maxLen ? text : text.substring(0, maxLen) + "...";

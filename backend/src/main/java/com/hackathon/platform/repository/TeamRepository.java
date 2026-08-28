@@ -21,4 +21,9 @@ public interface TeamRepository extends JpaRepository<Team, UUID> {
   long countByEventId(UUID eventId);
 
   long countByEventIdAndStatus(UUID eventId, String status);
+  /** Count teams for an event with a given status */
+  long countByEventIdAndStatus(UUID eventId, String status);
+
+  /** All teams for an event, used to aggregate participant accounts */
+  List<Team> findByEventId(UUID eventId);
 }

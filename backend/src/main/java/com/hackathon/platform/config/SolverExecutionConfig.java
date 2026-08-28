@@ -1,5 +1,7 @@
 package com.hackathon.platform.config;
 
+import java.util.Arrays;
+import java.util.List;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -24,4 +26,25 @@ public class SolverExecutionConfig {
   /** Max bytes of stdout/stderr captured from the solver, to avoid unbounded memory use. */
   @Value("${scoring.solver.max-output-bytes:1048576}")
   private int maxOutputBytes;
+
+  /** Deny-by-default allow-list of environment variable names passed into solver process */
+  @Value("${scoring.solver.allowed-env-keys:PATH,HOME,LANG,LC_ALL,SystemRoot}")
+  private String allowedEnvKeysRaw = "PATH,HOME,LANG,LC_ALL,SystemRoot";
+
+  // temporary commented out until deployment confirmation
+
+  // /** Max address space the solver may allocate */
+  // @Value("${scoring.solver.memory-limit-mb:512}")
+  // private int memoryLimitMb = 512;
+
+  // /** Max CPU time in seconds that the solver process may consume*/
+  // @Value("${scoring.solver.cpu-limit-seconds:30}")
+  // private int cpuLimitSeconds = 30;
+
+  public List<String> getAllowedEnvKeys() {
+    return Arrays.stream(allowedEnvKeysRaw.split(","))
+        .map(String::strip)
+        .filter(s -> !s.isEmpty())
+        .toList();
+  }
 }
