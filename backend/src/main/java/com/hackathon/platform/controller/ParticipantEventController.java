@@ -60,7 +60,7 @@ public class ParticipantEventController {
       @AuthenticationPrincipal User currUser) {
     String regKey = req == null ? null : req.getRegKey();
     EventRegistrationResponse resp =
-        eventRegistrationService.registerForEvent(eventId, currUser.getUserId(), regKey);
+        eventRegistrationService.registerForEvent(eventId, currUser.getUserId(), regKey, req == null ? null : req.getDietaryReq(), req == null ? null : req.getAllergies());
     return ResponseEntity.status(HttpStatus.CREATED).body(resp);
   }
 
