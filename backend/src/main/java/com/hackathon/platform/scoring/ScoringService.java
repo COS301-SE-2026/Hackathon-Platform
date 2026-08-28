@@ -147,7 +147,7 @@ public class ScoringService {
             .findById(submissionId)
             .orElseThrow(
                 () -> new IllegalArgumentException("Submission wasnt found " + submissionId));
-    if("CANCELED".equalsIgnoreCase(sub.getStatus())){
+    if ("CANCELED".equalsIgnoreCase(sub.getStatus())) {
       throw new IllegalArgumentException("Submission was canceled");
     }
     sub.setStatus("SCORING");

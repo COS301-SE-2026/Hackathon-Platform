@@ -154,6 +154,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   long countByEventId(UUID eventId);
 
   long countByEventIdAndStatus(UUID eventId, String status);
+
   @Query(
       "SELECT COUNT(s) FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId AND s.submittedAt >= :since")
   long countByAdminSince(@Param("userId") UUID userId, @Param("since") Instant since);
