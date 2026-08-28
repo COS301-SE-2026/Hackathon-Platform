@@ -197,8 +197,6 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
       nativeQuery = true)
   List<LevelScoreRow> findScoreDistributionByEventId(@Param("eventId") UUID eventId);
 
-  long countByEventIdAndStatus(UUID eventId, String status);
-
   /** Projection for gtoup by status counts */
   interface StatusCount {
     String getStatus();
