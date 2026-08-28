@@ -140,7 +140,7 @@ public class EventService {
   }
 
   public List<Event> getPrivateEvents() {
-    return eventRepository.findByVisibilityAndStatusIn("PRIVATE", List.of("Upcoming", "ACTIVE"));
+    return eventRepository.findByVisibilityAndStatusIn("PRIVATE", List.of("UPCOMING", "ACTIVE"));
   }
 
   public List<Event> getUserActiveEvents() {

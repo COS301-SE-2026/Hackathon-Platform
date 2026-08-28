@@ -83,7 +83,7 @@ public class LeaderboardService {
   }
 
   private List<LeaderboardEntry> entriesForLevel(Event event, UUID eventId, short levelId) {
-    OffsetDateTime freeze = event.getLeaderboardFreezeDuration();
+    OffsetDateTime freeze = event.getLeaderboardFreezeDateTime();
     if (freeze != null && !OffsetDateTime.now().isBefore(freeze)) {
       return subRepo.findFrozenLeaderboardByEventIdAndLevelId(eventId, levelId, freeze);
     }
@@ -91,7 +91,7 @@ public class LeaderboardService {
   }
 
   private List<LeaderboardEntry> entriesForEvent(Event event, UUID eventId) {
-    OffsetDateTime freeze = event.getLeaderboardFreezeDuration();
+    OffsetDateTime freeze = event.getLeaderboardFreezeDateTime();
     if (freeze != null && !OffsetDateTime.now().isBefore(freeze)) {
       return subRepo.findFrozenLeaderboardByEventId(eventId, freeze);
     }
