@@ -107,7 +107,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
             SELECT DISTINCT ON (team_id) team_id, score, submitted_at
             FROM submissions s
             WHERE level_id = :levelId AND status = 'SCORED' AND submitted_at <= :cutoff
-            ORDER BY team_id, score DESC submitted_at ASC, id ASC
+            ORDER BY team_id, score DESC, submitted_at ASC, id ASC
         )
         SELECT team.team_id AS "teamId", team.team_name AS "teamName",
                 COALESCE(best.score, CAST(0 AS NUMERIC)) AS "bestScore",
@@ -115,7 +115,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
         FROM teams team
         LEFT JOIN BestSubmissions best ON team.team_id = best.team_id
         WHERE team.event_id = :eventId AND team.status = 'ACTIVE'
-        ORDER BY "bestScore" DESC, "lastScoredAt" ASC NULLS LAST, team.team_nameASC, team.team_id ASC
+        ORDER BY "bestScore" DESC, "lastScoredAt" ASC NULLS LAST, team.team_name ASC, team.team_id ASC
 """,
       nativeQuery = true)
   List<LeaderboardEntry> findFrozenLeaderboardByEventIdAndLevelId(
@@ -131,14 +131,14 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
             FROM submissions s
             INNER JOIN teams t ON t.team_id = s.team_id
             WHERE t.event_id = :eventId AND s.status = 'SCORED' AND s.submitted_at <= :cutoff
-            ORDER BY s.team_id, s.level_id, s.score DESC, s.sub,itted_at ASC, s.id ASC
+            ORDER BY s.team_id, s.level_id, s.score DESC, s.submitted_at ASC, s.id ASC
         ), TeamTotals AS (
             SELECT team_id, sum(score) AS total_score, MAX(submitted_at) AS last_scored_at
             FROM BestSubmissions GROUP BY team_id
         )
         SELECT t.team_id AS "teamId", t.team_name AS "teamName",
                 COALESCE(totals.total_score, 0) AS "bestScore", totals.last_scored_at AS "lastScoredAt"
-        FROM teams t LEFT JOIN TeamTotals totals ON t.teamId = totals.team_id
+        FROM teams t LEFT JOIN TeamTotals totals ON t.team_id = totals.team_id
         WHERE t.event_id = :eventId AND t.status = 'ACTIVE'
         ORDER BY "bestScore" DESC, totals.last_scored_at ASC NULLS LAST, t.team_name ASC, t.team_id ASC
 """,
