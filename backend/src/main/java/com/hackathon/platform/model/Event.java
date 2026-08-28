@@ -127,8 +127,8 @@ public class Event {
 
   @Getter
   @Setter
-  @Column(name = "leaderboard_freeze_duration")
-  private OffsetDateTime leaderboardFreezeDuration;
+  @Column(name = "leaderboard_freeze_datetime")
+  private OffsetDateTime leaderboardFreezeDateTime;
 
   public UUID getEventId() {
     return eventId;

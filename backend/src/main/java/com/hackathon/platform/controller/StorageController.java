@@ -62,7 +62,6 @@ public class StorageController {
   private final HackathonService hackathonService;
   private final EventService eventService;
   private final EventRegistrationRepository eventRegRepo;
-  private final HackathonService hackService;
   private final TeamRepository teamRepo;
   private final TeamMemberRepository teamMemberRepo;
   private final LevelRepository levelRepo;

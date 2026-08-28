@@ -33,7 +33,7 @@ public class EventService {
   private static final Set<String> ALLOWED_STATUSES =
       Set.of("UPCOMING", "ACTIVE", "COMPLETED", "CANCELED");
   private static final Set<String> TERMINAL_STATUSES = Set.of("COMPLETED", "CANCELED");
-  private static final Set<String> ALLOWED_VISIBILITIES = Set.of("PUBLC", "PRIVATE");
+  private static final Set<String> ALLOWED_VISIBILITIES = Set.of("PUBLIC", "PRIVATE");
 
   @Autowired
   public EventService(
@@ -65,6 +65,7 @@ public class EventService {
     requireHackathon(req.getHackathonId());
     Event event = new Event();
     event.setCreatedByUserId(getCurrentAdminId());
+    applyReq(event, req, true);
     event.setStatus(
         calculateLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC), req.getStatus()));
     return eventRepository.save(event);
@@ -330,7 +331,7 @@ public class EventService {
       event.setTotalPrizePool(req.getTotalPrizePool());
     }
     if (req.getFreezeTime() != null) {
-      event.setLeaderboardFreezeDuration(req.getFreezeTime());
+      event.setLeaderboardFreezeDateTime(req.getFreezeTime());
     }
     if (req.getInPerson() != null) {
       event.setInPerson(req.getInPerson());

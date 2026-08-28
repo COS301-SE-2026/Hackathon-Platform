@@ -17,7 +17,7 @@ public class EventLifecycleService {
   private final EventRepository eventRepo;
   private final EventService eventService;
 
-  @Scheduled(fixedDelayString = "${events.lifecycle-refresh-ms:30000")
+  @Scheduled(fixedDelayString = "${events.lifecycle-refresh-ms:30000}")
   @Transactional
   public void refreshStatuses() {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);

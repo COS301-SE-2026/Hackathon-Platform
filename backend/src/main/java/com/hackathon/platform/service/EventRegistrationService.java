@@ -33,7 +33,7 @@ public class EventRegistrationService {
       UUID eventId, UUID userId, String key, String dietaryReq, String allergies) {
     Event event =
         eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
-    if ("COMPLETED".equals(event.getStatus()) || "CANCELLED".equals(event.getStatus())) {
+    if ("COMPLETED".equals(event.getStatus()) || "CANCELED".equals(event.getStatus())) {
       throw new RuntimeException("This event is not accepting registrations");
     }
 

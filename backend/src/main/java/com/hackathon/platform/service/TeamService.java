@@ -66,7 +66,7 @@ public class TeamService {
     assertEventAcceptsRegistrations(event);
     assertUserIsRegisteredForEvent(event.getEventId(), currentUserId);
 
-    if (teamRepository.existsByEventIdAndTeamName(currentUserId, teamName)) {
+    if (teamRepository.existsByEventIdAndTeamName(event.getEventId(), teamName)) {
       throw new RuntimeException("Team name is in use, please choose a new team name");
     }
 
@@ -87,6 +87,7 @@ public class TeamService {
     member.setTeamId(svdName.getTeamId());
     member.setUserId(currentUserId);
     member.setStatus("APPROVED");
+    teamMemberRepository.save(member);
     return toTeamResponse(svdName);
   }
 
