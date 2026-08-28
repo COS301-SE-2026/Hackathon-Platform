@@ -27,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.EventRegistrationRepository;
+import com.hackathon.platform.model.Event;
 
 @ExtendWith(MockitoExtension.class)
 class TeamServiceTest {
@@ -34,11 +37,14 @@ class TeamServiceTest {
   @Mock private TeamRepository teamRepository;
   @Mock private TeamMemberRepository teamMemberRepository;
   @Mock private UserRepository userRepository;
+  @Mock private EventRepository eventRepo;
+  @Mock private EventRegistrationRepository eventRegRepo;
   @InjectMocks private TeamService teamService;
 
   private UUID eventId;
   private UUID userId;
   private CreateTeamRequest createRequest;
+  private Event event;
 
   @BeforeEach
   void setUp() {
@@ -47,13 +53,20 @@ class TeamServiceTest {
     createRequest = new CreateTeamRequest();
     createRequest.setEventId(eventId);
     createRequest.setTeamName("Test Team");
+
+    event = new Event();
+    event.setEventId(eventId);
+    event.setStatus("UPCOMING");
+    event.setTeamSizeLimit((short) 4);
   }
 
   @Test
   void createTeam_shouldSucceed_whenValid() {
 
-    when(teamRepository.findAll()).thenReturn(Collections.emptyList());
-    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId))
         .thenReturn(Collections.emptyList());
 
     Team savedTeam = new Team();
@@ -61,6 +74,7 @@ class TeamServiceTest {
     savedTeam.setTeamName("Test Team");
     savedTeam.setEventId(eventId);
     savedTeam.setCreatedByUserId(userId);
+    savedTeam.setStatus("APPROVED");
     when(teamRepository.save(any(Team.class))).thenReturn(savedTeam);
     when(teamMemberRepository.save(any(TeamMember.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -75,29 +89,28 @@ class TeamServiceTest {
 
   @Test
   void createTeam_shouldThrow_whenDuplicateTeamName() {
-
-    Team existingTeam = new Team();
-    existingTeam.setTeamName("Test Team");
-    when(teamRepository.findAll()).thenReturn(List.of(existingTeam));
-
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(true);
     assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("Team name already exists");
+        .hasMessageContaining("Team name is in use, please choose a new team name");
     verify(teamRepository, never()).save(any(Team.class));
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
 
   @Test
   void createTeam_shouldThrow_whenUserAlreadyInTeam() {
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
 
-    when(teamRepository.findAll()).thenReturn(Collections.emptyList());
-
-    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId))
         .thenReturn(List.of(new TeamMember()));
 
     assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("already a member of a team");
+        .hasMessageContaining("You're already part of a team for this event");
     verify(teamRepository, never()).save(any(Team.class));
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
