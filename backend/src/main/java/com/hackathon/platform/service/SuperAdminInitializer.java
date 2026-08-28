@@ -26,4 +26,22 @@ public class SuperAdminInitializer implements ApplicationRunner {
     @Value("${platform.superadmin.password:}") private String password;
     @Value("${platform.superadmin.first-name:Platform}") private String firstName;
     @Value("${platform.superadmin.last-name:SuperAdmin}") private String lastName;
+
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args){
+        if(email == null || email.isBlank() || password == null || password.isBlank()){
+            return;
+        }
+
+        String emailFormatted = email.trim().toLowerCase(Locale.ROOT);
+        if(userRepo.existsByEmail(emailFormatted)){
+            return;
+        }
+
+        Role role = roleRepo.findByName("SUPERADMIN").orElseThrow(() -> new IllegalStateException("SUPERADMIN role not found"));
+
+        User user = User.builder().firstName(firstName.trim()).lastName(lastName).email(emailFormatted).passwordHash(paswrdEncoder.encode(password)).role(role).status("ACTIVE").build();
+        userRepo.save(user);
+    }
 }
