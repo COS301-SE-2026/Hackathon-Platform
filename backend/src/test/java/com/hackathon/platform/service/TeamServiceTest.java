@@ -180,6 +180,7 @@ class TeamServiceTest {
     UUID teamId = UUID.randomUUID();
     UUID targetUserId = UUID.randomUUID();
     Team team = new Team();
+    team.setTeamId(teamId);
     team.setEventId(eventId);
     team.setCreatedByUserId(userId);
     TeamMember pending = new TeamMember();
@@ -187,9 +188,9 @@ class TeamServiceTest {
 
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
-        .thenReturn(Optional.of(pending));
-    when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
-        .thenReturn(Collections.emptyList());
+            .thenReturn(Optional.of(pending));
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(targetUserId, "APPROVED", eventId)).thenReturn(Collections.emptyList());
     when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(1L);
 
     teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true);
@@ -210,7 +211,6 @@ class TeamServiceTest {
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
         .thenReturn(Optional.of(pending));
-
     teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, false);
 
     assertThat(pending.getStatus()).isEqualTo("REJECTED");
@@ -226,8 +226,7 @@ class TeamServiceTest {
     Team targetTeam = new Team();
     targetTeam.setEventId(eventId);
     targetTeam.setCreatedByUserId(userId);
-    Team otherTeam = new Team();
-    otherTeam.setEventId(eventId);
+
     TeamMember pendingMembership = new TeamMember();
     pendingMembership.setStatus("PENDING");
     TeamMember approvedMembershipInOtherTeam = new TeamMember();
@@ -237,13 +236,14 @@ class TeamServiceTest {
     when(teamRepository.findById(targetTeamId)).thenReturn(Optional.of(targetTeam));
     when(teamMemberRepository.findByTeamIdAndUserId(targetTeamId, targetUserId))
         .thenReturn(Optional.of(pendingMembership));
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
     when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
         .thenReturn(List.of(approvedMembershipInOtherTeam));
 
     assertThatThrownBy(
             () -> teamService.approveOrRejectJoinRequest(targetTeamId, targetUserId, userId, true))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("already an approved member of another team");
+        .hasMessageContaining("Youre already an approved member for another team for this event");
 
     verify(teamMemberRepository, never()).save(pendingMembership);
   }
