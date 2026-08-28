@@ -29,6 +29,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import com.hackathon.platform.repository.EventRegistrationRepository;
+import com.hackathon.platform.repository.TeamRepository;
+import com.hackathon.platform.repository.TeamMemberRepository;
+import com.hackathon.platform.repository.LevelRepository;
+import com.hackathon.platform.repository.SubmissionRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import org.springframework.security.access.AccessDeniedException;
 
 /**
  * REST controller for all file upload and presigned download URL operations. All logic is delegated
@@ -48,6 +58,13 @@ public class StorageController {
   private final ScoringJobProducer producer;
   private final HackathonService hackathonService;
   private final EventService eventService;
+  private final EventRegistrationRepository eventRegRepo;
+  private final HackathonService hackService;
+  private final TeamRepository teamRepo;
+  private final TeamMemberRepository teamMemberRepo;
+  private final LevelRepository levelRepo;
+  private final SubmissionRepository subRepo;
+
 
   // Event Resources
 
@@ -152,7 +169,6 @@ public class StorageController {
    *
    * @param hackathonId the event UUID
    * @param file the uploaded solver file
-   * @param uploadedBy UUID of the admin uploading the solver
    * @param notes optional release notes for this solver version
    * @return storageKey, blobUrl, version, and database record id
    */
@@ -539,5 +555,46 @@ public class StorageController {
         storageService.generatePresignedUrl(
             config.getScoringLogsContainer(), storageKey, config.getSasExpiryMinutes());
     return ResponseEntity.ok(Map.of("url", url));
+  }
+
+  private void requireEventStartedParticipant(UUID hackathon){
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    User currUser = auth != null && auth.getPrincipal() instanceof User ? (User) auth.getPrincipal() : null;
+    requireEventStartedForParticipant(hackathon, currUser);
+  }
+
+  private void requireEventStartedForParticipant(UUID hackathon, User currUser){
+    boolean admin = currUser != null && currUser.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()) || "ROLE_SUPERADMIN".equals(a.getAuthority()));
+    if(admin){
+      return;
+    }
+
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    boolean started = eventRepository.findByHackathon(hackathon).stream().anyMatch(event -> {
+      eventService.refreshLifecycleStatus(event, now);
+      return "ACTIVE".equals(event.getStatus());
+    });
+    if(!started){
+      throw new StorageException("You can only access resources when the event starts");
+    }
+  }
+
+  private void assertSubmissionAccess(String eventId, String teamId, Long submissionId, User currUser){
+    Submission sub = subRepo.findById(submissionId).orElseThrow(() -> new StorageException("Submission not found"));
+    if(!UUID.fromString(eventId).equals(sub.getEventId()) || !UUID.fromString(teamId).equals(sub.getTeamId())){
+      throw new StorageException("Submission not found");
+    }
+    boolean admin = currUser != null && currUser.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    if(admin){
+      return;
+    }
+    boolean member = teamMemberRepo.findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", sub.getEventId()).stream().anyMatch(m -> m.getTeamId().equals(sub.getTeamId()));
+    if(!member){
+      throw new AccessDeniedException("You dont have access to this event");
+    }
+  }
+
+  private boolean hackathonIdMatchesEvent(UUID levelHackathonId, UUID eventHackathonId){
+    return levelHackathonId != null && levelHackathonId.equals(eventHackathonId);
   }
 }
