@@ -191,7 +191,18 @@ textarea{
         }
 
 }
+.image-upload-row{
+    margin-bottom: 16px;
 
+    .image-drop-zone{
+        padding: 20px 12px;
+    }
+    .drop-zone-icon-lg{
+        width: 34px;
+        height: 34px;
+        font-size: 1.1rem;
+    }
+}
 .drop-zone {
     width: 100%;
     background-color: #f9fafc;
