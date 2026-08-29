@@ -95,7 +95,7 @@ class EventServiceTest {
     req.setName("My new name");
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
-    req.setDescription("This is a test");
+    req.setTagline("This is a test");
     req.setTeamSizeLimit((short) 4);
     req.setStartDateTime(OffsetDateTime.now().minusHours(1));
     req.setDuration(48*3600);
@@ -109,7 +109,7 @@ class EventServiceTest {
     assertThat(result.getName()).isEqualTo("My new name");
     assertThat(result.getVisibility()).isEqualTo("PUBLIC");
     assertThat(result.getStatus()).isEqualTo("ACTIVE");
-    assertThat(result.getDescription()).isEqualTo("This is a test");
+    assertThat(result.getTagline()).isEqualTo("This is a test");
     assertThat(result.getCreatedByUserId()).isEqualTo(creatorUserId);
 
     verify(eventRepository).save(any(Event.class));
@@ -240,7 +240,7 @@ class EventServiceTest {
     req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PUBLIC");
-    req.setStatus(null);
+    req.setStatus("INVALID");
     req.setDescription("This is a test");
     req.setTeamSizeLimit((short) 10);
     req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
@@ -286,7 +286,7 @@ class EventServiceTest {
     req.setName("My new name");
     req.setVisibility("PRIVATE");
     req.setStatus("ACTIVE");
-    req.setDescription("This is a test");
+    req.setTagline("This is a test");
     req.setRegistrationKey("THISISAKEY");
 
     when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
@@ -299,7 +299,7 @@ class EventServiceTest {
     assertThat(result.getName()).isEqualTo("My new name");
     assertThat(result.getVisibility()).isEqualTo("PRIVATE");
     assertThat(result.getStatus()).isEqualTo("ACTIVE");
-    assertThat(result.getDescription()).isEqualTo("This is a test");
+    assertThat(result.getTagline()).isEqualTo("This is a test");
     assertThat(result.getRegistrationKey()).isEqualTo("THISISAKEY");
     assertThat(result.getCreatedByUserId()).isEqualTo(creatorUserId);
 
@@ -352,6 +352,7 @@ class EventServiceTest {
 
   @Test
   void patchEventStatus_toPrivateWithoutKey_throwsRuntimeException() {
+    event.setRegistrationKey("OLD_KEY");
     when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
     assertThatThrownBy(() -> eventService.patchEventStatus(eventId, "PRIVATE", "ACTIVE", null))
