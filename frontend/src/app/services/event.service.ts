@@ -12,6 +12,8 @@ export interface EventRequest {
   description?: string;
   visibility: 'PUBLIC' | 'PRIVATE';
   status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
+  isInPerson?: boolean;
+  leaderboardFreezeDateTime?: string;  
 }
 
 export interface EventResponse {
@@ -26,6 +28,8 @@ export interface EventResponse {
   description?: string;
   visibility: string;
   status: string;
+  isInPerson?: boolean;
+  leaderboardFreezeDateTime?: string;
 }
 
 @Injectable({

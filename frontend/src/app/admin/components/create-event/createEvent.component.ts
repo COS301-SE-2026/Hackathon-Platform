@@ -36,7 +36,10 @@ export class CreateEventComponent implements OnInit {
     bannerFileName: '',
     description: '',
     registrationKey: '',
-    rules: ''
+    rules: '',
+    isInPerson: false,
+    leaderboardFreezeDateTime: '',
+
   };
 
   readonly descriptionMaxLength = 1000;
@@ -132,7 +135,12 @@ export class CreateEventComponent implements OnInit {
       description: this.form.description || undefined,
       visibility: this.form.visibility,
       status: 'ACTIVE',
-      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined
+      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined,
+      isInPerson: this.form.isInPerson,
+      leaderboardFreezeDateTime: this.form.leaderboardFreezeDateTime
+      ? new Date(this.form.leaderboardFreezeDateTime).toISOString()
+      :undefined
+
     };
 
     console.log('Sending event data to backend:', eventData);
