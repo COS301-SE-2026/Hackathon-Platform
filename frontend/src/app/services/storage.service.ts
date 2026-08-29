@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+
 
 export interface LevelFileResponse {
   id: number;
@@ -13,7 +15,7 @@ export interface LevelFileResponse {
   contentType?: string;
 }
 
-/** Maps a file's extension to the fileType values accepted by the level-file upload endpoint. */
+
 export function inferLevelFileType(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
   switch (ext) {
@@ -30,8 +32,18 @@ export function inferLevelFileType(fileName: string): string {
 
 @Injectable({ providedIn: 'root' })
 export class StorageService {
+    
+  uploadHackathonImage(hackathonId : string, file: File): Observable<{storageKey: string; blobUrl : string}>{
+    const formData = new FormData();
+    formData.append('file',file);
+    formData.append('hackathonId',hackathonId);
+
+    return this.http.post<{storageKey: string; blobUrl: string}>(
+      `${this.baseUrl}/hackathons/${hackathonId}/image`, formData
+    );
+  }
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/storage';
+  private readonly baseUrl = `${environment.apiUrl}/api/storage`;
 
   getLevelFileUrl(hackathonId: string, levelId: string, filename: string): Observable<{ url: string }> {
     return this.http.get<{ url: string }>(

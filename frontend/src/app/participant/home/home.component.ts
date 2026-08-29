@@ -1,25 +1,17 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse } from '../../services/event.service';
 import { CarouselModule, CarouselPageEvent } from 'primeng/carousel';
-import { CardModule } from 'primeng/card';         
-import { ButtonModule } from 'primeng/button';      
-import { TagModule } from 'primeng/tag';  
-import { InputTextModule } from 'primeng/inputtext';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
-import { SelectButtonModule } from 'primeng/selectbutton';
+import { ButtonComponent } from '../../shared/components/button/button.component';
+import { CardComponent } from '../../shared/components/card/card.component';
+import { InputComponent } from '../../shared/components/input/input.component';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { ToastService } from '../../shared/components/toast/toast.service';
+import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util';
 
-interface EventTimer {
-  label: string;
-  days: string;
-  hours: string;
-  minutes: string;
-  seconds: string;
-}
 
 interface OpenEventView {
   eventId: string;
@@ -28,7 +20,6 @@ interface OpenEventView {
   teams: number;
   visibility: string;
   status: string;
-  requiresKey: boolean;
   teamSizeLimit: number;
   description?: string;
   startDateTime: string;
@@ -39,27 +30,42 @@ interface OpenEventView {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, CarouselModule, CardModule, ButtonModule, TagModule, InputTextModule, IconFieldModule, InputIconModule, SelectButtonModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    CarouselModule, 
+    CardComponent, 
+    ButtonComponent,
+    InputComponent, 
+    ModalComponent,
+    LoaderComponent
+   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
+
 export class HomeComponent implements OnInit, OnDestroy {
+
   private readonly eventService = inject(EventService);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly change = inject(ChangeDetectorRef);
+  private readonly toast = inject(ToastService);
+  private timerInterval: ReturnType<typeof setInterval> | undefined;
 
-  userFirstName = '';
+ 
   isLoadingEvents = false;
+  registrationModal = false;
   isLoadingActiveEvents = false;
-  errorMessage = '';
-  searchTerm = '';
-  selectedFilterOption = 'All';
+  userFirstName = '';
+  registrationKey = '';
+  currentActiveEventIndex = 0;
 
   activeEvents: OpenEventView[] = [];
-  currentActiveEventIndex = 0;
-  openEvents: OpenEventView[] = [];
+  upcomingEvents: OpenEventView[] = [];
+  selectedEvent: OpenEventView | null = null;
 
-  private timerInterval: ReturnType<typeof setInterval> | undefined;
+  
   
 
     responsiveOptionsForCarousel = [
@@ -80,33 +86,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   ];
 
-filterOptions = [
-  { label: 'All', value: 'All' },
-  { label: 'Public', value: 'Public' },
-  { label: 'Private', value: 'Private' }
-];
 
-get filteredOpenEvents(): OpenEventView[] {
-  return this.openEvents.filter(event => {
 
-    const search = this.searchTerm.toLowerCase();
-    const name = event.name.toLowerCase();
 
-    if (!name.includes(search)) {
-      return false;
-    }
-
-    if (this.selectedFilterOption === 'All') {
-      return true;
-    }
-
-    return event.visibility === this.selectedFilterOption.toUpperCase();
-  });
-}
   ngOnInit(): void {
     const user = this.authService.getUser();
     this.userFirstName = user ? user.firstName : 'Participant';
-    this.loadOpenEvents();
+    this.loadUpcomingEvents();
     this.loadUsersActiveEvents();
     this.timerInterval = setInterval(() => this.tick(), 1000);
   }
@@ -121,27 +107,43 @@ get filteredOpenEvents(): OpenEventView[] {
     this.currentActiveEventIndex = event.page ?? 0;
 }
 
-  loadOpenEvents(): void {
-    this.isLoadingEvents = true;
-    this.errorMessage = '';
+ loadUpcomingEvents(): void {
+  this.isLoadingEvents = true;
+  
 
-    this.eventService.getOpenEvents().subscribe({
-      next: (events) => {
-        this.isLoadingEvents = false;
-        this.openEvents = events.map((event) => this.toOpenEventView(event));
-},
-      error: (error) => {
-        this.isLoadingEvents = false;
-        console.error('Error loading open events:', error);
-        this.errorMessage = 'Could not load open events.';
-      }
-    });
-  }
+  this.eventService.getOpenEvents().subscribe({
+    next: (events) => {
+      this.isLoadingEvents = false;
+
+      const now = new Date();
+
+      this.upcomingEvents = events
+        .map((event) => this.toOpenEventView(event))
+        .filter((event) => new Date(event.startDateTime) > now)
+        .sort(
+          (a, b) =>
+            new Date(a.startDateTime).getTime() -
+            new Date(b.startDateTime).getTime()
+        )
+        .slice(0, 4);
+
+      this.change.markForCheck();
+    },
+
+    error: (error) => {
+      this.isLoadingEvents = false;
+      console.error('Error loading upcoming events:', error);
+       this.toast.error('Unable to Load Events','We couldn’t load the upcoming events. Please try again.' );
+      this.change.markForCheck();
+    }
+  });
+}
+
 
   loadUsersActiveEvents(): void{
   
     this.isLoadingActiveEvents = true;
-    this.errorMessage = '';
+    
 
    this.eventService.getUserActiveEvents().subscribe({
     next: (events) => {
@@ -159,15 +161,16 @@ get filteredOpenEvents(): OpenEventView[] {
         this.activeEvents = [];
       
       }
+      this.change.markForCheck();
     },
     
     error: (err) => {
       
       this.isLoadingActiveEvents = false;
       console.error('Error loading active events:', err);
-      this.errorMessage = 'Could not load your active events. Please refresh the page';
+      this.toast.error('Unable to Load Active Events','We couldn’t load your active events. Please try again.');
       this.activeEvents = [];
-     
+      this.change.markForCheck();     
     }
   });
   }
@@ -181,26 +184,52 @@ get filteredOpenEvents(): OpenEventView[] {
   ]);
 }
 
-goToMyTeam(event: OpenEventView): void {
-  this.saveCurrentEvent(event);
-  this.router.navigate(
-    ['/participant/events', event.eventId],
-    { 
-      queryParams: {
-        tab: 'team'
-      }
-   }
-  );
+getEventTag(event: OpenEventView): string {
+  const now = new Date();
+  const start = new Date(event.startDateTime);
+  return now < start ? 'Starts Soon' : 'Live Now';
 }
 
-  createTeamForEvent(event: OpenEventView): void {
-    this.saveCurrentEvent(event);
-    localStorage.setItem('currentEventId', event.eventId);
-    localStorage.setItem('currentEventName', event.name);
-    this.router.navigate(['/participant/team'], {
-      queryParams: { eventId: event.eventId }
-    });
+getDaysUntilStart(event: OpenEventView): string | null {
+  const now = new Date();
+  const start = new Date(event.startDateTime);
+
+  if (now >= start) { return null;  }
+
+  const today = new Date( now.getFullYear(), now.getMonth(), now.getDate());
+
+  const startDate = new Date( start.getFullYear(),start.getMonth(),start.getDate());
+
+  const diff = startDate.getTime() - today.getTime();
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+  if (days === 0) {return 'Starts Today'; }
+  if (days === 1) { return 'Starts in 1 day'; }
+
+  return `Starts in ${days} days`;
+
+}
+
+registerForEvent(event: OpenEventView): void {
+  this.selectedEvent = event;
+  this.registrationKey = '';
+  this.registrationModal = true;
+}
+
+closeRegistrationModal(): void {
+  this.registrationModal = false;
+  this.selectedEvent = null;
+  this.registrationKey = '';
+}
+
+confirmRegistration(): void {
+  if (!this.selectedEvent) {
+    return;
   }
+
+  // Registration needs to be connected to backend.
+}
+
 
   private saveCurrentEvent(event: OpenEventView): void {
     localStorage.setItem('currentEventId', event.eventId);
@@ -215,7 +244,6 @@ goToMyTeam(event: OpenEventView): void {
       teams: 0,
       visibility: event.visibility,
       status: event.status,
-      requiresKey: !!event.registrationKey,
       teamSizeLimit: event.teamSizeLimit,
       description: event.description,
       startDateTime: event.startDateTime,
@@ -245,36 +273,11 @@ goToMyTeam(event: OpenEventView): void {
     });
   }
 
-  private tick(): void {
-    const now = new Date();
-
-    this.activeEvents.forEach(event => {
-    const start = new Date(event.startDateTime);
-    const end = new Date(start.getTime() + event.duration * 60 * 60 * 1000);
-    
-    let target: Date;
-    let label: string;
-
-    if (now < start) {
-      target = start;
-      label = 'Starts in';
-    } else {
-      target = end;
-      label = 'Time Remaining';
-    }
-
-    const diff = Math.max(0, target.getTime() - now.getTime());
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    event.timer.label = label;
-    event.timer.days = String(days).padStart(2, '0');
-    event.timer.hours = String(hours).padStart(2, '0');
-    event.timer.minutes = String(minutes).padStart(2, '0');
-    event.timer.seconds = String(seconds).padStart(2, '0');
-    });
-  }
+ private tick(): void {
+  this.activeEvents.forEach(event => {
+    event.timer = calculateEventTimer( event.startDateTime, event.duration );
+  });
+  this.change.markForCheck();
+}
 
 }

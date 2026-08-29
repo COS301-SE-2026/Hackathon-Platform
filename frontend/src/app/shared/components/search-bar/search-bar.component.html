@@ -1,0 +1,10 @@
+<div class="search-bar">
+  <i class="pi pi-search search-icon" aria-hidden="true"></i>
+
+  <input
+    type="search"
+    [placeholder]="placeholder"
+    (input)="onSearch($event)"
+    [attr.aria-label]="placeholder"
+  />
+</div>

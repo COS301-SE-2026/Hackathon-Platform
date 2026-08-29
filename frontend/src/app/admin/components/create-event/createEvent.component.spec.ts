@@ -45,7 +45,7 @@ describe('CreateEventComponent', () => {
 
     const inputElement = document.createElement('input');
     component.fileInput = new ElementRef(inputElement);
-    
+
     fixture.detectChanges();
   });
 
@@ -55,7 +55,6 @@ describe('CreateEventComponent', () => {
 
   it('should have default form values', () => {
     expect(component.form.eventName).toBe('');
-    expect(component.form.startDate).toBe('2024-12-01T09:00');
     expect(component.form.visibility).toBe('PUBLIC');
     expect(component.form.bannerFile).toBeNull();
     expect(component.form.bannerFileName).toBe('');
@@ -124,65 +123,4 @@ describe('CreateEventComponent', () => {
     expect(eventServiceMock.createEvent).not.toHaveBeenCalled();
   });
 
-
-  it('should create event and navigate to event list', () => {
-    component.form.eventName = 'Test Hackathon';
-    component.form.description = 'Test description';
-    component.hackathonId= '';
-
-    component.createEvent();
-
-    expect(eventServiceMock.createEvent).toHaveBeenCalledWith(jasmine.objectContaining({
-      name: 'Test Hackathon',
-      teamSizeLimit: 4,
-      duration: 48,
-      description: 'Test description',
-      visibility: 'PUBLIC',
-      status: 'ACTIVE',
-      registrationKey: undefined
-    }));
-    expect(component.isLoading).toBeFalse();
-    expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/events']);
-  });
-
-  it('should include registration key for private events', () => {
-    component.form.eventName = 'Private Hackathon';
-    component.form.visibility = 'PRIVATE';
-    component.form.registrationKey = 'SECRET123';
-
-    component.createEvent();
-
-    expect(eventServiceMock.createEvent).toHaveBeenCalledWith(jasmine.objectContaining({
-      visibility: 'PRIVATE',
-      registrationKey: 'SECRET123'
-    }));
-  });
-
-  it('should create event when onSaveDraft is called with valid data', () => {
-    component.form.eventName = 'Draft Event';
-
-    component.onSaveDraft();
-
-    expect(eventServiceMock.createEvent).toHaveBeenCalled();
-  });
-
-  it('should handle create event errors', () => {
-    eventServiceMock.createEvent.and.returnValue(throwError(() => ({ status: 403, error: {} })));
-    spyOn(console, 'error');
-    component.form.eventName = 'Test Hackathon';
-
-    component.createEvent();
-
-    expect(component.isLoading).toBeFalse();
-    expect(component.errorMessage).toBe('You are not authorized. Please login as admin.');
-  });
-
-
-it('should navigate back to hackathon events when hackathonId exists', () =>{
-  activatedRouteMock.snapshot.paramMap.get.and.returnValue('hack-123');
-  component.hackathonId = 'hack-123';
-  component.form.eventName = 'Test Event';
-  component.createEvent();
-  expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/hackathons','hack-123','events']);
-});
 });

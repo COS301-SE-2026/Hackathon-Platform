@@ -2,6 +2,8 @@
 
 ![Logo](./docs/logo.png)
 
+# Live Site: [hackathonplatform.co.za](https://hackathonplatform.co.za)
+
 ### A cloud-agnostic, full-stack event management platform that is pupose-build for deterministic optimization challenges. This platform automates the entire hackathons lifecycle, from highly configurable event setups, particpant registaritons and team formation to execution. Submission are dynamically queued and processed by a scalable pool of parallel scoring workers, this allows the official grading solver to evaluate, score and log outputs in ral-time to drive dynamic live leaderboards. Engineered with a modular Spring Boot backend and a desktop-first, mobile-friendly Angular frontend. The system also supports dymanic runtime solver updates by the event orgranisers and scales scales such that it can handle peak submission spikes near competition deadlines.
 
 ## Badges
@@ -10,21 +12,25 @@
 
 [![Lighthouse CI](https://github.com/COS301-SE-2026/Hackathon-Platform/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/COS301-SE-2026/Hackathon-Platform/actions/workflows/lighthouse.yml)
 
+[![CD](https://github.com/COS301-SE-2026/Hackathon-Platform/actions/workflows/cd.yml/badge.svg)](https://github.com/COS301-SE-2026/Hackathon-Platform/actions/workflows/cd.yml)
+
 ![GitHub Issues](https://img.shields.io/github/issues/COS301-SE-2026/Hackathon-Platform)
 
 ![GitHub Requirements](https://img.shields.io/badge/requirements-documented-brightgreen)
 
 [![codecov](https://codecov.io/gh/COS301-SE-2026/Hackathon-Platform/graph/badge.svg?token=4O5Z04RGNW)](https://codecov.io/gh/COS301-SE-2026/Hackathon-Platform)
 
-[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=bugs)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=COS301-SE-2026_Hackathon-Platform&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
+
 [![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg)](https://sonarcloud.io/summary/new_code?id=COS301-SE-2026_Hackathon-Platform)
 
+![Uptime Robot status](https://img.shields.io/uptimerobot/status/m803607544-ceb280e95680d2fadcf7d787)
+![Azure Container Apps](https://img.shields.io/badge/Hosted%20on-Azure%20Container%20Apps-0078D4?logo=microsoftazure&logoColor=white)
 
 ## Functional Requirements: [View the Software Requirements Specification (SRS)](./docs/SRS.pdf)
 ## GitHub Project Board: [View the Project Board](https://github.com/orgs/COS301-SE-2026/projects/54)
@@ -32,8 +38,13 @@
 ## Documentation
 
 - [API Service Contract](./docs/API%20Service%20Contract.pdf)
-- [Brand Style Guide](./docs/Brand%20Style%20Guide.pdf)
+- [Brand Style Guide](./docs/_Brand%20Style%20Guide-%20Version%202.pdf)
 - [Wireframes](./docs/Wireframes/Wire%20frames.pdf)
+- [Coding Standards](./docs/Coding%20Standards/Coding%20Standards.pdf)
+- [SAS](./docs/SAS.pdf)
+- [Testing Policy](./docs/Testing%20Policy.pdf)
+- [User Manual](./docs/User%20Manual%20Hackathon%20Platform.pdf)
+- [Brand Style Guide web page](https://hackathonplatform.co.za/style-guide)
 
 ---
 

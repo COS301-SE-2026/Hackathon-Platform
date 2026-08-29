@@ -18,11 +18,5 @@ INSERT INTO teammembers (team_member_id, team_id, user_id) VALUES
 INSERT INTO levels (event_id, name, level_number) VALUES
 ('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'Phase One', 1);
 
-INSERT INTO solverversion (event_id, uploaded_by, storage_key) VALUES
-('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'v1/solver-engine');
-
-INSERT INTO submissions (team_id, level_id, solver_version_id, score, status, source_code_storage_key, output_storage_key) VALUES
-('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 1, 1, 85.00, 'SCORED', 'src/code.zip', 'out/logs.txt');
-
 INSERT INTO leaderboardentries (team_id, level_id, event_id, best_score, best_submission_id) VALUES
-('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 1, 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 85.00, 1);
+('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 1, 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 85.00, NULL);

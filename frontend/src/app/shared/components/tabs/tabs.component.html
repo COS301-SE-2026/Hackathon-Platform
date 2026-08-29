@@ -1,0 +1,29 @@
+<nav class="tabs" [attr.aria-label]="ariaLabel">
+
+ @for (tab of tabs; track $index) {
+
+  @if (tab.type === 'label') {
+
+  <span class="tab-label">
+
+    @if (tab.icon) {<i [class]="tab.icon" aria-hidden="true"></i>}
+
+    <span>{{ tab.label }}</span>
+
+  </span>
+
+    } @else {
+
+    <a class="tab" [routerLink]="tab.route" [queryParams]="tab.queryParams" [class.active]="tab.queryParams?.['tab'] === activeTab">
+
+     @if (tab.icon) { <i [class]="tab.icon" aria-hidden="true"></i>}
+
+     <span>{{ tab.label }}</span>
+
+    </a>
+
+    }
+
+  }
+
+</nav>

@@ -1,153 +1,204 @@
 <div class = "page">
 
-     <div class = "back-navigation" >
-      <button class = "btn-secondary" (click) = "goBack()">Back to Hackathon
-      </button>
-    </div>
+  <div class = "back-navigation">
+    <button class = "back-btn" (click) = "goBack()">
+      <i class = "pi pi-arrow-left"></i>
+      Back to Hackathons</button>
+  </div>
 
-    <div class = " event-subnav">
-        <div class = "event-subnav-inner">
-            <span class = "event-tag">{{ hackathonName || 'Loading...' }}</span>
-            <div class = "event-tabs">
-                <a routerLink="Overview" routerLinkActive="active">Overview &amp; live ops</a>
-                <a routerLink="Levels" routerLinkActive="active">Levels &amp; files</a>
-                <a routerLink="Solver" routerLinkActive="active">Solver</a>
-                <a routerLink="Registrations" routerLinkActive="active">Registrations</a>
-                <a routerLink="Teams" routerLinkActive="active">Teams</a>
-                <a routerLink="Submissions" routerLinkActive="active">Submissions</a>   
-                <a routerLink="Analytics" routerLinkActive="active">Analytics</a>
+  <div class = "hackathon-header">
+        <div class = "hackathon-header-info">
+            <h1>{{hackathonName || 'Loading...'}}</h1>
+            <p class = "hackathon-header-subtitle">{{hackathonDescription}}</p>
+        </div>
+        <div class = "hackathon-header-stats">
+            <div class = "stat-item">
+                <i class = "pi pi-clone"></i>
+                <div class = "stat-item-text">
+                    <span class = "stat-value">{{levelsCount}}</span>
+                    <span class = "stat-label">Levels</span>
+                </div>
+            </div>
+            <div class = "stat-item">
+                <i class = "pi pi-calendar"></i>
+                <div class = "stat-item-text">
+                    <span class = "stat-value">{{eventsCount}}</span>
+                    <span class = "stat-label">Events</span>
+                </div>
+            </div>
+            <div class = "stat-item">
+                <i class = "pi pi-users"></i>
+                <div class = "stat-item-text">
+                    <span class = "stat-value">{{participantsCount | number}}</span>
+                    <span class = "stat-label">Participants</span>
+                </div>
             </div>
         </div>
     </div>
 
-<main class="content">
-    <div class="page-header">
-      <div>
-        <h1>Levels &amp; Files</h1>
-        <p class="page-subtitle">{{ hackathonName || 'Loading...' }}</p>
-      </div>
-      <p-button
-        label="+ Add New Level"
-        (click)="openAddLevelModal()"
-        (keyup.enter)="openAddLevelModal()"
-        (keyup.space)="openAddLevelModal()"
-        [disabled]="isLoading">
-      </p-button>
+    <div class = "event-subnav">
+        <div class = "event-subnav-inner">
+            <div class = "event-tabs">
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
+            <a routerLink = "/admin/hackathons/{{ hackathonId }}/announcements" routerLinkActive = "active"><i class = "pi pi-megaphone"></i>Announcements</a>
+            </div>
+        </div>
     </div>
 
-    @if (isSavingOrder) {
-      <div class="info-banner">Saving new order...</div>
+
+  <main class = "content">
+    <div class = "page-header">
+      <div>
+        <h1>Levels</h1>
+        <p class = "page-subtitle"> Drag and drop levels to reorder them.</p>
+      </div>
+      <div class = "page-header-actions">
+        <button type = "button" class = "btn-create-level" (click) = "openAddLevelModal()" [disabled] = "isLoading"> + Create Level</button>
+
+        <div class = "search-box">
+          <input type = "text" placeholder = "Search levels..." aria-label = "Search levels"/>
+          <i class = "pi pi-search search-icon"></i>
+        </div>
+    </div>
+    </div>
+    @if (isSavingOrder){
+      <div class = "info-banner">Saving new order...</div>
     }
-    @if (errorMessage) {
-      <div class="error-banner">{{ errorMessage }}</div>
+    @if (errorMessage){
+      <div class = "error-banner"> {{ errorMessage }}</div>
     }
 
-    @if (isLoading) {
-      <div class="empty-state">Loading levels...</div>
-    } @else {
-      <div class="levels-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
-        @if (levels.length === 0) {
-          <div class="empty-state">No levels created yet</div>
-        } @else {
-          @for (level of levels; track level.id) {
-            <div class="level-card" cdkDrag [cdkDragDisabled]="isSavingOrder">
-              <div class="drag-handle" cdkDragHandle>
-                <span class="drag-dot"></span><span class="drag-dot"></span>
-                <span class="drag-dot"></span><span class="drag-dot"></span>
-                <span class="drag-dot"></span><span class="drag-dot"></span>
+    @if (isLoading){
+      <div class = "empty-state">Loading levels...</div>
+    }@else {
+      <div class = "levels-table">
+        <div class = "levels-table-header">
+          <span></span>
+          <span>Order</span>
+          <span>Level</span>
+          <span>Description</span>
+          <span>Resources</span>
+          <span>Actions</span>
+        </div>
+        <div class = "levels-list" cdkDropList (cdkDropListDropped) = "onDrop($event)">
+          @if (levels.length === 0 ){
+            <div class = "empty-state">No levels created yet</div>
+          }@else {
+            @for (level of levels; track level.id){
+              <div class  = "level-row" cdkDrag [cdkDragDisabled] = "isSavingOrder">
+                <div class = "drag-handle" cdkDragHandle>
+                  <span class = "drag-dot"></span><span class = "drag-dot"></span>
+                  <span class = "drag-dot"></span><span class = "drag-dot"></span>
+                  <span class = "drag-dot"></span><span class = "drag-dot"></span>
               </div>
-              <div class="level-info">
-                <p class="level-name">Level {{ level.levelNumber }} &ndash; {{ level.name }}</p>
-                <p class="level-difficulty">{{ level.description || 'No description' }}</p>
-              </div>
+              <span class = "order-cell">{{ level.levelNumber }}</span>
+              <span class = "level-name">Level {{ level.levelNumber }} : {{level.name}} </span>
+              <span class = "level-description">{{ level.description || 'No description' }}</span>
+              <span class = "resources-cell">
+                <i class = "pi pi-file"></i>
+                {{level.filesLoaded ? (level.files.length + ' files'): '—'}}
+              </span>
 
-              <div class="level-actions">
-                <button type="button" class="btn-edit" (click)="openEditModal(level)">Edit</button>
-                <button type="button" class="btn-manage-files" (click)="openManageFiles(level)"
-                  (keyup.enter)="openManageFiles(level)" (keyup.space)="openManageFiles(level)">
-                  Manage Files
+              <div class = "level-actions">
+                <button type = "button" class = "btn-view-level" (click) = "openManageFiles(level)">
+                  <i class = "pi pi-eye"></i> View Level
+                </button>
+                <button type = "button" class = "icon-btn icon-btn-edit" aria-label = "Edit level" (click) = "openEditModal(level)">
+                  <i class = "pi pi-pencil"></i>
+                </button>
+                <button type = "button" class = "icon-btn icon-btn-delete" aria-label = "Delete level" (click) = "deleteLevel(level)">
+                  <i class = "pi pi-trash"></i>
                 </button>
               </div>
-            </div>
+              </div>
+            }
           }
-        }
+        </div>
       </div>
-
-      <button class="add-new-level-row" (click)="openAddLevelModal()">+ Add New Level</button>
+      <div class = "about-levels-card">
+        <span class = "about-levels-icon"><i class = "pi pi-info-circle"></i></span>
+        <div>
+          <p class = "about-levels-title">About Levels</p>
+          <p class = "about-levels-text">Levels are the structured stages of your hackathon. Participants will progress through each level in order.</p>
+        </div>
+      </div>
     }
+
   </main>
 </div>
 
-@if (showLevelModal) {
-  <div class="modal-overlay" (click)="closeLevelModal()" (keydown.escape)="closeLevelModal()" tabindex="-1">
-    <div class="modal-card" (click)="$event.stopPropagation()" (keydown.escape)="$event.stopPropagation()">
-      <h2 class="modal-title">{{ editingLevel ? 'Edit Level' : 'Add New Level' }}</h2>
-
-      @if (modalError) {
-        <p class="error-banner">{{ modalError }}</p>
-      }
-
-      <div class="form-group">
-        <label for="levelName">Level Name</label>
-        <input id="levelName" type="text" [(ngModel)]="modalForm.name" placeholder="e.g. Introduction" />
-      </div>
-
-      <div class="form-group">
-        <label for="levelNumber">Level Number</label>
-        <input id="levelNumber" type="number" min="1" [(ngModel)]="modalForm.levelNumber" />
-      </div>
-
-      <div class="form-group">
-        <label for="levelDescription">Description</label>
-        <textarea id="levelDescription" rows="3" [(ngModel)]="modalForm.description" placeholder="Optional description of this level"></textarea>
-      </div>
-
-      <div class="modal-actions">
-        @if (editingLevel) {
-          <button class="btn-danger" (click)="deleteLevel()" [disabled]="isSavingLevel">Delete Level</button>
-        }
-        <button class="btn-cancel" (click)="closeLevelModal()" [disabled]="isSavingLevel">Cancel</button>
-        <button class="btn-save" (click)="saveLevel()" [disabled]="isSavingLevel">
-          {{ isSavingLevel ? 'Saving...' : (editingLevel ? 'Save changes' : 'Add Level') }}
-        </button>
-      </div>
-    </div>
-  </div>
+@if (showLevelModal){
+  <div class = "modal-overlay" (click) = "closeLevelModal()" (keydown.escape) = "closeLevelModal()" tabindex = "-1">
+    <div class = "modal-card" (click) = "$event.stopPropagation()" (keydown.escape) = "$event.stopPropagation()">
+      <h2 class = "modal-title"> {{ editingLevel ? 'Edit Level' : 'Add New Level'}}</h2>
+    
+@if (modalError){
+  <p class = "error-banner">{{modalError}}</p>
 }
 
-@if (showFilesModal) {
-  <div class="modal-overlay" (click)="closeFilesModal()" (keydown.escape)="closeFilesModal()" tabindex="-1">
-    <div class="modal-card" (click)="$event.stopPropagation()" (keydown.escape)="$event.stopPropagation()">
-      <h2 class="modal-title">Manage Files &ndash; {{ activeLevel?.name }}</h2>
+<div class = "form-group">
+  <label for = "levelName">Level Name</label>
+  <input id = "levelName" type = "text" [(ngModel)] = "modalForm.name" placeholder="e.g. Introduction"/>
+</div>
 
-      @if (fileError) {
-        <p class="error-banner">{{ fileError }}</p>
+<div class = "form-group">
+  <label for = "levelNumber">Level Number</label>
+  <input id = "levelNumber" type = "number" min ="1" [(ngModel)] = "modalForm.levelNumber" />
+</div>
+
+<div class = "form-group">
+  <label for = "levelDescription">Description</label>
+  <textarea id = "levelDescription" rows = "3" [(ngModel)] = "modalForm.description" placeholder="Optional description of this level"></textarea>
+</div>
+
+<div class = "modal-actions">
+  @if (editingLevel){
+    <button class = "btn-danger" (click) = "deleteLevel()" [disabled] = "isSavingLevel">Delete Level</button>
+  }
+  <button class = "btn-cancel" (click) = "closeLevelModal()" [disabled] = "isSavingLevel">Cancel</button>
+  <button class = "btn-save" (click) = "saveLevel()" [disabled] = "isSavingLevel">
+    {{ isSavingLevel ? 'Saving...' : (editingLevel ? 'Save changes' :'Add Level')}}
+  </button>
+</div>  
+</div> 
+</div>
+
+} 
+@if (showFilesModal){
+  <div class = "modal-overlay" (click) = "closeFilesModal()" (keydown.escape) = "closeFilesModal()" tabindex = "-1">
+    <div class = "modal-card" (click) = "$event.stopPropagation()" (keydown.escape) = "$event.stopPropagation()">
+      <h2 class = "modal-title">Manage Files &ndash; {{ activeLevel?.name}}</h2>
+
+      @if (fileError){
+        <p class = "error-banner"> {{fileError}}</p>
       }
 
-      @if (isLoadingFiles) {
-        <p class="empty-files">Loading files...</p>
-      } @else if (activeLevel && activeLevel.files.length === 0) {
-        <p class="empty-files">No files uploaded for this level.</p>
-      } @else {
-        @for (file of activeLevel?.files; track file.id) {
-          <div class="file-row">
-            <span class="file-name">{{ file.fileName }}</span>
-            <button class="btn-remove-file" (click)="removeFile(file)">Remove</button>
+      @if (isLoadingFiles){
+        <p class = "empty-files">Loading files...</p>
+
+      }@else if (activeLevel && activeLevel.files.length === 0) {
+        <p class = "empty-files">No files uploaded for this level.</p>
+
+      }@else {
+        @for (file of activeLevel?.files; track file.id){
+          <div class = "file-row">
+            <span class = "file-name">{{ file.fileName}}</span>
+            <button class = "btn-remove-file" (click) = "removeFile(file)">Remove</button>
           </div>
         }
       }
+      <label for = "fileUpload" class = "sr-only">Upload files</label>
+      <button class = "drop-zone" (click) = "fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()" 
+      (dragover) = "$event.preventDefault()" (drop) = "onDropFile($event)" type = "button" [disabled] = "isUploadingFile">
+      <input #fileInput id ="fileUpload" type = "file" style = "display: none" (change) = "onFileSelected($event)" multiple />
+      <span> {{isUploadingFile ? 'Uploading...' : '+ Drop file here or browse'}}</span>
+    </button>
+    <div class = "modal-actions">
+      <button class = "btn-cancel" (click) = "closeFilesModal()">Close</button>
+    </div>
 
-      <label for="fileUpload" class="sr-only">Upload files</label>
-      <button class="drop-zone" (click)="fileInput.click()" (keyup.enter)="fileInput.click()" (keyup.space)="fileInput.click()"
-        (dragover)="$event.preventDefault()" (drop)="onDropFile($event)" type="button" [disabled]="isUploadingFile">
-
-        <input #fileInput id="fileUpload" type="file" style="display: none" (change)="onFileSelected($event)" multiple />
-        <span>{{ isUploadingFile ? 'Uploading...' : '+ Drop file here or browse' }}</span>
-      </button>
-
-      <div class="modal-actions">
-        <button class="btn-cancel" (click)="closeFilesModal()">Close</button>
-      </div>
     </div>
   </div>
 }

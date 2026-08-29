@@ -1,215 +1,369 @@
-<div class="home-body">
-  <h1 class="welcome-title">Welcome back, {{ userFirstName }}</h1>
-  <p class="welcome-sub">Browse events and track your progress</p>
+<div class="page-container">
 
-  @if (errorMessage) {
-    <div class="error-message">{{ errorMessage }}</div>
-  }
-
-  @if (activeEvents.length > 0) {
-<div class="active-card">
-  <div class="active-header">
-    <span class="active-label">Your Active Events</span>
-      
-    <span class="active-counter">
-      {{ currentActiveEventIndex + 1 }} / {{ activeEvents.length }}
-    </span>
-  
+  <div class="welcome-section">
+    <h1 class="welcome-title">Welcome back, {{ userFirstName }}!</h1>
+    <p class="welcome-sub">Ready to build something amazing today?</p>
   </div>
 
-  <p-carousel
-    [value]="activeEvents"
-    [numVisible]="1"
-    [numScroll]="1"
-    [responsiveOptions]="responsiveOptionsForCarousel"
-    [showIndicators]="true"
-    [showNavigators]="true"
-    [circular]="true"
-    [autoplayInterval]="10000"
-    (onPage)="onCarouselSlide($event)"
-  >
-    <ng-template let-event pTemplate="item">
+  @if (isLoadingActiveEvents){
 
-      <div class="active-body">
+    <div class="active-events-wrapper">
+      <app-card class="active-event-card loading-active-card">
+        <app-loader message="Loading your events..."></app-loader>
+      </app-card>
+    </div>
+  }
 
-        <div class="active-info">
+  @else if (activeEvents.length > 0) {
+    
+    <div class="active-events-wrapper">
+      <app-card class="active-event-card">
 
-          <div class="event-title-row">
-            <p-tag
-
-              [value]="event.visibility === 'PRIVATE' ? 'Private' : 'Public'"
-              [severity]="event.visibility === 'PRIVATE' ? 'warn' : 'info'">
-            </p-tag>
-            <h3 class="event-name">{{ event.name }}</h3>
-
-          </div>
-
-          <div class="event-meta">
-            <span>
-              <i class="pi pi-calendar"></i>
-              {{ event.dates }}
-            </span>
-
-            <span>
-              <i class="pi pi-users"></i>
-              Debug Thugs · {{ event.teamSizeLimit }} members 
-            </span>
-          </div>
-
-          <div class="active-actions">
-            <button
-              class="primary-btn"
-              (click)="goToEvent(event)">
-              Go to Event
-            </button>
-
-             <button
-              class="secondary-btn"
-              (click)="goToMyTeam(event)">
-              View Team
-            </button>
-          </div>
-
+        <div class="active-header">
+          <span class="active-label">Your Events</span>
+          <span class="active-counter"> {{ currentActiveEventIndex + 1 }} / {{ activeEvents.length }}</span>
         </div>
 
-        <div class="active-timer">
-          <span class="timer-label">
-                  <i class="pi pi-clock"></i>
-                  {{ event.timer.label }}
-          </span>
+        <p-carousel
+          [value]="activeEvents"
+          [numVisible]="1"
+          [numScroll]="1"
+          [responsiveOptions]="responsiveOptionsForCarousel"
+          [showIndicators]="true"
+          [showNavigators]="true"
+          [circular]="activeEvents.length > 1"
+          [autoplayInterval]="activeEvents.length > 1 ? 10000 : 0"
+          (onPage)="onCarouselSlide($event)">
 
-          <div class="timer-display">
-            <span class="timer-number">{{ event.timer.days }}</span>
-            <span class="timer-separator">:</span>
-            <span class="timer-number">{{ event.timer.hours }}</span>
-            <span class="timer-separator">:</span>
-            <span class="timer-number">{{ event.timer.minutes }}</span>
-            <span class="timer-separator">:</span>
-            <span class="timer-number">{{ event.timer.seconds }}</span>
-          </div>
+          <ng-template let-event pTemplate="item">
 
-          <div class="timer-labels">
-            <span>days</span>
-            <span>hrs</span>
-            <span>min</span>
-            <span>sec</span>
-          </div>  
-        </div>
-      </div>
-    </ng-template>
-  </p-carousel>
-</div>
-}
+              <div class="active-body">
+
+                <div class="active-event-image">
+
+                <img src="assets/images/hackathon-image.png" alt="Hackathon Event"/>
+
+                </div>
+
+                <div class="active-event-right">
+
+                  <div class="active-event-top">
+
+                    <div class="event-main-info">
+
+                      <div class="event-tag">
+                        <span class="event-status-tag" [class.tag-live]="getEventTag(event) === 'Live Now'"[class.tag-starting]="getEventTag(event) === 'Starts Soon'" >
+                          <span class="status-dot"></span>
+                          {{ getEventTag(event) }}
+                        </span>
+                      </div>
+
+                      <h3 class="event-name">{{ event.name }}</h3> 
+
+                    </div>
+
+
+                    <div class="active-actions">
+
+                      <div class="timer-section">
+
+                        <span class="timer-label"><i class="pi pi-clock"></i> {{ event.timer.label }}</span>
+
+                        <div class="timer-display">
+
+                          <div class="timer-block">
+                            <span class="timer-number">{{ event.timer.days }}</span>
+                            <span class="timer-unit">d</span>
+                          </div>
+
+                          <span class="timer-separator">:</span>
+
+                          <div class="timer-block">
+                            <span class="timer-number">{{ event.timer.hours }}</span>
+                            <span class="timer-unit">h</span>
+                          </div>
+
+                          <span class="timer-separator">:</span>
+
+                          <div class="timer-block">
+                            <span class="timer-number">{{ event.timer.minutes }}</span>
+                            <span class="timer-unit">m</span>
+                          </div>
+
+                          <span class="timer-separator">:</span>
+
+                          <div class="timer-block">
+                            <span class="timer-number">{{ event.timer.seconds }}</span>
+                            <span class="timer-unit">s</span>
+                          </div>
+
+                        </div>
+
+                      </div>
+                      
+                      <div class="active-action-button">
+                      <app-button variant="primary" width="100%" (click)="goToEvent(event)" (keydown)="null" (keyup)="null"> Go to Event </app-button>
+                      </div>
+                      
+
+                    </div>
+
+                  </div>
+
+                  <div class="active-event-details">
+          
+                    <div class="active-detail-item team-detail">
+
+                      <i class="pi pi-users"></i>
+
+                      <div class="detail-content">
+
+                        <span class="detail-label">Your Team</span>
+
+                        <span class="detail-value">CodeCrafters </span>
+
+                        <span class="detail-meta"> 4 / 5 Members</span>
+
+                      </div>
+
+                    </div>
+
+                    <div class="active-detail-item submission-detail">
+
+                      <i class="pi pi-file"></i>
+
+                      <div class="detail-content">
+
+                        <span class="detail-label"> Latest Submission </span>
+
+                        <span class="detail-value"> Level 7 </span>
+
+                        <span class="detail-meta"> Score: 350 </span>
+
+                      </div>
+
+                    </div>
+
+                    <div class="active-detail-item rank-detail">
+
+                      <i class="pi pi-trophy"></i>
+
+                      <div class="detail-content">
+
+                        <span class="detail-label"> Your Rank</span>
+
+                        <span class="detail-value"> #12 </span>
+
+                        <span class="detail-meta">  Top 7% · 250 teams</span>
+
+                      </div>
+
+                    </div>
+
+
+                  </div>
+
+                </div>
+
+              </div>
+
+          </ng-template>
+
+        </p-carousel>
+
+      </app-card>
+    </div>
+
+  }
 
   @else {
 
-<div class="active-card empty-active-card">
+    <div class="active-events-wrapper">
 
-    <div class="active-header">
-      <span class="active-label">Your Active Events</span>
+      <app-card class="active-event-card empty-active-card">
+
+      <div class="active-header">
+        <span class="active-label">Your Events</span>
+      </div>
+
+      <div class="empty-active-content">
+
+        <i
+          class="pi pi-calendar-times empty-active-icon"
+          aria-hidden="true">
+        </i>
+
+        <h3 class="empty-active-title"> No Active Events</h3>
+
+        <p class="empty-active-message">
+          You're currently not participating in any active events. Register for an event to get started.
+        </p>
+
+      </div>
+
+      </app-card>
+
+    </div>
+  }
+
+  <section class="upcoming-events">
+
+    <div class="section-header">
+      <h2 class="section-title">Upcoming Events</h2>
+      <app-button variant="ghost" width="150px" (keydown)="null" (keyup)="null"> View More</app-button>
     </div>
 
-    <div class="empty-active-content">
+    @if (isLoadingEvents) {
 
-        <i class="pi pi-calendar-times empty-active-icon"></i>
+      <app-loader message="Loading upcoming events..."></app-loader>
 
-        <h3 class="empty-active-title">No Active Events</h3>
+    } 
+    
+    @else if (upcomingEvents.length === 0) {
 
-        <p class="empty-active-message"> You're currently not participating in any active events. Register for an event to get started.</p>
-    </div>
-</div>
+      <p class="events-message"> No upcoming events are available right now.</p>
 
-}
-  <h2 class="section-title">Open events</h2>
+    }
+    
+   @else {
 
-  <div class="events-toolbar">
+    <div class="upcoming-events-list">
 
-      <label for="event-search" class="sr-only">Search events</label>
+      @for (event of upcomingEvents; track event.eventId) {
 
-    <p-iconfield class="events-search">
-      <p-inputicon class="pi pi-search"></p-inputicon>
+        <app-card class="upcoming-event-card">
 
-        <input
-          id="event-search"
-          pInputText
-          type="text"
-          placeholder="Search events..."
-          [(ngModel)]="searchTerm" />
-      </p-iconfield>
+          <div class="upcoming-event-content">
 
-    <p-selectButton
-        class="events-filter"
-        [options]="filterOptions"
-        [(ngModel)]="selectedFilterOption"
-        optionLabel="label"
-        optionValue="value">
-    </p-selectButton>
+            <div class="upcoming-event-image">
+              <img src="assets/images/hackathon-image.png" alt="Hackathn Event" class="event-img"/>
+            </div>
 
-  </div>
+            <div class="upcoming-event-details">
 
-@if (isLoadingEvents) {
+              <div class="event-top-section">
 
-<p class="events-message">Loading...</p>
+                <div class="event-heading">
 
-} @else if (openEvents.length === 0) {
+                  <h3 class="ev-name">  {{ event.name }}</h3>
 
-<p class="events-message">No open events are available right now.</p>
+                  <p class="event-tagline"> Build, compete, and innovate with developers from around the world. mpete, and innovate with developers from around the world and innovate with developers from around the world</p>
 
-} @else if (filteredOpenEvents.length === 0) {
+                </div>
 
-  <p class="events-message">No events match your search.</p>
+                <div class="event-actions">
+                  
+                  <div class="event-action-button"><app-button variant="secondary" (click)="goToEvent(event)"width="100%" (keydown)="null" (keyup)="null"> View Event</app-button></div>
 
-} @else {
-    <div class="events-list">
-      @for (event of filteredOpenEvents; track event.eventId) {
-        <div class="event-row">
-          <div class="event-info">
-            <p class="ev-name">{{ event.name }}</p>
-            <div class="ev-meta">
+                  <div class="event-action-button"> <app-button variant="primary" (click)="registerForEvent(event)" width="100%" (keydown)="null"(keyup)="null"> Register </app-button></div>
+                
 
-              <span>
-                <i class="pi pi-calendar"></i>
-                {{ event.dates }}
-              </span>
+                </div>
 
-              <span>
-                <i class="pi pi-users"></i>
-                {{ event.teams }} teams
-              </span>
+              </div>
 
-              <span>
-                <i
-                  [class]="event.visibility === 'PRIVATE'
-                    ? 'pi pi-lock'
-                    : 'pi pi-eye'">
-                </i>
-                {{ event.visibility }}
-              </span>
 
-              <span>
-                <i class="pi pi-users"></i>
-                Max: {{ event.teamSizeLimit }}
-              </span>
+              <div class="event-meta-row">
+
+                <div class="meta-item event-dates">
+                  <i class="pi pi-calendar"></i>
+                  <span>{{ event.dates }}</span>
+                </div>
+
+                <div class="meta-item visibility-meta">
+                  <i [class]="event.visibility === 'PRIVATE'  ? 'pi pi-lock'  : 'pi pi-globe'"> </i>
+                  <span>  {{ event.visibility | titlecase }} </span>
+                </div>
+
+                <div class="meta-item prize-meta">
+                  <i class="pi pi-trophy"></i>
+                   <span> R10 000 Prize Pool</span>
+                </div>
+
+                <div class="meta-item participants-meta">
+                  <i class="pi pi-users"></i>
+                   <span> 120+ Participants </span>
+                </div>
+
+                @if (getDaysUntilStart(event) !== null) {
+                <div class="event-start-tag">
+                  <i class="pi pi-clock"></i>
+                  <span>{{ getDaysUntilStart(event) }}</span>
+                </div>
+                }
+
+              </div>
 
             </div>
 
           </div>
 
-          <div class="event-actions">
-          <button
-              class="secondary-btn"
-              (click)="goToEvent(event)">
-              View Event
-            </button>
+        </app-card>
 
-        <button
-              class="primary-btn"
-              (click)="createTeamForEvent(event)">
-              Register
-            </button>
-          </div>
-        </div>
       }
+
     </div>
-  }
+
+   }
+
+
+  </section>
+
 </div>
+
+
+@if (registrationModal && selectedEvent) {
+
+<app-modal  title="Register for Event"  size="small"  footerLayout="center" (closed)="closeRegistrationModal()"> 
+
+  <div modal-body> 
+
+    <h3 class="registration-event-name"> {{ selectedEvent.name }}</h3> 
+
+    @if (selectedEvent.visibility === 'PRIVATE') { 
+
+      <div class="registration-confirmation">
+
+        <div class="confirmation-icon"><i class="pi pi-lock" aria-hidden="true"></i> </div>
+
+        <div class="registration-content">
+          <strong>Private Event</strong>
+          <p> This event requires a registration key to continue.</p>
+        </div>
+
+      </div>
+
+      <div class="registration-input">
+        <app-input   id="registration-key" label="Registration Key" placeholder="Enter registration key" [(value)]="registrationKey"> </app-input>
+      </div>
+
+    } 
+    
+    @else { 
+
+      <div class="registration-confirmation">
+
+        <div class="confirmation-icon">
+          <i class="pi pi-check-circle" aria-hidden="true"></i>
+        </div>
+
+        <div class="registration-content">
+          <strong>Ready to Register?</strong>
+          <p>You're about to register for this event. Continue when you're ready. </p>
+        </div>
+
+      </div>
+
+    } 
+
+  </div> 
+
+  <div modal-footer-right> 
+    <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px" (keydown)="null" (keyup)="null">Cancel</app-button> 
+    <app-button variant="primary" (click)="confirmRegistration()" width="135px" (keydown)="null" (keyup)="null">Register</app-button> 
+  </div> 
+
+</app-modal>
+
+}
+

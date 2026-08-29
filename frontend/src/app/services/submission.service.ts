@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type SubmissionStatus = 'QUEUED' | 'SCORING' | 'SCORED' | 'FAILED';
 
@@ -41,8 +42,8 @@ export interface SubmissionUploadResult {
 @Injectable({ providedIn: 'root' })
 export class SubmissionService {
   private readonly http = inject(HttpClient);
-  private readonly storageUrl = 'http://localhost:8080/api/storage';
-  private readonly scoringUrl = 'http://localhost:8080/api/scoring';
+  private readonly storageUrl = `${environment.apiUrl}/api/storage`;
+  private readonly scoringUrl = `${environment.apiUrl}/api/scoring`;
 
   /**
    * Uploads the solution output file and source code archive together for a level. The backend
@@ -83,6 +84,10 @@ export class SubmissionService {
     return this.http.get<SubmissionResponse>(
       `${this.scoringUrl}/teams/${teamId}/submissions/${submissionId}`
     );
+  }
+
+  getResentSubmission(limit = 20): Observable<SubmissionResponse[]> {
+    return this.http.get<SubmissionResponse[]>(`${this.scoringUrl}/admin/recentsubmissions/${limit}`);
   }
 
   /** Manually (re-)triggers scoring for a submission, e.g. after a solver hotfix. */

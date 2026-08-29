@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface CreateTeamRequest {
   teamName: string;
@@ -29,7 +30,7 @@ export interface TeamMemberResponse {
 @Injectable({ providedIn: 'root' })
 export class TeamService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api/teams';
+  private readonly baseUrl = `${environment.apiUrl}/api/teams`;
 
   createTeam(request: CreateTeamRequest): Observable<TeamResponse> {
     return this.http.post<TeamResponse>(this.baseUrl, request);

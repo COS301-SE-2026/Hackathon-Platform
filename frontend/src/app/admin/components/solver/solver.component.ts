@@ -37,7 +37,11 @@ export class SolverComponent implements OnInit{
     hackathonId ='';
     isUploading = false;
     uploadError = '';
-
+    hackathonName ='';
+    hackathonDescription ='';
+    levelsCount = 0;
+    eventsCount = 0;
+    participantsCount =0;
     isRescoring = false;
     rescoreError = '';
     rescoreSuccessMessage = '';
@@ -176,11 +180,16 @@ rescoreAllSubmissions(): void {
         return;
     }
     this.loadSolverVersions();
+    this.loadHackathonSummary();
+  }
+
+  loadHackathonSummary(): void {
+    console.log('Loading hackathon summary for:', this.hackathonId);
   }
 
 loadSolverVersions(): void {
     console.log('Loading solver for hackathon:',this.hackathonId);
-    // TODO: Implement API call to fetch version history
+
 
 }
 

@@ -14,7 +14,7 @@ export class HelpComponent {
 
 
 openUserGuide(): void {
-    alert('user guide comming soon.');
+     window.open('/assets/docs/User_Manual.pdf', '_blank');
 }
 
 }

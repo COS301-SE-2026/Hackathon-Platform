@@ -1,6 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { environment } from '../../environments/environment';
 
 export interface HackathonRequest {
     name: string;
@@ -13,14 +14,17 @@ export interface HackathonResponse {
     description?: string;
     createdAt?: string;
     problemStatementStorageKey?: string;
+    levelsCount?: number;
+    eventsCount?: number;
+    participantsCount?: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class HackathonService {
     private readonly http = inject(HttpClient);
-    private readonly baseUrl = 'http://localhost:8080/api/hackathon';
+    private readonly baseUrl = `${environment.apiUrl}/api/hackathon`;
 
-    getAllHacathons(): Observable<HackathonResponse[]> {
+    getAllHackathons(): Observable<HackathonResponse[]> {
         return this.http.get<HackathonResponse[]>(this.baseUrl);
     }
 
