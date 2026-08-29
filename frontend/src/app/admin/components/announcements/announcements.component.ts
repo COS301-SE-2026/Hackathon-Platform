@@ -59,8 +59,6 @@ export class AnnouncementsComponent implements OnInit{
         title: '',
         message: '',
         audience: 'ALL' as AnnouncementAudience,
-        sendOption: 'now' as 'now' | 'schedule',
-        scheduledFor: '',
         pinned: false,
         notifyByEmail: true
     };
