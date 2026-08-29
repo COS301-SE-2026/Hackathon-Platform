@@ -213,13 +213,6 @@
 
       <div class = "form-actions">
         <button type = "button" class = "btn-cancel" (click) = "goBack()" [disabled] ="isLoading">Cancel</button>
-        <button type = "button" class = "btn-secondary" (click) = "onSaveDraft()" [disabled] ="isLoading">
-          @if (isLoading){
-            <span>Saving...</span>
-          } @else{
-            <span>Save Draft</span>
-          }</button>
-
           <button type = "submit" class = "btn-primary" [disabled] ="isLoading">
           @if (isLoading){
             <span>Creating...</span>

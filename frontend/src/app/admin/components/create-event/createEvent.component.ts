@@ -99,9 +99,6 @@ export class CreateEventComponent implements OnInit {
     event.preventDefault();
   }
 
-  onSaveDraft(): void {
-    this.createEvent();
-  }
 
   createEvent(): void {
     if (!this.form.eventName) {
