@@ -41,6 +41,10 @@ public class Team {
     return java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
   }
 
+  public void regenJoinCode() {
+    this.joinCode = generateJoinCode();
+  }
+
   public String getJoinCode() {
     return joinCode;
   }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** REST controller for standalone team management endpoints. */
@@ -40,11 +41,17 @@ public class TeamController {
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
+  @GetMapping("/my-teams")
+  public ResponseEntity<List<TeamResponse>> getMyTeams(@AuthenticationPrincipal User currUser) {
+    return ResponseEntity.ok(teamService.getMyTeams(currUser.getUserId()));
+  }
+
   /** Get the authenticated user's approved team, if any. */
   @GetMapping("/my-team")
-  public ResponseEntity<TeamResponse> getMyTeam(@AuthenticationPrincipal User currentUser) {
+  public ResponseEntity<TeamResponse> getMyTeamForEvent(
+      @RequestParam UUID eventId, @AuthenticationPrincipal User currentUser) {
     return teamService
-        .getMyTeam(currentUser.getUserId())
+        .getMyTeamForEvent(currentUser.getUserId(), eventId)
         .map(ResponseEntity::ok)
         .orElseGet(() -> ResponseEntity.noContent().build());
   }
@@ -52,8 +59,15 @@ public class TeamController {
   /** Request to join a team. */
   @PostMapping("/{teamId}/join-requests")
   public ResponseEntity<Void> requestToJoin(
-      @PathVariable UUID teamId, @AuthenticationPrincipal User currentUser) {
-    teamService.requestToJoinTeam(teamId, currentUser.getUserId());
+      @PathVariable UUID teamId, @AuthenticationPrincipal User currUser) {
+    teamService.requestToJoinTeam(teamId, currUser.getUserId());
+    return ResponseEntity.status(HttpStatus.CREATED).build();
+  }
+
+  @PostMapping("/join/{joinCode}")
+  public ResponseEntity<Void> requestToJoinByCode(
+      @PathVariable String joinCode, @AuthenticationPrincipal User currUser) {
+    teamService.requestToJoinTeamByCode(joinCode, currUser.getUserId());
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
