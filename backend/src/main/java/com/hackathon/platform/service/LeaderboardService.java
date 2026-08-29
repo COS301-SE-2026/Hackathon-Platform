@@ -30,7 +30,7 @@ public class LeaderboardService {
   public List<LeaderboardEntryResponse> getLeaderboard(UUID eventId, short levelId) {
     List<LeaderboardEntry> entries;
     if (eventRepo == null) {
-      entries = subRepo.findLeaderboardByEventId(eventId);
+      entries = subRepo.findLeaderboardByEventIdAndLevelId(eventId, levelId);
     } else {
       Event event =
           eventRepo

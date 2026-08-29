@@ -153,10 +153,12 @@ class TeamControllerTest {
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
 
-    EventRegistration memberReg = new EventRegistration();
-    memberReg.setEventId(eventId);
-    memberReg.setUserId(userId);
-    eventRegRepo.saveAndFlush(memberReg);
+    if(!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
+      EventRegistration memberReg = new EventRegistration();
+      memberReg.setEventId(eventId);
+      memberReg.setUserId(memberId);
+      eventRegRepo.saveAndFlush(memberReg);
+    }
 
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(
@@ -220,6 +222,13 @@ class TeamControllerTest {
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
 
+    if(!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
+      EventRegistration memberReg = new EventRegistration();
+      memberReg.setEventId(eventId);
+      memberReg.setUserId(memberId);
+      eventRegRepo.saveAndFlush(memberReg);
+    }
+
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(
             savedMember, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
@@ -266,6 +275,13 @@ class TeamControllerTest {
             .build();
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
+
+    if(!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
+      EventRegistration memberReg = new EventRegistration();
+      memberReg.setEventId(eventId);
+      memberReg.setUserId(memberId);
+      eventRegRepo.saveAndFlush(memberReg);
+    }
 
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(

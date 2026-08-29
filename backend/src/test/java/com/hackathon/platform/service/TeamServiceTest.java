@@ -143,7 +143,9 @@ class TeamServiceTest {
     team.setStatus("ACTIVE");
     team.setEventId(eventId);
 
-    when(teamRepository.findById(teamId)).thenReturn(Optional.of(new Team()));
+    event.setEventId(eventId);
+
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
     when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
     when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId))
@@ -233,11 +235,13 @@ class TeamServiceTest {
     approvedMembershipInOtherTeam.setTeamId(otherTeamId);
     approvedMembershipInOtherTeam.setStatus("APPROVED");
 
+    event.setEventId(eventId);
+
     when(teamRepository.findById(targetTeamId)).thenReturn(Optional.of(targetTeam));
     when(teamMemberRepository.findByTeamIdAndUserId(targetTeamId, targetUserId))
         .thenReturn(Optional.of(pendingMembership));
     when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
-    when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(targetUserId, "APPROVED", eventId))
         .thenReturn(List.of(approvedMembershipInOtherTeam));
 
     assertThatThrownBy(
