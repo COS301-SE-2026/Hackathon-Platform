@@ -35,6 +35,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import com.hackathon.platform.repository.EventRegistrationRepository;
+import com.hackathon.platform.model.EventRegistration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -46,6 +48,7 @@ class TeamControllerTest {
   @Autowired private RoleRepository roleRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private HackathonRepository hackathonRepository;
+  @Autowired private EventRegistrationRepository eventRegRepo;
 
   private CreateTeamRequest createTeamRequest;
   private ApproveRequest approveRequest;
@@ -91,6 +94,11 @@ class TeamControllerTest {
 
     Event savedEvent = eventRepository.saveAndFlush(event);
     eventId = savedEvent.getEventId();
+
+    EventRegistration reg = new EventRegistration();
+    reg.setEventId(eventId);
+    reg.setUserId(userId);
+    eventRegRepo.saveAndFlush(reg);
 
     createTeamRequest = new CreateTeamRequest();
     createTeamRequest.setTeamName("Test Team");
@@ -144,6 +152,11 @@ class TeamControllerTest {
             .build();
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
+
+    EventRegistration memberReg = new EventRegistration();
+    memberReg.setEventId(eventId);
+    memberReg.setUserId(userId);
+    eventRegRepo.saveAndFlush(memberReg);
 
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(

@@ -45,6 +45,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import com.hackathon.platform.repository.EventRegistrationRepository;
+import com.hackathon.platform.repository.TeamMemberRepository;
+import com.hackathon.platform.repository.TeamRepository;
+import com.hackathon.platform.repository.LevelRepository;
+import com.hackathon.platform.repository.SubmissionRepository;
+import com.hackathon.platform.model.Team;
+import com.hackathon.platform.model.TeamMember;
+import com.hackathon.platform.model.Level;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -68,6 +76,11 @@ class StorageControllerTest {
   @MockBean private ScoringJobProducer producer;
 
   @MockBean private HackathonService hackathonService;
+  @MockBean private EventRegistrationRepository eventRegRepo;
+  @MockBean private TeamRepository teamRepo;
+  @MockBean private TeamMemberRepository teamMemberRepo;
+  @MockBean private LevelRepository levelRepo;
+  @MockBean private SubmissionRepository subRepo;
 
   private static final String EVENT_ID = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
   private static final String HACKATHON_ID = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
@@ -119,6 +132,29 @@ class StorageControllerTest {
     participantAuth =
         new UsernamePasswordAuthenticationToken(
             participantUser, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+
+    Event activeEvent = new Event();
+    activeEvent.setStatus("ACTIVE");
+    activeEvent.setHackathon(UUID.fromString(HACKATHON_ID));
+    when(eventRepository.findByHackathon(any())).thenReturn(List.of(activeEvent));
+    when(eventService.getEventById(any())).thenReturn(activeEvent);
+
+    Team team = new Team();
+    team.setEventId(UUID.fromString(EVENT_ID));
+    when(teamRepo.findById(any())).thenReturn(Optional.of(team));
+
+    TeamMember tm = new TeamMember();
+    tm.setTeamId(UUID.fromString(TEAM_ID));
+    when(teamMemberRepo.findByUserIdAndStatusAndEventId(any(), anyString(), any())).thenReturn(List.of(tm));
+
+    Level lvl = new Level();
+    lvl.setHackathonId(UUID.fromString(HACKATHON_ID));
+    when(levelRepo.findById(anyShort())).thenReturn(Optional.of(lvl));
+
+    Submission submission = new Submission();
+    submission.setEventId(UUID.fromString(EVENT_ID));
+    submission.setTeamId(UUID.fromString(TEAM_ID));
+    when(subRepo.findById(any())).thenReturn(Optional.of(submission));
   }
 
   @Test
