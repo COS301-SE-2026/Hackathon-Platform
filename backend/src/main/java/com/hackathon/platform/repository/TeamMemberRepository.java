@@ -18,6 +18,9 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, UUID> {
   /** List all members of a team with a specific status. */
   List<TeamMember> findByTeamIdAndStatus(UUID teamId, String status);
 
+  /** List all members across a set of teams with a specific status. */
+  List<TeamMember> findByTeamIdInAndStatus(List<UUID> teamIds, String status);
+
   /** List all memberships of a user with a specific status. */
   List<TeamMember> findByUserIdAndStatus(UUID userId, String status);
 
