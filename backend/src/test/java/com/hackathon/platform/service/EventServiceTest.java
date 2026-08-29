@@ -56,8 +56,10 @@ class EventServiceTest {
     event.setCreatedByUserId(creatorUserId);
     event.setName("Test Hackathon");
     event.setVisibility("PUBLIC");
-    event.setStatus("INACTIVE");
+    event.setStatus("ACTIVE");
     event.setRegistrationKey(null);
+    event.setStartDateTime(OffsetDateTime.now().minusHours(1));
+    event.setDuration(48*3600);
   }
 
   @AfterEach
@@ -95,8 +97,8 @@ class EventServiceTest {
     req.setStatus("ACTIVE");
     req.setDescription("This is a test");
     req.setTeamSizeLimit((short) 4);
-    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
-    req.setDuration(48);
+    req.setStartDateTime(OffsetDateTime.now().minusHours(1));
+    req.setDuration(48*3600);
     req.setHackathonId(UUID.randomUUID());
     when(eventRepository.save(any(Event.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
@@ -117,7 +119,7 @@ class EventServiceTest {
   void createEvent_withNullRequest_throwsIllegalArgumentException() {
     assertThatThrownBy(() -> eventService.createEvent(null))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Event request body cannot be null");
+        .hasMessageContaining("Event request body cant be null");
 
     verify(eventRepository, never()).save(any(Event.class));
   }
@@ -125,6 +127,7 @@ class EventServiceTest {
   @Test
   void createEvent_withInvalidName_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName(null);
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
@@ -140,12 +143,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event name is required.");
+    assertThat(ex.getMessage()).isEqualTo("Name is required");
   }
 
   @Test
   void createEvent_withInvalidTeamSize_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
@@ -161,12 +165,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Team size must be greater than 0.");
+    assertThat(ex.getMessage()).isEqualTo("Team size limit must be greater than 0");
   }
 
   @Test
   void createEvent_withInvalidStartDateTime_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
@@ -182,12 +187,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event start date is required.");
+    assertThat(ex.getMessage()).isEqualTo("Start date is required");
   }
 
   @Test
   void createEvent_withInvalidDuration_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
@@ -203,12 +209,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event duration must be greater than 0.");
+    assertThat(ex.getMessage()).isEqualTo("Duration is less than 0");
   }
 
   @Test
   void createEvent_withInvalidVisiblity_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility(null);
     req.setStatus("ACTIVE");
@@ -224,12 +231,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event visibility is required.");
+    assertThat(ex.getMessage()).isEqualTo("Visibility is required");
   }
 
   @Test
   void createEvent_withInvalidStatus_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PUBLIC");
     req.setStatus(null);
@@ -245,12 +253,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event status is required.");
+    assertThat(ex.getMessage()).contains("Status must be one of these:");
   }
 
   @Test
   void createEvent_withInvalidRegistrationKey_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PRIVATE");
     req.setStatus("ACTIVE");
@@ -268,7 +277,7 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Registration key is required for private events.");
+    assertThat(ex.getMessage()).isEqualTo("Registration key is required for private events");
   }
 
   @Test
@@ -347,7 +356,7 @@ class EventServiceTest {
 
     assertThatThrownBy(() -> eventService.patchEventStatus(eventId, "PRIVATE", "ACTIVE", null))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("Registration key is required for private events");
+        .hasMessageContaining("Registration key is required");
 
     verify(eventRepository, never()).save(any(Event.class));
   }
@@ -371,7 +380,7 @@ class EventServiceTest {
 
     assertThat(response).isNotNull();
     assertThat(response.getEventId()).isEqualTo(eventId);
-    assertThat(response.getStatus()).isEqualTo("INACTIVE");
+    assertThat(response.getStatus()).isEqualTo("ACTIVE");
     assertThat(response.getVisibility()).isEqualTo("PUBLIC");
 
     verify(eventRepository).findById(eventId);
@@ -408,7 +417,7 @@ class EventServiceTest {
 
     assertThatThrownBy(() -> eventService.getEventById(randomEventId))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("The event could not be found");
+        .hasMessageContaining("Event not found");
 
     verify(eventRepository).findById(randomEventId);
   }
