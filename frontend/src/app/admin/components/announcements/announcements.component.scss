@@ -233,7 +233,64 @@
 
 }
 
+.severity-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
 
+    .pi{
+        font-size: 0.68rem;
+    }
+
+    &.severity-info {
+        background-color: #eaf4fb;
+        color: #146a9d;
+    }
+    &.severity-important {
+        background-color: #fef3d9;
+        color: #9a6700;
+    }
+    &.severity-urgent {
+        background-color: #fde8e5;
+        color: #c0392b;
+    }
+}
+
+.severity-radio-row{
+    flex-wrap: wrap;
+}
+
+.severity-option{
+    padding: 7px 14px;
+    border: 1.5px solid #dfe3ea;
+    border-radius: 20px;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+
+    input{
+        margin:0;
+
+    }
+    &.severity-option-info.selected{
+        background-color: #eaf4fb;
+        border-color: #1983c2;
+        color: #146a9d;
+    }
+    &.severity-option-important.selected{
+        background-color: #fef3d9;
+        border-color: #e0a100;
+        color: #9a6700;
+    }
+    &.severity-option-urgent.selected{
+        background-color: #fde8e5;
+        border-color: #e0a099;
+        color: #c0392b;
+    }
+}
 .filter-tabs{
     display: flex;
     align-items: center;
