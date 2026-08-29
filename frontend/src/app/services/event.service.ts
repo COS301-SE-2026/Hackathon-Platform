@@ -28,6 +28,16 @@ export interface EventResponse {
   status: string;
 }
 
+export interface EventParticipantResponse {
+  userId: string;
+  fullName: string;
+  email: string;
+  teamId: string;
+  teamName: string;
+  teamRole: 'LEADER' | 'MEMBER';
+  joinedAt: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -86,5 +96,9 @@ export class EventService {
 
   createEventForHackathon(hackathonId: string, eventData: EventRequest): Observable<EventResponse> {
     return this.http.post<EventResponse>(`${this.baseUrl}/hackathon/${hackathonId}/events`, eventData);
+  }
+
+  getEventParticipants(eventId : string): Observable<EventParticipantResponse[]> {
+    return this.http.get<EventParticipantResponse[]>(`${this.baseUrl}/admin/events/${eventId}/participants`);
   }
 }
