@@ -130,8 +130,6 @@ export class AnnouncementsComponent implements OnInit{
             title: announcement.title,
             message: announcement.message,
             audience: announcement.audience,
-            sendOption: announcement.status === 'SCHEDULED'?'schedule' : 'now',
-            scheduledFor: announcement.scheduledFor || '',
             pinned: announcement.pinned,
             notifyByEmail: true
 
