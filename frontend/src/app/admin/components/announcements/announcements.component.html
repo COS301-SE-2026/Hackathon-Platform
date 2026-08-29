@@ -94,6 +94,10 @@
                                     <i class = "pi pi-star-fill pin-icon" aria-label = "Pinned"></i>
                                 }
                                 <h3 class = "announcement-title">{{ a.title}}</h3>
+                                <span class = "severity-badge" [ngClass] = "'severity-' + a.severity.toLowerCase()">
+                                    <i class = "pi" [ngClass] = "severityIcon(a.severity)"></i>
+                                    {{a.severity === 'INFO'? 'Info': (a.severity === 'IMPORTANT'? 'Important' : 'Urgent')}}
+                                </span>
                                
                             </div>
                             <p class = "announcement-message">{{a.message}}</p>
@@ -146,6 +150,18 @@
             <div class = "form-group">
                 <label for = "announcementMessage">Message</label>
                 <textarea id = "announcementMessage" rows = "4" [(ngModel)] = "modalForm.message" placeholder = "What do you want to tell participants?"></textarea>
+            </div>
+
+            <div class = "form-group">
+                <span class = "form-group-label">Severity</span>
+                <div class = "radio-row severity-radio-row">
+                    @for (option of severityOptions; track option.value){
+                        <label class = "radio-option severity-option" [class.selected] = "modalForm.severity === option.value" [ngClass] = "'severity-option-' + option.value.toLowerCase()">
+                            <input type = "radio" name = "severity" [value] = "option.value" [(ngModel)] = "modalForm.severity"/>
+                            {{option.label}}
+                        </label>
+                    }
+                </div>
             </div>
             
 
