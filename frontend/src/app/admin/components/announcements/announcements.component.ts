@@ -117,8 +117,6 @@ export class AnnouncementsComponent implements OnInit{
             title: '',
             message: '',
             audience: 'ALL',
-            sendOption: 'now',
-            scheduledFor: '',
             pinned: false,
             notifyByEmail: true
         };
@@ -152,10 +150,6 @@ export class AnnouncementsComponent implements OnInit{
         }
         if (!this.modalForm.message.trim()){
             this.modalError = 'The announcement message is required';
-            return;
-        }
-        if (this.modalForm.sendOption === 'schedule' && !this.modalForm.scheduledFor){
-            this.modalError = 'Please choose a date and time to schedule this announcement';
             return;
         }
         this.isSaving = true;
