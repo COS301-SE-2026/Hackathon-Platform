@@ -76,12 +76,6 @@ export class AnnouncementsComponent implements OnInit{
     get publishedCount(): number {
         return this.announcements.filter((a)=>a.status === 'PUBLISHED').length;
     }
-    get scheduledCount(): number {
-        return this.announcements.filter((a)=>a.status === 'SCHEDULED').length;
-    }
-    get draftCount(): number {
-        return this.announcements.filter((a)=>a.status === 'DRAFT').length;
-    }
 
     ngOnInit(): void {
         this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
