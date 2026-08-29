@@ -58,9 +58,6 @@ export class AnnouncementsComponent implements OnInit{
     modalForm = {
         title: '',
         message: '',
-        audience: 'ALL' as AnnouncementAudience,
-        pinned: false,
-        notifyByEmail: true
     };
 
     get filteredAnnouncements(): AnnouncementResponse[]{
@@ -116,9 +113,6 @@ export class AnnouncementsComponent implements OnInit{
         this.modalForm = {
             title: '',
             message: '',
-            audience: 'ALL',
-            pinned: false,
-            notifyByEmail: true
         };
         this.showAnnouncementModal = true;
     }
@@ -129,9 +123,6 @@ export class AnnouncementsComponent implements OnInit{
         this.modalForm = {
             title: announcement.title,
             message: announcement.message,
-            audience: announcement.audience,
-            pinned: announcement.pinned,
-            notifyByEmail: true
 
         };
         this.showAnnouncementModal =true;
