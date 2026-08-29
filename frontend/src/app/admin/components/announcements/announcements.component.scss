@@ -232,31 +232,7 @@
     }
 
 }
-.status-summary {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
-}
 
-.summary-chip{
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    background-color: #ffffff;
-    border: 1px solid #e7eaf0;
-    border-radius: 10px;
-    padding: 10px 16px;
-}
-.summary-value{
-    font-size: 1rem;
-    font-weight: 700;
-    color:#13192d;
-}
-.summary-label{
-    font-size: 0.8rem;
-    color:#8089a0;
-}
 
 .filter-tabs{
     display: flex;
@@ -676,9 +652,7 @@
 }
 
 @media(max-width: 640px){
-    .status-summary{
-        flex-wrap: wrap;
-    }
+
     .search-box input{
         width: 160px;
     }
