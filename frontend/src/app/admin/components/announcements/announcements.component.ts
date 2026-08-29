@@ -8,6 +8,7 @@ import { HackathonService } from '../../../services/hackathon.service';
 
 export type AnnouncementAudience = 'ALL' | 'TEAMS' | 'JUDGES';
 export type AnnouncementStatus = 'PUBLISHED';
+export type AnnouncementSeverity = 'INFO' | 'IMPORTANT' | 'URGENT';
 
 export interface AnnouncementResponse {
     id: number;
@@ -15,6 +16,7 @@ export interface AnnouncementResponse {
     message: string;
     audience: AnnouncementAudience;
     status: AnnouncementStatus;
+    severity: AnnouncementSeverity;
     pinned: boolean;
     scheduledFor?: string;
     publishedAt?: string;
@@ -58,7 +60,15 @@ export class AnnouncementsComponent implements OnInit{
     modalForm = {
         title: '',
         message: '',
+        severity: 'INFO' as AnnouncementSeverity,
     };
+
+    readonly severityOptions: {value: AnnouncementSeverity; label: string} []= [
+        {value: 'INFO',label:'Info'},
+        {value: 'IMPORTANT',label:'Important'},
+        {value: 'URGENT',label:'Urgent'},
+
+    ];
 
     get filteredAnnouncements(): AnnouncementResponse[]{
         const term = this.searchTerm.trim().toLowerCase();
@@ -113,6 +123,7 @@ export class AnnouncementsComponent implements OnInit{
         this.modalForm = {
             title: '',
             message: '',
+            severity: 'INFO',
         };
         this.showAnnouncementModal = true;
     }
@@ -123,6 +134,7 @@ export class AnnouncementsComponent implements OnInit{
         this.modalForm = {
             title: announcement.title,
             message: announcement.message,
+            severity: announcement.severity,
 
         };
         this.showAnnouncementModal =true;
@@ -150,6 +162,18 @@ export class AnnouncementsComponent implements OnInit{
 
     togglePin(announcement: AnnouncementResponse): void {
         announcement.pinned = !announcement.pinned;
+    }
+
+    severityIcon(severity: AnnouncementSeverity): string{
+        switch(severity){
+            case 'URGENT':
+                return 'pi-exclamation-triangle';
+            case 'IMPORTANT':
+                return 'pi-exclamation-circle';
+            default:
+                return 'pi-info-circle';
+
+        }
     }
 
     deleteAnnouncement(announcement: AnnouncementResponse): void {
