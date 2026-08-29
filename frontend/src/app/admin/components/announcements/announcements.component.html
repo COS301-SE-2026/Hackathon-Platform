@@ -183,7 +183,7 @@
             <div class = "modal-actions">
                 <button class = "btn-cancel" (click) = "closeModal()" [disabled] = "isSaving">Cancel</button>
                 <button class = "btn-save" (click) = "saveAnnouncement()" [disabled] = "isSaving">
-                    {{isSaving ? 'Saving...' : (editingAnnouncement ? 'Save changes': (modalForm.sendOption === 'schedule' ? 'Schedule announcement' : 'Post announcement'))}}
+                    {{isSaving ? 'Saving...' : (editingAnnouncement ? 'Save changes': 'Post announcement')}}
                 </button>
             </div>
         </div>
