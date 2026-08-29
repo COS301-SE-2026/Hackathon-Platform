@@ -7,7 +7,7 @@ import { ButtonModule} from 'primeng/button'
 import { HackathonService } from '../../../services/hackathon.service';
 
 export type AnnouncementAudience = 'ALL' | 'TEAMS' | 'JUDGES';
-export type AnnouncementStatus = 'DRAFT' | 'SCHEDULED' | 'PUBLISHED';
+export type AnnouncementStatus = 'PUBLISHED';
 
 export interface AnnouncementResponse {
     id: number;
