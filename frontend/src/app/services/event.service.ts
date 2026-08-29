@@ -31,7 +31,33 @@ export interface EventResponse {
   isInPerson?: boolean;
   leaderboardFreezeDateTime?: string;
 }
+export interface RegisteredParticipants{
+ participantId: string;
+ name: string;
+ email: string;
+}
 
+export interface RegisteredTeams{
+  teamId: string;
+  name: string;
+  members:RegisteredParticipants[];
+}
+
+export interface TeamSubmission {
+  teamId: string;
+  teamName: string;
+  rank: number;
+  score?:number;
+  submissionTitle: string;
+  sourceCodeUrl?: string;
+  jsonOutputUrl?:string;
+  submittedAt?: string;
+}
+
+export interface EventRegistrationSummary{
+  teams: RegisteredTeams[];
+  topSubmissions: TeamSubmission[];
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -71,6 +97,10 @@ export class EventService {
     return this.http.get<EventResponse>(`${this.baseUrl}/events/${eventId}`);
   }
 
+  getEventRegistrations(eventId: string): Observable<EventRegistrationSummary>{
+    return this.http.get<EventRegistrationSummary>(`${this.baseUrl}/admin/events/${eventId}/registrations`);
+  }
+
   patchEventStatus(eventId: string, visibility?: string, status?: string, registrationKey?: string): Observable<EventResponse> {
     return this.http.patch<EventResponse>(
       `${this.baseUrl}/admin/events/${eventId}/status`,
@@ -90,5 +120,10 @@ export class EventService {
 
   createEventForHackathon(hackathonId: string, eventData: EventRequest): Observable<EventResponse> {
     return this.http.post<EventResponse>(`${this.baseUrl}/hackathon/${hackathonId}/events`, eventData);
+  }
+  downloadEventResults(eventId: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/admin/events/${eventId}/results/export`,{
+      responseType: 'blob'
+    });
   }
 }
