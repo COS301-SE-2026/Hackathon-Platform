@@ -102,12 +102,7 @@
                                 @if (a.status === 'PUBLISHED'){
                                     <span class = "meta-item"><i class = "pi pi-check-circle"></i>Posted {{a.publishedAt}}</span>
                                 }
-                                @if (a.status === 'SCHEDULED'){
-                                    <span class = "meta-item"><i class = "pi pi-clock"></i>Scheduled for {{a.scheduledFor}}</span>
-                                }
-                                @if (a.status === 'DRAFT'){
-                                    <span class = "meta-item"><i class = "pi pi-file-edit"></i>Last edited {{a.createdAt}}</span>
-                                }
+                                
                             </div>
                         </div>
                         <div class = "announcement-actions">
