@@ -59,7 +59,7 @@ class EventServiceTest {
     event.setStatus("ACTIVE");
     event.setRegistrationKey(null);
     event.setStartDateTime(OffsetDateTime.now().minusHours(1));
-    event.setDuration(48*3600);
+    event.setDuration(48 * 3600);
   }
 
   @AfterEach
@@ -98,7 +98,7 @@ class EventServiceTest {
     req.setTagline("This is a test");
     req.setTeamSizeLimit((short) 4);
     req.setStartDateTime(OffsetDateTime.now().minusHours(1));
-    req.setDuration(48*3600);
+    req.setDuration(48 * 3600);
     req.setHackathonId(UUID.randomUUID());
     when(eventRepository.save(any(Event.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));

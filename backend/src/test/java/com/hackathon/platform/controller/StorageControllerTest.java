@@ -18,13 +18,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.hackathon.platform.config.AzureBlobConfig;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.Team;
+import com.hackathon.platform.model.TeamMember;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
+import com.hackathon.platform.repository.SubmissionRepository;
+import com.hackathon.platform.repository.TeamMemberRepository;
+import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.scoring.queue.ScoringJobProducer;
 import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.service.FileMetadataService;
@@ -45,14 +53,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import com.hackathon.platform.repository.EventRegistrationRepository;
-import com.hackathon.platform.repository.TeamMemberRepository;
-import com.hackathon.platform.repository.TeamRepository;
-import com.hackathon.platform.repository.LevelRepository;
-import com.hackathon.platform.repository.SubmissionRepository;
-import com.hackathon.platform.model.Team;
-import com.hackathon.platform.model.TeamMember;
-import com.hackathon.platform.model.Level;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -145,7 +145,8 @@ class StorageControllerTest {
 
     TeamMember tm = new TeamMember();
     tm.setTeamId(UUID.fromString(TEAM_ID));
-    when(teamMemberRepo.findByUserIdAndStatusAndEventId(any(), anyString(), any())).thenReturn(List.of(tm));
+    when(teamMemberRepo.findByUserIdAndStatusAndEventId(any(), anyString(), any()))
+        .thenReturn(List.of(tm));
 
     Level lvl = new Level();
     lvl.setHackathonId(UUID.fromString(HACKATHON_ID));

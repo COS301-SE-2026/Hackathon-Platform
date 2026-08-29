@@ -10,9 +10,12 @@ import static org.mockito.Mockito.when;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
+import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.TeamMember;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRegistrationRepository;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.TeamMemberRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.repository.UserRepository;
@@ -27,9 +30,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.hackathon.platform.repository.EventRepository;
-import com.hackathon.platform.repository.EventRegistrationRepository;
-import com.hackathon.platform.model.Event;
 
 @ExtendWith(MockitoExtension.class)
 class TeamServiceTest {
@@ -126,7 +126,8 @@ class TeamServiceTest {
     when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
     when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
-    when(teamMemberRepository.findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId)).thenReturn(Collections.emptyList());
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId))
+        .thenReturn(Collections.emptyList());
     when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(0L);
     when(teamMemberRepository.save(any(TeamMember.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -190,9 +191,10 @@ class TeamServiceTest {
 
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
-            .thenReturn(Optional.of(pending));
+        .thenReturn(Optional.of(pending));
     when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
-    when(teamMemberRepository.findByUserIdAndStatusAndEventId(targetUserId, "APPROVED", eventId)).thenReturn(Collections.emptyList());
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(targetUserId, "APPROVED", eventId))
+        .thenReturn(Collections.emptyList());
     when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(1L);
 
     teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, true);

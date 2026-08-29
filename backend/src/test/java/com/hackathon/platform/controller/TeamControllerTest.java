@@ -14,9 +14,11 @@ import com.hackathon.platform.dto.ApproveRequest;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.EventRegistration;
 import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.HackathonRepository;
 import com.hackathon.platform.repository.RoleRepository;
@@ -35,8 +37,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
-import com.hackathon.platform.repository.EventRegistrationRepository;
-import com.hackathon.platform.model.EventRegistration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -153,7 +153,7 @@ class TeamControllerTest {
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
 
-    if(!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
+    if (!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
       EventRegistration memberReg = new EventRegistration();
       memberReg.setEventId(eventId);
       memberReg.setUserId(memberId);
@@ -222,7 +222,7 @@ class TeamControllerTest {
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
 
-    if(!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
+    if (!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
       EventRegistration memberReg = new EventRegistration();
       memberReg.setEventId(eventId);
       memberReg.setUserId(memberId);
@@ -276,7 +276,7 @@ class TeamControllerTest {
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
 
-    if(!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
+    if (!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
       EventRegistration memberReg = new EventRegistration();
       memberReg.setEventId(eventId);
       memberReg.setUserId(memberId);
