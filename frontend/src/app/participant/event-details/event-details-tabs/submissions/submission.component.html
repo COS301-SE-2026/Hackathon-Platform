@@ -7,6 +7,49 @@
     </section>
 
 
+    @for (level of levels; track level.id) {
+
+        @if (level.id.toString() === activeLevel) {
+
+    <section class="level-content">
+
+    <div class="level-information">
+
+        <div class="level-heading"><h1>About this Level:</h1></div>
+
+        <div class="description-section">
+
+        <p> This introductory level is designed to get you familiar with the challenge environment and basic problem-solving.</p>
+
+        </div>
+
+        <div class="important-notes">
+
+        <div class="notes-heading">
+         <i class="pi pi-info-circle"></i>
+         <h2>Important Notes</h2>
+        </div>
+
+        <ul>
+         <li>Download the level resources before getting started.</li>
+         <li>You may submit multiple times before the deadline.</li>
+         <li>Your highest score will count.</li>
+          <li>Ensure your solution follows the submission requirements.</li>
+        </ul>
+
+        </div>
+
+    </div>
+
+     <div class="level-submission">
+
+     </div>
+     
+    </section>
+
+  }
+
+}
 
 
 </div>
