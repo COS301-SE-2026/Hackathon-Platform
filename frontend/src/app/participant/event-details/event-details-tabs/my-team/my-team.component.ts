@@ -7,6 +7,7 @@ import { AuthService } from '../../../../services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { ToastService } from '../../../../shared/components/toast/toast.service';
 
 
 interface DisplayTeamMember {
@@ -28,8 +29,9 @@ interface DisplayTeamMember {
 export class MyTeamComponent implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly authService = inject(AuthService);
-  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(ActivatedRoute);
   private readonly change = inject(ChangeDetectorRef);
+  private readonly toast = inject(ToastService);
 
   private eventID = '';
 
@@ -212,6 +214,7 @@ openRequestToJoinDialog(): void {
       next: () => {
         this.isLoading = false;
         this.successMessage = 'Join request sent! Waiting for the team lead to approve.';
+          this.toast.success('Request Sent Succesfully ',this.successMessage);
         this.teamIdToJoin = '';
          this.teamDialogVisible = false;
         this.change.markForCheck();

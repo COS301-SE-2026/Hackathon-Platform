@@ -88,9 +88,9 @@
             </div>
           
             <div class="team-stat-info">
-              <span class="team-stat-value">4</span>
+              <span class="team-stat-value">{{team.members.length}}</span>
 
-              <span class="team-stat-label">Members</span>
+              <span class="team-stat-label">{{ team.members.length === 1 ? 'Member' : 'Members' }}</span>
 
             </div>
 

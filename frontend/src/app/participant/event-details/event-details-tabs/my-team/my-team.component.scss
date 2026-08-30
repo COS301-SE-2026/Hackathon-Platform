@@ -43,7 +43,7 @@
     margin: 0;
     color: var(--black);
 
-    font-size: var(--font-size-body-lg);
+    font-size: var(--font-size-h3);
     font-weight: var(--font-weight-semibold);
     line-height: var(--line-height-h3);
   }
@@ -126,16 +126,16 @@
 .team-stat-value {
   color: var(--black);
 
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-body);
   font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-small);
+  line-height: var(--line-height-body);
 }
 
 .team-stat-label {
   color: var(--dark-gray);
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-small);
+  line-height: var(--line-height-body);
 }
 
 
@@ -154,9 +154,9 @@
   margin: 0;
   color: var(--dark-gray);
 
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-small);
+  line-height: var(--line-height-body);
 }
 
 .join-code-display {
@@ -235,9 +235,9 @@
 
 .members-table-header .members-column {
   color: var(--dark-gray);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-caption);
+  line-height: var(--line-height-small);
 }
 
 
@@ -281,9 +281,9 @@
   min-width: 0;
   overflow: hidden;
   color: var(--black);
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-small);
+  line-height: var(--line-height-body);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -297,9 +297,9 @@
   display: block;
   overflow: hidden;
   color: var(--dark-gray);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-small);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-caption);
+  line-height: var(--line-height-small);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -344,7 +344,7 @@
 .requests-card-header h2 {
   margin: 0;
   color: var(--black);
-  font-size: var(--font-size-body-lg);
+  font-size: var(--font-size-h3);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-h3);
 }
@@ -352,9 +352,9 @@
 .requests-card-header p {
   margin: var(--space-1) 0 0;
   color: var(--dark-gray);
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-small);
+  line-height: var(--line-height-body);
 }
 
 
@@ -390,9 +390,9 @@
 
 .requests-table-header .requests-column {
   color: var(--dark-gray);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-caption);
+  line-height: var(--line-height-small);
 }
 
 
@@ -412,9 +412,9 @@
 .request-member-name {
   overflow: hidden;
   color: var(--black);
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-small);
+  line-height: var(--line-height-body);
   text-overflow: ellipsis;
   text-transform: capitalize;
   white-space: nowrap;
@@ -424,9 +424,9 @@
   margin-top: var(--space-1);
   overflow: hidden;
   color: var(--dark-gray);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-small);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-caption);
+  line-height: var(--line-height-small);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -484,9 +484,9 @@
 .no-requests {
   padding: var(--space-4) var(--space-3);
   color: var(--dark-gray);
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-small);
+  line-height: var(--line-height-body);
 }
 
 
