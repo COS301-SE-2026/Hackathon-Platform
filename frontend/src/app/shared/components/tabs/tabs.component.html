@@ -1,4 +1,4 @@
-<nav class="tabs" [attr.aria-label]="ariaLabel">
+<nav class="tabs" [class.tabs-subtabs]="variant === 'subtabs'" [attr.aria-label]="ariaLabel">
 
  @for (tab of tabs; track $index) {
 
@@ -14,7 +14,7 @@
 
     } @else {
 
-    <a class="tab" [routerLink]="tab.route" [queryParams]="tab.queryParams" [class.active]="tab.queryParams?.['tab'] === activeTab">
+    <a class="tab" [routerLink]="tab.route" [queryParams]="tab.queryParams" [class.active]="tab.queryParams?.[activeQueryParam] === activeTab">
 
      @if (tab.icon) { <i [class]="tab.icon" aria-hidden="true"></i>}
 
