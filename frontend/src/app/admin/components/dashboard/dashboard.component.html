@@ -5,6 +5,17 @@
         <h1>Welcome back, Admin! </h1>
         <p class = "page-subtitle">Here's what's happening with your hackathons.</p>
       </div>
+
+      @if (allEvents.length > 0) {
+        <div class = "event-context-picker">
+          <span class = "event-context-label"><i class = "pi pi-calendar"></i> Viewing insights for</span>
+          <select class = "event-insights-select" [ngModel] = "selectedEventId" (ngModelChange) = "onSelectedEventChange($event)">
+            @for (event of allEvents; track event.eventId) {
+              <option [value] = "event.eventId">{{ event.name }}</option>
+            }
+          </select>
+        </div>
+      }
     </div>
 
     <div class = "stats-grid">
@@ -22,7 +33,7 @@
         <div>
           <p class = "stat-value">{{ activeParticipants }}</p>
         <p class = "stat-label">Active Participants</p>
-        <a routerLink = "/admin/participants" class = "stat-link">View all participants <i class = "pi pi-arrow-right"></i></a>
+        <a (click) = "openParticipantsModal(selectedEventId)" class = "stat-link">View all participants <i class = "pi pi-arrow-right"></i></a>
         </div>
        </div>
 
@@ -44,28 +55,6 @@
         </div>
         </div>
     </div>
-
-        <div class = "section">
-          <h2 class = "section-title">All events</h2>
-          <div class ="events-list-card">
-            @if (eventLoading){
-              <div class = "empty-state">Loading events...</div>
-            } @else if (eventError){
-            <div class="empty-state">{{ eventError }}</div>
-            } @else if (allEvents.length === 0) {
-              <div class="empty-state">No events have been loaded yet</div>
-            } @else {
-              @for (events of allEvents; track events.eventId) {
-                <div class="event-item">
-                  <div>
-                    <p class="event-name">{{ events.name }}</p>
-                    <p class="event-meta">{{ events.meta }}</p>
-                  </div>
-                </div>
-              }
-            }
-          </div>
-        </div>
 
         <div class = "panels-row">
           <div class = "panel-card">
@@ -101,10 +90,15 @@
           <div class = "panel-card">
             <div class = "panel-header">
               <h2 class = "panel-title">Active Participants</h2>
-              <a routerLink = "/admin/participants" class = "btn-view-all">View All</a>
+              <a (click) = "openParticipantsModal(selectedEventId)" class = "btn-view-all">View All</a>
             </div>
 
             <div class = "participant-rows">
+              @if (participantsPreviewLoading) {
+                <div class = "empty-state">Loading participants...</div>
+              } @else if (activeParticipantRows.length === 0) {
+                <div class = "empty-state">No approved participants yet for this event.</div>
+              } @else {
               @for (p of activeParticipantRows; track p.email){
                 <div class = "participant-row">
                   <div class = "avatar-badge">{{ p.initials}}</div>
@@ -113,13 +107,14 @@
                     <p class = "participant-row-email"> {{p.email}}</p>
                   </div>
                   <div class = "participant-row-points">
-                    <p class = "points-value">{{ p.points}}</p>
-                    <p class = "points-label">Points</p>
+                    <p class = "points-value">{{ p.team}}</p>
+                    <p class = "points-label">Team</p>
                   </div>
                 </div>
               }
+              }
             </div>
-            <a routerLink = "/admin/participants" class = "panel-footer-link">View all participants <i class = "pi pi-arrow-right"></i></a>
+            <a (click) = "openParticipantsModal(selectedEventId)" class = "panel-footer-link">View all participants <i class = "pi pi-arrow-right"></i></a>
           </div>
 
           <div class = "panel-card">
@@ -156,7 +151,17 @@
         </div>
 
         <div class = "section">
-          <h2 class = "section-title">Event Insights</h2>
+          <div class = "panel-header">
+            <h2 class = "section-title">Event Insights</h2>
+          </div>
+
+          @if (insightsLoading) {
+            <div class = "empty-state">Loading insights...</div>
+          } @else if (insightsError) {
+            <div class = "empty-state">{{ insightsError }}</div>
+          } @else if (!selectedEventId) {
+            <div class = "empty-state">No events to show insights for yet.</div>
+          } @else {
 
           <div class = "insights-strip">
             <div class = "insight-mini-card">
@@ -189,7 +194,7 @@
             </div>
 
           </div>
-        <div class = "panels-row panels-row-2">
+        <div class = "panels-row panels-row-3">
           <div class = "panel-card">
             <div class = "panel-header">
               <h2 class = "panel-title">Submissions per Minute</h2>
@@ -230,10 +235,34 @@
               }
             </div>
           </div>
-        </div>
-      </div>
-      
 
+          <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">Top 3 Teams</h2>
+            </div>
+            @if (topTeamsLoading) {
+              <div class = "empty-state">Loading leaderboard...</div>
+            } @else if (topTeamsError) {
+              <div class = "empty-state">{{ topTeamsError }}</div>
+            } @else if (topTeams.length === 0) {
+              <div class = "empty-state">No scored submissions yet.</div>
+            } @else {
+              <div class = "top-teams-rows">
+                @for (team of topTeams; track team.teamId) {
+                  <div class = "top-team-row">
+                    <span class = "top-team-rank" [class.rank-1] = "team.rank === 1" [class.rank-2] = "team.rank === 2" [class.rank-3] = "team.rank === 3">{{ team.rank }}</span>
+                    <div class = "top-team-info">
+                      <p class = "top-team-name">{{ team.teamName }}</p>
+                      <p class = "top-team-score">Best score {{ team.bestScore }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+        </div>
 
         <div class = "section">
           <div class = "panel-header">
@@ -331,4 +360,12 @@
         </div>
 
   </main>
+
+  @if (showParticipantsModal) {
+    <app-participants-modal
+      [eventId] = "participantsModalEventId"
+      [eventName] = "participantsModalEventName"
+      (closed) = "closeParticipantsModal()"
+    ></app-participants-modal>
+  }
 </div>
