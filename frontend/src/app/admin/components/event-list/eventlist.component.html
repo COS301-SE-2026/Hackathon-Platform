@@ -109,6 +109,7 @@
             <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
             <span class = "dates-cell">{{event.dateRangeLabel}}</span>
             <button type = "button" class = "btn-view-event" (click) = "navigateToViewEvent(event.eventId)">View Event</button>
+            <button type = "button" class = "btn-view-event" (click) = "navigateToParticipants(event.eventId)">Participants</button>
 
           </div>
         }
@@ -116,4 +117,12 @@
     </div>
   } 
 </main>
+
+@if (showParticipantsModal) {
+  <app-participants-modal
+    [eventId] = "participantsModalEventId"
+    [eventName] = "participantsModalEventName"
+    (closed) = "closeParticipantsModal()"
+    ></app-participants-modal>
+}
 </div>
