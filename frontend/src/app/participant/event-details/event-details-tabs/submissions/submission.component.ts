@@ -7,11 +7,12 @@ import { StorageService } from '../../../../services/storage.service';
 import { SubmissionService } from '../../../../services/submission.service';
 import { TabsComponent, TabItem} from '../../../../shared/components/tabs/tabs.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { UploadAreaComponent } from '../../../../shared/components/upload-area/upload-area.component';
 
 @Component({
   selector: 'app-submissions',
   standalone: true,
-  imports: [CommonModule, TabsComponent, ButtonComponent ],
+  imports: [CommonModule, TabsComponent, ButtonComponent, UploadAreaComponent],
   templateUrl: './submission.component.html',
   styleUrl: './submission.component.scss',
 })
@@ -152,19 +153,17 @@ export class SubmissionsComponent {
 
   
 
-  onSourceSelected(event: { files: File[] }): void {
-    const file = event.files[0];
-    if (!file?.name.toLowerCase().endsWith('.zip')) return;
+onSourceSelected(file: File): void {
+  if (!file.name.toLowerCase().endsWith('.zip')) return;
 
-    this.sourceArchive = file;
+  this.sourceArchive = file;
+}
 
-  }
+onSolutionSelected(file: File): void {
+  if (!file.name.toLowerCase().endsWith('.json')) return;
 
-  onSolutionSelected(event: { files: File[] }): void {
-    const file = event.files[0];
-    if (!file?.name.toLowerCase().endsWith('.json')) return;
-    this.solutionOutput = file;
-  }
+  this.solutionOutput = file;
+}
 
   removeSourceFile(uploader: { clear(): void }): void {
     this.sourceArchive = null;
