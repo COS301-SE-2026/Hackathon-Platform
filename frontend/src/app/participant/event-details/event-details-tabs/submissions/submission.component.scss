@@ -13,6 +13,13 @@
   box-shadow: var(--shadow-sm);
 }
 
+.level-content {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--space-6);
+  
+}
+
 
 .level-navigation {
   width: 100%;
@@ -93,3 +100,38 @@
     }
   }
 }
+
+
+.level-submission {
+  min-width: 0;
+}
+
+.submission-section {
+  margin: 0;
+}
+
+.section-header {
+  margin-bottom: var(--space-6);
+
+  h2 {
+    margin: 0;
+    color: var(--black);
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-h3);
+  }
+
+  p {
+    margin: var(--space-2) 0 0;
+    color: var(--dark-gray);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-body);
+  }
+}
+
+.resource-action {
+  width: 100%;
+}
+
+

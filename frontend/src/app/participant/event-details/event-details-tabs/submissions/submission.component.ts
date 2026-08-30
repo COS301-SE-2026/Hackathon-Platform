@@ -6,11 +6,12 @@ import { TeamService } from '../../../../services/team.service';
 import { StorageService } from '../../../../services/storage.service';
 import { SubmissionService } from '../../../../services/submission.service';
 import { TabsComponent, TabItem} from '../../../../shared/components/tabs/tabs.component';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-submissions',
   standalone: true,
-  imports: [CommonModule, TabsComponent ],
+  imports: [CommonModule, TabsComponent, ButtonComponent ],
   templateUrl: './submission.component.html',
   styleUrl: './submission.component.scss',
 })
