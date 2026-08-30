@@ -7,6 +7,22 @@
     </section>
 
 
+     @if (teamError) {
+        <div class="empty-history">{{ teamError }}</div>
+    }
+
+    @if (levelsLoading) {
+        <div class="empty-history">
+            <i class="pi pi-spin pi-spinner"></i> Loading levels...
+        </div>
+    } @else if (levelsError) {
+        <div class="empty-history">{{ levelsError }}</div>
+    } @else if (levels.length === 0) {
+        <div class="empty-history">No levels have been published for this event yet.</div>
+    }
+
+   @else{
+
     @for (level of levels; track level.id) {
 
         @if (level.id.toString() === activeLevel) {
@@ -106,8 +122,9 @@
 
     </section>
 
-  }
+    }
 
+  }
 }
 
 </div>
