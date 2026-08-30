@@ -1,9 +1,13 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
-import { EventResponse, EventService } from '../../../services/event.service';
+import { EventParticipantResponse, EventResponse, EventService } from '../../../services/event.service';
 import { SubmissionResponse, SubmissionService } from '../../../services/submission.service';
+import { EventInsightsResponse, InsightsService } from '../../../services/insights.service';
+import { LeaderboardEntry, LeaderboardService } from '../../../services/leaderboard.service';
+import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 
 interface Events {
   eventId: string;
@@ -31,7 +35,7 @@ interface ParticipantRow {
   initials: string;
   name: string;
   email: string;
-  points: number;
+  team: string;
 }
 
 interface AnnouncementRow{
@@ -71,61 +75,60 @@ interface ScoreLevelStat{
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit{
   private readonly eventService = inject(EventService);
   private readonly submissionService = inject(SubmissionService);
+  private readonly insightsService = inject(InsightsService);
+  private readonly leaderboardService = inject(LeaderboardService);
   private readonly change = inject(ChangeDetectorRef);
 
   allEvents: Events[] = [];
   recentSubmissions: Submissions[] = [];
 
   activeEvents = 0
-  activeParticipants = 1234;
-  teamsCount = 156;
-  submissionsCount = 12;
+  activeParticipants = 0;
+  teamsCount = 0;
+  submissionsCount = 0;
 
   eventLoading = false;
   submissionLoading = false;
   eventError = '';
   submissionError = '';
 
-  activeParticipantRows: ParticipantRow[]=[
-   {initials:'TC', name: 'Team CodeCrafters', email: 'codecrafters@example.com',points: 320},
-   {initials:'TC', name: 'Dev storm', email: 'devStorm@example.com',points: 389},
-  ];
+  // Per-event insights
+  selectedEventId = '';
+  insightsLoading = false;
+  insightsError = '';
 
-  submissionStatusSegments: SubmissionStatusSegment[]=[
-    {label : 'Queued', count:2, percent: 17, offset: 0, colorClass:'seg-solo'},
-    {label : 'Scoring', count:1, percent: 8, offset: 17, colorClass:'seg-small'},
-    {label : 'Scored', count:8, percent: 67, offset: 25, colorClass:'seg-medium'},
-    {label : 'Failed', count:1, percent: 8, offset: 92, colorClass:'seg-failed'},
-  ];
+  showParticipantsModal = false;
+  participantsModalEventId: string | null = null;
+  participantsModalEventName = '';
+
+  activeParticipantRows: ParticipantRow[] = [];
+  participantsPreviewLoading = false;
+
+  topTeams: LeaderboardEntry[] = [];
+  topTeamsLoading = false;
+  topTeamsError = '';
+
+  submissionStatusSegments: SubmissionStatusSegment[]=[];
 
   eventInsights: EventInsightsSummary= {
-    activeTeams: 18,
-    approvedParticipants: 142,
-    submissionsLastHour: 5,
-    errorRate:8,
+    activeTeams: 0,
+    approvedParticipants: 0,
+    submissionsLastHour: 0,
+    errorRate: 0,
   };
 
-  submissionTrend: {x:number; y:number}[]=[
-    {x:10, y:70},{x:56.7, y:53.3},{x:103.3, y:70},{x:150, y:36.7},
-    {x:196.7, y:53.3},{x:243.3, y:20},{x:290, y:36.7}
-  ];
+  submissionTrend: {x:number; y:number}[]=[];
+  submissionTrendPoints = '';
+  submissionTrendArea = '';
 
-  submissionTrendPoints = '10,70 56.7,53.3 103.3,70 150,36.7 196.7,53.3 243.3,20 290,36.7';
-  submissionTrendArea = 'M10,70 L56.7,53.3 L103.3,70 L150,36.7 L196.7,53.3 L243.3,20 L290,36.7 L290,70 L10,70 Z';
-
-  scoreByLevel: ScoreLevelStat[]=[
-    {level: 'Level 1', min:40, max:95,avg:72,count:5},
-    {level: 'Level 2', min:55, max:98,avg:80,count:4},
-    {level: 'Level 3', min:30, max:88,avg:60,count:3},
-
-  ];
+  scoreByLevel: ScoreLevelStat[]=[];
   recentAnnouncements: AnnouncementRow[]=[
     {title:'New challenge added', body:"Check out the new AI challenge", date:'May 16,2026'},
     {title:'Maintenance Notice', body:"Platform maintenance on May 20,2026 from 12:00 PM", date:'May 19,2026'},
@@ -136,8 +139,27 @@ export class DashboardComponent implements OnInit{
     {icon: 'warning', title: 'High submission volume', body: 'Submissions are 35% higher than usual', time:'Just now'},
   ]
   ngOnInit(): void {
+    this.loadDashboardSummary();
     this.loadEvents();
     this.loadRecentSubmissions();
+  }
+
+  private loadDashboardSummary(): void {
+
+    this.insightsService.getAdminDashboard().subscribe({
+      next: summary => {
+
+        this.activeEvents = summary.activeEvents;
+        this.teamsCount = summary.totalParticipants;
+        this.activeParticipants = summary.totalParticipants;
+        this.submissionsCount = summary.submissionsToday;
+        this.change.markForCheck();
+      },
+      error: () => {
+        // Fall back silent;
+        
+      }
+    });
   }
 
   private loadRecentSubmissions(): void {
