@@ -61,7 +61,7 @@ class AdminEventControllerTest {
     eventRequest = new EventRequest();
     eventRequest.setName("Test Hackathon");
     eventRequest.setVisibility("PUBLIC");
-    eventRequest.setStatus("INACTIVE");
+    eventRequest.setStatus("UPCOMING");
     eventRequest.setRegistrationKey(null);
     eventRequest.setDuration(400);
     eventRequest.setStartDateTime(OffsetDateTime.now().plusDays(7));

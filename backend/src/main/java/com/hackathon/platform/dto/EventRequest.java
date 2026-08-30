@@ -1,6 +1,9 @@
 package com.hackathon.platform.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +17,27 @@ public class EventRequest {
   private String description;
   private String visibility;
   private String status;
+
+  @Setter @Getter private Boolean inPerson;
+
+  @Setter @Getter private List<String> allowedTech;
+
+  @JsonAlias("eventRules")
+  @Getter
+  @Setter
+  private String rules;
+
+  @Setter @Getter private String tagline;
+
+  @Setter @Getter private BigDecimal firstPlacePrize;
+
+  @Setter @Getter private BigDecimal secondPlacePrize;
+
+  @Setter @Getter private BigDecimal thirdPlacePrize;
+
+  @Setter @Getter private BigDecimal totalPrizePool;
+
+  @Setter @Getter private OffsetDateTime freezeTime;
 
   @Setter @Getter private UUID hackathonId;
 
