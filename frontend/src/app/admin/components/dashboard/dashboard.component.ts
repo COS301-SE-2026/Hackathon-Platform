@@ -8,6 +8,7 @@ import { SubmissionResponse, SubmissionService } from '../../../services/submiss
 import { EventInsightsResponse, InsightsService } from '../../../services/insights.service';
 import { LeaderboardEntry, LeaderboardService } from '../../../services/leaderboard.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
+import { Subscriber } from 'rxjs';
 
 interface Events {
   eventId: string;
@@ -157,9 +158,195 @@ export class DashboardComponent implements OnInit{
       },
       error: () => {
         // Fall back silent;
-        
+
       }
     });
+  }
+
+  onSelectedEventChange(eventId: string): void {
+    this.selectedEventId = eventId;
+    if (eventId) {
+      this.loadEventInsights(eventId);
+      this.loadParticipantsPreview(eventId);
+      this.loadTopTeams(eventId);
+
+    }
+  }
+
+  private loadTopTeams(eventId: string): void {
+    this.topTeamsLoading = true;
+    this.topTeamsError = '';
+    this.topTeams = [];
+
+    this.leaderboardService.getEventLeaderboard(eventId).subscribe({
+      next: entries => {
+        this.topTeams = entries.slice(0,3);
+        this.topTeamsLoading = false;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.topTeamsError = 'Could not load the leaderboard for this event.';
+        this.topTeamsLoading = false;
+      }
+
+    });
+  }
+
+  private loadParticipantsPreview(eventId: string): void {
+    this.participantsPreviewLoading = true;
+    this.activeParticipantRows = [];
+
+    this.eventService.getEventParticipants(eventId).subscribe({
+      next: participants => {
+        this.activeParticipantRows = participants
+          .slice(0, 5)
+          .map(p => this.toParticipantRow(p));
+        this.participantsPreviewLoading = false;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.participantsPreviewLoading = false;
+      }
+    });
+  }
+
+  private toParticipantRow(p: EventParticipantResponse): ParticipantRow {
+    return {
+      initials: this.getInitials(p.fullName),
+      name: p.fullName,
+      email: p.email,
+      team: p.teamName,
+    };
+  }
+
+  private getInitials(fullName: string): string {
+
+    return (fullName || '')
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(part => part[0]?.toUpperCase())
+      .join('');
+
+  }
+
+  openParticipantsModal(eventId: string): void {
+    
+    if(!eventId) {
+      return;
+    }
+
+    const event = this.allEvents.find(e => e.eventId === eventId);
+    this.participantsModalEventId = eventId;
+    this.participantsModalEventName = event?.name || '';
+    this.showParticipantsModal = true;
+  }
+
+  closeParticipantsModal(): void {
+    this.showParticipantsModal = false;
+    this.participantsModalEventId = null;
+
+  }
+
+  private loadEventInsights(eventId: string): void {
+    this.insightsLoading = true;
+    this.insightsError = '';
+
+    this.insightsService.getEventInsights(eventId).subscribe({
+      next: insights => {
+        this.applyEventInsights(insights);
+        this.insightsLoading = false;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.insightsError = 'Could not load insights for this event.';
+        this.insightsLoading = false;
+      }
+    });
+  }
+
+  private applyEventInsights(insights: EventInsightsResponse): void {
+    this.eventInsights = {
+      activeTeams: insights.activeTeams,
+      approvedParticipants: insights.approvedParticipants,
+      submissionsLastHour: insights.submissionsLastHour,
+      errorRate: insights.errorRate ?? 0,
+
+    };
+
+    this.submissionStatusSegments =  this.toStatusSegments(insights.submissionsByStatus, insights.totalSubmissions);
+    this.scoreByLevel = insights.scoreDistributionByLevel.map(lvl => ({
+      level: lvl.levelName || `Level ${lvl.levelId}`,
+      min: Number(lvl.minScore ?? 0),
+      max: Number(lvl.maxScore ?? 0),
+      avg: Number(lvl.avgScore ?? 0),
+      count: lvl.scoredSubmissions,
+
+    }));
+
+    const trend = this.toTrendPoints(insights.submissionRate);
+    this.submissionTrend =  trend.points;
+    this.submissionTrendPoints = trend.polyline;
+    this.submissionTrendArea =  trend.area;
+
+  }
+
+  private readonly statusColorMap: Record<string, string> = {
+    QUEUED: 'seg-solo',
+    SCORING: 'seg-small',
+    SCORED: 'seg-medium',
+    FAILED: 'seg-failed',
+  };
+
+  private toStatusSegments(byStatus: Record<string, number>, total: number): SubmissionStatusSegment[] {
+    if (!byStatus || total <= 0) {
+      return [];
+    }
+
+    let offset = 0;
+    return Object.entries(byStatus).map(([label, count]) => {
+      const percent = Math.round((count/total) * 100);
+      const segment: SubmissionStatusSegment = {
+        label: this.formatStatus(label),
+        count,
+        percent,
+        offset,
+        colorClass: this.statusColorMap[label?.toUpperCase()] || 'seg-medium',
+      };
+      offset += percent;
+      return segment;
+    });
+
+  }
+
+  private toTrendPoints(buckets: { bucketStart: string; count: number }[]): {
+    points: { x: number; y: number }[];
+    polyline: string;
+    area: string;
+
+  } {
+    if (!buckets || buckets.length === 0) {
+      return { points: [], polyline: '', area: ''};
+    }
+
+    const maxCount = Math.max(1, ...buckets.map(b => b.count));
+    const chartLeft = 10;
+    const chartRight = 290;
+    const chartTop = 15;
+    const chartBottom = 70;
+    const step = buckets.length > 1 ? (chartRight - chartLeft) / (buckets.length - 1) : 0;
+
+    const points = buckets.map((bucket, i) => ({
+      x: chartLeft + step * i,
+      y: chartBottom - (bucket.count / maxCount) * (chartBottom - chartTop),
+
+    }));
+
+    const polyline = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+    const area = `M${polyline.split(' ').join(' L')} L${points[points.length - 1].x.toFixed(1)},${chartBottom} L${points[0].x.toFixed(1)},${chartBottom} Z`;
+
+    return { points, polyline, area };
+    
   }
 
   private loadRecentSubmissions(): void {
