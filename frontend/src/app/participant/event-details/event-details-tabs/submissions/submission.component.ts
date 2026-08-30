@@ -1,18 +1,16 @@
 import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TabsModule } from 'primeng/tabs';
-import { ButtonModule } from 'primeng/button';
-import { FileUploadModule } from 'primeng/fileupload';
-import { TableModule } from 'primeng/table';
 import { LevelService, LevelResponse } from '../../../../services/level.service';
 import { TeamService } from '../../../../services/team.service';
 import { StorageService } from '../../../../services/storage.service';
 import { SubmissionService } from '../../../../services/submission.service';
+import { TabsComponent, TabItem} from '../../../../shared/components/tabs/tabs.component';
 
 @Component({
   selector: 'app-submissions',
   standalone: true,
-  imports: [CommonModule, TabsModule, ButtonModule, FileUploadModule, TableModule],
+  imports: [CommonModule, TabsComponent ],
   templateUrl: './submission.component.html',
   styleUrl: './submission.component.scss',
 })
@@ -22,9 +20,40 @@ export class SubmissionsComponent {
   private readonly storageService = inject(StorageService);
   private readonly submissionService = inject(SubmissionService);
   private readonly change = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
+ 
+
+
+  levels: LevelResponse[] = [];
+  levelTabs: TabItem[] = [];
 
   private eventID = '';
   private hackathonID = '';
+  activeLevel = '';
+  levelsError = '';
+  teamError = '';
+  submitError = '';
+  submitSuccess = '';
+
+  levelsLoading = false;
+  submitting = false;
+  teamLoading = false;
+
+  teamId: string | null = null;
+  sourceArchive: File | null = null;
+  solutionOutput: File | null = null;
+ 
+
+  ngOnInit(): void {
+  this.route.queryParamMap.subscribe(params => {
+    const subtab = params.get('subtab');
+
+    if (subtab) {
+     this.activeLevel = subtab;
+    }
+  });
+}
+
 
   @Input({ required: true })
   set eventId(value: string) {
@@ -52,21 +81,22 @@ export class SubmissionsComponent {
     return this.hackathonID;
   }
 
-  activeLevel = '';
+  private setLevelTabs(): void {
 
-  levels: LevelResponse[] = [];
-  levelsLoading = false;
-  levelsError = '';
+  this.levelTabs = [
+    { label: 'Submission Levels', type: 'label'}
+  ];
 
-  teamId: string | null = null;
-  teamLoading = false;
-  teamError = '';
-
-  sourceArchive: File | null = null;
-  solutionOutput: File | null = null;
-  submitting = false;
-  submitError = '';
-  submitSuccess = '';
+  this.levels.forEach(level => {
+    this.levelTabs.push({
+      label: `Level ${level.levelNumber}`,
+      route: `/participant/events/${this.eventID}`,
+      queryParams: {  tab: 'submissions',
+        subtab: level.id.toString()
+       }
+     });
+   });
+  }
 
 
   loadLevels(): void {
@@ -77,6 +107,9 @@ export class SubmissionsComponent {
     this.levelService.getLevels(this.hackathonID).subscribe({
       next: levels => {
         this.levels = [...levels].sort((a, b) => a.levelNumber - b.levelNumber);
+
+        this.setLevelTabs();
+
         if (!this.activeLevel && this.levels.length > 0) {
           this.activeLevel = this.levels[0].id.toString();
         }
