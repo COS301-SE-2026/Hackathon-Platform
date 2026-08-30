@@ -346,7 +346,7 @@ export class DashboardComponent implements OnInit{
     const area = `M${polyline.split(' ').join(' L')} L${points[points.length - 1].x.toFixed(1)},${chartBottom} L${points[0].x.toFixed(1)},${chartBottom} Z`;
 
     return { points, polyline, area };
-    
+
   }
 
   private loadRecentSubmissions(): void {
@@ -440,9 +440,16 @@ export class DashboardComponent implements OnInit{
 
     this.eventService.getMyEvents().subscribe({
       next: events => {
-        this.activeEvents = events.filter(event => this.isActiveEvent(event)).length;
         this.allEvents = events.map(event => this.toDashboardEvent(event));
         this.eventLoading = false;
+
+        if (!this.selectedEventId) {
+          const defaultEvent = events.find(event => this.isActiveEvent(event)) || events[0];
+          if (defaultEvent) {
+            this.onSelectedEventChange(defaultEvent.eventId);
+          }
+        }
+        
         this.change.markForCheck();
       },
       error: () => {
