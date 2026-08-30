@@ -1,5 +1,5 @@
-import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, Input, inject, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LevelService, LevelResponse } from '../../../../services/level.service';
 import { TeamService } from '../../../../services/team.service';
@@ -8,6 +8,7 @@ import { SubmissionService } from '../../../../services/submission.service';
 import { TabsComponent, TabItem} from '../../../../shared/components/tabs/tabs.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { UploadAreaComponent } from '../../../../shared/components/upload-area/upload-area.component';
+import { ToastService } from '../../../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-submissions',
@@ -23,8 +24,8 @@ export class SubmissionsComponent {
   private readonly submissionService = inject(SubmissionService);
   private readonly change = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
- 
-
+  private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   levels: LevelResponse[] = [];
   levelTabs: TabItem[] = [];
@@ -44,6 +45,9 @@ export class SubmissionsComponent {
   teamId: string | null = null;
   sourceArchive: File | null = null;
   solutionOutput: File | null = null;
+
+  @ViewChild('sourceUploader') sourceUploader!: UploadAreaComponent;
+  @ViewChild('solutionUploader') solutionUploader!: UploadAreaComponent;
  
 
   ngOnInit(): void {
@@ -115,6 +119,11 @@ export class SubmissionsComponent {
         if (!this.activeLevel && this.levels.length > 0) {
           this.activeLevel = this.levels[0].id.toString();
         }
+
+         this.router.navigate([], {
+          relativeTo: this.route, queryParams: { subtab: this.activeLevel }, queryParamsHandling: 'merge', replaceUrl: true
+        });
+
         this.levelsLoading = false;
         this.change.detectChanges();
       },
@@ -165,15 +174,13 @@ onSolutionSelected(file: File): void {
   this.solutionOutput = file;
 }
 
-  removeSourceFile(uploader: { clear(): void }): void {
-    this.sourceArchive = null;
-    uploader.clear();
-  }
+onSourceCleared(): void {
+  this.sourceArchive = null;
+}
 
-  removeSolutionFile(uploader: { clear(): void }): void {
-    this.solutionOutput = null;
-    uploader.clear();
-  }
+onSolutionCleared(): void {
+  this.solutionOutput = null;
+}
 
   get canSubmit(): boolean {
     return (
@@ -186,7 +193,7 @@ onSolutionSelected(file: File): void {
 
   }
 
-  submitSolution(sourceUploader: { clear(): void }, solutionUploader: { clear(): void }): void {
+  submitSolution(): void {
     if (!this.canSubmit || !this.teamId) {
       return;
     }
@@ -208,8 +215,11 @@ onSolutionSelected(file: File): void {
         next: () => {
           this.submitting = false;
           this.submitSuccess = 'Your solution was uploaded and queued for scoring.';
-          this.removeSourceFile(sourceUploader);
-          this.removeSolutionFile(solutionUploader);
+          this.sourceArchive = null;
+          this.solutionOutput = null;
+          this.sourceUploader.clear();
+          this.solutionUploader.clear();
+          this.toast.success('Submission Successful','Your solution was uploaded and queued for scoring.');
           this.change.detectChanges();
           
         },
