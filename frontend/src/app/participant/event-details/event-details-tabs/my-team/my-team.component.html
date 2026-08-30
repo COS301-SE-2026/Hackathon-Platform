@@ -1,328 +1,495 @@
 @if (isLoadingTeam) {   <p>Team Loading...</p>  }
 
+
 @else if (hasTeam === false) {
 
-<div class="no-team-page">
+<div class="my-team-page">
 
-    @if (successMessage) {<p class="page-message success">{{ successMessage }}</p>}
-    @if (errorMessage) {<p class="page-message error">{{ errorMessage }}</p>}
+  <div class="team-dashboard">
 
-    <i class="pi pi-users empty-icon"></i>
+  @if (teamBelongsToOtherEvent) {
 
-    @if (teamBelongsToOtherEvent) {
+    <h2>You're already part of a team</h2>
 
-        <h2>You're already part of a team</h2>
+    <p>You can only belong to one team at a time, and your current team isn't registered for this event. Leave it first if you'd like to create or join a team here.</p>
 
-        <p>You can only belong to one team at a time, and your current team isn't registered for this event. Leave it first if you'd like to create or join a team here.</p>
+  } 
 
-    } @else {
+  @else {
 
-        <h2>You're currently not part of a team</h2>
 
-        <p>Join an existing team or create your own team to collaborate during this hackathon.</p>
+  <div class="empty-state">
 
-        <div class="team-buttons">
+   <div class="empty-state-illustration">
 
-           <button
-                type="button"
-                class="primary-btn"
-                (click)="openCreateTeamDialog()">
-                Create Team
-            </button>
+     <img src="assets/images/team.svg" alt="Teamwork illustration">
 
-            <button
-                type="button"
-                class="secondary-btn"
-                (click)="openRequestToJoinDialog()">
-                Request To Join
-            </button>
+    </div>
 
-        </div>
+    <div class="empty-state-content">
 
-    }
+      <h2>You're not part of a team yet</h2>
+
+      <p>Hackathons are way more fun with a team! Join an existing team or create your own to collaborate and take on the challenge together.</p>
+
+    </div>
+
+    <div class="empty-state-actions">
+
+      <app-button variant="primary"  width="100%" (click)="openCreateTeamDialog()" (keydown)="null" (keyup)="null" >Create Team</app-button>
+
+      <app-button variant="secondary" width="100%"  (click)="openRequestToJoinDialog()" (keydown)="null" (keyup)="null" >Request To Join</app-button>
+
+    </div>
+
+  </div>
+
+  }
+
+  </div>
 
 </div>
 
 }
+
 
 @else {
 
 <div class="my-team-page">
 
-    @if (successMessage) {<p class="page-message success">{{ successMessage }}</p>}
-    @if (errorMessage) {<p class="page-message error">{{ errorMessage }}</p>}
+  <div class="team-dashboard">
 
-    <div class="team-page-header">
 
-        <div class="team-page-info">
-            <h1 class="team-page-title">MY TEAM - {{ team.name }}</h1>
+    <div class="team-overview">
 
-            <p class="team-page-prompt">Manage your team for this hackathon.</p>
+     
+      <section class="team-section my-team-section">
+
+        <div class="card-header">  <h2>My Team</h2> </div>
+
+        <div class="team-identity">
+
+          <div class="team-icon"><i class="pi pi-code"></i></div>
+
+          <div class="team-name"><h1>{{ team.name }}</h1></div>
+
         </div>
 
-       <button
-            type="button"
-            class="secondary-btn"
-            (click)="leaveTeamDialogVisible = true">
+       
+        <div class="team-stats">
+
+          <div class="team-stat">
+
+            <div class="team-stat-icon">
+
+
+              <i class="pi pi-users"></i>
+              
+            </div>
+          
+            <div class="team-stat-info">
+              <span class="team-stat-value">4</span>
+
+              <span class="team-stat-label">Members</span>
+
+            </div>
+
+
+          </div>
+
+          <div class="team-stat">
+
+
+            <div class="team-stat-icon">
+              <i class="pi pi-file"></i>
+            </div>
+
+            <div class="team-stat-info">
+              <span class="team-stat-value">18</span>
+              <span class="team-stat-label">Submissions</span>
+            </div>
+
+          </div>
+
+          <div class="team-stat">
+
+            <div class="team-stat-icon">
+              <i class="pi pi-star"></i>
+            </div>
+
+
+            <div class="team-stat-info">
+              <span class="team-stat-value">1,450</span>
+              <span class="team-stat-label">Score</span>
+            </div>
+
+          </div>
+
+          <div class="team-stat">
+
+            <div class="team-stat-icon">
+              <i class="pi pi-trophy"></i>
+            </div>
+
+
+            <div class="team-stat-info">
+              <span class="team-stat-value">#1</span>
+              <span class="team-stat-label">Current Rank</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      
+        <div class="team-actions">
+
+          <app-button variant="secondary" width="100%" (click)="leaveTeamDialogVisible = true" (keydown)="null" (keyup)="null">
+
             <i class="pi pi-sign-out"></i>
+
             Leave Team
-        </button>
 
-    </div>
-
-    <div class="my-team-content">
-
-       <div class="join-code-section">
-
-            <h3 class="join-code-title">Join Code</h3>
-
-            <div class="join-code-card">
-
-                 <div class="join-code-display">{{ team.teamId }}</div>
-
-               <button
-                    type="button"
-                    class="secondary-btn"
-                    (click)="copyJoinCode()">
-                    <i class="pi pi-copy"></i>
-                    Copy
-                </button>
-
-            </div>
+          </app-button>
 
         </div>
 
-        <div class="team-members-section">
+      </section>
 
-            <div class="section-header">
 
-                <h3 class="team-members-section-title">Team Members</h3>
+      
+      <section class="team-section invite-section">
 
-                <button
-                    type="button"
-                    class="secondary-btn"
-                    (click)="refreshTeamMembers()">
-                    <i class="pi pi-refresh"></i>
-                    Refresh
-                </button>
+        <div class="card-header"> <h2>Invite to Your Team</h2></div>
 
-            </div>
+        <div class="invite-card-content">
 
-            <div class="team-members-list">
+          <p class="invite-description"> Share this code with others to invite them to your team.</p>
 
-                @for (member of team.members; track member.userId) {
+          <div class="join-code-display">
 
-                <div class="team-member-card">
+            <span class="join-code-label">JOIN CODE</span>
 
-                    <div class="member-info">
+            <span class="join-code">CAA1A3</span>
 
-                        <div class="member-avatar">{{ getInitials(member.name) }}</div>
+          </div>
 
-                        <div class="member-details">
-
-                            <div class="member-name">{{ member.name }} </div>
-
-                            <div class="member-email">{{ member.email }}</div>
-
-                        </div>
-
-                    </div>
-                              @if (member.isLead) {<span class="team-lead-badge">Team Lead</span>}
-
-                </div>
-
-                }
-
-            </div>
+          <app-button variant="secondary" width="100%" (click)="copyJoinCode()" (keydown)="null" (keyup)="null"> <i class="pi pi-copy"></i> Copy</app-button>
 
         </div>
 
-
-@if (isTeamLead) {
-
-<div class="team-requests-section">
-
-    <div class="section-header">
-
-        <h3 class="requests-title">Pending Requests</h3>
+      </section>
 
     </div>
 
 
-    @if (pendingRequests.length > 0) {
+  
 
-    
-    <div class="team-requests-list">
-        @for (request of pendingRequests; track request.userId) {
 
-        <div class="team-member-card">
+    <section class="team-section members-section">
 
+      <div class="card-header"><h2>Team Members ({{ team.members.length }})</h2></div>
+
+      <div class="members-table">
+
+      
+        <div class="members-table-header">
+
+          <div class="member-header-spacer"></div>
+
+          <div class="members-column joined-column"> Joined</div>
+
+          <div class="members-column submissions-column"> Submissions</div>
+
+          <div class="members-column points-column"> Best Score</div>
+
+        </div>
+
+       
+        @for (member of team.members; track member.userId) {
+
+          <div class="member-row">
+
+            
             <div class="member-info">
 
-                <div class="member-avatar">
-                    {{ getInitials(request.name) }}
+              <div class="member-avatar">
+                <i class="pi pi-user"></i>
+              </div>
+
+              <div class="member-details">
+
+                <div class="member-name">
+
+                  <span>{{ member.name }}</span>
+
+                  @if (member.isLead) {
+                    <span class="team-member-role">Captain</span>
+                  }
+
                 </div>
 
-                <div class="member-details">
+                <div class="member-meta">
 
-                    <div class="member-name">
-                        {{ request.name }}
-                    </div>
-
-                    <div class="member-email">
-                        {{ request.email }}
-                    </div>
+                  <span class="member-email">{{ member.email }}</span>
 
                 </div>
+
+              </div>
 
             </div>
 
-            <div class="request-actions">
+           
+            <div class="members-column joined-column">
+               <span class="member-table-value"> 12 Aug 2026</span>
+            </div>
 
-                <button
-                     type="button"
-                    class="success-btn"
-                    (click)="approveRequest(request.userId)"
-                    [disabled]="isLoading">
-                    Approve
-                </button>
+            
+            <div class="members-column submissions-column">
+             <span class="member-table-value">8</span>
+            </div>
 
-                <button
-                     type="button"
-                    class="danger-btn"
-                    (click)="rejectRequest(request.userId)"
-                    [disabled]="isLoading">
-                    Reject
-                </button>
+           
+            <div class="members-column points-column">
+             <span class="member-table-value">500</span>
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+
+
+    @if (isTeamLead) {
+
+    <section class="team-section requests-section">
+
+        <div class="requests-card-header">
+          <h2>Pending Requests ({{ pendingRequests.length }})</h2>
+          <p>Review and manage requests to join your team.</p>
+        </div>
+
+        <div class="requests-table">
+
+        
+          <div class="requests-table-header">
+
+            <div class="requests-column request-header-spacer"></div>
+
+            <div class="requests-column request-email-header">Email</div>
+
+            <div class="requests-column request-actions-header"> Actions</div>
+
+          </div>
+
+          @for (request of pendingRequests; track request.userId) {
+
+            <div class="request-row">
+
+              
+              <div class="request-member">
+
+                <div class="member-avatar"><i class="pi pi-user"></i></div>
+
+                <div class="request-member-details">
+
+                  <span class="request-member-name">{{ request.name }}</span>
+
+                  <span class="request-time"> Requested 2 hours ago </span>
+
+                </div>
+
+              </div>
+
+           
+              <div class="requests-column request-email">
+
+                <span class="member-email"> {{ request.email }}</span>
+
+              </div>
+
+             
+              <div class="requests-column request-actions">
+
+                <button type="button" class="request-action approve-button" (click)="approveRequest(request.userId)" [disabled]="isLoading" aria-label="Approve request" (keydown)="null" (keyup)="null"> <i class="pi pi-check"></i> </button>
+
+                <button type="button" class="request-action reject-button" (click)="rejectRequest(request.userId)" [disabled]="isLoading" aria-label="Reject request" (keydown)="null" (keyup)="null"><i class="pi pi-times"></i></button>
+
+              </div>
 
             </div>
+
+          }
+
+          @if (pendingRequests.length === 0) {
+
+            <div class="no-requests"> No pending requests </div>
+
+          }
 
         </div>
 
-        }
-   </div>
+    </section>
 
-    } @else { <p class="no-requests-message">No pending join requests.</p> }
+    }
 
-</div>
 
-}
-    </div>
+  </div>
 
 </div>
+
+
 }
 
-<p-dialog 
-    header="Create Team" 
-    class="team-dialog"  
-    [(visible)]="createTeamDialogVisible"  
-    [modal]="true"  
-    [draggable]="false"  
-    [style]="{ width: '420px' }"
-    >
 
-    <p class="dialog-prompt"> Enter a unique name for your hackathon team.</p>
 
-    <label for="teamName">Team Name</label>
 
-    <input 
-        pInputText id="teamName"  
-        [(ngModel)]="newTeamName"  
-        placeholder="Enter team name"  
-        class="team-dialog-input" 
-        />
+@if (teamDialogVisible) {
 
-     @if (errorMessage) {<small class="dialog-error">{{ errorMessage }}</small>}
+  <app-modal  [title]="teamDialogMode === 'create' ? 'Create Team' : 'Request to Join Team'"   size="small"  footerLayout="center" (closed)="teamDialogVisible = false">
 
-    <div class="team-dialog-buttons">
+    <div modal-body>
 
-        <button
-         type="button"
-            class="secondary-btn"
-            (click)="createTeamDialogVisible = false">
-            Cancel
-        </button>
+      @if (teamDialogMode === 'create') {
 
-        <button
-            type="button"
-            class="primary-btn"
-            (click)="onCreateTeam()"
-            [disabled]="!newTeamName.trim() || isLoading">
-            Create Team
-        </button>
+        <p class="team-dialog-prompt"> Enter a unique name for your hackathon team. </p>
+
+        <app-input id="teamName" label="Team Name" placeholder="Enter team name" [(value)]="newTeamName"  (valueChange)="errorMessage = ''"> </app-input>
+
+      } @else {
+
+        <p class="team-dialog-prompt">Enter the join code shared by the team creator. </p>
+
+        <app-input id="teamJoinCode"  label="Join Code" placeholder="Enter join code"  [(value)]="teamIdToJoin"  (valueChange)="errorMessage = ''"> </app-input>
+
+      }
+
+      <div class="team-dialog-error"> @if (errorMessage) { {{ errorMessage }} } </div>
 
     </div>
 
-</p-dialog>
+    <div modal-footer-right>
 
-<p-dialog
-    header="Request to Join Team" 
-    class="team-dialog"
-    [(visible)]="requestToJoinDialogVisible"
-    [modal]="true"
-    [draggable]="false"
-    [style]="{ width: '420px' }">
+      <app-button  variant="secondary" width="135px" (click)="teamDialogVisible = false" (keydown)="null" (keyup)="null"> Cancel </app-button>
 
-    <p class="dialog-prompt">Enter the join code shared by the team creator.</p>
+      @if (teamDialogMode === 'create') {
 
-    <label for="teamJoinCode">Join Code</label>
+        <app-button variant="primary" width="135px" (click)="onCreateTeam()" [disabled]="!newTeamName.trim() || isLoading" (keydown)="null" (keyup)="null">Create Team </app-button>
 
-        <input
-            pInputText
-            id="teamJoinCode"
-            [(ngModel)]="teamIdToJoin"
-            placeholder="Enter join code"
-            class="team-dialog-input" />
+      } @else {
 
-      @if (errorMessage) {<small class="dialog-error">{{ errorMessage }}</small>} 
+        <app-button variant="primary" width="135px" (click)="joinTeam()" [disabled]="!teamIdToJoin.trim() || isLoading" (keydown)="null" (keyup)="null">Send </app-button>
 
-    <div class="team-dialog-buttons">
-
-        <button
-             type="button"
-            class="secondary-btn"
-            (click)="requestToJoinDialogVisible = false">
-            Cancel
-        </button>
-
-        <button
-            class="primary-btn"
-            (click)="joinTeam()"
-            [disabled]="!teamIdToJoin.trim() || isLoading">
-            Send Request
-        </button>
+      }
 
     </div>
 
-</p-dialog>
+  </app-modal>
 
-<p-dialog
-    header="Leave Team"
-    class="team-dialog"
-    [(visible)]="leaveTeamDialogVisible"
-    [modal]="true"
-    [draggable]="false"
-    [style]="{ width: '420px' }">
-    
-    <p class="dialog-prompt">Are you sure you want to leave <strong>{{ team.name }}</strong>?</p>
-     <p class="dialog-warning">You will no longer be a member of this team. You can only rejoin if you submit a new join request. </p>
+}
 
-    <div class="team-dialog-buttons">
 
-        <button
-            type="button"
-            class="secondary-btn "
-            (click)="leaveTeamDialogVisible = false">
-            Cancel
-        </button>
+@if ( leaveTeamDialogVisible){
 
-            <button
-            type="button"
-            class="danger-btn"
-            (click)="confirmLeaveTeam()"
-            [disabled]="isLoading">
-            Leave Team
-        </button>
-    </div>
+  <app-modal title="Leave Team" size="small"  footerLayout="center" (closed)="leaveTeamDialogVisible = false">
 
-</p-dialog>
+  <div modal-body>
+
+    <p class="team-dialog-prompt">Are you sure you want to leave <strong>{{ team.name }}</strong>?</p>
+
+    <p class="team-dialog-warning"> You will no longer be a member of this team. You can only rejoin if you submit a new join request.</p>
+
+  </div>
+
+  <div modal-footer-right>
+
+    <app-button variant="secondary" width="135px" (click)="leaveTeamDialogVisible = false" (keydown)="null" (keyup)="null"> Cancel</app-button>
+
+    <app-button variant="danger" width="135px" (click)="confirmLeaveTeam()" [disabled]="isLoading" (keydown)="null" (keyup)="null"> Leave Team</app-button>
+
+  </div>
+
+</app-modal>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

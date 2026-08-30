@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TeamService, TeamMemberResponse } from '../../../../services/team.service';
 import { AuthService } from '../../../../services/auth.service';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+
 
 interface DisplayTeamMember {
   name: string;
@@ -19,7 +20,7 @@ interface DisplayTeamMember {
 @Component({
   selector: 'app-my-team',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ButtonModule, DialogModule, InputTextModule],
+  imports: [CommonModule, FormsModule, RouterModule, ButtonComponent, ModalComponent,InputComponent],
   templateUrl: './my-team.component.html',
   styleUrl: './my-team.component.scss',
 })
@@ -47,15 +48,13 @@ export class MyTeamComponent implements OnInit {
 
   teamIdToJoin = '';
   newTeamName = '';
-
   isLoading = false;
   isLoadingTeam = true;
   errorMessage = '';
   successMessage = '';
-  createTeamDialogVisible = false;
-  requestToJoinDialogVisible = false;
+  teamDialogVisible = false;
+  teamDialogMode: 'create' | 'join' = 'create';
   leaveTeamDialogVisible = false;
-
   hasTeam = false;
   currentUserId = '';
   isTeamLead = false;
@@ -163,7 +162,7 @@ export class MyTeamComponent implements OnInit {
     this.teamService.createTeam({ teamName: this.newTeamName.trim(), eventId: this.eventID }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.createTeamDialogVisible = false;
+         this.teamDialogVisible = false;
         this.successMessage = `Team "${this.newTeamName.trim()}" created successfully!`;
         this.newTeamName = '';
         this.loadUserTeam();
@@ -184,19 +183,20 @@ export class MyTeamComponent implements OnInit {
     });
   }
 
-  openCreateTeamDialog(): void {
+openCreateTeamDialog(): void {
+  this.teamDialogMode = 'create';
   this.errorMessage = '';
   this.newTeamName = '';
-  this.createTeamDialogVisible = true;
-
+  this.teamDialogVisible = true;
 }
 
 openRequestToJoinDialog(): void {
+  this.teamDialogMode = 'join';
   this.errorMessage = '';
   this.teamIdToJoin = '';
-  this.requestToJoinDialogVisible = true;
-
+  this.teamDialogVisible = true;
 }
+
 
   joinTeam(): void {
     this.clearMessages();
@@ -213,7 +213,7 @@ openRequestToJoinDialog(): void {
         this.isLoading = false;
         this.successMessage = 'Join request sent! Waiting for the team lead to approve.';
         this.teamIdToJoin = '';
-        this.requestToJoinDialogVisible = false;
+         this.teamDialogVisible = false;
         this.change.markForCheck();
       },
       error: (error) => {
@@ -263,7 +263,7 @@ openRequestToJoinDialog(): void {
   }
 
   leaveCurrentTeam(): void {
-    // if (!confirm('Are you sure you want to leave this team?')) return;
+   
 
     this.isLoading = true;
     this.clearMessages();
