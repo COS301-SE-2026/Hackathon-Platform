@@ -43,14 +43,14 @@
                     }
                 </button>
 
-                <div class = "navbar-profile" (click) = "toggleProfileMenu()" (keydown.enter)="toggleProfileMenu()"(keydown.space)="toggleProfileMenu()" tabindex="0">
+                <button class = "navbar-profile" (click) = "toggleProfileMenu()" aria-haspopup="true" [attr.aria-expanded]="isProfileMenuOpen">
                     <div class = "avatar-circle">{{ getInitials() }}</div>
                 <div class = "user-info">
                     <span class = "user-name">{{ userName }}</span>
                     <span class = "user-role">{{ userRole }}</span>
                 </div>
                 <i class = "pi pi-chevron-down profile-chevron"></i>
-                </div>
+            </button>
                 <button class = "navbar-logout" (click) = "logout()">
                     <i class = "pi pi-sign-out"></i>
                     <span>Logout</span>
