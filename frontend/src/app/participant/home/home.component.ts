@@ -25,6 +25,10 @@ interface OpenEventView {
   startDateTime: string;
   duration: number;
   timer: EventTimer;
+
+  tagline?: string;
+  logoStorageKey?: string;
+  totalPrizePool?: number;
 }
 
 @Component({
@@ -125,7 +129,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             new Date(a.startDateTime).getTime() -
             new Date(b.startDateTime).getTime()
         )
-        .slice(0, 4);
+        
 
       this.change.markForCheck();
     },
@@ -248,6 +252,11 @@ confirmRegistration(): void {
       description: event.description,
       startDateTime: event.startDateTime,
       duration: event.duration,
+
+      tagline: event.tagline,
+      logoStorageKey: event.logoStorageKey,
+      totalPrizePool: event.totalPrizePool,
+
       timer: {
         label: '',
         days: '00',
