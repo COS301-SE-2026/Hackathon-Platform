@@ -4,24 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { ButtonModule} from 'primeng/button'
 
-import { HackathonService } from '../../../services/hackathon.service';
+import { EventService, EventResponse } from '../../../services/event.service';
+import { AnnouncementService, AnnouncementResponse, AnnouncementSeverity } from '../../../services/announcement.service';
 
-export type AnnouncementAudience = 'ALL' | 'TEAMS' | 'JUDGES';
 export type AnnouncementStatus = 'PUBLISHED';
-export type AnnouncementSeverity = 'INFO' | 'IMPORTANT' | 'URGENT';
-
-export interface AnnouncementResponse {
-    id: number;
-    title: string;
-    message: string;
-    audience: AnnouncementAudience;
-    status: AnnouncementStatus;
-    severity: AnnouncementSeverity;
-    pinned: boolean;
-    scheduledFor?: string;
-    publishedAt?: string;
-    createdAt: string;
-}
 
 type StatusFilter = 'ALL' | AnnouncementStatus;
 
@@ -37,14 +23,12 @@ export class AnnouncementsComponent implements OnInit{
      private readonly router = inject(Router);
      private readonly route = inject(ActivatedRoute);
      private readonly change = inject(ChangeDetectorRef);
-     private readonly hackathonService = inject(HackathonService);
+     private readonly eventService = inject(EventService);
+     private readonly announcementService = inject(AnnouncementService);
 
-    hackathonId = '';
-    hackathonName ='';
-    hackathonDescription ='';
-    levelsCount = 0;
-    eventsCount = 0;
-    participantsCount =0;
+    eventId = '';
+    eventName ='';
+    eventDescription ='';
 
     announcements: AnnouncementResponse[]=[];
     isLoading = true;
@@ -53,7 +37,6 @@ export class AnnouncementsComponent implements OnInit{
     statusFilter: StatusFilter = 'ALL';
 
     showAnnouncementModal = false;
-    editingAnnouncement: AnnouncementResponse | null = null;
     isSaving = false;
     modalError = '';
 
@@ -73,35 +56,31 @@ export class AnnouncementsComponent implements OnInit{
     get filteredAnnouncements(): AnnouncementResponse[]{
         const term = this.searchTerm.trim().toLowerCase();
         return this.announcements
-        .filter((a) => this.statusFilter === 'ALL' || a.status === this.statusFilter)
-        .filter((a) => !term || a.title.toLowerCase().includes(term) || a.message.toLowerCase().includes(term))
-        .sort((a,b) => Number(b.pinned)- Number(a.pinned));
+        .filter(() => this.statusFilter === 'ALL')
+        .filter((a) => !term || a.title.toLowerCase().includes(term) || a.body.toLowerCase().includes(term));
     }
 
     get publishedCount(): number {
-        return this.announcements.filter((a)=>a.status === 'PUBLISHED').length;
+        return this.announcements.length;
     }
 
     ngOnInit(): void {
-        this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
+        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
 
-        if (!this.hackathonId){
-            this.errorMessage = 'There was no hackathon ID provided';
+        if (!this.eventId){
+            this.errorMessage = 'There was no event ID provided';
             this.isLoading = false;
             return;
         }
-        this.loadHackathonSummary();
+        this.loadEvent();
         this.loadAnnouncements();
     }
 
-    private loadHackathonSummary(): void {
-        this.hackathonService.getHackathon(this.hackathonId).subscribe ({
-            next: (hackathon) =>{
-                this.hackathonName = hackathon.name;
-                this.hackathonDescription = hackathon.description || '';
-                this.levelsCount = hackathon.levelsCount || 0;
-                this.eventsCount = hackathon.eventsCount || 0;
-                this.participantsCount = hackathon.participantsCount || 0;
+    private loadEvent(): void {
+        this.eventService.getEventById(this.eventId).subscribe ({
+            next: (event: EventResponse) =>{
+                this.eventName = event.name;
+                this.eventDescription = event.description || '';
                 this.change.markForCheck();
             },
             error: () => {
@@ -113,12 +92,22 @@ export class AnnouncementsComponent implements OnInit{
     loadAnnouncements(): void{
         this.isLoading = true;
         this.errorMessage = '';
-        console.log('Loading announcements for hackathon:',this.hackathonId);
-        this.isLoading = false;
+        this.announcementService.getAnnouncements(this.eventId).subscribe ({
+            next: (announcements) =>{
+                this.announcements = announcements;
+                this.isLoading = false;
+                this.change.markForCheck();
+            },
+            error: (error) => {
+                console.error('Failed to load announcements:', error);
+                this.errorMessage = 'Failed to load announcements.';
+                this.isLoading = false;
+                this.change.markForCheck();
+            }
+        });
     }
 
     openCreateModal(): void {
-        this.editingAnnouncement = null;
         this.modalError = '';
         this.modalForm = {
             title: '',
@@ -128,20 +117,8 @@ export class AnnouncementsComponent implements OnInit{
         this.showAnnouncementModal = true;
     }
 
-    openEditModal(announcement: AnnouncementResponse): void {
-        this.editingAnnouncement = announcement;
-        this.modalError = '';
-        this.modalForm = {
-            title: announcement.title,
-            message: announcement.message,
-            severity: announcement.severity,
-
-        };
-        this.showAnnouncementModal =true;
-    }
     closeModal():void {
         this.showAnnouncementModal =false;
-        this.editingAnnouncement = null;
     }
 
     saveAnnouncement(): void {
@@ -156,12 +133,22 @@ export class AnnouncementsComponent implements OnInit{
         this.isSaving = true;
         this.modalError = '';
 
-        this.isSaving = false;
-        this.closeModal();
-    }
-
-    togglePin(announcement: AnnouncementResponse): void {
-        announcement.pinned = !announcement.pinned;
+        this.announcementService.createAnnouncement(this.eventId, {
+            title: this.modalForm.title.trim(),
+            body: this.modalForm.message.trim(),
+            severity: this.modalForm.severity
+        }).subscribe ({
+            next: () =>{
+                this.isSaving = false;
+                this.closeModal();
+                this.loadAnnouncements();
+            },
+            error: (error) => {
+                console.error('Failed to create announcement:', error);
+                this.isSaving = false;
+                this.modalError = error.error?.message || 'Failed to create announcement.';
+            }
+        });
     }
 
     severityIcon(severity: AnnouncementSeverity): string{
@@ -176,20 +163,7 @@ export class AnnouncementsComponent implements OnInit{
         }
     }
 
-    deleteAnnouncement(announcement: AnnouncementResponse): void {
-        if (!confirm(`Delete "${announcement.title}" ? This action is not reversible.`)){
-            return;
-        }
-        this.announcements = this.announcements.filter((a) => a.id !== announcement.id);
-    }
-
     goBack(): void {
-    if (this.hackathonId){
-         this.router.navigate(['/admin/hackathons', this.hackathonId]);
-
-    }else {
-        this.router.navigate(['/admin/hackathons']);
+        this.router.navigate(['/admin/events']);
     }
-
-  }
 }
