@@ -248,6 +248,10 @@ export class EventlistComponent implements OnInit {
     this.showParticipantsModal = true;
   }
 
+  navigateToAnnouncements(eventId: string): void {
+    this.router.navigate(['/admin/events', eventId, 'announcements']);
+  }
+
   closeParticipantsModal(): void {
     this.showParticipantsModal = false;
     this.participantsModalEventId = null;
