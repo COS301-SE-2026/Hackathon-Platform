@@ -100,5 +100,16 @@ class AnnouncementEmailDeliveryServiceTest {
 
         verify(emailDeliveryRepo, times(2)).save(delivery);
     }
+    
+    @Test
+    void sentEmailIsNotSentAgain() {
+        delivery.setDeliveryStatus("SENT");
+        when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
+        when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
+        when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
+        deliveryService.processMessage(msgId);
+        verify(announcementEmailService, never()).sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
+        verify(emailDeliveryRepo, never()).save(delivery);
+    }
 
 }
