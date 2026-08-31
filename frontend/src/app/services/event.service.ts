@@ -11,9 +11,11 @@ export interface EventRequest {
   duration: number;
   description?: string;
   visibility: 'PUBLIC' | 'PRIVATE';
-  status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
-  isInPerson?: boolean;
+  status?: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
+  inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
+  freezeTime?: string;
+  rules?: string;
 }
 
 export interface EventResponse {
@@ -28,7 +30,7 @@ export interface EventResponse {
   description?: string;
   visibility: string;
   status: string;
-  isInPerson?: boolean;
+  inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
 }
 
@@ -70,10 +72,6 @@ export interface EventParticipantResponse {
   joinedAt: string;
 }
 
-export interface EventRegistrationSummary{
-  teams: RegisteredTeams[];
-  topSubmissions: TeamSubmission[];
-}
 @Injectable({
   providedIn: 'root'
 })
