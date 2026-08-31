@@ -46,26 +46,6 @@
         display: block;
     }
 
-    .brand-text{
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        line-height: 1;
-    }
-
-.brand-line1 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: -0.01em;
-}
-
-.brand-line2 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #d6e64a;
-    letter-spacing: -0.01em;
-}
 }
 
 
@@ -401,9 +381,6 @@ a {
         height: 28px;
 
     }
-    .brand-line1,
-    .brand-line2{
-        font-size: 0.9rem;
-    }
+    
 }
 
