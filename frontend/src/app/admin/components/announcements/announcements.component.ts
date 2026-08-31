@@ -7,7 +7,8 @@ import { ButtonModule} from 'primeng/button'
 import { HackathonService } from '../../../services/hackathon.service';
 
 export type AnnouncementAudience = 'ALL' | 'TEAMS' | 'JUDGES';
-export type AnnouncementStatus = 'DRAFT' | 'SCHEDULED' | 'PUBLISHED';
+export type AnnouncementStatus = 'PUBLISHED';
+export type AnnouncementSeverity = 'INFO' | 'IMPORTANT' | 'URGENT';
 
 export interface AnnouncementResponse {
     id: number;
@@ -15,6 +16,7 @@ export interface AnnouncementResponse {
     message: string;
     audience: AnnouncementAudience;
     status: AnnouncementStatus;
+    severity: AnnouncementSeverity;
     pinned: boolean;
     scheduledFor?: string;
     publishedAt?: string;
@@ -58,12 +60,15 @@ export class AnnouncementsComponent implements OnInit{
     modalForm = {
         title: '',
         message: '',
-        audience: 'ALL' as AnnouncementAudience,
-        sendOption: 'now' as 'now' | 'schedule',
-        scheduledFor: '',
-        pinned: false,
-        notifyByEmail: true
+        severity: 'INFO' as AnnouncementSeverity,
     };
+
+    readonly severityOptions: {value: AnnouncementSeverity; label: string} []= [
+        {value: 'INFO',label:'Info'},
+        {value: 'IMPORTANT',label:'Important'},
+        {value: 'URGENT',label:'Urgent'},
+
+    ];
 
     get filteredAnnouncements(): AnnouncementResponse[]{
         const term = this.searchTerm.trim().toLowerCase();
@@ -75,12 +80,6 @@ export class AnnouncementsComponent implements OnInit{
 
     get publishedCount(): number {
         return this.announcements.filter((a)=>a.status === 'PUBLISHED').length;
-    }
-    get scheduledCount(): number {
-        return this.announcements.filter((a)=>a.status === 'SCHEDULED').length;
-    }
-    get draftCount(): number {
-        return this.announcements.filter((a)=>a.status === 'DRAFT').length;
     }
 
     ngOnInit(): void {
@@ -124,11 +123,7 @@ export class AnnouncementsComponent implements OnInit{
         this.modalForm = {
             title: '',
             message: '',
-            audience: 'ALL',
-            sendOption: 'now',
-            scheduledFor: '',
-            pinned: false,
-            notifyByEmail: true
+            severity: 'INFO',
         };
         this.showAnnouncementModal = true;
     }
@@ -139,11 +134,7 @@ export class AnnouncementsComponent implements OnInit{
         this.modalForm = {
             title: announcement.title,
             message: announcement.message,
-            audience: announcement.audience,
-            sendOption: announcement.status === 'SCHEDULED'?'schedule' : 'now',
-            scheduledFor: announcement.scheduledFor || '',
-            pinned: announcement.pinned,
-            notifyByEmail: true
+            severity: announcement.severity,
 
         };
         this.showAnnouncementModal =true;
@@ -162,10 +153,6 @@ export class AnnouncementsComponent implements OnInit{
             this.modalError = 'The announcement message is required';
             return;
         }
-        if (this.modalForm.sendOption === 'schedule' && !this.modalForm.scheduledFor){
-            this.modalError = 'Please choose a date and time to schedule this announcement';
-            return;
-        }
         this.isSaving = true;
         this.modalError = '';
 
@@ -175,6 +162,18 @@ export class AnnouncementsComponent implements OnInit{
 
     togglePin(announcement: AnnouncementResponse): void {
         announcement.pinned = !announcement.pinned;
+    }
+
+    severityIcon(severity: AnnouncementSeverity): string{
+        switch(severity){
+            case 'URGENT':
+                return 'pi-exclamation-triangle';
+            case 'IMPORTANT':
+                return 'pi-exclamation-circle';
+            default:
+                return 'pi-info-circle';
+
+        }
     }
 
     deleteAnnouncement(announcement: AnnouncementResponse): void {

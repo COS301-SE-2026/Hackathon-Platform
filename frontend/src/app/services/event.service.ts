@@ -70,6 +70,10 @@ export interface EventParticipantResponse {
   joinedAt: string;
 }
 
+export interface EventRegistrationSummary{
+  teams: RegisteredTeams[];
+  topSubmissions: TeamSubmission[];
+}
 @Injectable({
   providedIn: 'root'
 })
