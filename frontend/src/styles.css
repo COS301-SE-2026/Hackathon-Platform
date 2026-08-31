@@ -173,6 +173,14 @@ input,textarea, select  {
   font-family: var(--font-family-base);
 }
 
+/* ---------- LAYOUT UTILITIES ---------- */
+
+.page-container {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--page-padding-y) var(--page-padding-x);
+}
 
 /* ---------- ACCESSIBILITY ---------- */
 

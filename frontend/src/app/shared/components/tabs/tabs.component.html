@@ -1,27 +1,29 @@
-<p-tabs [scrollable]="true" class="custom-tabs">
+<nav class="tabs" [attr.aria-label]="ariaLabel">
 
-<p-tablist [attr.aria-label]="ariaLabel">
+ @for (tab of tabs; track $index) {
 
-@for (tab of tabs; track $index) {
+  @if (tab.type === 'label') {
 
-@if (tab.type === 'label') {
+  <span class="tab-label">
 
-<span class="tab-label"> @if (tab.icon) { <i [class]="tab.icon"></i> }{{ tab.label }}</span>} 
+    @if (tab.icon) {<i [class]="tab.icon" aria-hidden="true"></i>}
 
-@else {
+    <span>{{ tab.label }}</span>
 
-<p-tab [value]="$index.toString()" [routerLink]="tab.route" routerLinkActive="tab-route-active" [routerLinkActiveOptions]="{ exact: true }">
+  </span>
 
-@if (tab.icon) {  <i [class]="tab.icon"></i>}
+    } @else {
 
-<span>{{ tab.label }}</span>
+    <a class="tab" [routerLink]="tab.route" [queryParams]="tab.queryParams" [class.active]="tab.queryParams?.['tab'] === activeTab">
 
-</p-tab>
+     @if (tab.icon) { <i [class]="tab.icon" aria-hidden="true"></i>}
 
-}
+     <span>{{ tab.label }}</span>
 
-}
+    </a>
 
-</p-tablist>
+    }
 
-</p-tabs>
+  }
+
+</nav>

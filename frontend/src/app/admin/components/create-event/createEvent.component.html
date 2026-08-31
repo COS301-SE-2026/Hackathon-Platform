@@ -1,119 +1,182 @@
 <div class = "create-event-page">
-  <main class = "content">
+  <div class = "modal-card">
 
-     <div class = "back-navigation" >
-      <button class = "btn-secondary" (click) = "goBack()"> Back to Events
+     <div class = "modal-header">
+     <div>
+      <h1>Create Event</h1>
+      <p class = "page-subtitle">Create a new event {{hackathonName ? ' for ' + hackathonName : ''}}.</p>
+    </div>
+      <button type = "button" class = "modal-close" aria-label = "Close" (click) = "goBack()">
+        <i class = "pi pi-times"></i>
       </button>
-    </div>
-    <div class = "page-header">
-      <h1>Create new Event</h1>
-      <p class = "page-subtitle">Configure all event parameters before publishing</p>
-    </div>
-    @if (errorMessage){
-      <div class = "error-message">
-        {{ errorMessage }}
       </div>
-    }
 
+      @if (errorMessage){
+        <div class = "error-message">
+          {{errorMessage}}
+        </div>
+      }
     <form (ngSubmit) = "createEvent()" class = "event-form">
+      <div class = "modal-body">
       <div class = "form-section">
-        <h2 class = "section-heading">Basic Information :</h2>
+        <h2 class = "section-heading">Basic Information</h2>
 
         <div class = "form-group">
           <label for = "eventName">Event Name</label>
-          <input 
-          type = "text" 
-          id = "eventName" 
-          name = "eventName" 
-          [(ngModel)] = "form.eventName" 
+          <input
+          type = "text"
+          id = "eventName"
+          name = "eventName"
+          [(ngModel)] = "form.eventName"
+          placeholder="Enter event name"
           required />
         </div>
-        <div class = "form-row">
-          <div class = "form-group">
-            <label for = "startDate">Start Date &amp; Time *</label>
-            <input 
-            type = "datetime-local" 
-            id = "startDate" 
-            name = "startDate" 
-            [(ngModel)] = "form.startDate" 
-            required />
-          </div>
+
 
           <div class = "form-group">
-            <label for = "duration">Duration (hours) *</label>
-            <input 
-            type = "number" 
-            id = "duration" 
-            name = "duration" 
-            min = '1'
-            [(ngModel)] = "form.duration" 
-            required />
-          </div>
+            <span class = "form-group-label">Event image</span>
+            <label for = "bannerFileInput" class = "sr-only">Upload event image</label>
+            <button class = "drop-zone image-drop-zone" (click) = "triggerFileInput()"
+            (keyup.enter) = "triggerFileInput()" (keyup.space) = "triggerFileInput()"
+            (dragover) = "onDragOver($event)" (drop)="onDrop($event)" type="button">
+
+          <input  #fileInput id = "bannerFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg" (change) = "onFileSelected($event)"/>
+          <span class = "drop-zone-icon-lg"><i class = "pi pi-image"></i></span>
+          <p><span class = "drop-zone-cta">Click to upload</span> or drag and drop</p>
+          <p class = "drop-zone-hint">PNG,JPG or JPEG</p>
+          @if (form.bannerFileName){
+            <p class = "drop-zone-filename">{{form.bannerFileName}}</p>
+          }
+        </button>
+      </div>
+
+          <div class = "form-group">
+            <div class = "field-label-row">
+            <label for = "description">Description</label>
+            <span class = "char-count">{{form.description.length}}/{{descriptionMaxLength}}</span>
+            </div>
+            <textarea
+            id = "description"
+            [(ngModel)] = "form.description"
+            name = "description"
+            [maxlength] = "descriptionMaxLength"
+            rows = "3"
+            placeholder="Describe your event..."></textarea>
         </div>
 
         <div class = "form-group">
-          <label for = "teamSizeLimit">Team Size Limit *</label>
-          <input
-          type = "number" 
-            id = "teamSizeLimit" 
-            name = "teamSizeLimit" 
-            min = '1'
-            [(ngModel)] = "form.teamSizeLimit" 
-            required />
+            <div class = "field-label-row">
+            <label for = "rules">Rules</label>
+            <span class = "char-count">{{form.rules.length}}/{{rulesMaxLength}}</span>
+            </div>
+            <textarea
+            id = "rules"
+            [(ngModel)] = "form.rules"
+            name = "rules"
+            [maxlength] = "rulesMaxLength"
+            rows = "3"
+            placeholder="Enter the rules and requirements for participants..."></textarea>
         </div>
       </div>
 
       <div class = "form-section">
-        <h2 class = "section-heading">Visibility &amp; Access</h2>
-        <div class = "toggle-group" role = "group" aria-label = "Visibility selection">
+        <h2 class = "section-heading">Schedule</h2>
+        <div class = "form-row">
+      <div class = "form-group">
+              <label for = "startDate">Start Date</label>
+
+            <input
+            type = "date"
+            id = "startDate"
+            name = "startDate"
+            [(ngModel)] = "form.startDate"
+            required/>
+        </div>
+
+        <div class = "form-group">
+          <label for = "startTime">Start Time</label>
+          <input
+          type = "time"
+            id = "startTime"
+            name = "startTime"
+            [(ngModel)] = "form.startTime"
+            required />
+        </div>
+      </div>
+
+        <div class = "form-group">
+          <label for = "duration">Duration (hours)</label>
+          <input
+          type = "number"
+            id = "duration"
+            name = "duration"
+            [(ngModel)] = "form.duration"
+            required />
+        </div>
+
+        <p class = "info-banner"><i class = "pi pi-info-circle"></i> The event will end automatically based on the start date, time and duration.</p>
+      </div>
+
+      <div class = "form-section">
+        <h2 class = "section-heading">Access</h2>
+        <p class = "section-hint">Choose who can access this event.</p>
+        <div class = "access-group" role = "radiogroup" aria-label = "Access selection">
        <button
        type = "button"
-        class = "toggle-option"
+        class = "access-option"
         [class.selected] = "form.visibility === 'PUBLIC'"
+        role = "radio"
+        [attr.aria-checked] = "form.visibility === 'PUBLIC'"
         (click) = "form.visibility = 'PUBLIC'"
         >
-          <span class = "toggle-title">Public</span>
-          <span class = "toggle-description">Anyone can view and register for the event</span>
+          <span class = "access-option-top">
+            <i class = "pi pi-globe"></i>
+          <span class = "access-radio-dot"></span>
+          </span>
+          <span class = "access-title">Public</span>
+          <span class = "access-description">Anyone can discover and participate in this event.</span>
         </button>
+
+
         <button
         type = "button"
-        class = "toggle-option"
+        class = "access-option"
         [class.selected] = "form.visibility === 'PRIVATE'"
+        role = "radio"
+        [attr.aria-checked]= "form.visibility === 'PRIVATE'"
         (click) = "form.visibility = 'PRIVATE'"
         >
-          <span class = "toggle-title">Private</span>
-          <span class = "toggle-description">Only invited users can view and register for the event</span>
+          <span class = "access-option-top">
+            <i class = "pi pi-lock"></i>
+            <span class = "access-radio-dot"></span>
+          </span>
+          <span class = "access-title">Private</span>
+          <span class = "access-description">Only invited users or authorized participants can access this event.</span>
         </button>
         </div>
 
         @if (form.visibility === 'PRIVATE'){
           <div class = "form-group" style = "margin-top: 16px; ">
-            <label for = "registrationKey">Registration Key *</label>
-            <input 
-            type = "text" 
-            id = "registrationKey" 
-            name = "registrationKey" 
-            [(ngModel)] = "form.registrationKey" 
+            <label for = "registrationKey">Registration Key</label>
+            <input
+            type = "text"
+            id = "registrationKey"
+            name = "registrationKey"
+            [(ngModel)] = "form.registrationKey"
+            placeholder="Enter a registration key for private access"
             required />
           </div>
         }
       </div>
-
-      <div class = "form-section">
-        <h2 class = "section-heading">Rules &amp; Description</h2>
-        <textarea
-        [(ngModel)] = "form.description"
-        name = "description"
-        rows = "4"></textarea>
       </div>
 
       <div class = "form-actions">
+        <button type = "button" class = "btn-cancel" (click) = "goBack()" [disabled] ="isLoading">Cancel</button>
         <button type = "button" class = "btn-secondary" (click) = "onSaveDraft()" [disabled] ="isLoading">
           @if (isLoading){
             <span>Saving...</span>
           } @else{
             <span>Save Draft</span>
-
           }</button>
 
           <button type = "submit" class = "btn-primary" [disabled] ="isLoading">
@@ -126,5 +189,5 @@
           </button>
      </div>
     </form>
-  </main>
+  </div>
 </div>

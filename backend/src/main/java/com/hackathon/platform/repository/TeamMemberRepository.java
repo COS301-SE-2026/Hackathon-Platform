@@ -38,4 +38,10 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, UUID> {
         """)
   boolean existsApprovedParticipantInEvent(
       @Param("userId") UUID userId, @Param("eventId") UUID eventId);
+      @Query("SELECT tm FROM TeamMember tm JOIN Team t ON tm.teamId = t.teamId WHERE tm.userId = :userId AND tm.status = :status AND t.eventId = :eventId")
+  List<TeamMember> findByUserIdAndStatusAndEventId(
+      @Param("userId") UUID userId, @Param("status") String status, @Param("eventId") UUID eventId);
+
+  /** Count memebers with a given status across a set of teams */
+  long countByTeamIdInAndStatus(List<UUID> teamIds, String status);
 }

@@ -2,6 +2,8 @@ package com.hackathon.platform.dto;
 
 import java.time.Instant;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
 
 /** DTO for team creation/update responses. */
 public class TeamResponse {
@@ -12,6 +14,7 @@ public class TeamResponse {
   private UUID createdByUserId;
   private Instant createdAt;
   private String status;
+  @Setter @Getter private String joinCode;
 
   /** Default constructor. */
   public TeamResponse() {}

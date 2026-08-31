@@ -56,12 +56,12 @@
 }
 
 .modal-header h2 {
+  margin: 0;
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-h3);
   color: var(--black);
 }
-
 
 
 
@@ -112,23 +112,25 @@
 .modal-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 
   flex-shrink: 0;
 
   padding: var(--space-6);
 }
 
-
-
-:host ::ng-deep [modal-footer-left], :host ::ng-deep [modal-footer-right] {
-  display: flex;
-  align-items: center;
+.modal-footer--center {
+  justify-content: center;
 }
 
+.modal-footer--split {
+  justify-content: space-between;
+}
+
+:host ::ng-deep [modal-footer-left],
 :host ::ng-deep [modal-footer-right] {
-  margin-left: auto;
-  gap: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 

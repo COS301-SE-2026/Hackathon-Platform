@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import {ButtonModule} from 'primeng/button';
 
 import { EventResponse, EventService } from '../../../services/event.service';
 import { SubmissionResponse, SubmissionService } from '../../../services/submission.service';
@@ -9,25 +8,70 @@ import { SubmissionResponse, SubmissionService } from '../../../services/submiss
 interface Events {
   eventId: string;
   name: string;
+  logoInitial: string;
+  dateRangeLabel: string;
+  statusPill: 'Live' | 'Upcoming' |'Ended';
+  participantsLabel: string;
   meta: string;
-  timeLabel: string;
 }
 
 interface Submissions {
   submissionId: number;
   team: string;
+  teamInitials: string;
   event: string;
   level: string;
   score: string;
   status: string;
   statusClass: string;
+  challenge: string;
   time: string;
+}
+interface ParticipantRow {
+  initials: string;
+  name: string;
+  email: string;
+  points: number;
+}
+
+interface AnnouncementRow{
+  title: string;
+  body: string;
+  date: string;
+
+}
+interface NotificationRow {
+  icon: 'success' | 'warning' | 'info';
+  title: string;
+  body: string;
+  time: string;
+}
+interface SubmissionStatusSegment{
+  label: string;
+  count: number;
+  percent: number;
+  offset: number;
+  colorClass : string;
+}
+interface EventInsightsSummary{
+  activeTeams: number;
+  approvedParticipants: number;
+  submissionsLastHour: number;
+  errorRate: number;
+}
+
+interface ScoreLevelStat{
+  level: string;
+  min: number;
+  max: number;
+  avg: number;
+  count: number;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule,ButtonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -40,14 +84,57 @@ export class DashboardComponent implements OnInit{
   recentSubmissions: Submissions[] = [];
 
   activeEvents = 0
-  totalParticipants = 1234; //WIP
-  submissionsToday = 12; //WIP
+  activeParticipants = 1234;
+  teamsCount = 156;
+  submissionsCount = 12;
 
   eventLoading = false;
   submissionLoading = false;
   eventError = '';
   submissionError = '';
 
+  activeParticipantRows: ParticipantRow[]=[
+   {initials:'TC', name: 'Team CodeCrafters', email: 'codecrafters@example.com',points: 320},
+   {initials:'TC', name: 'Dev storm', email: 'devStorm@example.com',points: 389},
+  ];
+
+  submissionStatusSegments: SubmissionStatusSegment[]=[
+    {label : 'Queued', count:2, percent: 17, offset: 0, colorClass:'seg-solo'},
+    {label : 'Scoring', count:1, percent: 8, offset: 17, colorClass:'seg-small'},
+    {label : 'Scored', count:8, percent: 67, offset: 25, colorClass:'seg-medium'},
+    {label : 'Failed', count:1, percent: 8, offset: 92, colorClass:'seg-failed'},
+  ];
+
+  eventInsights: EventInsightsSummary= {
+    activeTeams: 18,
+    approvedParticipants: 142,
+    submissionsLastHour: 5,
+    errorRate:8,
+  };
+
+  submissionTrend: {x:number; y:number}[]=[
+    {x:10, y:70},{x:56.7, y:53.3},{x:103.3, y:70},{x:150, y:36.7},
+    {x:196.7, y:53.3},{x:243.3, y:20},{x:290, y:36.7}
+  ];
+
+  submissionTrendPoints = '10,70 56.7,53.3 103.3,70 150,36.7 196.7,53.3 243.3,20 290,36.7';
+  submissionTrendArea = 'M10,70 L56.7,53.3 L103.3,70 L150,36.7 L196.7,53.3 L243.3,20 L290,36.7 L290,70 L10,70 Z';
+
+  scoreByLevel: ScoreLevelStat[]=[
+    {level: 'Level 1', min:40, max:95,avg:72,count:5},
+    {level: 'Level 2', min:55, max:98,avg:80,count:4},
+    {level: 'Level 3', min:30, max:88,avg:60,count:3},
+
+  ];
+  recentAnnouncements: AnnouncementRow[]=[
+    {title:'New challenge added', body:"Check out the new AI challenge", date:'May 16,2026'},
+    {title:'Maintenance Notice', body:"Platform maintenance on May 20,2026 from 12:00 PM", date:'May 19,2026'},
+  ];
+
+  systemNotifications: NotificationRow[]=[
+    {icon: 'success', title: 'All systems operational', body: 'Last checked 2 min ago', time:'Just now'},
+    {icon: 'warning', title: 'High submission volume', body: 'Submissions are 35% higher than usual', time:'Just now'},
+  ]
   ngOnInit(): void {
     this.loadEvents();
     this.loadRecentSubmissions();
@@ -71,11 +158,14 @@ export class DashboardComponent implements OnInit{
   }
 
   private toDashboardSubmission(sub: SubmissionResponse): Submissions {
+    const team = this.shortId(sub.teamId);
     return{
       submissionId: sub.submissionId,
-  team: this.shortId(sub.teamId),
+  team,
+  teamInitials: team.slice(0,2).toUpperCase(),
   event: 'Event',
   level: `Level ${sub.levelId}`,
+  challenge: `Level ${sub.levelId}`,
   score: sub.score === null || sub.score === undefined
     ? '-'
     : Number(sub.score).toFixed(2),
@@ -101,7 +191,7 @@ export class DashboardComponent implements OnInit{
 
   private formatRelativeTime(value: string): string {
     const submittedAt = new Date(value);
-    
+
     if(Number.isNaN(submittedAt.getTime())) {
       return 'unknown';
     }
@@ -144,6 +234,7 @@ export class DashboardComponent implements OnInit{
         this.activeEvents = events.filter(event => this.isActiveEvent(event)).length;
         this.allEvents = events.map(event => this.toDashboardEvent(event));
         this.eventLoading = false;
+        this.change.markForCheck();
       },
       error: () => {
         this.eventError = "Could not load events."
@@ -161,8 +252,12 @@ export class DashboardComponent implements OnInit{
     return {
       eventId: event.eventId,
       name: event.name,
-      meta: `${this.formatStatus(event.status)} · ${event.visibility} · team limit ${event.teamSizeLimit}`,
-      timeLabel: this.getEventTimeLabel(event),
+      logoInitial: event.name?.charAt(0)?.toUpperCase() || '?',
+      dateRangeLabel: this.formatDateRange(event),
+      statusPill: this.getStatusPill(event),
+      participantsLabel: '—',
+      meta: event.description || 'No description',
+
     }
   }
 
@@ -173,8 +268,20 @@ export class DashboardComponent implements OnInit{
 
     return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
   }
+  private getStatusPill(event:EventResponse): 'Live'|'Upcoming' |'Ended'{
+    const start = new Date(event.startDateTime);
+    if (Number.isNaN(start.getTime())){
+      return 'Upcoming';
+    }
+    const end = new Date(start.getTime() + Number(event.duration || 0)* 60 * 60 * 1000);
+    const now = Date.now();
 
-  private getEventTimeLabel(event: EventResponse): string {
+    if(now < start.getTime()) return "Upcoming";
+    if(now < end.getTime()) return "Live";
+    return 'Ended';
+  }
+
+  private formatDateRange(event: EventResponse): string {
     const start = new Date(event.startDateTime);
 
     if(Number.isNaN(start.getTime())) {
@@ -182,36 +289,11 @@ export class DashboardComponent implements OnInit{
     }
 
     const end = new Date(start.getTime() + Number(event.duration || 0) * 60 * 60 * 1000);
-    const now = Date.now();
+    const startLabel = start.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const endLabel = end.toLocaleDateString('en-US',{month:'short',day:'numeric', year:'numeric'});
 
-    if (now < start.getTime()) {
-      return `starts in ${this.formatDuration(start.getTime() - now)}`;
-    }
-    if (now < end.getTime()) {
-      return `end in ${this.formatDuration(end.getTime() - now)}`
-    }
-
-    return 'ended';
+    return `${startLabel} \u2013 ${endLabel}`
   }
 
-  private formatDuration(ms: number): string {
-    const totMin = Math.max(0, Math.floor(ms/60000));
-    const days = Math.floor(totMin / 1440);
-    const hours = Math.floor((totMin % 1440) / 60);
-    const min = totMin % 60;
 
-    if (days > 0 && hours > 0) {
-      return `${days}d ${hours}h`;
-    }
-
-    if (days > 0) {
-      return `${days}d`;
-    }
-
-    if (hours > 0) {
-      return `${hours}h`;
-    }
-
-    return `${min}m`;
-  }
 }

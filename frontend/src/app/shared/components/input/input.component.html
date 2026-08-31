@@ -3,7 +3,9 @@
 <input
   [id]="id"
   class="input"
+  [value]="value"
   type="text"
   [placeholder]="placeholder"
   [disabled]="disabled"
+  (input)="onInput($event)"
 />

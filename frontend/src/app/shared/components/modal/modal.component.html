@@ -17,12 +17,14 @@
 </div>
 
  
-<div class="modal-footer">
-
+<div
+  class="modal-footer"
+  [class.modal-footer--center]="footerLayout === 'center'"
+  [class.modal-footer--split]="footerLayout === 'split'"
+>
   <ng-content select="[modal-footer-left]"></ng-content>
 
   <ng-content select="[modal-footer-right]"></ng-content>
-
 </div>
 
 </dialog>

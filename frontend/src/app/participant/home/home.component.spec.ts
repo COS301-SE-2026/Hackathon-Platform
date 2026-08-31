@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 import { HomeComponent } from './home.component';
+import { MessageService } from 'primeng/api';
 import { EventService } from '../../services/event.service';
 
 describe('HomeComponent', () => {
@@ -48,7 +49,7 @@ eventServiceMock.getUserActiveEvents.and.returnValue(of([]));
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule, HomeComponent],
       providers: [
-        { provide: EventService, useValue: eventServiceMock },
+        { provide: EventService, useValue: eventServiceMock },MessageService,
         {
           provide: ActivatedRoute,
           useValue: {
@@ -67,7 +68,7 @@ eventServiceMock.getUserActiveEvents.and.returnValue(of([]));
   });
 
   afterEach(() => {
-    component.ngOnDestroy();
+    component?.ngOnDestroy();
     localStorage.clear();
   });
 

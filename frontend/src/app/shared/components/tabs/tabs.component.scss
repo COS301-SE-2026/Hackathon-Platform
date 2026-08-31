@@ -1,121 +1,130 @@
-.custom-tabs {
+.tabs {
   width: 100%;
-  display: block;
-}
-
-
-:host ::ng-deep .custom-tabs {
-  background-color: var(--white);
-  border: 1px solid var(--light-gray);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-
-:host ::ng-deep .custom-tabs .p-tablist {
-  min-height: 64px;
-
-  background-color: var(--white);
-  border: none;
 
   display: flex;
   align-items: stretch;
-}
 
-:host ::ng-deep .custom-tabs .p-tablist-tab-list {
   background-color: var(--white);
-  border: none;
+
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-lg);
+
+  overflow-x: auto;
+
+  overflow-y: hidden;
+
+  -webkit-overflow-scrolling: touch;
+
+ 
+  scrollbar-width: thin;
+
+  scrollbar-color: var(--mid-gray) transparent;
 }
 
+.tabs::-webkit-scrollbar {
+  height: 4px;
+}
 
-:host ::ng-deep .custom-tabs .p-tab {
-  flex: 1 0 150px;
+.tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+.tabs::-webkit-scrollbar-thumb {
+  background-color: var(--mid-gray);
+
+  border-radius: var(--radius-full);
+}
+
+.tab {
+  
+  flex: 0 0 auto;
 
   min-width: 150px;
-  padding: var(--space-4) var(--space-6);
 
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: var(--space-2);
+
+  padding: var(--space-4) var(--space-6);
 
   color: var(--dark-gray);
 
   font-family: var(--font-family-base);
+
   font-size: var(--font-size-small);
+
   font-weight: var(--font-weight-medium);
+
   line-height: var(--line-height-small);
 
+  text-decoration: none;
   white-space: nowrap;
 
-  transition:
-    color var(--duration-fast) var(--easing-standard),
-    background-color var(--duration-fast) var(--easing-standard),
-    border-color var(--duration-fast) var(--easing-standard);
+  border-bottom: 2px solid transparent;
 }
 
 
-:host ::ng-deep .custom-tabs .p-tab i {
+
+
+.tab i {
   color: inherit;
   font-size: 16px;
 }
 
 
-:host ::ng-deep .custom-tabs .p-tab:hover {
-  background-color: var(--bright-blue-bg);
-  color: var(--dark-navy);
-}
 
-:host ::ng-deep .custom-tabs .p-tab.tab-route-active {
+
+.tab.active {
   color: var(--bright-blue);
-  font-weight: var(--font-weight-semibold);
-  border-bottom: 2px solid var(--bright-blue);
+
+  border-bottom-color: var(--bright-blue);
 }
 
 
-
-:host ::ng-deep .custom-tabs .tab-label {
+.tab-label {
   flex: 0 0 auto;
+
+  min-width: 150px;
 
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
 
-  min-width: 150px;
   padding: var(--space-4) var(--space-6);
 
   color: var(--dark-navy);
 
   font-family: var(--font-family-base);
+  
   font-size: var(--font-size-small);
+
   font-weight: var(--font-weight-semibold);
+
   line-height: var(--line-height-small);
 
   white-space: nowrap;
 }
 
 
+.tab-label i {
+  color: inherit;
+  font-size: 16px;
+}
 
 @media (max-width: 767px) {
 
-  :host ::ng-deep .custom-tabs .p-tablist {
-    min-height: 56px;
-  }
-
-  :host ::ng-deep .custom-tabs .p-tab {
-    flex: 0 0 140px;
-
+  .tab {
     min-width: 140px;
 
     padding: var(--space-3) var(--space-4);
   }
 
-  :host ::ng-deep .custom-tabs .tab-label {
+  .tab-label {
     min-width: 140px;
 
     padding: var(--space-3) var(--space-4);
