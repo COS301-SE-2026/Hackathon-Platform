@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
-import { EventService, EventResponse } from '../../../services/event.service';
+import { EventService, EventResponse, EventRegistrationSummary } from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 
@@ -48,7 +48,11 @@ export class EventlistComponent implements OnInit {
   searchTerm = '';
   statusFilter = 'ALL';
 
-
+  expandedEventId: string | null = null;
+  registrationsByEvent: Record<string, EventRegistrationSummary> = {};
+  registrationsLoading: Record<string, boolean> = {};
+  registrationsError: Record<string, string> = {};
+  exportingResults: Record<string, boolean> = {};
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
@@ -188,17 +192,68 @@ export class EventlistComponent implements OnInit {
     console.warn('No event-detail route exists in app.routes.ts yet for event', eventId);
   }
 
+  toggleEventDetails(eventId: string): void {
+    if(this.expandedEventId === eventId){
+      this.expandedEventId = null;
+      return;
+    }
+    this.expandedEventId = eventId;
+    if (!this.registrationsByEvent[eventId]){
+      this.loadRegistrations(eventId);
+    }
+  }
+
+  private loadRegistrations(eventId: string): void {
+    this.registrationsLoading[eventId] = true;
+    this.registrationsError[eventId] ='';
+
+    this.eventService.getEventRegistrations(eventId).subscribe({
+      next: (summary) =>{
+        this.registrationsByEvent[eventId] = summary;
+      this.registrationsLoading[eventId] = false;
+      this.change.markForCheck();
+      },
+      error:(error) =>{
+        console.error('Failed to load registrations for event',eventId,error);
+        this.registrationsError[eventId] = 'Could not load registered teams and participants.';
+        this.registrationsLoading[eventId] = false;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  downloadResults(eventId: string, eventName:string): void{
+    this.exportingResults[eventId] = true;
+
+    this.eventService.downloadEventResults(eventId).subscribe(
+      {
+        next: (blob) =>{
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href =url;
+          link.download = `${eventName || 'event'}-results.xlsx`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+          this.exportingResults[eventId] = false;
+          this.change.markForCheck();
+        },
+        error: (error) =>{
+          console.error('Failed to export results for event', eventId, error);
+          this.exportingResults[eventId] =false;
+          this.change.markForCheck();
+        }
+  });
+  }
+
   navigateToParticipants(eventId: string): void {
     const event = this.events.find(e => e.eventId === eventId);
     this.participantsModalEventId = eventId;
     this.participantsModalEventName = event?.name || '';
     this.showParticipantsModal = true;
-
   }
 
   closeParticipantsModal(): void {
-    
     this.showParticipantsModal = false;
-    this.participantsModalEventId =  null;
+    this.participantsModalEventId = null;
   }
 }
