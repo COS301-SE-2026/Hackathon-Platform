@@ -84,4 +84,21 @@ class AnnouncementEmailDeliveryServiceTest {
         verify(emailDeliveryRepo, times(2)).save(delivery);
     }
 
+    @Test
+    void failedEmailIsMarkedAsFailed() {
+        when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
+        when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
+        when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
+
+        doThrow(new RuntimeException("SMTP failed")).when(announcementEmailService).sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
+        deliveryService.processMessage(msgId);
+
+        assertEquals("FAILED", delivery.getDeliveryStatus());
+        assertEquals(1, delivery.getAttemptCount());
+        assertEquals("SMTP failed", delivery.getLastError());
+        assertNull(delivery.getSentAt());
+
+        verify(emailDeliveryRepo, times(2)).save(delivery);
+    }
+
 }
