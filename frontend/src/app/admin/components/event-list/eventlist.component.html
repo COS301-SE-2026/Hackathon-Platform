@@ -102,97 +102,100 @@
         @for (event of events; track event.eventId){
           <div class = "event-row-group">
             <div class = "event-row">
-            <div class = "event-name-cell">
-              <span class = "event-logo">{{event.logoInitial}}</span>
-              <span class = "event-name">{{event.name}}</span>
+              <div class = "event-name-cell">
+                <span class = "event-logo">{{event.logoInitial}}</span>
+                <span class = "event-name">{{event.name}}</span>
+              </div>
+              <span class = "type-pill">{{event.visibility}}</span>
+              <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
+              <span class = "dates-cell">{{event.dateRangeLabel}}</span>
+              <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "expandedEventId === event.eventId"
+               [attr.aria-expanded] = "expandedEventId === event.eventId" (click) = "toggleEventDetails(event.eventId)">
+                {{expandedEventId === event.eventId ? 'Hide Registrations' : 'View Event' }}
+                <i class = "pi" [ngClass] = "expandedEventId === event.eventId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+              </button>
+              <button type = "button" class = "btn-view-event" (click) = "navigateToParticipants(event.eventId)">Participants</button>
             </div>
-            <span class = "type-pill">{{event.visibility}}</span>
-            <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
-            <span class = "dates-cell">{{event.dateRangeLabel}}</span>
-            <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "expandedEventId === event.eventId"
-             [attr.aria-expanded] = "expandedEventId === event.eventId" (click) = "toggleEventDetails(event.eventId)">
-            {{expandedEventId === event.eventId ? 'Hide Registrations' : 'View Event' }}
-            <i class = "pi" [ngClass] = "expandedEventId === event.eventId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
-          </button>
-          </div>
-          @if (expandedEventId === event.eventId){
-            <div class = "event-registrations-panel">
-              @if (registrationsLoading[event.eventId]){
-                <div class = "registrations-loading">Loading registrations...</div>
-              } @else if (registrationsError[event.eventId]){
-                <div class = "registrations-error">{{registrationsError[event.eventId]}}</div>
-              }@else if (registrationsByEvent[event.eventId]){
-                <div class = "registrations-summary-bar">
-                  <span><i class = "pi pi-users"></i>{{registrationsByEvent[event.eventId].teams.length}} teams</span>
-                  <button type ="button" class = "btn-export-results"[disabled] = "exportingResults[event.eventId]" (click) = "downloadResults(event.eventId, event.name)">
-                    <i class = "pi pi-download"></i>
-                    {{exportingResults[event.eventId] ? 'Exporting...' : 'Download results (.xlsx)'}}
-                  </button>
-                </div>
-                @if (registrationsByEvent[event.eventId].teams.length === 0){
-                  <p class = "registrations-empty">No one has registered for this event yet.</p>
-                }@else {
-                  <div class = "registrations-section">
-                    <h4 class = "registrations-section-title">Registered Teams</h4>
-                    <div class = "team-card-list">
-                      @for (team of registrationsByEvent[event.eventId].teams; track team.teamId){
-                        <div class = "team-card">
-                          <div class = "team-card-header">
-                            <span class = "team-name">{{team.name}}</span>
-                            <span class = "team-member-count">{{team.members.length}} member{{ team.members.length === 1 ? '' : 's'}}</span>
-                          </div>
-                          <ul class = "team-member-list">
-                            @for (member of team.members; track member.participantId){
-                              <li>
-                                <span>{{ member.name }}</span>
-                                <span class = "member-email">{{ member.email }}</span>
-                              </li>
-                            }
-                          </ul>
-                        </div>
-                      }
-                    </div>
-                  </div>
 
-                  @if (registrationsByEvent[event.eventId].topSubmissions.length > 0){
+            @if (expandedEventId === event.eventId){
+              <div class = "event-registrations-panel">
+                @if (registrationsLoading[event.eventId]){
+                  <div class = "registrations-loading">Loading registrations...</div>
+                } @else if (registrationsError[event.eventId]){
+                  <div class = "registrations-error">{{registrationsError[event.eventId]}}</div>
+                } @else if (registrationsByEvent[event.eventId]){
+                  <div class = "registrations-summary-bar">
+                    <span><i class = "pi pi-users"></i>{{registrationsByEvent[event.eventId].teams.length}} teams</span>
+                    <button type = "button" class = "btn-export-results" [disabled] = "exportingResults[event.eventId]" (click) = "downloadResults(event.eventId, event.name)">
+                      <i class = "pi pi-download"></i>
+                      {{exportingResults[event.eventId] ? 'Exporting...' : 'Download results (.xlsx)'}}
+                    </button>
+                  </div>
+                  @if (registrationsByEvent[event.eventId].teams.length === 0){
+                    <p class = "registrations-empty">No one has registered for this event yet.</p>
+                  } @else {
                     <div class = "registrations-section">
-                      <h4 class = "registrations-section-title">Top Submissions</h4>
-                      <div class = "submission-list">
-                        @for (submission of registrationsByEvent[event.eventId].topSubmissions; track submission.teamId){
-                          <div class = "submission-card">
-                            <span class = "submission-rank" [ngClass] = "'rank-' + submission.rank">#{{ submission.rank }}</span>
-                            <div class = "submission-main">
-                              <div class = "submission-title-row">
-                                <span class = "submission-team-name">{{ submission.teamName }}</span>
-                                @if (submission.score !== undefined){
-                                  <span class = "submission-score">{{ submission.score }} pts</span>
-                                }
-                              </div>
-                              <p class = "submission-title">{{ submission.submissionTitle }}</p>
-                              @if (submission.submittedAt){
-                                <p class = "submission-meta">Submitted {{ submission.submittedAt }}</p>
-                              }
+                      <h4 class = "registrations-section-title">Registered Teams</h4>
+                      <div class = "team-card-list">
+                        @for (team of registrationsByEvent[event.eventId].teams; track team.teamId){
+                          <div class = "team-card">
+                            <div class = "team-card-header">
+                              <span class = "team-name">{{team.name}}</span>
+                              <span class = "team-member-count">{{team.members.length}} member{{ team.members.length === 1 ? '' : 's'}}</span>
                             </div>
-                            <div class = "submission-links">
-                              @if (submission.sourceCodeUrl){
-                                <a [href] = "submission.sourceCodeUrl" target = "_blank" rel ="noopener" class = "submission-link-btn">
-                                  <i class = "pi pi-github"></i> Source
-                                </a>
+                            <ul class = "team-member-list">
+                              @for (member of team.members; track member.participantId){
+                                <li>
+                                  <span>{{ member.name }}</span>
+                                  <span class = "member-email">{{ member.email }}</span>
+                                </li>
                               }
-                              @if (submission.jsonOutputUrl){
-                                <a [href] = "submission.jsonOutputUrl" target = "_blank" rel ="noopener" class = "submission-link-btn">
-                                  <i class = "pi pi-code"></i> JSON output</a>
-                              }
-                            </div>
-                          </div>   
-                      }
+                            </ul>
+                          </div>
+                        }
                       </div>
                     </div>
+
+                    @if (registrationsByEvent[event.eventId].topSubmissions.length > 0){
+                      <div class = "registrations-section">
+                        <h4 class = "registrations-section-title">Top Submissions</h4>
+                        <div class = "submission-list">
+                          @for (submission of registrationsByEvent[event.eventId].topSubmissions; track submission.teamId){
+                            <div class = "submission-card">
+                              <span class = "submission-rank" [ngClass] = "'rank-' + submission.rank">#{{ submission.rank }}</span>
+                              <div class = "submission-main">
+                                <div class = "submission-title-row">
+                                  <span class = "submission-team-name">{{ submission.teamName }}</span>
+                                  @if (submission.score !== undefined){
+                                    <span class = "submission-score">{{ submission.score }} pts</span>
+                                  }
+                                </div>
+                                <p class = "submission-title">{{ submission.submissionTitle }}</p>
+                                @if (submission.submittedAt){
+                                  <p class = "submission-meta">Submitted {{ submission.submittedAt }}</p>
+                                }
+                              </div>
+                              <div class = "submission-links">
+                                @if (submission.sourceCodeUrl){
+                                  <a [href] = "submission.sourceCodeUrl" target = "_blank" rel = "noopener" class = "submission-link-btn">
+                                    <i class = "pi pi-github"></i> Source
+                                  </a>
+                                }
+                                @if (submission.jsonOutputUrl){
+                                  <a [href] = "submission.jsonOutputUrl" target = "_blank" rel = "noopener" class = "submission-link-btn">
+                                    <i class = "pi pi-code"></i> JSON output
+                                  </a>
+                                }
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
                   }
                 }
-              }
-            </div>
-          }
+              </div>
+            }
           </div>
 
         }
@@ -202,4 +205,12 @@
   
   } 
 </main>
+
+@if (showParticipantsModal) {
+  <app-participants-modal
+    [eventId] = "participantsModalEventId"
+    [eventName] = "participantsModalEventName"
+    (closed) = "closeParticipantsModal()"
+  ></app-participants-modal>
+}
 </div>

@@ -13,7 +13,7 @@ export interface EventRequest {
   visibility: 'PUBLIC' | 'PRIVATE';
   status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
   isInPerson?: boolean;
-  leaderboardFreezeDateTime?: string;  
+  leaderboardFreezeDateTime?: string;
 }
 
 export interface EventResponse {
@@ -31,27 +31,43 @@ export interface EventResponse {
   isInPerson?: boolean;
   leaderboardFreezeDateTime?: string;
 }
-export interface RegisteredParticipants{
- participantId: string;
- name: string;
- email: string;
+
+export interface RegisteredParticipants {
+  participantId: string;
+  name: string;
+  email: string;
 }
 
-export interface RegisteredTeams{
+export interface RegisteredTeams {
   teamId: string;
   name: string;
-  members:RegisteredParticipants[];
+  members: RegisteredParticipants[];
 }
 
 export interface TeamSubmission {
   teamId: string;
   teamName: string;
   rank: number;
-  score?:number;
+  score?: number;
   submissionTitle: string;
   sourceCodeUrl?: string;
-  jsonOutputUrl?:string;
+  jsonOutputUrl?: string;
   submittedAt?: string;
+}
+
+export interface EventRegistrationSummary {
+  teams: RegisteredTeams[];
+  topSubmissions: TeamSubmission[];
+}
+
+export interface EventParticipantResponse {
+  userId: string;
+  fullName: string;
+  email: string;
+  teamId: string;
+  teamName: string;
+  teamRole: 'LEADER' | 'MEMBER';
+  joinedAt: string;
 }
 
 export interface EventRegistrationSummary{
@@ -73,7 +89,7 @@ export class EventService {
     return this.http.get<EventResponse[]>(`${this.baseUrl}/admin/events`);
   }
 
-  getEvent(eventId: string):Observable<EventResponse> {
+  getEvent(eventId: string): Observable<EventResponse> {
     return this.http.get<EventResponse>(`${this.baseUrl}/admin/events/${eventId}`)
   }
 
@@ -97,7 +113,7 @@ export class EventService {
     return this.http.get<EventResponse>(`${this.baseUrl}/events/${eventId}`);
   }
 
-  getEventRegistrations(eventId: string): Observable<EventRegistrationSummary>{
+  getEventRegistrations(eventId: string): Observable<EventRegistrationSummary> {
     return this.http.get<EventRegistrationSummary>(`${this.baseUrl}/admin/events/${eventId}/registrations`);
   }
 
@@ -121,9 +137,14 @@ export class EventService {
   createEventForHackathon(hackathonId: string, eventData: EventRequest): Observable<EventResponse> {
     return this.http.post<EventResponse>(`${this.baseUrl}/hackathon/${hackathonId}/events`, eventData);
   }
+
   downloadEventResults(eventId: string): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/admin/events/${eventId}/results/export`,{
+    return this.http.get(`${this.baseUrl}/admin/events/${eventId}/results/export`, {
       responseType: 'blob'
     });
+  }
+
+  getEventParticipants(eventId: string): Observable<EventParticipantResponse[]> {
+    return this.http.get<EventParticipantResponse[]>(`${this.baseUrl}/admin/events/${eventId}/participants`);
   }
 }
