@@ -8,7 +8,6 @@ import { SubmissionResponse, SubmissionService } from '../../../services/submiss
 import { EventInsightsResponse, InsightsService } from '../../../services/insights.service';
 import { LeaderboardEntry, LeaderboardService } from '../../../services/leaderboard.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
-import { Subscriber } from 'rxjs';
 
 interface Events {
   eventId: string;
@@ -231,7 +230,7 @@ export class DashboardComponent implements OnInit{
   }
 
   openParticipantsModal(eventId: string): void {
-    
+
     if(!eventId) {
       return;
     }
@@ -449,7 +448,7 @@ export class DashboardComponent implements OnInit{
             this.onSelectedEventChange(defaultEvent.eventId);
           }
         }
-        
+
         this.change.markForCheck();
       },
       error: () => {
