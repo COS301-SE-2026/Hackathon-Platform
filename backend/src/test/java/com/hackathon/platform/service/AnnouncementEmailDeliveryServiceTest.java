@@ -124,4 +124,10 @@ class AnnouncementEmailDeliveryServiceTest {
         verify(emailDeliveryRepo, never()).save(delivery);
     }
 
+    @Test
+    void missingMessageThrowsException() {
+        when(communicationRepo.findById(msgId)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> deliveryService.processMessage(msgId));
+    }
+
 }
