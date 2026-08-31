@@ -30,6 +30,17 @@ export interface EventResponse {
   status: string;
   isInPerson?: boolean;
   leaderboardFreezeDateTime?: string;
+  bannerStorageKey?: string;
+  logoStorageKey?: string;
+  scoringPaused?: boolean;
+  allowedTech?: string[];
+  rules?: string;
+  tagline?: string;
+  firstPlacePrize?: number;
+  secondPlacePrize?: number;
+  thirdPlacePrize?: number;
+  totalPrizePool?: number;
+
 }
 
 export interface RegisteredParticipants {
@@ -70,10 +81,6 @@ export interface EventParticipantResponse {
   joinedAt: string;
 }
 
-export interface EventRegistrationSummary{
-  teams: RegisteredTeams[];
-  topSubmissions: TeamSubmission[];
-}
 @Injectable({
   providedIn: 'root'
 })
