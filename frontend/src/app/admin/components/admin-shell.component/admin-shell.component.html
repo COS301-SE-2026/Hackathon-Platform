@@ -43,7 +43,7 @@
                     }
                 </button>
 
-                <div class = "navbar-profile" (click) = "toggleProfileMenu()">
+                <div class = "navbar-profile" (click) = "toggleProfileMenu()" (keydown.enter)="toggleProfileMenu()"(keydown.space)="toggleProfileMenu()" tabindex="0">
                     <div class = "avatar-circle">{{ getInitials() }}</div>
                 <div class = "user-info">
                     <span class = "user-name">{{ userName }}</span>
