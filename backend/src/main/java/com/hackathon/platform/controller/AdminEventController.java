@@ -93,8 +93,7 @@ public class AdminEventController {
   @GetMapping("/{id}/participants")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<EventParticipantResponse>> getEventParticipants(
-    @PathVariable("id") UUID eventId
-  ) {
+      @PathVariable("id") UUID eventId) {
     return ResponseEntity.ok(teamService.listEventParticipants(eventId));
   }
 }
