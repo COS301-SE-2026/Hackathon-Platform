@@ -1,11 +1,13 @@
 package com.hackathon.platform.controller;
 
+import com.hackathon.platform.dto.EventParticipantResponse;
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.dto.ScoringPauseResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.service.EventService;
+import com.hackathon.platform.service.TeamService;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/admin/events")
 public class AdminEventController {
   private final EventService eventService;
+  private final TeamService teamService;
 
-  public AdminEventController(EventService eventService) {
+  public AdminEventController(EventService eventService, TeamService teamService) {
     this.eventService = eventService;
+    this.teamService = teamService;
   }
 
   /** Create an event /api/admin/events */
@@ -84,5 +88,12 @@ public class AdminEventController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ScoringPauseResponse> resumeScoring(@PathVariable("id") UUID eventId) {
     return ResponseEntity.ok(eventService.setScoringPaused(eventId, false));
+  }
+
+  @GetMapping("/{id}/participants")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<List<EventParticipantResponse>> getEventParticipants(
+      @PathVariable("id") UUID eventId) {
+    return ResponseEntity.ok(teamService.listEventParticipants(eventId));
   }
 }

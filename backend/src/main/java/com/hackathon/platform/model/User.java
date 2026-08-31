@@ -32,7 +32,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
-
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "user_id")
@@ -69,6 +68,10 @@ public class User implements UserDetails {
   /** Returns the role as spring security. It requires ROLE_ before hasRole() checks */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
+    if ("SUPERADMIN".equals(role.getName())) {
+      return List.of(
+          new SimpleGrantedAuthority("ROLE_SUPERADMIN"), new SimpleGrantedAuthority("ROLE_ADMIN"));
+    }
     return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName()));
   }
 
