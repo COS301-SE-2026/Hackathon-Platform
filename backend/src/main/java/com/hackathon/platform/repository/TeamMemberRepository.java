@@ -27,6 +27,22 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, UUID> {
   List<TeamMember> findByUserIdAndStatus(UUID userId, String status);
 
   @Query(
+      """
+            SELECT CASE WHEN COUNT(tm) > 0 THEN true ELSE false END
+            FROM TeamMember tm
+            WHERE tm.userId = :userId
+            AND tm.status = 'APPROVED'
+            AND EXISTS (
+              SELECT t FROM Team t
+              WHERE t.teamId = tm.teamId
+                AND t.eventId = :eventId
+                AND t.status = 'ACTIVE'
+            )
+        """)
+  boolean existsApprovedParticipantInEvent(
+      @Param("userId") UUID userId, @Param("eventId") UUID eventId);
+
+  @Query(
       "SELECT tm FROM TeamMember tm JOIN Team t ON tm.teamId = t.teamId WHERE tm.userId = :userId AND tm.status = :status AND t.eventId = :eventId")
   List<TeamMember> findByUserIdAndStatusAndEventId(
       @Param("userId") UUID userId, @Param("status") String status, @Param("eventId") UUID eventId);
