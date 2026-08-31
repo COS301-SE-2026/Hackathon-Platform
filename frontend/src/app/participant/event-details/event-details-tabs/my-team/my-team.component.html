@@ -193,17 +193,7 @@
       <div class="members-table">
 
       
-        <div class="members-table-header">
-
-          <div class="member-header-spacer"></div>
-
-          <div class="members-column joined-column"> Joined</div>
-
-          <div class="members-column submissions-column"> Submissions</div>
-
-          <div class="members-column points-column"> Best Score</div>
-
-        </div>
+       
 
        
         @for (member of team.members; track member.userId) {
@@ -239,20 +229,6 @@
 
             </div>
 
-           
-            <div class="members-column joined-column">
-               <span class="member-table-value"> 12 Aug 2026</span>
-            </div>
-
-            
-            <div class="members-column submissions-column">
-             <span class="member-table-value">8</span>
-            </div>
-
-           
-            <div class="members-column points-column">
-             <span class="member-table-value">500</span>
-            </div>
 
           </div>
 
@@ -276,15 +252,7 @@
         <div class="requests-table">
 
         
-          <div class="requests-table-header">
-
-            <div class="requests-column request-header-spacer"></div>
-
-            <div class="requests-column request-email-header">Email</div>
-
-            <div class="requests-column request-actions-header"> Actions</div>
-
-          </div>
+          
 
           @for (request of pendingRequests; track request.userId) {
 
@@ -299,20 +267,14 @@
 
                   <span class="request-member-name">{{ request.name }}</span>
 
-                  <span class="request-time"> Requested 2 hours ago </span>
+                  <span class="member-email">{{ request.email }}</span>
 
                 </div>
 
               </div>
 
            
-              <div class="requests-column request-email">
-
-                <span class="member-email"> {{ request.email }}</span>
-
-              </div>
-
-             
+            
               <div class="requests-column request-actions">
 
                 <button type="button" class="request-action approve-button" (click)="approveRequest(request.userId)" [disabled]="isLoading" aria-label="Approve request" (keydown)="null" (keyup)="null"> <i class="pi pi-check"></i> </button>
