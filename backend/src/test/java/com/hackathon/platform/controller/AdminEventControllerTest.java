@@ -1,6 +1,7 @@
 // package com.hackathon.platform.controller;
 
-// import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+// import static
+// org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -232,7 +233,8 @@
 
 //     mockMvc
 //         .perform(
-//             get("/api/admin/events/{id}/status", exisitngEventId).with(authentication(adminAuth)))
+//             get("/api/admin/events/{id}/status",
+// exisitngEventId).with(authentication(adminAuth)))
 //         .andExpect(status().isOk());
 //   }
 

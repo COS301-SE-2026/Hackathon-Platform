@@ -4,7 +4,8 @@
 // import static org.mockito.ArgumentMatchers.anyInt;
 // import static org.mockito.ArgumentMatchers.anyLong;
 // import static org.mockito.Mockito.when;
-// import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+// import static
+// org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 // import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -247,7 +248,8 @@
 //             "code.zip",
 //             log);
 
-//     when(submissionQueryService.getSubmissionDetail(SUBMISSION_ID, TEAM_ID)).thenReturn(response);
+//     when(submissionQueryService.getSubmissionDetail(SUBMISSION_ID,
+// TEAM_ID)).thenReturn(response);
 
 //     mockMvc
 //         .perform(
@@ -365,7 +367,8 @@
 //   void getLeaderboard_returns403WhenCallerIsNotAuthenticated() throws Exception {
 //     mockMvc
 //         .perform(
-//             get("/api/scoring/events/{eventId}/levels/{levelId}/leaderboard", EVENT_ID, LEVEL_ID))
+//             get("/api/scoring/events/{eventId}/levels/{levelId}/leaderboard", EVENT_ID,
+// LEVEL_ID))
 //         .andExpect(status().isForbidden());
 //   }
 // }

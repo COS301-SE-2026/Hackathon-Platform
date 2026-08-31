@@ -1,7 +1,8 @@
 // package com.hackathon.platform.controller;
 
 // import static org.hamcrest.Matchers.hasSize;
-// import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+// import static
+// org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -180,13 +181,15 @@
 //                     .content(objectMapper.writeValueAsString(levelRequest("lvl1", 1))))
 //             .andExpect(status().isOk())
 //             .andReturn();
-//     Level creat = objectMapper.readValue(createRes.getResponse().getContentAsString(), Level.class);
+//     Level creat = objectMapper.readValue(createRes.getResponse().getContentAsString(),
+// Level.class);
 //     mockMvc
 //         .perform(
 //             put("/api/levels/{levelId}", creat.getId())
 //                 .with(authentication(part))
 //                 .contentType(MediaType.APPLICATION_JSON)
-//                 .content(objectMapper.writeValueAsString(levelRequest("im tired of testing", 1))))
+//                 .content(objectMapper.writeValueAsString(levelRequest("im tired of testing",
+// 1))))
 //         .andExpect(status().isForbidden());
 //   }
 

@@ -1,6 +1,7 @@
 // package com.hackathon.platform.controller;
 
-// import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+// import static
+// org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 // import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -166,7 +167,8 @@
 
 //     mockMvc
 //         .perform(
-//             post("/api/teams/{id}/join-requests", createdTeamId).with(authentication(memberAuth)))
+//             post("/api/teams/{id}/join-requests",
+// createdTeamId).with(authentication(memberAuth)))
 //         .andDo(print())
 //         .andExpect(status().isCreated());
 //   }
@@ -235,7 +237,8 @@
 
 //     mockMvc
 //         .perform(
-//             post("/api/teams/{id}/join-requests", createdTeamId).with(authentication(memberAuth)))
+//             post("/api/teams/{id}/join-requests",
+// createdTeamId).with(authentication(memberAuth)))
 //         .andDo(print())
 //         .andExpect(status().isCreated());
 //     mockMvc
@@ -289,7 +292,8 @@
 
 //     mockMvc
 //         .perform(
-//             post("/api/teams/{id}/join-requests", createdTeamId).with(authentication(memberAuth)))
+//             post("/api/teams/{id}/join-requests",
+// createdTeamId).with(authentication(memberAuth)))
 //         .andDo(print())
 //         .andExpect(status().isCreated());
 //     mockMvc
@@ -301,7 +305,8 @@
 //         .andExpect(status().isOk());
 
 //     mockMvc
-//         .perform(delete("/api/teams/{id}/members", createdTeamId).with(authentication(memberAuth)))
+//         .perform(delete("/api/teams/{id}/members",
+// createdTeamId).with(authentication(memberAuth)))
 //         .andDo(print())
 //         .andExpect(status().isNoContent());
 //   }
