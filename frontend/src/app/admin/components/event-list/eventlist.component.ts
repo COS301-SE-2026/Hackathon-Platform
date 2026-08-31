@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
-import { EventService, EventResponse, EventRegistrationSummary } from '../../../services/event.service';
+import { EventService, EventResponse, EventParticipantResponse } from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 
@@ -15,6 +15,12 @@ interface EventRow {
   status: string;
   statusClass: 'live' | 'upcoming' | 'completed' | 'canceled'| 'ended';
   dateRangeLabel: string;
+}
+
+interface RegisteredTeam {
+  teamId: string;
+  name: string;
+  members: EventParticipantResponse[];
 }
 
 @Component({
@@ -49,10 +55,9 @@ export class EventlistComponent implements OnInit {
   statusFilter = 'ALL';
 
   expandedEventId: string | null = null;
-  registrationsByEvent: Record<string, EventRegistrationSummary> = {};
+  registrationsByEvent: Record<string, RegisteredTeam[]> = {};
   registrationsLoading: Record<string, boolean> = {};
   registrationsError: Record<string, string> = {};
-  exportingResults: Record<string, boolean> = {};
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
@@ -189,7 +194,7 @@ export class EventlistComponent implements OnInit {
   }
 
   navigateToViewEvent(eventId: string): void {
-    console.warn('No event-detail route exists in app.routes.ts yet for event', eventId);
+    this.toggleEventDetails(eventId);
   }
 
   toggleEventDetails(eventId: string): void {
@@ -207,42 +212,33 @@ export class EventlistComponent implements OnInit {
     this.registrationsLoading[eventId] = true;
     this.registrationsError[eventId] ='';
 
-    this.eventService.getEventRegistrations(eventId).subscribe({
-      next: (summary) =>{
-        this.registrationsByEvent[eventId] = summary;
-      this.registrationsLoading[eventId] = false;
-      this.change.markForCheck();
+    this.eventService.getEventParticipants(eventId).subscribe({
+      next: (participants) =>{
+        const teams = new Map<string, RegisteredTeam>();
+
+        participants.forEach((participant) => {
+          if (!teams.has(participant.teamId)) {
+            teams.set(participant.teamId, {
+              teamId: participant.teamId,
+              name: participant.teamName,
+              members: []
+            });
+          }
+
+          teams.get(participant.teamId)?.members.push(participant);
+        });
+
+        this.registrationsByEvent[eventId] = Array.from(teams.values());
+        this.registrationsLoading[eventId] = false;
+        this.change.markForCheck();
       },
       error:(error) =>{
         console.error('Failed to load registrations for event',eventId,error);
-        this.registrationsError[eventId] = 'Could not load registered teams and participants.';
+        this.registrationsError[eventId] = 'Could not load registered teams.';
         this.registrationsLoading[eventId] = false;
         this.change.markForCheck();
       }
     });
-  }
-
-  downloadResults(eventId: string, eventName:string): void{
-    this.exportingResults[eventId] = true;
-
-    this.eventService.downloadEventResults(eventId).subscribe(
-      {
-        next: (blob) =>{
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href =url;
-          link.download = `${eventName || 'event'}-results.xlsx`;
-          link.click();
-          window.URL.revokeObjectURL(url);
-          this.exportingResults[eventId] = false;
-          this.change.markForCheck();
-        },
-        error: (error) =>{
-          console.error('Failed to export results for event', eventId, error);
-          this.exportingResults[eventId] =false;
-          this.change.markForCheck();
-        }
-  });
   }
 
   navigateToParticipants(eventId: string): void {
