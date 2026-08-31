@@ -5,6 +5,7 @@ import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
 import { EventService, EventResponse, EventRegistrationSummary } from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
+import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 
 interface EventRow {
   eventId : string;
@@ -19,7 +20,7 @@ interface EventRow {
 @Component({
   selector: 'app-eventlist',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent],
   templateUrl: './eventlist.component.html',
   styleUrls: ['./eventlist.component.scss']
 })
@@ -30,6 +31,10 @@ export class EventlistComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly change = inject(ChangeDetectorRef);
+
+  showParticipantsModal = false;
+  participantsModalEventId: string | null = null;
+  participantsModalEventName = '';
 
   hackathonId = '';
   isHackathonScoped = false;
@@ -48,7 +53,6 @@ export class EventlistComponent implements OnInit {
   registrationsLoading: Record<string, boolean> = {};
   registrationsError: Record<string, string> = {};
   exportingResults: Record<string, boolean> = {};
-
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
@@ -239,5 +243,17 @@ export class EventlistComponent implements OnInit {
           this.change.markForCheck();
         }
   });
+  }
+
+  navigateToParticipants(eventId: string): void {
+    const event = this.events.find(e => e.eventId === eventId);
+    this.participantsModalEventId = eventId;
+    this.participantsModalEventName = event?.name || '';
+    this.showParticipantsModal = true;
+  }
+
+  closeParticipantsModal(): void {
+    this.showParticipantsModal = false;
+    this.participantsModalEventId = null;
   }
 }

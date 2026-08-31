@@ -184,6 +184,9 @@
 .panels-row-2{
   grid-template-columns: 1fr 1fr;
 }
+.panels-row-3{
+  grid-template-columns: 1fr 1fr 1fr;
+}
 
 .panel-card{
   background-color: #ffffff;
@@ -781,5 +784,116 @@
 
   }
 
+  .event-context-picker{
+    align-self: stretch;
+    justify-content: space-between;
+  }
+
+  .event-insights-select{
+    max-width: none;
+    flex: 1;
+  }
+
  
+}
+.top-teams-rows{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.top-team-row{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.top-team-rank{
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: #f1f3f7;
+  color: #3a4357;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.rank-1{
+    background-color: #fde68a;
+    color: #7c5b00;
+  }
+  &.rank-2{
+    background-color: #e2e8f0;
+    color: #334155;
+  }
+  &.rank-3{
+    background-color: #fbd0ac;
+    color: #92400e;
+  }
+}
+.top-team-info{
+  flex: 1;
+  min-width: 0;
+}
+.top-team-name{
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #13192d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.top-team-score{
+  margin: 0;
+  font-size: 0.72rem;
+  color: #6b7588;
+}
+
+.event-context-picker{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: 0 1px 2px rgba(19,25,45,0.04);
+  flex-shrink: 0;
+}
+.event-context-label{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7588;
+  white-space: nowrap;
+
+  i{
+    font-size: 0.78rem;
+    color: #146a9d;
+  }
+}
+.event-insights-select{
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #e7eaf0;
+  background-color: #f8f9fb;
+  border-radius: 8px;
+  padding: 6px 30px 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #13192d;
+  max-width: 220px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%236b7588' stroke-width='1.5' fill='none' fill-rule='evenodd'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+
+  &:focus{
+    outline: none;
+    border-color: #146a9d;
+  }
 }
