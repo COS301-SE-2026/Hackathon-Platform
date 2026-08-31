@@ -1,9 +1,9 @@
 package com.hackathon.platform.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -17,8 +17,8 @@ import com.hackathon.platform.repository.AnnouncementEmailDeliveryRepository;
 import com.hackathon.platform.repository.CommunicationMessageRepository;
 import com.hackathon.platform.repository.UserRepository;
 import java.util.List;
-import java.util.UUID;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,107 +27,109 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AnnouncementEmailDeliveryServiceTest {
-    @Mock
-    private AnnouncementEmailDeliveryRepository emailDeliveryRepo;
-    
-    @Mock
-    private CommunicationMessageRepository communicationRepo;
+  @Mock private AnnouncementEmailDeliveryRepository emailDeliveryRepo;
 
-    @Mock
-    private UserRepository userRepo;
+  @Mock private CommunicationMessageRepository communicationRepo;
 
-    @Mock
-    private AnnouncementEmailService announcementEmailService;
+  @Mock private UserRepository userRepo;
 
-    private AnnouncementEmailDeliveryService deliveryService;
-    private UUID msgId;
-    private UUID adminId;
-    private CommunicationMessage msg;
-    private User admin;
-    private AnnouncementEmailDelivery delivery;
+  @Mock private AnnouncementEmailService announcementEmailService;
 
-    @BeforeEach
-    void setUp() {
-        deliveryService = new AnnouncementEmailDeliveryService(emailDeliveryRepo, communicationRepo, userRepo, announcementEmailService);
-        msgId = UUID.randomUUID();
-        adminId = UUID.randomUUID();
+  private AnnouncementEmailDeliveryService deliveryService;
+  private UUID msgId;
+  private UUID adminId;
+  private CommunicationMessage msg;
+  private User admin;
+  private AnnouncementEmailDelivery delivery;
 
-        msg = new CommunicationMessage();
-        msg.setCreatedByUserId(adminId);
-        msg.setTitle("TEST");
-        msg.setBody("BODY");
-        msg.setSeverity("IMPORTANT");
+  @BeforeEach
+  void setUp() {
+    deliveryService =
+        new AnnouncementEmailDeliveryService(
+            emailDeliveryRepo, communicationRepo, userRepo, announcementEmailService);
+    msgId = UUID.randomUUID();
+    adminId = UUID.randomUUID();
 
-        admin = new User();
-        admin.setEmail("test@email.com");
+    msg = new CommunicationMessage();
+    msg.setCreatedByUserId(adminId);
+    msg.setTitle("TEST");
+    msg.setBody("BODY");
+    msg.setSeverity("IMPORTANT");
 
-        delivery = new AnnouncementEmailDelivery();
-        delivery.setRecipientEmail("send@here.com");
-        delivery.setDeliveryStatus("PENDING");
-        delivery.setAttemptCount(0);
-    }
+    admin = new User();
+    admin.setEmail("test@email.com");
 
-    @Test
-    void successfulEmailIsMarkedAsSent() {
-        when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
-        when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
-        when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
+    delivery = new AnnouncementEmailDelivery();
+    delivery.setRecipientEmail("send@here.com");
+    delivery.setDeliveryStatus("PENDING");
+    delivery.setAttemptCount(0);
+  }
 
-        deliveryService.processMessage(msgId);
-        verify(announcementEmailService).sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
+  @Test
+  void successfulEmailIsMarkedAsSent() {
+    when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
+    when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
+    when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
 
-        assertEquals("SENT", delivery.getDeliveryStatus());
-        assertEquals(1, delivery.getAttemptCount());
-        assertNotNull(delivery.getSentAt());
-        assertNull(delivery.getLastError());
+    deliveryService.processMessage(msgId);
+    verify(announcementEmailService)
+        .sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
 
-        verify(emailDeliveryRepo, times(2)).save(delivery);
-    }
+    assertEquals("SENT", delivery.getDeliveryStatus());
+    assertEquals(1, delivery.getAttemptCount());
+    assertNotNull(delivery.getSentAt());
+    assertNull(delivery.getLastError());
 
-    @Test
-    void failedEmailIsMarkedAsFailed() {
-        when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
-        when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
-        when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
+    verify(emailDeliveryRepo, times(2)).save(delivery);
+  }
 
-        doThrow(new RuntimeException("SMTP failed")).when(announcementEmailService).sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
-        deliveryService.processMessage(msgId);
+  @Test
+  void failedEmailIsMarkedAsFailed() {
+    when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
+    when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
+    when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
 
-        assertEquals("FAILED", delivery.getDeliveryStatus());
-        assertEquals(1, delivery.getAttemptCount());
-        assertEquals("SMTP failed", delivery.getLastError());
-        assertNull(delivery.getSentAt());
+    doThrow(new RuntimeException("SMTP failed"))
+        .when(announcementEmailService)
+        .sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
+    deliveryService.processMessage(msgId);
 
-        verify(emailDeliveryRepo, times(2)).save(delivery);
-    }
-    
-    @Test
-    void sentEmailIsNotSentAgain() {
-        delivery.setDeliveryStatus("SENT");
-        when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
-        when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
-        when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
-        deliveryService.processMessage(msgId);
-        verify(announcementEmailService, never()).sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
-        verify(emailDeliveryRepo, never()).save(delivery);
-    }
+    assertEquals("FAILED", delivery.getDeliveryStatus());
+    assertEquals(1, delivery.getAttemptCount());
+    assertEquals("SMTP failed", delivery.getLastError());
+    assertNull(delivery.getSentAt());
 
-    @Test
-    void EmailIsNotSentAfterThreeAttempts() {
-        delivery.setDeliveryStatus("FAILED");
-        delivery.setAttemptCount(3);
-        when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
-        when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
-        when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
-        deliveryService.processMessage(msgId);
-        verify(announcementEmailService, never()).sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
-        verify(emailDeliveryRepo, never()).save(delivery);
-    }
+    verify(emailDeliveryRepo, times(2)).save(delivery);
+  }
 
-    @Test
-    void missingMessageThrowsException() {
-        when(communicationRepo.findById(msgId)).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> deliveryService.processMessage(msgId));
-    }
+  @Test
+  void sentEmailIsNotSentAgain() {
+    delivery.setDeliveryStatus("SENT");
+    when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
+    when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
+    when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
+    deliveryService.processMessage(msgId);
+    verify(announcementEmailService, never())
+        .sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
+    verify(emailDeliveryRepo, never()).save(delivery);
+  }
 
+  @Test
+  void EmailIsNotSentAfterThreeAttempts() {
+    delivery.setDeliveryStatus("FAILED");
+    delivery.setAttemptCount(3);
+    when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
+    when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
+    when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
+    deliveryService.processMessage(msgId);
+    verify(announcementEmailService, never())
+        .sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
+    verify(emailDeliveryRepo, never()).save(delivery);
+  }
+
+  @Test
+  void missingMessageThrowsException() {
+    when(communicationRepo.findById(msgId)).thenReturn(Optional.empty());
+    assertThrows(IllegalArgumentException.class, () -> deliveryService.processMessage(msgId));
+  }
 }

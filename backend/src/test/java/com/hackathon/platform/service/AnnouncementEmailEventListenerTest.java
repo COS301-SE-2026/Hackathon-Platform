@@ -11,19 +11,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AnnouncementEmailEventListenerTest {
-    @Mock
-    private AnnouncementEmailDeliveryService emailService;
-    
-    @InjectMocks
-    private AnnouncementEmailEventListener listener;
+  @Mock private AnnouncementEmailDeliveryService emailService;
 
-    @Test
-    void announcementEventProcessesEmailDeliveries() {
-        UUID eventId = UUID.randomUUID();
-        UUID msgId = UUID.randomUUID();
-        AnnouncementCreatedEvent event = new AnnouncementCreatedEvent(eventId, msgId);
+  @InjectMocks private AnnouncementEmailEventListener listener;
 
-        listener.handleAnnouncement(event);
-        verify(emailService).processMessage(msgId);
-    }
+  @Test
+  void announcementEventProcessesEmailDeliveries() {
+    UUID eventId = UUID.randomUUID();
+    UUID msgId = UUID.randomUUID();
+    AnnouncementCreatedEvent event = new AnnouncementCreatedEvent(eventId, msgId);
+
+    listener.handleAnnouncement(event);
+    verify(emailService).processMessage(msgId);
+  }
 }
