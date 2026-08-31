@@ -68,7 +68,7 @@
 
         <div class="resource-action">
 
-        <app-button variant="secondary" width= "100%" (click)="downloadLevelFiles(level.id)">
+        <app-button variant="secondary" width= "100%" (click)="downloadLevelFiles(level.id)" (keydown)="null" (keyup)="null">
          <i class="pi pi-download"></i>
          Download Resources
         </app-button>
@@ -108,7 +108,7 @@
     <div class="submit-section">
 
 
-        <app-button  variant="primary"  width= "100%"  [disabled]="!canSubmit"  (click)="submitSolution()">
+        <app-button  variant="primary"  width= "100%"  [disabled]="!canSubmit"  (click)="submitSolution()" (keydown)="null" (keyup)="null">
          <i class="pi pi-send"></i>
          {{ submitting ? 'Submitting...' : 'Submit Solution' }}
         </app-button>
