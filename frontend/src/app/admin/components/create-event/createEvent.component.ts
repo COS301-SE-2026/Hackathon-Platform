@@ -16,6 +16,9 @@ export class CreateEventComponent implements OnInit {
   @ViewChild('fileInput')
   fileInput!: ElementRef<HTMLInputElement>;
 
+  @ViewChild('logoFileInput')
+  logoFileInput!: ElementRef<HTMLInputElement>;
+
   private readonly eventService = inject(EventService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -34,9 +37,14 @@ export class CreateEventComponent implements OnInit {
     visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
     bannerFile: null as File | null,
     bannerFileName: '',
+    logoFile: null as File | null,
+    logoFileName:'',
     description: '',
     registrationKey: '',
-    rules: ''
+    rules: '',
+    isInPerson: false,
+    leaderboardFreezeDateTime: '',
+
   };
 
   readonly descriptionMaxLength = 1000;
@@ -49,25 +57,41 @@ export class CreateEventComponent implements OnInit {
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
    }
 
-  triggerFileInput(): void {
-    this.fileInput.nativeElement.click();
+  triggerFileInput(target: 'banner'| 'logo' = 'banner'): void {
+    if (target === 'logo'){
+     this.logoFileInput.nativeElement.click(); 
+    } else {
+      this.fileInput.nativeElement.click();
+
+    }
+    
   }
 
-  onFileSelected(event: Event): void {
+  onFileSelected(event: Event, target: 'banner'| 'logo' = 'banner'): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
+      if (target === 'logo'){
+      this.form.logoFile = file;
+      this.form.logoFileName = file.name;
+      }else {
       this.form.bannerFile = file;
       this.form.bannerFileName = file.name;
+      }
     }
   }
 
-  onDrop(event: DragEvent): void {
+  onDrop(event: DragEvent, target: 'banner'| 'logo' = 'banner'): void {
     event.preventDefault();
     const file = event.dataTransfer?.files?.[0];
     if (file) {
+      if (target === 'logo'){
+      this.form.logoFile = file;
+      this.form.logoFileName = file.name;
+      }else {
       this.form.bannerFile = file;
       this.form.bannerFileName = file.name;
+      }
     }
   }
 
@@ -75,9 +99,6 @@ export class CreateEventComponent implements OnInit {
     event.preventDefault();
   }
 
-  onSaveDraft(): void {
-    this.createEvent();
-  }
 
   createEvent(): void {
     if (!this.form.eventName) {
@@ -132,7 +153,12 @@ export class CreateEventComponent implements OnInit {
       description: this.form.description || undefined,
       visibility: this.form.visibility,
       status: 'ACTIVE',
-      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined
+      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined,
+      isInPerson: this.form.isInPerson,
+      leaderboardFreezeDateTime: this.form.leaderboardFreezeDateTime
+      ? new Date(this.form.leaderboardFreezeDateTime).toISOString()
+      :undefined
+
     };
 
     console.log('Sending event data to backend:', eventData);
