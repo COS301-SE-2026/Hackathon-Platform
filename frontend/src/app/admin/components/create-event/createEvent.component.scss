@@ -491,10 +491,117 @@ textarea{
     margin-top: 6px;
 }
 
+.prize-list{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 
+}
+.prize-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+}
+.prize-row-index{
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: #eaf4f6;
+    color: #146a9d;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.prize-row-fields{
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 10px;
+    min-width: 0;
+}
+
+.prize-title-input,
+.prize-description-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #dfe3ea;
+    border-radius: 8px;
+    background-color: #f9fafc;
+    color: #13192d;
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s, background-color 0.15s;
+
+    &::placeholder{
+        color: #a3aabb;
+    }
+    &:focus{
+        border-color: #1983c2;
+        background-color: #ffffff;
+    }
+}
+
+.prize-remove-btn{
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    color: #8089a0;
+    border: 1.5px solid #dfe3ea;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+
+    &:hover:not(:disabled){
+        border-color: #e0938f;
+        color: #c0392b;
+        background-color: #fdf1f0;
+
+    }
+    &:disabled{
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+.btn-add-prize{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    background-color: #f9fafc;
+    color: #146a9d;
+    border: 1.5px dashed #dfe3ea;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+
+    &:hover{
+        border-color: #1983c2;
+        background-color: #f4f9fd;
+    }
+}
 @media (max-width : 600px){
     .form-row, .access-group {
         grid-template-columns : 1fr;
+    }
+
+    .prize-row-fields{
+        grid-template-columns: 1fr;
     }
 
 }
