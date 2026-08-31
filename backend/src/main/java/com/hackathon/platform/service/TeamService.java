@@ -250,7 +250,7 @@ public class TeamService {
     return toMemberResponses(teamId, "APPROVED");
   }
 
-  /**List every approved participant across all teams for an event for admin use */
+  /** List every approved participant across all teams for an event for admin use */
   public List<EventParticipantResponse> listEventParticipants(UUID eventId) {
     List<Team> teams = teamRepository.findByEventId(eventId);
     if (teams.isEmpty()) {
@@ -259,40 +259,37 @@ public class TeamService {
 
     List<UUID> teamIds = teams.stream().map(Team::getTeamId).collect(Collectors.toList());
     Map<UUID, Team> teamsById =
-      teams.stream().collect(Collectors.toMap(Team::getTeamId, team -> team));
-    
+        teams.stream().collect(Collectors.toMap(Team::getTeamId, team -> team));
+
     List<TeamMember> members = teamMemberRepository.findByTeamIdInAndStatus(teamIds, "APPROVED");
 
     List<UUID> userIds = members.stream().map(TeamMember::getUserId).collect(Collectors.toList());
     Map<UUID, User> usersById =
-      userRepository.findAllById(userIds).stream()
-        .collect(Collectors.toMap(User::getUserId, user -> user));
+        userRepository.findAllById(userIds).stream()
+            .collect(Collectors.toMap(User::getUserId, user -> user));
 
-      return members.stream()
+    return members.stream()
         .map(
-          member -> {
-            Team team = teamsById.get(member.getTeamId());
-            User user = usersById.get(member.getUserId());
-            if (team == null || user == null) {
-              return null;
-            }
-            String role =
-              member.getUserId().equals(team.getCreatedByUserId()) ? "LEADER" : "MEMBER";
-            
-            return new EventParticipantResponse(
-              user.getUserId(),
-              user.getFirstName() + " " + user.getLastName(),
-              user.getEmail(),
-              team.getTeamId(),
-              team.getTeamName(),
-              role,
-              member.getJoinedAt()
-            );
-          }
-        )
-      .filter(response -> response != null)
-      .collect(Collectors.toList());
-      
+            member -> {
+              Team team = teamsById.get(member.getTeamId());
+              User user = usersById.get(member.getUserId());
+              if (team == null || user == null) {
+                return null;
+              }
+              String role =
+                  member.getUserId().equals(team.getCreatedByUserId()) ? "LEADER" : "MEMBER";
+
+              return new EventParticipantResponse(
+                  user.getUserId(),
+                  user.getFirstName() + " " + user.getLastName(),
+                  user.getEmail(),
+                  team.getTeamId(),
+                  team.getTeamName(),
+                  role,
+                  member.getJoinedAt());
+            })
+        .filter(response -> response != null)
+        .collect(Collectors.toList());
   }
 
   /** View pending join requests. Only the team creator may view them. */
