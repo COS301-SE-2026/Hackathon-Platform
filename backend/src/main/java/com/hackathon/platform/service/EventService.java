@@ -64,6 +64,7 @@ public class EventService {
     validateEventReq(req, true);
     requireHackathon(req.getHackathonId());
     Event event = new Event();
+    event.setHackathon(req.getHackathonId());
     event.setCreatedByUserId(getCurrentAdminId());
     applyReq(event, req, true);
     event.setStatus(
