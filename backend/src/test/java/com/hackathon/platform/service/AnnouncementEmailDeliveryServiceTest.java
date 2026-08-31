@@ -112,4 +112,16 @@ class AnnouncementEmailDeliveryServiceTest {
         verify(emailDeliveryRepo, never()).save(delivery);
     }
 
+    @Test
+    void EmailIsNotSentAfterThreeAttempts() {
+        delivery.setDeliveryStatus("FAILED");
+        delivery.setAttemptCount(3);
+        when(communicationRepo.findById(msgId)).thenReturn(Optional.of(msg));
+        when(userRepo.findById(adminId)).thenReturn(Optional.of(admin));
+        when(emailDeliveryRepo.findByMessageId(msgId)).thenReturn(List.of(delivery));
+        deliveryService.processMessage(msgId);
+        verify(announcementEmailService, never()).sendAnnouncementEmail("send@here.com", "test@email.com", "TEST", "BODY", "IMPORTANT");
+        verify(emailDeliveryRepo, never()).save(delivery);
+    }
+
 }
