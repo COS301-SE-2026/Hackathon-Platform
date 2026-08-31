@@ -616,8 +616,8 @@ com.hackathon.platform.model.Hackathon();
     when(producer.enqueue(any())).thenReturn("record-123");
 
     MockMultipartFile outputFile =
-        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output
-data".getBytes());
+        new MockMultipartFile("outputFile", "output.txt", "text/plain", 
+        "output data".getBytes());
     MockMultipartFile sourceFile =
         new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
 "zipdata".getBytes());
@@ -657,8 +657,8 @@ TEAM_ID)
   @Test
   void uploadSubmission_returnsErrorWhenLevelIdMissing() throws Exception {
     MockMultipartFile outputFile =
-        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output
-data".getBytes());
+        new MockMultipartFile("outputFile", "output.txt", "text/plain", 
+        "output data".getBytes());
     MockMultipartFile sourceFile =
         new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
 "zipdata".getBytes());
@@ -775,8 +775,8 @@ TEAM_ID)
   @Test
   void uploadSubmission_returns403WhenCallerIsAdminNotParticipant() throws Exception {
     MockMultipartFile outputFile =
-        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output
-data".getBytes());
+        new MockMultipartFile("outputFile", "output.txt", "text/plain",
+        "output data".getBytes());
     MockMultipartFile sourceFile =
         new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
 "zipdata".getBytes());
