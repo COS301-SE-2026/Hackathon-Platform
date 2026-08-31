@@ -10,7 +10,7 @@
 
 <ng-template #body let-rowData let-columns="columns">
 
-<tr> @for (column of columns; track column.field) {
+<tr [class]="rowClass ? rowClass(rowData) : ''" > @for (column of columns; track column.field) {
     
       <td>
 

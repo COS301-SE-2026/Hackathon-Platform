@@ -4,141 +4,136 @@
         <h2>Leaderboard Loading...</h2>
         <i class="pi pi-spin pi-spinner empty-icon"></i>
     </div>
-   } @else if (leaderboardAvailable && leaderboard.length > 0) {
- <div class="leaderboard-header">
+   } 
+   
+    @else if (leaderboardAvailable && leaderboard.length > 0) {
 
-     <h1 class="leaderboard-title">Current Standings</h1>
 
-      <p class="leaderboard-prompt">See how your team ranks against the competition.</p>
-        @if (myTeam; as currentTeam) {
-        <div class="my-team-summary">
 
-            <div class="team-rank">#{{ currentTeam.rank }}</div>
+    @if (myTeam; as currentTeam) {
 
-            <div class="team-info">
+    <div class="my-team-performance">
 
-            <h2 class="team-name">{{ currentTeam.name }}<span class="team-tag"> — Your Team</span></h2>
-               
-            <p class="team-score">{{ currentTeam.score}} pts</p>
-            
-          </div>
+        <div class="performance-header"><h2>My Team Performance</h2></div>
 
-     </div>
-    }
+        <div class="performance-content">
 
- </div>
+        <div class="performance-team">
 
-@if (topThree.length >= 3) {
- <div class="podium-section">
+          <div class="team-icon"> <i class="pi pi-code"></i></div>
 
- <div class="podium-header">
-
-        <h2 class="podium-title">Top Teams</h2>
-        <p class="podium-prompt">The three highest scoring teams in the competition.</p>
-    </div>
-
-    <div class="podium">
-
-        
-        <div class="podium-card rank-2">
-
-          <div class="podium-medal silver">
-            <i class="pi pi-trophy"></i>
-          </div>
-
-            <h3 class="podium-team">{{ topThree[1].name }}</h3>
-
-            <p class="podium-score">{{ topThree[1].score}} pts </p>
-
-            <span class="podium-rank-2">Rank #2</span>
+          <div class="team-name">  <h1>{{ currentTeam.name }}</h1> </div>
 
         </div>
 
-        
-        <div class="podium-card rank-1">
+        <div class="performance-stats">
 
-          <div class="podium-medal gold">
-         <i class="pi pi-trophy"></i>
-          </div>
+            <div class="performance-stat">
+            <div class="performance-stat-icon"> <i class="pi pi-trophy"></i></div>
 
-            <h3 class="podium-team">{{ topThree[0].name }}</h3>
+            <div class="performance-stat-info">
 
-            <p class="podium-score">{{ topThree[0].score}} pts</p>
+                <span class="performance-stat-value"> #{{ currentTeam.rank }}</span>
 
-            <span class="podium-rank-1">Rank #1</span>
-
-        </div>
-
-      
-        <div class="podium-card rank-3">
-           <div class="podium-medal bronze">
-             <i class="pi pi-trophy"></i>
+                <span class="performance-stat-label"> Rank</span>
             </div>
 
-            <h3 class="podium-team">{{ topThree[2].name }}</h3>
+            </div>
 
-            <p class="podium-score">{{ topThree[2].score}} pts</p>
+            <div class="performance-stat">
+            <div class="performance-stat-icon"><i class="pi pi-star"></i></div>
 
-            <span class="podium-rank-3">Rank #3</span>
+            <div class="performance-stat-info">
+                <span class="performance-stat-value">{{ currentTeam.score }} pts</span>
+                
+                <span class="performance-stat-label">Score</span>
+            </div>
+
+            </div>
+
+        </div>
 
         </div>
 
     </div>
 
-</div>
-}
+    }
 
-<div class="rankings-section">
+
+    <div class="rankings-section">
 
     <div class="rankings-header">
 
-        <h2 class="rankings-title">Full Rankings</h2>
+        <div class="rankings-header-content">
+
+        <h2 class="rankings-title">Leaderboard</h2>
+
+        <p class="rankings-prompt"> Top performing teams in the event.</p>
+
+        </div>
+
+    
+    </div>
+
+        <app-table [columns]="tableColumns" [data]="tableData" [loading]="false" [rowClass]="getRowClass" emptyMessage="No teams found."></app-table>
 
     </div>
 
-    <p-table [value]="leaderboard" class="leaderboard-table" [paginator]="true" [rows]="10" >
 
-        <ng-template pTemplate="header">
+   } 
+   
+   @else{
 
-         <tr>
-            <th scope="col">Rank</th>
-            <th scope="col">Team</th>
-            <th scope="col">Score</th>
-        </tr>
+    <div class="no-leaderboard-page">
 
-        </ng-template>
+        <i class="pi pi-lock empty-icon"></i>
 
-        <ng-template  pTemplate="body" let-team>
+        <h2>Leaderboard Currently Unavailable</h2>
 
-         <tr [class.current-team]="currTeamId && team.teamId === currTeamId">
+    </div>
 
-             <td>{{ team.rank }}</td>
-
-                <td>
-                  <div class="team-cell">
-                   <div class="team-avatar">{{ getInitials(team.name) }}</div>
-                       <span>{{ team.name }}</span>
-                    </div>
-                </td>
-
-                <td>{{ team.score}}</td>
-         </tr>
-
-        </ng-template>
-
-    </p-table>
-
-</div>
-   } @else{
-
-<div class="no-leaderboard-page">
-
-    <i class="pi pi-lock empty-icon"></i>
-
-    <h2>Leaderboard Currently Unavailable</h2>
+    }
 
 </div>
 
-}
 
-</div>
+<ng-template #rankTemplate let-row>
+
+  @if (row.rank === 1) {
+
+    <div class="rank-icon rank-gold"> {{ row.rank }} </div>
+
+  } 
+  
+  @else if (row.rank === 2) {
+
+    <div class="rank-icon rank-silver"> {{ row.rank }}</div>
+
+  } 
+  
+  @else if (row.rank === 3) {
+
+    <div class="rank-icon rank-bronze">{{ row.rank }}</div>
+
+  } @else {
+
+
+    <div class="rank-icon rank-default"> {{ row.rank }}</div>
+
+  }
+
+</ng-template>
+
+
+
+<ng-template #teamTemplate let-row>
+
+  <div class="team-cell">
+
+    <div class="team-avatar">  {{ getInitials(row.team) }}</div>
+
+    <span>{{ row.team }}</span>
+
+  </div>
+
+</ng-template>

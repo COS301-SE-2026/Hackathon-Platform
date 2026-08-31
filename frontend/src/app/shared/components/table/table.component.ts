@@ -25,4 +25,6 @@ export class TableComponent {
   @Input() loading = false;
 
   @Input() emptyMessage = 'No data available';
+
+  @Input() rowClass?: (row: TableRow) => string;
 }
