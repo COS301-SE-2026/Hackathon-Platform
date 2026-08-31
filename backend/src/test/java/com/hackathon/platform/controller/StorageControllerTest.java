@@ -9,8 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static
-org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -335,8 +334,7 @@ class StorageControllerTest {
 
     mockMvc
         .perform(
-            get("/api/storage/events/{eventId}/banner",
-EVENT_ID).with(authentication(adminAuth)))
+            get("/api/storage/events/{eventId}/banner", EVENT_ID).with(authentication(adminAuth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.url").value(BLOB_URL));
   }
@@ -348,8 +346,7 @@ EVENT_ID).with(authentication(adminAuth)))
 
     mockMvc
         .perform(
-            get("/api/storage/events/{eventId}/banner",
-EVENT_ID).with(authentication(adminAuth)))
+            get("/api/storage/events/{eventId}/banner", EVENT_ID).with(authentication(adminAuth)))
         .andExpect(status().isNoContent());
   }
 
@@ -493,8 +490,7 @@ EVENT_ID).with(authentication(adminAuth)))
 
     mockMvc
         .perform(
-            delete("/api/storage/events/{eventId}/logo",
-EVENT_ID).with(authentication(adminAuth)))
+            delete("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
         .andExpect(status().isNoContent());
 
     verify(storageService, times(1)).delete(CONTAINER, storageKey);
@@ -508,8 +504,7 @@ EVENT_ID).with(authentication(adminAuth)))
 
     mockMvc
         .perform(
-            delete("/api/storage/events/{eventId}/logo",
-EVENT_ID).with(authentication(adminAuth)))
+            delete("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
         .andExpect(status().isNoContent());
 
     verify(storageService, never()).delete(anyString(), anyString());
@@ -558,8 +553,7 @@ EVENT_ID).with(authentication(adminAuth)))
 
   @Test
   void getProblemStatementUrl_returns200WithPresignedUrl() throws Exception {
-    com.hackathon.platform.model.Hackathon hackathon = new
-com.hackathon.platform.model.Hackathon();
+    com.hackathon.platform.model.Hackathon hackathon = new com.hackathon.platform.model.Hackathon();
     hackathon.setProblemStatementStorageKey("hackathons/.../problem.pdf");
 
     when(hackathonService.getHackathonById(any())).thenReturn(hackathon);
@@ -616,16 +610,13 @@ com.hackathon.platform.model.Hackathon();
     when(producer.enqueue(any())).thenReturn("record-123");
 
     MockMultipartFile outputFile =
-        new MockMultipartFile("outputFile", "output.txt", "text/plain", 
-        "output data".getBytes());
+        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output data".getBytes());
     MockMultipartFile sourceFile =
-        new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
-"zipdata".getBytes());
+        new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
 
     mockMvc
         .perform(
-            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID,
-TEAM_ID)
+            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID, TEAM_ID)
                 .file(outputFile)
                 .file(sourceFile)
                 .param("levelId", "1")
@@ -641,13 +632,11 @@ TEAM_ID)
   @Test
   void uploadSubmission_returnsErrorWhenOutputFileMissing() throws Exception {
     MockMultipartFile sourceFile =
-        new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
-"zipdata".getBytes());
+        new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
 
     mockMvc
         .perform(
-            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID,
-TEAM_ID)
+            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID, TEAM_ID)
                 .file(sourceFile)
                 .param("levelId", "1")
                 .with(authentication(participantAuth)))
@@ -657,16 +646,13 @@ TEAM_ID)
   @Test
   void uploadSubmission_returnsErrorWhenLevelIdMissing() throws Exception {
     MockMultipartFile outputFile =
-        new MockMultipartFile("outputFile", "output.txt", "text/plain", 
-        "output data".getBytes());
+        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output data".getBytes());
     MockMultipartFile sourceFile =
-        new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
-"zipdata".getBytes());
+        new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
 
     mockMvc
         .perform(
-            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID,
-TEAM_ID)
+            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID, TEAM_ID)
                 .file(outputFile)
                 .file(sourceFile)
                 .with(authentication(participantAuth)))
@@ -685,8 +671,7 @@ TEAM_ID)
     mockMvc
         .perform(
             get(
-
-"/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+                    "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
                     EVENT_ID,
                     TEAM_ID,
                     SUBMISSION_ID,
@@ -708,8 +693,7 @@ TEAM_ID)
     mockMvc
         .perform(
             get(
-
-"/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}",
+                    "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/source/{filename}",
                     EVENT_ID,
                     TEAM_ID,
                     SUBMISSION_ID,
@@ -724,8 +708,7 @@ TEAM_ID)
     mockMvc
         .perform(
             get(
-
-"/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
+                    "/api/storage/events/{eventId}/teams/{teamId}/submissions/{submissionId}/output/{filename}",
                     EVENT_ID,
                     TEAM_ID,
                     "not-a-number",
@@ -744,8 +727,7 @@ TEAM_ID)
     mockMvc
         .perform(
             get(
-
-"/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}",
+                    "/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}",
                     EVENT_ID,
                     TEAM_ID,
                     LEVEL_ID,
@@ -775,16 +757,13 @@ TEAM_ID)
   @Test
   void uploadSubmission_returns403WhenCallerIsAdminNotParticipant() throws Exception {
     MockMultipartFile outputFile =
-        new MockMultipartFile("outputFile", "output.txt", "text/plain",
-        "output data".getBytes());
+        new MockMultipartFile("outputFile", "output.txt", "text/plain", "output data".getBytes());
     MockMultipartFile sourceFile =
-        new MockMultipartFile("sourceFile", "archive.zip", "application/zip",
-"zipdata".getBytes());
+        new MockMultipartFile("sourceFile", "archive.zip", "application/zip", "zipdata".getBytes());
 
     mockMvc
         .perform(
-            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID,
-TEAM_ID)
+            multipart("/api/storage/events/{eventId}/teams/{teamId}/submissions", EVENT_ID, TEAM_ID)
                 .file(outputFile)
                 .file(sourceFile)
                 .param("levelId", "1")

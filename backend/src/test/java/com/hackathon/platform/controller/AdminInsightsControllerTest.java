@@ -3,8 +3,7 @@ package com.hackathon.platform.controller;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static
-org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,8 +41,7 @@ class AdminInsightsControllerTest {
   @MockBean private InsightsService insightsService;
 
   private static final UUID EVENT_ID = UUID.fromString("c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14");
-  private static final UUID ADMIN_USER_ID =
-UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+  private static final UUID ADMIN_USER_ID = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
 
   private UsernamePasswordAuthenticationToken adminAuth;
   private UsernamePasswordAuthenticationToken participantAuth;
@@ -101,8 +99,7 @@ UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
                 new BigDecimal("100.0"),
                 new BigDecimal("55.5")));
 
-    return new EventInsightsResponse(EVENT_ID, 4L, 12L, 12L, 3L, byStatus, 0.3, rate,
-distribution);
+    return new EventInsightsResponse(EVENT_ID, 4L, 12L, 12L, 3L, byStatus, 0.3, rate, distribution);
   }
 
   @Test
@@ -131,8 +128,7 @@ distribution);
         .thenReturn(sampleEventInsights());
 
     mockMvc
-        .perform(get("/api/admin/events/{id}/insights",
-EVENT_ID).with(authentication(adminAuth)))
+        .perform(get("/api/admin/events/{id}/insights", EVENT_ID).with(authentication(adminAuth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.eventId").value(EVENT_ID.toString()))
         .andExpect(jsonPath("$.activeTeams").value(4))
@@ -151,26 +147,22 @@ EVENT_ID).with(authentication(adminAuth)))
   void getEventInsights_asParticipant_returns403Forbidden() throws Exception {
     mockMvc
         .perform(
-            get("/api/admin/events/{id}/insights",
-EVENT_ID).with(authentication(participantAuth)))
+            get("/api/admin/events/{id}/insights", EVENT_ID).with(authentication(participantAuth)))
         .andExpect(status().isForbidden());
   }
 
   @Test
   void getEventInsights_withDefaultTrendWindow_passes60ToService() throws Exception {
-    when(insightsService.getEventInsights(eq(EVENT_ID),
-eq(60))).thenReturn(sampleEventInsights());
+    when(insightsService.getEventInsights(eq(EVENT_ID), eq(60))).thenReturn(sampleEventInsights());
 
     mockMvc
-        .perform(get("/api/admin/events/{id}/insights",
-EVENT_ID).with(authentication(adminAuth)))
+        .perform(get("/api/admin/events/{id}/insights", EVENT_ID).with(authentication(adminAuth)))
         .andExpect(status().isOk());
   }
 
   @Test
   void getEventInsights_withCustomTrendWindow_passesParamToService() throws Exception {
-    when(insightsService.getEventInsights(eq(EVENT_ID),
-eq(15))).thenReturn(sampleEventInsights());
+    when(insightsService.getEventInsights(eq(EVENT_ID), eq(15))).thenReturn(sampleEventInsights());
 
     mockMvc
         .perform(

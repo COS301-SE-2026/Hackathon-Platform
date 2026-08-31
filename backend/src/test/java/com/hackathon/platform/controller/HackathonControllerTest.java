@@ -1,7 +1,6 @@
 package com.hackathon.platform.controller;
 
-import static
-org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -164,8 +163,7 @@ class HackathonControllerTest {
   void deleteHackathon_asAdmin_return204() throws Exception {
     mockMvc
         .perform(
-            delete("/api/hackathon/{hackathonId}",
-seededHackathonId).with(authentication(admin)))
+            delete("/api/hackathon/{hackathonId}", seededHackathonId).with(authentication(admin)))
         .andExpect(status().isNoContent());
   }
 
@@ -173,8 +171,7 @@ seededHackathonId).with(authentication(admin)))
   void deleteHackathon_asParticipant_return403() throws Exception {
     mockMvc
         .perform(
-            delete("/api/hackathon/{hackathonId}",
-seededHackathonId).with(authentication(partic)))
+            delete("/api/hackathon/{hackathonId}", seededHackathonId).with(authentication(partic)))
         .andExpect(status().isForbidden());
   }
 }
