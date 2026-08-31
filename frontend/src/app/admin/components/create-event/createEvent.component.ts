@@ -44,7 +44,7 @@ export class CreateEventComponent implements OnInit {
     rules: '',
     isInPerson: false,
     leaderboardFreezeDateTime: '',
-
+    prizes: [{ title: '1st Place', description: ''}] as { title: string, description: string}[],
   };
 
   readonly descriptionMaxLength = 1000;
@@ -99,6 +99,15 @@ export class CreateEventComponent implements OnInit {
     event.preventDefault();
   }
 
+  addPrize(): void {
+    this.form.prizes.push({title: '', description:''});
+  }
+
+  removePrize(index: number): void {
+    if (this.form.prizes.length > 1){
+      this.form.prizes.splice(index,1);
+    }
+  }
 
   createEvent(): void {
     if (!this.form.eventName) {
