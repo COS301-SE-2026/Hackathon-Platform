@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { AuthService } from '../../services/auth.service';
+import { forkJoin } from 'rxjs';
 import { Router, RouterModule } from '@angular/router';
 import { EventService, EventResponse, EventRegistrationRequest } from '../../services/event.service';
 import { CarouselModule, CarouselPageEvent } from 'primeng/carousel';
@@ -185,43 +186,59 @@ export class HomeComponent implements OnInit, OnDestroy {
 }
 
 
-  loadUsersActiveEvents(): void{
-  
-    this.isLoadingActiveEvents = true;
-    
+loadUsersActiveEvents(): void {
+  this.isLoadingActiveEvents = true;
 
-   this.eventService.getUserActiveEvents().subscribe({
-    next: (events) => {
-      this.isLoadingActiveEvents = false;
-      
-      if (events && events.length > 0) {
+  this.activeEvents = [];
+
+  this.eventService.getMyRegistrations().subscribe({
+    next: (registrations) => {
+
+      if (registrations.length === 0) {
         
-        this.activeEvents = events.map(event => this.toOpenEventView(event));
-        this.currentActiveEventIndex = 0;
+        this.isLoadingActiveEvents = false;
 
-        this.loadEventLogos(this.activeEvents);
-
-        this.tick();
-      } 
-      
-      else {
-        
-        this.activeEvents = [];
-      
+        this.change.markForCheck();
+        return;
       }
-      this.change.markForCheck();
+
+      const eventRequests = registrations.map((registration) =>
+        this.eventService.getEventById(registration.eventId)
+      );
+
+      forkJoin(eventRequests).subscribe({
+        next: (events) => {
+          this.activeEvents = events.map((event) =>
+
+            this.toOpenEventView(event)
+          );
+
+          this.currentActiveEventIndex = 0;
+
+          this.loadEventLogos(this.activeEvents);
+          this.tick();
+
+          this.isLoadingActiveEvents = false;
+          this.change.markForCheck();
+        },
+
+        error: (error) => {
+          console.error('Error loading registered events:', error);
+          this.activeEvents = [];
+          this.isLoadingActiveEvents = false;
+          this.change.markForCheck();
+        }
+      });
     },
-    
-    error: (err) => {
-      
-      this.isLoadingActiveEvents = false;
-      console.error('Error loading active events:', err);
-      this.toast.error('Unable to Load Active Events','We couldn’t load your active events. Please try again.');
+
+    error: (error) => {
+      console.error('Error loading registrations:', error);
       this.activeEvents = [];
-      this.change.markForCheck();     
+      this.isLoadingActiveEvents = false;
+      this.change.markForCheck();
     }
   });
-  }
+}
 
   goToEvent(event: OpenEventView): void {
   this.saveCurrentEvent(event);
@@ -307,6 +324,8 @@ confirmRegistration(): void {
       this.isRegistering = false;
 
       this.closeRegistrationModal();
+
+      this.loadUsersActiveEvents();
 
       this.toast.success('Registration Successful', `You are now registered for ${eventName}.`);
 
