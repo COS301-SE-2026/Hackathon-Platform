@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angula
 import { CommonModule } from '@angular/common'; 
 import { AuthService } from '../../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
-import { EventService, EventResponse } from '../../services/event.service';
+import { EventService, EventResponse, EventRegistrationRequest } from '../../services/event.service';
 import { CarouselModule, CarouselPageEvent } from 'primeng/carousel';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
@@ -29,6 +29,7 @@ interface OpenEventView {
   tagline?: string;
   totalPrizePool?: number;
   logoUrl?: string;
+  inPerson?: boolean;
 }
 
 @Component({
@@ -61,13 +62,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   isLoadingEvents = false;
   registrationModal = false;
   isLoadingActiveEvents = false;
+  isRegistering = false;
   userFirstName = '';
   registrationKey = '';
+  dietaryReq = '';
+  allergies = '';
   currentActiveEventIndex = 0;
 
   activeEvents: OpenEventView[] = [];
   upcomingEvents: OpenEventView[] = [];
   selectedEvent: OpenEventView | null = null;
+  registeredEventIds = new Set<string>();
 
   
   
@@ -98,6 +103,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.userFirstName = user ? user.firstName : 'Participant';
     this.loadUpcomingEvents();
     this.loadUsersActiveEvents();
+    this.loadMyRegistrations();
     this.timerInterval = setInterval(() => this.tick(), 1000);
   }
 
@@ -112,6 +118,21 @@ export class HomeComponent implements OnInit, OnDestroy {
 }
 
 
+  private loadMyRegistrations(): void {
+
+  this.eventService.getMyRegistrations().subscribe({
+    next: (registrations) => {
+
+      this.registeredEventIds = new Set( registrations.map((registration) => registration.eventId) );
+
+      this.change.markForCheck();
+    },
+
+     error: (error) => {
+        console.error('Error loading registrations:', error);
+     }
+   });
+}
 
   private loadEventLogos(events: OpenEventView[]): void {
 
@@ -240,6 +261,8 @@ getDaysUntilStart(event: OpenEventView): string | null {
 registerForEvent(event: OpenEventView): void {
   this.selectedEvent = event;
   this.registrationKey = '';
+  this.dietaryReq = '';
+  this.allergies = '';
   this.registrationModal = true;
 }
 
@@ -247,16 +270,61 @@ closeRegistrationModal(): void {
   this.registrationModal = false;
   this.selectedEvent = null;
   this.registrationKey = '';
+  this.dietaryReq = '';
+  this.allergies = '';
 }
 
 confirmRegistration(): void {
-  if (!this.selectedEvent) {
+  if (!this.selectedEvent || this.isRegistering) {
     return;
   }
 
-  // Registration needs to be connected to backend.
-}
+  if (this.selectedEvent.visibility === 'PRIVATE' && !this.registrationKey.trim()) {
+    this.toast.error('Registration Key Required','Please enter the registration key for this private event.');
+    return;
+  }
 
+  const eventId = this.selectedEvent.eventId;
+  const eventName = this.selectedEvent.name;
+
+  const registrationData: EventRegistrationRequest = {};
+
+  if (this.selectedEvent.visibility === 'PRIVATE') {
+    registrationData.regKey = this.registrationKey.trim();
+  }
+
+  if (this.selectedEvent.inPerson) {
+    registrationData.dietaryReq = this.dietaryReq.trim() || undefined;
+    registrationData.allergies = this.allergies.trim() || undefined;
+  }
+
+  this.isRegistering = true;
+
+  this.eventService.registerForEvent(eventId, registrationData).subscribe({
+    next: () => {
+      this.registeredEventIds.add(eventId);
+
+      this.isRegistering = false;
+
+      this.closeRegistrationModal();
+
+      this.toast.success('Registration Successful', `You are now registered for ${eventName}.`);
+
+      this.change.markForCheck();
+    },
+
+    error: (error) => {
+
+      this.isRegistering = false;
+
+      console.error('Error registering for event:', error);
+
+      this.toast.error('Registration Failed', error.error?.message || 'Unable to register for this event. Please try again.');
+
+      this.change.markForCheck();
+    }
+  });
+}
 
   private saveCurrentEvent(event: OpenEventView): void {
     localStorage.setItem('currentEventId', event.eventId);
@@ -278,6 +346,7 @@ confirmRegistration(): void {
 
       tagline: event.tagline,
       totalPrizePool: event.totalPrizePool,
+      inPerson: event.inPerson,
 
       timer: {
         label: '',

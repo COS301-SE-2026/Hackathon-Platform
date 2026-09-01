@@ -28,7 +28,7 @@ export interface EventResponse {
   description?: string;
   visibility: string;
   status: string;
-  isInPerson?: boolean;
+  inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
   scoringPaused?: boolean;
   allowedTech?: string[];
