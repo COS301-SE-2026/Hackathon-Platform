@@ -58,6 +58,7 @@ export class EventDetailsComponent implements OnDestroy {
   problemStatementError = '';
   registrationModal = false;
   registrationKey = '';
+  isRegistered = false;
 
   event = {
     name: '',
@@ -85,6 +86,7 @@ export class EventDetailsComponent implements OnDestroy {
       if (this.eventId) {
         this.setTabs();
         this.loadEvents();
+        this.loadRegistrationStatus();
       }
     });
 
@@ -117,6 +119,18 @@ export class EventDetailsComponent implements OnDestroy {
   goHome(): void {
   this.router.navigate(['/participant/home']);
   }
+
+  private loadRegistrationStatus(): void {
+  this.eventService.getMyRegistrations().subscribe({
+    next: (registrations) => {
+      this.isRegistered = registrations.some( registration => registration.eventId === this.eventId);
+      this.change.markForCheck();
+    },
+    error: (error) => {
+      console.error('Error loading registration status:', error);
+    }
+  });
+}
 
  getEventTag(): string {
   const now = new Date();
