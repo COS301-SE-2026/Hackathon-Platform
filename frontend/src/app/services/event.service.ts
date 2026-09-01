@@ -41,6 +41,20 @@ export interface EventResponse {
 
 }
 
+export interface EventRegistrationRequest {
+  regKey?: string;
+  dietaryReq?: string;
+  allergies?: string;
+}
+
+export interface EventRegistrationResponse {
+  regId: string;
+  eventId: string;
+  registeredAt: string;
+  dietaryReq?: string;
+  allergies?: string;
+}
+
 export interface RegisteredParticipants {
   participantId: string;
   name: string;
@@ -162,4 +176,14 @@ export class EventService {
   getEventParticipants(eventId: string): Observable<EventParticipantResponse[]> {
     return this.http.get<EventParticipantResponse[]>(`${this.baseUrl}/admin/events/${eventId}/participants`);
   }
+
+  registerForEvent( eventId: string, registrationData: EventRegistrationRequest): Observable<EventRegistrationResponse> {
+  return this.http.post<EventRegistrationResponse>( `${this.baseUrl}/events/${eventId}/registered`, registrationData);
+}
+
+getMyRegistrations(): Observable<EventRegistrationResponse[]> {
+  return this.http.get<EventRegistrationResponse[]>( `${this.baseUrl}/events/my-registrations`);
+}
+
+
 }
