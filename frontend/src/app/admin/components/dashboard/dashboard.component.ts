@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { EventParticipantResponse, EventResponse, EventService } from '../../../services/event.service';
-import { SubmissionResponse, SubmissionService } from '../../../services/submission.service';
+import { RecentSubmissionResponse, SubmissionService } from '../../../services/submission.service';
 import { EventInsightsResponse, InsightsService } from '../../../services/insights.service';
 import { LeaderboardEntry, LeaderboardService } from '../../../services/leaderboard.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
@@ -141,7 +141,6 @@ export class DashboardComponent implements OnInit{
   ngOnInit(): void {
     this.loadDashboardSummary();
     this.loadEvents();
-    this.loadRecentSubmissions();
   }
 
   private loadDashboardSummary(): void {
@@ -168,7 +167,10 @@ export class DashboardComponent implements OnInit{
       this.loadEventInsights(eventId);
       this.loadParticipantsPreview(eventId);
       this.loadTopTeams(eventId);
+      this.loadRecentSubmissions(eventId);
 
+    } else {
+      this.recentSubmissions = [];
     }
   }
 
@@ -348,11 +350,12 @@ export class DashboardComponent implements OnInit{
 
   }
 
-  private loadRecentSubmissions(): void {
+  private loadRecentSubmissions(eventId: string): void {
     this.submissionLoading = true;
     this.submissionError = '';
+    this.recentSubmissions = [];
 
-    this.submissionService.getResentSubmission(20).subscribe({
+    this.submissionService.getRecentSubmissionsForEvent(eventId, 20).subscribe({
       next: submissions => {
         this.recentSubmissions = submissions.map(sub => this.toDashboardSubmission(sub));
         this.submissionLoading = false;
@@ -365,15 +368,16 @@ export class DashboardComponent implements OnInit{
     });
   }
 
-  private toDashboardSubmission(sub: SubmissionResponse): Submissions {
-    const team = this.shortId(sub.teamId);
+  private toDashboardSubmission(sub: RecentSubmissionResponse): Submissions {
+    const team = sub.teamName || this.shortId(sub.teamId);
+    const levelLabel = sub.levelName ? `Level ${sub.levelNumber}: ${sub.levelName}` : `Level ${sub.levelNumber}`;
     return{
       submissionId: sub.submissionId,
   team,
-  teamInitials: team.slice(0,2).toUpperCase(),
-  event: 'Event',
-  level: `Level ${sub.levelId}`,
-  challenge: `Level ${sub.levelId}`,
+  teamInitials: this.getInitials(team) || team.slice(0,2).toUpperCase(),
+  event: sub.eventName || 'Event',
+  level: levelLabel,
+  challenge: levelLabel,
   score: sub.score === null || sub.score === undefined
     ? '-'
     : Number(sub.score).toFixed(2),
