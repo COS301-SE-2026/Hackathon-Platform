@@ -51,5 +51,105 @@ public class RecentSubmissionResponse {
 
   }
 
-  
+  public Long getSubmissionId() {
+
+    return submissionId;
+  }
+
+  public void setSubmissionId(Long submissionId) {
+    this.submissionId = submissionId;
+
+  }
+
+  public UUID getTeamId() {
+
+    return teamId;
+  }
+
+  public void setTeamId(UUID teamId) {
+
+    this.teamId = teamId;
+  }
+
+  public String getTeamName() {
+    return teamName;
+
+  }
+
+  public void setTeamName(String teamName) {
+
+    this.teamName = teamName;
+  }
+
+  public UUID getEventId() {
+
+    return eventId;
+
+  }
+
+  public void setEventId(UUID eventId) {
+
+    this.eventId = eventId;
+  }
+
+  public String getEventName() {
+    return eventName;
+  }
+
+  public void setEventName(String eventName) {
+    this.eventName = eventName;
+  }
+
+  public short getLevelId() {
+    return levelId;
+  }
+
+  public void setLevelId(short levelId) {
+    this.levelId = levelId;
+  }
+
+  public short getLevelNumber() {
+
+    return levelNumber;
+  }
+
+  public void setLevelNumber(short levelNumber) {
+    this.levelNumber = levelNumber;
+  }
+
+  public String getLevelName() {
+
+    return levelName;
+  }
+
+  public void setLevelName(String levelName) {
+    this.levelName = levelName;
+  }
+
+  public BigDecimal getScore() {
+    return score;
+
+  }
+
+  public void setScore(BigDecimal score) {
+    this.score = score;
+  }
+
+  public String getStatus() {
+
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  public Instant getSubmittedAt() {
+    return submittedAt;
+  }
+
+  public void setSubmittedAt(Instant submittedAt) {
+    this.submittedAt = submittedAt;
+    
+  }
 }
