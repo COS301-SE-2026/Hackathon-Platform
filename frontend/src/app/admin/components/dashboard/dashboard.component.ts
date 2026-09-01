@@ -62,6 +62,7 @@ interface EventInsightsSummary{
   activeTeams: number;
   approvedParticipants: number;
   submissionsLastHour: number;
+  totalSubmissions: number;
   errorRate: number;
 }
 
@@ -123,6 +124,7 @@ export class DashboardComponent implements OnInit{
     activeTeams: 0,
     approvedParticipants: 0,
     submissionsLastHour: 0,
+    totalSubmissions: 0,
     errorRate: 0,
   };
 
@@ -152,7 +154,7 @@ export class DashboardComponent implements OnInit{
         this.activeEvents = summary.activeEvents;
         this.teamsCount = summary.totalParticipants;
         this.activeParticipants = summary.totalParticipants;
-        this.submissionsCount = summary.submissionsToday;
+        this.submissionsCount = summary.totalSubmissions;
         this.change.markForCheck();
       },
       error: () => {
@@ -174,7 +176,7 @@ export class DashboardComponent implements OnInit{
     } else {
       this.recentSubmissions = [];
       this.recentAnnouncements = [];
-
+      
     }
   }
 
@@ -275,6 +277,7 @@ export class DashboardComponent implements OnInit{
       activeTeams: insights.activeTeams,
       approvedParticipants: insights.approvedParticipants,
       submissionsLastHour: insights.submissionsLastHour,
+      totalSubmissions: insights.totalSubmissions,
       errorRate: insights.errorRate ?? 0,
 
     };
@@ -386,8 +389,7 @@ export class DashboardComponent implements OnInit{
       body: a.body,
       date: this.formatAnnouncementDate(a.createdAt),
     };
-
-    
+     
   }
 
   private formatAnnouncementDate(value: string): string {
