@@ -140,8 +140,8 @@
           </div>
 
           <div class="event-action-register">
-            <app-button variant="primary" width="100%" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
-              Register 
+            <app-button variant="primary" width="100%" [disabled]="isCheckingRegistration || isRegistered" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
+             {{ isRegistered ? 'Registered' : 'Register' }}
             </app-button>
           </div>
 

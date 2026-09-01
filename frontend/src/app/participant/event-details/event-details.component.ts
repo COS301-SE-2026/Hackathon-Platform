@@ -59,6 +59,7 @@ export class EventDetailsComponent implements OnDestroy {
   registrationModal = false;
   registrationKey = '';
   isRegistered = false;
+  isCheckingRegistration = true;
 
   event = {
     name: '',
@@ -124,6 +125,7 @@ export class EventDetailsComponent implements OnDestroy {
   this.eventService.getMyRegistrations().subscribe({
     next: (registrations) => {
       this.isRegistered = registrations.some( registration => registration.eventId === this.eventId);
+      this.isCheckingRegistration = false;
       this.change.markForCheck();
     },
     error: (error) => {
