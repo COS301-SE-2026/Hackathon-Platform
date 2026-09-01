@@ -31,6 +31,9 @@ interface OpenEventView {
   totalPrizePool?: number;
   logoUrl?: string;
   inPerson?: boolean;
+
+  teamName?: string;
+  teamMemberCount?: number;
 }
 
 @Component({
@@ -118,6 +121,41 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.currentActiveEventIndex = event.page ?? 0;
 }
 
+  private loadTeamDetails(events: OpenEventView[]): void {
+
+  events.forEach((event) => {
+
+     this.eventService.getMyTeamForEvent(event.eventId).subscribe({
+
+    next: (team) => {
+
+      event.teamName = team.teamName;
+
+      this.eventService.getTeamMembers(team.teamId).subscribe({
+
+        next: (members) => {
+
+          event.teamMemberCount = members.length;
+
+          this.change.markForCheck();
+
+        },
+
+        error: (error) => {
+              console.error(`Failed to load team members for ${event.eventId}:`, error);
+            }
+
+          });
+
+        },
+        error: (error) => {
+          console.error(`Failed to load team for ${event.eventId}:`, error);
+        }
+
+      });
+    });
+
+  }
 
   private loadMyRegistrations(): void {
 
@@ -195,7 +233,7 @@ loadUsersActiveEvents(): void {
     next: (registrations) => {
 
       if (registrations.length === 0) {
-        
+
         this.isLoadingActiveEvents = false;
 
         this.change.markForCheck();
@@ -216,6 +254,7 @@ loadUsersActiveEvents(): void {
           this.currentActiveEventIndex = 0;
 
           this.loadEventLogos(this.activeEvents);
+          this.loadTeamDetails(this.activeEvents);
           this.tick();
 
           this.isLoadingActiveEvents = false;
