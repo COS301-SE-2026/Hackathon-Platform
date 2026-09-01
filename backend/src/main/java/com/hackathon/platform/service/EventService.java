@@ -196,6 +196,20 @@ public class EventService {
     return new ScoringPauseResponse(eventId, paused);
   }
 
+  @Transactional
+  public Event extendEvent(UUID eventId, int sec){
+    if(sec<=0){
+      throw new IllegalArgumentException("Invalid time");
+    }
+    Event event = getEventById(eventId);
+    if("CANCELED".equals(event.getStatus())){
+      throw new IllegalArgumentException("Event was canceled");
+    }
+    event.setDuration(event.getDuration()+sec);
+    refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
+    return eventRepository.save(event);
+  }
+
   private void assertValidStatusTransition(String currStat, String newStat) {
     if (!ALLOWED_STATUSES.contains(newStat)) {
       throw new IllegalArgumentException("New status must be one of " + ALLOWED_STATUSES);
