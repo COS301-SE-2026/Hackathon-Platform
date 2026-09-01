@@ -30,8 +30,6 @@ export interface EventResponse {
   status: string;
   isInPerson?: boolean;
   leaderboardFreezeDateTime?: string;
-  bannerStorageKey?: string;
-  logoStorageKey?: string;
   scoringPaused?: boolean;
   allowedTech?: string[];
   rules?: string;
@@ -144,6 +142,16 @@ export class EventService {
   createEventForHackathon(hackathonId: string, eventData: EventRequest): Observable<EventResponse> {
     return this.http.post<EventResponse>(`${this.baseUrl}/hackathon/${hackathonId}/events`, eventData);
   }
+
+
+  getEventBannerUrl( eventId: string ): Observable<{ url: string; storageKey: string }> {
+    return this.http.get<{ url: string; storageKey: string }>( `${this.baseUrl}/storage/events/${eventId}/banner` );
+  }
+
+  getEventLogoUrl( eventId: string): Observable<{ url: string; storageKey: string }> {
+    return this.http.get<{ url: string; storageKey: string }>( `${this.baseUrl}/storage/events/${eventId}/logo`);
+  }
+
 
   downloadEventResults(eventId: string): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/admin/events/${eventId}/results/export`, {
