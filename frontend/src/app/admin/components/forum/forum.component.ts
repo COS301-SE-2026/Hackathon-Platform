@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component,inject, OnInit } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import { FormsModule} from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 type ForumRole = 'ADMIN' | 'PARTICIPANT';
 
@@ -26,22 +27,33 @@ interface ForumThread{
     standalone: true,
     imports: [CommonModule, FormsModule],
     templateUrl: './forum.component.html',
-    styleUrls: ['./forum.component.css']
+    styleUrls: ['./forum.component.scss']
 })
 
 export class ForumComponent implements OnInit {
     private readonly change = inject(ChangeDetectorRef);
+    private readonly route = inject(ActivatedRoute);
 
     isLoading = false;
     errorMessage = '';
     searchTerm = '';
+    hackathonId ='';
 
     expandedThreadId: string | null = null;
     replyDrafts: Record<string, string> = {};
 
     threads: ForumThread[] = [];
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
+
+        if (!this.hackathonId){
+            
+            this.errorMessage = 'No hackathon ID provided.';
+            return;
+        }
+        this.isLoading = false;
+    }
 
     get filteredThreads(): ForumThread[] {
         const term = this.searchTerm.trim().toLowerCase();
