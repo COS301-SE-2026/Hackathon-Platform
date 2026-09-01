@@ -7,6 +7,8 @@ import { TagModule } from 'primeng/tag';
 import {StorageService} from '../../../services/storage.service';
 import {SubmissionService} from '../../../services/submission.service';
 import {HackathonService} from '../../../services/hackathon.service';
+import {LevelService} from '../../../services/level.service';
+import {EventService} from '../../../services/event.service';
 
 interface SolverVersion {
     version : string;
@@ -31,6 +33,8 @@ export class SolverComponent implements OnInit{
     private readonly storageService = inject(StorageService);
     private readonly submissionService = inject(SubmissionService);
     private readonly hackathonService = inject(HackathonService);
+    private readonly levelService = inject(LevelService);
+    private readonly eventService = inject(EventService);
     private readonly change = inject(ChangeDetectorRef);
 
     @ViewChild('uploadForm') uploadFormRef!: ElementRef<HTMLElement>;
@@ -187,6 +191,8 @@ rescoreAllSubmissions(): void {
     }
     this.loadSolverVersions();
     this.loadHackathonSummary();
+    this.loadLevelsCount();
+    this.loadEventsCount();
   }
 
   loadHackathonSummary(): void {
@@ -194,7 +200,6 @@ rescoreAllSubmissions(): void {
       next: (hackathon) => {
         this.hackathonName = hackathon.name;
         this.hackathonDescription = hackathon.description || '';
-        this.eventsCount = hackathon.eventsCount || 0;
         this.participantsCount = hackathon.participantsCount || 0;
         this.change.markForCheck();
       },
@@ -202,6 +207,32 @@ rescoreAllSubmissions(): void {
         if (this.hackathonName === 'Loading...') {
           this.hackathonName = '';
         }
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  private loadLevelsCount(): void {
+    this.levelService.getLevels(this.hackathonId).subscribe({
+      next: (levels) => {
+        this.levelsCount = levels.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.levelsCount = 0;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  private loadEventsCount(): void {
+    this.eventService.getEventsForHackathon(this.hackathonId).subscribe({
+      next: (events) => {
+        this.eventsCount = events.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.eventsCount = 0;
         this.change.markForCheck();
       }
     });
