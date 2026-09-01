@@ -1,0 +1,134 @@
+<div class = "forum-page">
+    <main class = "content">
+        <div class = "page-header">
+            <div>
+            <h2>Forum</h2>
+            <p class = "page-subtitle">View and moderate discussion threads for this hackathon.</p>
+            </div>
+         </div>
+
+         <div class = "toolbar">
+            <div class = "search-box">
+                <i class = "pi pi-search search-icon"></i>
+                <input type = "text" 
+                placeholder = "Search threads..." 
+                aria-label = "Search threads"
+                [(ngModel)] = "searchTerm"
+                name = "searchTerm" />                
+            </div>
+         </div>
+
+         @if (errorMessage){
+            <div class = "error-banner">{{ errorMessage }}</div>
+         }
+         <div class = "thread-list">
+            @if (isLoading){
+                <div class = "empty-state">Loading...</div>
+            }@else if (filteredThreads.length === 0){
+                <div class = "empty-state">No threads found.</div>
+            }@else{
+                @for (thread of filteredThreads; track thread.threadId){
+                    <div class = "thread-card">
+                        <div class = "thread-row">
+                            <div class = "thread-name-cell">
+                                <span class = "thread-avatar">{{thread.rootMessage.authorInitial}}</span>
+                                <div class = "thread-meta">
+                                    <div class = "thread-title-row">
+                                        <span class = "thread-title">{{thread.title}}</span>
+                                        <span class = "role-tag" [ngClass] = "thread.rootMessage.authorRole === 'ADMIN' ? 'role-tag-admin' : 'role-tag-participant'">{{thread.rootMessage.authorRole === 'ADMIN' ? 'Admin' : 'Participant'}}</span>
+
+                                    </div>
+                                    <p class = "thread-subline">
+                                        Started by {{thread.rootMessage.authorName}} &middot; {{thread.replies.length}} repl{{thread.replies.length === 1 ? 'y' : 'ies'}} 
+                                    </p>
+                                </div>
+                            </div>
+                            <span class = "thread-timestamp">{{thread.lastActivityLabel}}</span>
+                            <button
+                            type ="button"
+                            class = "btn-view-thread"
+                            [class.btn-view-thread-active] = "expandedThreadId === thread.threadId"
+                            [attr.aria-expanded] = "expandedThreadId === thread.threadId"
+                            (click) = "toggleThread(thread.threadId)">
+                                {{expandedThreadId === thread.threadId ? 'Hide Thread' : 'View Thread'}}
+                                <i class = "pi" [ngClass] = "expandedThreadId === thread.threadId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                            </button>
+                        </div>
+                        @if (expandedThreadId === thread.threadId){
+                            <div class = "thread-panel">
+                                <div class = "message-card">
+                                    <div class = "message-header">
+                                        <div class = "message-author">
+                                            <span class = "message-avatar">{{thread.rootMessage.authorInitial}}</span>
+                                            <div>
+                                                <span class = "message-author-name">{{thread.rootMessage.authorName}}</span>
+                                                <span class = "role-tag" [ngClass] = "thread.rootMessage.authorRole === 'ADMIN' ? 'role-tag-admin' : 'role-tag-participant'">{{thread.rootMessage.authorRole === 'ADMIN' ? 'Admin' : 'Participant'}}</span>
+                                            </div>
+                                        </div>
+                                        <div class = "message-header-right">
+                                            <span class = "message-timestamp">{{thread.rootMessage.postedAtLabel}}</span>
+                                            <button
+                                                type = "button"
+                                                class = "message-delete-btn"
+                                                (click) = "deleteMessage(thread.threadId, thread.rootMessage.messageId)"
+                                                aria-label = "Delete message">
+                                                <i class = "pi pi-times"></i>    
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class = "message-content">{{thread.rootMessage.content}}</p>
+                                </div>
+
+                                @if (thread.replies.length > 0){
+                                    <div class = "reply-list">
+                                        @for(reply of thread.replies; track reply.messageId){
+                                            <div class = "message-card reply-card">
+                                                <div class = "message-header">
+                                                    <div class = "message-author">
+                                                        <span class = "message-avatar">{{reply.authorInitial}}</span>
+                                                        <div>
+                                                            <span class = "message-author-name">{{reply.authorName}}</span>
+                                                            <span class ="role-tag" [ngClass] = "reply.authorRole === 'ADMIN' ? 'role-tag-admin' : 'role-tag-participant'">{{reply.authorRole === 'ADMIN' ? 'Admin' : 'Participant'}}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class = "message-header-right">
+                                                        <span class = "message-timestamp">{{reply.postedAtLabel}}</span>
+                                                        <button
+                                                            type = "button"
+                                                            class = "message-delete-btn"
+                                                            (click) = "deleteMessage(thread.threadId, reply.messageId)"
+                                                            aria-label = "Delete message">
+                                                            <i class = "pi pi-times"></i>    
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <p class = "message-content">{{reply.content}}</p>
+                                            </div>
+                                        }
+                                    </div>
+                                }@else {
+                                    <p class = "reply-empty">No replies yet.</p>
+                                }
+                                <div class = "reply-compose">
+                                    <textarea
+                                        [(ngModel)] = "replyDrafts[thread.threadId]"
+                                        name = "replyDraft{{thread.threadId}}"
+                                        placeholder = "Reply as admin..."
+                                        rows = "2"></textarea>
+                                    <button
+                                        type = "button"
+                                        class = "btn-post-reply"
+                                        [disabled] = "!replyDrafts[thread.threadId].trim()"
+                                        (click) = "postReply(thread.threadId)">
+                                        Post Reply
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            </div>
+         
+    </main>
+</div>
