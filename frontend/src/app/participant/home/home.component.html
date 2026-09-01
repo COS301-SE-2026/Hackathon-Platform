@@ -8,9 +8,9 @@
   @if (isLoadingActiveEvents){
 
     <div class="active-events-wrapper">
-      <app-card class="active-event-card loading-active-card">
+      
         <app-loader message="Loading your events..."></app-loader>
-      </app-card>
+      
     </div>
   }
 
@@ -119,9 +119,9 @@
 
                         <span class="detail-label">Your Team</span>
 
-                        <span class="detail-value">CodeCrafters </span>
+                        <span class="detail-value">{{ event.teamName || 'No team yet' }}</span>
 
-                        <span class="detail-meta"> 4 / 5 Members</span>
+                        <span class="detail-meta"> {{ event.teamMemberCount ?? 0 }} / {{ event.teamSizeLimit }} Members</span>
 
                       </div>
 
@@ -135,9 +135,9 @@
 
                         <span class="detail-label"> Latest Submission </span>
 
-                        <span class="detail-value"> Level 7 </span>
+                        <span class="detail-value"> {{ event.latestSubmissionLevel ? 'Level ' + event.latestSubmissionLevel : 'n/a' }} </span>
 
-                        <span class="detail-meta"> Score: 350 </span>
+                        <span class="detail-meta">  {{ event.latestSubmissionScore != null ? 'Score: ' + event.latestSubmissionScore : 'No submission yet' }} </span>
 
                       </div>
 
@@ -151,9 +151,9 @@
 
                         <span class="detail-label"> Your Rank</span>
 
-                        <span class="detail-value"> #12 </span>
+                        <span class="detail-value"> {{ event.teamRank ? '#' + event.teamRank : 'n/a' }} </span>
 
-                        <span class="detail-meta">  Top 7% · 250 teams</span>
+                        <span class="detail-meta">  {{ event.teamRank && event.totalTeams ? 'of ' + event.totalTeams + ' teams' : 'Not ranked yet' }}</span>
 
                       </div>
 
@@ -273,6 +273,11 @@
                 <div class="meta-item prize-meta">
                   <i class="pi pi-trophy"></i>
                    <span> {{ event.totalPrizePool }} Prize Pool</span>
+                </div>
+
+                <div class="meta-item location-meta">
+                  <i class="pi pi-map-marker"></i>
+                  <span>{{ event.inPerson ? 'In Person' : 'Virtual' }}</span>
                 </div>
 
                 @if (getDaysUntilStart(event) !== null) {

@@ -368,11 +368,11 @@ line-height: 1;
 }
 
 .submission-detail > i {
-  color: var(--teal);
+ color: var(--bright-blue);
 }
 
 .rank-detail > i {
-  color: #c58b00;
+  color: var(--bright-blue);
 }
 
 .detail-content {
@@ -612,6 +612,7 @@ line-height: 1;
 
 .upcoming-events {
   width: 100%;
+  margin-top: var(--section-gap);
 }
 
 .section-header {
@@ -795,6 +796,10 @@ border-bottom-left-radius: var(--radius-lg);
 }
 
 .prize-meta i {
+  color: var(--bright-blue);
+}
+
+.location-meta i {
   color: var(--bright-blue);
 }
 
