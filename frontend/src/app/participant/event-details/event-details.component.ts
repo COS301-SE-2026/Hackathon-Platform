@@ -130,6 +130,7 @@ export class EventDetailsComponent implements OnDestroy {
     next: (registrations) => {
       this.isRegistered = registrations.some( registration => registration.eventId === this.eventId);
       this.isCheckingRegistration = false;
+       this.setTabs();
       this.change.markForCheck();
     },
     error: (error) => {
@@ -191,6 +192,7 @@ confirmRegistration(): void {
     next: () => {
       this.isRegistered = true;
       this.isRegistering = false;
+      this.setTabs();
       this.closeRegistrationModal();
       this.change.markForCheck();
     },
@@ -234,11 +236,13 @@ confirmRegistration(): void {
   const tabDef = [
     ['Overview', 'pi pi-list', 'overview'],
     ['Rules', 'pi pi-file', 'rules'],
-    ['My Team', 'pi pi-users', 'team'],
-    ['Submissions', 'pi pi-code', 'submissions'],
-    ['Submissions History', 'pi pi-history', 'submission-history'],
-    ['Leaderboard', 'pi pi-trophy', 'leaderboard']
   ];
+
+   if (this.isRegistered) {
+    tabDef.push( ['My Team', 'pi pi-users', 'team'], ['Submissions', 'pi pi-code', 'submissions'],
+      ['Submissions History', 'pi pi-history', 'submission-history'], ['Leaderboard', 'pi pi-trophy', 'leaderboard']
+    );
+  }
 
   this.tabs = tabDef.map(([label, icon, tab]) => ({
     label,
