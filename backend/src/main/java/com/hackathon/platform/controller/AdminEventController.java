@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.hackathon.platform.dto.ExtendTimerResponse;
+import com.hackathon.platform.dto.ExtendTimerRequest;
 
 @RestController
 @RequestMapping("/api/admin/events")
@@ -95,5 +97,12 @@ public class AdminEventController {
   public ResponseEntity<List<EventParticipantResponse>> getEventParticipants(
       @PathVariable("id") UUID eventId) {
     return ResponseEntity.ok(teamService.listEventParticipants(eventId));
+  }
+
+  @PatchMapping("/{id}/extend")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ExtendTimerResponse> extendTimer(@PathVariable("id") UUID eventId, @RequestBody ExtendTimerRequest req){
+    Event event = eventService.extendEvent(eventId, req.getAdditionalTime());
+    return ResponseEntity.ok(new ExtendTimerResponse(event.getEventId(), event.getDuration(), event.getEndDateTime()));
   }
 }

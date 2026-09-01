@@ -64,6 +64,7 @@ public class EventService {
     validateEventReq(req, true);
     requireHackathon(req.getHackathonId());
     Event event = new Event();
+    event.setHackathon(req.getHackathonId());
     event.setCreatedByUserId(getCurrentAdminId());
     applyReq(event, req, true);
     event.setStatus(
@@ -193,6 +194,20 @@ public class EventService {
     eventRepository.save(event);
 
     return new ScoringPauseResponse(eventId, paused);
+  }
+
+  @Transactional
+  public Event extendEvent(UUID eventId, int sec){
+    if(sec<=0){
+      throw new IllegalArgumentException("Invalid time");
+    }
+    Event event = getEventById(eventId);
+    if("CANCELED".equals(event.getStatus())){
+      throw new IllegalArgumentException("Event was canceled");
+    }
+    event.setDuration(event.getDuration()+sec);
+    refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
+    return eventRepository.save(event);
   }
 
   private void assertValidStatusTransition(String currStat, String newStat) {
