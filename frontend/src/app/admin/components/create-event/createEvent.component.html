@@ -98,6 +98,59 @@
       </div>
 
       <div class = "form-section">
+        <h2 class = "section-heading">Tags &amp; Technology</h2>
+        <p class = "section-hint">Help participants find and prepare for this event.</p>
+       
+      <div class = "form-group">
+        <label for = "tagInput">Event Tags</label>
+            <div class = "chip-input-wrapper">
+           @for (tag of form.tags; track $index){
+            <span class = "chip">
+              {{tag}}
+              <button type = "button" class = "chip-remove" (click) = "removeTag($index)" aria-label= "Remove tag">
+                <i class = "pi pi-times"></i>
+              </button>
+            </span>
+           }
+            <input
+            type = "text"
+            id = "tagInput"
+            name = "tagInput"
+            [(ngModel)] = "tagInput"
+            (keydown.enter) = "addTag($event)"
+            (keydown.,) = "addTag($event)"
+            placeholder = "e.g. AI, Web3, Beginner-friendly"
+            class = "chip-input"/>
+        </div>
+        <p class = "field-hint">Press Enter or comma to add a tag.</p>
+         </div>
+       
+      <div class = "form-group">
+        <label for = "technologyInput">Allowed Technology</label>
+            <div class = "chip-input-wrapper">
+           @for (tech of form.allowedTechnologies; track $index){
+            <span class = "chip chip-tech">
+              {{tech}}
+              <button type = "button" class = "chip-remove" (click) = "removeTechnology($index)" aria-label = "Remove technology">
+                <i class = "pi pi-times"></i>
+              </button>
+            </span>
+           }
+            <input
+            type = "text"
+            id = "technologyInput"
+            name = "technologyInput"
+            [(ngModel)] = "technologyInput"
+            (keydown.enter) = "addTechnology($event)"
+            (keydown.,) = "addTechnology($event)"
+            placeholder = "e.g. React, Python, Java"
+            class = "chip-input"/>
+        </div>
+        <p class = "field-hint">Leave empty to allow any technology, or add specific stacks to restrict submissions.</p>
+         </div>
+      </div>
+
+      <div class = "form-section">
         <h2 class = "section-heading">Schedule</h2>
         <div class = "form-row">
       <div class = "form-group">
@@ -243,7 +296,7 @@
         </div>
 
         @if (form.visibility === 'PRIVATE'){
-          <div class = "form-group" style = "margin-top: 16px; ">
+          <div class = "form-group" style = "margin-top: 16px;">
             <label for = "registrationKey">Registration Key</label>
             <input
             type = "text"
