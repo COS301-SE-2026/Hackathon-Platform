@@ -1,9 +1,9 @@
 <div class="page-container">
 
-  <div class="welcome-section">
-    <h1 class="welcome-title">Welcome back, {{ userFirstName }}!</h1>
-    <p class="welcome-sub">Ready to build something amazing today?</p>
-  </div>
+   <div class="section-header">
+      <h2 class="section-title">Your Events</h2>
+      
+    </div>
 
   @if (isLoadingActiveEvents){
 
@@ -20,7 +20,7 @@
       <app-card class="active-event-card">
 
         <div class="active-header">
-          <span class="active-label">Your Events</span>
+         
           <span class="active-counter"> {{ currentActiveEventIndex + 1 }} / {{ activeEvents.length }}</span>
         </div>
 
@@ -39,11 +39,10 @@
 
               <div class="active-body">
 
-                <div class="active-event-image">
+              <div class="active-event-image">
 
-                <img src="assets/images/hackathon-image.png" alt="Hackathon Event"/>
-
-                </div>
+                <img [src]="event.logoUrl || 'assets/images/hackathon-image.png'" [alt]="event.name"/>
+              </div>
 
                 <div class="active-event-right">
 
@@ -182,10 +181,6 @@
 
       <app-card class="active-event-card empty-active-card">
 
-      <div class="active-header">
-        <span class="active-label">Your Events</span>
-      </div>
-
       <div class="empty-active-content">
 
         <i
@@ -210,7 +205,7 @@
 
     <div class="section-header">
       <h2 class="section-title">Upcoming Events</h2>
-      <app-button variant="ghost" width="150px" (keydown)="null" (keyup)="null"> View More</app-button>
+      
     </div>
 
     @if (isLoadingEvents) {
@@ -235,9 +230,9 @@
 
           <div class="upcoming-event-content">
 
-            <div class="upcoming-event-image">
-              <img src="assets/images/hackathon-image.png" alt="Hackathn Event" class="event-img"/>
-            </div>
+          <div class="upcoming-event-image">
+            <img [src]="event.logoUrl || 'assets/images/hackathon-image.png'" [alt]="event.name" class="event-img" />
+          </div>
 
             <div class="upcoming-event-details">
 
@@ -247,7 +242,7 @@
 
                   <h3 class="ev-name">  {{ event.name }}</h3>
 
-                  <p class="event-tagline"> Build, compete, and innovate with developers from around the world. mpete, and innovate with developers from around the world and innovate with developers from around the world</p>
+                  <p class="event-tagline"> {{ event.tagline }}</p>
 
                 </div>
 
@@ -277,12 +272,7 @@
 
                 <div class="meta-item prize-meta">
                   <i class="pi pi-trophy"></i>
-                   <span> R10 000 Prize Pool</span>
-                </div>
-
-                <div class="meta-item participants-meta">
-                  <i class="pi pi-users"></i>
-                   <span> 120+ Participants </span>
+                   <span> {{ event.totalPrizePool }} Prize Pool</span>
                 </div>
 
                 @if (getDaysUntilStart(event) !== null) {
