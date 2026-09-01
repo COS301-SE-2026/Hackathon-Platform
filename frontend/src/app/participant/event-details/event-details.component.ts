@@ -12,6 +12,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { CardComponent } from '../../shared/components/card/card.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { ToastService } from '../../shared/components/toast/toast.service';
 import { EventService, EventResponse, EventRegistrationRequest } from '../../services/event.service';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util'
 import { StorageService } from '../../services/storage.service';
@@ -45,6 +46,7 @@ export class EventDetailsComponent implements OnDestroy {
   private readonly eventService = inject(EventService);
   private readonly storageService = inject(StorageService);
   private readonly change = inject(ChangeDetectorRef);
+  private readonly toast = inject(ToastService);
   private timerInterval: ReturnType<typeof setInterval> | undefined;
 
   tabs: TabItem[] = [];
@@ -187,6 +189,8 @@ confirmRegistration(): void {
   }
 
   if (  this.event.visibility === 'PRIVATE' && !this.registrationKey.trim()) {
+     this.toast.error( 'Registration Key Required','Please enter the registration key for this private event.'
+  );
     return;
   }
 
@@ -210,6 +214,7 @@ confirmRegistration(): void {
       this.isRegistering = false;
       this.setTabs();
       this.closeRegistrationModal();
+       this.toast.success('Registration Successful',`You are now registered for ${this.event.name}.`);
       this.change.markForCheck();
     },
 
@@ -217,7 +222,7 @@ confirmRegistration(): void {
       this.isRegistering = false;
 
       console.error('Error registering for event:', error);
-
+       this.toast.error( 'Registration Failed', error.error?.message || 'Unable to register for this event. Please try again.');
       this.change.markForCheck();
      }
   });
