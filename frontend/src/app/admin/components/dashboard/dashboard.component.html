@@ -323,6 +323,13 @@
                <a routerLink = "/admin/announcements" class = "btn-view-all">View All</a>
             </div>
             <div class = "announcement-rows">
+              @if (announcementsLoading){
+                <div class = "empty-state">Loading announcements...</div>
+              } @else if (announcementsError){
+                <div class = "empty-state">{{ announcementsError }}</div>
+              } @else if (recentAnnouncements.length === 0){
+                <div class = "empty-state">No announcements yet for this event.</div>
+              } @else {
               @for (a of recentAnnouncements; track a.title){
                 <div class = "announcement-row">
                   <span class = "announcement-icon"><i class = "pi pi-megaphone"></i></span>
@@ -332,6 +339,7 @@
                   </div>
                   <span class = "announcement-date">{{a.date}}</span>
                 </div>
+              }
               }
             </div>
           </div>
