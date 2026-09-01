@@ -572,29 +572,6 @@ textarea{
     }
 }
 
-.btn-add-prize{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    margin-top: 12px;
-    padding: 10px;
-    background-color: #f9fafc;
-    color: #146a9d;
-    border: 1.5px dashed #dfe3ea;
-    border-radius: 8px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: border-color 0.15s, background-color 0.15s;
-
-    &:hover{
-        border-color: #1983c2;
-        background-color: #f4f9fd;
-    }
-}
 @media (max-width : 600px){
     .form-row, .access-group {
         grid-template-columns : 1fr;

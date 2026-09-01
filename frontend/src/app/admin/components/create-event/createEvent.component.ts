@@ -46,9 +46,7 @@ export class CreateEventComponent implements OnInit {
     leaderboardFreezeDateTime: '',
     prizes: [{ title: '1st Place', description: ''},
             { title: '2nd Place', description: ''},
-            { title: '3rd Place', description: ''},
-            { title: 'Honorable Mention', description: ''},
-    ] as { title: string, description: string}[],
+            { title: '3rd Place', description: ''}, ] as { title: string, description: string}[],
   };
 
   readonly descriptionMaxLength = 1000;
@@ -103,9 +101,6 @@ export class CreateEventComponent implements OnInit {
     event.preventDefault();
   }
 
-  addPrize(): void {
-    this.form.prizes.push({title: '', description:''});
-  }
 
   removePrize(index: number): void {
     if (this.form.prizes.length > 1){
