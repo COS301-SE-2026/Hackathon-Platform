@@ -82,7 +82,7 @@ class AdminInsightsControllerTest {
   }
 
   private AdminDashboardResponse sampleDashboard() {
-    return new AdminDashboardResponse(2L, 3L, 25L, 4L);
+    return new AdminDashboardResponse(2L, 3L, 25L, 4L, 30L);
   }
 
   private EventInsightsResponse sampleEventInsights() {
@@ -112,7 +112,8 @@ class AdminInsightsControllerTest {
         .andExpect(jsonPath("$.activeEvents").value(2))
         .andExpect(jsonPath("$.totalEvents").value(3))
         .andExpect(jsonPath("$.totalParticipants").value(25))
-        .andExpect(jsonPath("$.submissionsToday").value(4));
+        .andExpect(jsonPath("$.submissionsToday").value(4))
+        .andExpect(jsonPath("$.totalSubmissions").value(30));
   }
 
   @Test
