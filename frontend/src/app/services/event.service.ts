@@ -14,6 +14,8 @@ export interface EventRequest {
   status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
   isInPerson?: boolean;
   leaderboardFreezeDateTime?: string;
+  tags?: string[];
+  allowedTechnologies?: string [];
 }
 
 export interface EventResponse {
@@ -30,6 +32,7 @@ export interface EventResponse {
   status: string;
   isInPerson?: boolean;
   leaderboardFreezeDateTime?: string;
+  
 }
 
 export interface RegisteredParticipants {

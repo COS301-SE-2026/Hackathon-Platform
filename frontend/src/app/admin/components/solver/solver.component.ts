@@ -7,14 +7,6 @@ import { TagModule } from 'primeng/tag';
 import {StorageService} from '../../../services/storage.service';
 import {SubmissionService} from '../../../services/submission.service';
 
-interface SolverVersion {
-    version : string;
-    uploaded :string;
-    runs : number;
-    avgRuntime : string;
-    errorRate : string;
-    status : 'Active' | 'Inactive' | 'Archived';
-}
 
 @Component({
     selector : 'app-solver',
@@ -46,7 +38,6 @@ export class SolverComponent implements OnInit{
     rescoreError = '';
     rescoreSuccessMessage = '';
 
-    versionHistory: SolverVersion[] = [];
 
 scrollToUploadForm(): void{
     this.uploadFormRef?.nativeElement.scrollIntoView({behavior:'smooth',block: 'center'});
@@ -110,16 +101,6 @@ onUploadAndActivate(): void{
             console.log('Solver uploaded successfully:', response);
             this.isUploading = false;
 
-            this.versionHistory.unshift({
-                version: `v${response.version}`,
-                uploaded: new Date().toLocaleString('en-ZA',{month: 'short', day:'2-digit',hour:'2-digit',minute: '2-digit'}),
-                runs:0,
-                avgRuntime:'-',
-                errorRate: '-',
-                status:'Active'
-
-            });
-
     alert(`Solver v${response.version} uploaded and activated successfully.`);
 
     this.selectedFile= null;
@@ -179,7 +160,7 @@ rescoreAllSubmissions(): void {
         alert('No hackathon ID provided');
         return;
     }
-    this.loadSolverVersions();
+
     this.loadHackathonSummary();
   }
 
@@ -187,10 +168,6 @@ rescoreAllSubmissions(): void {
     console.log('Loading hackathon summary for:', this.hackathonId);
   }
 
-loadSolverVersions(): void {
-    console.log('Loading solver for hackathon:',this.hackathonId);
 
-
-}
 
 }
