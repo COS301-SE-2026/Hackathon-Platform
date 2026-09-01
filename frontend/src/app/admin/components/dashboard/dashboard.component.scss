@@ -687,19 +687,19 @@
   font-weight: 700;
   color: #147d78;
 }
-.announcement-rows, .notification-rows{
+.announcement-rows{
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.announcement-row, .notification-row{
+.announcement-row{
   display: flex;
   align-items: flex-start;
   gap: 12px;
 }
 
-.announcement-icon, .notification-icon{
+.announcement-icon{
   width: 30px;
   height: 30px;
   flex-shrink: 0;
@@ -715,41 +715,26 @@
   background-color: #eaf4fb;
   color:#1983c2;
 }
-.notification-icon{
-  &.success{
-    background-color: #e8f7ee;
-    color: #1a7d3a;
-  }
 
-  &.warning{
-    background-color: #fff3e0;
-    color: #b5670a;
-  }
 
-  &.info{
-    background-color: #eaf4fb;
-    color: #1983c2;
-  }
-}
-
-.announcement-info, .notification-info{
+.announcement-info{
   flex: 1;
   min-width: 0;
 }
 
-.announcement-title, .notification-title{
+.announcement-title{
   font-size: 0.84rem;
   font-weight: 700;
   color:#13192d;
 }
 
-.announcement-body, .notification-body{
+.announcement-body{
   font-size: 0.78rem;
   color: #8089a0;
   margin-top: 2px;
 }
 
-.announcement-date, .notification-time{
+.announcement-date{
   font-size: 0.72rem;
   color: #a3aabb;
   white-space: nowrap;
