@@ -49,6 +49,8 @@ export class EventDetailsComponent implements OnDestroy {
 
   tabs: TabItem[] = [];
 
+  private readonly protectedTabs = [ 'team','submissions', 'submission-history','leaderboard'];
+
   activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'overview';
   eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
   hackathonId = '';
@@ -109,6 +111,7 @@ export class EventDetailsComponent implements OnDestroy {
     }
 
     this.activeTab = tab;
+    this.validateActiveTab(tab);
 
   });
 
@@ -121,6 +124,18 @@ export class EventDetailsComponent implements OnDestroy {
     }
   }
 
+  private validateActiveTab(tab: string): void {
+  if ( this.isCheckingRegistration || this.isRegistered || !this.protectedTabs.includes(tab)) {
+    return;
+  }
+
+  this.router.navigate([], {
+    relativeTo: this.route,
+    queryParams: { tab: 'overview', subtab: null },
+    replaceUrl: true
+  });
+}
+
   goHome(): void {
   this.router.navigate(['/participant/home']);
   }
@@ -131,6 +146,7 @@ export class EventDetailsComponent implements OnDestroy {
       this.isRegistered = registrations.some( registration => registration.eventId === this.eventId);
       this.isCheckingRegistration = false;
        this.setTabs();
+       this.validateActiveTab(this.activeTab);
       this.change.markForCheck();
     },
     error: (error) => {
