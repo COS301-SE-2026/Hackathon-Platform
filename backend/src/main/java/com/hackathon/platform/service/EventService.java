@@ -197,15 +197,15 @@ public class EventService {
   }
 
   @Transactional
-  public Event extendEvent(UUID eventId, int sec){
-    if(sec<=0){
+  public Event extendEvent(UUID eventId, int sec) {
+    if (sec <= 0) {
       throw new IllegalArgumentException("Invalid time");
     }
     Event event = getEventById(eventId);
-    if("CANCELED".equals(event.getStatus())){
+    if ("CANCELED".equals(event.getStatus())) {
       throw new IllegalArgumentException("Event was canceled");
     }
-    event.setDuration(event.getDuration()+sec);
+    event.setDuration(event.getDuration() + sec);
     refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
     return eventRepository.save(event);
   }
