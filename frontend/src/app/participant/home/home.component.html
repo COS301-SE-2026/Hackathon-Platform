@@ -250,7 +250,7 @@
                   
                   <div class="event-action-button"><app-button variant="secondary" (click)="goToEvent(event)"width="100%" (keydown)="null" (keyup)="null"> View Event</app-button></div>
 
-                  <div class="event-action-button"> <app-button variant="primary" (click)="registerForEvent(event)" width="100%" (keydown)="null"(keyup)="null"> Register </app-button></div>
+                  <div class="event-action-button"> <app-button variant="primary" [disabled]="registeredEventIds.has(event.eventId)" (click)="registerForEvent(event)" width="100%" (keydown)="null"(keyup)="null"> {{ registeredEventIds.has(event.eventId) ? 'Registered' : 'Register' }} </app-button></div>
                 
 
                 </div>
@@ -344,13 +344,45 @@
 
       </div>
 
-    } 
+    }
+    
+    
+    @if (selectedEvent.inPerson) {
+
+        <div class="registration-confirmation">
+
+          <div class="confirmation-icon"> <i class="pi pi-map-marker" aria-hidden="true"></i></div>
+
+          <div class="registration-content">
+
+            <strong>In-Person Event</strong>
+
+            <p> This event is held at a physical location. Please provide any dietary requirements or allergies. </p>
+          
+          </div>
+          
+        </div>
+
+        <div class="registration-input">
+
+          <app-input id="dietary-requirements"label="Dietary Requirements" placeholder="e.g. Vegetarian, Vegan, Halal"  [(value)]="dietaryReq" ></app-input>
+
+        </div>
+
+        <div class="registration-input">
+
+          <app-input id="allergies" label="Allergies" placeholder="Enter any allergies" [(value)]="allergies"></app-input>
+
+        </div>
+
+      }
+
 
   </div> 
 
   <div modal-footer-right> 
     <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px" (keydown)="null" (keyup)="null">Cancel</app-button> 
-    <app-button variant="primary" (click)="confirmRegistration()" width="135px" (keydown)="null" (keyup)="null">Register</app-button> 
+    <app-button variant="primary" (click)="confirmRegistration()" width="135px" [disabled]="isRegistering" (keydown)="null" (keyup)="null">{{ isRegistering ? 'Registering...' : 'Register' }}</app-button> 
   </div> 
 
 </app-modal>
