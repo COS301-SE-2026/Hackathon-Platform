@@ -41,6 +41,24 @@ export interface EventResponse {
 
 }
 
+export interface TeamResponse {
+  teamId: string;
+  teamName: string;
+  eventId: string;
+  createdByUserId: string;
+  createdAt: string;
+  status: string;
+  joinCode?: string;
+}
+
+export interface TeamMemberResponse {
+  userId: string;
+  fullName: string;
+  email: string;
+  joinedAt: string;
+  role: string;
+}
+
 export interface EventRegistrationRequest {
   regKey?: string;
   dietaryReq?: string;
@@ -185,5 +203,12 @@ getMyRegistrations(): Observable<EventRegistrationResponse[]> {
   return this.http.get<EventRegistrationResponse[]>( `${this.baseUrl}/events/my-registrations`);
 }
 
+getMyTeamForEvent(eventId: string): Observable<TeamResponse> {
+  return this.http.get<TeamResponse>( `${this.baseUrl}/teams/my-team?eventId=${eventId}`);
+}
+
+getTeamMembers(teamId: string): Observable<TeamMemberResponse[]> {
+  return this.http.get<TeamMemberResponse[]>( `${this.baseUrl}/teams/${teamId}/members`);
+}
 
 }
