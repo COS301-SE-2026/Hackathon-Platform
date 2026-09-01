@@ -185,17 +185,39 @@
       @else {
         <div class="registration-confirmation">
           <div class="confirmation-icon">
-
             <i class="pi pi-check-circle" aria-hidden="true"> </i>
           </div>
 
           <div class="registration-content">
             <strong>Ready to Register?</strong>
-
             <p> You're about to register for this event. Continue when you're ready. </p>
+          </div>
+        </div>
+      }
+
+        @if (event.inPerson) {
+
+        <div class="registration-confirmation">
+
+          <div class="confirmation-icon">
+             <i class="pi pi-map-marker" aria-hidden="true"></i>
+          </div>
+
+          <div class="registration-content">
+            <strong>In-Person Event</strong>
+
+          <p>Please provide any dietary requirements or allergies.</p>
 
           </div>
 
+        </div>
+
+        <div class="registration-input">
+           <app-input id="dietary-requirements" label="Dietary Requirements" placeholder="Enter dietary requirements" [(value)]="dietaryReq"></app-input>
+        </div>
+
+        <div class="registration-input">
+          <app-input id="allergies" label="Allergies" placeholder="Enter any allergies" [(value)]="allergies"></app-input>
         </div>
 
       }
@@ -204,11 +226,9 @@
 
     <div modal-footer-right>
       
-      <app-button variant="secondary" (click)="closeRegistrationModal()" 
-      width="135px" (keydown)="null" (keyup)="null"> Cancel</app-button>
+      <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px" (keydown)="null" (keyup)="null"> Cancel</app-button>
 
-      <app-button variant="primary" (click)="confirmRegistration()" width="135px" 
-      (keydown)="null" (keyup)="null"> Register</app-button>
+      <app-button variant="primary" (click)="confirmRegistration()" width="135px" [disabled]="isRegistering" (keydown)="null" (keyup)="null"> {{ isRegistering ? 'Registering...' : 'Register' }}</app-button>
 
     </div>
 
