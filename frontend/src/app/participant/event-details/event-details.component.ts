@@ -12,7 +12,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { CardComponent } from '../../shared/components/card/card.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import {EventResponse,EventService } from '../../services/event.service';
+import { EventService, EventResponse, EventRegistrationRequest } from '../../services/event.service';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util'
 import { StorageService } from '../../services/storage.service';
 
@@ -60,6 +60,9 @@ export class EventDetailsComponent implements OnDestroy {
   registrationKey = '';
   isRegistered = false;
   isCheckingRegistration = true;
+  isRegistering = false;
+  dietaryReq = '';
+  allergies = '';
 
   event = {
     name: '',
@@ -69,6 +72,7 @@ export class EventDetailsComponent implements OnDestroy {
     endDate: '',
     teamSize: 0,
     visibility: '',
+    inPerson: false,
     startDateTime: '',
     duration: 0,
     timer: {
@@ -130,6 +134,8 @@ export class EventDetailsComponent implements OnDestroy {
     },
     error: (error) => {
       console.error('Error loading registration status:', error);
+       this.isCheckingRegistration = false;
+      this.change.markForCheck();
     }
   });
 }
@@ -142,7 +148,13 @@ export class EventDetailsComponent implements OnDestroy {
  }
 
   registerForEvent(): void {
+    if (this.isRegistered || this.isRegistering) {
+    return;
+  }
+
   this.registrationKey = '';
+  this.dietaryReq = '';
+  this.allergies = '';
   this.registrationModal = true;
 }
 
@@ -152,8 +164,46 @@ closeRegistrationModal(): void {
 }
 
 confirmRegistration(): void {
-  // Registration needs to be connected to backend.
-}
+
+  if (this.isRegistered || this.isRegistering) {
+    return;
+  }
+
+  if (  this.event.visibility === 'PRIVATE' && !this.registrationKey.trim()) {
+    return;
+  }
+
+  const registrationData: EventRegistrationRequest = {};
+
+  if (this.event.visibility === 'PRIVATE') {
+      registrationData.regKey = this.registrationKey.trim();
+  }
+
+    if (this.event.inPerson) {
+     registrationData.dietaryReq = this.dietaryReq.trim() || undefined;
+
+     registrationData.allergies = this.allergies.trim() || undefined;
+  }
+
+  this.isRegistering = true;
+
+  this.eventService.registerForEvent( this.eventId, registrationData).subscribe({
+    next: () => {
+      this.isRegistered = true;
+      this.isRegistering = false;
+      this.closeRegistrationModal();
+      this.change.markForCheck();
+    },
+
+    error: (error) => {
+      this.isRegistering = false;
+
+      console.error('Error registering for event:', error);
+
+      this.change.markForCheck();
+     }
+  });
+ }
 
   loadEvents(): void {
     this.loading = true;
@@ -255,6 +305,7 @@ confirmRegistration(): void {
       endDate: this.formatDate(end),
       teamSize: event.teamSizeLimit,
       visibility: event.visibility,
+      inPerson: event.inPerson ?? false,
       startDateTime: event.startDateTime,
       duration: event.duration,
       timer: {
