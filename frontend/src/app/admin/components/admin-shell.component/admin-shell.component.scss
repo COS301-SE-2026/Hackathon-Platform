@@ -174,9 +174,6 @@ a {
     border-radius: 8px;
     transition: background-color 0.15s;
 
-    &:hover{
-        background-color: rgba(255,255,255,0.06);
-    }
 }
 .avatar-circle {
     width: 32px;
@@ -215,33 +212,6 @@ a {
     transition: transform 0.2s ease;
 }
 
-.navbar-logout{
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: transparent;
-    padding: 7px 12px;
-    border-radius: 8px;
-    color: #aab4c8;
-    font-size: 0.8rem;
-    font-weight: 600;
-    font-family: inherit;
-    border: 1px solid rgba(255,255,255,0.14);
-    cursor: pointer;
-    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
-   
-
-    .pi{
-        font-size: 0.85rem;
-    }
-
-    &:hover{
-        background-color: rgba(192,57,43,0.15);
-        border-color: rgba(192,57,43,0.3);
-        color: #e0685b;
-    
-    }
-}
 
 .navbar-toggle{
     display: none;
@@ -357,12 +327,6 @@ a {
     }
     .user-info{
         display:none;
-    }
-    .navbar-logout span{
-        display: none;
-    }
-    .navbar-logout{
-        padding: 8px 12px;
     }
 }
 
