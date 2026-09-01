@@ -110,7 +110,9 @@
                                     <p class = "reply-empty">No replies yet.</p>
                                 }
                                 <div class = "reply-compose">
+                                    <label for = "replyDraft{{thread.threadId}}" class = "sr-only">Reply as admin</label>
                                     <textarea
+                                    id = "replyDraft{{thread.threadId}}"
                                         [(ngModel)] = "replyDrafts[thread.threadId]"
                                         name = "replyDraft{{thread.threadId}}"
                                         placeholder = "Reply as admin..."
