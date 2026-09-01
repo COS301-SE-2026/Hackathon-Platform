@@ -27,8 +27,8 @@ interface OpenEventView {
   timer: EventTimer;
 
   tagline?: string;
-  logoStorageKey?: string;
   totalPrizePool?: number;
+  logoUrl?: string;
 }
 
 @Component({
@@ -111,6 +111,25 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.currentActiveEventIndex = event.page ?? 0;
 }
 
+
+
+  private loadEventLogos(events: OpenEventView[]): void {
+
+   events.forEach((event) => {
+
+   this.eventService.getEventLogoUrl(event.eventId).subscribe({
+        next: (response) => {
+          if (response?.url) { 
+           event.logoUrl = response.url;
+            this.change.markForCheck();
+          }
+        },
+      error: (error) => { console.error(`Failed to load logo for event ${event.eventId}:`, error); }
+       });
+     });
+  }
+
+
  loadUpcomingEvents(): void {
   this.isLoadingEvents = true;
   
@@ -128,8 +147,9 @@ export class HomeComponent implements OnInit, OnDestroy {
           (a, b) =>
             new Date(a.startDateTime).getTime() -
             new Date(b.startDateTime).getTime()
-        )
+        );
         
+        this.loadEventLogos(this.upcomingEvents);
 
       this.change.markForCheck();
     },
@@ -157,6 +177,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         
         this.activeEvents = events.map(event => this.toOpenEventView(event));
         this.currentActiveEventIndex = 0;
+
+        this.loadEventLogos(this.activeEvents);
+
         this.tick();
       } 
       
@@ -254,7 +277,6 @@ confirmRegistration(): void {
       duration: event.duration,
 
       tagline: event.tagline,
-      logoStorageKey: event.logoStorageKey,
       totalPrizePool: event.totalPrizePool,
 
       timer: {
