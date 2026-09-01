@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 
 import { EventParticipantResponse, EventResponse, EventService } from '../../../services/event.service';
 import { RecentSubmissionResponse, SubmissionService } from '../../../services/submission.service';
+import { AnnouncementResponse, AnnouncementService } from '../../../services/announcement.service';
 import { EventInsightsResponse, InsightsService } from '../../../services/insights.service';
 import { LeaderboardEntry, LeaderboardService } from '../../../services/leaderboard.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
@@ -84,6 +85,7 @@ export class DashboardComponent implements OnInit{
   private readonly submissionService = inject(SubmissionService);
   private readonly insightsService = inject(InsightsService);
   private readonly leaderboardService = inject(LeaderboardService);
+  private readonly announcementService = inject(AnnouncementService);
   private readonly change = inject(ChangeDetectorRef);
 
   allEvents: Events[] = [];
@@ -129,10 +131,9 @@ export class DashboardComponent implements OnInit{
   submissionTrendArea = '';
 
   scoreByLevel: ScoreLevelStat[]=[];
-  recentAnnouncements: AnnouncementRow[]=[
-    {title:'New challenge added', body:"Check out the new AI challenge", date:'May 16,2026'},
-    {title:'Maintenance Notice', body:"Platform maintenance on May 20,2026 from 12:00 PM", date:'May 19,2026'},
-  ];
+  recentAnnouncements: AnnouncementRow[]=[];
+  announcementsLoading = false;
+  announcementsError = '';
 
   systemNotifications: NotificationRow[]=[
     {icon: 'success', title: 'All systems operational', body: 'Last checked 2 min ago', time:'Just now'},
@@ -168,9 +169,12 @@ export class DashboardComponent implements OnInit{
       this.loadParticipantsPreview(eventId);
       this.loadTopTeams(eventId);
       this.loadRecentSubmissions(eventId);
+      this.loadRecentAnnouncements(eventId);
 
     } else {
       this.recentSubmissions = [];
+      this.recentAnnouncements = [];
+
     }
   }
 
@@ -348,6 +352,51 @@ export class DashboardComponent implements OnInit{
 
     return { points, polyline, area };
 
+  }
+
+  private loadRecentAnnouncements(eventId: string): void {
+
+    this.announcementsLoading = true;
+    this.announcementsError = '';
+    this.recentAnnouncements = [];
+
+    this.announcementService.getAnnouncements(eventId).subscribe({
+      next: announcements => {
+
+        this.recentAnnouncements = announcements
+          .slice()
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5)
+          .map(a => this.toAnnouncementRow(a));
+        this.announcementsLoading = false;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.announcementsError = 'Could not load announcements for this event.';
+        this.announcementsLoading = false;
+      }
+
+
+    });
+  }
+
+  private toAnnouncementRow(a: AnnouncementResponse): AnnouncementRow {
+    return {
+      title: a.title,
+      body: a.body,
+      date: this.formatAnnouncementDate(a.createdAt),
+    };
+
+    
+  }
+
+  private formatAnnouncementDate(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return 'unknown';
+    }
+
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
   private loadRecentSubmissions(eventId: string): void {
