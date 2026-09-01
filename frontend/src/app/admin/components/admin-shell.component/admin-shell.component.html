@@ -13,18 +13,18 @@
             <ul>
                 <li>
                     <a routerLink = "/admin/dashboard" routerLinkActive = "active" (click)="closeMenu()">
-                        <i class = "pi pi-home"></i><span>Home</span>
+                        <span>Home</span>
                     </a>
                 </li>
                 <li>
                     <a routerLink = "/admin/hackathons" routerLinkActive = "active" (click)="closeMenu()">
-                    <i class = "pi pi-th-large"></i><span>Hackathons</span>
+                    <span>Hackathons</span>
                  </a>
                 </li>
             
             <li>
-                <a routerLink = "/admin/settings" routerLinkActive = "active" (click)="closeMenu()">
-                <i class = "pi pi-cog"></i><span>Settings</span>
+                <a routerLink = "/admin/forum" routerLinkActive = "active" (click)="closeMenu()">
+                    <span>Forums</span>
                 </a>
                 </li>
             </ul>  
@@ -46,12 +46,7 @@
                     <span class = "user-role">{{ userRole }}</span>
                 </div>
                 <i class = "pi pi-chevron-down profile-chevron"></i>
-            </button>
-                <button class = "navbar-logout" (click) = "logout()">
-                    <i class = "pi pi-sign-out"></i>
-                    <span>Logout</span>
                 </button>
-
                 <button class = "navbar-toggle" aria-label = "Toggle navigation" (click) = "toggleMenu()">
                     <i class = "pi" [ngClass] ="isMenuOpen ? 'pi-times' : 'pi-bars'"></i>
                    
