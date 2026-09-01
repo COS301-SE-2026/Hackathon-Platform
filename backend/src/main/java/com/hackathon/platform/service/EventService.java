@@ -137,8 +137,9 @@ public class EventService {
   }
 
   public List<Event> getOpenEventsForParticipants() {
-    return eventRepository.findByVisibilityAndStatusIn("PUBLIC", List.of("UPCOMING", "ACTIVE"));
+    return eventRepository.findByVisibilityInAndStatusIn( List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE"));
   }
+
 
   public List<Event> getPrivateEvents() {
     return eventRepository.findByVisibilityAndStatusIn("PRIVATE", List.of("UPCOMING", "ACTIVE"));
