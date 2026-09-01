@@ -230,13 +230,17 @@
             <div class = "prize-row">
               <span class = "prize-row-index">{{$index +1}}</span>
               <div class = "prize-row-fields">
+                <label for = "prizeTitle{{$index}}" class = "sr-only">Prize title {{$index + 1}}</label>
                 <input
+                id = "prizeTitle{{$index}}"
                 type ="text"
                 [(ngModel)] ="prize.title"
                 name = "prizeTitle{{$index}}"
                 placeholder = "e.g. 1st Place"
                 class = "prize-title-input"/>
+                <label for = "prizeDescription{{$index}}" class = "sr-only">Prize description {{$index + 1}}</label>
                 <input
+                id = "prizeDescription{{$index}}"
                 type ="text"
                 [(ngModel)] ="prize.description"
                 name = "prizeDescription{{$index}}"
