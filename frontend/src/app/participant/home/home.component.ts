@@ -34,6 +34,11 @@ interface OpenEventView {
 
   teamName?: string;
   teamMemberCount?: number;
+
+  latestSubmissionLevel?: number;
+  latestSubmissionScore?: number;
+  teamRank?: number;
+  totalTeams?: number;
 }
 
 @Component({
@@ -126,19 +131,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   events.forEach((event) => {
 
      this.eventService.getMyTeamForEvent(event.eventId).subscribe({
-
     next: (team) => {
-
-      event.teamName = team.teamName;
+       event.teamName = team.teamName;
 
       this.eventService.getTeamMembers(team.teamId).subscribe({
-
         next: (members) => {
-
-          event.teamMemberCount = members.length;
-
+           event.teamMemberCount = members.length;
           this.change.markForCheck();
-
         },
 
         error: (error) => {
@@ -147,9 +146,44 @@ export class HomeComponent implements OnInit, OnDestroy {
 
           });
 
-        },
+         this.eventService.getTeamSubmissions(team.teamId).subscribe({
+
+          next: (submissions) => {
+
+            if (submissions.length > 0) {
+               const latestSubmission = submissions.reduce( (latest, submission) =>  new Date(submission.submittedAt).getTime() >  new Date(latest.submittedAt).getTime() ? submission : latest  );
+               event.latestSubmissionLevel = latestSubmission.levelId;
+              event.latestSubmissionScore = latestSubmission.score;
+            }
+
+            this.change.markForCheck();
+          },
+
+          error: (error) => {
+             console.error( `Failed to load submissions for ${event.eventId}:`, error );
+          }
+        });
+
+        this.eventService.getEventLeaderboard(event.eventId).subscribe({
+           next: (leaderboard) => {
+
+            const teamEntry = leaderboard.find(  entry => entry.teamId === team.teamId );
+
+            if (teamEntry) {
+               event.teamRank = teamEntry.rank;
+              event.totalTeams = leaderboard.length;
+            }
+
+            this.change.markForCheck();
+          },
+
+          error: (error) => {
+            console.error( `Failed to load leaderboard for ${event.eventId}:`, error );
+          }
+        });
+    },
         error: (error) => {
-          console.error(`Failed to load team for ${event.eventId}:`, error);
+         console.error(`Failed to load team for ${event.eventId}:`, error);
         }
 
       });
