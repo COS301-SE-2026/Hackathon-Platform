@@ -41,6 +41,26 @@ export interface EventResponse {
 
 }
 
+export interface SubmissionResponse {
+  submissionId: number;
+  teamId: string;
+  levelId: number;
+  solverVersionId: number;
+  score?: number;
+  status: string;
+  submittedAt: string;
+  outputFileName?: string;
+  sourceFileName?: string;
+}
+
+export interface LeaderboardEntryResponse {
+  rank: number;
+  teamId: string;
+  teamName: string;
+  bestScore?: number;
+  lastScoredAt?: string;
+}
+
 export interface TeamResponse {
   teamId: string;
   teamName: string;
@@ -209,6 +229,14 @@ getMyTeamForEvent(eventId: string): Observable<TeamResponse> {
 
 getTeamMembers(teamId: string): Observable<TeamMemberResponse[]> {
   return this.http.get<TeamMemberResponse[]>( `${this.baseUrl}/teams/${teamId}/members`);
+}
+
+getTeamSubmissions(teamId: string): Observable<SubmissionResponse[]> {
+  return this.http.get<SubmissionResponse[]>( `${this.baseUrl}/scoring/teams/${teamId}/submissions` );
+}
+
+getEventLeaderboard(eventId: string): Observable<LeaderboardEntryResponse[]> {
+  return this.http.get<LeaderboardEntryResponse[]>( `${this.baseUrl}/scoring/events/${eventId}/leaderboard`);
 }
 
 }
