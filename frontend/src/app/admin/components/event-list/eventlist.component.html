@@ -44,7 +44,6 @@
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
-      <a routerLink = "/admin/hackathons/{{hackathonId }}/announcements" routerLinkActive = "active"><i class = "pi pi-megaphone"></i>Announcements</a>
       
 </div>
 
@@ -109,13 +108,46 @@
               <span class = "type-pill">{{event.visibility}}</span>
               <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
               <span class = "dates-cell">{{event.dateRangeLabel}}</span>
+
+              <div class = "event-actions">
               <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "expandedEventId === event.eventId"
                [attr.aria-expanded] = "expandedEventId === event.eventId" (click) = "toggleEventDetails(event.eventId)">
                 {{expandedEventId === event.eventId ? 'Hide Registrations' : 'View Event' }}
                 <i class = "pi" [ngClass] = "expandedEventId === event.eventId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
               </button>
-              <button type = "button" class = "btn-view-event" (click) = "navigateToParticipants(event.eventId)">Participants</button>
+              <button type = "button" class = "icon-action-btn" aria-label = "View participants" (click) = "navigateToParticipants(event.eventId)">
+                <i class = "pi pi-users"></i>
+              </button>
+              <button type = "button" class = "icon-action-btn" aria-label = "Manage announcements for this event" (click) = "openAnnouncementsModal(event.eventId, event.name)">
+                <i class = "pi pi-megaphone"></i>
+              </button>
+              <button type = "button" class = "icon-action-btn" [class.icon-action-btn-active] = "extendingEventId === event.eventId" aria-label = "Extent event time" (click) = "toggleExtendPanel(event.eventId)">
+                <i class = "pi pi-clock"></i>
+              </button>
+              </div>
+
             </div>
+
+            @if (extendingEventId === event.eventId){
+              <div class = "extend-time-panel">
+                <i class = "pi pi-clock"></i>
+                <span>Add hours to this event:</span>
+                <input
+                type = "number"
+                min = "1"
+                [(ngModel)] = "extendHoursDraft[event.eventId]"
+                name = "extendHours{{event.eventId}}"
+                aria-label = "Hours to add"/>
+                <button type = "button" class = "btn-confirm-extent" [disabled] = "isExtending[event.eventId]" (click) = "confirmExtend(event.eventId)">
+                  {{isExtending[event.eventId] ? 'Extending...' : 'Confirm'}}
+                </button>
+                <button type = "button" class = "btn-cancel-extent"  (click) = "toggleExtendPanel(event.eventId)">Cancel</button>
+                @if (extendError[event.eventId]){
+                  <span class = "extent-error">{{extendError[event.eventId]}}</span>
+                }
+              </div>
+            }
+
 
             @if (expandedEventId === event.eventId){
               <div class = "event-registrations-panel">
@@ -212,5 +244,13 @@
     [eventName] = "participantsModalEventName"
     (closed) = "closeParticipantsModal()"
   ></app-participants-modal>
+}
+
+@if (showAnnouncementsModal) {
+  <app-event-announcements-modal
+    [eventId] = "announcementsModalEventId"
+    [eventName] = "announcementsModalEventName"
+    (closed) = "closeAnnouncementsModal()"
+  ></app-event-announcements-modal>
 }
 </div>
