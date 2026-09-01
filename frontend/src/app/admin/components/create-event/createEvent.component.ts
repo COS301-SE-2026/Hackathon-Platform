@@ -46,7 +46,9 @@ export class CreateEventComponent implements OnInit {
     leaderboardFreezeDateTime: '',
     prizes: [{ title: '1st Place', description: ''},
             { title: '2nd Place', description: ''},
-            { title: '3rd Place', description: ''}, ] as { title: string, description: string}[],
+            { title: '3rd Place', description: ''},
+            { title: 'Prize Pool', description: ''},
+           ] as { title: string, description: string}[],
   };
 
   readonly descriptionMaxLength = 1000;
