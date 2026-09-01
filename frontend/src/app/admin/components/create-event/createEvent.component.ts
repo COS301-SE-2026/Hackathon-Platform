@@ -44,7 +44,11 @@ export class CreateEventComponent implements OnInit {
     rules: '',
     isInPerson: false,
     leaderboardFreezeDateTime: '',
-    prizes: [{ title: '1st Place', description: ''}] as { title: string, description: string}[],
+    prizes: [{ title: '1st Place', description: ''},
+            { title: '2nd Place', description: ''},
+            { title: '3rd Place', description: ''},
+            { title: 'Honorable Mention', description: ''},
+    ] as { title: string, description: string}[],
   };
 
   readonly descriptionMaxLength = 1000;
