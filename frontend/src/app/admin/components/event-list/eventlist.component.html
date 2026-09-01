@@ -157,6 +157,10 @@
                   <button type = "button" class = "btn-view-event" (click) = "navigateToAnnouncements(event.eventId)">
                     <i class = "pi pi-megaphone"></i> Announcements
                   </button>
+                  <button type = "button" class = "btn-view-event" (click) = "pauseLeaderboard(event.eventId)" [disabled] = "leaderboardPauseLoading[event.eventId]">
+                    <i class = "pi" [ngClass] = "leaderboardPaused[event.eventId] ? 'pi-play' : 'pi-pause'"></i>
+                    {{leaderboardPauseLoading[event.eventId] ? 'Updating...' : leaderboardPaused[event.eventId] ? 'Resume Leaderboard' : 'Pause Leaderboard'}}
+                  </button>
                 }
               </div>
             }

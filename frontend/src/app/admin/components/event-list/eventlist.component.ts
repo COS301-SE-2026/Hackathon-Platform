@@ -15,6 +15,7 @@ interface EventRow {
   status: string;
   statusClass: 'live' | 'upcoming' | 'completed' | 'canceled'| 'ended';
   dateRangeLabel: string;
+  scoringPaused: boolean;
 }
 
 interface RegisteredTeam {
@@ -58,6 +59,8 @@ export class EventlistComponent implements OnInit {
   registrationsByEvent: Record<string, RegisteredTeam[]> = {};
   registrationsLoading: Record<string, boolean> = {};
   registrationsError: Record<string, string> = {};
+  leaderboardPaused: Record<string, boolean> = {};
+  leaderboardPauseLoading: Record<string, boolean> = {};
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
@@ -103,6 +106,9 @@ export class EventlistComponent implements OnInit {
       next: (events) => {
         this.eventCount = events.length;
         this.events = events.map((e) => this.toEventRow(e));
+        events.forEach((event) => {
+          this.leaderboardPaused[event.eventId] = event.scoringPaused;
+        });
         this.isLoading = false;
         this.change.markForCheck();
       },
@@ -128,6 +134,7 @@ export class EventlistComponent implements OnInit {
       status: this.statusLabel(event.status),
       statusClass: this.getStatusClass(event.status),
       dateRangeLabel: this.formatDateRange(event),
+      scoringPaused: event.scoringPaused,
     }
   }
 
@@ -250,6 +257,29 @@ export class EventlistComponent implements OnInit {
 
   navigateToAnnouncements(eventId: string): void {
     this.router.navigate(['/admin/events', eventId, 'announcements']);
+  }
+
+  pauseLeaderboard(eventId: string): void {
+    if(this.leaderboardPauseLoading[eventId]) return;
+
+    this.leaderboardPauseLoading[eventId] = true;
+
+    const request = this.leaderboardPaused[eventId]
+      ? this.eventService.resumeLeaderboard(eventId)
+      : this.eventService.pauseLeaderboard(eventId);
+
+    request.subscribe({
+      next: (response) => {
+        this.leaderboardPaused[eventId] = response.scoringPaused;
+        this.leaderboardPauseLoading[eventId] = false;
+        this.change.markForCheck();
+      },
+      error: (error) => {
+        console.error('Failed to update leaderboard pause for event', eventId, error);
+        this.leaderboardPauseLoading[eventId] = false;
+        this.change.markForCheck();
+      }
+    });
   }
 
   closeParticipantsModal(): void {

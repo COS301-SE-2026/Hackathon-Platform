@@ -32,6 +32,7 @@ export interface EventResponse {
   status: string;
   inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
+  scoringPaused: boolean;
 }
 
 export interface RegisteredParticipants {
@@ -144,5 +145,19 @@ export class EventService {
 
   getEventParticipants(eventId: string): Observable<EventParticipantResponse[]> {
     return this.http.get<EventParticipantResponse[]>(`${this.baseUrl}/admin/events/${eventId}/participants`);
+  }
+
+  pauseLeaderboard(eventId: string): Observable<{ eventId: string; scoringPaused: boolean }> {
+    return this.http.patch<{ eventId: string; scoringPaused: boolean }>(
+      `${this.baseUrl}/admin/events/${eventId}/scoring/pause`,
+      {}
+    );
+  }
+
+  resumeLeaderboard(eventId: string): Observable<{ eventId: string; scoringPaused: boolean }> {
+    return this.http.patch<{ eventId: string; scoringPaused: boolean }>(
+      `${this.baseUrl}/admin/events/${eventId}/scoring/resume`,
+      {}
+    );
   }
 }
