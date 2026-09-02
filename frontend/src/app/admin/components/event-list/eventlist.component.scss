@@ -389,8 +389,26 @@
 }
 
 .dates-cell{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   font-size: 0.82rem;
   color: #4a5468;
+}
+
+.dates-range{
+  font-size: 0.82rem;
+  color: #4a5468;
+}
+
+.time-remaining{
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7588;
+}
+
+.time-remaining-urgent{
+  color: #1983c2;
 }
 
 .btn-view-event{
@@ -506,6 +524,50 @@
   background-color: #f9fafc;
   border-top: 1px solid #f1f3f7;
   padding: 18px 22px 22px 70px;
+}
+
+.extend-timer-panel{
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 16px;
+  background-color: #ffffff;
+  border: 1px solid #dfe3ea;
+  border-radius: 8px;
+
+  label{
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #4a5468;
+    margin-bottom: 8px;
+  }
+}
+
+.extend-timer-controls{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.extend-timer-input{
+  width: 90px;
+  padding: 8px 10px;
+  border: 1px solid #dfe3ea;
+  border-radius: 7px;
+  font-size: 0.85rem;
+  font-family: inherit;
+
+  &:focus{
+    outline: none;
+    border-color: #1983c2;
+  }
+}
+
+.extend-timer-error{
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: #c0392b;
 }
 .registrations-summary-bar{
   display: flex;

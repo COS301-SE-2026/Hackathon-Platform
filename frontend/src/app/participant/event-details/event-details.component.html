@@ -261,6 +261,10 @@
       <app-leaderboard [eventId]="eventId"> </app-leaderboard>
     }
 
+    @if (activeTab === 'announcements' && eventId) {
+    <app-announcements [eventId]="eventId"></app-announcements>
+    }
+
   </div>
 
 </div>
