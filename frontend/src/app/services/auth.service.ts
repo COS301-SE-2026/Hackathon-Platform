@@ -24,6 +24,14 @@ export interface AuthResponse {
   role: string;
 }
 
+export interface AdminResponse {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  status: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -41,6 +49,14 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.baseUrl}/register`, userData).pipe(
       tap(response => this.saveSession(response))
     );
+  }
+
+  createAdmin(admin: { firstName: string; lastName: string; email: string; password: string }): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/superadmin/admin`, admin);
+  }
+
+  getAdmins(): Observable<AdminResponse[]> {
+    return this.http.get<AdminResponse[]>(`${environment.apiUrl}/api/superadmin/admins`);
   }
 
   logout(): void {

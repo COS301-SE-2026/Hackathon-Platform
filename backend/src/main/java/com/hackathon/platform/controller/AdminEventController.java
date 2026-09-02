@@ -3,6 +3,8 @@ package com.hackathon.platform.controller;
 import com.hackathon.platform.dto.EventParticipantResponse;
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
+import com.hackathon.platform.dto.ExtendTimerRequest;
+import com.hackathon.platform.dto.ExtendTimerResponse;
 import com.hackathon.platform.dto.ScoringPauseResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.User;
@@ -95,5 +97,14 @@ public class AdminEventController {
   public ResponseEntity<List<EventParticipantResponse>> getEventParticipants(
       @PathVariable("id") UUID eventId) {
     return ResponseEntity.ok(teamService.listEventParticipants(eventId));
+  }
+
+  @PatchMapping("/{id}/extend")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<ExtendTimerResponse> extendTimer(
+      @PathVariable("id") UUID eventId, @RequestBody ExtendTimerRequest req) {
+    Event event = eventService.extendEvent(eventId, req.getAdditionalTime());
+    return ResponseEntity.ok(
+        new ExtendTimerResponse(event.getEventId(), event.getDuration(), event.getEndDateTime()));
   }
 }

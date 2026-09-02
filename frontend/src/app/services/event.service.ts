@@ -11,9 +11,13 @@ export interface EventRequest {
   duration: number;
   description?: string;
   visibility: 'PUBLIC' | 'PRIVATE';
-  status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
-  isInPerson?: boolean;
+  status?: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
+  inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
+  freezeTime?: string;
+  rules?: string;
+  allowedTech?: string[];
+  tagline?: string;
 }
 
 export interface EventResponse {
@@ -30,7 +34,7 @@ export interface EventResponse {
   status: string;
   inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
-  scoringPaused?: boolean;
+  scoringPaused: boolean;
   allowedTech?: string[];
   rules?: string;
   tagline?: string;
@@ -239,4 +243,17 @@ getEventLeaderboard(eventId: string): Observable<LeaderboardEntryResponse[]> {
   return this.http.get<LeaderboardEntryResponse[]>( `${this.baseUrl}/scoring/events/${eventId}/leaderboard`);
 }
 
+  pauseLeaderboard(eventId: string): Observable<{ eventId: string; scoringPaused: boolean }> {
+    return this.http.patch<{ eventId: string; scoringPaused: boolean }>(
+      `${this.baseUrl}/admin/events/${eventId}/scoring/pause`,
+      {}
+    );
+  }
+
+  resumeLeaderboard(eventId: string): Observable<{ eventId: string; scoringPaused: boolean }> {
+    return this.http.patch<{ eventId: string; scoringPaused: boolean }>(
+      `${this.baseUrl}/admin/events/${eventId}/scoring/resume`,
+      {}
+    );
+  }
 }
