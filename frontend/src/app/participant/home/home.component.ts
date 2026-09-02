@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { forkJoin } from 'rxjs';
 import { Router, RouterModule } from '@angular/router';
@@ -45,12 +45,12 @@ interface OpenEventView {
   selector: 'app-home',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
-    CarouselModule, 
-    CardComponent, 
+    CommonModule,
+    RouterModule,
+    CarouselModule,
+    CardComponent,
     ButtonComponent,
-    InputComponent, 
+    InputComponent,
     ModalComponent,
     LoaderComponent
    ],
@@ -67,7 +67,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private timerInterval: ReturnType<typeof setInterval> | undefined;
 
- 
+
   isLoadingEvents = false;
   registrationModal = false;
   isLoadingActiveEvents = false;
@@ -83,8 +83,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   selectedEvent: OpenEventView | null = null;
   registeredEventIds = new Set<string>();
 
-  
-  
+
+
 
     responsiveOptionsForCarousel = [
     {
@@ -213,7 +213,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
    this.eventService.getEventLogoUrl(event.eventId).subscribe({
         next: (response) => {
-          if (response?.url) { 
+          if (response?.url) {
            event.logoUrl = response.url;
             this.change.markForCheck();
           }
@@ -226,7 +226,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
  loadUpcomingEvents(): void {
   this.isLoadingEvents = true;
-  
+
 
   this.eventService.getOpenEvents().subscribe({
     next: (events) => {
@@ -236,13 +236,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       this.upcomingEvents = events
         .map((event) => this.toOpenEventView(event))
-        .filter((event) => new Date(event.startDateTime) > now)
         .sort(
           (a, b) =>
             new Date(a.startDateTime).getTime() -
             new Date(b.startDateTime).getTime()
         );
-        
+
         this.loadEventLogos(this.upcomingEvents);
 
       this.change.markForCheck();
