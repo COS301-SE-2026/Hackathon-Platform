@@ -32,12 +32,6 @@
     </div>
 
 
-    <div class = "filter-tabs">
-        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'ALL'" (click) = "statusFilter = 'ALL'">All</button>
-        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'PUBLISHED'" (click) = "statusFilter = 'PUBLISHED'">Published</button>
-
-    </div>
-
     @if (errorMessage){
         <div class = "error-banner">{{errorMessage}}</div>
     }
