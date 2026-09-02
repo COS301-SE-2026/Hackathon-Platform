@@ -19,6 +19,10 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.io.ByteArrayOutputStream;
+import com.hackathon.platform.config.AzureBlobConfig;
+import java.util.List;
+import java.io.InputStream;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 @Service
 public class CertificateService {
@@ -32,11 +36,15 @@ public class CertificateService {
     private final EventRepository eventRepo;
     private final HackathonRepository hackRepo;
     private final EventRegistrationRepository eventRegRepo;
+    private final StorageService storageService;
+    private AzureBlobConfig blob;
 
-    public CertificateService(EventRepository eventRepo, HackathonRepository hackRepo, EventRegistrationRepository eventRegRepo){
+    public CertificateService(EventRepository eventRepo, HackathonRepository hackRepo, EventRegistrationRepository eventRegRepo, StorageService storageService, AzureBlobConfig blobConfig){
         this.eventRepo = eventRepo;
         this.hackRepo = hackRepo;
         this.eventRegRepo = eventRegRepo;
+        this.storageService = storageService;
+        this.blob = blobConfig;
     }
 
     public byte[] genCertificate(UUID eventId, User user){
@@ -50,13 +58,13 @@ public class CertificateService {
         String partName = (user.getFirstName()+" "+user.getLastName());
 
         try{
-            return render(partName, event.getName(), hackathonName);
+            return render(partName, event, hackathonName);
         } catch(IOException e){
             throw new RuntimeException("Failed to make the certificate");
         }
     }
 
-    private byte[] render(String partName, String eventName, String hackathonName) throws IOException {
+    private byte[] render(String partName, Event event, String hackathonName) throws IOException {
         try(PDDocument doc = new PDDocument()){
             PDPage page = new PDPage(new PDRectangle(PAGE_WIDTH, PAGE_HEIGHT));
             doc.addPage(page);
@@ -89,7 +97,7 @@ public class CertificateService {
                 cs.stroke();
                 y-=45;
 
-                String bodyText = "has successfully participated in \""+eventName+"\"";
+                String bodyText = "has successfully participated in \""+event.getName()+"\"";
                 drawCentered(cs, body, 13, centreX, y, bodyText, GREY, 0f);
                 y-=110;
 
@@ -174,5 +182,18 @@ public class CertificateService {
         cs.newLineAtOffset(x-width, y);
         cs.showText(text);
         cs.endText();
+    }
+
+    private PDImageXObject loadLogoImage(PDDocument doc, Event event){
+        String logoKey = event.getLogoStorageKey();
+        if(logoKey == null || logoKey.isBlank()){
+            return null;
+        }
+        try(InputStream in = storageService.download(blob.getEventResourcesContainer(), logoKey)){
+            byte[] bytes = in.readAllBytes();
+            return PDImageXObject.createFromByteArray(doc, bytes, logoKey);
+        }catch(Exception e){
+            return null;
+        }
     }
 }
