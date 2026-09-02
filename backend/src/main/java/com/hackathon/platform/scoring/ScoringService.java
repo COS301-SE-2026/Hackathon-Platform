@@ -1,12 +1,14 @@
 package com.hackathon.platform.scoring;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.ScoringLog;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.Team;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.LevelFileRepository;
 import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.ScoringLogRepository;
@@ -59,6 +61,7 @@ public class ScoringService {
   private final AzureBlobConfig blobConfig;
   private final SolverRunner solverRunner;
   private final LeaderboardUpdateService leaderboardUpdateService;
+  private final EventRepository eventRepo;
 
   /**
    * Scores the submission, can be recalled (e.g. admin re-scoring after a solver hotfix).
@@ -144,6 +147,9 @@ public class ScoringService {
             .findById(submissionId)
             .orElseThrow(
                 () -> new IllegalArgumentException("Submission wasnt found " + submissionId));
+    if ("CANCELED".equalsIgnoreCase(sub.getStatus())) {
+      throw new IllegalArgumentException("Submission was canceled");
+    }
     sub.setStatus("SCORING");
     return submissionRepo.save(sub);
   }
@@ -278,5 +284,18 @@ public class ScoringService {
     } catch (IOException e) {
       logger.warn("Failed to clean up scoring fetch dir {}: {}", dir, e.getMessage());
     }
+  }
+
+  public boolean isScoringPaused(Long subId) {
+    Submission sub =
+        submissionRepo
+            .findById(subId)
+            .orElseThrow(() -> new IllegalArgumentException("Submission was not found " + subId));
+    Event event =
+        eventRepo
+            .findById(sub.getEventId())
+            .orElseThrow(() -> new IllegalArgumentException("Could not find the event"));
+
+    return event.getScoringPaused();
   }
 }

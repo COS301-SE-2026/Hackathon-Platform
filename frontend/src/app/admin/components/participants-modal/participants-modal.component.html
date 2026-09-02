@@ -1,0 +1,74 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-panel" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div>
+        <h2>{{ eventName || 'Event' }} - Participants</h2>
+        <p class="modal-subtitle">Everyone approved into a team for this event.</p>
+      </div>
+      <button type="button" class="modal-close-btn" (click)="close()" aria-label="Close">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-toolbar">
+      <div class="search-box">
+        <i class="pi pi-search search-icon"></i>
+        <input
+          type="text"
+          placeholder="Search by name, email, or team..."
+          aria-label="Search participants"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="applyFilter()"
+        />
+      </div>
+      <span class="participants-count-pill">
+        <i class="pi pi-users"></i>
+        {{ filteredParticipants.length }} of {{ participants.length }}
+      </span>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-banner">{{ errorMessage }}</div>
+    }
+
+    <div class="modal-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Participant</th>
+            <th>Email</th>
+            <th>Team</th>
+            <th>Role</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading) {
+            <tr><td colspan="5" class="empty-state">Loading participants...</td></tr>
+          } @else if (filteredParticipants.length === 0 && !errorMessage) {
+            <tr><td colspan="5" class="empty-state">
+              {{ participants.length === 0 ? 'No approved participants yet for this event.' : 'No participants match your search.' }}
+            </td></tr>
+          } @else {
+            @for (p of filteredParticipants; track p.userId) {
+              <tr>
+                <td>
+                  <div class="participant-cell">
+                    <span class="participant-avatar">{{ getInitials(p.fullName) }}</span>
+                    <span>{{ p.fullName }}</span>
+                  </div>
+                </td>
+                <td>{{ p.email }}</td>
+                <td>{{ p.teamName }}</td>
+                <td>
+                  <span class="role-badge" [class.role-leader]="p.teamRole === 'LEADER'">{{ p.teamRole }}</span>
+                </td>
+                <td>{{ p.joinedAt | date: 'mediumDate' }}</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

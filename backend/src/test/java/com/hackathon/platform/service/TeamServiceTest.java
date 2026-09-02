@@ -10,9 +10,12 @@ import static org.mockito.Mockito.when;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
+import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.TeamMember;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRegistrationRepository;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.TeamMemberRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.repository.UserRepository;
@@ -34,11 +37,14 @@ class TeamServiceTest {
   @Mock private TeamRepository teamRepository;
   @Mock private TeamMemberRepository teamMemberRepository;
   @Mock private UserRepository userRepository;
+  @Mock private EventRepository eventRepo;
+  @Mock private EventRegistrationRepository eventRegRepo;
   @InjectMocks private TeamService teamService;
 
   private UUID eventId;
   private UUID userId;
   private CreateTeamRequest createRequest;
+  private Event event;
 
   @BeforeEach
   void setUp() {
@@ -47,13 +53,20 @@ class TeamServiceTest {
     createRequest = new CreateTeamRequest();
     createRequest.setEventId(eventId);
     createRequest.setTeamName("Test Team");
+
+    event = new Event();
+    event.setEventId(eventId);
+    event.setStatus("UPCOMING");
+    event.setTeamSizeLimit((short) 4);
   }
 
   @Test
   void createTeam_shouldSucceed_whenValid() {
 
-    when(teamRepository.findAll()).thenReturn(Collections.emptyList());
-    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId))
         .thenReturn(Collections.emptyList());
 
     Team savedTeam = new Team();
@@ -61,6 +74,7 @@ class TeamServiceTest {
     savedTeam.setTeamName("Test Team");
     savedTeam.setEventId(eventId);
     savedTeam.setCreatedByUserId(userId);
+    savedTeam.setStatus("APPROVED");
     when(teamRepository.save(any(Team.class))).thenReturn(savedTeam);
     when(teamMemberRepository.save(any(TeamMember.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -75,29 +89,28 @@ class TeamServiceTest {
 
   @Test
   void createTeam_shouldThrow_whenDuplicateTeamName() {
-
-    Team existingTeam = new Team();
-    existingTeam.setTeamName("Test Team");
-    when(teamRepository.findAll()).thenReturn(List.of(existingTeam));
-
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(true);
     assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("Team name already exists");
+        .hasMessageContaining("Team name is in use, please choose a new team name");
     verify(teamRepository, never()).save(any(Team.class));
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
 
   @Test
   void createTeam_shouldThrow_whenUserAlreadyInTeam() {
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
+    when(teamRepository.existsByEventIdAndTeamName(eventId, "Test Team")).thenReturn(false);
 
-    when(teamRepository.findAll()).thenReturn(Collections.emptyList());
-
-    when(teamMemberRepository.findByUserIdAndStatus(userId, "APPROVED"))
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId))
         .thenReturn(List.of(new TeamMember()));
 
     assertThatThrownBy(() -> teamService.createTeam(createRequest, userId))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("already a member of a team");
+        .hasMessageContaining("You're already part of a team for this event");
     verify(teamRepository, never()).save(any(Team.class));
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
@@ -106,9 +119,15 @@ class TeamServiceTest {
   void requestToJoinTeam_shouldSucceed_whenValid() {
     UUID teamId = UUID.randomUUID();
     Team team = new Team();
+    team.setTeamId(teamId);
+    team.setStatus("ACTIVE");
     team.setEventId(eventId);
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId))
+        .thenReturn(Collections.emptyList());
     when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(0L);
     when(teamMemberRepository.save(any(TeamMember.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -120,13 +139,22 @@ class TeamServiceTest {
   @Test
   void requestToJoinTeam_shouldThrow_whenAlreadyRequested() {
     UUID teamId = UUID.randomUUID();
-    when(teamRepository.findById(teamId)).thenReturn(Optional.of(new Team()));
+    Team team = new Team();
+    team.setTeamId(teamId);
+    team.setStatus("ACTIVE");
+    team.setEventId(eventId);
+
+    event.setEventId(eventId);
+
+    when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId))
         .thenReturn(Optional.of(new TeamMember()));
 
     assertThatThrownBy(() -> teamService.requestToJoinTeam(teamId, userId))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("Already requested or member");
+        .hasMessageContaining("You already requested or are a member for this team");
     verify(teamMemberRepository, never()).save(any(TeamMember.class));
   }
 
@@ -134,8 +162,12 @@ class TeamServiceTest {
   void requestToJoinTeam_shouldThrow_whenTeamFull() {
     UUID teamId = UUID.randomUUID();
     Team team = new Team();
+    team.setTeamId(teamId);
+    team.setStatus("ACTIVE");
     team.setEventId(eventId);
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, userId)).thenReturn(Optional.empty());
     when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(4L);
 
@@ -151,6 +183,7 @@ class TeamServiceTest {
     UUID teamId = UUID.randomUUID();
     UUID targetUserId = UUID.randomUUID();
     Team team = new Team();
+    team.setTeamId(teamId);
     team.setEventId(eventId);
     team.setCreatedByUserId(userId);
     TeamMember pending = new TeamMember();
@@ -159,7 +192,8 @@ class TeamServiceTest {
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
         .thenReturn(Optional.of(pending));
-    when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(targetUserId, "APPROVED", eventId))
         .thenReturn(Collections.emptyList());
     when(teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED")).thenReturn(1L);
 
@@ -181,7 +215,6 @@ class TeamServiceTest {
     when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
     when(teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId))
         .thenReturn(Optional.of(pending));
-
     teamService.approveOrRejectJoinRequest(teamId, targetUserId, userId, false);
 
     assertThat(pending.getStatus()).isEqualTo("REJECTED");
@@ -197,24 +230,26 @@ class TeamServiceTest {
     Team targetTeam = new Team();
     targetTeam.setEventId(eventId);
     targetTeam.setCreatedByUserId(userId);
-    Team otherTeam = new Team();
-    otherTeam.setEventId(eventId);
+
     TeamMember pendingMembership = new TeamMember();
     pendingMembership.setStatus("PENDING");
     TeamMember approvedMembershipInOtherTeam = new TeamMember();
     approvedMembershipInOtherTeam.setTeamId(otherTeamId);
     approvedMembershipInOtherTeam.setStatus("APPROVED");
 
+    event.setEventId(eventId);
+
     when(teamRepository.findById(targetTeamId)).thenReturn(Optional.of(targetTeam));
     when(teamMemberRepository.findByTeamIdAndUserId(targetTeamId, targetUserId))
         .thenReturn(Optional.of(pendingMembership));
-    when(teamMemberRepository.findByUserIdAndStatus(targetUserId, "APPROVED"))
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(teamMemberRepository.findByUserIdAndStatusAndEventId(targetUserId, "APPROVED", eventId))
         .thenReturn(List.of(approvedMembershipInOtherTeam));
 
     assertThatThrownBy(
             () -> teamService.approveOrRejectJoinRequest(targetTeamId, targetUserId, userId, true))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("already an approved member of another team");
+        .hasMessageContaining("Youre already an approved member for another team for this event");
 
     verify(teamMemberRepository, never()).save(pendingMembership);
   }

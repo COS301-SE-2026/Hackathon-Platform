@@ -1,9 +1,31 @@
 <div class = "hackathons-page">
     <div class = "page-header">
+    <div>
         <h1>Hackathons</h1>
         <p class = "page-subtitle"> Manage all your hackathons and create events for each</p>
     </div>
-    <p-button label = "+ New Hackathon" (onClick) = "openCreateDialog()" />
+    <button type = 'button' class = "btn-create-hackathon" (click) = "openCreateDialog()"> + Create Hackathon
+    </button>
+</div>
+
+<div class = "toolbar">
+    <div class = "search-box">
+        <i class = "pi pi-search search-icon"></i>
+        <input type = "text" placeholder = "Search hackathons..." aria-label="Search hackathons"/>
+    </div>
+
+    <div class = "toolbar-right">
+        <span class = "hackathon-count">{{ hackathons.length}} Hackathons</span>
+        <div class = "view-toggle">
+            <button type = "button" class = "view-toggle-btn active" aria-label="Grid view">
+                <i class = "pi pi-th-large"></i>
+            </button>
+            <button type = "button" class = "view-toggle-btn" aria-label = "List view">
+                <i class = "pi pi-bars"></i>
+            </button>
+        </div>
+    </div>
+</div>
 
     @if (errorMessage) {
         <div class="error-banner">{{ errorMessage }}</div>
@@ -16,78 +38,64 @@
     <div class = "hackathons-grid">
         @for (hackathon of hackathons; track hackathon.hackathonId){
             <div class = "hackathon-card">
-                <div class = "hackathon-header">
+                <div class = "hackathon-logo">{{hackathon.name.charAt(0)}}</div>
+
                     <h3 class = "hackathon-name">{{hackathon.name}}</h3>
-                </div>
 
-                <p class = "hackathon-description">{{hackathon.description}}</p>
+                    <div class = "hackathon-stats">
+                        <div class = "stat">
+                            <span class = "stat-value">{{hackathon.levelCount}}</span>
+                            <span class = "stat-label">Levels</span>
+                        </div>
+                    <div class = "stat">
+                            <span class = "stat-value">{{hackathon.eventCount}}</span>
+                            <span class = "stat-label">Events</span>
+                        </div>
+                    </div>
 
-                <div class = "hackathon-stats">
-                    <span>{{hackathon.eventCount}} events</span>
-                </div>
 
                 <div class = "hackathon-actions">
-                    <p-button 
-                    label = "View Events"
-                    (onClick) = "navigateToEvents(hackathon.hackathonId)"
-                    styleClass = "p-button-primary" />
-
-                    <p-button 
-                    label = "+ Create Event"
-                    (onClick) = "navigateToCreateEvent(hackathon.hackathonId)"
-                    styleClass = "p-button-success" />
-
-                     <p-button 
-                    label = "Levels"
-                    (onClick) = "navigateToLevels(hackathon.hackathonId)"
-                    styleClass = "p-button-secondary" />
-
-                    <p-button 
-                    label = "Solver"
-                    (onClick) = "navigateToSolver(hackathon.hackathonId)"
-                    styleClass = "p-button-secondary" />
-
-
-                     <p-button 
-                    label = "Edit"
-                    (onClick) = "openEditDialog(hackathon)"
-                    styleClass = "p-button-secondary" />
-
-                    <p-button 
-                    label = "Delete"
-                    (onClick) = "deleteHackathon(hackathon.hackathonId)"
-                    styleClass = "p-button-danger" />
+                   <button type = "button" class = "btn-view-hackathon" (click) = "navigateToHackathon(hackathon.hackathonId)">
+                    <i class = "pi pi-calendar"></i> View Hackathon
+                   </button>
+                   <button type = "button" class = "icon-btn icon-btn-edit" aria-label= "Edit hackathon" (click) = "openEditDialog(hackathon)">
+                    <i class = "pi pi-pencil"></i>
+                   </button>
+                   <button type = "button" class = "icon-btn icon-btn-delete" aria-label= "Delete hackathon" (click) = "deleteHackathon(hackathon.hackathonId)">
+                    <i class = "pi pi-trash"></i>
+                   </button>
 
                 </div>
             </div>
-        } 
+        }
         @if (hackathons.length === 0) {
             <div class = "empty-state">
                 <p>No hackathons created yet</p>
-                <p-button label = "Create your first hackathon" (onClick) = "openCreateDialog()"/>
+
             </div>
         }
     </div>
 }
 </div>
- 
 
 
-<p-dialog 
+
+<p-dialog
 [(visible)] = "showDialog"
 [modal] = "true"
-[style] = "{width : '500px'}"
+[style] = "{width : '560px'}"
 [header] = "editingHackathon ? 'Edit Hackathon' : 'Create New Hackathon' ">
 
 <div class = "dialog-content">
+    <h4 class = "dialog-section-title">Basic Information</h4>
     <div class = "form-group">
-        <label for = "hackathonName">Hackathon Name *</label>
+        <label for = "hackathonName">Hackathon Name</label>
         <input id = "hackathonName" pInputText [(ngModel)] = "newHackathon.name" placeholder = "Enter hackathon name" />
 
     </div>
     <div class = "form-group">
         <label for = "hackathonDescription">Description</label>
-        <textarea id = "hackathonDescription" pTextarea [(ngModel)] = "newHackathon.description" rows = "3" placeholder = "Enter description"></textarea>
+        <textarea id = "hackathonDescription" pTextarea [(ngModel)] = "newHackathon.description" rows = "4" placeholder = "Enter hackathon description"></textarea>
     </div>
 
     <div class = "form-group">
@@ -97,15 +105,24 @@
             <p class = "upload-hint">A problem statement is already uploaded. Choose a new file to replace it.</p>
         }
 
-        <input
-            id = "problemStatementFile"
-            type = "file"
-            accept = "application/pdf"
-            (change) = "onProblemStatementFileSelected($event)" />
+        <label for = "problemStatementFile" class = "sr-only">Upload problem statement</label>
+            <button class = "drop-zone" (click) = "problemStatementInput.click()"
+            (keyup.enter) = "problemStatementInput.click()" (keyup.space) = "problemStatementInput.click()"
+            (dragover) = "$event.preventDefault()" type ="button">
 
-        @if (problemStatementFileName) {
-            <p class = "upload-filename">{{ problemStatementFileName }} will be uploaded when you save.</p>
-        }
+            <input #problemStatementInput id = "problemStatementFile" type = "file" style = "display:none"
+            accept = "application/pdf" (change) = "onProblemStatementFileSelected($event)" />
+
+            <span class = "drop-zone-left">
+                <span class = "drop-zone-icon"><i class = "pi pi-upload"></i></span>
+                <span class = "drop-zone-text">
+                    <p><span class = "drop-zone-cta">Click to upload</span> or drag and drop</p>
+                    <p class = "drop-zone-hint">PDF (Max 10MB)</p>
+                </span>
+            </span>
+            <span class = "drop-zone-filename">{{problemStatementFileName || 'No file selected' }}</span>
+
+        </button>
 
         @if (problemStatementUploadError) {
             <p class = "upload-error">{{ problemStatementUploadError }}</p>
@@ -118,13 +135,12 @@
 
 
 <ng-template #footer>
-    <p-button label = "Cancel" (onClick) = "showDialog = false" styleClass = "p-button-secondary" [disabled] = "isSaving" />
-    <p-button
-        [label] = "isSaving ? 'Saving...' : (problemStatementFile ? 'Save & Upload' : 'Save')"
+    <button type = "button" class = "btn-cancel" (click) = "showDialog = false" [disabled] = "isSaving">Cancel</button>
+    <button type = "button" class = "btn-create-hackathon"
         [disabled] = "isSaving"
-        (onClick) = "saveHackathon()"
-        styleClass = "p-button-primary" />
-    
+        (click) = "saveHackathon()">
+        {{isSaving ? 'Saving...' : (editingHackathon ? 'Save Changes' : 'Create Hackathon')}}
+    </button>
 </ng-template>
 </p-dialog>
 

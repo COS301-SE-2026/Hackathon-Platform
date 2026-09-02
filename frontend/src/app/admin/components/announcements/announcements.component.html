@@ -1,0 +1,125 @@
+<div class = "announcement-page">
+
+    <div class = "back-navigation">
+        <button class = "back-btn" (click) = "goBack()">
+            <i class = "pi pi-arrow-left"></i>
+            Back to Events
+        </button>
+    </div>
+
+    <div class = "hackathon-header">
+        <div class = "hackathon-header-info">
+            <h1>{{eventName || 'Loading...'}}</h1>
+            <p class = "hackathon-header-subtitle">{{eventDescription}}</p>
+        </div>
+    </div>
+
+    <main class = "content">
+    <div class = "page-header">
+        <div>
+            <h1>Announcements</h1>
+            <p class = "page-subtitle">Post updates and notify participants about this event.</p>
+        </div>
+        <div class = "page-header-actions">
+            <button type = "button"  class = "btn-create-announcement"  (click) = "openCreateModal()">
+                + New Announcement
+            </button>
+            <div class = "search-box">
+                <input type = "text" [(ngModel)] = "searchTerm" placeholder="Search announcements..." aria-label="Search announcements"/>
+                <i class = "pi pi-search search-icon"></i>
+            </div>
+        </div>
+    </div>
+
+
+    <div class = "filter-tabs">
+        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'ALL'" (click) = "statusFilter = 'ALL'">All</button>
+        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'PUBLISHED'" (click) = "statusFilter = 'PUBLISHED'">Published</button>
+
+    </div>
+
+    @if (errorMessage){
+        <div class = "error-banner">{{errorMessage}}</div>
+    }
+    @if (isLoading){
+        <div class = "empty-state">Loading...</div>
+    } @else {
+        <div class = "announcements-list">
+            @if (filteredAnnouncements.length === 0){
+                <div class = "empty-state">
+                    <span class = "empty-state-icon"><i class = "pi pi-megaphone"></i></span>
+                    <p class = "empty-state-title">No announcements yet.</p>
+                    <p class = "empty-state-subtitle">Create your first announcement to notify participants.</p>
+                </div>
+            }@else{
+                @for (a of filteredAnnouncements; track a.messageId){
+                    <div class = "announcement-card">
+                        <div class = "announcement-main">
+                            <div class = "announcement-title-row">
+                                <h3 class = "announcement-title">{{ a.title}}</h3>
+                                <span class = "severity-badge" [ngClass] = "'severity-' + a.severity.toLowerCase()">
+                                    <i class = "pi" [ngClass] = "severityIcon(a.severity)"></i>
+                                    {{a.severity === 'INFO'? 'Info': (a.severity === 'IMPORTANT'? 'Important' : 'Urgent')}}
+                                </span>
+                               
+                            </div>
+                            <p class = "announcement-message">{{a.body}}</p>
+                            <div class = "announcement-meta">
+                                <span class = "meta-item"><i class = "pi pi-users"></i>Event participants</span>
+                                <span class = "meta-item"><i class = "pi pi-check-circle"></i>Posted {{a.createdAt}}</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+    <div class = "about-levels-card">
+        <span class = "about-levels-icon"><i class = "pi pi-info-circle"></i></span>
+    <div>
+    <p class = "about-levels-title">About Announcements</p>
+    <p class = "about-levels-text">Announcements notify participants registered for this event.</p>
+</div>
+</div>
+</main>
+</div>
+
+@if (showAnnouncementModal){
+    <div class = "modal-overlay" (click) = "closeModal()" (keydown.escape)="closeModal()" tabindex="-1">
+        <div class = "modal-card" (click) = "$event.stopPropagation()" (keydown.escape) = "$event.stopPropagation()">
+            <h2 class = "modal-title">New Announcement</h2>
+
+            @if (modalError){
+                <p class = "error-banner">{{modalError}}</p>
+            }
+            <div class = "form-group">
+                <label for = "announcementTitle">Title</label>
+                <input id = "announcementTitle" type = "text" [(ngModel)] = "modalForm.title" placeholder = "e.g. Level 3 now open"/>
+            </div>
+            <div class = "form-group">
+                <label for = "announcementMessage">Message</label>
+                <textarea id = "announcementMessage" rows = "4" [(ngModel)] = "modalForm.message" placeholder = "What do you want to tell participants?"></textarea>
+            </div>
+
+            <div class = "form-group">
+                <span class = "form-group-label">Severity</span>
+                <div class = "radio-row severity-radio-row">
+                    @for (option of severityOptions; track option.value){
+                        <label class = "radio-option severity-option" [class.selected] = "modalForm.severity === option.value" [ngClass] = "'severity-option-' + option.value.toLowerCase()">
+                            <input type = "radio" name = "severity" [value] = "option.value" [(ngModel)] = "modalForm.severity"/>
+                            {{option.label}}
+                        </label>
+                    }
+                </div>
+            </div>
+            
+
+            <div class = "modal-actions">
+                <button class = "btn-cancel" (click) = "closeModal()" [disabled] = "isSaving">Cancel</button>
+                <button class = "btn-save" (click) = "saveAnnouncement()" [disabled] = "isSaving">
+                    {{isSaving ? 'Saving...' : 'Post announcement'}}
+                </button>
+            </div>
+        </div>
+    </div>
+}

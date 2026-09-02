@@ -14,6 +14,9 @@ export interface HackathonResponse {
     description?: string;
     createdAt?: string;
     problemStatementStorageKey?: string;
+    levelsCount?: number;
+    eventsCount?: number;
+    participantsCount?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -21,7 +24,7 @@ export class HackathonService {
     private readonly http = inject(HttpClient);
     private readonly baseUrl = `${environment.apiUrl}/api/hackathon`;
 
-    getAllHacathons(): Observable<HackathonResponse[]> {
+    getAllHackathons(): Observable<HackathonResponse[]> {
         return this.http.get<HackathonResponse[]>(this.baseUrl);
     }
 

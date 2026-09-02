@@ -1,0 +1,91 @@
+<div class = "super-admin-page">
+
+    <header class = "super-admin-topbar">
+        <div class = "brand">
+            <span class = "brand-line1">Hackathon</span>
+            <span class = "brand-line2">Platform</span>
+            <span class = "super-admin-tag">Super Admin</span>
+        </div>
+        <button type = "button" class ="logout-btn" (click) = "logout()">
+            <i class = "pi pi-sign-out"></i> Logout
+        </button>
+    </header>
+
+    <main class = "super-admin-content">
+        <div class = "page-header">
+            <h1>User Management</h1>
+            <p class = "page-subtitle">Logged in as: <strong>{{loggedInAsName}}</strong></p>
+        </div>
+
+        <div class = "panel-card">
+            <div class = "panel-header">
+                <div>
+                    <h2 class = "panel-title">Create Admin Account</h2>
+                    <p class = "panel-subtitle">Create a new administrator login for this platform.</p>
+                </div>
+            </div>
+
+            @if (createAdminError){
+                <p class = "form-error">{{createAdminError}}</p>
+            }@if (createAdminSuccess){
+                <p class = "form-success">{{createAdminSuccess}}</p>
+            }
+            <form (ngSubmit) = "createAdminAccount()" class = "create-admin-form">
+                <div class = "form-group">
+                    <label for = "adminEmail">Email</label>
+                    <input id = "adminEmail" type = "email" name = "adminEmail" [(ngModel)] = "newAdmin.email" placeholder = "admin@example.com" required>
+                </div>
+                <div class = "form-group">
+                    <label for = "adminPassword">Password</label>
+                    <input id = "adminPassword" type = "password" name = "adminPassword" [(ngModel)] = "newAdmin.password" placeholder = "At least 8 characters" required>
+                </div>
+                <div class = "form-group">
+                    <label for = "adminConfirmPassword">Confirm Password</label>
+                    <input id = "adminConfirmPassword" type = "password" name = "adminConfirmPassword" [(ngModel)] = "newAdmin.confirmPassword" placeholder = "Re-enter password" required>
+                </div>
+                <button type = "submit" class = "btn-primary create-admin-btn" [disabled] = "isCreatingAdmin">
+                    {{ isCreatingAdmin ? 'Creating...' : 'Create Admin Account'}}
+                </button>
+            </form>
+        </div>
+
+        <div class = "panel-card">
+            <div class = "panel-header">
+                <h2 class = "panel-title">All Admins</h2>
+            </div>
+
+            <div class = "table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (isLoadingAdmins){
+                        <tr>
+                            <td colspan = "4" class = "empty-cell">Loading admins...</td>
+                        </tr>
+                    }@else if (allUsers.length === 0){
+                        <tr>
+                            <td colspan = "4" class = "empty-cell">No admins found.</td>
+                        </tr>
+                    }@else {
+                        @for (user of allUsers; track user.username){
+                            <tr>
+                                <td class = "username-cell">{{user.username}}</td>
+                                <td>{{user.email}}</td>
+                                <td><span class = "role-pill" [ngClass] = "user.roleClass">{{user.role}}</span></td>
+                                <td><span class = "status-pill" [ngClass] = "user.status.toLowerCase()">{{user.status}}</span></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>

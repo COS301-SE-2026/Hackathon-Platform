@@ -1,40 +1,266 @@
+<div class="page-container">
 
-<div class="event-subnav">
- <div class="event-subnav-inner">
+<section class="event-banner">
 
-  <div class="event-tabs">
-  <button [class.active]="activeTab === 'overview'" (click)="activeTab='overview'">Overview</button>
+  <app-card>
 
-  <button [class.active]="activeTab === 'rules'" (click)="activeTab='rules'">Rules</button>
+    <div class="event-banner-header">
+      <button type="button" class="go-home-button" (click)="goHome()" (keydown)="null" (keyup)="null">
+        <i class="pi pi-arrow-left" aria-hidden="true"></i>
+        <span>Go Home</span>
+      </button>
+    </div>
 
-  <button [class.active]="activeTab === 'submissions'" (click)="activeTab='submissions'"> Upload Solution</button>
+    <div class="event-banner-body">
 
-   <button [class.active]="activeTab === 'submission-history'" (click)="activeTab='submission-history'"> Submission History</button>
+      <div class="event-main">
 
-  <button [class.active]="activeTab === 'team'" (click)="activeTab='team'"> My Team</button>
-          <button [class.active]="activeTab === 'leaderboard'" (click)="activeTab='leaderboard'">Leaderboard</button>
-
-      
+        <div class="event-banner-image">
+          <img [src]="event.bannerUrl || 'assets/images/hackathon-image.png'" [alt]="event.name" class="event-img"/>
         </div>
 
-    
+
+        <div class="event-banner-details">
+
+          <div class="event-details-top">
+
+            <div class="event-tag">
+              <span class="event-status-tag" [class.tag-live]="getEventTag() === 'Live Now'" [class.tag-starting]="getEventTag() === 'Starts Soon'">
+                <span class="status-dot"></span>   {{ getEventTag() }}
+              </span>
+            </div>
+
+            <div class="timer-section">
+
+              <span class="timer-label">
+                <i class="pi pi-clock" aria-hidden="true"> </i>
+                {{ event.timer.label }}
+              </span>
+
+              <div class="timer-display">
+
+                <div class="timer-block">
+                  <span class="timer-number">
+                    {{ event.timer.days }}
+                  </span>
+                  <span class="timer-unit">d</span>
+                </div>
+
+                <span class="timer-separator">:</span>
+
+                <div class="timer-block">
+                  <span class="timer-number">
+                    {{ event.timer.hours }}
+                  </span>
+                  <span class="timer-unit">h</span>
+                </div>
+
+                <span class="timer-separator">:</span>
+
+                <div class="timer-block">
+                  <span class="timer-number">
+                    {{ event.timer.minutes }}
+                  </span>
+                  <span class="timer-unit">m</span>
+                </div>
+
+                <span class="timer-separator">:</span>
+
+                <div class="timer-block">
+                  <span class="timer-number">
+                    {{ event.timer.seconds }}
+                  </span>
+                  <span class="timer-unit">s</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="event-details-middle">
+
+            <div class="event-name">
+              <h1 class="event-title"> {{ event.name }} </h1>
+            </div>
+
+            <div class="event-description-wrapper">
+              <p class="event-description">{{event.tagline}}</p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="event-banner-bottom">
+        <div class="event-meta">
+
+          <span class="event-meta-item event-meta-date">
+            <i class="pi pi-calendar" aria-hidden="true"> </i>
+            {{ event.startDate }} – {{ event.endDate }}
+          </span>
+
+          <span class="event-meta-item event-meta-members">
+            <i class="pi pi-users" aria-hidden="true"> </i>
+           1 – {{ event.teamSize }} Members
+          </span>
+
+          <span class="event-meta-item event-meta-visibility">
+            <i class="pi pi-globe" aria-hidden="true"> </i>
+            {{ event.visibility | titlecase }}
+          </span>
+
+          <span class="event-meta-item event-meta-prize">
+            <i class="pi pi-trophy" aria-hidden="true"></i>
+             Prize Pool: R {{ event.prizePool | number }}
+          </span>
+
+          <span class="event-meta-item event-meta-levels">
+            <i class="pi pi-bars" aria-hidden="true"> </i>
+            3 Levels
+          </span>
+
+           <div class="event-meta-item event-meta-location">
+              <i class="pi pi-map-marker"></i>
+                <span> {{ event.inPerson ? 'In Person' : 'Virtual' }}</span>
+            </div>
+
+        </div>
+
+        <div class="event-banner-actions">
+
+          <div class="event-action-download">
+            <app-button variant="secondary"  width="100%" (click)="downloadProblemStatement()"(keydown)="null" (keyup)="null">
+              <i class="pi pi-download" aria-hidden="true"></i>
+              {{ downloadingProblemStatement  ? 'Downloading Specs...' : 'Download Specs' }}
+            </app-button>
+          </div>
+
+          <div class="event-action-register">
+            <app-button variant="primary" width="100%" [disabled]="isCheckingRegistration || isRegistered" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
+             {{ isRegistered ? 'Registered' : 'Register' }}
+            </app-button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </app-card>
+
+</section>
+
+
+@if (registrationModal) {
+
+  <app-modal title="Register for Event"  size="small" footerLayout="center" (closed)="closeRegistrationModal()">
+    <div modal-body>
+      
+      <h3 class="registration-event-name">{{ event.name }}</h3>
+
+      @if (event.visibility === 'PRIVATE') {
+        <div class="registration-confirmation">
+
+          <div class="confirmation-icon">
+            <i class="pi pi-lock" aria-hidden="true"></i>
+          </div>
+          <div class="registration-content">
+            <strong>Private Event</strong>
+
+            <p> This event requires a registration key to continue.</p>
+          </div>
+
+        </div>
+        <div class="registration-input">
+
+          <app-input id="registration-key"  label="Registration Key"placeholder="Enter registration key" [(value)]="registrationKey"> </app-input>
+        </div>
+
+      } 
+      @else {
+        <div class="registration-confirmation">
+          <div class="confirmation-icon">
+            <i class="pi pi-check-circle" aria-hidden="true"> </i>
+          </div>
+
+          <div class="registration-content">
+            <strong>Ready to Register?</strong>
+            <p> You're about to register for this event. Continue when you're ready. </p>
+          </div>
+        </div>
+      }
+
+        @if (event.inPerson) {
+
+        <div class="registration-confirmation">
+
+          <div class="confirmation-icon">
+             <i class="pi pi-map-marker" aria-hidden="true"></i>
+          </div>
+
+          <div class="registration-content">
+            <strong>In-Person Event</strong>
+
+          <p>Please provide any dietary requirements or allergies.</p>
+
+          </div>
+
+        </div>
+
+        <div class="registration-input">
+           <app-input id="dietary-requirements" label="Dietary Requirements" placeholder="Enter dietary requirements" [(value)]="dietaryReq"></app-input>
+        </div>
+
+        <div class="registration-input">
+          <app-input id="allergies" label="Allergies" placeholder="Enter any allergies" [(value)]="allergies"></app-input>
+        </div>
+
+      }
+
+    </div>
+
+    <div modal-footer-right>
+      
+      <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px" (keydown)="null" (keyup)="null"> Cancel</app-button>
+
+      <app-button variant="primary" (click)="confirmRegistration()" width="135px" [disabled]="isRegistering" (keydown)="null" (keyup)="null"> {{ isRegistering ? 'Registering...' : 'Register' }}</app-button>
+
+    </div>
+
+  </app-modal>
+
+}
+
+  <section class="event-tabs"><app-tabs [tabs]="tabs" [activeTab]="activeTab"></app-tabs> </section>
+
+
+  <div class="event-content">
+
+    @if (activeTab === 'overview') {<app-overview />}
+
+    @if (activeTab === 'rules') { <app-rules />}
+
+    @if (activeTab === 'submissions' && eventId && hackathonId) {
+      <app-submissions [eventId]="eventId" [hackathonId]="hackathonId"></app-submissions>
+    }
+
+    @if (activeTab === 'submission-history' && eventId && hackathonId) {
+      <app-submission-history  [eventId]="eventId" [hackathonId]="hackathonId"></app-submission-history>
+    }
+
+    @if (activeTab === 'team' && eventId) {
+      <app-my-team [eventId]="eventId"></app-my-team>
+    }
+
+    @if (activeTab === 'leaderboard' && eventId) {
+      <app-leaderboard [eventId]="eventId"> </app-leaderboard>
+    }
+
   </div>
 
 </div>
-
-<div class="event-content">
-
-    @if (activeTab === 'overview') {<app-overview [event]="event" [hackathonId]="hackathonId" /> }
-
-    @if (activeTab === 'rules') {<app-rules/>}
-
-    @if (activeTab === 'submissions' && eventId && hackathonId) { <app-submissions [eventId]="eventId"[hackathonId]="hackathonId"/>
-    }
-
-    @if (activeTab === 'submission-history' && eventId && hackathonId) {<app-submission-history [eventId]="eventId" />}
-    
-    @if (activeTab === 'team' && eventId) {<app-my-team [eventId]="eventId"/>}
-
-    @if (activeTab === 'leaderboard' && eventId) { <app-leaderboard [eventId]="eventId"/>}
-
-</div> 

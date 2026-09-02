@@ -1,25 +1,39 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
+import com.hackathon.platform.repository.SubmissionRepository;
+import com.hackathon.platform.repository.TeamMemberRepository;
+import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.scoring.queue.ScoringJobProducer;
+import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
 import com.hackathon.platform.storage.BlobPath;
 import com.hackathon.platform.storage.StorageException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +60,12 @@ public class StorageController {
   private final EventRepository eventRepository;
   private final ScoringJobProducer producer;
   private final HackathonService hackathonService;
+  private final EventService eventService;
+  private final EventRegistrationRepository eventRegRepo;
+  private final TeamRepository teamRepo;
+  private final TeamMemberRepository teamMemberRepo;
+  private final LevelRepository levelRepo;
+  private final SubmissionRepository subRepo;
 
   // Event Resources
 
@@ -102,6 +122,8 @@ public class StorageController {
       @PathVariable String levelId,
       @PathVariable String filename) {
 
+    UUID hackathonUUID = UUID.fromString(hackathonId);
+    requireEventStartedForParticipant(hackathonUUID);
     String storageKey = BlobPath.levelFile(hackathonId, levelId, filename);
     String url =
         storageService.generatePresignedUrl(
@@ -123,7 +145,10 @@ public class StorageController {
   @GetMapping("/hackathons/{hackathonId}/levels/{levelId}/files")
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<List<LevelFile>> listLevelFiles(
-      @PathVariable String hackathonId, @PathVariable Long levelId) {
+      @PathVariable String hackathonId,
+      @PathVariable Long levelId,
+      @AuthenticationPrincipal User currUser) {
+    requireEventStartedForParticipant(UUID.fromString(hackathonId), currUser);
     return ResponseEntity.ok(fileMetadataService.listLevelFiles(levelId));
   }
 
@@ -150,7 +175,6 @@ public class StorageController {
    *
    * @param hackathonId the event UUID
    * @param file the uploaded solver file
-   * @param uploadedBy UUID of the admin uploading the solver
    * @param notes optional release notes for this solver version
    * @return storageKey, blobUrl, version, and database record id
    */
@@ -208,20 +232,133 @@ public class StorageController {
             String.valueOf(nextVersion)));
   }
 
+  // Event Branding helpers
+
+  private static final List<String> ALLOWED_IMAGE_TYPES =
+      List.of("image/png", "image/jpeg", "image/webp", "image/svg+xml");
+
+  private static void validateImage(MultipartFile file) {
+    if (file == null || file.isEmpty()) {
+
+      throw new StorageException("No file provided");
+    }
+
+    String contentType = file.getContentType();
+    if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase())) {
+
+      throw new StorageException(
+          "Branding asset must be an image (PNG, JPEG, WEBP or SVG). Received: " + contentType);
+    }
+  }
+
   /**
-   * Uploads a branding asset (logo, banner) for a specific event.
+   * Uploads/replaces the banner image for a specific event.
    *
-   * @param hackathonId the event UUID
-   * @param file the uploaded image file
+   * @param eventId the event UUID
+   * @param file the uploaded banner image
    * @return storageKey and blobUrl
    */
-  @PostMapping("/hackathons/{hackathonId}/branding")
+  @PostMapping("/events/{eventId}/banner")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Map<String, String>> uploadBrandingAsset(
-      @PathVariable String hackathonId, @RequestParam("file") MultipartFile file) {
-    String storageKey = BlobPath.brandingAsset(hackathonId, file.getOriginalFilename());
+  public ResponseEntity<Map<String, String>> uploadEventBanner(
+      @PathVariable String eventId, @RequestParam("file") MultipartFile file) {
+    validateImage(file);
+
+    String storageKey = BlobPath.eventBanner(eventId, file.getOriginalFilename());
     String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
+
+    eventService.updateEventBanner(UUID.fromString(eventId), storageKey);
+
     return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+  }
+
+  /**
+   * Uploads/replaces the brand logo image for a specific event.
+   *
+   * @param eventId the event UUID
+   * @param file the uploaded logo image
+   * @return storageKey and blobUrl
+   */
+  @PostMapping("/events/{eventId}/logo")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Map<String, String>> uploadEventLogo(
+      @PathVariable String eventId, @RequestParam("file") MultipartFile file) {
+    validateImage(file);
+
+    String storageKey = BlobPath.eventLogo(eventId, file.getOriginalFilename());
+    String blobUrl = storageService.upload(config.getEventResourcesContainer(), storageKey, file);
+
+    eventService.updateEventLogo(UUID.fromString(eventId), storageKey);
+
+    return ResponseEntity.ok(Map.of("storageKey", storageKey, "blobUrl", blobUrl));
+  }
+
+  /**
+   * Returns a presigned SAS URL for an event's banner image, for display on the frontend.
+   *
+   * @param eventId the event UUID
+   * @return presigned download URL and storage key
+   */
+  @GetMapping("/events/{eventId}/banner")
+  public ResponseEntity<Map<String, String>> getEventBannerUrl(@PathVariable String eventId) {
+    String storageKey = eventService.getEventById(UUID.fromString(eventId)).getBannerStorageKey();
+    if (storageKey == null) {
+      return ResponseEntity.noContent().build();
+    }
+    String url =
+        storageService.generatePresignedUrl(
+            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
+    return ResponseEntity.ok(Map.of("url", url, "storageKey", storageKey));
+  }
+
+  /**
+   * Returns a presigned SAS URL for an event's brand logo image, for display on the frontend.
+   *
+   * @param eventId the event UUID
+   * @return presigned download URL and storage key
+   */
+  @GetMapping("/events/{eventId}/logo")
+  public ResponseEntity<Map<String, String>> getEventLogoUrl(@PathVariable String eventId) {
+    String storageKey = eventService.getEventById(UUID.fromString(eventId)).getLogoStorageKey();
+    if (storageKey == null) {
+      return ResponseEntity.noContent().build();
+    }
+    String url =
+        storageService.generatePresignedUrl(
+            config.getEventResourcesContainer(), storageKey, config.getSasExpiryMinutes());
+    return ResponseEntity.ok(Map.of("url", url, "storageKey", storageKey));
+  }
+
+  /**
+   * Deletes an event's banner image, removing both the blob and clearing the storage key.
+   *
+   * @param eventId the event UUID
+   */
+  @DeleteMapping("/events/{eventId}/banner")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> deleteEventBanner(@PathVariable String eventId) {
+    String storageKey = eventService.getEventById(UUID.fromString(eventId)).getBannerStorageKey();
+    if (storageKey != null) {
+      storageService.delete(config.getEventResourcesContainer(), storageKey);
+      eventService.updateEventBanner(UUID.fromString(eventId), null);
+    }
+    return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Deletes an event's brand logo image, removing both the blob and clearing the storage key.
+   *
+   * @param eventId the event UUID
+   */
+  @DeleteMapping("/events/{eventId}/logo")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> deleteEventLogo(@PathVariable String eventId) {
+    String storageKey = eventService.getEventById(UUID.fromString(eventId)).getLogoStorageKey();
+    if (storageKey != null) {
+      storageService.delete(config.getEventResourcesContainer(), storageKey);
+      eventService.updateEventLogo(UUID.fromString(eventId), null);
+    }
+    return ResponseEntity.noContent().build();
   }
 
   /**
@@ -262,7 +399,8 @@ public class StorageController {
   @GetMapping("/hackathons/{hackathonId}/problem-statement")
   @PreAuthorize("hasAnyRole('ADMIN', 'PARTICIPANT')")
   public ResponseEntity<Map<String, String>> getProblemStatementUrl(
-      @PathVariable String hackathonId) {
+      @PathVariable String hackathonId, @AuthenticationPrincipal User currUser) {
+    requireEventStartedForParticipant(UUID.fromString(hackathonId), currUser);
     String storageKey =
         hackathonService
             .getHackathonById(UUID.fromString(hackathonId))
@@ -302,7 +440,45 @@ public class StorageController {
       @PathVariable String teamId,
       @RequestParam("outputFile") MultipartFile outputFile,
       @RequestParam("sourceFile") MultipartFile sourceFile,
-      @RequestParam("levelId") short levelId) {
+      @RequestParam("levelId") short levelId,
+      @AuthenticationPrincipal User currUser) {
+
+    if (outputFile == null || outputFile.isEmpty()) {
+      throw new StorageException("Output file is missing");
+    }
+    if (sourceFile == null || sourceFile.isEmpty()) {
+      throw new StorageException("Source file is missing");
+    }
+    String fileName =
+        sourceFile.getOriginalFilename() == null
+            ? ""
+            : sourceFile.getOriginalFilename().toLowerCase();
+    if (!fileName.endsWith(".zip")) {
+      throw new StorageException("Source code archive needs to be .zip");
+    }
+    UUID eventUUID = UUID.fromString(eventId);
+    UUID teamUUID = UUID.fromString(teamId);
+    Event event = eventService.getEventById(eventUUID);
+    eventService.refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
+    if (!"ACTIVE".equals(event.getStatus())) {
+      throw new StorageException("You cant submit before the event starts");
+    }
+    Team team =
+        teamRepo.findById(teamUUID).orElseThrow(() -> new StorageException("Team not found"));
+    if (!eventUUID.equals(team.getEventId())) {
+      throw new StorageException("Team doesnt exist");
+    }
+    if (!teamMemberRepo
+        .findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", eventUUID)
+        .stream()
+        .anyMatch(m -> teamUUID.equals(m.getTeamId()))) {
+      throw new StorageException("You are not part of this team");
+    }
+    Level lvl =
+        levelRepo.findById(levelId).orElseThrow(() -> new StorageException("Level not found"));
+    if (!hackathonIdMatchesEvent(lvl.getHackathonId(), event.getHackathon())) {
+      throw new StorageException("Level doesnt exist");
+    }
 
     UUID hackathonId =
         eventRepository
@@ -368,8 +544,10 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
-      @PathVariable String filename) {
+      @PathVariable String filename,
+      @AuthenticationPrincipal User currUser) {
 
+    assertSubmissionAccess(eventId, teamId, submissionId, currUser);
     String storageKey = fileMetadataService.getSubmissionOutputStorageKey(submissionId);
     String url =
         storageService.generatePresignedUrl(
@@ -392,8 +570,10 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable Long submissionId,
-      @PathVariable String filename) {
+      @PathVariable String filename,
+      @AuthenticationPrincipal User currUser) {
 
+    assertSubmissionAccess(eventId, teamId, submissionId, currUser);
     String storageKey = fileMetadataService.getSubmissionSourceStorageKey(submissionId);
     String url =
         storageService.generatePresignedUrl(
@@ -418,11 +598,77 @@ public class StorageController {
       @PathVariable String eventId,
       @PathVariable String teamId,
       @PathVariable String levelId,
-      @PathVariable String submissionId) {
+      @PathVariable String submissionId,
+      @AuthenticationPrincipal User currUser) {
+
+    assertSubmissionAccess(eventId, teamId, Long.valueOf(submissionId), currUser);
     String storageKey = BlobPath.scoringLog(eventId, teamId, levelId, submissionId);
     String url =
         storageService.generatePresignedUrl(
             config.getScoringLogsContainer(), storageKey, config.getSasExpiryMinutes());
     return ResponseEntity.ok(Map.of("url", url));
+  }
+
+  private void requireEventStartedForParticipant(UUID hackathon) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    User currUser =
+        auth != null && auth.getPrincipal() instanceof User ? (User) auth.getPrincipal() : null;
+    requireEventStartedForParticipant(hackathon, currUser);
+  }
+
+  private void requireEventStartedForParticipant(UUID hackathon, User currUser) {
+    boolean admin =
+        currUser != null
+            && currUser.getAuthorities().stream()
+                .anyMatch(
+                    a ->
+                        "ROLE_ADMIN".equals(a.getAuthority())
+                            || "ROLE_SUPERADMIN".equals(a.getAuthority()));
+    if (admin) {
+      return;
+    }
+
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    boolean started =
+        eventRepository.findByHackathon(hackathon).stream()
+            .anyMatch(
+                event -> {
+                  eventService.refreshLifecycleStatus(event, now);
+                  return "ACTIVE".equals(event.getStatus());
+                });
+    if (!started) {
+      throw new StorageException("You can only access resources when the event starts");
+    }
+  }
+
+  private void assertSubmissionAccess(
+      String eventId, String teamId, Long submissionId, User currUser) {
+    Submission sub =
+        subRepo
+            .findById(submissionId)
+            .orElseThrow(() -> new StorageException("Submission not found"));
+    if (!UUID.fromString(eventId).equals(sub.getEventId())
+        || !UUID.fromString(teamId).equals(sub.getTeamId())) {
+      throw new StorageException("Submission not found");
+    }
+    boolean admin =
+        currUser != null
+            && currUser.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    if (admin) {
+      return;
+    }
+    boolean member =
+        teamMemberRepo
+            .findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", sub.getEventId())
+            .stream()
+            .anyMatch(m -> m.getTeamId().equals(sub.getTeamId()));
+    if (!member) {
+      throw new AccessDeniedException("You dont have access to this event");
+    }
+  }
+
+  private boolean hackathonIdMatchesEvent(UUID levelHackathonId, UUID eventHackathonId) {
+    return levelHackathonId != null && levelHackathonId.equals(eventHackathonId);
   }
 }

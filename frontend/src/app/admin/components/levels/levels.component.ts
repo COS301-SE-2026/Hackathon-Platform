@@ -10,8 +10,9 @@ import { firstValueFrom } from 'rxjs';
 import { LevelService, LevelRequest, LevelResponse } from '../../../services/level.service';
 import { StorageService, LevelFileResponse } from '../../../services/storage.service';
 import { HackathonService } from '../../../services/hackathon.service';
+import { EventService } from '../../../services/event.service';
 
-/** A level plus its lazily-loaded file list, used only by this component's view. */
+
 interface UiLevel extends LevelResponse {
   files: LevelFileResponse[];
   filesLoaded: boolean;
@@ -22,7 +23,7 @@ interface UiLevel extends LevelResponse {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule,DragDropModule,ButtonModule],
   templateUrl: './levels.component.html',
-  styleUrls: ['./levels.component.scss'] 
+  styleUrls: ['./levels.component.scss']
 })
 
 export class LevelsComponent implements OnInit {
@@ -31,6 +32,7 @@ export class LevelsComponent implements OnInit {
   private readonly levelService = inject(LevelService);
   private readonly storageService = inject(StorageService);
   private readonly hackathonService = inject(HackathonService);
+  private readonly eventService = inject(EventService);
   private readonly change = inject(ChangeDetectorRef);
 
   hackathonId = '';
@@ -39,6 +41,14 @@ export class LevelsComponent implements OnInit {
   isLoading = true;
   isSavingOrder = false;
   errorMessage = '';
+  hackathonDescription ='';
+  eventsCount = 0;
+  participantsCount = 0;
+
+
+  get levelsCount(): number {
+    return this.levels.length;
+  }
 
   showLevelModal = false;
   showFilesModal = false;
@@ -57,7 +67,7 @@ export class LevelsComponent implements OnInit {
     levelNumber: 1,
     description: ''
   }
-  
+
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
 
@@ -71,13 +81,29 @@ export class LevelsComponent implements OnInit {
     }
 
     this.loadHackathonName();
+    this.loadEventsCount();
     this.loadLevels();
+  }
+
+  private loadEventsCount(): void {
+    this.eventService.getEventsForHackathon(this.hackathonId).subscribe({
+      next: (events) => {
+        this.eventsCount = events.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.eventsCount = 0;
+        this.change.markForCheck();
+      }
+    });
   }
 
   private loadHackathonName(): void {
     this.hackathonService.getHackathon(this.hackathonId).subscribe({
       next: (hackathon) => {
         this.hackathonName = hackathon.name;
+        this.hackathonDescription = hackathon.description || '';
+        this.participantsCount = hackathon.participantsCount|| 0 ;
         this.change.markForCheck();
       },
       error: () => {
@@ -124,7 +150,7 @@ export class LevelsComponent implements OnInit {
     this.isUploadingFile = true;
 
     const level = this.activeLevel;
-    const uploads = Array.from(files).map((file) => 
+    const uploads = Array.from(files).map((file) =>
     firstValueFrom(this.storageService.uploadLevelFile(this.hackathonId, level.id.toString(), file)));
 
     Promise.allSettled(uploads).then((results) => {
@@ -163,7 +189,7 @@ export class LevelsComponent implements OnInit {
       );
 
       const updated = await Promise.all(
-        this.levels.map((l, index) => 
+        this.levels.map((l, index) =>
           firstValueFrom(
             this.levelService.updateLevel(l.id, {
               name: l.name,
@@ -181,7 +207,7 @@ export class LevelsComponent implements OnInit {
         };
       });
     } catch (err: unknown) {
-      this.errorMessage = err instanceof HttpErrorResponse 
+      this.errorMessage = err instanceof HttpErrorResponse
         ? err.error?.message || 'Failed to save the new level order, undoing changes...'
         : 'Failed to save the new level order, changes will be reverted...';
       this.levels = previousOrder;
@@ -202,7 +228,7 @@ export class LevelsComponent implements OnInit {
     this.editingLevel = level;
     this.modalError = '';
     this.modalForm = { name: level.name, levelNumber: level.levelNumber, description: level.description || ''};
-    this.showLevelModal = true; 
+    this.showLevelModal = true;
   }
 
   closeLevelModal(): void {
@@ -210,10 +236,6 @@ export class LevelsComponent implements OnInit {
     this.editingLevel = null;
   }
 
-  closeFilesModal(): void{
-    this.showFilesModal = false;
-    this.activeLevel = null;
-  }
 
   saveLevel(): void {
     if (!this.modalForm.name.trim()){
@@ -222,7 +244,7 @@ export class LevelsComponent implements OnInit {
     }
 
     if(!this.modalForm.levelNumber || this.modalForm.levelNumber <= 0) {
-      this.modalError = 'The level number must be greater than 0'
+      this.modalError = 'The level number must be greater than 0';
       return;
     }
 
@@ -256,7 +278,7 @@ export class LevelsComponent implements OnInit {
       },
       error: (err) => {
         this.isSavingLevel = false;
-        this.modalError = err.error?.message || 'the level failed to save'
+        this.modalError = err.error?.message || 'The level failed to save';
         this.change.markForCheck();
       }
     });
@@ -278,14 +300,14 @@ export class LevelsComponent implements OnInit {
             },
             error: (err: HttpErrorResponse) => {
               this.isLoadingFiles = false;
-              this.fileError = err.error?.message || 'Failed to loead files for this level';
+              this.fileError = err.error?.message || 'Failed to load files for this level';
               this.change.markForCheck();
             }
           });
         }
     }
-    
-    closeManageFilesModal(): void {
+
+    closeFilesModal(): void {
         this.showFilesModal = false;
         this.activeLevel = null;
     }
@@ -293,7 +315,7 @@ export class LevelsComponent implements OnInit {
     removeFile(file: LevelFileResponse): void {
     if(!this.activeLevel) return;
     if(!confirm(`Remove "${file.fileName}"?`)) return
-    
+
     this.storageService.deleteLevelFile(this.hackathonId, this.activeLevel.id, file.id).subscribe({
       next: () => {
         this.activeLevel!.files = this.activeLevel!.files.filter((f) => f.id !== file.id);
@@ -306,7 +328,7 @@ export class LevelsComponent implements OnInit {
     })
     }
 
-  
+
 
 onDropFile(event: DragEvent): void {
  event.preventDefault();
@@ -334,10 +356,12 @@ onFileSelected(event: Event):void{
     }
   }
 
-  deleteLevel() : void {
+  deleteLevel(level?: UiLevel) : void {
+    const targetLevel = level || this.editingLevel;
+    if (!targetLevel) return;
     if (!this.editingLevel) return;
 
-    if(!confirm(`Are you sure you want to delte "${this.editingLevel.name}"? This action is not reversable.`)) {
+    if(!confirm(`Are you sure you want to delete "${this.editingLevel.name}"? This action is not reversible.`)) {
       return;
     }
 
@@ -348,12 +372,19 @@ onFileSelected(event: Event):void{
       next: () => {
         this.isSavingLevel = false;
         this.levels = this.levels.filter((l) => l.id !== levelId);
+        if (this.editingLevel){
         this.closeLevelModal();
+        }
         this.change.markForCheck();
       },
       error: (err: HttpErrorResponse) => {
         this.isSavingLevel = false;
+
+        if (this.editingLevel){
         this.modalError = err.error?.message || 'The level failed to delete';
+        }else {
+         this.errorMessage = err.error?.message || 'The level failed to delete';
+        }
         this.change.markForCheck();
       }
     });

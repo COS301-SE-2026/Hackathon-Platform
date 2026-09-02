@@ -56,8 +56,10 @@ class EventServiceTest {
     event.setCreatedByUserId(creatorUserId);
     event.setName("Test Hackathon");
     event.setVisibility("PUBLIC");
-    event.setStatus("INACTIVE");
+    event.setStatus("ACTIVE");
     event.setRegistrationKey(null);
+    event.setStartDateTime(OffsetDateTime.now().minusHours(1));
+    event.setDuration(48 * 3600);
   }
 
   @AfterEach
@@ -93,10 +95,10 @@ class EventServiceTest {
     req.setName("My new name");
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
-    req.setDescription("This is a test");
+    req.setTagline("This is a test");
     req.setTeamSizeLimit((short) 4);
-    req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
-    req.setDuration(48);
+    req.setStartDateTime(OffsetDateTime.now().minusHours(1));
+    req.setDuration(48 * 3600);
     req.setHackathonId(UUID.randomUUID());
     when(eventRepository.save(any(Event.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
@@ -107,7 +109,7 @@ class EventServiceTest {
     assertThat(result.getName()).isEqualTo("My new name");
     assertThat(result.getVisibility()).isEqualTo("PUBLIC");
     assertThat(result.getStatus()).isEqualTo("ACTIVE");
-    assertThat(result.getDescription()).isEqualTo("This is a test");
+    assertThat(result.getTagline()).isEqualTo("This is a test");
     assertThat(result.getCreatedByUserId()).isEqualTo(creatorUserId);
 
     verify(eventRepository).save(any(Event.class));
@@ -117,7 +119,7 @@ class EventServiceTest {
   void createEvent_withNullRequest_throwsIllegalArgumentException() {
     assertThatThrownBy(() -> eventService.createEvent(null))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("Event request body cannot be null");
+        .hasMessageContaining("Event request body cant be null");
 
     verify(eventRepository, never()).save(any(Event.class));
   }
@@ -125,6 +127,7 @@ class EventServiceTest {
   @Test
   void createEvent_withInvalidName_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName(null);
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
@@ -140,12 +143,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event name is required.");
+    assertThat(ex.getMessage()).isEqualTo("Name is required");
   }
 
   @Test
   void createEvent_withInvalidTeamSize_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
@@ -161,12 +165,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Team size must be greater than 0.");
+    assertThat(ex.getMessage()).isEqualTo("Team size limit must be greater than 0");
   }
 
   @Test
   void createEvent_withInvalidStartDateTime_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
@@ -182,12 +187,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event start date is required.");
+    assertThat(ex.getMessage()).isEqualTo("Start date is required");
   }
 
   @Test
   void createEvent_withInvalidDuration_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PUBLIC");
     req.setStatus("ACTIVE");
@@ -203,12 +209,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event duration must be greater than 0.");
+    assertThat(ex.getMessage()).isEqualTo("Duration is less than 0");
   }
 
   @Test
   void createEvent_withInvalidVisiblity_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility(null);
     req.setStatus("ACTIVE");
@@ -224,15 +231,16 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event visibility is required.");
+    assertThat(ex.getMessage()).isEqualTo("Visibility is required");
   }
 
   @Test
   void createEvent_withInvalidStatus_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PUBLIC");
-    req.setStatus(null);
+    req.setStatus("INVALID");
     req.setDescription("This is a test");
     req.setTeamSizeLimit((short) 10);
     req.setStartDateTime(OffsetDateTime.parse("2026-06-01T09:00:00+02:00"));
@@ -245,12 +253,13 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Event status is required.");
+    assertThat(ex.getMessage()).contains("Status must be one of these:");
   }
 
   @Test
   void createEvent_withInvalidRegistrationKey_throwsIllegalArgumentException() {
     EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
     req.setName("null");
     req.setVisibility("PRIVATE");
     req.setStatus("ACTIVE");
@@ -268,7 +277,7 @@ class EventServiceTest {
               eventService.createEvent(req);
             });
 
-    assertThat(ex.getMessage()).isEqualTo("Registration key is required for private events.");
+    assertThat(ex.getMessage()).isEqualTo("Registration key is required for private events");
   }
 
   @Test
@@ -277,7 +286,7 @@ class EventServiceTest {
     req.setName("My new name");
     req.setVisibility("PRIVATE");
     req.setStatus("ACTIVE");
-    req.setDescription("This is a test");
+    req.setTagline("This is a test");
     req.setRegistrationKey("THISISAKEY");
 
     when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
@@ -290,7 +299,7 @@ class EventServiceTest {
     assertThat(result.getName()).isEqualTo("My new name");
     assertThat(result.getVisibility()).isEqualTo("PRIVATE");
     assertThat(result.getStatus()).isEqualTo("ACTIVE");
-    assertThat(result.getDescription()).isEqualTo("This is a test");
+    assertThat(result.getTagline()).isEqualTo("This is a test");
     assertThat(result.getRegistrationKey()).isEqualTo("THISISAKEY");
     assertThat(result.getCreatedByUserId()).isEqualTo(creatorUserId);
 
@@ -343,11 +352,12 @@ class EventServiceTest {
 
   @Test
   void patchEventStatus_toPrivateWithoutKey_throwsRuntimeException() {
+    event.setRegistrationKey("OLD_KEY");
     when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
     assertThatThrownBy(() -> eventService.patchEventStatus(eventId, "PRIVATE", "ACTIVE", null))
         .isInstanceOf(RuntimeException.class)
-        .hasMessageContaining("Registration key is required for private events");
+        .hasMessageContaining("Registration key is required");
 
     verify(eventRepository, never()).save(any(Event.class));
   }
@@ -371,7 +381,7 @@ class EventServiceTest {
 
     assertThat(response).isNotNull();
     assertThat(response.getEventId()).isEqualTo(eventId);
-    assertThat(response.getStatus()).isEqualTo("INACTIVE");
+    assertThat(response.getStatus()).isEqualTo("ACTIVE");
     assertThat(response.getVisibility()).isEqualTo("PUBLIC");
 
     verify(eventRepository).findById(eventId);
@@ -387,5 +397,109 @@ class EventServiceTest {
         .hasMessageContaining("Event not found");
 
     verify(eventRepository).findById(randomEventId);
+  }
+
+  @Test
+  void getEventById_withValidId_returnsEvent() {
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    Event result = eventService.getEventById(eventId);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getEventId()).isEqualTo(eventId);
+    assertThat(result.getName()).isEqualTo("Test Hackathon");
+    verify(eventRepository).findById(eventId);
+  }
+
+  @Test
+  void getEventById_withInvalidId_throwsRuntimeException() {
+    UUID randomEventId = UUID.randomUUID();
+    when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> eventService.getEventById(randomEventId))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Event not found");
+
+    verify(eventRepository).findById(randomEventId);
+  }
+
+  @Test
+  void updateEventBanner_withValidId_setsStorageKeyAndSaves() {
+    String storageKey = "events/" + eventId + "/branding/banner/banner.png";
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.updateEventBanner(eventId, storageKey);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getBannerStorageKey()).isEqualTo(storageKey);
+    verify(eventRepository).findById(eventId);
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void updateEventBanner_withNullStorageKey_clearsBanner() {
+    event.setBannerStorageKey("events/" + eventId + "/branding/banner/old.png");
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.updateEventBanner(eventId, null);
+
+    assertThat(result.getBannerStorageKey()).isNull();
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void updateEventBanner_withInvalidId_throwsRuntimeException() {
+    UUID randomEventId = UUID.randomUUID();
+    when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> eventService.updateEventBanner(randomEventId, "some-key"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("The event could not be found");
+
+    verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void updateEventLogo_withValidId_setsStorageKeyAndSaves() {
+    String storageKey = "events/" + eventId + "/branding/logo/logo.png";
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.updateEventLogo(eventId, storageKey);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getLogoStorageKey()).isEqualTo(storageKey);
+    verify(eventRepository).findById(eventId);
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void updateEventLogo_withNullStorageKey_clearsLogo() {
+    event.setLogoStorageKey("events/" + eventId + "/branding/logo/old.png");
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.updateEventLogo(eventId, null);
+
+    assertThat(result.getLogoStorageKey()).isNull();
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void updateEventLogo_withInvalidId_throwsRuntimeException() {
+    UUID randomEventId = UUID.randomUUID();
+    when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> eventService.updateEventLogo(randomEventId, "some-key"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("The event could not be found");
+
+    verify(eventRepository, never()).save(any(Event.class));
   }
 }

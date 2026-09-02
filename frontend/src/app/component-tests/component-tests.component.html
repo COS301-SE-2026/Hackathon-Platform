@@ -1,0 +1,218 @@
+<!-- Navbar Component -->
+<app-navbar
+  [links]="navbarLinks"
+  firstName="John"
+  lastName="Smith"
+  profileSubtitle="Level 7"
+  [profileMenuItems]="profileMenuItems"
+  (logout)="onLogout()">
+</app-navbar>
+
+
+<div class="component-tests">
+
+
+  <!-- Button Component -->
+  <div class="component-section buttons-section">
+    <h2>Buttons</h2>
+
+    <div class="buttons-preview">
+      <app-button variant="primary">
+        Register Now
+      </app-button>
+
+      <app-button variant="secondary">
+        Download Problem Statement
+      </app-button>
+
+      <app-button variant="danger">
+        Delete Team
+      </app-button>
+
+      <app-button variant="ghost">
+        Ghost Button
+      </app-button>
+
+      <app-button variant="success">
+        Success Button
+      </app-button>
+    </div>
+  </div>
+
+
+  <!-- Card Component -->
+  <div class="component-section card-section">
+    <h2>Card</h2>
+
+    <div class="card-preview">
+      <app-card>
+        <h3>AWS Hackathon</h3>
+
+        <p>
+          Build innovative solutions and compete with other developers.
+        </p>
+
+        <div class="card-details">
+          <span>Starts: 25 August 2026</span>
+          <span>128 Participants</span>
+        </div>
+
+        <app-button variant="secondary">
+          View Hackathon
+        </app-button>
+      </app-card>
+    </div>
+  </div>
+
+
+  <!-- Form Components -->
+  <div class="component-row form-components-row">
+
+    <!-- Input Component -->
+    <div class="component-section input-section">
+      <h2>Input</h2>
+
+      <div class="input-preview">
+        <app-input
+          placeholder="Enter join code">
+        </app-input>
+      </div>
+    </div>
+
+
+    <!-- Search Bar Component -->
+    <div class="component-section search-section">
+      <h2>Search Bar</h2>
+
+      <div class="search-preview">
+        <app-search-bar
+          placeholder="Search events...">
+        </app-search-bar>
+      </div>
+    </div>
+
+
+    <!-- Dropdown Component -->
+    <div class="component-section dropdown-section">
+      <h2>Dropdown</h2>
+
+      <div class="dropdown-preview">
+        <app-dropdown
+          [options]="['All Visibility', 'Public', 'Private']"
+          value="All Visibility">
+        </app-dropdown>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- Upload Area Component -->
+  <div class="component-section upload-section">
+    <h2>Upload Area</h2>
+
+    <div class="upload-preview">
+      <app-upload-area
+        accept=".zip"
+        helpText="Only .zip files allowed"
+        (fileSelected)="onFileSelected($event)">
+      </app-upload-area>
+    </div>
+  </div>
+
+
+  <!-- Loader Component -->
+  <div class="component-section loader-section">
+    <h2>Loader</h2>
+
+    <div class="loader-preview">
+      <app-loader
+        message="Loading...">
+      </app-loader>
+    </div>
+  </div>
+
+
+  <!-- Toast Component -->
+  <div class="component-section toast-section">
+    <h2>Toast</h2>
+
+    <div class="toast-preview">
+      <app-button
+        variant="success"
+        (click)="showSuccessToast()"
+         (keydown)="null"
+        (keyup)="null">
+        Success Toast
+      </app-button>
+
+      <app-button
+        variant="primary"
+        (click)="showInfoToast()"
+          (keydown)="null"
+          (keyup)="null">
+        Info Toast
+      </app-button>
+
+      <app-button
+        variant="danger"
+        (click)="showErrorToast()"
+          (keydown)="null"
+          (keyup)="null">
+        Error Toast
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Textarea Component -->
+  <div class="component-section textarea-section">
+    <h2>Textarea</h2>
+
+    <div class="textarea-preview">
+      <app-textarea
+        placeholder="Describe your event..."
+        [maxLength]="2000"
+        [rows]="10">
+      </app-textarea>
+    </div>
+  </div>
+
+
+
+
+
+  <!-- Pagination Component -->
+  <div class="component-section pagination-section">
+    <h2>Pagination</h2>
+
+    <div class="pagination-preview">
+      <app-pagination
+        [currentPage]="currentPage"
+        [totalItems]="100"
+        [itemsPerPage]="10"
+        itemLabel="events"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
+    </div>
+  </div>
+
+
+  
+  <!-- Table Component -->
+
+<div class="component-section table-section">
+
+<h2>Table</h2>
+
+<div class="table">
+
+<app-table
+  [columns]="columns"
+  [data]="events">
+</app-table></div>
+
+
+</div>
+
+</div>
+

@@ -14,9 +14,11 @@ import com.hackathon.platform.dto.ApproveRequest;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.EventRegistration;
 import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.HackathonRepository;
 import com.hackathon.platform.repository.RoleRepository;
@@ -46,6 +48,7 @@ class TeamControllerTest {
   @Autowired private RoleRepository roleRepository;
   @Autowired private EventRepository eventRepository;
   @Autowired private HackathonRepository hackathonRepository;
+  @Autowired private EventRegistrationRepository eventRegRepo;
 
   private CreateTeamRequest createTeamRequest;
   private ApproveRequest approveRequest;
@@ -91,6 +94,11 @@ class TeamControllerTest {
 
     Event savedEvent = eventRepository.saveAndFlush(event);
     eventId = savedEvent.getEventId();
+
+    EventRegistration reg = new EventRegistration();
+    reg.setEventId(eventId);
+    reg.setUserId(userId);
+    eventRegRepo.saveAndFlush(reg);
 
     createTeamRequest = new CreateTeamRequest();
     createTeamRequest.setTeamName("Test Team");
@@ -144,6 +152,13 @@ class TeamControllerTest {
             .build();
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
+
+    if (!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
+      EventRegistration memberReg = new EventRegistration();
+      memberReg.setEventId(eventId);
+      memberReg.setUserId(memberId);
+      eventRegRepo.saveAndFlush(memberReg);
+    }
 
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(
@@ -207,6 +222,13 @@ class TeamControllerTest {
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
 
+    if (!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
+      EventRegistration memberReg = new EventRegistration();
+      memberReg.setEventId(eventId);
+      memberReg.setUserId(memberId);
+      eventRegRepo.saveAndFlush(memberReg);
+    }
+
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(
             savedMember, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
@@ -253,6 +275,13 @@ class TeamControllerTest {
             .build();
     User savedMember = userRepository.saveAndFlush(member);
     UUID memberId = savedMember.getUserId();
+
+    if (!eventRegRepo.existsByEventIdAndUserId(eventId, memberId)) {
+      EventRegistration memberReg = new EventRegistration();
+      memberReg.setEventId(eventId);
+      memberReg.setUserId(memberId);
+      eventRegRepo.saveAndFlush(memberReg);
+    }
 
     UsernamePasswordAuthenticationToken memberAuth =
         new UsernamePasswordAuthenticationToken(

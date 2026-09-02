@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 import { HomeComponent } from './home.component';
+import { MessageService } from 'primeng/api';
 import { EventService } from '../../services/event.service';
 
 describe('HomeComponent', () => {
@@ -39,16 +40,22 @@ describe('HomeComponent', () => {
   ];
 
   beforeEach(async () => {
-    eventServiceMock = jasmine.createSpyObj<EventService>( 'EventService', ['getOpenEvents', 'getUserActiveEvents']
+    eventServiceMock = jasmine.createSpyObj<EventService>( 'EventService', ['getOpenEvents', 'getUserActiveEvents', 'getMyRegistrations', 'getEventLogoUrl']
 );
 
 eventServiceMock.getOpenEvents.and.returnValue(of(mockEvents as any));
 eventServiceMock.getUserActiveEvents.and.returnValue(of([]));
+eventServiceMock.getMyRegistrations.and.returnValue(of([]));
+eventServiceMock.getEventLogoUrl.and.returnValue(
+  of({
+    url: 'https://mock-storage.com/dummy-logo-key.png',
+    storageKey: 'dummy-logo-key'
+  }));
 
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule, HomeComponent],
       providers: [
-        { provide: EventService, useValue: eventServiceMock },
+        { provide: EventService, useValue: eventServiceMock },MessageService,
         {
           provide: ActivatedRoute,
           useValue: {
@@ -67,7 +74,7 @@ eventServiceMock.getUserActiveEvents.and.returnValue(of([]));
   });
 
   afterEach(() => {
-    component.ngOnDestroy();
+    component?.ngOnDestroy();
     localStorage.clear();
   });
 

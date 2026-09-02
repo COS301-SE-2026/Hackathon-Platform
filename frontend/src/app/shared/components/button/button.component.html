@@ -1,0 +1,17 @@
+<button
+  type="button"
+  class="button"
+  [class.button-primary]="variant === 'primary'"
+  [class.button-secondary]="variant === 'secondary'"
+  [class.button-danger]="variant === 'danger'"
+  [class.button-ghost]="variant === 'ghost'"
+  [class.button-success]="variant === 'success'"
+  [style.width]="width"
+  [disabled]="disabled"
+>
+  <ng-content></ng-content>
+</button> 
+
+
+
+

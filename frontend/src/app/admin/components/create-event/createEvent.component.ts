@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule,ActivatedRoute } from '@angular/router';
 import { EventService, EventRequest } from '../../../services/event.service';
+import { StorageService } from '../../../services/storage.service';
 
 @Component({
   selector: 'app-create-event',
@@ -16,23 +17,49 @@ export class CreateEventComponent implements OnInit {
   @ViewChild('fileInput')
   fileInput!: ElementRef<HTMLInputElement>;
 
+  @ViewChild('logoFileInput')
+  logoFileInput!: ElementRef<HTMLInputElement>;
+
   private readonly eventService = inject(EventService);
+  private readonly storageService = inject(StorageService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
   hackathonId ='';
+  hackathonName ='';
+
+  private readonly DEFAULT_TEAM_SIZE_LIMIT = 4;
 
   form = {
     eventName: '',
-    startDate: '2024-12-01T09:00',
+    startDate: '',
+    startTime: '',
     duration: 48,
     teamSizeLimit: 4,
     visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
     bannerFile: null as File | null,
     bannerFileName: '',
+    logoFile: null as File | null,
+    logoFileName:'',
     description: '',
-    registrationKey: ''
+    registrationKey: '',
+    rules: '',
+    isInPerson: false,
+    leaderboardFreezeDateTime: '',
+    prizes: [{ title: '1st Place', description: ''},
+            { title: '2nd Place', description: ''},
+            { title: '3rd Place', description: ''},
+            { title: 'Prize Pool', description: ''},
+           ] as { title: string, description: string}[],
+    tagline: '',
+    allowedTechnologies: [] as string[],
+    
   };
+
+  readonly descriptionMaxLength = 1000;
+  readonly rulesMaxLength  = 2000;
+
+  technologyInput = '';
 
   isLoading = false;
   errorMessage = '';
@@ -41,25 +68,41 @@ export class CreateEventComponent implements OnInit {
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
    }
 
-  triggerFileInput(): void {
-    this.fileInput.nativeElement.click();
+  triggerFileInput(target: 'banner'| 'logo' = 'banner'): void {
+    if (target === 'logo'){
+     this.logoFileInput.nativeElement.click(); 
+    } else {
+      this.fileInput.nativeElement.click();
+
+    }
+    
   }
 
-  onFileSelected(event: Event): void {
+  onFileSelected(event: Event, target: 'banner'| 'logo' = 'banner'): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
+      if (target === 'logo'){
+      this.form.logoFile = file;
+      this.form.logoFileName = file.name;
+      }else {
       this.form.bannerFile = file;
       this.form.bannerFileName = file.name;
+      }
     }
   }
 
-  onDrop(event: DragEvent): void {
+  onDrop(event: DragEvent, target: 'banner'| 'logo' = 'banner'): void {
     event.preventDefault();
     const file = event.dataTransfer?.files?.[0];
     if (file) {
+      if (target === 'logo'){
+      this.form.logoFile = file;
+      this.form.logoFileName = file.name;
+      }else {
       this.form.bannerFile = file;
       this.form.bannerFileName = file.name;
+      }
     }
   }
 
@@ -67,10 +110,26 @@ export class CreateEventComponent implements OnInit {
     event.preventDefault();
   }
 
-  onSaveDraft(): void {
-    this.createEvent();
+
+  removePrize(index: number): void {
+    if (this.form.prizes.length > 1){
+      this.form.prizes.splice(index,1);
+    }
   }
 
+  addTechnology(event: Event): void {
+    event.preventDefault();
+    const value = this.technologyInput.trim();
+    if (value && !this.form.allowedTechnologies.includes(value)){
+      this.form.allowedTechnologies.push(value);
+    }
+    this.technologyInput = '';
+    
+  }
+
+  removeTechnology(index: number): void {
+    this.form.allowedTechnologies.splice(index, 1);
+  }
   createEvent(): void {
     if (!this.form.eventName) {
       this.errorMessage = 'Please enter an event name';
@@ -79,6 +138,11 @@ export class CreateEventComponent implements OnInit {
 
     if (!this.form.startDate) {
       this.errorMessage = 'Please select a start date';
+      return;
+    }
+
+    if (!this.form.startTime) {
+      this.errorMessage = 'Please select a start time';
       return;
     }
 
@@ -92,14 +156,24 @@ export class CreateEventComponent implements OnInit {
       return;
     }
 
+    if (this.form.visibility === 'PRIVATE' && !this.form.registrationKey.trim()){
+      this.errorMessage = 'Please enter a registration key for a private event.'
+      return;
+    }
+
     if(!this.hackathonId) {
       this.errorMessage = 'The hackathon ID is missing, make sure you are creating an event from a hackathon.';
+      return;
     }
 
     this.isLoading = true;
     this.errorMessage = '';
 
-    const startDateTime = new Date(this.form.startDate);
+    const startDateTime = new Date(`${this.form.startDate}T${this.form.startTime}`);
+    if (Number.isNaN(startDateTime.getTime())){
+      this.errorMessage = 'Please enter a valid start date and time';
+      return;
+    }
     
     const eventData: EventRequest = {
       name: this.form.eventName,
@@ -108,8 +182,15 @@ export class CreateEventComponent implements OnInit {
       duration: this.form.duration,
       description: this.form.description || undefined,
       visibility: this.form.visibility,
-      status: 'ACTIVE',
-      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined
+      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined,
+      inPerson: this.form.isInPerson,
+      rules: this.form.rules || undefined,
+      freezeTime: this.form.leaderboardFreezeDateTime
+      ? new Date(this.form.leaderboardFreezeDateTime).toISOString()
+      :undefined,
+      tagline: this.form.tagline || undefined,
+      allowedTech: this.form.allowedTechnologies
+
     };
 
     console.log('Sending event data to backend:', eventData);
@@ -117,14 +198,57 @@ export class CreateEventComponent implements OnInit {
     this.eventService.createEventForHackathon(this.hackathonId, eventData).subscribe({
       next: (response) => {
         console.log('Event created successfully:', response);
-        this.isLoading = false;
 
-        if (this.hackathonId){
-         this.router.navigate(['/admin/hackathons',this.hackathonId,'events']);
-        }else {
-           this.router.navigate(['/admin/events']);
+        const uploads = [];
+
+        if (this.form.bannerFile) {
+          uploads.push(
+            this.storageService.uploadEventBanner(response.eventId, this.form.bannerFile)
+          );
         }
-       
+
+        if (this.form.logoFile) {
+          uploads.push(
+            this.storageService.uploadEventLogo(response.eventId, this.form.logoFile)
+          );
+        }
+
+        if (uploads.length === 0) {
+          this.isLoading = false;
+
+          if (this.hackathonId){
+            this.router.navigate(['/admin/hackathons',this.hackathonId,'events']);
+          }else {
+            this.router.navigate(['/admin/events']);
+          }
+
+          return;
+        }
+
+        let completedUploads = 0;
+
+        uploads.forEach(upload => {
+          upload.subscribe({
+            next: () => {
+              completedUploads++;
+
+              if (completedUploads === uploads.length) {
+                this.isLoading = false;
+
+                if (this.hackathonId){
+                  this.router.navigate(['/admin/hackathons',this.hackathonId,'events']);
+                }else {
+                  this.router.navigate(['/admin/events']);
+                }
+              }
+            },
+            error: (error) => {
+              console.error('Error uploading event branding:', error);
+              this.isLoading = false;
+              this.errorMessage = 'Event created, but the branding image upload failed.';
+            }
+          });
+        });
       },
       error: (error) => {
         console.error('Error creating event:', error);

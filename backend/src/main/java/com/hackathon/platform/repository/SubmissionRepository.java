@@ -1,6 +1,7 @@
 package com.hackathon.platform.repository;
 
 import com.hackathon.platform.model.Submission;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,6 +33,58 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
       "SELECT s FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId ORDER BY s.submittedAt DESC")
   List<Submission> getRecentSubmissions(@Param("userId") UUID userId, Pageable pageeable);
 
+  /** Recent submissions scoped to a single event */
+  @Query(
+      value =
+          """
+        SELECT
+            s.id AS "submissionId",
+            s.team_id AS "teamId",
+            t.team_name AS "teamName",
+            s.event_id AS "eventId",
+            e.name AS "eventName",
+            s.level_id AS "levelId",
+            l.level_number AS "levelNumber",
+            l.name AS "levelName",
+            s.score AS "score",
+            s.status AS "status",
+            s.submitted_at AS "submittedAt"
+        FROM submissions s
+        JOIN teams t ON t.team_id = s.team_id
+        JOIN levels l ON l.id = s.level_id
+        JOIN events e ON e.event_id = s.event_id
+        WHERE s.event_id = :eventId AND e.created_by_user_id = :userId
+        ORDER BY s.submitted_at DESC
+        """,
+      nativeQuery = true)
+  List<RecentSubmissionRow> getRecentSubmissionsForEvent(
+      @Param("eventId") UUID eventId, @Param("userId") UUID userId, Pageable pageable);
+
+  /** Projection for getRecentSubmissionsForEvent */
+  interface RecentSubmissionRow {
+    Long getSubmissionId();
+
+    UUID getTeamId();
+
+    String getTeamName();
+
+    UUID getEventId();
+
+    String getEventName();
+
+    short getLevelId();
+
+    short getLevelNumber();
+
+    String getLevelName();
+
+    java.math.BigDecimal getScore();
+
+    String getStatus();
+
+    Instant getSubmittedAt();
+  }
+
   @Query(
       "SELECT s.id FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.hackathon = :hackathonId")
   List<Long> findIdsByHackathonId(@Param("hackathonId") UUID hackathonId);
@@ -59,7 +112,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
             COALESCE(best.score, CAST(0 AS NUMERIC)) AS "bestScore",
             best.submitted_at AS "lastScoredAt"
         FROM teams team
-            LEFT JOIN BestSubmissions best ON team.team_id = best.team_id WHERE team.event_id = :eventId AND team.status = 'ACTIVE' ORDER BY "bestScore" DESC
+            LEFT JOIN BestSubmissions best ON team.team_id = best.team_id WHERE team.event_id = :eventId AND team.status = 'ACTIVE' ORDER BY "bestScore" DESC, "lastScoredAt" ASC NULLS LAST
         """,
       nativeQuery = true)
   List<LeaderboardEntry> findLeaderboardByEventIdAndLevelId(
@@ -100,7 +153,133 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
       nativeQuery = true)
   List<LeaderboardEntry> findLeaderboardByEventId(@Param("eventId") UUID eventId);
 
+  @Query(
+      value =
+          """
+        WITH BestSubmissions AS (
+            SELECT DISTINCT ON (team_id) team_id, score, submitted_at
+            FROM submissions s
+            WHERE level_id = :levelId AND status = 'SCORED' AND submitted_at <= :cutoff
+            ORDER BY team_id, score DESC, submitted_at ASC, id ASC
+        )
+        SELECT team.team_id AS "teamId", team.team_name AS "teamName",
+                COALESCE(best.score, CAST(0 AS NUMERIC)) AS "bestScore",
+                best.submitted_at AS "lastScoredAt"
+        FROM teams team
+        LEFT JOIN BestSubmissions best ON team.team_id = best.team_id
+        WHERE team.event_id = :eventId AND team.status = 'ACTIVE'
+        ORDER BY "bestScore" DESC, "lastScoredAt" ASC NULLS LAST, team.team_name ASC, team.team_id ASC
+""",
+      nativeQuery = true)
+  List<LeaderboardEntry> findFrozenLeaderboardByEventIdAndLevelId(
+      @Param("eventId") UUID eventId,
+      @Param("levelId") short levelId,
+      @Param("cutoff") java.time.OffsetDateTime cutoff);
+
+  @Query(
+      value =
+          """
+        WITH BestSubmissions AS (
+            SELECT DISTINCT ON (s.team_id, s.level_id) s.team_id, s.level_id, s.score, s.submitted_at
+            FROM submissions s
+            INNER JOIN teams t ON t.team_id = s.team_id
+            WHERE t.event_id = :eventId AND s.status = 'SCORED' AND s.submitted_at <= :cutoff
+            ORDER BY s.team_id, s.level_id, s.score DESC, s.submitted_at ASC, s.id ASC
+        ), TeamTotals AS (
+            SELECT team_id, sum(score) AS total_score, MAX(submitted_at) AS last_scored_at
+            FROM BestSubmissions GROUP BY team_id
+        )
+        SELECT t.team_id AS "teamId", t.team_name AS "teamName",
+                COALESCE(totals.total_score, 0) AS "bestScore", totals.last_scored_at AS "lastScoredAt"
+        FROM teams t LEFT JOIN TeamTotals totals ON t.team_id = totals.team_id
+        WHERE t.event_id = :eventId AND t.status = 'ACTIVE'
+        ORDER BY "bestScore" DESC, totals.last_scored_at ASC NULLS LAST, t.team_name ASC, t.team_id ASC
+""",
+      nativeQuery = true)
+  List<LeaderboardEntry> findFrozenLeaderboardByEventId(
+      @Param("eventId") UUID eventId, @Param("cutoff") java.time.OffsetDateTime cutoff);
+
   boolean existsByOutputStorageKey(String storageKey);
 
   boolean existsBySourceCodeStorageKey(String storageKey);
+
+  long countByEventId(UUID eventId);
+
+  long countByEventIdAndStatus(UUID eventId, String status);
+
+  @Query(
+      "SELECT COUNT(s) FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId AND s.submittedAt >= :since")
+  long countByAdminSince(@Param("userId") UUID userId, @Param("since") Instant since);
+
+  @Query(
+      "SELECT COUNT(s) FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId")
+  long countByAdmin(@Param("userId") UUID userId);
+
+  long countByEventIdAndSubmittedAtAfter(UUID eventId, Instant since);
+
+  @Query(
+      "SELECT s.status AS status, COUNT(s) AS total FROM Submission s WHERE s.eventId = :eventId GROUP BY s.status")
+  List<StatusCount> countByEventIdGroupByStatus(@Param("eventId") UUID eventId);
+
+  @Query(
+      value =
+          """
+       SELECT date_trunc('minute', submitted_at) AS "bucketStart", COUNT(*) AS "count"
+       FROM submissions
+       WHERE event_id = :eventId AND submitted_at >= :since
+       GROUP BY date_trunc('minute', submitted_at)
+       ORDER BY "bucketStart" ASC
+        """,
+      nativeQuery = true)
+  List<SubmissionRateRow> findSubmissionRateSince(
+      @Param("eventId") UUID eventId, @Param("since") Instant since);
+
+  @Query(
+      value =
+          """
+       SELECT
+            s.level_id AS "levelId",
+            l.name AS "levelName",
+            COUNT(*) AS "scoredSubmissions",
+            MIN(s.score) AS "minScore",
+            MAX(s.score) AS "maxScore",
+            AVG(s.score) AS "avgScore"
+       FROM submissions s
+       JOIN levels l ON l.id = s.level_id
+       WHERE s.event_id = :eventId AND s.status = 'SCORED'
+       GROUP BY s.level_id, l.name
+       ORDER BY s.level_id ASC
+        """,
+      nativeQuery = true)
+  List<LevelScoreRow> findScoreDistributionByEventId(@Param("eventId") UUID eventId);
+
+  /** Projection for gtoup by status counts */
+  interface StatusCount {
+    String getStatus();
+
+    long getTotal();
+  }
+
+  /** Projection for the submission rate time series */
+  interface SubmissionRateRow {
+
+    Instant getBucketStart();
+
+    long getCount();
+  }
+
+  /** Projection for the per level score distribution */
+  interface LevelScoreRow {
+    short getLevelId();
+
+    String getLevelName();
+
+    long getScoredSubmissions();
+
+    java.math.BigDecimal getMinScore();
+
+    java.math.BigDecimal getMaxScore();
+
+    java.math.BigDecimal getAvgScore();
+  }
 }

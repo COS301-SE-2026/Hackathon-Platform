@@ -5,6 +5,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -14,14 +17,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.Team;
+import com.hackathon.platform.model.TeamMember;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
+import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.SolverVersionRepository;
+import com.hackathon.platform.repository.SubmissionRepository;
+import com.hackathon.platform.repository.TeamMemberRepository;
+import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.scoring.queue.ScoringJobProducer;
+import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
@@ -58,9 +71,16 @@ class StorageControllerTest {
 
   @MockBean private EventRepository eventRepository;
 
+  @MockBean private EventService eventService;
+
   @MockBean private ScoringJobProducer producer;
 
   @MockBean private HackathonService hackathonService;
+  @MockBean private EventRegistrationRepository eventRegRepo;
+  @MockBean private TeamRepository teamRepo;
+  @MockBean private TeamMemberRepository teamMemberRepo;
+  @MockBean private LevelRepository levelRepo;
+  @MockBean private SubmissionRepository subRepo;
 
   private static final String EVENT_ID = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
   private static final String HACKATHON_ID = "c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13";
@@ -112,6 +132,30 @@ class StorageControllerTest {
     participantAuth =
         new UsernamePasswordAuthenticationToken(
             participantUser, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+
+    Event activeEvent = new Event();
+    activeEvent.setStatus("ACTIVE");
+    activeEvent.setHackathon(UUID.fromString(HACKATHON_ID));
+    when(eventRepository.findByHackathon(any())).thenReturn(List.of(activeEvent));
+    when(eventService.getEventById(any())).thenReturn(activeEvent);
+
+    Team team = new Team();
+    team.setEventId(UUID.fromString(EVENT_ID));
+    when(teamRepo.findById(any())).thenReturn(Optional.of(team));
+
+    TeamMember tm = new TeamMember();
+    tm.setTeamId(UUID.fromString(TEAM_ID));
+    when(teamMemberRepo.findByUserIdAndStatusAndEventId(any(), anyString(), any()))
+        .thenReturn(List.of(tm));
+
+    Level lvl = new Level();
+    lvl.setHackathonId(UUID.fromString(HACKATHON_ID));
+    when(levelRepo.findById(anyShort())).thenReturn(Optional.of(lvl));
+
+    Submission submission = new Submission();
+    submission.setEventId(UUID.fromString(EVENT_ID));
+    submission.setTeamId(UUID.fromString(TEAM_ID));
+    when(subRepo.findById(any())).thenReturn(Optional.of(submission));
   }
 
   @Test
@@ -244,7 +288,25 @@ class StorageControllerTest {
   }
 
   @Test
-  void uploadBrandingAsset_returns200WithStorageKey() throws Exception {
+  void uploadEventBanner_returns200WithStorageKey() throws Exception {
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
+
+    MockMultipartFile file =
+        new MockMultipartFile("file", "banner.png", "image/png", "imagedata".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .file(file)
+                .with(authentication(adminAuth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.storageKey").exists())
+        .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+  }
+
+  @Test
+  void uploadEventLogo_returns200WithStorageKey() throws Exception {
     when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
     when(storageService.upload(anyString(), anyString(), any())).thenReturn(BLOB_URL);
 
@@ -253,12 +315,209 @@ class StorageControllerTest {
 
     mockMvc
         .perform(
-            multipart("/api/storage/hackathons/{hackathonId}/branding", HACKATHON_ID)
+            multipart("/api/storage/events/{eventId}/logo", EVENT_ID)
                 .file(file)
                 .with(authentication(adminAuth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.storageKey").exists())
         .andExpect(jsonPath("$.blobUrl").value(BLOB_URL));
+  }
+
+  @Test
+  void getEventBannerUrl_returnsPresignedUrl() throws Exception {
+    Event event = new Event();
+    event.setBannerStorageKey("events/" + EVENT_ID + "/branding/banner/banner.png");
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+        .thenReturn(BLOB_URL);
+
+    mockMvc
+        .perform(
+            get("/api/storage/events/{eventId}/banner", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.url").value(BLOB_URL));
+  }
+
+  @Test
+  void getEventBannerUrl_returns204WhenNoBannerUploaded() throws Exception {
+    Event event = new Event();
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+
+    mockMvc
+        .perform(
+            get("/api/storage/events/{eventId}/banner", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void getEventLogoUrl_returnsPresignedUrl() throws Exception {
+    Event event = new Event();
+    event.setLogoStorageKey("events/" + EVENT_ID + "/branding/logo/logo.png");
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+    when(storageService.generatePresignedUrl(anyString(), anyString(), anyInt()))
+        .thenReturn(BLOB_URL);
+
+    mockMvc
+        .perform(
+            get("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.url").value(BLOB_URL));
+  }
+
+  @Test
+  void getEventLogoUrl_returns204WhenNoLogoUploaded() throws Exception {
+    Event event = new Event();
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+
+    mockMvc
+        .perform(
+            get("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void uploadEventBanner_returns500WhenContentTypeNotAnImage() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "banner.pdf", "application/pdf", "notanimage".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .file(file)
+                .with(authentication(adminAuth)))
+        .andExpect(status().is5xxServerError());
+  }
+
+  @Test
+  void uploadEventBanner_returns500WhenFileMissing() throws Exception {
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .with(authentication(adminAuth)))
+        .andExpect(status().is5xxServerError());
+  }
+
+  @Test
+  void uploadEventBanner_returns403WhenCallerIsNotAdmin() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "banner.png", "image/png", "imagedata".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .file(file)
+                .with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void uploadEventLogo_returns500WhenContentTypeNotAnImage() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "logo.pdf", "application/pdf", "notanimage".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/logo", EVENT_ID)
+                .file(file)
+                .with(authentication(adminAuth)))
+        .andExpect(status().is5xxServerError());
+  }
+
+  @Test
+  void uploadEventLogo_returns403WhenCallerIsNotAdmin() throws Exception {
+    MockMultipartFile file =
+        new MockMultipartFile("file", "logo.png", "image/png", "imagedata".getBytes());
+
+    mockMvc
+        .perform(
+            multipart("/api/storage/events/{eventId}/logo", EVENT_ID)
+                .file(file)
+                .with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void deleteEventBanner_returns204AndDeletesBlobWhenBannerExists() throws Exception {
+    Event event = new Event();
+    String storageKey = "events/" + EVENT_ID + "/branding/banner/banner.png";
+    event.setBannerStorageKey(storageKey);
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+
+    verify(storageService, times(1)).delete(CONTAINER, storageKey);
+    verify(eventService, times(1)).updateEventBanner(UUID.fromString(EVENT_ID), null);
+  }
+
+  @Test
+  void deleteEventBanner_returns204WithoutDeletingWhenNoBannerExists() throws Exception {
+    Event event = new Event();
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+
+    verify(storageService, never()).delete(anyString(), anyString());
+    verify(eventService, never()).updateEventBanner(any(), any());
+  }
+
+  @Test
+  void deleteEventBanner_returns403WhenCallerIsNotAdmin() throws Exception {
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/banner", EVENT_ID)
+                .with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void deleteEventLogo_returns204AndDeletesBlobWhenLogoExists() throws Exception {
+    Event event = new Event();
+    String storageKey = "events/" + EVENT_ID + "/branding/logo/logo.png";
+    event.setLogoStorageKey(storageKey);
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+    when(config.getEventResourcesContainer()).thenReturn(CONTAINER);
+
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+
+    verify(storageService, times(1)).delete(CONTAINER, storageKey);
+    verify(eventService, times(1)).updateEventLogo(UUID.fromString(EVENT_ID), null);
+  }
+
+  @Test
+  void deleteEventLogo_returns204WithoutDeletingWhenNoLogoExists() throws Exception {
+    Event event = new Event();
+    when(eventService.getEventById(UUID.fromString(EVENT_ID))).thenReturn(event);
+
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/logo", EVENT_ID).with(authentication(adminAuth)))
+        .andExpect(status().isNoContent());
+
+    verify(storageService, never()).delete(anyString(), anyString());
+    verify(eventService, never()).updateEventLogo(any(), any());
+  }
+
+  @Test
+  void deleteEventLogo_returns403WhenCallerIsNotAdmin() throws Exception {
+    mockMvc
+        .perform(
+            delete("/api/storage/events/{eventId}/logo", EVENT_ID)
+                .with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
   }
 
   @Test

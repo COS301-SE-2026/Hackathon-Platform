@@ -2,64 +2,113 @@ import { ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
+import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
+import { EventService, EventResponse, EventParticipantResponse } from '../../../services/event.service';
+import { LevelService } from '../../../services/level.service';
+import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 
+interface EventRow {
+  eventId : string;
+  name: string;
+  logoInitial: string;
+  visibility: string;
+  status: string;
+  statusClass: 'live' | 'upcoming' | 'completed' | 'canceled'| 'ended';
+  dateRangeLabel: string;
+  scoringPaused: boolean;
+}
 
-import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
-import { TagModule } from 'primeng/tag';
-import{ SelectModule } from 'primeng/select';
-import { InputTextModule } from 'primeng/inputtext';
-import { EventService, EventResponse } from '../../../services/event.service';
-
+interface RegisteredTeam {
+  teamId: string;
+  name: string;
+  members: EventParticipantResponse[];
+}
 
 @Component({
   selector: 'app-eventlist',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule,ButtonModule,TableModule,TagModule,SelectModule,InputTextModule],
+  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent],
   templateUrl: './eventlist.component.html',
   styleUrls: ['./eventlist.component.scss']
 })
 export class EventlistComponent implements OnInit {
+  private readonly levelService = inject(LevelService);
+  private readonly hackathonService = inject(HackathonService);
   private readonly eventService = inject(EventService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly change = inject(ChangeDetectorRef);
 
+  showParticipantsModal = false;
+  participantsModalEventId: string | null = null;
+  participantsModalEventName = '';
+
   hackathonId = '';
-  searchQuery = '';
-  statusFilter = '';
-  visibilityFilter = '';
-
-  statusOptions = [
-    { label: 'All Statuses',value: ''},
-    { label: 'Active',value: 'active'},
-    { label: 'Upcoming',value: 'upcoming'},
-    { label: 'Completed',value: 'completed'},
-    { label: 'Cancelled',value: 'cancelled'},
-
-
-  ];
-
-
-  visibilityOptions = [
-    { label: 'All Visibility',value: ''},
-    { label: 'Public',value: 'public'},
-    { label: 'Private',value: 'private'}
-
-  ];
-  events: EventResponse[] = [];
+  isHackathonScoped = false;
+  hackathon: HackathonResponse | null = null;
+  levelCount = 0;
+  eventCount = 0;
+  participantCount: number | null = null;
+  events: EventRow[] = [];
   isLoading = true;
+  errorMessage = '';
+  searchTerm = '';
+  statusFilter = 'ALL';
+
+  expandedEventId: string | null = null;
+  registrationsByEvent: Record<string, RegisteredTeam[]> = {};
+  registrationsLoading: Record<string, boolean> = {};
+  registrationsError: Record<string, string> = {};
+  leaderboardPaused: Record<string, boolean> = {};
+  leaderboardPauseLoading: Record<string, boolean> = {};
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
-    this.loadEvents();
+    this.isHackathonScoped = !!this.hackathonId;
+
+    if(this.isHackathonScoped){
+      this.loadHackathon();
+      this.loadLevelCount();
+      this.loadEvents();
+    }else {
+      this.isLoading = false;
+    }
+
   }
 
-  loadEvents(): void{
+  private loadHackathon(): void {
+    this.hackathonService.getHackathon(this.hackathonId).subscribe({
+      next: (hackathon) =>{
+        this.hackathon = hackathon;
+        this.change.markForCheck();
+      },
+    });
+  }
+
+  private loadLevelCount(): void {
+    this.levelService.getLevels(this.hackathonId).subscribe({
+      next: (levels) =>{
+        this.levelCount = levels.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.levelCount = 0;
+      }
+    });
+  }
+
+
+ private loadEvents(): void{
     this.isLoading = true;
-    this.eventService.getMyEvents().subscribe({
+    this.errorMessage = '';
+
+    this.eventService.getEventsForHackathon(this.hackathonId).subscribe({
       next: (events) => {
-        this.events = events;
+        this.eventCount = events.length;
+        this.events = events.map((e) => this.toEventRow(e));
+        events.forEach((event) => {
+          this.leaderboardPaused[event.eventId] = event.scoringPaused;
+        });
         this.isLoading = false;
         this.change.markForCheck();
       },
@@ -71,24 +120,52 @@ export class EventlistComponent implements OnInit {
     });
   }
 
-  get filteredEvents(): EventResponse[] {
-    return this.events.filter(e => {
-      const matchSearch = !this.searchQuery ||
-        e.name.toLowerCase().includes(this.searchQuery.toLowerCase());
-      const matchStatus = !this.statusFilter ||
-        e.status.toLowerCase() === this.statusFilter;
-      const matchVisibility = !this.visibilityFilter ||
-        e.visibility.toLowerCase() === this.visibilityFilter;
-      return matchSearch && matchStatus && matchVisibility;
-    });
+  private titleCase(value:string): string {
+    if (!value) return '';
+    return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
   }
 
-  getStatusClass(status: string): string{
-    switch(status.toLowerCase()){
-      case 'active': return 'live';
-      case 'upcoming': return 'upcoming';
-      case 'completed': return 'completed';
-      case 'cancelled': return 'ended';
+  private toEventRow(event:EventResponse): EventRow {
+    return{
+      eventId: event.eventId,
+      name: event.name,
+      logoInitial: event.name?.charAt(0)?.toUpperCase() || '?',
+      visibility: this.titleCase(event.visibility),
+      status: this.statusLabel(event.status),
+      statusClass: this.getStatusClass(event.status),
+      dateRangeLabel: this.formatDateRange(event),
+      scoringPaused: event.scoringPaused,
+    }
+  }
+
+  private statusLabel(status: string): string {
+    switch(status?.toUpperCase()){
+      case 'ONGOING':
+      case 'ACTIVE':
+        return 'Live';
+      case 'UPCOMING':
+        return 'Upcoming';
+      case 'COMPLETED':
+        return 'Completed';
+      case 'CANCELED':
+        return 'Canceled';
+      default: return this.titleCase(status);
+
+    }
+
+  }
+
+  getStatusClass(status: string): EventRow['statusClass']{
+    switch(status?.toLowerCase()){
+      case 'active':
+      case 'ongoing':
+      return 'live';
+      case 'upcoming':
+      return 'upcoming';
+      case 'completed':
+      return 'completed';
+      case 'cancelled':
+      return 'ended';
       default: return 'upcoming';
     }
   }
@@ -105,5 +182,108 @@ export class EventlistComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/admin/hackathons']);
+  }
+
+  private formatDateRange(event: EventResponse): string {
+    const start = new Date (event.startDateTime);
+    if (Number.isNaN(start.getTime())){
+      return 'date unavailable';
+    }
+    const end = new Date(start.getTime() + Number(event.duration || 0) * 60 * 60 * 1000);
+    const startLabel = start.toLocaleDateString('en-US',{day:'numeric',month:'long'});
+    const endLabel = end.toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'});
+
+    return `${startLabel}\u2013 ${endLabel}`;
+  }
+
+  navigateToCreateEvents(): void {
+    this.router.navigate(['/admin/hackathons',this.hackathonId,'events','create']);
+  }
+
+  navigateToViewEvent(eventId: string): void {
+    this.toggleEventDetails(eventId);
+  }
+
+  toggleEventDetails(eventId: string): void {
+    if(this.expandedEventId === eventId){
+      this.expandedEventId = null;
+      return;
+    }
+    this.expandedEventId = eventId;
+    if (!this.registrationsByEvent[eventId]){
+      this.loadRegistrations(eventId);
+    }
+  }
+
+  private loadRegistrations(eventId: string): void {
+    this.registrationsLoading[eventId] = true;
+    this.registrationsError[eventId] ='';
+
+    this.eventService.getEventParticipants(eventId).subscribe({
+      next: (participants) =>{
+        const teams = new Map<string, RegisteredTeam>();
+
+        participants.forEach((participant) => {
+          if (!teams.has(participant.teamId)) {
+            teams.set(participant.teamId, {
+              teamId: participant.teamId,
+              name: participant.teamName,
+              members: []
+            });
+          }
+
+          teams.get(participant.teamId)?.members.push(participant);
+        });
+
+        this.registrationsByEvent[eventId] = Array.from(teams.values());
+        this.registrationsLoading[eventId] = false;
+        this.change.markForCheck();
+      },
+      error:(error) =>{
+        console.error('Failed to load registrations for event',eventId,error);
+        this.registrationsError[eventId] = 'Could not load registered teams.';
+        this.registrationsLoading[eventId] = false;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  navigateToParticipants(eventId: string): void {
+    const event = this.events.find(e => e.eventId === eventId);
+    this.participantsModalEventId = eventId;
+    this.participantsModalEventName = event?.name || '';
+    this.showParticipantsModal = true;
+  }
+
+  navigateToAnnouncements(eventId: string): void {
+    this.router.navigate(['/admin/events', eventId, 'announcements']);
+  }
+
+  pauseLeaderboard(eventId: string): void {
+    if(this.leaderboardPauseLoading[eventId]) return;
+
+    this.leaderboardPauseLoading[eventId] = true;
+
+    const request = this.leaderboardPaused[eventId]
+      ? this.eventService.resumeLeaderboard(eventId)
+      : this.eventService.pauseLeaderboard(eventId);
+
+    request.subscribe({
+      next: (response) => {
+        this.leaderboardPaused[eventId] = response.scoringPaused;
+        this.leaderboardPauseLoading[eventId] = false;
+        this.change.markForCheck();
+      },
+      error: (error) => {
+        console.error('Failed to update leaderboard pause for event', eventId, error);
+        this.leaderboardPauseLoading[eventId] = false;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  closeParticipantsModal(): void {
+    this.showParticipantsModal = false;
+    this.participantsModalEventId = null;
   }
 }

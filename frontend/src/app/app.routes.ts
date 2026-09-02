@@ -7,9 +7,12 @@ import { AuthGuard } from './guards/auth.guard';
 export const routes: Routes = [
  { path: '', loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)},
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
+  { path: 'super-admin', loadComponent: () => import('./admin/super-admin/super-admin.component').then(m => m.SuperAdminComponent), canActivate: [AuthGuard] },
   { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
   {path: 'style-guide', loadComponent: () => import('./components/brand-style-guide/brand-style-guide.component').then( m => m.BrandStyleGuideComponent),},
-  
+  {
+  path: 'component-tests', loadComponent: () =>import('./component-tests/component-tests.component').then(m => m.ComponentTestsComponent)},
+
   {
     path: 'admin',
     component: AdminShellComponent,
@@ -32,6 +35,10 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
       },
       {
+        path: 'events/:eventId/announcements',
+        loadComponent: () => import('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
+      },
+      {
         path: 'hackathons/:hackathonId/events/create',
         loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
       },
@@ -46,6 +53,14 @@ export const routes: Routes = [
       {
         path: 'hackathons/:hackathonId/solver',
         loadComponent: () => import('./admin/components/solver/solver.component').then(m => m.SolverComponent),
+      },
+      {
+        path: "hackathons/:hackathonId/announcements",
+        loadComponent: () => import ('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
+      },
+      {
+        path: "settings",
+        loadComponent: () => import ('./admin/components/profile/admin-profile.component').then(m => m.AdminProfileComponent),
       },
       {
         path: '',

@@ -1,28 +1,84 @@
 <div class = "admin-shell">
+    <nav class = "navbar">
+        <div class = "navbar-container">
+            <div class = "navbar-brand">
+                <a routerLink = "/admin/dashboard">
+                <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform" class = "brand-logo" />
+                </a>
+            </div>
 
-    <nav class = "topnav">
-        <div class = "topnav-left">
-            <div class = "logo-badge">H</div>
-            <span class = "brand">Hackathon <span class = "brand-accent">Platform</span></span>
+      
 
+        <div class = "navbar-links" [class.navbar-links-open] = "isMenuOpen">
+            <ul>
+                <li>
+                    <a routerLink = "/admin/dashboard" routerLinkActive = "active" (click)="closeMenu()">
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a routerLink = "/admin/hackathons" routerLinkActive = "active" (click)="closeMenu()">
+                    <span>Hackathons</span>
+                 </a>
+                </li>
+            
+            <li>
+                <a routerLink = "/admin/forum" routerLinkActive = "active" (click)="closeMenu()">
+                    <span>Forums</span>
+                </a>
+                </li>
+            </ul>  
         </div>
 
-        <div class = "topnav-links">
-            <a routerLink = "/admin/dashboard" routerLinkActive = "active">Dashboard</a>
-            <a routerLink = "/admin/hackathons" routerLinkActive = "active">Hackathons</a>
-            <a routerLink = "/admin/events" routerLinkActive = "active">Events</a>
 
+            <div class = "navbar-right">
+                <button class = "navbar-notifications" aria-label = "Notifications" (click) = "toggleNotifications()">
+                    <i class = "pi pi-bell"></i>
+                    @if (notificationCount > 0){
+                        <span class = "notification-badge">{{ notificationCount }}</span>
+                    }
+                </button>
 
-        </div>
-        <div class = "topnav-right">
-            <span class = "admin-pill">Admin</span>
-            <div class = "avatar-circle">A</div>
-            <button class = "logout-btn" (click) = "logout()">Logout</button>
-        </div>
+                <button class = "navbar-profile" (click) = "toggleProfileMenu()" aria-haspopup="true" [attr.aria-expanded]="isProfileMenuOpen">
+                    <div class = "avatar-circle">{{ getInitials() }}</div>
+                <div class = "user-info">
+                    <span class = "user-name">{{ userName }}</span>
+                    <span class = "user-role">{{ userRole }}</span>
+                </div>
+                <i class = "pi pi-chevron-down profile-chevron"></i>
+                </button>
+                <button class = "navbar-toggle" aria-label = "Toggle navigation" (click) = "toggleMenu()">
+                    <i class = "pi" [ngClass] ="isMenuOpen ? 'pi-times' : 'pi-bars'"></i>
+                   
+                </button>
+    </div>
+</div>
+        @if(isProfileMenuOpen){
+            <div class = "profile-dropdown">
+                <a routerLink = "/admin/settings" class = "dropdown-item" (click) = "closeProfileMenu()">
+                    <i class = "pi pi-cog"></i>
+                    Settings
+                </a>
+                <div class = "dropdown-divider"></div>
+                <button class = "dropdown-item" (click) = "logout()">
+                    <i class = "pi pi-sign-out"></i>
+                    Logout
+                </button>
+            </div>
+        }
+        @if (isNotificationsOpen){
+            <div class = "notifications-dropdown">
+                <div class = "dropdown-header">Notifications</div>
+                @if (notificationCount === 0){
+                    <div class = "dropdown-empty">No new notifications</div>
+                }
+            </div>
+        }
     </nav>
-
-
-    <main class = "admin-content">
-        <router-outlet></router-outlet>
+    <main class = "admin-main">
+        <div class = "admin-content">
+            <router-outlet></router-outlet>
+        </div>
     </main>
 </div>
+

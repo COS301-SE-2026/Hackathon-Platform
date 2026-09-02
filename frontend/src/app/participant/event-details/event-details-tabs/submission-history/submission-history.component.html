@@ -1,65 +1,59 @@
 
  <div class="submission-history">
 
-        <div class="history-header">
+ <div class="history-header">
 
-            <h2 class="history-title">Submission History</h2>
+  <div class="history-header-content">
+    <h2 class="history-title">Submission History</h2>
 
-        </div>
+    <p class="history-description">View your submissions across different levels.</p>
+ </div>
 
-       <p class="history-description"> View your submission history, track scoring progress, and download solver logs to review failed or completed submissions.</p>
+  <div class="history-filters">
 
-        @if (historyLoading) {
+    <app-dropdown  id="level-filter"  label="Filter by level"  [options]="levelOptions" [value]="selectedLevel" (selectionChange)="selectedLevel = $event"> </app-dropdown>
 
-            <div class="empty-history"><i class="pi pi-spin pi-spinner"></i> Loading submission history...</div>
+     <app-dropdown  id="status-filter" label="Filter by status"  [options]="statusOptions"  [value]="selectedStatus"  (selectionChange)="selectedStatus = $event"> </app-dropdown>
 
-        } @else if (historyError) {
+     </div>
 
-            <div class="empty-history">{{ historyError }}</div>
+ </div>
 
-        } @else if (submissionHistory.length > 0) {
 
-            <p-table
-                [value]="submissionHistory"
-                class="submission-table" [paginator]="true" [rows]="10">
+ @if (historyLoading) {
 
-                <ng-template pTemplate="header">
+  <div class="empty-history">
+    <i class="pi pi-spin pi-spinner"></i>
+    Loading submission history...
+  </div>
 
-                    <tr>
-                        <th scope="col">Uploaded</th>
-                        <th scope="col">Level</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Score</th>
-                        <th scope="col"></th>
-                    </tr>
+} @else if (historyError) {
 
-                </ng-template>
+  <div class="empty-history">
+    {{ historyError }}
+  </div>
 
-                <ng-template pTemplate="body"
-                    let-submission>
+} @else {
 
-                    <tr>
-                        <td>{{ formatDate(submission.submittedAt) }}</td>
-                        <td>Level {{ submission.levelId }}</td>
-                        <td><span class="status-badge" [ngClass]="statusClass(submission.status)"> {{ statusLabel(submission.status) }}</span></td>
-                        <td>{{ submission.status === 'SCORED' ? submission.score : '--' }}</td>
-                        <td>
+<app-table  [columns]="tableColumns" [data]="paginatedTableData" [loading]="false" emptyMessage="No submissions found."></app-table>
 
-                         <button
-                            type="button"
-                            class="secondary-btn"
-                            (click)="downloadLog(submission)">
-                            <i class="pi pi-download"></i>
-                            Log
-                        </button>
+<app-pagination [currentPage]="currentPage" [totalItems]="filteredTableData.length" [itemsPerPage]="itemsPerPage" itemLabel="submissions" (pageChange)="onPageChange($event)"></app-pagination>
 
-                        </td>
-                    </tr>
+}
 
-                </ng-template>
 
-            </p-table>
+ <ng-template #statusTemplate let-row>
+ <span class="status-badge" [ngClass]="statusClass(row.status)"> {{ statusLabel(row.status) }}</span>
+ </ng-template>
 
-        } @else { <div class="empty-history">No submissions yet</div> }
 
-    </div>
+ <ng-template #logTemplate let-row>
+ <app-button variant="secondary" width="100%" (click)="downloadLog(row.submission)" (keydown)="null" (keyup)="null">  <i class="pi pi-download"></i>
+  Log
+  </app-button>
+
+  </ng-template>
+
+
+
+</div>
