@@ -57,6 +57,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/events/*/forum/stream")
                     .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/events/*/announcements/stream")
+                    .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/scoring/events/*/leaderboard/update")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/storage/events/*/banner")
