@@ -11,11 +11,11 @@ export interface EventRequest {
   duration: number;
   description?: string;
   visibility: 'PUBLIC' | 'PRIVATE';
-  status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
-  isInPerson?: boolean;
+  status?: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
+  inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
-  tags?: string[];
-  allowedTechnologies?: string [];
+  freezeTime?: string;
+  rules?: string;
 }
 
 export interface EventResponse {
@@ -30,9 +30,9 @@ export interface EventResponse {
   description?: string;
   visibility: string;
   status: string;
-  isInPerson?: boolean;
+  inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
-  
+  scoringPaused: boolean;
 }
 
 export interface RegisteredParticipants {
@@ -73,10 +73,6 @@ export interface EventParticipantResponse {
   joinedAt: string;
 }
 
-export interface EventRegistrationSummary{
-  teams: RegisteredTeams[];
-  topSubmissions: TeamSubmission[];
-}
 @Injectable({
   providedIn: 'root'
 })
@@ -149,5 +145,19 @@ export class EventService {
 
   getEventParticipants(eventId: string): Observable<EventParticipantResponse[]> {
     return this.http.get<EventParticipantResponse[]>(`${this.baseUrl}/admin/events/${eventId}/participants`);
+  }
+
+  pauseLeaderboard(eventId: string): Observable<{ eventId: string; scoringPaused: boolean }> {
+    return this.http.patch<{ eventId: string; scoringPaused: boolean }>(
+      `${this.baseUrl}/admin/events/${eventId}/scoring/pause`,
+      {}
+    );
+  }
+
+  resumeLeaderboard(eventId: string): Observable<{ eventId: string; scoringPaused: boolean }> {
+    return this.http.patch<{ eventId: string; scoringPaused: boolean }>(
+      `${this.baseUrl}/admin/events/${eventId}/scoring/resume`,
+      {}
+    );
   }
 }

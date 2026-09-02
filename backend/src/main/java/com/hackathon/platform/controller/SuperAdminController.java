@@ -3,6 +3,9 @@ package com.hackathon.platform.controller;
 import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.CreateAdminRequest;
 import com.hackathon.platform.service.SuperAdminService;
+import com.hackathon.platform.dto.AdminResponse;
+import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,4 +27,10 @@ public class SuperAdminController {
   public ResponseEntity<AuthResponse> createAdmin(@Valid @RequestBody CreateAdminRequest req) {
     return ResponseEntity.status(HttpStatus.CREATED).body(sAdService.createAdmin(req));
   }
+
+  @GetMapping("/admins")
+  public ResponseEntity<List<AdminResponse>> getAdmins() {
+    return ResponseEntity.ok(sAdService.getAdmins());
+  }
+  
 }

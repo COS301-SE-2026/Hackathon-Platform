@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { EventParticipantResponse, EventResponse, EventService } from '../../../services/event.service';
-import { SubmissionResponse, SubmissionService } from '../../../services/submission.service';
+import { RecentSubmissionResponse, SubmissionService } from '../../../services/submission.service';
+import { AnnouncementResponse, AnnouncementService } from '../../../services/announcement.service';
 import { EventInsightsResponse, InsightsService } from '../../../services/insights.service';
 import { LeaderboardEntry, LeaderboardService } from '../../../services/leaderboard.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
@@ -56,6 +57,7 @@ interface EventInsightsSummary{
   activeTeams: number;
   approvedParticipants: number;
   submissionsLastHour: number;
+  totalSubmissions: number;
   errorRate: number;
 }
 
@@ -79,6 +81,7 @@ export class DashboardComponent implements OnInit{
   private readonly submissionService = inject(SubmissionService);
   private readonly insightsService = inject(InsightsService);
   private readonly leaderboardService = inject(LeaderboardService);
+  private readonly announcementService = inject(AnnouncementService);
   private readonly change = inject(ChangeDetectorRef);
 
   allEvents: Events[] = [];
@@ -116,6 +119,7 @@ export class DashboardComponent implements OnInit{
     activeTeams: 0,
     approvedParticipants: 0,
     submissionsLastHour: 0,
+    totalSubmissions: 0,
     errorRate: 0,
   };
 
@@ -124,16 +128,14 @@ export class DashboardComponent implements OnInit{
   submissionTrendArea = '';
 
   scoreByLevel: ScoreLevelStat[]=[];
-  recentAnnouncements: AnnouncementRow[]=[
-    {title:'New challenge added', body:"Check out the new AI challenge", date:'May 16,2026'},
-    {title:'Maintenance Notice', body:"Platform maintenance on May 20,2026 from 12:00 PM", date:'May 19,2026'},
-  ];
+  recentAnnouncements: AnnouncementRow[]=[];
+  announcementsLoading = false;
+  announcementsError = '';
 
 
   ngOnInit(): void {
     this.loadDashboardSummary();
     this.loadEvents();
-    this.loadRecentSubmissions();
   }
 
   private loadDashboardSummary(): void {
@@ -144,7 +146,7 @@ export class DashboardComponent implements OnInit{
         this.activeEvents = summary.activeEvents;
         this.teamsCount = summary.totalParticipants;
         this.activeParticipants = summary.totalParticipants;
-        this.submissionsCount = summary.submissionsToday;
+        this.submissionsCount = summary.totalSubmissions;
         this.change.markForCheck();
       },
       error: () => {
@@ -160,7 +162,13 @@ export class DashboardComponent implements OnInit{
       this.loadEventInsights(eventId);
       this.loadParticipantsPreview(eventId);
       this.loadTopTeams(eventId);
+      this.loadRecentSubmissions(eventId);
+      this.loadRecentAnnouncements(eventId);
 
+    } else {
+      this.recentSubmissions = [];
+      this.recentAnnouncements = [];
+      
     }
   }
 
@@ -261,6 +269,7 @@ export class DashboardComponent implements OnInit{
       activeTeams: insights.activeTeams,
       approvedParticipants: insights.approvedParticipants,
       submissionsLastHour: insights.submissionsLastHour,
+      totalSubmissions: insights.totalSubmissions,
       errorRate: insights.errorRate ?? 0,
 
     };
@@ -340,11 +349,56 @@ export class DashboardComponent implements OnInit{
 
   }
 
-  private loadRecentSubmissions(): void {
+  private loadRecentAnnouncements(eventId: string): void {
+
+    this.announcementsLoading = true;
+    this.announcementsError = '';
+    this.recentAnnouncements = [];
+
+    this.announcementService.getAnnouncements(eventId).subscribe({
+      next: announcements => {
+
+        this.recentAnnouncements = announcements
+          .slice()
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5)
+          .map(a => this.toAnnouncementRow(a));
+        this.announcementsLoading = false;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.announcementsError = 'Could not load announcements for this event.';
+        this.announcementsLoading = false;
+      }
+
+
+    });
+  }
+
+  private toAnnouncementRow(a: AnnouncementResponse): AnnouncementRow {
+    return {
+      title: a.title,
+      body: a.body,
+      date: this.formatAnnouncementDate(a.createdAt),
+    };
+     
+  }
+
+  private formatAnnouncementDate(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return 'unknown';
+    }
+
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  private loadRecentSubmissions(eventId: string): void {
     this.submissionLoading = true;
     this.submissionError = '';
+    this.recentSubmissions = [];
 
-    this.submissionService.getResentSubmission(20).subscribe({
+    this.submissionService.getRecentSubmissionsForEvent(eventId, 20).subscribe({
       next: submissions => {
         this.recentSubmissions = submissions.map(sub => this.toDashboardSubmission(sub));
         this.submissionLoading = false;
@@ -357,15 +411,16 @@ export class DashboardComponent implements OnInit{
     });
   }
 
-  private toDashboardSubmission(sub: SubmissionResponse): Submissions {
-    const team = this.shortId(sub.teamId);
+  private toDashboardSubmission(sub: RecentSubmissionResponse): Submissions {
+    const team = sub.teamName || this.shortId(sub.teamId);
+    const levelLabel = sub.levelName ? `Level ${sub.levelNumber}: ${sub.levelName}` : `Level ${sub.levelNumber}`;
     return{
       submissionId: sub.submissionId,
   team,
-  teamInitials: team.slice(0,2).toUpperCase(),
-  event: 'Event',
-  level: `Level ${sub.levelId}`,
-  challenge: `Level ${sub.levelId}`,
+  teamInitials: this.getInitials(team) || team.slice(0,2).toUpperCase(),
+  event: sub.eventName || 'Event',
+  level: levelLabel,
+  challenge: levelLabel,
   score: sub.score === null || sub.score === undefined
     ? '-'
     : Number(sub.score).toFixed(2),
