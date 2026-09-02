@@ -18,6 +18,10 @@ export interface EventRequest {
   rules?: string;
   allowedTech?: string[];
   tagline?: string;
+  firstPlacePrize?: number;
+  secondPlacePrize?: number;
+  thirdPlacePrize?: number;
+  totalPrizePool?: number;
 }
 
 export interface EventResponse {

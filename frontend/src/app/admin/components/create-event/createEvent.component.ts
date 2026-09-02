@@ -29,6 +29,7 @@ export class CreateEventComponent implements OnInit {
   hackathonName ='';
 
   private readonly DEFAULT_TEAM_SIZE_LIMIT = 4;
+  private readonly SECONDS_PER_HOUR = 3600;
 
   form = {
     eventName: '',
@@ -46,11 +47,10 @@ export class CreateEventComponent implements OnInit {
     rules: '',
     isInPerson: false,
     leaderboardFreezeDateTime: '',
-    prizes: [{ title: '1st Place', description: ''},
-            { title: '2nd Place', description: ''},
-            { title: '3rd Place', description: ''},
-            { title: 'Prize Pool', description: ''},
-           ] as { title: string, description: string}[],
+    firstPlacePrize: null as number | null,
+    secondPlacePrize: null as number | null,
+    thirdPlacePrize: null as number | null,
+    totalPrizePool: null as number | null,
     tagline: '',
     allowedTechnologies: [] as string[],
     
@@ -110,12 +110,6 @@ export class CreateEventComponent implements OnInit {
     event.preventDefault();
   }
 
-
-  removePrize(index: number): void {
-    if (this.form.prizes.length > 1){
-      this.form.prizes.splice(index,1);
-    }
-  }
 
   addTechnology(event: Event): void {
     event.preventDefault();
@@ -179,17 +173,21 @@ export class CreateEventComponent implements OnInit {
       name: this.form.eventName,
       teamSizeLimit: this.form.teamSizeLimit,
       startDateTime: startDateTime.toISOString(),
-      duration: this.form.duration,
+      duration: this.form.duration * this.SECONDS_PER_HOUR,
       description: this.form.description || undefined,
       visibility: this.form.visibility,
       registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined,
       inPerson: this.form.isInPerson,
-      rules: this.form.rules || undefined,
+      rules: this.form.rules,
       freezeTime: this.form.leaderboardFreezeDateTime
       ? new Date(this.form.leaderboardFreezeDateTime).toISOString()
       :undefined,
       tagline: this.form.tagline || undefined,
-      allowedTech: this.form.allowedTechnologies
+      allowedTech: this.form.allowedTechnologies,
+      firstPlacePrize: this.form.firstPlacePrize ?? undefined,
+      secondPlacePrize: this.form.secondPlacePrize ?? undefined,
+      thirdPlacePrize: this.form.thirdPlacePrize ?? undefined,
+      totalPrizePool: this.form.totalPrizePool ?? undefined
 
     };
 
