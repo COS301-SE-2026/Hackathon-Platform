@@ -51,7 +51,8 @@
   width: 100%;
 
   aspect-ratio: 4 / 3;
-
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
   overflow: hidden;
 
 
@@ -317,7 +318,7 @@
 }
 
 .event-meta-item i {
-  font-size: 15px;
+ font-size: 20px;
   flex-shrink: 0;
 }
 
@@ -326,23 +327,24 @@
 }
 
 .event-meta-members i {
-  color: var(--teal);
+ color: var(--bright-blue);
 }
 
 .event-meta-visibility i {
-  color: var(--red);
+  color: var(--bright-blue);
 }
 
-.event-meta-participants i {
-  color: var(--lime-green);
+.event-meta-location i {
+color: var(--bright-blue);
+
 }
 
 .event-meta-levels i {
-  color: var(--teal);
+ color: var(--bright-blue);
 }
 
 .event-meta-prize i {
-  color: var(--orange);
+  color: var(--bright-blue);
 }
 
 .event-banner-actions {
