@@ -51,7 +51,7 @@ export class CreateEventComponent implements OnInit {
             { title: '3rd Place', description: ''},
             { title: 'Prize Pool', description: ''},
            ] as { title: string, description: string}[],
-    tags:[] as string[],
+    tagline: '',
     allowedTechnologies: [] as string[],
     
   };
@@ -59,7 +59,6 @@ export class CreateEventComponent implements OnInit {
   readonly descriptionMaxLength = 1000;
   readonly rulesMaxLength  = 2000;
 
-  tagInput = '';
   technologyInput = '';
 
   isLoading = false;
@@ -116,19 +115,6 @@ export class CreateEventComponent implements OnInit {
     if (this.form.prizes.length > 1){
       this.form.prizes.splice(index,1);
     }
-  }
-
-  addTag(event: Event): void {
-    event.preventDefault();
-    const value = this.tagInput.trim();
-    if (value && !this.form.tags.includes(value)){
-      this.form.tags.push(value);
-    }
-    this.tagInput = '';
-  }
-
-  removeTag(index: number): void {
-    this.form.tags.splice(index,1);
   }
 
   addTechnology(event: Event): void {
@@ -202,8 +188,8 @@ export class CreateEventComponent implements OnInit {
       freezeTime: this.form.leaderboardFreezeDateTime
       ? new Date(this.form.leaderboardFreezeDateTime).toISOString()
       :undefined,
-      tags: this.form.tags,
-      allowedTechnologies: this.form.allowedTechnologies
+      tagline: this.form.tagline || undefined,
+      allowedTech: this.form.allowedTechnologies
 
     };
 

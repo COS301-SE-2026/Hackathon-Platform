@@ -12,7 +12,11 @@ public class AdminDashboardResponse {
   public AdminDashboardResponse() {}
 
   public AdminDashboardResponse(
-      long activeEvents, long totalEvents, long totalParticipants, long submissionsToday, long totalSubmissions) {
+      long activeEvents,
+      long totalEvents,
+      long totalParticipants,
+      long submissionsToday,
+      long totalSubmissions) {
     this.activeEvents = activeEvents;
     this.totalEvents = totalEvents;
     this.totalParticipants = totalParticipants;

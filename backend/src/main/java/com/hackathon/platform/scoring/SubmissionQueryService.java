@@ -62,9 +62,7 @@ public class SubmissionQueryService {
         .collect(Collectors.toList());
   }
 
-  /**
-   * Recent submissions for a single event
-   */
+  /** Recent submissions for a single event */
   @Transactional(readOnly = true)
   public List<RecentSubmissionResponse> getRecentSubmissionsForEvent(
       UUID eventId, UUID userId, int limit) {
@@ -87,7 +85,6 @@ public class SubmissionQueryService {
                     row.getStatus(),
                     row.getSubmittedAt()))
         .collect(Collectors.toList());
-        
   }
 
   /**

@@ -4,10 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Response shape for a row in the admin "recent submissions" table.
- * 
- */
+/** Response shape for a row in the admin "recent submissions" table. */
 public class RecentSubmissionResponse {
 
   private Long submissionId;
@@ -35,8 +32,7 @@ public class RecentSubmissionResponse {
       String levelName,
       BigDecimal score,
       String status,
-      Instant submittedAt
-    ) {
+      Instant submittedAt) {
     this.submissionId = submissionId;
     this.teamId = teamId;
     this.teamName = teamName;
@@ -48,7 +44,6 @@ public class RecentSubmissionResponse {
     this.score = score;
     this.status = status;
     this.submittedAt = submittedAt;
-
   }
 
   public Long getSubmissionId() {
@@ -58,7 +53,6 @@ public class RecentSubmissionResponse {
 
   public void setSubmissionId(Long submissionId) {
     this.submissionId = submissionId;
-
   }
 
   public UUID getTeamId() {
@@ -73,7 +67,6 @@ public class RecentSubmissionResponse {
 
   public String getTeamName() {
     return teamName;
-
   }
 
   public void setTeamName(String teamName) {
@@ -84,7 +77,6 @@ public class RecentSubmissionResponse {
   public UUID getEventId() {
 
     return eventId;
-
   }
 
   public void setEventId(UUID eventId) {
@@ -128,7 +120,6 @@ public class RecentSubmissionResponse {
 
   public BigDecimal getScore() {
     return score;
-
   }
 
   public void setScore(BigDecimal score) {
@@ -150,6 +141,5 @@ public class RecentSubmissionResponse {
 
   public void setSubmittedAt(Instant submittedAt) {
     this.submittedAt = submittedAt;
-    
   }
 }
