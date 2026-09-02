@@ -1,4 +1,4 @@
-import { Component, Input, inject, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, inject, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LevelService, LevelResponse } from '../../../../services/level.service';
@@ -17,7 +17,7 @@ import { ToastService } from '../../../../shared/components/toast/toast.service'
   templateUrl: './submission.component.html',
   styleUrl: './submission.component.scss',
 })
-export class SubmissionsComponent {
+export class SubmissionsComponent implements OnInit {
   private readonly levelService = inject(LevelService);
   private readonly teamService = inject(TeamService);
   private readonly storageService = inject(StorageService);
