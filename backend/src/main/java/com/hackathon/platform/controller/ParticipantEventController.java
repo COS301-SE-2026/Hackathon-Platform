@@ -4,12 +4,15 @@ import com.hackathon.platform.dto.EventRegistrationRequest;
 import com.hackathon.platform.dto.EventRegistrationResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.service.CertificateService;
 import com.hackathon.platform.service.EventRegistrationService;
 import com.hackathon.platform.service.EventService;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.hackathon.platform.service.CertificateService;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
 /** Participant-facing event endpoints. */
 @RestController
@@ -32,7 +32,9 @@ public class ParticipantEventController {
   private final CertificateService certServ;
 
   public ParticipantEventController(
-      EventService eventService, EventRegistrationService eventRegistrationService, CertificateService certServ) {
+      EventService eventService,
+      EventRegistrationService eventRegistrationService,
+      CertificateService certServ) {
     this.eventService = eventService;
     this.eventRegistrationService = eventRegistrationService;
     this.certServ = certServ;
@@ -82,12 +84,16 @@ public class ParticipantEventController {
   }
 
   @GetMapping("/{eventId}/certificate")
-  public ResponseEntity<byte[]> getParticipationCertificate(@PathVariable UUID eventId, @AuthenticationPrincipal User user){
+  public ResponseEntity<byte[]> getParticipationCertificate(
+      @PathVariable UUID eventId, @AuthenticationPrincipal User user) {
     byte[] pdf = certServ.genCertificate(eventId, user);
-    String file = "certificate-"+user.getFirstName().toLowerCase().replaceAll("[^a-z0-9]+", "-")+".pdf";
+    String file =
+        "certificate-" + user.getFirstName().toLowerCase().replaceAll("[^a-z0-9]+", "-") + ".pdf";
     ContentDisposition disposition = ContentDisposition.inline().filename(file).build();
 
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString()).body(pdf);
-
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_PDF)
+        .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+        .body(pdf);
   }
 }

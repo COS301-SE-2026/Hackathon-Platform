@@ -2,25 +2,25 @@
 
    <div class="section-header">
       <h2 class="section-title">Your Events</h2>
-      
+
     </div>
 
   @if (isLoadingActiveEvents){
 
     <div class="active-events-wrapper">
-      
+
         <app-loader message="Loading your events..."></app-loader>
-      
+
     </div>
   }
 
   @else if (activeEvents.length > 0) {
-    
+
     <div class="active-events-wrapper">
       <app-card class="active-event-card">
 
         <div class="active-header">
-         
+
           <span class="active-counter"> {{ currentActiveEventIndex + 1 }} / {{ activeEvents.length }}</span>
         </div>
 
@@ -57,7 +57,7 @@
                         </span>
                       </div>
 
-                      <h3 class="event-name">{{ event.name }}</h3> 
+                      <h3 class="event-name">{{ event.name }}</h3>
 
                     </div>
 
@@ -99,18 +99,18 @@
                         </div>
 
                       </div>
-                      
+
                       <div class="active-action-button">
                       <app-button variant="primary" width="100%" (click)="goToEvent(event)" (keydown)="null" (keyup)="null"> Go to Event </app-button>
                       </div>
-                      
+
 
                     </div>
 
                   </div>
 
                   <div class="active-event-details">
-          
+
                     <div class="active-detail-item team-detail">
 
                       <i class="pi pi-users"></i>
@@ -205,21 +205,21 @@
 
     <div class="section-header">
       <h2 class="section-title">Upcoming Events</h2>
-      
+
     </div>
 
     @if (isLoadingEvents) {
 
       <app-loader message="Loading upcoming events..."></app-loader>
 
-    } 
-    
+    }
+
     @else if (upcomingEvents.length === 0) {
 
       <p class="events-message"> No upcoming events are available right now.</p>
 
     }
-    
+
    @else {
 
     <div class="upcoming-events-list">
@@ -247,11 +247,11 @@
                 </div>
 
                 <div class="event-actions">
-                  
+
                   <div class="event-action-button"><app-button variant="secondary" (click)="goToEvent(event)"width="100%" (keydown)="null" (keyup)="null"> View Event</app-button></div>
 
                   <div class="event-action-button"> <app-button variant="primary" [disabled]="registeredEventIds.has(event.eventId)" (click)="registerForEvent(event)" width="100%" (keydown)="null"(keyup)="null"> {{ registeredEventIds.has(event.eventId) ? 'Registered' : 'Register' }} </app-button></div>
-                
+
 
                 </div>
 
@@ -304,18 +304,77 @@
 
   </section>
 
+  <section class="completed-events">
+    <div class="section-header">
+      <h2 class="section-title">Completed Events</h2>
+    </div>
+
+    @if (isLoadingCompletedEvents) {
+      <app-loader message="Loading the completed events"></app-loader>
+    }
+    @else if(completedEvents.length === 0) {
+      <p class="events-message">You have not done any events yet</p>
+    }
+    @else{
+      <div class="upcoming-events-list">
+        @for (event of completedEvents; track event.eventId){
+          <app-card class="upcoming-event-card">
+            <div class="upcoming-event-image">
+              <img [src]="event.logoUrl || 'assets/images/hackathon-image.png'" [alt]="event.name" class="event-img"/>
+            </div>
+
+            <div class="upcoming-event-details">
+              <div class="event-top-section">
+                <div class="event-heading">
+                  <h3 class="ev-name">{{ event.name }}</h3>
+                  <p class="event-tagline">{{ event.tagline }}</p>
+                </div>
+
+                <div class="event-actions">
+                  <div class="events-action-button"><app-button variant="secondary" (click)="goToEvent(event)" width="100%" (keydown)="null" (keyup)="null">View Event</app-button></div>
+
+                  <div class="event-action-button">
+                    <app-button variant="primary" [disabled]="generatingCertificateEventId===event.eventId" (click)="generateCertificate(event)" width="100%" (keydown)="null" (keyup)="null">
+                      {{ generatingCertificateEventId === event.eventId ? 'Generating' : 'Generate Certificate' }}
+                    </app-button>
+                  </div>
+                </div>
+              </div>
+              <div class="event-meta-row">
+                <div class="meta-item event-dates">
+                  <i class="pi pi-calendar"></i>
+                  <span>{{ event.dates }}</span>
+                </div>
+
+                <div class="meta-item visibility-meta">
+                  <i [class]="event.visibility === 'PRIVATE' ? 'pi pi-lock' : 'pi pi-globe'"></i>
+                  <span>{{ event.visibility | titlecase }}</span>
+                </div>
+
+                <div class="meta-item location-meta">
+                  <i class="pi pi-map-marker"></i>
+                  <span>{{ event.inPerson ? 'In person' : 'Virtual' }}</span>
+                </div>
+              </div>
+            </div>
+          </app-card>
+        }
+      </div>
+    }
+  </section>
+
 </div>
 
 
 @if (registrationModal && selectedEvent) {
 
-<app-modal  title="Register for Event"  size="small"  footerLayout="center" (closed)="closeRegistrationModal()"> 
+<app-modal  title="Register for Event"  size="small"  footerLayout="center" (closed)="closeRegistrationModal()">
 
-  <div modal-body> 
+  <div modal-body>
 
-    <h3 class="registration-event-name"> {{ selectedEvent.name }}</h3> 
+    <h3 class="registration-event-name"> {{ selectedEvent.name }}</h3>
 
-    @if (selectedEvent.visibility === 'PRIVATE') { 
+    @if (selectedEvent.visibility === 'PRIVATE') {
 
       <div class="registration-confirmation">
 
@@ -332,9 +391,9 @@
         <app-input   id="registration-key" label="Registration Key" placeholder="Enter registration key" [(value)]="registrationKey"> </app-input>
       </div>
 
-    } 
-    
-    @else { 
+    }
+
+    @else {
 
       <div class="registration-confirmation">
 
@@ -350,8 +409,8 @@
       </div>
 
     }
-    
-    
+
+
     @if (selectedEvent.inPerson) {
 
         <div class="registration-confirmation">
@@ -363,9 +422,9 @@
             <strong>In-Person Event</strong>
 
             <p> This event is held at a physical location. Please provide any dietary requirements or allergies. </p>
-          
+
           </div>
-          
+
         </div>
 
         <div class="registration-input">
@@ -383,12 +442,12 @@
       }
 
 
-  </div> 
+  </div>
 
-  <div modal-footer-right> 
-    <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px" (keydown)="null" (keyup)="null">Cancel</app-button> 
-    <app-button variant="primary" (click)="confirmRegistration()" width="135px" [disabled]="isRegistering" (keydown)="null" (keyup)="null">{{ isRegistering ? 'Registering...' : 'Register' }}</app-button> 
-  </div> 
+  <div modal-footer-right>
+    <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px" (keydown)="null" (keyup)="null">Cancel</app-button>
+    <app-button variant="primary" (click)="confirmRegistration()" width="135px" [disabled]="isRegistering" (keydown)="null" (keyup)="null">{{ isRegistering ? 'Registering...' : 'Register' }}</app-button>
+  </div>
 
 </app-modal>
 

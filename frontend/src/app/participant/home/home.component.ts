@@ -235,8 +235,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     next: (events) => {
       this.isLoadingEvents = false;
 
-      const now = new Date();
-
       this.upcomingEvents = events
         .map((event) => this.toOpenEventView(event))
         .sort(
@@ -479,12 +477,12 @@ confirmRegistration(): void {
 
     this.eventService.getCompletedEvents().subscribe({
       next: (events) => {
-        this.completedEvents = events.map((event) => this.toOpenEventView(event)).sort((a, b) => new Date(b.startDateTime).getTime()-new Date(a.startDateTime.getTime()));
+        this.completedEvents = events.map((event) => this.toOpenEventView(event)).sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime());
         this.loadEventLogos(this.completedEvents);
         this.isLoadingCompletedEvents = false;
         this.change.markForCheck();
       },
-      error: (error) => {
+      error: () => {
         this.completedEvents = [];
         this.isLoadingCompletedEvents = false;
         this.change.markForCheck();
@@ -512,8 +510,8 @@ confirmRegistration(): void {
         this.change.markForCheck();
       },
 
-      error: (error) => {
-        this.toast.error("Cant find the certificate");
+      error: () => {
+        this.toast.error("Error", "Cant find the certificate");
         this.generatingCertificateEventId = null;
         this.change.markForCheck();
       }
