@@ -123,7 +123,7 @@
                                     <button
                                         type = "button"
                                         class = "btn-post-reply"
-                                        [disabled] = "!replyDrafts[thread.threadId].trim()"
+                                        [disabled] = "!replyDrafts[thread.threadId]?.trim()"
                                         (click) = "postReply(thread.threadId)">
                                         Post Reply
                                     </button>
