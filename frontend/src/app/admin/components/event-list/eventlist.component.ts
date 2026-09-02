@@ -1,9 +1,9 @@
-import { ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
-import { EventService, EventResponse, EventParticipantResponse } from '../../../services/event.service';
+import { EventService, EventResponse, EventParticipantResponse, ExtendTimerResponse } from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 
@@ -16,6 +16,8 @@ interface EventRow {
   statusClass: 'live' | 'upcoming' | 'completed' | 'canceled'| 'ended';
   dateRangeLabel: string;
   scoringPaused: boolean;
+  startDateTime: string;
+  endDateTime: string | null;
 }
 
 interface RegisteredTeam {
@@ -31,7 +33,7 @@ interface RegisteredTeam {
   templateUrl: './eventlist.component.html',
   styleUrls: ['./eventlist.component.scss']
 })
-export class EventlistComponent implements OnInit {
+export class EventlistComponent implements OnInit, OnDestroy {
   private readonly levelService = inject(LevelService);
   private readonly hackathonService = inject(HackathonService);
   private readonly eventService = inject(EventService);
@@ -62,6 +64,13 @@ export class EventlistComponent implements OnInit {
   leaderboardPaused: Record<string, boolean> = {};
   leaderboardPauseLoading: Record<string, boolean> = {};
 
+  extendTimerOpenFor: string | null = null;
+  extendTimerHours: Record<string, number> = {};
+  extendTimerLoading: Record<string, boolean> = {};
+  extendTimerError: Record<string, string> = {};
+
+  private countdownIntervalId: ReturnType<typeof setInterval> | null = null;
+
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
     this.isHackathonScoped = !!this.hackathonId;
@@ -74,6 +83,18 @@ export class EventlistComponent implements OnInit {
       this.isLoading = false;
     }
 
+    // Refresh every 30s
+    this.countdownIntervalId = setInterval(() => {
+      if (this.events.length > 0) {
+        this.change.markForCheck();
+      }
+    }, 30000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.countdownIntervalId !== null) {
+      clearInterval(this.countdownIntervalId);
+    }
   }
 
   private loadHackathon(): void {
@@ -98,8 +119,10 @@ export class EventlistComponent implements OnInit {
   }
 
 
- private loadEvents(): void{
-    this.isLoading = true;
+ private loadEvents(silent = false): void{
+    if (!silent) {
+      this.isLoading = true;
+    }
     this.errorMessage = '';
 
     this.eventService.getEventsForHackathon(this.hackathonId).subscribe({
@@ -135,6 +158,8 @@ export class EventlistComponent implements OnInit {
       statusClass: this.getStatusClass(event.status),
       dateRangeLabel: this.formatDateRange(event),
       scoringPaused: event.scoringPaused,
+      startDateTime: event.startDateTime,
+      endDateTime: event.endDateTime ?? this.computeEndDateTime(event),
     }
   }
 
@@ -189,11 +214,65 @@ export class EventlistComponent implements OnInit {
     if (Number.isNaN(start.getTime())){
       return 'date unavailable';
     }
-    const end = new Date(start.getTime() + Number(event.duration || 0) * 60 * 60 * 1000);
+    const end = event.endDateTime ? new Date(event.endDateTime) : new Date(start.getTime() + Number(event.duration || 0) * 1000);
     const startLabel = start.toLocaleDateString('en-US',{day:'numeric',month:'long'});
     const endLabel = end.toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'});
 
     return `${startLabel}\u2013 ${endLabel}`;
+  }
+
+  private computeEndDateTime(event: EventResponse): string | null {
+    const start = new Date(event.startDateTime);
+    if (Number.isNaN(start.getTime())){
+      return null;
+
+    }
+    return new Date(start.getTime() + Number(event.duration || 0) * 1000).toISOString();
+    
+  }
+
+  getTimeRemaining(event: EventRow): string {
+
+    if (event.statusClass === 'canceled' || event.statusClass === 'ended') {
+      return 'Canceled';
+    }
+    if (!event.endDateTime) {
+      return '\u2014';
+    }
+
+    const now = Date.now();
+    const start = new Date(event.startDateTime).getTime();
+    const end = new Date(event.endDateTime).getTime();
+
+    if (Number.isNaN(start) || Number.isNaN(end)) {
+      return '\u2014';
+    }
+
+    if (now < start) {
+      return `Starts in ${this.formatDurationMs(start - now)}`;
+    }
+    if (now >= end) {
+      return 'Ended';
+    }
+    return `${this.formatDurationMs(end - now)} left`;
+  }
+
+  private formatDurationMs(ms: number): string {
+
+    const totalMinutes = Math.max(0, Math.floor(ms / 60000));
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+    const minutes = totalMinutes % 60;
+
+    if (days > 0) {
+
+      return `${days}d ${hours}h`;
+    }
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+
   }
 
   navigateToCreateEvents(): void {
@@ -279,6 +358,52 @@ export class EventlistComponent implements OnInit {
         this.leaderboardPauseLoading[eventId] = false;
         this.change.markForCheck();
       }
+    });
+  }
+
+  toggleExtendTimer(eventId: string): void {
+    if (this.extendTimerOpenFor === eventId) {
+      this.extendTimerOpenFor = null;
+      return;
+
+    }
+    this.extendTimerOpenFor = eventId;
+    this.extendTimerError[eventId] = '';
+    if (!this.extendTimerHours[eventId]) {
+
+      this.extendTimerHours[eventId] = 1;
+    }
+  }
+
+  extendTimer(eventId: string): void {
+
+    if (this.extendTimerLoading[eventId]) return;
+
+    const hours = Number(this.extendTimerHours[eventId]);
+    if (!hours || hours <= 0) {
+      this.extendTimerError[eventId] = 'Enter a number of hours greater than 0.';
+      return;
+    }
+
+    this.extendTimerError[eventId] = '';
+    this.extendTimerLoading[eventId] = true;
+    const additionalTimeSeconds = Math.round(hours * 3600);
+
+
+    this.eventService.extendTimer(eventId, additionalTimeSeconds).subscribe({
+      next: (_response: ExtendTimerResponse) => {
+        this.extendTimerLoading[eventId] = false;
+        this.extendTimerOpenFor = null;
+        this.loadEvents(true);
+      },
+      error: (error) => {
+        console.error('Failed to extend timer for event', eventId, error);
+        this.extendTimerError[eventId] = 'Could not extend the timer. Please try again.';
+        this.extendTimerLoading[eventId] = false;
+        this.change.markForCheck();
+      }
+
+
     });
   }
 
