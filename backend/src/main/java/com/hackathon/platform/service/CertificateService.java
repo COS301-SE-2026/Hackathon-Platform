@@ -70,13 +70,13 @@ public class CertificateService {
                 drawBackground(cs);
                 drawBorder(cs);
                 float centreX = PAGE_WIDTH/2f;
-                float y = PAGE_HEIGHT/2f;
+                float y = PAGE_HEIGHT-130;
 
                 drawCentered(cs, body, 13, centreX, y, "CERTIFICATE OF PARTICIPATION", GREY, 3.5F);
                 y-=55f;
                 drawCentered(cs, titleFont, 34, centreX, y, hackathonName, NAVY, 0f);
                 y-=55f;
-                drawCentered(cs, body, 13, centreX, y, "Tis certifies that", GREY, 0f);
+                drawCentered(cs, body, 13, centreX, y, "This certifies that", GREY, 0f);
                 y-=58f;
                 drawCentered(cs, cursive, 40, centreX, y, partName, GOLD, 0f);
                 y-=6;
@@ -85,7 +85,7 @@ public class CertificateService {
                 float nameWidth = cursive.getStringWidth(partName)/1000*40;
                 float lineHalf = Math.max(nameWidth/2f+40, 160);
                 cs.moveTo(centreX-lineHalf, y);
-                cs.lineTo(centreX-lineHalf, y);
+                cs.lineTo(centreX+lineHalf, y);
                 cs.stroke();
                 y-=45;
 
@@ -101,6 +101,7 @@ public class CertificateService {
                 cs.setStrokingColor(GREY[0], GREY[1], GREY[2]);
                 cs.setLineWidth(0.8f);
                 cs.moveTo(leftX, footerY+30);
+                cs.lineTo(leftX+170, footerY+30);
                 cs.stroke();
                 drawLeft(cs, bodyBoldFont, 11, leftX, footerY+12, dateStr, NAVY);
                 drawLeft(cs, body, 9.5f, leftX, footerY-3, "Date Issued", GREY);
@@ -110,7 +111,7 @@ public class CertificateService {
                 cs.stroke();
                 drawRight(cs, bodyBoldFont, 11, rightX, footerY+12, "Hackathon Platform", NAVY);
                 drawRight(cs, body, 9.5f, rightX, footerY-3, "Hosted on", GREY);
-                drawCentered(cs, bodyBoldFont, 9, centreX, 55, "\u2726 HACKATHON PLATFORM \u2726", GOLD, 2f);
+                drawCentered(cs, bodyBoldFont, 9, centreX, 55, "HACKATHON PLATFORM", GOLD, 2f);
             }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             doc.save(out);
@@ -126,7 +127,7 @@ public class CertificateService {
 
     private void drawBorder(PDPageContentStream cs) throws IOException{
         float outerMargin = 28;
-        float innerMargin = 28;
+        float innerMargin = 40;
 
         cs.setStrokingColor(NAVY[0], NAVY[1], NAVY[2]);
         cs.setLineWidth(3f);
@@ -146,7 +147,7 @@ public class CertificateService {
 
         float x = centreX-width/2f;
         cs.beginText();
-        cs.setStrokingColor(colour[0], colour[1], colour[2]);
+        cs.setNonStrokingColor(colour[0], colour[1], colour[2]);
         cs.setFont(font, size);
         if(spacing>0){
             cs.setCharacterSpacing((spacing));
@@ -170,7 +171,7 @@ public class CertificateService {
         cs.beginText();
         cs.setNonStrokingColor(colour[0], colour[1], colour[2]);
         cs.setFont(font, size);
-        cs.newLineAtOffset(x-width/2, y);
+        cs.newLineAtOffset(x-width, y);
         cs.showText(text);
         cs.endText();
     }
