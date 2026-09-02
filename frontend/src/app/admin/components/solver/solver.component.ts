@@ -1,4 +1,4 @@
-import {Component, ViewChild, ElementRef,inject,OnInit} from '@angular/core';
+import {Component, ViewChild, ElementRef,inject,OnInit,ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule,Router, ActivatedRoute } from '@angular/router';
@@ -6,15 +6,10 @@ import {ButtonModule} from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import {StorageService} from '../../../services/storage.service';
 import {SubmissionService} from '../../../services/submission.service';
+import {HackathonService} from '../../../services/hackathon.service';
+import {LevelService} from '../../../services/level.service';
+import {EventService} from '../../../services/event.service';
 
-interface SolverVersion {
-    version : string;
-    uploaded :string;
-    runs : number;
-    avgRuntime : string;
-    errorRate : string;
-    status : 'Active' | 'Inactive' | 'Archived';
-}
 
 @Component({
     selector : 'app-solver',
@@ -29,6 +24,10 @@ export class SolverComponent implements OnInit{
     private readonly route = inject(ActivatedRoute);
     private readonly storageService = inject(StorageService);
     private readonly submissionService = inject(SubmissionService);
+    private readonly hackathonService = inject(HackathonService);
+    private readonly levelService = inject(LevelService);
+    private readonly eventService = inject(EventService);
+    private readonly change = inject(ChangeDetectorRef);
 
     @ViewChild('uploadForm') uploadFormRef!: ElementRef<HTMLElement>;
     selectedFile: File | null = null;
@@ -46,7 +45,6 @@ export class SolverComponent implements OnInit{
     rescoreError = '';
     rescoreSuccessMessage = '';
 
-    versionHistory: SolverVersion[] = [];
 
 scrollToUploadForm(): void{
     this.uploadFormRef?.nativeElement.scrollIntoView({behavior:'smooth',block: 'center'});
@@ -110,16 +108,6 @@ onUploadAndActivate(): void{
             console.log('Solver uploaded successfully:', response);
             this.isUploading = false;
 
-            this.versionHistory.unshift({
-                version: `v${response.version}`,
-                uploaded: new Date().toLocaleString('en-ZA',{month: 'short', day:'2-digit',hour:'2-digit',minute: '2-digit'}),
-                runs:0,
-                avgRuntime:'-',
-                errorRate: '-',
-                status:'Active'
-
-            });
-
     alert(`Solver v${response.version} uploaded and activated successfully.`);
 
     this.selectedFile= null;
@@ -175,22 +163,62 @@ rescoreAllSubmissions(): void {
   ngOnInit(): void {
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
 
+    const navigation = this.router.getCurrentNavigation();
+    this.hackathonName = navigation?.extras?.state?.['hackathonName'] || 'Loading...';
+
     if (!this.hackathonId){
         alert('No hackathon ID provided');
         return;
     }
-    this.loadSolverVersions();
+
     this.loadHackathonSummary();
+    this.loadLevelsCount();
+    this.loadEventsCount();
   }
 
   loadHackathonSummary(): void {
-    console.log('Loading hackathon summary for:', this.hackathonId);
+    this.hackathonService.getHackathon(this.hackathonId).subscribe({
+      next: (hackathon) => {
+        this.hackathonName = hackathon.name;
+        this.hackathonDescription = hackathon.description || '';
+        this.participantsCount = hackathon.participantsCount || 0;
+        this.change.markForCheck();
+      },
+      error: () => {
+        if (this.hackathonName === 'Loading...') {
+          this.hackathonName = '';
+        }
+        this.change.markForCheck();
+      }
+    });
   }
 
-loadSolverVersions(): void {
-    console.log('Loading solver for hackathon:',this.hackathonId);
+  private loadLevelsCount(): void {
+    this.levelService.getLevels(this.hackathonId).subscribe({
+      next: (levels) => {
+        this.levelsCount = levels.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.levelsCount = 0;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  private loadEventsCount(): void {
+    this.eventService.getEventsForHackathon(this.hackathonId).subscribe({
+      next: (events) => {
+        this.eventsCount = events.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.eventsCount = 0;
+        this.change.markForCheck();
+      }
+    });
+  }
 
 
-}
 
 }

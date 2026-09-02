@@ -54,9 +54,10 @@ public class InsightsService {
 
     Instant startOfToday = LocalDate.now(ZoneOffset.UTC).atStartOfDay(ZoneOffset.UTC).toInstant();
     long submissionsToday = submissionRepository.countByAdminSince(adminUserId, startOfToday);
+    long totalSubmissions = submissionRepository.countByAdmin(adminUserId);
 
     return new AdminDashboardResponse(
-        activeEvents, events.size(), totalParticipants, submissionsToday);
+        activeEvents, events.size(), totalParticipants, submissionsToday, totalSubmissions);
   }
 
   /** Dashboard stats for a single event */

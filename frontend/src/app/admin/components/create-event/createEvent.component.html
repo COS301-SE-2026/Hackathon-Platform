@@ -98,6 +98,59 @@
       </div>
 
       <div class = "form-section">
+        <h2 class = "section-heading">Tags &amp; Technology</h2>
+        <p class = "section-hint">Help participants find and prepare for this event.</p>
+       
+      <div class = "form-group">
+        <label for = "tagInput">Event Tags</label>
+            <div class = "chip-input-wrapper">
+           @for (tag of form.tags; track $index){
+            <span class = "chip">
+              {{tag}}
+              <button type = "button" class = "chip-remove" (click) = "removeTag($index)" aria-label= "Remove tag">
+                <i class = "pi pi-times"></i>
+              </button>
+            </span>
+           }
+            <input
+            type = "text"
+            id = "tagInput"
+            name = "tagInput"
+            [(ngModel)] = "tagInput"
+            (keydown.enter) = "addTag($event)"
+            (keydown.,) = "addTag($event)"
+            placeholder = "e.g. AI, Web3, Beginner-friendly"
+            class = "chip-input"/>
+        </div>
+        <p class = "field-hint">Press Enter or comma to add a tag.</p>
+         </div>
+       
+      <div class = "form-group">
+        <label for = "technologyInput">Allowed Technology</label>
+            <div class = "chip-input-wrapper">
+           @for (tech of form.allowedTechnologies; track $index){
+            <span class = "chip chip-tech">
+              {{tech}}
+              <button type = "button" class = "chip-remove" (click) = "removeTechnology($index)" aria-label = "Remove technology">
+                <i class = "pi pi-times"></i>
+              </button>
+            </span>
+           }
+            <input
+            type = "text"
+            id = "technologyInput"
+            name = "technologyInput"
+            [(ngModel)] = "technologyInput"
+            (keydown.enter) = "addTechnology($event)"
+            (keydown.,) = "addTechnology($event)"
+            placeholder = "e.g. React, Python, Java"
+            class = "chip-input"/>
+        </div>
+        <p class = "field-hint">Leave empty to allow any technology, or add specific stacks to restrict submissions.</p>
+         </div>
+      </div>
+
+      <div class = "form-section">
         <h2 class = "section-heading">Schedule</h2>
         <div class = "form-row">
       <div class = "form-group">
@@ -132,6 +185,17 @@
             required />
         </div>
 
+        <div class = "form-group">
+          <label for = "teamSizeLimit">Team Member Limit</label>
+          <input
+          type = "number"
+            id = "teamSizeLimit"
+            name = "teamSizeLimit"
+            [(ngModel)] = "form.teamSizeLimit"
+            min = "1"
+            required />
+        </div>
+
         <p class = "info-banner"><i class = "pi pi-info-circle"></i> The event will end automatically based on the start date, time and duration.</p>
     
 
@@ -156,6 +220,45 @@
           [(ngModel)] = "form.leaderboardFreezeDateTime"/>
         <p class = "field-hint">Leaderboard rankings will stop updating publicly after this time.</p>
       </div>
+      </div>
+
+      <div class = "form-section">
+        <h2 class = "section-heading">Prizes</h2>
+        <p class = "section-hint">Add the prizes participants can win.</p>
+        <div class = "prize-list">
+          @for (prize of form.prizes; track $index){
+            <div class = "prize-row">
+              <span class = "prize-row-index">{{$index +1}}</span>
+              <div class = "prize-row-fields">
+                <label for = "prizeTitle{{$index}}" class = "sr-only">Prize title {{$index + 1}}</label>
+                <input
+                id = "prizeTitle{{$index}}"
+                type ="text"
+                [(ngModel)] ="prize.title"
+                name = "prizeTitle{{$index}}"
+                placeholder = "e.g. 1st Place"
+                class = "prize-title-input"/>
+                <label for = "prizeDescription{{$index}}" class = "sr-only">Prize description {{$index + 1}}</label>
+                <input
+                id = "prizeDescription{{$index}}"
+                type ="text"
+                [(ngModel)] ="prize.description"
+                name = "prizeDescription{{$index}}"
+                placeholder = "e.g. R10,000 cash + mentorship"
+                class = "prize-description-input"/>
+              </div>
+              <button
+              type = "button"
+              class = "prize-remove-btn"
+              (click) = "removePrize($index)"
+              [disabled] = "form.prizes.length === 1"
+              aria-label = "Remove prize">
+              <i class = "pi pi-trash"></i>
+            </button>
+            </div>
+          }
+        </div>
+      
       </div>
 
       <div class = "form-section">
@@ -197,7 +300,7 @@
         </div>
 
         @if (form.visibility === 'PRIVATE'){
-          <div class = "form-group" style = "margin-top: 16px; ">
+          <div class = "form-group" style = "margin-top: 16px;">
             <label for = "registrationKey">Registration Key</label>
             <input
             type = "text"
