@@ -116,6 +116,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.loadUpcomingEvents();
     this.loadUsersActiveEvents();
     this.loadMyRegistrations();
+    this.loadCompletedEvents();
     this.timerInterval = setInterval(() => this.tick(), 1000);
   }
 
