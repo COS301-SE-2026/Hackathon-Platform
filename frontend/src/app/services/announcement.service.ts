@@ -51,4 +51,12 @@ export class AnnouncementService {
             request
         );
     }
+
+    getParticipantAnnouncements( eventId: string ): Observable<AnnouncementResponse[]> {
+        return this.http.get<AnnouncementResponse[]>( `${this.baseUrl}/events/${eventId}/announcements`);
+    }
+
+    connectToAnnouncementStream(eventId: string): EventSource {
+        return new EventSource( `${this.baseUrl}/events/${eventId}/announcements/stream` );
+    }
 }
