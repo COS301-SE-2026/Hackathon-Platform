@@ -132,16 +132,37 @@ export class ForumComponent implements OnInit {
             return;
         }
 
-        if (thread.rootMessage.messageId === messageId) {
-            this.threads = this.threads.filter(t => t.threadId !== threadId);
-            if (this.expandedThreadId === threadId) {
-                this.expandedThreadId = null;
+        this.errorMessage = '';
+
+        if(thread.rootMessage.messageId === messageId) {
+            this.forumService.deletePost(this.eventId, threadId).subscribe({
+                next: () => {
+                    this.threads = this.threads.filter(t => t.threadId !== threadId);
+                    if (this.expandedThreadId === threadId) {
+                        this.expandedThreadId = null;
+                    }
+
+                    this.change.markForCheck();
+                },
+
+                error: () => {
+                    this.errorMessage = "The post failed to be deleted";
+                    this.change.markForCheck();
+                }
+            });
+            return;
+        }
+
+        this.forumService.deleteComment(this.eventId, messageId).subscribe({
+            next: () => {
+                thread.replies = thread.replies.filter(reply => reply.messageId !== messageId);
+                this.change.markForCheck();
+            },
+            error: () => {
+                this.errorMessage = 'The comment failed to be deleted';
+                this.change.markForCheck();
             }
-    
-    } else {
-        thread.replies = thread.replies.filter(reply => reply.messageId !== messageId);
-    }
-    this.change.markForCheck();
+        });
 }
 
     postReply(threadId: string): void {
