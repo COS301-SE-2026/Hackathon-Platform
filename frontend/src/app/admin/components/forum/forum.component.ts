@@ -37,7 +37,11 @@ export class ForumComponent implements OnInit {
     isLoading = false;
     errorMessage = '';
     searchTerm = '';
-    hackathonId ='';
+    eventId ='';
+    showCreatePost = false;
+
+    newPostTitle = '';
+    newPostBody = '';
 
     expandedThreadId: string | null = null;
     replyDrafts: Record<string, string> = {};
@@ -45,14 +49,14 @@ export class ForumComponent implements OnInit {
     threads: ForumThread[] = [];
 
     ngOnInit(): void {
-        this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
+        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
 
-        if (!this.hackathonId){
+        if (!this.eventId){
             
-            this.errorMessage = 'No hackathon ID provided.';
+            this.errorMessage = 'No event ID provided.';
             return;
         }
-        this.isLoading = false;
+        this.isLoading = false;  
     }
 
     get filteredThreads(): ForumThread[] {
@@ -107,5 +111,19 @@ export class ForumComponent implements OnInit {
         });
         this.replyDrafts[threadId] = '';
         this.change.markForCheck();
+    }
+
+    openCreatePost(): void {
+        this.newPostBody = '';
+        this.newPostTitle = '';
+        this.showCreatePost = true;
+    }
+
+    createPost(): void {
+        
+    }
+
+    closeCreatePost(): void {
+        this.showCreatePost = false;
     }
 }

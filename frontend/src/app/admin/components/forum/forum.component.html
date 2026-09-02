@@ -3,8 +3,11 @@
         <div class = "page-header">
             <div>
             <h2>Forum</h2>
-            <p class = "page-subtitle">View and moderate discussion threads for this hackathon.</p>
             </div>
+            <button type="button" class="btn-create-post" (click)="openCreatePost()">
+                <i class="pi pi-plus"></i>
+                Create Post
+            </button>
          </div>
 
          <div class = "toolbar">
@@ -133,4 +136,28 @@
             </div>
          
     </main>
+
+    @if (showCreatePost) {
+        <div
+            class="modal-overlay" (click)="closeCreatePost()" (keydown.escape)="closeCreatePost()" tabindex="-1">
+            <div
+                class="modal-card" (click)="$event.stopPropagation()">
+                <h2 class="modal-title">Create Post</h2>
+                <div class="form-group">
+                    <label for="postTitle">Title</label>
+                    <input id="postTitle" type="text" [(ngModel)]="newPostTitle" placeholder="Enter title" maxlength="255"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="postBody">body</label>
+                    <textarea id="postBody" rows="5" [(ngModel)]="newPostBody" placeholder="Explain your post"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" (click)="closeCreatePost()">Cancel</button>
+                    <button type="button" class="btn-save" [disabled]="!newPostTitle.trim() || !newPostBody.trim()" (click)="createPost()">Create Post</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
