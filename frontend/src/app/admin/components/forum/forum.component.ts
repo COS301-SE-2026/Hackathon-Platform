@@ -154,9 +154,16 @@ export class ForumComponent implements OnInit, OnDestroy {
             return;
         }
 
+        const isPost = thread.rootMessage.messageId === messageId;
+        const confirm = window.confirm(isPost ? 'Confirm deletion of this post?' : 'Confirm deletion of this comment?')
+
+        if (!confirm) {
+            return;
+        }
+
         this.errorMessage = '';
 
-        if(thread.rootMessage.messageId === messageId) {
+        if(isPost) {
             this.forumService.deletePost(this.eventId, threadId).subscribe({
                 next: () => {
                     this.threads = this.threads.filter(t => t.threadId !== threadId);
@@ -369,6 +376,6 @@ export class ForumComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.eventSource?.close;
+        this.eventSource?.close();
     }
 }
