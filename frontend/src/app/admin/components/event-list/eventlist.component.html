@@ -162,7 +162,7 @@
                   </button>
                   <button type = "button" class = "btn-view-event" (click) = "pauseLeaderboard(event.eventId)" [disabled] = "leaderboardPauseLoading[event.eventId]">
                     <i class = "pi" [ngClass] = "leaderboardPaused[event.eventId] ? 'pi-play' : 'pi-pause'"></i>
-                    {{leaderboardPauseLoading[event.eventId] ? 'Updating...' : leaderboardPaused[event.eventId] ? 'Resume Leaderboard' : 'Pause Leaderboard'}}
+                    {{leaderboardPauseLoading[event.eventId] ? 'Updating...' : leaderboardPaused[event.eventId] ? 'Resume Scoring' : 'Pause Scoring'}}
                   </button>
 
                   <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "extendTimerOpenFor === event.eventId" (click) = "toggleExtendTimer(event.eventId)">
