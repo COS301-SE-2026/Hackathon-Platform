@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class ForumService {
     private final ForumCommentRepository commentRepo;
     private final UserRepository userRepo;
     private final ForumAccessService accessService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<ForumPostSummaryResponse> getPosts(UUID eventId, User user) {
@@ -47,6 +49,7 @@ public class ForumService {
         accessService.requireForumAccess(eventId, user);
         ForumPost post = new ForumPost(eventId, user.getUserId(), req.getTitle().trim(), req.getBody());
         ForumPost saved = postRepo.save(post);
+        eventPublisher.publishEvent(new ForumUpdatedEvent(eventId, "POST_CREATED", saved.getPostId()));
 
         return new ForumPostDetailResponse(saved.getPostId(), saved.getTitle(), saved.getBody(), getAuthor(saved.getAuthorId()), saved.getCreatedAt(), List.of());
     }
@@ -57,6 +60,7 @@ public class ForumService {
         ForumPost post = requirePost(eventId, postId);
         ForumComment comment = new ForumComment(post.getPostId(), user.getUserId(), req.getBody());
         ForumComment saved = commentRepo.save(comment);
+        eventPublisher.publishEvent(new ForumUpdatedEvent(eventId, "COMMENT_CREATED", saved.getCommentId()));
 
         return toCommentResponse(saved);
     }
@@ -68,8 +72,8 @@ public class ForumService {
         post.setDeleted(true);
         post.setDeletedAt(Instant.now());
         post.setDeletedByUserId(user.getUserId());
-
         postRepo.save(post);
+        eventPublisher.publishEvent(new ForumUpdatedEvent(eventId, "POST_DELETED", post.getPostId()));
     }
 
     @Transactional
@@ -88,6 +92,8 @@ public class ForumService {
         comment.setDeletedByUserId(user.getUserId());
 
         commentRepo.save(comment);
+
+        eventPublisher.publishEvent(new ForumUpdatedEvent(eventId, "COMMENT_DELETED", comment.getCommentId()));
     }
 
     private ForumPost requirePost(UUID eventId, UUID postId) {

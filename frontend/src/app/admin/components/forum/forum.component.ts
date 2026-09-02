@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component,inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, NgZone, OnDestroy } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import { FormsModule} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -31,10 +31,12 @@ interface ForumThread{
     styleUrls: ['./forum.component.scss']
 })
 
-export class ForumComponent implements OnInit {
+export class ForumComponent implements OnInit, OnDestroy {
     private readonly change = inject(ChangeDetectorRef);
     private readonly route = inject(ActivatedRoute);
     private readonly forumService = inject(ForumService);
+    private readonly zone = inject(NgZone);
+    private eventSource?: EventSource;
 
     isLoading = false;
     errorMessage = '';
@@ -62,6 +64,7 @@ export class ForumComponent implements OnInit {
         }
         this.loadForum();
         this.loadPerms();
+        this.connectToForumUpdates();
     }
 
     loadPerms(): void {
@@ -263,8 +266,10 @@ export class ForumComponent implements OnInit {
         });
     }
 
-    loadForum(): void {
-        this.isLoading = true;
+    loadForum(showSpinner = true, reopenThreadId: string | null = null): void {
+        if (showSpinner) {
+            this.isLoading = true;
+        }
         this.errorMessage = '';
 
         this.forumService.getPosts(this.eventId).subscribe({
@@ -287,6 +292,15 @@ export class ForumComponent implements OnInit {
                 }));
 
                 this.isLoading = false;
+                if (reopenThreadId) {
+                    const threadStillExists = this.threads.some(t => t.threadId === reopenThreadId);
+                    if (threadStillExists) {
+                        this.expandedThreadId = null;
+                        this.toggleThread(reopenThreadId);
+                    } else {
+                        this.expandedThreadId = null;
+                    }
+                }
                 this.change.markForCheck();
             },
 
@@ -328,5 +342,24 @@ export class ForumComponent implements OnInit {
 
     closeCreatePost(): void {
         this.showCreatePost = false;
+    }
+
+    connectToForumUpdates(): void {
+        this.eventSource?.close();
+        this.eventSource = this.forumService.connectToForumUpdates(this.eventId);
+        this.eventSource.addEventListener('forum-update', () => {
+            this.zone.run(() => {
+                const openThreadId = this.expandedThreadId;
+                this.loadForum(false, openThreadId);
+            });
+        });
+
+        this.eventSource.onerror = () => {
+            console.warn("connection was lost, retrying...");
+        };
+    }
+
+    ngOnDestroy(): void {
+        this.eventSource?.close;
     }
 }

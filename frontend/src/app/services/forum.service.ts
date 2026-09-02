@@ -83,4 +83,8 @@ export class ForumService {
     deleteComment(eventId: string, commentId: string): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/admin/events/${eventId}/forum/comments/${commentId}`);
     }
+
+    connectToForumUpdates(eventId: string): EventSource {
+        return new EventSource(`${this.baseUrl}/events/${eventId}/forum/stream`);
+    }
 }
