@@ -16,6 +16,9 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.io.ByteArrayOutputStream;
 
 @Service
 public class CertificateService {
@@ -24,7 +27,7 @@ public class CertificateService {
 
     private static final float[] NAVY = {0.09f, 0.13f, 0.24f};
     private static final float[] GOLD = {0.72f, 0.58f, 0.20f};
-    private static final float[] grey = {0.35f, 0.38f, 0.45f};
+    private static final float[] GREY = {0.35f, 0.38f, 0.45f};
 
     private final EventRepository eventRepo;
     private final HackathonRepository hackRepo;
@@ -60,8 +63,54 @@ public class CertificateService {
             PDFont bodyBoldFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
 
             try(PDPageContentStream cs = new PDPageContentStream(doc, page)){
+                drawBackground(cs);
+                drawBorder(cs);
+                float centreX = PAGE_WIDTH/2f;
+                float y = PAGE_HEIGHT/2f;
 
+                drawCentered(cs, body, 13, centreX, y, "CERTIFICATE OF PARTICIPATION", GREY, 3.5F);
+                y-=55f;
+                drawCentered(cs, titleFont, 34, centreX, y, hackathonName, NAVY, 0f);
+                y-=55f;
+                drawCentered(cs, body, 13, centreX, y, "Tis certifies that", GREY, 0f);
+                y-=58f;
+                drawCentered(cs, cursive, 40, centreX, y, partName, GOLD, 0f);
+                y-=6;
+                cs.setStrokingColor(GOLD[0], GOLD[1], GOLD[2]);
+                cs.setLineWidth(1.2f);
+                float nameWidth = cursive.getStringWidth(partName)/1000*40;
+                float lineHalf = Math.max(nameWidth/2f+40, 160);
+                cs.moveTo(centreX-lineHalf, y);
+                cs.lineTo(centreX-lineHalf, y);
+                cs.stroke();
+                y-=45;
+
+                String bodyText = "has successfully participated in \""+eventName+"\"";
+                drawCentered(cs, body, 13, centreX, y, bodyText, GREY, 0f);
+                y-=110;
+
+                String dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy"));
+                float footerY = 110;
+                float leftX = 140;
+                float rightX = PAGE_WIDTH-140;
+
+                cs.setStrokingColor(GREY[0], GREY[1], GREY[2]);
+                cs.setLineWidth(0.8f);
+                cs.moveTo(leftX, footerY+30);
+                cs.stroke();
+                drawLeft(cs, bodyBoldFont, 11, leftX, footerY+12, dateStr, NAVY);
+                drawLeft(cs, body, 9.5f, leftX, footerY-3, "Date Issued", GREY);
+
+                cs.moveTo(rightX-170, footerY+30);
+                cs.lineTo(rightX, footerY+30);
+                cs.stroke();
+                drawRight(cs, bodyBoldFont, 11, rightX, footerY+12, "Hackathon Platform", NAVY);
+                drawRight(cs, body, 9.5f, rightX, footerY-3, "Hosted on", GREY);
+                drawCentered(cs, bodyBoldFont, 9, centreX, 55, "\u2726 HACKATHON PLATFORM \u2726", GOLD, 2f);
             }
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            doc.save(out);
+            return out.toByteArray();
         }
     }
 
