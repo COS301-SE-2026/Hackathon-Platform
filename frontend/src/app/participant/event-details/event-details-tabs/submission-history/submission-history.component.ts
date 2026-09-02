@@ -16,7 +16,7 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
   styleUrl: './submission-history.component.scss',
 })
 export class SubmissionHistoryComponent implements AfterViewInit {
-  
+
 private readonly teamService = inject(TeamService);
 private readonly submissionService = inject(SubmissionService);
 private readonly levelService = inject(LevelService);
@@ -97,7 +97,7 @@ onPageChange(page: number): void {
 }
 
 get filteredTableData(): TableRow[] {
-  
+
   return this.tableData.filter(row => {
 
     const levelMatches =
@@ -190,7 +190,7 @@ get hackathonId(): string {
         } else {
           this.teamId = null;
             this.teamLoading = false;
-           this.historyLoading = false;   
+           this.historyLoading = false;
           this.teamError = 'Join or create a team for this event before submitting a solution.';
         }
         this.change.detectChanges();
@@ -247,9 +247,9 @@ get hackathonId(): string {
   downloadLog(submission: SubmissionResponse): void {
     if (!this.teamId) return;
 
-    this.submissionService.getSubmissionDetail(this.teamId, submission.submissionId).subscribe({
-      next: detail => {
-        const content = detail.scoringLog?.logContent ?? 'No log is available for this submission yet.';
+    this.submissionService.getSubmissionLog(this.teamId, submission.submissionId).subscribe({
+      next: logResponse => {
+        const content = logResponse?.logContent ?? "No log found";
         const blob = new Blob([content], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -258,7 +258,13 @@ get hackathonId(): string {
         link.click();
         URL.revokeObjectURL(url);
       },
-      error: () => alert('The log could not be downloaded.'),
+      error: (err) => {
+        if(err.status === 404){
+          alert('No log found');
+        } else {
+          alert('Cant download log');
+        }
+      }
     });
   }
 

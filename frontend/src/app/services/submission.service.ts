@@ -131,4 +131,8 @@ export class SubmissionService {
       {}
     );
   }
+
+  getSubmissionLog(teamId: string, submissionId: number){
+    return this.http.get<ScoringLogResponse>(`${this.scoringUrl}/teams/${teamId}/submissions/${submissionId}/log`);
+  }
 }
