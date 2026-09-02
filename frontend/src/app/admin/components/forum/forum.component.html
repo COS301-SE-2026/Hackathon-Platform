@@ -4,10 +4,12 @@
             <div>
             <h2>Forum</h2>
             </div>
-            <button type="button" class="btn-create-post" (click)="openCreatePost()">
-                <i class="pi pi-plus"></i>
-                Create Post
-            </button>
+            @if (perms?.canCreatePost) {
+                <button type="button" class="btn-create-post" (click)="openCreatePost()">
+                    <i class="pi pi-plus"></i>
+                    Create Post
+                </button>
+            }
          </div>
 
          <div class = "toolbar">
@@ -70,13 +72,15 @@
                                         </div>
                                         <div class = "message-header-right">
                                             <span class = "message-timestamp">{{thread.rootMessage.postedAtLabel}}</span>
-                                            <button
-                                                type = "button"
-                                                class = "message-delete-btn"
-                                                (click) = "deleteMessage(thread.threadId, thread.rootMessage.messageId)"
-                                                aria-label = "Delete message">
-                                                <i class = "pi pi-times"></i>    
-                                            </button>
+                                            @if (perms?.canModerate) {
+                                                <button
+                                                    type = "button"
+                                                    class = "message-delete-btn"
+                                                    (click) = "deleteMessage(thread.threadId, thread.rootMessage.messageId)"
+                                                    aria-label = "Delete message">
+                                                    <i class = "pi pi-times"></i>    
+                                                </button>
+                                            }
                                         </div>
                                     </div>
                                     <p class = "message-content">{{thread.rootMessage.content}}</p>
@@ -96,13 +100,15 @@
                                                     </div>
                                                     <div class = "message-header-right">
                                                         <span class = "message-timestamp">{{reply.postedAtLabel}}</span>
-                                                        <button
-                                                            type = "button"
-                                                            class = "message-delete-btn"
-                                                            (click) = "deleteMessage(thread.threadId, reply.messageId)"
-                                                            aria-label = "Delete message">
-                                                            <i class = "pi pi-times"></i>    
-                                                        </button>
+                                                        @if (perms?.canModerate) {
+                                                            <button
+                                                                type = "button"
+                                                                class = "message-delete-btn"
+                                                                (click) = "deleteMessage(thread.threadId, reply.messageId)"
+                                                                aria-label = "Delete message">
+                                                                <i class = "pi pi-times"></i>    
+                                                            </button>
+                                                        }
                                                     </div>
                                                 </div>
                                                 <p class = "message-content">{{reply.content}}</p>
@@ -112,22 +118,24 @@
                                 }@else {
                                     <p class = "reply-empty">No replies yet.</p>
                                 }
-                                <div class = "reply-compose">
-                                    <label for = "replyDraft{{thread.threadId}}" class = "sr-only">Reply as admin</label>
-                                    <textarea
-                                    id = "replyDraft{{thread.threadId}}"
-                                        [(ngModel)] = "replyDrafts[thread.threadId]"
-                                        name = "replyDraft{{thread.threadId}}"
-                                        placeholder = "Reply as admin..."
-                                        rows = "2"></textarea>
-                                    <button
-                                        type = "button"
-                                        class = "btn-post-reply"
-                                        [disabled] = "!replyDrafts[thread.threadId]?.trim()"
-                                        (click) = "postReply(thread.threadId)">
-                                        Post Reply
-                                    </button>
-                                </div>
+                                @if (perms?.canComment) {
+                                    <div class = "reply-compose">
+                                        <label for = "replyDraft{{thread.threadId}}" class = "sr-only">Reply</label>
+                                        <textarea
+                                        id = "replyDraft{{thread.threadId}}"
+                                            [(ngModel)] = "replyDrafts[thread.threadId]"
+                                            name = "replyDraft{{thread.threadId}}"
+                                            placeholder = "Reply..."
+                                            rows = "2"></textarea>
+                                        <button
+                                            type = "button"
+                                            class = "btn-post-reply"
+                                            [disabled] = "!replyDrafts[thread.threadId]?.trim()"
+                                            (click) = "postReply(thread.threadId)">
+                                            Post Reply
+                                        </button>
+                                    </div>
+                                }
                             </div>
                         }
                     </div>
@@ -149,7 +157,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="postBody">body</label>
+                    <label for="postBody">Body</label>
                     <textarea id="postBody" rows="5" [(ngModel)]="newPostBody" placeholder="Explain your post"></textarea>
                 </div>
 

@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component,inject, OnInit } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import { FormsModule} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { ForumService } from '../../../services/forum.service';
+import { ForumService, ForumPermissionResponse } from '../../../services/forum.service';
 
 type ForumRole = 'ADMIN' | 'PARTICIPANT';
 
@@ -42,6 +42,8 @@ export class ForumComponent implements OnInit {
     eventId ='';
     showCreatePost = false;
 
+    perms: ForumPermissionResponse | null = null;
+
     newPostTitle = '';
     newPostBody = '';
 
@@ -59,6 +61,20 @@ export class ForumComponent implements OnInit {
             return;
         }
         this.loadForum();
+        this.loadPerms();
+    }
+
+    loadPerms(): void {
+        this.forumService.getPermissions(this.eventId).subscribe({
+            next: perms => {
+                this.perms = perms;
+                this.change.markForCheck();
+            },
+            error: () => {
+                this.errorMessage = 'Forum permissions could not be loaded';
+                this.change.markForCheck();
+            }
+        });
     }
 
     get filteredThreads(): ForumThread[] {
