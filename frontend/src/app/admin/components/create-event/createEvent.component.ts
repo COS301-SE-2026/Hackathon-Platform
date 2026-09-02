@@ -46,11 +46,21 @@ export class CreateEventComponent implements OnInit {
     rules: '',
     isInPerson: false,
     leaderboardFreezeDateTime: '',
-
+    prizes: [{ title: '1st Place', description: ''},
+            { title: '2nd Place', description: ''},
+            { title: '3rd Place', description: ''},
+            { title: 'Prize Pool', description: ''},
+           ] as { title: string, description: string}[],
+    tags:[] as string[],
+    allowedTechnologies: [] as string[],
+    
   };
 
   readonly descriptionMaxLength = 1000;
   readonly rulesMaxLength  = 2000;
+
+  tagInput = '';
+  technologyInput = '';
 
   isLoading = false;
   errorMessage = '';
@@ -102,6 +112,38 @@ export class CreateEventComponent implements OnInit {
   }
 
 
+  removePrize(index: number): void {
+    if (this.form.prizes.length > 1){
+      this.form.prizes.splice(index,1);
+    }
+  }
+
+  addTag(event: Event): void {
+    event.preventDefault();
+    const value = this.tagInput.trim();
+    if (value && !this.form.tags.includes(value)){
+      this.form.tags.push(value);
+    }
+    this.tagInput = '';
+  }
+
+  removeTag(index: number): void {
+    this.form.tags.splice(index,1);
+  }
+
+  addTechnology(event: Event): void {
+    event.preventDefault();
+    const value = this.technologyInput.trim();
+    if (value && !this.form.allowedTechnologies.includes(value)){
+      this.form.allowedTechnologies.push(value);
+    }
+    this.technologyInput = '';
+    
+  }
+
+  removeTechnology(index: number): void {
+    this.form.allowedTechnologies.splice(index, 1);
+  }
   createEvent(): void {
     if (!this.form.eventName) {
       this.errorMessage = 'Please enter an event name';
@@ -159,7 +201,9 @@ export class CreateEventComponent implements OnInit {
       rules: this.form.rules || undefined,
       freezeTime: this.form.leaderboardFreezeDateTime
       ? new Date(this.form.leaderboardFreezeDateTime).toISOString()
-      :undefined
+      :undefined,
+      tags: this.form.tags,
+      allowedTechnologies: this.form.allowedTechnologies
 
     };
 

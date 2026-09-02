@@ -112,49 +112,5 @@
     </div>
 </div>
     
-    <h2 class = "section-title">Version History</h2>
-    <p class = "section-subtitle">View and monitor all uploaded solver versions.</p>
-    <div class = "table-card">
-        <table>
-            <thead>
-                <tr>
-                <th scope ="col">Version</th> 
-                <th scope ="col">Uploaded</th>    
-                <th scope ="col">Runs</th>  
-                <th scope ="col">Avg Runtime</th>      
-                <th scope ="col">Error Rate</th>
-                <th scope ="col">Status</th>
-                <th scope ="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (v of versionHistory; track v.version){
-                <tr >
-                    <td class = "version-cell">{{ v.version }}</td>
-                    <td> {{v.uploaded}}</td>
-                    <td>{{v.runs | number }}</td>
-                    <td> {{v.avgRuntime }}</td>
-                    <td>{{v.errorRate}}</td>
-                    <td>
-                        <span class = "status-badge" [ngClass] ="v.status.toLowerCase()">{{v.status}}</span>
-                    </td>
-                    <td>
-                        <button class = "row-action-btn" type = "button" aria-label = "Row actions">
-                            <i class = "pi pi-ellipsis-v"></i>
-                        </button>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-        @if (versionHistory.length ===0){
-            
-            <div class = "empty-state">
-                <span class = "empty-state-icon"><i class = "pi pi-inbox"></i></span>
-                <p class = "empty-state-title">No solver versions uploaded yet.</p>
-                <p class = "empty-state-subtitle">Upload your first solver version to get started.</p>
-            </div>
-        }
-    </div>
 </main>
 </div>

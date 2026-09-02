@@ -45,12 +45,7 @@ interface AnnouncementRow{
   date: string;
 
 }
-interface NotificationRow {
-  icon: 'success' | 'warning' | 'info';
-  title: string;
-  body: string;
-  time: string;
-}
+
 interface SubmissionStatusSegment{
   label: string;
   count: number;
@@ -137,10 +132,7 @@ export class DashboardComponent implements OnInit{
   announcementsLoading = false;
   announcementsError = '';
 
-  systemNotifications: NotificationRow[]=[
-    {icon: 'success', title: 'All systems operational', body: 'Last checked 2 min ago', time:'Just now'},
-    {icon: 'warning', title: 'High submission volume', body: 'Submissions are 35% higher than usual', time:'Just now'},
-  ]
+
   ngOnInit(): void {
     this.loadDashboardSummary();
     this.loadEvents();

@@ -24,8 +24,8 @@
         <div>
           <p class = "stat-value">{{ activeEvents }}</p>
         <p class = "stat-label">Active events</p>
-        <a routerLink = "/admin/events" class = "stat-link">View all events <i class = "pi pi-arrow-right"></i></a>
         </div>
+        
       </div>
 
        <div class = "stat-card">
@@ -33,7 +33,7 @@
         <div>
           <p class = "stat-value">{{ activeParticipants }}</p>
         <p class = "stat-label">Active Participants</p>
-        <a (click) = "openParticipantsModal(selectedEventId)" class = "stat-link">View all participants <i class = "pi pi-arrow-right"></i></a>
+        
         </div>
        </div>
 
@@ -42,7 +42,7 @@
         <div>
           <p class = "stat-value">{{ teamsCount }}</p>
         <p class = "stat-label">Teams</p>
-        <a routerLink = "/admin/teams" class = "stat-link">View all teams <i class = "pi pi-arrow-right"></i></a>
+       
         </div>
         </div>
 
@@ -51,7 +51,7 @@
         <div>
           <p class = "stat-value">{{ submissionsCount}}</p>
         <p class = "stat-label">Submissions</p>
-        <a routerLink = "/admin/submissions" class = "stat-link">View all submissions <i class = "pi pi-arrow-right"></i></a>
+       
         </div>
         </div>
     </div>
@@ -316,7 +316,7 @@
           </div>
         </div>
 
-        <div class = "panels-row panels-row-2">
+        <div class = "panels-row">
           <div class = "panel-card">
             <div class = "panel-header">
               <h2 class = "panel-title">Recent Announcements</h2>
@@ -344,27 +344,6 @@
             </div>
           </div>
 
-
-          <div class = "panel-card">
-            <div class = "panel-header">
-              <h2 class = "panel-title">System Notifications</h2>
-               <a routerLink = "/admin/settings" class = "btn-view-all">View All</a>
-            </div>
-            <div class = "notification-rows">
-              @for (n of systemNotifications; track n.title){
-                <div class = "notification-row">
-                  <span class = "notification-icon" [ngClass] = "n.icon">
-                    <i class = "pi" [ngClass] = "n.icon === 'success' ? 'pi-check' : (n.icon === 'warning' ? 'pi-exclamation-triangle' : 'pi-info-circle')"></i>
-                  </span>
-                  <div class = "notification-info">
-                    <p class = "notification-title">{{n.title}}</p>
-                    <p class = "notification-body">{{n.body}}</p>
-                  </div>
-                  <span class = "notification-time">{{n.time}}</span>
-                </div>
-              }
-            </div>
-          </div>
         </div>
 
   </main>
