@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
-import { EventService, EventResponse, EventParticipantResponse, ExtendTimerResponse } from '../../../services/event.service';
+import { EventService, EventResponse, EventParticipantResponse} from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 
@@ -228,7 +228,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
 
     }
     return new Date(start.getTime() + Number(event.duration || 0) * 1000).toISOString();
-    
+
   }
 
   getTimeRemaining(event: EventRow): string {
@@ -391,7 +391,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
 
 
     this.eventService.extendTimer(eventId, additionalTimeSeconds).subscribe({
-      next: (_response: ExtendTimerResponse) => {
+      next: () => {
         this.extendTimerLoading[eventId] = false;
         this.extendTimerOpenFor = null;
         this.loadEvents(true);

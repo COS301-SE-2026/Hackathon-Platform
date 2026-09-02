@@ -1,6 +1,5 @@
 package com.hackathon.platform.service;
 
-import java.util.Locale;
 import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.LoginRequest;
 import com.hackathon.platform.dto.RegisterRequest;
@@ -8,6 +7,7 @@ import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.RoleRepository;
 import com.hackathon.platform.repository.UserRepository;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
