@@ -46,7 +46,11 @@ describe('HomeComponent', () => {
 eventServiceMock.getOpenEvents.and.returnValue(of(mockEvents as any));
 eventServiceMock.getUserActiveEvents.and.returnValue(of([]));
 eventServiceMock.getMyRegistrations.and.returnValue(of([]));
-eventServiceMock.getEventLogoUrl.and.returnValue('https://mock-storage.com/dummy-logo-key.png');
+eventServiceMock.getEventLogoUrl.and.returnValue(
+  of({
+    url: 'https://mock-storage.com/dummy-logo-key.png',
+    storageKey: 'dummy-logo-key'
+  }));
 
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule, HomeComponent],
