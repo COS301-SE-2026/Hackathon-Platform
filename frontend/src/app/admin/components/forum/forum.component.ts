@@ -3,11 +3,13 @@ import {CommonModule} from '@angular/common';
 import { FormsModule} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ForumService, ForumPermissionResponse } from '../../../services/forum.service';
+import { AuthService } from '../../../services/auth.service';
 
 type ForumRole = 'ADMIN' | 'PARTICIPANT';
 
 interface ForumMessage {
     messageId: string;
+    authorId: string;
     authorName: string;
     authorInitial: string;
     authorRole: ForumRole;
@@ -37,12 +39,14 @@ export class ForumComponent implements OnInit, OnDestroy {
     private readonly route = inject(ActivatedRoute);
     private readonly forumService = inject(ForumService);
     private readonly zone = inject(NgZone);
+    private readonly authService = inject(AuthService);
     private eventSource?: EventSource;
 
     isLoading = false;
     errorMessage = '';
     searchTerm = '';
     eventId ='';
+    currUserId = this.authService.getUser()?.userId ?? '';
     showCreatePost = false;
 
     perms: ForumPermissionResponse | null = null;
@@ -113,6 +117,7 @@ export class ForumComponent implements OnInit, OnDestroy {
 
                 thread.rootMessage = {
                     messageId: post.postId,
+                    authorId: post.author.userId,
                     authorName: `${post.author.firstName} ${post.author.lastName}`,
                     authorInitial: post.author.firstName.charAt(0).toUpperCase(),
                     authorRole: post.author.role === 'ADMIN' || post.author.role === 'SUPERADMIN' ? 'ADMIN' : 'PARTICIPANT',
@@ -122,6 +127,7 @@ export class ForumComponent implements OnInit, OnDestroy {
 
                 thread.replies = post.comments.map(comment => ({
                     messageId: comment.commentId,
+                    authorId: comment.author.userId,
                     authorName: `${comment.author.firstName} ${comment.author.lastName}`,
                     authorInitial: comment.author.firstName.charAt(0).toUpperCase(),
                     authorRole: comment.author.role === 'ADMIN' || comment.author.role === 'SUPERADMIN' ? 'ADMIN' : 'PARTICIPANT',
@@ -199,6 +205,7 @@ export class ForumComponent implements OnInit, OnDestroy {
             next: comment => {
                 thread.replies.push({
                     messageId: comment.commentId,
+                    authorId: comment.author.userId,
                     authorName: `${comment.author.firstName} ${comment.author.lastName}`,
                     authorInitial: comment.author.firstName.charAt(0).toUpperCase(),
                     authorRole: comment.author.role === 'ADMIN' || comment.author.role === 'SUPERADMIN' ? 'ADMIN' : 'PARTICIPANT',
@@ -239,6 +246,7 @@ export class ForumComponent implements OnInit, OnDestroy {
                     title: post.title,
                     rootMessage: {
                         messageId: post.postId,
+                        authorId: post.author.userId,
                         authorName: `${post.author.firstName} ${post.author.lastName}`,
                         authorInitial: post.author.firstName.charAt(0).toUpperCase(),
                         authorRole: post.author.role === 'ADMIN' || post.author.role === 'SUPERADMIN' ? 'ADMIN' : 'PARTICIPANT',
@@ -279,6 +287,7 @@ export class ForumComponent implements OnInit, OnDestroy {
 
                     rootMessage: {
                         messageId: p.postId,
+                        authorId: p.author.userId,
                         authorName: `${p.author.firstName} ${p.author.lastName}`,
                         authorInitial: p.author.firstName.charAt(0).toUpperCase(),
                         authorRole: p.author.role === 'ADMIN' || p.author.role === 'SUPERADMIN' ? 'ADMIN' : 'PARTICIPANT',

@@ -78,11 +78,11 @@ export class ForumService {
     }
 
     deletePost(eventId: string, postId: string): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/admin/events/${eventId}/forum/posts/${postId}`);
+        return this.http.delete<void>(`${this.baseUrl}/events/${eventId}/forum/posts/${postId}`);
     }
 
     deleteComment(eventId: string, commentId: string): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/admin/events/${eventId}/forum/comments/${commentId}`);
+        return this.http.delete<void>(`${this.baseUrl}/events/${eventId}/forum/comments/${commentId}`);
     }
 
     connectToForumUpdates(eventId: string): EventSource {

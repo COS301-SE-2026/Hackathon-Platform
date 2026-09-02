@@ -22,6 +22,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -65,5 +66,17 @@ public class ForumController {
     @PreAuthorize("permitAll()")
     public SseEmitter streamForum(@PathVariable UUID eventId) {
         return forumUpdateService.subscribe(eventId);
+    }
+
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable UUID eventId, @PathVariable UUID postId, @AuthenticationPrincipal User user) {
+        forumService.deletePost(eventId, postId, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable UUID eventId, @PathVariable UUID commentId, @AuthenticationPrincipal User user) {
+        forumService.deleteComment(eventId, commentId, user);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -67,8 +67,13 @@ public class ForumService {
 
     @Transactional
     public void deletePost(UUID eventId, UUID postId, User user) {
-        accessService.requireModeratorAccess(eventId, user);
+        accessService.requireForumAccess(eventId, user);
         ForumPost post = requirePost(eventId, postId);
+
+        if (!post.getAuthorId().equals(user.getUserId())) {
+            accessService.requireModeratorAccess(eventId, user);
+        }
+
         post.setDeleted(true);
         post.setDeletedAt(Instant.now());
         post.setDeletedByUserId(user.getUserId());
@@ -78,7 +83,7 @@ public class ForumService {
 
     @Transactional
     public void deleteComment(UUID eventId, UUID commentId, User user) {
-        accessService.requireModeratorAccess(eventId, user);
+        accessService.requireForumAccess(eventId, user);
         ForumComment comment = commentRepo.findById(commentId).orElseThrow(() -> new IllegalArgumentException("Comment not found: " + commentId));
 
         if (comment.isDeleted()) {
@@ -86,6 +91,10 @@ public class ForumService {
         }
 
         requirePost(eventId, comment.getPostId());
+
+        if (!comment.getAuthorId().equals(user.getUserId())) {
+            accessService.requireModeratorAccess(eventId, user);
+        }
 
         comment.setDeleted(true);
         comment.setDeletedAt(Instant.now());

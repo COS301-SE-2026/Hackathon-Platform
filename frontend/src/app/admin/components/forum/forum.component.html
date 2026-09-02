@@ -72,7 +72,7 @@
                                         </div>
                                         <div class = "message-header-right">
                                             <span class = "message-timestamp">{{thread.rootMessage.postedAtLabel}}</span>
-                                            @if (perms?.canModerate) {
+                                            @if (perms?.canModerate || thread.rootMessage.authorId === currUserId) {
                                                 <button
                                                     type = "button"
                                                     class = "message-delete-btn"
@@ -100,7 +100,7 @@
                                                     </div>
                                                     <div class = "message-header-right">
                                                         <span class = "message-timestamp">{{reply.postedAtLabel}}</span>
-                                                        @if (perms?.canModerate) {
+                                                        @if (perms?.canModerate || reply.authorId === currUserId) {
                                                             <button
                                                                 type = "button"
                                                                 class = "message-delete-btn"
