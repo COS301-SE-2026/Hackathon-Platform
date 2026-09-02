@@ -80,6 +80,15 @@ public class CertificateService {
                 float centreX = PAGE_WIDTH/2f;
                 float y = PAGE_HEIGHT-130;
 
+                PDImageXObject logo = loadLogoImage(doc, event);
+                if(logo != null){
+                    float logoSize = 70f;
+                    float logoX = centreX-logoSize/2f;
+                    float logoY = y-logoSize+20f;
+                    cs.drawImage(logo, logoX, logoY, logoSize, logoSize);
+                    y-=(logoSize+20f);
+                }
+
                 drawCentered(cs, body, 13, centreX, y, "CERTIFICATE OF PARTICIPATION", GREY, 3.5F);
                 y-=55f;
                 drawCentered(cs, titleFont, 34, centreX, y, hackathonName, NAVY, 0f);
