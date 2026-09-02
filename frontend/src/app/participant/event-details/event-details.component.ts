@@ -239,9 +239,11 @@ confirmRegistration(): void {
         this.event = this.toEventView(event);
         this.hackathonId = event.hackathon ?? '';
 
-        this.eventService.getEventBannerUrl(this.eventId).subscribe({
-          next: ({ url }) => {
-            this.event.bannerUrl = url;
+       this.eventService.getEventBannerUrl(this.eventId).subscribe({
+          next: (response) => {
+            if (response?.url) {
+              this.event.bannerUrl = response.url;
+            }
             this.change.markForCheck();
           },
         error: (error) => {
