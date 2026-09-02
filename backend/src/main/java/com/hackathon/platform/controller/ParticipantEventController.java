@@ -84,7 +84,7 @@ public class ParticipantEventController {
   @GetMapping("/{eventId}/certificate")
   public ResponseEntity<byte[]> getParticipationCertificate(@PathVariable UUID eventId, @AuthenticationPrincipal User user){
     byte[] pdf = certServ.genCertificate(eventId, user);
-    String file = "certificate-"+user.getFirstName().toLowerCase()+".pdf";
+    String file = "certificate-"+user.getFirstName().toLowerCase().replaceAll("[^a-z0-9]+", "-")+".pdf";
     ContentDisposition disposition = ContentDisposition.inline().filename(file).build();
 
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString()).body(pdf);

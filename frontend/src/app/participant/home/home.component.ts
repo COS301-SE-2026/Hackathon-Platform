@@ -80,6 +80,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   activeEvents: OpenEventView[] = [];
   upcomingEvents: OpenEventView[] = [];
+  completedEvents: OpenEventView[] = [];
+  isLoadingCompletedEvents = false;
+  generatingCertificateEventId: string | null = null;
   selectedEvent: OpenEventView | null = null;
   registeredEventIds = new Set<string>();
 
@@ -471,4 +474,49 @@ confirmRegistration(): void {
   this.change.markForCheck();
 }
 
+  loadCompletedEvents(): void {
+    this.isLoadingCompletedEvents = true;
+
+    this.eventService.getCompletedEvents().subscribe({
+      next: (events) => {
+        this.completedEvents = events.map((event) => this.toOpenEventView(event)).sort((a, b) => new Date(b.startDateTime).getTime()-new Date(a.startDateTime.getTime()));
+        this.loadEventLogos(this.completedEvents);
+        this.isLoadingCompletedEvents = false;
+        this.change.markForCheck();
+      },
+      error: (error) => {
+        this.completedEvents = [];
+        this.isLoadingCompletedEvents = false;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  generateCertificate(event: OpenEventView): void {
+    if(this.generatingCertificateEventId){
+      return;
+    }
+
+    this.generatingCertificateEventId = event.eventId;
+
+    this.eventService.downloadCertificate(event.eventId).subscribe({
+      next: (blob) =>{
+        const fileName = `${event.name.replace(/[^a-z0-9]+/gi, '-')}-certificate.pdf`;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.generatingCertificateEventId = null;
+        this.change.markForCheck();
+      },
+
+      error: (error) => {
+        this.toast.error("Cant find the certificate");
+        this.generatingCertificateEventId = null;
+        this.change.markForCheck();
+      }
+    })
+  }
 }
