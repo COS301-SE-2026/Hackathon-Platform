@@ -84,4 +84,41 @@ public class CertificateService {
         cs.addRect(innerMargin, innerMargin, PAGE_WIDTH-2*innerMargin, PAGE_HEIGHT-2*innerMargin);
         cs.stroke();
     }
+
+    private void drawCentered(PDPageContentStream cs, PDFont font, float size, float centreX, float y, String text, float[] colour, float spacing) throws IOException{
+        float width = font.getStringWidth(text)/1000*size;
+        if(spacing>0){
+            width+=spacing*(text.length()-1);
+        }
+
+        float x = centreX-width/2f;
+        cs.beginText();
+        cs.setStrokingColor(colour[0], colour[1], colour[2]);
+        cs.setFont(font, size);
+        if(spacing>0){
+            cs.setCharacterSpacing((spacing));
+        }
+        cs.newLineAtOffset(x, y);
+        cs.showText(text);
+        cs.endText();
+    }
+
+    private void drawLeft(PDPageContentStream cs, PDFont font, float size, float x, float y, String text, float[] colour) throws IOException{
+        cs.beginText();
+        cs.setNonStrokingColor(colour[0], colour[1], colour[2]);
+        cs.setFont(font, size);
+        cs.newLineAtOffset(x, y);
+        cs.showText(text);
+        cs.endText();
+    }
+
+    private void drawRight(PDPageContentStream cs, PDFont font, float size, float x, float y, String text, float[] colour) throws IOException{
+        float width = font.getStringWidth(text)/1000*size;
+        cs.beginText();
+        cs.setNonStrokingColor(colour[0], colour[1], colour[2]);
+        cs.setFont(font, size);
+        cs.newLineAtOffset(x-width/2, y);
+        cs.showText(text);
+        cs.endText();
+    }
 }
