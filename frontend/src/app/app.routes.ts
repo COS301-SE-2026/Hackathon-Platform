@@ -38,6 +38,9 @@ export const routes: Routes = [
         path: 'events/:eventId/announcements',
         loadComponent: () => import('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
       },
+      { path: 'events/:eventId/forum',
+        loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent),
+      },
       {
         path: 'hackathons/:hackathonId/events/create',
         loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
@@ -75,8 +78,9 @@ export const routes: Routes = [
     component: ParticipantShellComponent,
     children: [
       { path: 'home', loadComponent: () => import('./participant/home/home.component').then(m => m.HomeComponent) },
-      {path: 'help',loadComponent: () =>import('./participant/help/help.component').then(m => m.HelpComponent) },
-      {path: 'events/:eventId', loadComponent: () => import('./participant/event-details/event-details.component').then(m => m.EventDetailsComponent)},
+      { path: 'help',loadComponent: () =>import('./participant/help/help.component').then(m => m.HelpComponent) },
+      { path: 'events/:eventId/forum', loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent) },
+      { path: 'events/:eventId', loadComponent: () => import('./participant/event-details/event-details.component').then(m => m.EventDetailsComponent)},
       { path: '', redirectTo: 'home', pathMatch: 'full' }
     ]
   },

@@ -17,6 +17,7 @@ import { ToastService } from '../../shared/components/toast/toast.service';
 import { EventService, EventResponse, EventRegistrationRequest } from '../../services/event.service';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util'
 import { StorageService } from '../../services/storage.service';
+import { ForumComponent } from '../../admin/components/forum/forum.component';
 
 
 @Component({
@@ -31,6 +32,7 @@ import { StorageService } from '../../services/storage.service';
     LeaderboardComponent,
     SubmissionHistoryComponent,
     AnnouncementsComponent,
+    ForumComponent,
     ModalComponent,
     InputComponent,
     TabsComponent,
@@ -53,7 +55,7 @@ export class EventDetailsComponent implements OnDestroy {
 
   tabs: TabItem[] = [];
 
-  private readonly protectedTabs = [ 'team','submissions', 'submission-history','leaderboard', 'announcements'];
+  private readonly protectedTabs = [ 'team','submissions', 'submission-history','leaderboard', 'forum', 'announcements'];
 
   activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'overview';
   eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
@@ -277,7 +279,7 @@ confirmRegistration(): void {
 
    if (this.isRegistered) {
     tabDef.push( ['My Team', 'pi pi-users', 'team'], ['Submissions', 'pi pi-code', 'submissions'],
-      ['Submissions History', 'pi pi-history', 'submission-history'], ['Leaderboard', 'pi pi-trophy', 'leaderboard'], ['Announcements', 'pi pi-megaphone', 'announcements'],
+      ['Submissions History', 'pi pi-history', 'submission-history'], ['Leaderboard', 'pi pi-trophy', 'leaderboard'], ['Forum', 'pi pi-comments', 'forum'], ['Announcements', 'pi pi-megaphone', 'announcements'],
     );
   }
 
