@@ -16,7 +16,7 @@
       <div class="event-main">
 
         <div class="event-banner-image">
-          <img src="assets/images/hackathon-image.png"  alt="Hackathon Event" class="event-img">
+          <img [src]="event.bannerUrl || 'assets/images/hackathon-image.png'" [alt]="event.name" class="event-img"/>
         </div>
 
 
@@ -86,7 +86,7 @@
             </div>
 
             <div class="event-description-wrapper">
-              <p class="event-description">Join innovators, developers, and changemakers to build solutions that address real-world challenges and createa better tomorrow for everyone Join innovators, developers, and changemakers to buildsolutions that address real-world challenges and create a better tomorrow for everyone. </p>
+              <p class="event-description">{{event.tagline}}</p>
             </div>
 
           </div>
@@ -105,7 +105,7 @@
 
           <span class="event-meta-item event-meta-members">
             <i class="pi pi-users" aria-hidden="true"> </i>
-            2 – 4 Members
+           1 – {{ event.teamSize }} Members
           </span>
 
           <span class="event-meta-item event-meta-visibility">
@@ -113,20 +113,20 @@
             {{ event.visibility | titlecase }}
           </span>
 
-          <span class="event-meta-item event-meta-participants">
-            <i  class="pi pi-user-plus" aria-hidden="true"> </i>
-            +120 Participants
-          </span>
-
           <span class="event-meta-item event-meta-prize">
             <i class="pi pi-trophy" aria-hidden="true"></i>
-            Prize Pool: R 50 000
+             Prize Pool: R {{ event.prizePool | number }}
           </span>
 
           <span class="event-meta-item event-meta-levels">
-            <i class="pi pi-sitemap" aria-hidden="true"> </i>
-            7 Levels
+            <i class="pi pi-bars" aria-hidden="true"> </i>
+            3 Levels
           </span>
+
+           <div class="event-meta-item event-meta-location">
+              <i class="pi pi-map-marker"></i>
+                <span> {{ event.inPerson ? 'In Person' : 'Virtual' }}</span>
+            </div>
 
         </div>
 
@@ -140,8 +140,8 @@
           </div>
 
           <div class="event-action-register">
-            <app-button variant="primary" width="100%" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
-              Register 
+            <app-button variant="primary" width="100%" [disabled]="isCheckingRegistration || isRegistered" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
+             {{ isRegistered ? 'Registered' : 'Register' }}
             </app-button>
           </div>
 
@@ -185,17 +185,39 @@
       @else {
         <div class="registration-confirmation">
           <div class="confirmation-icon">
-
             <i class="pi pi-check-circle" aria-hidden="true"> </i>
           </div>
 
           <div class="registration-content">
             <strong>Ready to Register?</strong>
-
             <p> You're about to register for this event. Continue when you're ready. </p>
+          </div>
+        </div>
+      }
+
+        @if (event.inPerson) {
+
+        <div class="registration-confirmation">
+
+          <div class="confirmation-icon">
+             <i class="pi pi-map-marker" aria-hidden="true"></i>
+          </div>
+
+          <div class="registration-content">
+            <strong>In-Person Event</strong>
+
+          <p>Please provide any dietary requirements or allergies.</p>
 
           </div>
 
+        </div>
+
+        <div class="registration-input">
+           <app-input id="dietary-requirements" label="Dietary Requirements" placeholder="Enter dietary requirements" [(value)]="dietaryReq"></app-input>
+        </div>
+
+        <div class="registration-input">
+          <app-input id="allergies" label="Allergies" placeholder="Enter any allergies" [(value)]="allergies"></app-input>
         </div>
 
       }
@@ -204,11 +226,9 @@
 
     <div modal-footer-right>
       
-      <app-button variant="secondary" (click)="closeRegistrationModal()" 
-      width="135px" (keydown)="null" (keyup)="null"> Cancel</app-button>
+      <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px" (keydown)="null" (keyup)="null"> Cancel</app-button>
 
-      <app-button variant="primary" (click)="confirmRegistration()" width="135px" 
-      (keydown)="null" (keyup)="null"> Register</app-button>
+      <app-button variant="primary" (click)="confirmRegistration()" width="135px" [disabled]="isRegistering" (keydown)="null" (keyup)="null"> {{ isRegistering ? 'Registering...' : 'Register' }}</app-button>
 
     </div>
 
