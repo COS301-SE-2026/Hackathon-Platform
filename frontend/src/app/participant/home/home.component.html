@@ -1,16 +1,16 @@
 <div class="page-container">
 
-  <div class="welcome-section">
-    <h1 class="welcome-title">Welcome back, {{ userFirstName }}!</h1>
-    <p class="welcome-sub">Ready to build something amazing today?</p>
-  </div>
+   <div class="section-header">
+      <h2 class="section-title">Your Events</h2>
+      
+    </div>
 
   @if (isLoadingActiveEvents){
 
     <div class="active-events-wrapper">
-      <app-card class="active-event-card loading-active-card">
+      
         <app-loader message="Loading your events..."></app-loader>
-      </app-card>
+      
     </div>
   }
 
@@ -20,7 +20,7 @@
       <app-card class="active-event-card">
 
         <div class="active-header">
-          <span class="active-label">Your Events</span>
+         
           <span class="active-counter"> {{ currentActiveEventIndex + 1 }} / {{ activeEvents.length }}</span>
         </div>
 
@@ -39,11 +39,10 @@
 
               <div class="active-body">
 
-                <div class="active-event-image">
+              <div class="active-event-image">
 
-                <img src="assets/images/hackathon-image.png" alt="Hackathon Event"/>
-
-                </div>
+                <img [src]="event.logoUrl || 'assets/images/hackathon-image.png'" [alt]="event.name"/>
+              </div>
 
                 <div class="active-event-right">
 
@@ -120,9 +119,9 @@
 
                         <span class="detail-label">Your Team</span>
 
-                        <span class="detail-value">CodeCrafters </span>
+                        <span class="detail-value">{{ event.teamName || 'No team yet' }}</span>
 
-                        <span class="detail-meta"> 4 / 5 Members</span>
+                        <span class="detail-meta"> {{ event.teamMemberCount ?? 0 }} / {{ event.teamSizeLimit }} Members</span>
 
                       </div>
 
@@ -136,9 +135,9 @@
 
                         <span class="detail-label"> Latest Submission </span>
 
-                        <span class="detail-value"> Level 7 </span>
+                        <span class="detail-value"> {{ event.latestSubmissionLevel ? 'Level ' + event.latestSubmissionLevel : 'n/a' }} </span>
 
-                        <span class="detail-meta"> Score: 350 </span>
+                        <span class="detail-meta">  {{ event.latestSubmissionScore !== null ? 'Score: ' + event.latestSubmissionScore : 'No submission yet' }} </span>
 
                       </div>
 
@@ -152,9 +151,9 @@
 
                         <span class="detail-label"> Your Rank</span>
 
-                        <span class="detail-value"> #12 </span>
+                        <span class="detail-value"> {{ event.teamRank ? '#' + event.teamRank : 'n/a' }} </span>
 
-                        <span class="detail-meta">  Top 7% · 250 teams</span>
+                        <span class="detail-meta">  {{ event.teamRank && event.totalTeams ? 'of ' + event.totalTeams + ' teams' : 'Not ranked yet' }}</span>
 
                       </div>
 
@@ -182,10 +181,6 @@
 
       <app-card class="active-event-card empty-active-card">
 
-      <div class="active-header">
-        <span class="active-label">Your Events</span>
-      </div>
-
       <div class="empty-active-content">
 
         <i
@@ -210,7 +205,7 @@
 
     <div class="section-header">
       <h2 class="section-title">Upcoming Events</h2>
-      <app-button variant="ghost" width="150px" (keydown)="null" (keyup)="null"> View More</app-button>
+      
     </div>
 
     @if (isLoadingEvents) {
@@ -235,9 +230,9 @@
 
           <div class="upcoming-event-content">
 
-            <div class="upcoming-event-image">
-              <img src="assets/images/hackathon-image.png" alt="Hackathn Event" class="event-img"/>
-            </div>
+          <div class="upcoming-event-image">
+            <img [src]="event.logoUrl || 'assets/images/hackathon-image.png'" [alt]="event.name" class="event-img" />
+          </div>
 
             <div class="upcoming-event-details">
 
@@ -247,7 +242,7 @@
 
                   <h3 class="ev-name">  {{ event.name }}</h3>
 
-                  <p class="event-tagline"> Build, compete, and innovate with developers from around the world. mpete, and innovate with developers from around the world and innovate with developers from around the world</p>
+                  <p class="event-tagline"> {{ event.tagline }}</p>
 
                 </div>
 
@@ -255,7 +250,7 @@
                   
                   <div class="event-action-button"><app-button variant="secondary" (click)="goToEvent(event)"width="100%" (keydown)="null" (keyup)="null"> View Event</app-button></div>
 
-                  <div class="event-action-button"> <app-button variant="primary" (click)="registerForEvent(event)" width="100%" (keydown)="null"(keyup)="null"> Register </app-button></div>
+                  <div class="event-action-button"> <app-button variant="primary" [disabled]="registeredEventIds.has(event.eventId)" (click)="registerForEvent(event)" width="100%" (keydown)="null"(keyup)="null"> {{ registeredEventIds.has(event.eventId) ? 'Registered' : 'Register' }} </app-button></div>
                 
 
                 </div>
@@ -277,12 +272,12 @@
 
                 <div class="meta-item prize-meta">
                   <i class="pi pi-trophy"></i>
-                   <span> R10 000 Prize Pool</span>
+                   <span> {{ event.totalPrizePool }} Prize Pool</span>
                 </div>
 
-                <div class="meta-item participants-meta">
-                  <i class="pi pi-users"></i>
-                   <span> 120+ Participants </span>
+                <div class="meta-item location-meta">
+                  <i class="pi pi-map-marker"></i>
+                  <span>{{ event.inPerson ? 'In Person' : 'Virtual' }}</span>
                 </div>
 
                 @if (getDaysUntilStart(event) !== null) {
@@ -354,13 +349,45 @@
 
       </div>
 
-    } 
+    }
+    
+    
+    @if (selectedEvent.inPerson) {
+
+        <div class="registration-confirmation">
+
+          <div class="confirmation-icon"> <i class="pi pi-map-marker" aria-hidden="true"></i></div>
+
+          <div class="registration-content">
+
+            <strong>In-Person Event</strong>
+
+            <p> This event is held at a physical location. Please provide any dietary requirements or allergies. </p>
+          
+          </div>
+          
+        </div>
+
+        <div class="registration-input">
+
+          <app-input id="dietary-requirements"label="Dietary Requirements" placeholder="e.g. Vegetarian, Vegan, Halal"  [(value)]="dietaryReq" ></app-input>
+
+        </div>
+
+        <div class="registration-input">
+
+          <app-input id="allergies" label="Allergies" placeholder="Enter any allergies" [(value)]="allergies"></app-input>
+
+        </div>
+
+      }
+
 
   </div> 
 
   <div modal-footer-right> 
     <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px" (keydown)="null" (keyup)="null">Cancel</app-button> 
-    <app-button variant="primary" (click)="confirmRegistration()" width="135px" (keydown)="null" (keyup)="null">Register</app-button> 
+    <app-button variant="primary" (click)="confirmRegistration()" width="135px" [disabled]="isRegistering" (keydown)="null" (keyup)="null">{{ isRegistering ? 'Registering...' : 'Register' }}</app-button> 
   </div> 
 
 </app-modal>

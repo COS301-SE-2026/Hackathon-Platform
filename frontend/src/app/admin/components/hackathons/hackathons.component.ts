@@ -20,7 +20,6 @@ import { StorageService } from '../../../services/storage.service';
 interface HackathonVm extends HackathonResponse {
     eventCount: number;
     levelCount: number;
-    participantCount: number | null;
 }
 
 @Component ({
@@ -86,7 +85,7 @@ export class HackathonsComponent implements OnInit {
 
     this.hackathonService.getAllHackathons().subscribe({
         next: (hackathons) => {
-            this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0, levelCount: 0, participantCount: null}));
+            this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0, levelCount: 0}));
             this.isLoading = false;
             this.change.markForCheck();
             this.loadEventCounts();
@@ -294,7 +293,7 @@ export class HackathonsComponent implements OnInit {
                     this.hackathons[index] = { ...this.hackathons[index], ...saved };
                 }
             } else {
-                this.hackathons.unshift({ ...saved, eventCount: 0, levelCount:0, participantCount: null });
+                this.hackathons.unshift({ ...saved, eventCount: 0, levelCount:0 });
             }
             this.change.markForCheck();
 

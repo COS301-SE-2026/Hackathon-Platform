@@ -1,11 +1,13 @@
 package com.hackathon.platform.service;
 
+import com.hackathon.platform.dto.AdminResponse;
 import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.CreateAdminRequest;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.RoleRepository;
 import com.hackathon.platform.repository.UserRepository;
+import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +20,21 @@ public class SuperAdminService {
   private final UserRepository userRepo;
   private final RoleRepository roleRepo;
   private final PasswordEncoder pswrdEnc;
+
+  public List<AdminResponse> getAdmins() {
+    return userRepo.findAll().stream()
+        .filter(user -> "ADMIN".equals(user.getRole().getName()))
+        .map(
+            user ->
+                AdminResponse.builder()
+                    .userId(user.getUserId())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
+                    .email(user.getEmail())
+                    .status(user.getStatus())
+                    .build())
+        .toList();
+  }
 
   @Transactional
   public AuthResponse createAdmin(CreateAdminRequest req) {

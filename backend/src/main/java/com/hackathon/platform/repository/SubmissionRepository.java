@@ -33,6 +33,58 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
       "SELECT s FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId ORDER BY s.submittedAt DESC")
   List<Submission> getRecentSubmissions(@Param("userId") UUID userId, Pageable pageeable);
 
+  /** Recent submissions scoped to a single event */
+  @Query(
+      value =
+          """
+        SELECT
+            s.id AS "submissionId",
+            s.team_id AS "teamId",
+            t.team_name AS "teamName",
+            s.event_id AS "eventId",
+            e.name AS "eventName",
+            s.level_id AS "levelId",
+            l.level_number AS "levelNumber",
+            l.name AS "levelName",
+            s.score AS "score",
+            s.status AS "status",
+            s.submitted_at AS "submittedAt"
+        FROM submissions s
+        JOIN teams t ON t.team_id = s.team_id
+        JOIN levels l ON l.id = s.level_id
+        JOIN events e ON e.event_id = s.event_id
+        WHERE s.event_id = :eventId AND e.created_by_user_id = :userId
+        ORDER BY s.submitted_at DESC
+        """,
+      nativeQuery = true)
+  List<RecentSubmissionRow> getRecentSubmissionsForEvent(
+      @Param("eventId") UUID eventId, @Param("userId") UUID userId, Pageable pageable);
+
+  /** Projection for getRecentSubmissionsForEvent */
+  interface RecentSubmissionRow {
+    Long getSubmissionId();
+
+    UUID getTeamId();
+
+    String getTeamName();
+
+    UUID getEventId();
+
+    String getEventName();
+
+    short getLevelId();
+
+    short getLevelNumber();
+
+    String getLevelName();
+
+    java.math.BigDecimal getScore();
+
+    String getStatus();
+
+    Instant getSubmittedAt();
+  }
+
   @Query(
       "SELECT s.id FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.hackathon = :hackathonId")
   List<Long> findIdsByHackathonId(@Param("hackathonId") UUID hackathonId);
@@ -158,6 +210,10 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   @Query(
       "SELECT COUNT(s) FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId AND s.submittedAt >= :since")
   long countByAdminSince(@Param("userId") UUID userId, @Param("since") Instant since);
+
+  @Query(
+      "SELECT COUNT(s) FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId")
+  long countByAdmin(@Param("userId") UUID userId);
 
   long countByEventIdAndSubmittedAtAfter(UUID eventId, Instant since);
 

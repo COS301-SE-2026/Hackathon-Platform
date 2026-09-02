@@ -3,6 +3,8 @@ package com.hackathon.platform.controller;
 import com.hackathon.platform.dto.EventParticipantResponse;
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
+import com.hackathon.platform.dto.ExtendTimerRequest;
+import com.hackathon.platform.dto.ExtendTimerResponse;
 import com.hackathon.platform.dto.ScoringPauseResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.User;
@@ -21,8 +23,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.hackathon.platform.dto.ExtendTimerResponse;
-import com.hackathon.platform.dto.ExtendTimerRequest;
 
 @RestController
 @RequestMapping("/api/admin/events")
@@ -101,8 +101,10 @@ public class AdminEventController {
 
   @PatchMapping("/{id}/extend")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<ExtendTimerResponse> extendTimer(@PathVariable("id") UUID eventId, @RequestBody ExtendTimerRequest req){
+  public ResponseEntity<ExtendTimerResponse> extendTimer(
+      @PathVariable("id") UUID eventId, @RequestBody ExtendTimerRequest req) {
     Event event = eventService.extendEvent(eventId, req.getAdditionalTime());
-    return ResponseEntity.ok(new ExtendTimerResponse(event.getEventId(), event.getDuration(), event.getEndDateTime()));
+    return ResponseEntity.ok(
+        new ExtendTimerResponse(event.getEventId(), event.getDuration(), event.getEndDateTime()));
   }
 }

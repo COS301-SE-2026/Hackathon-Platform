@@ -40,11 +40,17 @@ describe('HomeComponent', () => {
   ];
 
   beforeEach(async () => {
-    eventServiceMock = jasmine.createSpyObj<EventService>( 'EventService', ['getOpenEvents', 'getUserActiveEvents']
+    eventServiceMock = jasmine.createSpyObj<EventService>( 'EventService', ['getOpenEvents', 'getUserActiveEvents', 'getMyRegistrations', 'getEventLogoUrl']
 );
 
 eventServiceMock.getOpenEvents.and.returnValue(of(mockEvents as any));
 eventServiceMock.getUserActiveEvents.and.returnValue(of([]));
+eventServiceMock.getMyRegistrations.and.returnValue(of([]));
+eventServiceMock.getEventLogoUrl.and.returnValue(
+  of({
+    url: 'https://mock-storage.com/dummy-logo-key.png',
+    storageKey: 'dummy-logo-key'
+  }));
 
     await TestBed.configureTestingModule({
       imports: [RouterTestingModule, HomeComponent],

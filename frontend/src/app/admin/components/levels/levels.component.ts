@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { LevelService, LevelRequest, LevelResponse } from '../../../services/level.service';
 import { StorageService, LevelFileResponse } from '../../../services/storage.service';
 import { HackathonService } from '../../../services/hackathon.service';
+import { EventService } from '../../../services/event.service';
 
 
 interface UiLevel extends LevelResponse {
@@ -31,6 +32,7 @@ export class LevelsComponent implements OnInit {
   private readonly levelService = inject(LevelService);
   private readonly storageService = inject(StorageService);
   private readonly hackathonService = inject(HackathonService);
+  private readonly eventService = inject(EventService);
   private readonly change = inject(ChangeDetectorRef);
 
   hackathonId = '';
@@ -79,7 +81,21 @@ export class LevelsComponent implements OnInit {
     }
 
     this.loadHackathonName();
+    this.loadEventsCount();
     this.loadLevels();
+  }
+
+  private loadEventsCount(): void {
+    this.eventService.getEventsForHackathon(this.hackathonId).subscribe({
+      next: (events) => {
+        this.eventsCount = events.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.eventsCount = 0;
+        this.change.markForCheck();
+      }
+    });
   }
 
   private loadHackathonName(): void {
@@ -87,7 +103,6 @@ export class LevelsComponent implements OnInit {
       next: (hackathon) => {
         this.hackathonName = hackathon.name;
         this.hackathonDescription = hackathon.description || '';
-        this.eventsCount = hackathon.eventsCount || 0;
         this.participantsCount = hackathon.participantsCount|| 0 ;
         this.change.markForCheck();
       },

@@ -69,12 +69,14 @@ class InsightsServiceTest {
     when(teamRepository.findByEventId(any())).thenReturn(Collections.emptyList());
     when(submissionRepository.countByAdminSince(eq(adminUserId), any(Instant.class)))
         .thenReturn(5L);
+    when(submissionRepository.countByAdmin(adminUserId)).thenReturn(9L);
 
     AdminDashboardResponse response = insightsService.getAdminDashboard(adminUserId);
 
     assertThat(response.getTotalEvents()).isEqualTo(2);
     assertThat(response.getActiveEvents()).isEqualTo(1);
     assertThat(response.getSubmissionsToday()).isEqualTo(5L);
+    assertThat(response.getTotalSubmissions()).isEqualTo(9L);
   }
 
   @Test
@@ -82,6 +84,7 @@ class InsightsServiceTest {
     when(eventRepository.fetchAllByAdmin(adminUserId)).thenReturn(Collections.emptyList());
     when(submissionRepository.countByAdminSince(eq(adminUserId), any(Instant.class)))
         .thenReturn(0L);
+    when(submissionRepository.countByAdmin(adminUserId)).thenReturn(0L);
 
     AdminDashboardResponse response = insightsService.getAdminDashboard(adminUserId);
 
@@ -89,6 +92,7 @@ class InsightsServiceTest {
     assertThat(response.getActiveEvents()).isZero();
     assertThat(response.getTotalParticipants()).isZero();
     assertThat(response.getSubmissionsToday()).isZero();
+    assertThat(response.getTotalSubmissions()).isZero();
   }
 
   @Test

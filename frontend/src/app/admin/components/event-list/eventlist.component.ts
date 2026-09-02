@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
-import { EventService, EventResponse, EventRegistrationSummary } from '../../../services/event.service';
+import { EventService, EventResponse, EventParticipantResponse } from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 
@@ -15,6 +15,13 @@ interface EventRow {
   status: string;
   statusClass: 'live' | 'upcoming' | 'completed' | 'canceled'| 'ended';
   dateRangeLabel: string;
+  scoringPaused: boolean;
+}
+
+interface RegisteredTeam {
+  teamId: string;
+  name: string;
+  members: EventParticipantResponse[];
 }
 
 @Component({
@@ -49,10 +56,11 @@ export class EventlistComponent implements OnInit {
   statusFilter = 'ALL';
 
   expandedEventId: string | null = null;
-  registrationsByEvent: Record<string, EventRegistrationSummary> = {};
+  registrationsByEvent: Record<string, RegisteredTeam[]> = {};
   registrationsLoading: Record<string, boolean> = {};
   registrationsError: Record<string, string> = {};
-  exportingResults: Record<string, boolean> = {};
+  leaderboardPaused: Record<string, boolean> = {};
+  leaderboardPauseLoading: Record<string, boolean> = {};
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
@@ -98,6 +106,9 @@ export class EventlistComponent implements OnInit {
       next: (events) => {
         this.eventCount = events.length;
         this.events = events.map((e) => this.toEventRow(e));
+        events.forEach((event) => {
+          this.leaderboardPaused[event.eventId] = event.scoringPaused;
+        });
         this.isLoading = false;
         this.change.markForCheck();
       },
@@ -123,6 +134,7 @@ export class EventlistComponent implements OnInit {
       status: this.statusLabel(event.status),
       statusClass: this.getStatusClass(event.status),
       dateRangeLabel: this.formatDateRange(event),
+      scoringPaused: event.scoringPaused,
     }
   }
 
@@ -189,7 +201,7 @@ export class EventlistComponent implements OnInit {
   }
 
   navigateToViewEvent(eventId: string): void {
-    console.warn('No event-detail route exists in app.routes.ts yet for event', eventId);
+    this.toggleEventDetails(eventId);
   }
 
   toggleEventDetails(eventId: string): void {
@@ -207,42 +219,33 @@ export class EventlistComponent implements OnInit {
     this.registrationsLoading[eventId] = true;
     this.registrationsError[eventId] ='';
 
-    this.eventService.getEventRegistrations(eventId).subscribe({
-      next: (summary) =>{
-        this.registrationsByEvent[eventId] = summary;
-      this.registrationsLoading[eventId] = false;
-      this.change.markForCheck();
+    this.eventService.getEventParticipants(eventId).subscribe({
+      next: (participants) =>{
+        const teams = new Map<string, RegisteredTeam>();
+
+        participants.forEach((participant) => {
+          if (!teams.has(participant.teamId)) {
+            teams.set(participant.teamId, {
+              teamId: participant.teamId,
+              name: participant.teamName,
+              members: []
+            });
+          }
+
+          teams.get(participant.teamId)?.members.push(participant);
+        });
+
+        this.registrationsByEvent[eventId] = Array.from(teams.values());
+        this.registrationsLoading[eventId] = false;
+        this.change.markForCheck();
       },
       error:(error) =>{
         console.error('Failed to load registrations for event',eventId,error);
-        this.registrationsError[eventId] = 'Could not load registered teams and participants.';
+        this.registrationsError[eventId] = 'Could not load registered teams.';
         this.registrationsLoading[eventId] = false;
         this.change.markForCheck();
       }
     });
-  }
-
-  downloadResults(eventId: string, eventName:string): void{
-    this.exportingResults[eventId] = true;
-
-    this.eventService.downloadEventResults(eventId).subscribe(
-      {
-        next: (blob) =>{
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href =url;
-          link.download = `${eventName || 'event'}-results.xlsx`;
-          link.click();
-          window.URL.revokeObjectURL(url);
-          this.exportingResults[eventId] = false;
-          this.change.markForCheck();
-        },
-        error: (error) =>{
-          console.error('Failed to export results for event', eventId, error);
-          this.exportingResults[eventId] =false;
-          this.change.markForCheck();
-        }
-  });
   }
 
   navigateToParticipants(eventId: string): void {
@@ -250,6 +253,33 @@ export class EventlistComponent implements OnInit {
     this.participantsModalEventId = eventId;
     this.participantsModalEventName = event?.name || '';
     this.showParticipantsModal = true;
+  }
+
+  navigateToAnnouncements(eventId: string): void {
+    this.router.navigate(['/admin/events', eventId, 'announcements']);
+  }
+
+  pauseLeaderboard(eventId: string): void {
+    if(this.leaderboardPauseLoading[eventId]) return;
+
+    this.leaderboardPauseLoading[eventId] = true;
+
+    const request = this.leaderboardPaused[eventId]
+      ? this.eventService.resumeLeaderboard(eventId)
+      : this.eventService.pauseLeaderboard(eventId);
+
+    request.subscribe({
+      next: (response) => {
+        this.leaderboardPaused[eventId] = response.scoringPaused;
+        this.leaderboardPauseLoading[eventId] = false;
+        this.change.markForCheck();
+      },
+      error: (error) => {
+        console.error('Failed to update leaderboard pause for event', eventId, error);
+        this.leaderboardPauseLoading[eventId] = false;
+        this.change.markForCheck();
+      }
+    });
   }
 
   closeParticipantsModal(): void {
