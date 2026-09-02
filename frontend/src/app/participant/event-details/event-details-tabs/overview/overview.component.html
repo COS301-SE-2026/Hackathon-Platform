@@ -1,0 +1,146 @@
+<div class="overview-page">
+
+ @if (loading) {
+
+  <div class="overview-state">
+   <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+    <p>Loading event information...</p>
+  </div>
+
+ }
+
+  @else if (errorMsg) {
+
+ <div class="overview-state"><p>{{ errorMsg }}</p></div>
+
+  }
+
+  @else if (event) {
+
+    <div class="overview-header">
+      <h2>Event Overview</h2>
+      <p>Everything you need to know about this event.</p>
+    </div>
+
+    <section class="overview-section about-section">
+
+      <div class="section-heading">
+        <i class="pi pi-info-circle section-icon" aria-hidden="true"></i>
+        <div class="section-heading-content"><h3>About the Event</h3> </div>
+      </div>
+
+      @if (event.description) {
+        <p class="event-description"> {{ event.description }} </p>
+      }
+
+    </section>
+
+    <section class="overview-section">
+
+    <div class="section-heading">
+     <i class="pi pi-calendar section-icon" aria-hidden="true"></i>
+
+    <div class="section-heading-content">
+     <h3>Event Details</h3>
+     <p>Key information about participation.</p>
+    </div>
+      </div>
+
+      <div class="details-grid">
+
+        <div class="detail-item">
+
+          <i class="pi pi-users detail-icon" aria-hidden="true"></i>
+
+          <div class="detail-content">
+            <span class="detail-label">Team Size</span>
+            <span class="detail-value">
+              Up to {{ event.teamSizeLimit }} members
+            </span>
+          </div>
+
+        </div>
+
+        <div class="detail-item">
+
+          <i class="pi pi-map-marker detail-icon" aria-hidden="true"></i>
+
+          <div class="detail-content">
+            <span class="detail-label">Format</span>
+            <span class="detail-value"> {{ event.inPerson ? 'In-person' : 'Virtual' }}</span>
+          </div>
+
+        </div>
+
+        <div class="detail-item">
+
+          <i class="pi pi-globe detail-icon" aria-hidden="true"></i>
+
+          <div class="detail-content">
+            <span class="detail-label">Visibility</span>
+            <span class="detail-value"> {{ event.visibility }} </span>
+          </div>
+
+        </div>
+
+        @if (event.allowedTech && event.allowedTech.length > 0) {
+
+          <div class="detail-item">
+
+            <i class="pi pi-code detail-icon" aria-hidden="true"></i>
+
+            <div class="detail-content">
+              <span class="detail-label">Allowed Technologies</span>
+
+              <div class="technology-list">
+                @for (technology of event.allowedTech; track technology) {
+                 <span class="technology-tag">{{ technology }}</span>
+                }
+              </div>
+
+            </div>
+
+          </div>
+
+        }
+      </div>
+
+    </section>
+
+    <section class="overview-section prizes-section">
+
+      <div class="section-heading">
+        <i class="pi pi-trophy section-icon" aria-hidden="true"></i>
+        <div class="section-heading-content">
+          <h3>Prizes</h3>
+          <p>Rewards for the top performing teams.</p>
+        </div>
+      </div>
+
+      <div class="prizes-grid">
+
+        <div class="prize-item">
+          <i class="pi pi-medal prize-icon" aria-hidden="true"></i>
+          <span class="prize-place">1st Place</span>
+          <strong>R{{ event.firstPlacePrize ?? 0 | number:'1.0-2' }} </strong>
+        </div>
+
+        <div class="prize-item">
+          <i class="pi pi-medal prize-icon" aria-hidden="true"></i>
+          <span class="prize-place">2nd Place</span>
+          <strong> R{{ event.secondPlacePrize ?? 0 | number:'1.0-2' }}</strong>
+        </div>
+
+        <div class="prize-item">
+          <i class="pi pi-medal prize-icon" aria-hidden="true"></i>
+         <span class="prize-place">3rd Place</span>
+          <strong> R{{ event.thirdPlacePrize ?? 0 | number:'1.0-2' }} </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+  }
+
+</div>
