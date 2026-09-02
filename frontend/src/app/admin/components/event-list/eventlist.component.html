@@ -114,7 +114,7 @@
               </span>
               <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "expandedEventId === event.eventId"
                [attr.aria-expanded] = "expandedEventId === event.eventId" (click) = "toggleEventDetails(event.eventId)">
-                {{expandedEventId === event.eventId ? 'Hide Registrations' : 'View Event' }}
+                {{expandedEventId === event.eventId ? 'Hide Event' : 'View Event' }}
                 <i class = "pi" [ngClass] = "expandedEventId === event.eventId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
               </button>
               <button type = "button" class = "btn-view-event" (click) = "navigateToParticipants(event.eventId)">Participants</button>
