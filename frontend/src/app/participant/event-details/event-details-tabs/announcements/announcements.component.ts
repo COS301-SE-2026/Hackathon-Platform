@@ -1,15 +1,16 @@
-import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnnouncementResponse, AnnouncementService } from '../../../../services/announcement.service';
+import { CardComponent } from '../../../../shared/components/card/card.component';
 
 @Component({
   selector: 'app-announcements',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CardComponent],
   templateUrl: './announcements.component.html',
   styleUrls: ['./announcements.component.scss']
 })
-export class AnnouncementsComponent  {
+export class AnnouncementsComponent implements OnDestroy  {
 
 private readonly announcementService = inject(AnnouncementService);
 private readonly change = inject(ChangeDetectorRef);
@@ -17,6 +18,7 @@ private readonly change = inject(ChangeDetectorRef);
  private eventID = '';
  errorMsg = '';
  loading = false;
+ private eventSource?: EventSource;
  announcements: AnnouncementResponse[] = [];
 
  
@@ -27,6 +29,7 @@ set eventId(value: string) {
     }
     this.eventID = value;
     this.loadAnnouncements();
+    this.connectToAnnouncementStream();
   }
 
 get eventId(): string {
@@ -61,5 +64,22 @@ loadAnnouncements(): void {
   });
 }
 
+
+connectToAnnouncementStream(): void {
+   this.eventSource?.close();
+  this.eventSource = this.announcementService.connectToAnnouncementStream(this.eventID);
+
+  this.eventSource.addEventListener('announcement-created', () => {
+   this.loadAnnouncements();
+   });
+
+  this.eventSource.onerror = () => {
+  console.warn('Lost connection to announcements. Browser will retry connection.');
+   };
+}
+
+ngOnDestroy(): void {
+ this.eventSource?.close();
+}
 
 }
