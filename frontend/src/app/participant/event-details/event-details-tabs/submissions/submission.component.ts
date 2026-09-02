@@ -1,30 +1,65 @@
-import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, inject, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TabsModule } from 'primeng/tabs';
-import { ButtonModule } from 'primeng/button';
-import { FileUploadModule } from 'primeng/fileupload';
-import { TableModule } from 'primeng/table';
 import { LevelService, LevelResponse } from '../../../../services/level.service';
 import { TeamService } from '../../../../services/team.service';
 import { StorageService } from '../../../../services/storage.service';
 import { SubmissionService } from '../../../../services/submission.service';
+import { TabsComponent, TabItem} from '../../../../shared/components/tabs/tabs.component';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { UploadAreaComponent } from '../../../../shared/components/upload-area/upload-area.component';
+import { ToastService } from '../../../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-submissions',
   standalone: true,
-  imports: [CommonModule, TabsModule, ButtonModule, FileUploadModule, TableModule],
+  imports: [CommonModule, TabsComponent, ButtonComponent, UploadAreaComponent],
   templateUrl: './submission.component.html',
   styleUrl: './submission.component.scss',
 })
-export class SubmissionsComponent {
+export class SubmissionsComponent implements OnInit {
   private readonly levelService = inject(LevelService);
   private readonly teamService = inject(TeamService);
   private readonly storageService = inject(StorageService);
   private readonly submissionService = inject(SubmissionService);
   private readonly change = inject(ChangeDetectorRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
+
+  levels: LevelResponse[] = [];
+  levelTabs: TabItem[] = [];
 
   private eventID = '';
   private hackathonID = '';
+  activeLevel = '';
+  levelsError = '';
+  teamError = '';
+  submitError = '';
+  submitSuccess = '';
+
+  levelsLoading = false;
+  submitting = false;
+  teamLoading = false;
+
+  teamId: string | null = null;
+  sourceArchive: File | null = null;
+  solutionOutput: File | null = null;
+
+  @ViewChild('sourceUploader') sourceUploader!: UploadAreaComponent;
+  @ViewChild('solutionUploader') solutionUploader!: UploadAreaComponent;
+ 
+
+  ngOnInit(): void {
+  this.route.queryParamMap.subscribe(params => {
+    const subtab = params.get('subtab');
+
+    if (subtab) {
+     this.activeLevel = subtab;
+    }
+  });
+}
+
 
   @Input({ required: true })
   set eventId(value: string) {
@@ -52,21 +87,22 @@ export class SubmissionsComponent {
     return this.hackathonID;
   }
 
-  activeLevel = '';
+  private setLevelTabs(): void {
 
-  levels: LevelResponse[] = [];
-  levelsLoading = false;
-  levelsError = '';
+  this.levelTabs = [
+    { label: 'Submission Levels', type: 'label'}
+  ];
 
-  teamId: string | null = null;
-  teamLoading = false;
-  teamError = '';
-
-  sourceArchive: File | null = null;
-  solutionOutput: File | null = null;
-  submitting = false;
-  submitError = '';
-  submitSuccess = '';
+  this.levels.forEach(level => {
+    this.levelTabs.push({
+      label: `Level ${level.levelNumber}`,
+      route: `/participant/events/${this.eventID}`,
+      queryParams: {  tab: 'submissions',
+        subtab: level.id.toString()
+       }
+     });
+   });
+  }
 
 
   loadLevels(): void {
@@ -77,9 +113,17 @@ export class SubmissionsComponent {
     this.levelService.getLevels(this.hackathonID).subscribe({
       next: levels => {
         this.levels = [...levels].sort((a, b) => a.levelNumber - b.levelNumber);
+
+        this.setLevelTabs();
+
         if (!this.activeLevel && this.levels.length > 0) {
           this.activeLevel = this.levels[0].id.toString();
         }
+
+         this.router.navigate([], {
+          relativeTo: this.route, queryParams: { subtab: this.activeLevel }, queryParamsHandling: 'merge', replaceUrl: true
+        });
+
         this.levelsLoading = false;
         this.change.detectChanges();
       },
@@ -96,7 +140,7 @@ export class SubmissionsComponent {
     this.teamError = '';
     this.change.detectChanges();
 
-    this.teamService.getMyTeam().subscribe({
+    this.teamService.getMyTeam(this.eventId).subscribe({
       next: team => {
         this.teamLoading = false;
         if (team && team.eventId === this.eventID) {
@@ -118,29 +162,25 @@ export class SubmissionsComponent {
 
   
 
-  onSourceSelected(event: { files: File[] }): void {
-    const file = event.files[0];
-    if (!file?.name.toLowerCase().endsWith('.zip')) return;
+onSourceSelected(file: File): void {
+  if (!file.name.toLowerCase().endsWith('.zip')) return;
 
-    this.sourceArchive = file;
+  this.sourceArchive = file;
+}
 
-  }
+onSolutionSelected(file: File): void {
+  if (!file.name.toLowerCase().endsWith('.json')) return;
 
-  onSolutionSelected(event: { files: File[] }): void {
-    const file = event.files[0];
-    if (!file?.name.toLowerCase().endsWith('.json')) return;
-    this.solutionOutput = file;
-  }
+  this.solutionOutput = file;
+}
 
-  removeSourceFile(uploader: { clear(): void }): void {
-    this.sourceArchive = null;
-    uploader.clear();
-  }
+onSourceCleared(): void {
+  this.sourceArchive = null;
+}
 
-  removeSolutionFile(uploader: { clear(): void }): void {
-    this.solutionOutput = null;
-    uploader.clear();
-  }
+onSolutionCleared(): void {
+  this.solutionOutput = null;
+}
 
   get canSubmit(): boolean {
     return (
@@ -153,7 +193,7 @@ export class SubmissionsComponent {
 
   }
 
-  submitSolution(sourceUploader: { clear(): void }, solutionUploader: { clear(): void }): void {
+  submitSolution(): void {
     if (!this.canSubmit || !this.teamId) {
       return;
     }
@@ -175,8 +215,11 @@ export class SubmissionsComponent {
         next: () => {
           this.submitting = false;
           this.submitSuccess = 'Your solution was uploaded and queued for scoring.';
-          this.removeSourceFile(sourceUploader);
-          this.removeSolutionFile(solutionUploader);
+          this.sourceArchive = null;
+          this.solutionOutput = null;
+          this.sourceUploader.clear();
+          this.solutionUploader.clear();
+          this.toast.success('Submission Successful','Your solution was uploaded and queued for scoring.');
           this.change.detectChanges();
           
         },

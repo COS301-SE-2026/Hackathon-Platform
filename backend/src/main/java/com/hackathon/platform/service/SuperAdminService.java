@@ -1,13 +1,13 @@
 package com.hackathon.platform.service;
 
-import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.AdminResponse;
-import java.util.List;
+import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.CreateAdminRequest;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.RoleRepository;
 import com.hackathon.platform.repository.UserRepository;
+import java.util.List;
 import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

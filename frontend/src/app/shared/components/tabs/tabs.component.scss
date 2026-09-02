@@ -130,3 +130,42 @@
     padding: var(--space-3) var(--space-4);
   }
 }
+
+
+.tabs-subtabs {
+  border: 0;
+  border-radius: 0;
+  
+  background-color: transparent;
+  overflow-x: auto;
+  margin-bottom: var(--space-2);
+  
+}
+
+
+.tabs-subtabs .tab {
+  min-width: 120px;
+
+  padding: var(--space-3) var(--space-4);
+
+  border-bottom: 2px solid transparent;
+
+  color: var(--dark-gray);
+  font-size: var(--font-size-small);
+  border-radius: var(--radius-sm);
+}
+
+
+.tabs-subtabs .tab-label {
+  min-width: 120px;
+
+  padding: var(--space-3) var(--space-4);
+
+  color: var(--dark-navy);
+}
+
+
+.tabs-subtabs .tab.active {
+  color: var(--bright-blue);
+  background-color: var(--bright-blue-bg);
+}

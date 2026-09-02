@@ -1,11 +1,13 @@
-<div class="submission-page">
+<div class="submissions-page">
 
-    <div class="submission-header">
-        <h1 class="submission-title">Submit Solution</h1>
-        <p class="submission-prompt">Select a level below to view its requirements and submit your solution.</p>
-    </div>
+    <section class="level-navigation">
 
-    @if (teamError) {
+      <app-tabs [tabs]="levelTabs" [activeTab]="activeLevel"  activeQueryParam="subtab" ariaLabel="Submission levels" variant="subtabs"></app-tabs>
+
+    </section>
+
+
+     @if (teamError) {
         <div class="empty-history">{{ teamError }}</div>
     }
 
@@ -17,204 +19,112 @@
         <div class="empty-history">{{ levelsError }}</div>
     } @else if (levels.length === 0) {
         <div class="empty-history">No levels have been published for this event yet.</div>
-    } @else {
+    }
 
-    <p-tabs
-        [(value)]="activeLevel"
-        scrollable>
+   @else{
 
-        <p-tablist>
+    @for (level of levels; track level.id) {
 
-         @for (level of levels; track level.id) {
-                <p-tab [value]="level.id.toString()">{{ level.name }}</p-tab>
-            }
+        @if (level.id.toString() === activeLevel) {
 
-        </p-tablist>
+    <section class="level-content">
 
-        <p-tabpanels>
+    <div class="level-information">
 
-            @for (level of levels; track level.id) {
+        <div class="level-heading"><h1>About this Level:</h1></div>
 
-                <p-tabpanel [value]="level.id.toString()">
+        <div class="description-section">
 
-                    <div class="level-content">
+        <p> This introductory level is designed to get you familiar with the challenge environment and basic problem-solving.</p>
 
-                        <div class="level-header">
+        </div>
 
-                            <div class="level-info">
-                                <div class="level-number">{{ level.levelNumber }}</div>
-                                <h2 class="level-name">{{ level.name }}</h2>
-                            </div>
+        <div class="important-notes">
 
-                            <button
-                                type="button"
-                                class="secondary-btn"
-                                (click)="downloadLevelFiles(level.id)">
-                                Download Level Files
-                            </button>
+        <div class="notes-heading">
+         <i class="pi pi-info-circle"></i>
+         <h2>Important Notes</h2>
+        </div>
 
-                        </div>
+        <ul>
+         <li>Download the level resources before getting started.</li>
+         <li>You may submit multiple times before the deadline.</li>
+         <li>Your highest score will count.</li>
+          <li>Ensure your solution follows the submission requirements.</li>
+        </ul>
 
-                        <div class="upload-area">
+        </div>
 
-                                <div class="upload-grid">
+    </div>
 
-                                    <div class="upload-card">
+    <div class="level-submission">
 
-                                        <h3 class="upload-title">Upload Source Code Archive</h3>
+    <section class="submission-section resources-section">
 
-                                        <p-fileUpload
-                                            #sourceUploader
-                                            mode="advanced"
-                                            accept=".zip"
-                                            [multiple]="false"
-                                            [customUpload]="true"
-                                            [auto]="false"
-                                            (onSelect)="onSourceSelected($event)"
-                                            >
+        <div class="section-header">
+        <h2>Level {{ level.levelNumber }} Resources</h2>
+        <p> Download the resources to get started.</p>
+        </div>
 
-                                            <ng-template pTemplate="content">
+        <div class="resource-action">
 
-                                                <div class="upload-dropzone" [class.file-selected]="sourceArchive">
+        <app-button variant="secondary" width= "100%" (click)="downloadLevelFiles(level.id)" (keydown)="null" (keyup)="null">
+         <i class="pi pi-download"></i>
+         Download Resources
+        </app-button>
 
-                                                    @if (sourceArchive) {
+        </div>
 
-                                                        <button
-                                                            pButton
-                                                            type="button"
-                                                            icon="pi pi-times"
-                                                            text rounded
-                                                            class="remove-file-btn"
-                                                            (click)="removeSourceFile(sourceUploader)">
-                                                        </button>
+    </section>
 
-                                                        <i class="pi pi-file upload-icon"></i>
-                                                        <h4 class="selected-file-name">{{ formatFileName(sourceArchive.name) }}</h4>
-                                                        <p class="drop-subtitle"> Click or drag a new file to replace</p>
 
-                                                       <button
-                                                        type="button"
-                                                        class="secondary-btn"
-                                                        (click)="sourceUploader.choose()">
-                                                        Replace ZIP File
-                                                    </button>
-                                                        
-                                                    } 
-                                                    
-                                                    @else {
+    <section class="submission-section solution-section">
 
-                                                        <i class="pi pi-cloud-upload upload-icon"></i>
-                                                        <h4 class="drop-title">Drag and drop your ZIP here</h4>
+    <div class="section-header"><h2>Submission</h2></div>
 
-                                                        <p class="drop-subtitle">or click to browse files</p>
-                                                        <button
-                                                            type="button"
-                                                            class="secondary-btn"
-                                                            (click)="sourceUploader.choose()">
-                                                            Choose ZIP File
-                                                        </button>
-                                                    }
+ 
+    <div class="upload-item">
 
-                                                </div>
-                                            </ng-template>
+        <h3>1. Solution Archive</h3>
 
-                                        </p-fileUpload>
+        <p>Upload your solution as a .zip file.</p>
 
-                                    </div>
+        <app-upload-area  #sourceUploader  accept=".zip"  helpText="Only .zip files are allowed" (fileCleared)="onSourceCleared()" (fileSelected)="onSourceSelected($event)"></app-upload-area>
 
-                                    <div class="upload-card">
+    </div>
 
-                                        <h3 class="upload-title">Upload Solution Output File</h3>
+  
+    <div class="upload-item">
 
-                                        <p-fileUpload
-                                            #solutionUploader
-                                            mode="advanced"
-                                            [multiple]="false"
-                                            [customUpload]="true"
-                                            accept=".json"
-                                            [auto]="false"                                      
-                                            (onSelect)="onSolutionSelected($event)"
-                                            >
-                                            <ng-template pTemplate="content">
+        <h3>2. Output File (JSON)</h3>
 
-                                                <div
-                                                    class="upload-dropzone" [class.file-selected]="solutionOutput">
+        <p> Upload the output.json file generated by your program.</p>
 
-                                                    @if (solutionOutput) {
-                                                        <button
-                                                            pButton
-                                                            type="button"
-                                                            icon="pi pi-times"
-                                                            text rounded
-                                                            class="remove-file-btn"
-                                                            (click)="removeSolutionFile(solutionUploader)">
-                                                        </button>
+        <app-upload-area  #solutionUploader  accept=".json"  helpText="Only .json files are allowed" (fileCleared)="onSolutionCleared()"  (fileSelected)="onSolutionSelected($event)"> </app-upload-area>
 
-                                                        <i class="pi pi-file upload-icon"></i>
+    </div>
 
-                                                        <h4 class="selected-file-name">{{ formatFileName(solutionOutput.name) }}</h4>
-                                                        <p class="drop-subtitle">Click or drag a new file to replace </p>
+ 
+    <div class="submit-section">
 
-                                                        <button
-                                                            type="button"
-                                                            class="secondary-btn"
-                                                            (click)="solutionUploader.choose()">
-                                                            Replace JSON File
-                                                        </button>
 
-                                                    } @else {
-                                                        <i class="pi pi-cloud-upload upload-icon"></i>
-                                                        <h4 class="drop-title">Drag and drop your JSON here</h4>
-                                                         <p class="drop-subtitle">or click to browse files</p>
+        <app-button  variant="primary"  width= "100%"  [disabled]="!canSubmit"  (click)="submitSolution()" (keydown)="null" (keyup)="null">
+         <i class="pi pi-send"></i>
+         {{ submitting ? 'Submitting...' : 'Submit Solution' }}
+        </app-button>
 
-                                                      <button
-                                                            type="button"
-                                                            class="secondary-btn"
-                                                            (click)="solutionUploader.choose()">
-                                                            Choose JSON File
-                                                        </button>
-                                                    }
+    </div>
 
-                                                </div>
+    </section>
 
-                                            </ng-template>
 
-                                        </p-fileUpload>
+    </div>
 
-                                    </div>
-                                </div>
-
-                                @if (submitError) {
-                                    <div class="empty-history">{{ submitError }}</div>
-                                }
-                                @if (submitSuccess) {
-                                    <div class="empty-history">{{ submitSuccess }}</div>
-                                }
-
-                                <div class="submit-bar">
-                                  
-                                    <button
-                                        type="button"
-                                        class="primary-btn"
-                                        [disabled]="!canSubmit"
-                                        (click)="submitSolution(sourceUploader, solutionUploader)">
-                                        {{ submitting ? 'Submitting...' : 'Submit Solution' }}
-                                    </button>
-                                </div>
-                        </div>
-
-                    </div>
-
-                </p-tabpanel>
-
-            }
-
-        </p-tabpanels>
-
-    </p-tabs>
+    </section>
 
     }
 
-   
+  }
+}
 
 </div>
