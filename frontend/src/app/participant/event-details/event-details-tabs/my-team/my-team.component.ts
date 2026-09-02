@@ -1,7 +1,7 @@
 import { Component, Input,ChangeDetectorRef , inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { TeamService, TeamMemberResponse } from '../../../../services/team.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -29,7 +29,6 @@ interface DisplayTeamMember {
 export class MyTeamComponent implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly authService = inject(AuthService);
-  private readonly router = inject(ActivatedRoute);
   private readonly change = inject(ChangeDetectorRef);
   private readonly toast = inject(ToastService);
 
@@ -61,8 +60,6 @@ export class MyTeamComponent implements OnInit {
   currentUserId = '';
   isTeamLead = false;
 
-  /** Set when the user already belongs to an approved team, but for a different event. */
-  teamBelongsToOtherEvent = false;
 
   team = {
     name: '',
@@ -79,38 +76,30 @@ export class MyTeamComponent implements OnInit {
 
   loadUserTeam(): void {
     this.isLoadingTeam = true;
-    this.teamService.getMyTeam().subscribe({
+
+    this.teamService.getMyTeam(this.eventID).subscribe({
       next: (response) => {
         this.isLoadingTeam = false;
 
-        if (response && response.eventId === this.eventID) {
-          this.hasTeam = true;
-          this.teamBelongsToOtherEvent = false;
-          this.team.teamId = response.teamId;
-          this.team.name = response.teamName;
-          this.loadTeamMembers(response.teamId);
-        } else if (response) {
-          // The user already belongs to a team, but it's for a different event.
-          this.hasTeam = false;
-          this.teamBelongsToOtherEvent = true;
-          this.resetTeamState();
-        } else {
-          this.hasTeam = false;
-          this.teamBelongsToOtherEvent = false;
-          this.resetTeamState();
-        }
-        this.change.markForCheck();
-      },
+        if (response) {
+        this.hasTeam = true;
+        this.team.teamId = response.teamId;
+        this.team.name = response.teamName;
+
+        this.loadTeamMembers(response.teamId);
+
+      } 
+      else {
+        this.hasTeam = false;
+        this.resetTeamState();
+      }
+
+      this.change.markForCheck();
+    },
       error: (error) => {
         this.isLoadingTeam = false;
         console.error('Error loading team:', error);
-        if (error.status === 204) {
-          this.hasTeam = false;
-          this.teamBelongsToOtherEvent = false;
-          this.resetTeamState();
-        } else {
-          this.errorMessage = 'Could not load your team. Please refresh.';
-        }
+        this.errorMessage = 'Could not load your team. Please refresh.';
         this.change.markForCheck();
       }
     });
@@ -170,18 +159,19 @@ export class MyTeamComponent implements OnInit {
         this.loadUserTeam();
         this.change.markForCheck();
       },
-      error: (error) => {
-        this.isLoading = false;
-        console.error('Error creating team:', error);
-        if (error.status === 409 || error.error?.message?.includes('already exists')) {
-          this.errorMessage = 'A team with that name already exists. Choose a different name.';
-        } else if (error.error?.message?.includes('already a member')) {
-         this.errorMessage = 'You are already a member of a team. Leave your current team first.';
-        } else {
-          this.errorMessage = error.error?.message || 'Failed to create team. Please try again.';
-        }
-        this.change.markForCheck();
+    error: (error) => {
+      this.isLoading = false;
+      console.error('Error creating team:', error);
+
+      if (error.status === 409 || error.error?.message?.includes('already exists')) {
+        this.errorMessage = 'A team with that name already exists. Choose a different name.';
+      } else {
+        this.errorMessage =
+          error.error?.message || 'Failed to create team. Please try again.';
       }
+
+      this.change.markForCheck();
+    }
     });
   }
 
@@ -214,24 +204,24 @@ openRequestToJoinDialog(): void {
       next: () => {
         this.isLoading = false;
         this.successMessage = 'Join request sent! Waiting for the team lead to approve.';
-          this.toast.success('Request Sent Succesfully ',this.successMessage);
+          this.toast.success('Request Sent Successfully ',this.successMessage);
         this.teamIdToJoin = '';
          this.teamDialogVisible = false;
         this.change.markForCheck();
       },
-      error: (error) => {
+     error: (error) => {
         this.isLoading = false;
         console.error('Error requesting to join team:', error);
-        if (error.error?.message?.includes('already a member')) {
-          this.errorMessage = 'You are already in a team.';
-        } else if (error.error?.message?.includes('already requested')) {
+
+        if (error.error?.message?.includes('already requested')) {
           this.errorMessage = 'You have already sent a join request to this team.';
         } else if (error.error?.message?.includes('full')) {
           this.errorMessage = 'This team is full.';
         } else if (error.status === 404) {
           this.errorMessage = 'Team not found. Check the team ID and try again.';
         } else {
-          this.errorMessage = error.error?.message || 'Failed to send join request.';
+          this.errorMessage =
+            error.error?.message || 'Failed to send join request.';
         }
         this.change.markForCheck();
       }

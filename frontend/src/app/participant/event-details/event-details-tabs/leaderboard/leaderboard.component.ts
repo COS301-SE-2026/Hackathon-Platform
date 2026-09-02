@@ -162,7 +162,7 @@ getInitials(name: string): string {
   }
 
   loadMyTeam(): void {
-    this.teamService.getMyTeam().subscribe({
+    this.teamService.getMyTeam(this.eventId).subscribe({
       next: team => {
         if(team && team.eventId === this.eventId) {
           this.currTeamId = team.teamId;

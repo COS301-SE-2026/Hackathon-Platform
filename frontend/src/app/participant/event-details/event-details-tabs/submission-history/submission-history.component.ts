@@ -181,7 +181,7 @@ get hackathonId(): string {
     this.teamError = '';
     this.change.detectChanges();
 
-    this.teamService.getMyTeam().subscribe({
+    this.teamService.getMyTeam(this.eventId).subscribe({
       next: team => {
         this.teamLoading = false;
         if (team && team.eventId === this.eventID) {
