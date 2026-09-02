@@ -147,9 +147,8 @@
 
     @if (showCreatePost) {
         <div
-            class="modal-overlay" (click)="closeCreatePost()" (keydown.escape)="closeCreatePost()" tabindex="-1">
-            <div
-                class="modal-card" (click)="$event.stopPropagation()">
+            class="modal-overlay" (click)="onOverlayClick($event)" (keydown.escape)="closeCreatePost()" tabindex="-1">
+            <div class="modal-card">
                 <h2 class="modal-title">Create Post</h2>
                 <div class="form-group">
                     <label for="postTitle">Title</label>

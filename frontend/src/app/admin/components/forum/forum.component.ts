@@ -375,6 +375,12 @@ export class ForumComponent implements OnInit, OnDestroy {
         };
     }
 
+    onOverlayClick(event: MouseEvent): void {
+        if (event.target === event.currentTarget) {
+            this.closeCreatePost();
+        }
+    }
+
     ngOnDestroy(): void {
         this.eventSource?.close();
     }

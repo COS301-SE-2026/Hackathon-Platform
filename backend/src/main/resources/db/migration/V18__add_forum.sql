@@ -2,7 +2,7 @@ CREATE TABLE forum_posts (
     post_id UUID PRIMARY KEY,
     event_id UUID NOT NULL,
     author_id UUID NOT NULL,
-    title VARCHAR(255) NOT NULL,
+    title VARCHAR2(255) NOT NULL,
     body TEXT NOT NULL,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
