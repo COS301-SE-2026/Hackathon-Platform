@@ -49,7 +49,11 @@ public class CertificateService {
         String hackathonName = hackRepo.findById(event.getHackathon()).map(Hackathon::getName).orElse(event.getName());
         String partName = (user.getFirstName()+" "+user.getLastName());
 
-
+        try{
+            return render(partName, event.getName(), hackathonName);
+        } catch(IOException e){
+            throw new RuntimeException("Failed to make the certificate");
+        }
     }
 
     private byte[] render(String partName, String eventName, String hackathonName) throws IOException {
