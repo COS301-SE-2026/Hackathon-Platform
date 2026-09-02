@@ -21,6 +21,7 @@ interface ForumThread{
     rootMessage: ForumMessage;
     replies: ForumMessage[];
     lastActivityLabel: string;
+    replyCount: number;
 }
 
 @Component({
@@ -125,15 +126,11 @@ export class ForumComponent implements OnInit, OnDestroy {
                     authorInitial: comment.author.firstName.charAt(0).toUpperCase(),
                     authorRole: comment.author.role === 'ADMIN' || comment.author.role === 'SUPERADMIN' ? 'ADMIN' : 'PARTICIPANT',
                     content: comment.body,
-                    postedAtLabel: this.formatDate(comment.createdAt)
+                    postedAtLabel: this.formatDate(comment.createdAt),
                 }));
+                thread.replyCount = post.comments.length;
 
-                if (post.comments.length > 0) {
-                    const latestComment = post.comments[post.comments.length - 1];
-                    thread.lastActivityLabel = this.formatDate(latestComment.createdAt);
-                } else {
-                    thread.lastActivityLabel = this.formatDate(post.createdAt);
-                }
+                thread.lastActivityLabel = this.formatDate(post.createdAt);
 
                 this.change.markForCheck();
             },
@@ -175,6 +172,7 @@ export class ForumComponent implements OnInit, OnDestroy {
         this.forumService.deleteComment(this.eventId, messageId).subscribe({
             next: () => {
                 thread.replies = thread.replies.filter(reply => reply.messageId !== messageId);
+                thread.replyCount--;
                 this.change.markForCheck();
             },
             error: () => {
@@ -207,7 +205,7 @@ export class ForumComponent implements OnInit, OnDestroy {
                     content: comment.body,
                     postedAtLabel: "Just now"
                 });
-                thread.lastActivityLabel = 'Just now';
+                thread.replyCount++;
                 this.replyDrafts[threadId] = '';
                 this.change.markForCheck();
             },
@@ -248,7 +246,8 @@ export class ForumComponent implements OnInit, OnDestroy {
                         postedAtLabel: "Just now"
                     },
                     replies: [],
-                    lastActivityLabel: 'Just now'
+                    lastActivityLabel: 'Just now',
+                    replyCount: 0
                 });
 
                 this.closeCreatePost();
@@ -288,7 +287,8 @@ export class ForumComponent implements OnInit, OnDestroy {
                     },
 
                     replies: [],
-                    lastActivityLabel: this.formatDate(p.createdAt)
+                    lastActivityLabel: this.formatDate(p.createdAt),
+                    replyCount: p.replyCount
                 }));
 
                 this.isLoading = false;

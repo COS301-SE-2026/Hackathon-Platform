@@ -245,6 +245,8 @@
 
     @if (activeTab === 'rules') { <app-rules />}
 
+    @if (activeTab === 'forum') { <app-forum />}
+
     @if (activeTab === 'submissions' && eventId && hackathonId) {
       <app-submissions [eventId]="eventId" [hackathonId]="hackathonId"></app-submissions>
     }

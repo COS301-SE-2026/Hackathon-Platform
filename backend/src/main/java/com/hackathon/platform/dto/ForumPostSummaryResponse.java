@@ -16,4 +16,5 @@ public class ForumPostSummaryResponse {
     private String title;
     private ForumAuthorResponse author;
     private Instant createdAt;
+    private long replyCount;
 }

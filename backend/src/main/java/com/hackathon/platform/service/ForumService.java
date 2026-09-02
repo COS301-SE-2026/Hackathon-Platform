@@ -101,7 +101,8 @@ public class ForumService {
     }
 
     private ForumPostSummaryResponse toPostSummary(ForumPost post) {
-        return new ForumPostSummaryResponse(post.getPostId(), post.getTitle(), getAuthor(post.getAuthorId()), post.getCreatedAt());
+        long replyCount = commentRepo.countByPostIdAndIsDeletedFalse(post.getPostId());
+        return new ForumPostSummaryResponse(post.getPostId(), post.getTitle(), getAuthor(post.getAuthorId()), post.getCreatedAt(), replyCount);
     }
 
     private ForumCommentResponse toCommentResponse(ForumComment comment) {

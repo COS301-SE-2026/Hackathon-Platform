@@ -23,6 +23,7 @@ export interface ForumPostSummaryResponse {
     title: string;
     author: ForumAuthorResponse;
     createdAt: string;
+    replyCount: number;
 }
 
 export interface ForumPostDetailResponse {
