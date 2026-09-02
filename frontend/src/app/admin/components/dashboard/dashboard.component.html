@@ -1,10 +1,6 @@
 <div class = "dashboard-page">
   <main class = "content">
     <div class = "page-header">
-      <div>
-        <h1>Welcome back, Admin! </h1>
-        <p class = "page-subtitle">Here's what's happening with your hackathons.</p>
-      </div>
 
       @if (allEvents.length > 0) {
         <div class = "event-context-picker">
@@ -60,7 +56,7 @@
           <div class = "panel-card">
             <div class = "panel-header">
               <h2 class = "panel-title">Active Events</h2>
-              <a routerLink = "/admin/events" class = "btn-view-all">View All</a>
+             
             </div>
 
             @if (eventLoading){
@@ -83,14 +79,14 @@
                   </div>
                 }
               </div>
-              <a routerLink = "/admin/events" class = "panel-footer-link">View all events <i class = "pi pi-arrow-right"></i></a>
+             
             }
           </div>
 
           <div class = "panel-card">
             <div class = "panel-header">
               <h2 class = "panel-title">Active Participants</h2>
-              <a (click) = "openParticipantsModal(selectedEventId)" class = "btn-view-all">View All</a>
+              
             </div>
 
             <div class = "participant-rows">
@@ -114,13 +110,12 @@
               }
               }
             </div>
-            <a (click) = "openParticipantsModal(selectedEventId)" class = "panel-footer-link">View all participants <i class = "pi pi-arrow-right"></i></a>
           </div>
 
           <div class = "panel-card">
             <div class = "panel-header">
               <h2 class = "panel-title">Submission Status</h2>
-              <a routerLink = "/admin/submissions" class = "btn-view-all">View All</a>
+             
             </div>
 
             <div class = "donut-wrap">
@@ -267,7 +262,7 @@
         <div class = "section">
           <div class = "panel-header">
           <h2 class = "section-title">Recent submissions</h2>
-          <a routerLink = "/admin/submissions" class = "btn-view-all">View All</a>
+         
           </div> 
         
           <div class = "table-card">
@@ -311,7 +306,6 @@
                 }
               </tbody>
             </table>
-            <a routerLink = "/admin/submissions" class = "panel-footer-link table-footer-link">View all submissions <i class = "pi pi-arrow-right"></i></a>
           }
           </div>
         </div>
@@ -320,7 +314,7 @@
           <div class = "panel-card">
             <div class = "panel-header">
               <h2 class = "panel-title">Recent Announcements</h2>
-               <a routerLink = "/admin/announcements" class = "btn-view-all">View All</a>
+              
             </div>
             <div class = "announcement-rows">
               @if (announcementsLoading){

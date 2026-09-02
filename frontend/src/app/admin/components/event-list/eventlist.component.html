@@ -29,13 +29,7 @@
             <p class = "stat-label">Events</p>
           </div>
           </div>
-          <div class = "stat">
-          <i class = "pi pi-users"></i>
-          <div>
-            <p class = "stat-value">{{participantCount ?? '—'}}</p>
-            <p class = "stat-label">Participants</p>
-          </div>
-        </div>
+          
       </div>
     </div>
     </div>
@@ -44,7 +38,7 @@
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
-      <a routerLink = "/admin/hackathons/{{hackathonId }}/announcements" routerLinkActive = "active"><i class = "pi pi-megaphone"></i>Announcements</a>
+
       
 </div>
 
@@ -108,7 +102,10 @@
               </div>
               <span class = "type-pill">{{event.visibility}}</span>
               <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
-              <span class = "dates-cell">{{event.dateRangeLabel}}</span>
+              <span class = "dates-cell">
+                <span class = "dates-range">{{event.dateRangeLabel}}</span>
+                <span class = "time-remaining" [class.time-remaining-urgent] = "event.statusClass === 'live'">{{getTimeRemaining(event)}}</span>
+              </span>
               <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "expandedEventId === event.eventId"
                [attr.aria-expanded] = "expandedEventId === event.eventId" (click) = "toggleEventDetails(event.eventId)">
                 {{expandedEventId === event.eventId ? 'Hide Registrations' : 'View Event' }}
@@ -164,8 +161,50 @@
 
                   <button type = "button" class = "btn-view-event" (click) = "pauseLeaderboard(event.eventId)" [disabled] = "leaderboardPauseLoading[event.eventId]">
                     <i class = "pi" [ngClass] = "leaderboardPaused[event.eventId] ? 'pi-play' : 'pi-pause'"></i>
-                    {{leaderboardPauseLoading[event.eventId] ? 'Updating...' : leaderboardPaused[event.eventId] ? 'Resume Leaderboard' : 'Pause Leaderboard'}}
+                    {{leaderboardPauseLoading[event.eventId] ? 'Updating...' : leaderboardPaused[event.eventId] ? 'Resume Scoring' : 'Pause Scoring'}}
                   </button>
+
+                  <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "extendTimerOpenFor === event.eventId" (click) = "toggleExtendTimer(event.eventId)">
+                    <i class = "pi pi-clock"></i>
+                    Extend Timer
+                  </button>
+
+                  @if (extendTimerOpenFor === event.eventId) {
+                    <div class = "extend-timer-panel">
+                      <label [attr.for] = "'extend-timer-' + event.eventId">Add hours</label>
+                      <div class = "extend-timer-controls">
+                        <input
+                          type = "number"
+                          min = "0.25"
+                          step = "0.25"
+                          [id] = "'extend-timer-' + event.eventId"
+                          class = "extend-timer-input"
+                          [(ngModel)] = "extendTimerHours[event.eventId]"
+                          [disabled] = "extendTimerLoading[event.eventId]"
+                          aria-label = "Hours to extend event by"
+                        />
+                        <button
+                          type = "button"
+                          class = "btn-view-event"
+                          [disabled] = "extendTimerLoading[event.eventId]"
+                          (click) = "extendTimer(event.eventId)"
+                        >
+                          {{extendTimerLoading[event.eventId] ? 'Extending...' : 'Apply'}}
+                        </button>
+                        <button
+                          type = "button"
+                          class = "btn-view-event"
+                          [disabled] = "extendTimerLoading[event.eventId]"
+                          (click) = "toggleExtendTimer(event.eventId)"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      @if (extendTimerError[event.eventId]) {
+                        <p class = "extend-timer-error">{{extendTimerError[event.eventId]}}</p>
+                      }
+                    </div>
+                  }
                 }
               </div>
             }

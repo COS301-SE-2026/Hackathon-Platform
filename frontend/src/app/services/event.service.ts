@@ -18,6 +18,10 @@ export interface EventRequest {
   rules?: string;
   allowedTech?: string[];
   tagline?: string;
+  firstPlacePrize?: number;
+  secondPlacePrize?: number;
+  thirdPlacePrize?: number;
+  totalPrizePool?: number;
 }
 
 export interface EventResponse {
@@ -29,6 +33,7 @@ export interface EventResponse {
   teamSizeLimit: number;
   startDateTime: string;
   duration: number;
+  endDateTime?: string;
   description?: string;
   visibility: string;
   status: string;
@@ -123,6 +128,12 @@ export interface TeamSubmission {
 export interface EventRegistrationSummary {
   teams: RegisteredTeams[];
   topSubmissions: TeamSubmission[];
+}
+
+export interface ExtendTimerResponse {
+  eventId: string;
+  duration: number;
+  endDateTime: string;
 }
 
 export interface EventParticipantResponse {
@@ -254,6 +265,13 @@ getEventLeaderboard(eventId: string): Observable<LeaderboardEntryResponse[]> {
     return this.http.patch<{ eventId: string; scoringPaused: boolean }>(
       `${this.baseUrl}/admin/events/${eventId}/scoring/resume`,
       {}
+    );
+  }
+
+  extendTimer(eventId: string, additionalTimeSeconds: number): Observable<ExtendTimerResponse> {
+    return this.http.patch<ExtendTimerResponse>(
+      `${this.baseUrl}/admin/events/${eventId}/extend`,
+      { additionalTime: additionalTimeSeconds }
     );
   }
 }

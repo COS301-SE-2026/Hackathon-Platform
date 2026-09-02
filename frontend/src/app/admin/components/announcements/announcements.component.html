@@ -32,12 +32,6 @@
     </div>
 
 
-    <div class = "filter-tabs">
-        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'ALL'" (click) = "statusFilter = 'ALL'">All</button>
-        <button type = "button" class = "filter-tab" [class.active] = "statusFilter === 'PUBLISHED'" (click) = "statusFilter = 'PUBLISHED'">Published</button>
-
-    </div>
-
     @if (errorMessage){
         <div class = "error-banner">{{errorMessage}}</div>
     }
@@ -66,7 +60,7 @@
                             <p class = "announcement-message">{{a.body}}</p>
                             <div class = "announcement-meta">
                                 <span class = "meta-item"><i class = "pi pi-users"></i>Event participants</span>
-                                <span class = "meta-item"><i class = "pi pi-check-circle"></i>Posted {{a.createdAt}}</span>
+                                <span class = "meta-item"><i class = "pi pi-check-circle"></i>Posted {{a.createdAt | date:'MMM d, y, h:mm a'}}</span>
                             </div>
                         </div>
                     </div>
