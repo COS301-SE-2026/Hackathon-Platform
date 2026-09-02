@@ -243,6 +243,10 @@
 
     @if (activeTab === 'overview' && eventId) { <app-overview [eventId]="eventId"></app-overview> }
 
+    @if (activeTab === 'rules') {
+        <app-rules [eventId]="eventId" />
+        }
+
     @if (activeTab === 'forum') { <app-forum />}
 
     @if (activeTab === 'submissions' && eventId && hackathonId) {

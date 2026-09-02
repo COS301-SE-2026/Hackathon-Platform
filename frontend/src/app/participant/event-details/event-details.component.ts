@@ -278,8 +278,8 @@ confirmRegistration(): void {
   ];
 
    if (this.isRegistered) {
-    tabDef.push( ['My Team', 'pi pi-users', 'team'], ['Submissions', 'pi pi-code', 'submissions'],
-      ['Submissions History', 'pi pi-history', 'submission-history'], ['Leaderboard', 'pi pi-trophy', 'leaderboard'], ['Forum', 'pi pi-comments', 'forum'], ['Announcements', 'pi pi-megaphone', 'announcements'],
+    tabDef.push( ['Team', 'pi pi-users', 'team'], ['Submissions', 'pi pi-code', 'submissions'],
+      ['History', 'pi pi-history', 'submission-history'], ['Rankings', 'pi pi-trophy', 'leaderboard'], ['Forum', 'pi pi-comments', 'forum'], ['Announcements', 'pi pi-megaphone', 'announcements'],
     );
   }
 
