@@ -214,37 +214,53 @@
         <h2 class = "section-heading">Prizes</h2>
         <p class = "section-hint">Add the prizes participants can win.</p>
         <div class = "prize-list">
-          @for (prize of form.prizes; track $index){
-            <div class = "prize-row">
-              <span class = "prize-row-index">{{$index +1}}</span>
-              <div class = "prize-row-fields">
-                <label for = "prizeTitle{{$index}}" class = "sr-only">Prize title {{$index + 1}}</label>
-                <input
-                id = "prizeTitle{{$index}}"
-                type ="text"
-                [(ngModel)] ="prize.title"
-                name = "prizeTitle{{$index}}"
-                placeholder = "e.g. 1st Place"
-                class = "prize-title-input"/>
-                <label for = "prizeDescription{{$index}}" class = "sr-only">Prize description {{$index + 1}}</label>
-                <input
-                id = "prizeDescription{{$index}}"
-                type ="text"
-                [(ngModel)] ="prize.description"
-                name = "prizeDescription{{$index}}"
-                placeholder = "e.g. R10,000 cash + mentorship"
-                class = "prize-description-input"/>
-              </div>
-              <button
-              type = "button"
-              class = "prize-remove-btn"
-              (click) = "removePrize($index)"
-              [disabled] = "form.prizes.length === 1"
-              aria-label = "Remove prize">
-              <i class = "pi pi-trash"></i>
-            </button>
-            </div>
-          }
+          <div class = "form-group">
+            <label for = "firstPlacePrize">1st Place Prize</label>
+            <input
+            id = "firstPlacePrize"
+            type = "number"
+            min = "0"
+            step = "0.01"
+            [(ngModel)] = "form.firstPlacePrize"
+            name = "firstPlacePrize"
+            placeholder = "e.g. 10000"/>
+          </div>
+
+          <div class = "form-group">
+            <label for = "secondPlacePrize">2nd Place Prize</label>
+            <input
+            id = "secondPlacePrize"
+            type = "number"
+            min = "0"
+            step = "0.01"
+            [(ngModel)] = "form.secondPlacePrize"
+            name = "secondPlacePrize"
+            placeholder = "e.g. 5000"/>
+          </div>
+
+          <div class = "form-group">
+            <label for = "thirdPlacePrize">3rd Place Prize</label>
+            <input
+            id = "thirdPlacePrize"
+            type = "number"
+            min = "0"
+            step = "0.01"
+            [(ngModel)] = "form.thirdPlacePrize"
+            name = "thirdPlacePrize"
+            placeholder = "e.g. 2500"/>
+          </div>
+
+          <div class = "form-group">
+            <label for = "totalPrizePool">Total Prize Pool</label>
+            <input
+            id = "totalPrizePool"
+            type = "number"
+            min = "0"
+            step = "0.01"
+            [(ngModel)] = "form.totalPrizePool"
+            name = "totalPrizePool"
+            placeholder = "e.g. 20000"/>
+          </div>
         </div>
       
       </div>
