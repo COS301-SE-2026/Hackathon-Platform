@@ -190,11 +190,15 @@
         }
       }
       <label for = "fileUpload" class = "sr-only">Upload files</label>
-      <button class = "drop-zone" (click) = "fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()" 
-      (dragover) = "$event.preventDefault()" (drop) = "onDropFile($event)" type = "button" [disabled] = "isUploadingFile">
-      <input #fileInput id ="fileUpload" type = "file" style = "display: none" (change) = "onFileSelected($event)" multiple />
-      <span> {{isUploadingFile ? 'Uploading...' : '+ Drop file here or browse'}}</span>
-    </button>
+      @if (activeLevel && activeLevel.files.length > 0) {
+        <p class = "file-limit-note">This level already has a file. Remove it to upload a different one.</p>
+      } @else {
+        <button class = "drop-zone" (click) = "fileInput.click()" (keyup.enter) = "fileInput.click()" (keyup.space) = "fileInput.click()"
+        (dragover) = "$event.preventDefault()" (drop) = "onDropFile($event)" type = "button" [disabled] = "isUploadingFile">
+        <input #fileInput id ="fileUpload" type = "file" style = "display: none" (change) = "onFileSelected($event)" />
+        <span> {{isUploadingFile ? 'Uploading...' : '+ Drop file here or browse'}}</span>
+      </button>
+      }
     <div class = "modal-actions">
       <button class = "btn-cancel" (click) = "closeFilesModal()">Close</button>
     </div>
