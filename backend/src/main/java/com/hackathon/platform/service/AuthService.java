@@ -1,5 +1,6 @@
 package com.hackathon.platform.service;
 
+import java.util.Locale;
 import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.LoginRequest;
 import com.hackathon.platform.dto.RegisterRequest;
@@ -44,7 +45,7 @@ public class AuthService {
         User.builder()
             .firstName(request.getFirstName())
             .lastName(request.getLastName())
-            .email(request.getEmail())
+            .email(request.getEmail().toLowerCase(Locale.ROOT))
             .passwordHash(passwordEncoder.encode(request.getPassword()))
             .role(participantRole)
             .status("ACTIVE")
@@ -65,7 +66,7 @@ public class AuthService {
   public AuthResponse login(LoginRequest request) {
     User user =
         userRepository
-            .findByEmail(request.getEmail())
+            .findByEmail(request.getEmail().toLowerCase(Locale.ROOT))
             .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
     if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {

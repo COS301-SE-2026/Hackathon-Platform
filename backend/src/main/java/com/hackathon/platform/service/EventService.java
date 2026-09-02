@@ -321,6 +321,9 @@ public class EventService {
       event.setRegistrationKey(
           "PRIVATE".equals(event.getVisibility()) ? req.getRegistrationKey() : null);
     }
+    if (req.getDescription() != null) {
+      event.setDescription(req.getDescription());
+    }
     if (req.getStatus() != null && !creating) {
       event.setStatus(req.getStatus());
     }
