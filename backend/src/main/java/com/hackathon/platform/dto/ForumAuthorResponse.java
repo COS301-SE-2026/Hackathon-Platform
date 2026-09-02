@@ -11,8 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ForumAuthorResponse {
-    private UUID userId;
-    private String firstName;
-    private String lastName;
-    private String role;
+  private UUID userId;
+  private String firstName;
+  private String lastName;
+  private String role;
 }

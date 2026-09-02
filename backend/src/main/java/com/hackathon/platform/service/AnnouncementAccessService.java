@@ -1,8 +1,8 @@
 package com.hackathon.platform.service;
 
 import com.hackathon.platform.model.Event;
-import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.EventRegistrationRepository;
+import com.hackathon.platform.repository.EventRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;

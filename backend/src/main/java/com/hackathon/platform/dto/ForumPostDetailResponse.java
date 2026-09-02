@@ -1,8 +1,8 @@
 package com.hackathon.platform.dto;
 
 import java.time.Instant;
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,10 +13,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ForumPostDetailResponse {
-    private UUID postId;
-    private String title;
-    private String body;
-    private ForumAuthorResponse author;
-    private Instant createdAt;
-    private List<ForumCommentResponse> comments;
+  private UUID postId;
+  private String title;
+  private String body;
+  private ForumAuthorResponse author;
+  private Instant createdAt;
+  private List<ForumCommentResponse> comments;
 }

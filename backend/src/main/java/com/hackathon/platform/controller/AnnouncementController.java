@@ -35,8 +35,7 @@ public class AnnouncementController {
 
   @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   @PreAuthorize("permitAll()")
-  public SseEmitter streamAnnouncements(
-      @PathVariable UUID eventId) {
+  public SseEmitter streamAnnouncements(@PathVariable UUID eventId) {
     return announcementUpdateService.subscribe(eventId);
   }
 }

@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ForumPermissionResponse {
-    private boolean canCreatePost;
-    private boolean canComment;
-    private boolean canModerate;
+  private boolean canCreatePost;
+  private boolean canComment;
+  private boolean canModerate;
 }

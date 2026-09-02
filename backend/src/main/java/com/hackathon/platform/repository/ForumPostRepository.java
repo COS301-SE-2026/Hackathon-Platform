@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ForumPostRepository extends JpaRepository<ForumPost, UUID> {
-    List<ForumPost> findByEventIdAndIsDeletedFalseOrderByCreatedAtDesc(UUID eventId);
-    Optional<ForumPost> findByPostIdAndEventIdAndIsDeletedFalse(UUID postId, UUID eventId);
+  List<ForumPost> findByEventIdAndIsDeletedFalseOrderByCreatedAtDesc(UUID eventId);
+
+  Optional<ForumPost> findByPostIdAndEventIdAndIsDeletedFalse(UUID postId, UUID eventId);
 }

@@ -1,7 +1,6 @@
 import { Component, Input, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnnouncementResponse, AnnouncementService } from '../../../../services/announcement.service';
-import { CardComponent } from '../../../../shared/components/card/card.component';
 
 @Component({
   selector: 'app-announcements',

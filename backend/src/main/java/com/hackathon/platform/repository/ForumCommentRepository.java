@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ForumCommentRepository extends JpaRepository<ForumComment, UUID> {
-    List<ForumComment> findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(UUID postId);
-    long countByPostIdAndIsDeletedFalse(UUID postId);
+  List<ForumComment> findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(UUID postId);
+
+  long countByPostIdAndIsDeletedFalse(UUID postId);
 }

@@ -50,8 +50,7 @@ public class ForumUpdateService {
 
     for (SseEmitter emitter : emitters) {
       try {
-        emitter.send(
-            SseEmitter.event().name("forum-update").data(data));
+        emitter.send(SseEmitter.event().name("forum-update").data(data));
       } catch (IOException | IllegalStateException exception) {
         removeEmitter(eventId, emitter);
       }

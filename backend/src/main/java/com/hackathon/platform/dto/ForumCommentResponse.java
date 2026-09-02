@@ -12,9 +12,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ForumCommentResponse {
-    private UUID commentId;
-    private UUID postId;
-    private ForumAuthorResponse author;
-    private String body;
-    private Instant createdAt;
+  private UUID commentId;
+  private UUID postId;
+  private ForumAuthorResponse author;
+  private String body;
+  private Instant createdAt;
 }
