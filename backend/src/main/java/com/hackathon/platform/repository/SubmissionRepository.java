@@ -237,18 +237,23 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   @Query(
       value =
           """
+       WITH BestSubmissions AS (
+            SELECT DISTINCT ON (s.team_id, s.level_id) s.team_id, s.level_id, s.score
+            FROM submissions s
+            WHERE s.event_id = :eventId AND s.status = 'SCORED'
+            ORDER BY s.team_id, s.level_id, s.score DESC, s.submitted_at ASC, s.id ASC
+       )
        SELECT
-            s.level_id AS "levelId",
+            b.level_id AS "levelId",
             l.name AS "levelName",
             COUNT(*) AS "scoredSubmissions",
-            MIN(s.score) AS "minScore",
-            MAX(s.score) AS "maxScore",
-            AVG(s.score) AS "avgScore"
-       FROM submissions s
-       JOIN levels l ON l.id = s.level_id
-       WHERE s.event_id = :eventId AND s.status = 'SCORED'
-       GROUP BY s.level_id, l.name
-       ORDER BY s.level_id ASC
+            MIN(b.score) AS "minScore",
+            MAX(b.score) AS "maxScore",
+            AVG(b.score) AS "avgScore"
+       FROM BestSubmissions b
+       JOIN levels l ON l.id = b.level_id
+       GROUP BY b.level_id, l.name
+       ORDER BY b.level_id ASC
         """,
       nativeQuery = true)
   List<LevelScoreRow> findScoreDistributionByEventId(@Param("eventId") UUID eventId);
