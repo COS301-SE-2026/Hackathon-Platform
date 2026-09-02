@@ -123,6 +123,7 @@ public class ScoringController {
   /**
    * Recent submissions for a single event, with the team name and level number/name already
    * resolved
+   *
    * @param eventId the event to scope submissions to
    * @param limit the maximum number of submissions to return
    */

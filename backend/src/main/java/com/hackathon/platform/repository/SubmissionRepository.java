@@ -33,9 +33,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
       "SELECT s FROM Submission s, Event e WHERE s.eventId = e.eventId AND e.createdByUserId = :userId ORDER BY s.submittedAt DESC")
   List<Submission> getRecentSubmissions(@Param("userId") UUID userId, Pageable pageeable);
 
-  /**
-   * Recent submissions scoped to a single event
-   */
+  /** Recent submissions scoped to a single event */
   @Query(
       value =
           """
