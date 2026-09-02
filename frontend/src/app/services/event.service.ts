@@ -16,6 +16,8 @@ export interface EventRequest {
   leaderboardFreezeDateTime?: string;
   freezeTime?: string;
   rules?: string;
+  allowedTech?: string[];
+  tagline?: string;
 }
 
 export interface EventResponse {
