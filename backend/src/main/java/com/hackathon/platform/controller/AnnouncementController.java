@@ -2,7 +2,6 @@ package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.AnnouncementResponse;
 import com.hackathon.platform.model.User;
-import com.hackathon.platform.service.AnnouncementAccessService;
 import com.hackathon.platform.service.AnnouncementService;
 import com.hackathon.platform.service.AnnouncementUpdateService;
 import java.util.List;
@@ -23,7 +22,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class AnnouncementController {
   private final AnnouncementService announcementService;
-  private final AnnouncementAccessService announcementAccessService;
   private final AnnouncementUpdateService announcementUpdateService;
 
   @GetMapping
@@ -36,10 +34,8 @@ public class AnnouncementController {
   }
 
   @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  @PreAuthorize("hasRole('PARTICIPANT')")
-  public SseEmitter streamAnnouncements(
-      @PathVariable UUID eventId, @AuthenticationPrincipal User user) {
-    announcementAccessService.requireParticipantAccess(eventId, user.getUserId());
+  @PreAuthorize("permitAll()")
+  public SseEmitter streamAnnouncements(@PathVariable UUID eventId) {
     return announcementUpdateService.subscribe(eventId);
   }
 }
