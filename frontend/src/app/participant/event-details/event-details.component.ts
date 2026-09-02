@@ -70,8 +70,10 @@ export class EventDetailsComponent implements OnDestroy {
 
   event = {
     name: '',
+    tagline: '',
     description: 'Not specified',
-    prizePool: 'Not specified',
+    bannerUrl: '',
+     prizePool: 0,
     startDate: '',
     endDate: '',
     teamSize: 0,
@@ -237,6 +239,16 @@ confirmRegistration(): void {
         this.event = this.toEventView(event);
         this.hackathonId = event.hackathon ?? '';
 
+        this.eventService.getEventBannerUrl(this.eventId).subscribe({
+          next: ({ url }) => {
+            this.event.bannerUrl = url;
+            this.change.markForCheck();
+          },
+        error: (error) => {
+          console.error('Failed to load event banner:', error);
+        }
+      });
+
         this.loading = false;
 
         this.tick();
@@ -324,8 +336,10 @@ confirmRegistration(): void {
 
     return {
       name: event.name,
+      tagline: event.tagline ?? '',
+      bannerUrl: '',
       description: event.description ?? 'Not specified',
-      prizePool: 'Not specified',
+      prizePool: event.totalPrizePool ?? 0,
       startDate: this.formatDate(start),
       endDate: this.formatDate(end),
       teamSize: event.teamSizeLimit,
