@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { forkJoin } from 'rxjs';
 import { Router, RouterModule } from '@angular/router';
@@ -12,9 +12,9 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ToastService } from '../../shared/components/toast/toast.service';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util';
+import { EventCardComponent } from '../event-card/event-card.component';
 
-
-interface OpenEventView {
+export interface OpenEventView {
   eventId: string;
   name: string;
   dates: string;
@@ -45,17 +45,18 @@ interface OpenEventView {
   selector: 'app-home',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
-    CarouselModule, 
-    CardComponent, 
+    CommonModule,
+    RouterModule,
+    CarouselModule,
+    CardComponent,
     ButtonComponent,
-    InputComponent, 
+    InputComponent,
     ModalComponent,
-    LoaderComponent
+    LoaderComponent,
+    EventCardComponent
    ],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  templateUrl: '../home/home.component.html',
+  styleUrls: ['../home/home.component.scss']
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
@@ -67,7 +68,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private timerInterval: ReturnType<typeof setInterval> | undefined;
 
- 
+
   isLoadingEvents = false;
   registrationModal = false;
   isLoadingActiveEvents = false;
@@ -80,11 +81,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   activeEvents: OpenEventView[] = [];
   upcomingEvents: OpenEventView[] = [];
+  completedEvents: OpenEventView[] = [];
+  isLoadingCompletedEvents = false;
+  generatingCertificateEventId: string | null = null;
   selectedEvent: OpenEventView | null = null;
   registeredEventIds = new Set<string>();
 
-  
-  
+
+
 
     responsiveOptionsForCarousel = [
     {
@@ -113,6 +117,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.loadUpcomingEvents();
     this.loadUsersActiveEvents();
     this.loadMyRegistrations();
+    this.loadCompletedEvents();
     this.timerInterval = setInterval(() => this.tick(), 1000);
   }
 
@@ -213,7 +218,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
    this.eventService.getEventLogoUrl(event.eventId).subscribe({
         next: (response) => {
-          if (response?.url) { 
+          if (response?.url) {
            event.logoUrl = response.url;
             this.change.markForCheck();
           }
@@ -226,23 +231,20 @@ export class HomeComponent implements OnInit, OnDestroy {
 
  loadUpcomingEvents(): void {
   this.isLoadingEvents = true;
-  
+
 
   this.eventService.getOpenEvents().subscribe({
     next: (events) => {
       this.isLoadingEvents = false;
 
-      const now = new Date();
-
       this.upcomingEvents = events
         .map((event) => this.toOpenEventView(event))
-        .filter((event) => new Date(event.startDateTime) > now)
         .sort(
           (a, b) =>
             new Date(a.startDateTime).getTime() -
             new Date(b.startDateTime).getTime()
         );
-        
+
         this.loadEventLogos(this.upcomingEvents);
 
       this.change.markForCheck();
@@ -452,7 +454,7 @@ confirmRegistration(): void {
 
   private formatEventDates(startDateTime: string, durationHours: number): string {
     const start = new Date(startDateTime);
-    const end = new Date(start.getTime() + durationHours * 60 * 60 * 1000);
+    const end = new Date(start.getTime() + durationHours * 1000);
 
     return `${this.formatShortDate(start)} – ${this.formatShortDate(end)}`;
   }
@@ -472,4 +474,49 @@ confirmRegistration(): void {
   this.change.markForCheck();
 }
 
+  loadCompletedEvents(): void {
+    this.isLoadingCompletedEvents = true;
+
+    this.eventService.getCompletedEvents().subscribe({
+      next: (events) => {
+        this.completedEvents = events.map((event) => this.toOpenEventView(event)).sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime());
+        this.loadEventLogos(this.completedEvents);
+        this.isLoadingCompletedEvents = false;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.completedEvents = [];
+        this.isLoadingCompletedEvents = false;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  generateCertificate(event: OpenEventView): void {
+    if(this.generatingCertificateEventId){
+      return;
+    }
+
+    this.generatingCertificateEventId = event.eventId;
+
+    this.eventService.downloadCertificate(event.eventId).subscribe({
+      next: (blob) =>{
+        const fileName = `${event.name.replace(/[^a-z0-9]+/gi, '-')}-certificate.pdf`;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.generatingCertificateEventId = null;
+        this.change.markForCheck();
+      },
+
+      error: () => {
+        this.toast.error("Error", "Cant find the certificate");
+        this.generatingCertificateEventId = null;
+        this.change.markForCheck();
+      }
+    })
+  }
 }

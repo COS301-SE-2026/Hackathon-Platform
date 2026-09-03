@@ -274,4 +274,8 @@ getEventLeaderboard(eventId: string): Observable<LeaderboardEntryResponse[]> {
       { additionalTime: additionalTimeSeconds }
     );
   }
+
+  downloadCertificate(eventId: string): Observable<Blob>{
+    return this.http.get(`${this.baseUrl}/events/${eventId}/certificate`, {responseType: 'blob'});
+  }
 }

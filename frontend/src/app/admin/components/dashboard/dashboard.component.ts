@@ -97,6 +97,11 @@ export class DashboardComponent implements OnInit{
   eventError = '';
   submissionError = '';
 
+  get selectedEventName(): string {
+    const event = this.allEvents.find(e => e.eventId === this.selectedEventId);
+    return event?.name || 'selected event';
+  }
+
   // Per-event insights
   selectedEventId = '';
   insightsLoading = false;
@@ -535,7 +540,7 @@ export class DashboardComponent implements OnInit{
     if (Number.isNaN(start.getTime())){
       return 'Upcoming';
     }
-    const end = new Date(start.getTime() + Number(event.duration || 0)* 60 * 60 * 1000);
+    const end = new Date(start.getTime() + Number(event.duration || 0) * 1000);
     const now = Date.now();
 
     if(now < start.getTime()) return "Upcoming";
@@ -550,7 +555,7 @@ export class DashboardComponent implements OnInit{
       return 'date unavailable';
     }
 
-    const end = new Date(start.getTime() + Number(event.duration || 0) * 60 * 60 * 1000);
+    const end = new Date(start.getTime() + Number(event.duration || 0) * 1000);
     const startLabel = start.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     const endLabel = end.toLocaleDateString('en-US',{month:'short',day:'numeric', year:'numeric'});
 

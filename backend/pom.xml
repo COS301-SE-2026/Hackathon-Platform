@@ -110,6 +110,12 @@
       <artifactId>spring-boot-starter-websocket</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+
     <!-- Actuator (health endpoints for monitoring) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
