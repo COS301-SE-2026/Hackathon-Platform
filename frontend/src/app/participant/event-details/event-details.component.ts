@@ -337,7 +337,7 @@ confirmRegistration(): void {
 
     const end = new Date(
       start.getTime() +
-      event.duration * 60 * 60 * 1000
+      event.duration * 1000
     );
 
     return {
