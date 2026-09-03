@@ -18,6 +18,7 @@ import { EventService, EventResponse, EventRegistrationRequest } from '../../ser
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util'
 import { StorageService } from '../../services/storage.service';
 import { ForumComponent } from '../../admin/components/forum/forum.component';
+import { LevelService } from '../../services/level.service';
 
 
 @Component({
@@ -51,6 +52,7 @@ export class EventDetailsComponent implements OnDestroy {
   private readonly storageService = inject(StorageService);
   private readonly change = inject(ChangeDetectorRef);
   private readonly toast = inject(ToastService);
+  private readonly levelService = inject(LevelService);
   private timerInterval: ReturnType<typeof setInterval> | undefined;
 
   tabs: TabItem[] = [];
@@ -71,6 +73,7 @@ export class EventDetailsComponent implements OnDestroy {
   isRegistering = false;
   dietaryReq = '';
   allergies = '';
+  numberOfLevels: number | null = null;
 
   event = {
     name: '',
@@ -234,6 +237,21 @@ confirmRegistration(): void {
   });
  }
 
+ loadNumberOfLevels(): void {
+  if (!this.hackathonId) {
+    return;
+  }
+
+  this.levelService.getLevels(this.hackathonId).subscribe({
+    next: levels => {
+      this.numberOfLevels = levels.length;
+    },
+    error: () => {
+      this.numberOfLevels = 0;
+    }
+  });
+}
+
   loadEvents(): void {
     this.loading = true;
     this.eventError = '';
@@ -242,6 +260,7 @@ confirmRegistration(): void {
       next: event => {
         this.event = this.toEventView(event);
         this.hackathonId = event.hackathon ?? '';
+        this.loadNumberOfLevels();
 
        this.eventService.getEventBannerUrl(this.eventId).subscribe({
           next: (response) => {
