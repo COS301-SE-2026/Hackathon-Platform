@@ -19,7 +19,7 @@
     </div>
 
    <div class="navbar-actions">
-  <app-button variant="primary" (click)="router.navigate(['/login'])">Login</app-button>
+  <app-button variant="primary" (click)="router.navigate(['/login'])" (keydown)="null" (keyup)="null">Login</app-button>
 </div>
 
     <button type="button" class="navbar-menu-button" (click)="toggleSidebar()" [attr.aria-expanded]="showSidebar" aria-label="Open navigation menu" > <i class="pi pi-bars" aria-hidden="true"></i></button>

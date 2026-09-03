@@ -76,8 +76,7 @@
   color: var(--dark-gray);
   font-size: var(--font-size-body);
   line-height: var(--line-height-body);
-  overflow-wrap: break-word;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   text-align: justify;
 }
 
