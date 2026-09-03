@@ -238,8 +238,8 @@ getMyRegistrations(): Observable<EventRegistrationResponse[]> {
   return this.http.get<EventRegistrationResponse[]>( `${this.baseUrl}/events/my-registrations`);
 }
 
-getMyTeamForEvent(eventId: string): Observable<TeamResponse> {
-  return this.http.get<TeamResponse>( `${this.baseUrl}/teams/my-team?eventId=${eventId}`);
+getMyTeamForEvent(eventId: string): Observable<TeamResponse | null> {
+  return this.http.get<TeamResponse | null>( `${this.baseUrl}/teams/my-team?eventId=${eventId}`);
 }
 
 getTeamMembers(teamId: string): Observable<TeamMemberResponse[]> {

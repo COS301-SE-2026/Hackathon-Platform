@@ -2,7 +2,6 @@
     <div class = "page-header">
     <div>
         <h1>Hackathons</h1>
-        <p class = "page-subtitle"> Manage all your hackathons and create events for each</p>
     </div>
     <button type = 'button' class = "btn-create-hackathon" (click) = "openCreateDialog()"> + Create Hackathon
     </button>
@@ -16,14 +15,6 @@
 
     <div class = "toolbar-right">
         <span class = "hackathon-count">{{ hackathons.length}} Hackathons</span>
-        <div class = "view-toggle">
-            <button type = "button" class = "view-toggle-btn active" aria-label="Grid view">
-                <i class = "pi pi-th-large"></i>
-            </button>
-            <button type = "button" class = "view-toggle-btn" aria-label = "List view">
-                <i class = "pi pi-bars"></i>
-            </button>
-        </div>
     </div>
 </div>
 
@@ -60,9 +51,6 @@
                    </button>
                    <button type = "button" class = "icon-btn icon-btn-edit" aria-label= "Edit hackathon" (click) = "openEditDialog(hackathon)">
                     <i class = "pi pi-pencil"></i>
-                   </button>
-                   <button type = "button" class = "icon-btn icon-btn-delete" aria-label= "Delete hackathon" (click) = "deleteHackathon(hackathon.hackathonId)">
-                    <i class = "pi pi-trash"></i>
                    </button>
 
                 </div>
