@@ -48,9 +48,6 @@
   <div class = "page-header">
     <div>
       <h2>{{isHackathonScoped ? 'Events Management' : 'All Events'}}</h2>
-      <p class = "page-subtitle">
-        {{isHackathonScoped ? 'View and manage all events for this hackathon.' : 'View events across every hackathon on the platform.'}}
-      </p>
     </div>
     @if (isHackathonScoped){
       <button type = "button" class = "btn-create-event" (click) = "navigateToCreateEvents()">
@@ -63,15 +60,15 @@
     <div class = "toolbar">
       <div class = "search-box">
         <i class = "pi pi-search search-icon"></i>
-        <input type = "text" placeholder = "Search events..." aria-label = "Search events"/>
+        <input type = "text" placeholder = "Search events..." aria-label = "Search events" [(ngModel)]="searchTerm"/>
       </div>
       <div class = "filter-select">
-        <select aria-label = "Filter by status">
-          <option>All Events</option>
-          <option>Live</option>
-          <option>Upcoming</option>
-          <option>Completed</option>
-          <option>Canceled</option>
+        <select aria-label = "Filter by status" [(ngModel)]="statusFilter">
+          <option value="ALL">All Events</option>
+          <option value="Live">Live</option>
+          <option value="Upcoming">Upcoming</option>
+          <option value="Completed">Completed</option>
+          <option value="Canceled">Canceled</option>
         </select>
         <i class = "pi pi-chevron-down filter-chevron"></i>
       </div>
@@ -90,10 +87,10 @@
 
       @if (isLoading){
         <div class = "empty-state">Loading events...</div>
-      } @else if (events.length === 0){
+      } @else if (filteredEvents.length === 0){
         <div class = "empty-state">No events created yet for this hackathon.</div>
       } @else {
-        @for (event of events; track event.eventId){
+        @for (event of filteredEvents; track event.eventId){
           <div class = "event-row-group">
             <div class = "event-row">
               <div class = "event-name-cell">

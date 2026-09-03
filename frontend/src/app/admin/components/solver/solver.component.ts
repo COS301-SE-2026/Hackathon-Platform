@@ -113,11 +113,13 @@ onUploadAndActivate(): void{
     this.selectedFile= null;
     this.selectedFileName ='';
     this.changeNotes= '';
+    this.change.markForCheck();
         },
         error: (error) => {
             console.error('Upload failed:',error);
             this.isUploading = false;
             this.uploadError = error.error?.message || 'Upload failed. Please try again';
+            this.change.markForCheck();
         }
     });
 
@@ -141,23 +143,19 @@ rescoreAllSubmissions(): void {
         next: (response) => {
             this.isRescoring = false;
             this.rescoreSuccessMessage = `${response.queuedCount} submission(s) queued for rescoring.`;
+            this.change.markForCheck();
         },
         error: (error) => {
             console.error('Rescore failed:', error);
             this.isRescoring = false;
             this.rescoreError = error.error?.message || 'Rescore failed. Please try again';
+            this.change.markForCheck();
         }
     });
 }
 
   goBack(): void {
-    if (this.hackathonId){
-         this.router.navigate(['/admin/hackathons', this.hackathonId]);
-
-    }else {
-        this.router.navigate(['/admin/hackathons']);
-    }
-   
+    this.router.navigate(['/admin/hackathons']);
   }
 
   ngOnInit(): void {

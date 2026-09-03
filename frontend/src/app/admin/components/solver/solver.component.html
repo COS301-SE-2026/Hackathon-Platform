@@ -45,13 +45,11 @@
     <div class = "page-header">
         <div>
             <h1>Solver Management</h1>
-            <p class = "page-subtitle">Upload and manage solver versions for this hackathon.</p>
         </div>
         <div class = "page-header-actions">
             <button class = "btn-secondary" [disabled] = "isRescoring" (click) = "rescoreAllSubmissions()">
                 {{ isRescoring ? 'Queuing rescore…' : 'Rescore all submissions' }}
             </button>
-            <button class = "btn-primary" (click) = "scrollToUploadForm()">Upload new version</button>
         </div>
     </div>
 

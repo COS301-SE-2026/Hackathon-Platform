@@ -137,6 +137,17 @@ export class HomeComponent implements OnInit, OnDestroy {
 
      this.eventService.getMyTeamForEvent(event.eventId).subscribe({
     next: (team) => {
+
+      if (!team) {
+        event.teamName = undefined;
+        event.teamMemberCount = 0;
+        event.latestSubmissionLevel = undefined;
+        event.latestSubmissionScore = undefined;
+        event.teamRank = undefined;
+        event.totalTeams = undefined;
+        this.change.markForCheck();
+        return;
+      }
        event.teamName = team.teamName;
 
       this.eventService.getTeamMembers(team.teamId).subscribe({
