@@ -8,7 +8,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
-import { LeaderboardService, LeaderboardEntry } from '../../../../services/leaderboard.service';
+import { LeaderboardService } from '../../../../services/leaderboard.service';
 import { SubmissionService } from '../../../../services/submission.service';
 
 
