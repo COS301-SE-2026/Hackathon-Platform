@@ -97,6 +97,11 @@ export class DashboardComponent implements OnInit{
   eventError = '';
   submissionError = '';
 
+  get selectedEventName(): string {
+    const event = this.allEvents.find(e => e.eventId === this.selectedEventId);
+    return event?.name || 'selected event';
+  }
+
   // Per-event insights
   selectedEventId = '';
   insightsLoading = false;
