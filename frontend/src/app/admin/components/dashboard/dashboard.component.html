@@ -14,12 +14,18 @@
       }
     </div>
 
+    <div class = "scope-legend">
+      <span class = "scope-legend-item"><span class = "scope-swatch scope-swatch-global"></span>All events</span>
+      <span class = "scope-legend-item"><span class = "scope-swatch scope-swatch-event"></span>Selected event only</span>
+    </div>
+
     <div class = "stats-grid">
       <div class = "stat-card">
         <div class = "stat-icon stat-icon-blue"><i class = "pi pi-calendar"></i></div>
         <div>
           <p class = "stat-value">{{ activeEvents }}</p>
         <p class = "stat-label">Active events</p>
+        <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
         </div>
         
       </div>
@@ -29,7 +35,7 @@
         <div>
           <p class = "stat-value">{{ activeParticipants }}</p>
         <p class = "stat-label">Active Participants</p>
-        
+        <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
         </div>
        </div>
 
@@ -38,7 +44,7 @@
         <div>
           <p class = "stat-value">{{ teamsCount }}</p>
         <p class = "stat-label">Teams</p>
-       
+        <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
         </div>
         </div>
 
@@ -47,16 +53,18 @@
         <div>
           <p class = "stat-value">{{ submissionsCount}}</p>
         <p class = "stat-label">Submissions</p>
-       
+        <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
         </div>
         </div>
     </div>
 
         <div class = "panels-row">
-          <div class = "panel-card">
+          <div class = "panel-card panel-card-global">
             <div class = "panel-header">
-              <h2 class = "panel-title">Active Events</h2>
-             
+              <div class = "panel-header-titles">
+                <h2 class = "panel-title">Active Events</h2>
+                <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
+              </div>
             </div>
 
             @if (eventLoading){
@@ -83,10 +91,13 @@
             }
           </div>
 
-          <div class = "panel-card">
+          <div class = "panel-card panel-card-event">
             <div class = "panel-header">
-              <h2 class = "panel-title">Active Participants</h2>
-              
+              <div class = "panel-header-titles">
+                <h2 class = "panel-title">Active Participants</h2>
+                <span class = "scope-tag scope-tag-event" [title] = "'Scoped to ' + selectedEventName"><i class = "pi pi-map-marker"></i>This event</span>
+              </div>
+              <a (click) = "openParticipantsModal(selectedEventId)" class = "btn-view-all">View Participants</a>
             </div>
 
             <div class = "participant-rows">
@@ -112,10 +123,12 @@
             </div>
           </div>
 
-          <div class = "panel-card">
+          <div class = "panel-card panel-card-event">
             <div class = "panel-header">
-              <h2 class = "panel-title">Submission Status</h2>
-             
+              <div class = "panel-header-titles">
+                <h2 class = "panel-title">Submission Status</h2>
+                <span class = "scope-tag scope-tag-event" [title] = "'Scoped to ' + selectedEventName"><i class = "pi pi-map-marker"></i>This event</span>
+              </div>
             </div>
 
             <div class = "donut-wrap">
@@ -147,7 +160,10 @@
 
         <div class = "section">
           <div class = "panel-header">
-            <h2 class = "section-title">Event Insights</h2>
+            <div class = "panel-header-titles">
+              <h2 class = "section-title">Event Insights</h2>
+              <span class = "scope-tag scope-tag-event" [title] = "'Scoped to ' + selectedEventName"><i class = "pi pi-map-marker"></i>{{ selectedEventName }}</span>
+            </div>
           </div>
 
           @if (insightsLoading) {
@@ -190,9 +206,12 @@
 
           </div>
         <div class = "panels-row panels-row-3">
-          <div class = "panel-card">
+          <div class = "panel-card panel-card-event">
             <div class = "panel-header">
-              <h2 class = "panel-title">Submissions per Minute</h2>
+              <div class = "panel-header-titles">
+                <h2 class = "panel-title">Submissions per Minute</h2>
+                <span class = "scope-tag scope-tag-event"><i class = "pi pi-map-marker"></i>This event</span>
+              </div>
               <span class = "trend-window">Last 60 min</span>
             </div>
             <svg viewBox = "0 0 300 80" class = "trend-svg" preserveAspectRatio = "none">
@@ -207,9 +226,12 @@
             </svg>
           </div>
 
-          <div class = "panel-card">
+          <div class = "panel-card panel-card-event">
             <div class = "panel-header">
-              <h2 class = "panel-title">Score Distribution by Level</h2>
+              <div class = "panel-header-titles">
+                <h2 class = "panel-title">Score Distribution by Level</h2>
+                <span class = "scope-tag scope-tag-event"><i class = "pi pi-map-marker"></i>This event</span>
+              </div>
             </div>
             <div class = "score-bars">
               @for (lvl of scoreByLevel; track lvl.level){
@@ -231,9 +253,12 @@
             </div>
           </div>
 
-          <div class = "panel-card">
+          <div class = "panel-card panel-card-event">
             <div class = "panel-header">
-              <h2 class = "panel-title">Top 3 Teams</h2>
+              <div class = "panel-header-titles">
+                <h2 class = "panel-title">Top 3 Teams</h2>
+                <span class = "scope-tag scope-tag-event"><i class = "pi pi-map-marker"></i>This event</span>
+              </div>
             </div>
             @if (topTeamsLoading) {
               <div class = "empty-state">Loading leaderboard...</div>
@@ -261,11 +286,13 @@
 
         <div class = "section">
           <div class = "panel-header">
-          <h2 class = "section-title">Recent submissions</h2>
-         
+          <div class = "panel-header-titles">
+            <h2 class = "section-title">Recent submissions</h2>
+            <span class = "scope-tag scope-tag-event" [title] = "'Scoped to ' + selectedEventName"><i class = "pi pi-map-marker"></i>This event</span>
+          </div>
           </div> 
         
-          <div class = "table-card">
+          <div class = "table-card panel-card-event">
             @if (recentSubmissions.length === 0){
               <div class = "empty-state">No submissions yet</div>
             } @else {
@@ -311,10 +338,12 @@
         </div>
 
         <div class = "panels-row">
-          <div class = "panel-card">
+          <div class = "panel-card panel-card-event">
             <div class = "panel-header">
-              <h2 class = "panel-title">Recent Announcements</h2>
-              
+              <div class = "panel-header-titles">
+                <h2 class = "panel-title">Recent Announcements</h2>
+                <span class = "scope-tag scope-tag-event" [title] = "'Scoped to ' + selectedEventName"><i class = "pi pi-map-marker"></i>This event</span>
+              </div>
             </div>
             <div class = "announcement-rows">
               @if (announcementsLoading){
