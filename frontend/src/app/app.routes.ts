@@ -10,8 +10,6 @@ export const routes: Routes = [
   { path: 'super-admin', loadComponent: () => import('./admin/super-admin/super-admin.component').then(m => m.SuperAdminComponent), canActivate: [AuthGuard] },
   { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
   {path: 'style-guide', loadComponent: () => import('./components/brand-style-guide/brand-style-guide.component').then( m => m.BrandStyleGuideComponent),},
-  {
-  path: 'component-tests', loadComponent: () =>import('./component-tests/component-tests.component').then(m => m.ComponentTestsComponent)},
 
   {
     path: 'admin',

@@ -241,9 +241,11 @@
 
   <div class="event-content">
 
-    @if (activeTab === 'overview') {<app-overview />}
+    @if (activeTab === 'overview' && eventId) { <app-overview [eventId]="eventId"></app-overview> }
 
-    @if (activeTab === 'rules') { <app-rules />}
+    @if (activeTab === 'rules') {
+        <app-rules [eventId]="eventId" />
+        }
 
     @if (activeTab === 'forum') { <app-forum />}
 
