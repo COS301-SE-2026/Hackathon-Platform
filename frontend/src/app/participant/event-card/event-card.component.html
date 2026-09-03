@@ -1,0 +1,78 @@
+<app-card class="upcoming-event-card">
+
+  <div class="upcoming-event-content">
+
+    <div class="upcoming-event-image">
+      <img [src]="event.logoUrl || 'assets/images/hackathon-image.png'" [alt]="event.name" class="event-img" />
+    </div>
+
+    <div class="upcoming-event-details">
+
+      <div class="event-top-section">
+
+        <div class="event-heading">
+
+          <h3 class="ev-name">  {{ event.name }}</h3>
+
+          <p class="event-tagline"> {{ event.tagline }}</p>
+
+        </div>
+
+        <div class="event-actions">
+
+          <div class="event-action-button"><app-button variant="secondary" (click)="goToEvent(event)"width="100%" (keydown)="null" (keyup)="null"> View Event</app-button></div>
+
+          @if (type === 'upcoming'){
+            <div class="event-action-button"> <app-button variant="primary" [disabled]="registeredEventIds.has(event.eventId)" (click)="registerForEvent(event)" width="100%" (keydown)="null" (keyup)="null"> {{ registeredEventIds.has(event.eventId) ? 'Registered' : 'Register' }} </app-button></div>
+          } @else {
+            <div class="event-action-button">
+              <app-button variant="primary" [disabled]="generatingCertificateEventId===event.eventId" (click)="generateCertificate(event)" width="100%" (keydown)="null" (keyup)="null">
+                {{ generatingCertificateEventId === event.eventId ? 'Generating' : 'Generate Certificate' }}
+              </app-button>
+            </div>
+          }
+
+        </div>
+
+      </div>
+
+
+      <div class="event-meta-row">
+
+        <div class="meta-item event-dates">
+          <i class="pi pi-calendar"></i>
+          <span>{{ event.dates }}</span>
+        </div>
+
+        <div class="meta-item visibility-meta">
+          <i [class]="event.visibility === 'PRIVATE'  ? 'pi pi-lock'  : 'pi pi-globe'"> </i>
+          <span>  {{ event.visibility | titlecase }} </span>
+        </div>
+
+
+        @if(type === 'upcoming'){
+          <div class="meta-item prize-meta">
+            <i class="pi pi-trophy"></i>
+            <span> {{ event.totalPrizePool }} Prize Pool</span>
+          </div>
+        }
+
+        <div class="meta-item location-meta">
+          <i class="pi pi-map-marker"></i>
+          <span>{{ event.inPerson ? 'In Person' : 'Virtual' }}</span>
+        </div>
+
+        @if (type === 'upcoming' && getDaysUntilStart(event) !== null) {
+          <div class="event-start-tag">
+            <i class="pi pi-clock"></i>
+            <span>{{ getDaysUntilStart(event) }}</span>
+          </div>
+        }
+
+      </div>
+
+    </div>
+
+  </div>
+
+</app-card>
