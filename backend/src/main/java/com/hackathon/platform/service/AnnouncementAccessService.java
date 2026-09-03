@@ -1,8 +1,8 @@
 package com.hackathon.platform.service;
 
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
-import com.hackathon.platform.repository.TeamMemberRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AnnouncementAccessService {
   private final EventRepository eventRepo;
-  private final TeamMemberRepository teamMemberRepo;
+  private final EventRegistrationRepository eventregRepo;
 
   public Event requireEventOwner(UUID eventId, UUID adminUserId) {
     Event event =
@@ -30,7 +30,7 @@ public class AnnouncementAccessService {
       throw new IllegalArgumentException("Event could not be found: " + eventId);
     }
 
-    boolean access = teamMemberRepo.existsApprovedParticipantInEvent(userId, eventId);
+    boolean access = eventregRepo.existsByEventIdAndUserId(eventId, userId);
 
     if (!access) {
       throw new AccessDeniedException("You are not a participant in this event");

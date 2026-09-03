@@ -338,6 +338,10 @@ export class EventlistComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/events', eventId, 'announcements']);
   }
 
+  navigateToForum(eventId: string): void {
+    this.router.navigate(['/admin/events', eventId, 'forum']);
+  }
+
   pauseLeaderboard(eventId: string): void {
     if(this.leaderboardPauseLoading[eventId]) return;
 

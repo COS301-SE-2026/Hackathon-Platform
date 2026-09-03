@@ -29,13 +29,7 @@
             <p class = "stat-label">Events</p>
           </div>
           </div>
-          <div class = "stat">
-          <i class = "pi pi-users"></i>
-          <div>
-            <p class = "stat-value">{{participantCount ?? '—'}}</p>
-            <p class = "stat-label">Participants</p>
-          </div>
-        </div>
+          
       </div>
     </div>
     </div>
@@ -44,7 +38,7 @@
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
-      <a routerLink = "/admin/hackathons/{{hackathonId }}/announcements" routerLinkActive = "active"><i class = "pi pi-megaphone"></i>Announcements</a>
+
       
 </div>
 
@@ -160,6 +154,11 @@
                   <button type = "button" class = "btn-view-event" (click) = "navigateToAnnouncements(event.eventId)">
                     <i class = "pi pi-megaphone"></i> Announcements
                   </button>
+
+                  <button type = "button" class = "btn-view-event" (click) = "navigateToForum(event.eventId)">
+                    <i class = "pi pi-comments"></i> Forum
+                  </button>
+
                   <button type = "button" class = "btn-view-event" (click) = "pauseLeaderboard(event.eventId)" [disabled] = "leaderboardPauseLoading[event.eventId]">
                     <i class = "pi" [ngClass] = "leaderboardPaused[event.eventId] ? 'pi-play' : 'pi-pause'"></i>
                     {{leaderboardPauseLoading[event.eventId] ? 'Updating...' : leaderboardPaused[event.eventId] ? 'Resume Scoring' : 'Pause Scoring'}}

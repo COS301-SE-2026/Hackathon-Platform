@@ -7,6 +7,7 @@ import { SubmissionsComponent } from './event-details-tabs/submissions/submissio
 import { SubmissionHistoryComponent } from './event-details-tabs/submission-history/submission-history.component';
 import { MyTeamComponent } from './event-details-tabs/my-team/my-team.component';
 import { LeaderboardComponent } from './event-details-tabs/leaderboard/leaderboard.component';
+import { AnnouncementsComponent } from './event-details-tabs/announcements/announcements.component';
 import { TabsComponent, TabItem} from '../../shared/components/tabs/tabs.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
@@ -16,6 +17,7 @@ import { ToastService } from '../../shared/components/toast/toast.service';
 import { EventService, EventResponse, EventRegistrationRequest } from '../../services/event.service';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util'
 import { StorageService } from '../../services/storage.service';
+import { ForumComponent } from '../../admin/components/forum/forum.component';
 
 
 @Component({
@@ -29,6 +31,8 @@ import { StorageService } from '../../services/storage.service';
     MyTeamComponent,
     LeaderboardComponent,
     SubmissionHistoryComponent,
+    AnnouncementsComponent,
+    ForumComponent,
     ModalComponent,
     InputComponent,
     TabsComponent,
@@ -51,7 +55,7 @@ export class EventDetailsComponent implements OnDestroy {
 
   tabs: TabItem[] = [];
 
-  private readonly protectedTabs = [ 'team','submissions', 'submission-history','leaderboard'];
+  private readonly protectedTabs = [ 'team','submissions', 'submission-history','leaderboard', 'forum', 'announcements'];
 
   activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'overview';
   eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
@@ -275,7 +279,7 @@ confirmRegistration(): void {
 
    if (this.isRegistered) {
     tabDef.push( ['My Team', 'pi pi-users', 'team'], ['Submissions', 'pi pi-code', 'submissions'],
-      ['Submissions History', 'pi pi-history', 'submission-history'], ['Leaderboard', 'pi pi-trophy', 'leaderboard']
+      ['Submissions History', 'pi pi-history', 'submission-history'], ['Leaderboard', 'pi pi-trophy', 'leaderboard'], ['Forum', 'pi pi-comments', 'forum'], ['Announcements', 'pi pi-megaphone', 'announcements'],
     );
   }
 

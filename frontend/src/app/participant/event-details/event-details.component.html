@@ -245,6 +245,8 @@
 
     @if (activeTab === 'rules') { <app-rules />}
 
+    @if (activeTab === 'forum') { <app-forum />}
+
     @if (activeTab === 'submissions' && eventId && hackathonId) {
       <app-submissions [eventId]="eventId" [hackathonId]="hackathonId"></app-submissions>
     }
@@ -259,6 +261,10 @@
 
     @if (activeTab === 'leaderboard' && eventId) {
       <app-leaderboard [eventId]="eventId"> </app-leaderboard>
+    }
+
+    @if (activeTab === 'announcements' && eventId) {
+    <app-announcements [eventId]="eventId"></app-announcements>
     }
 
   </div>
