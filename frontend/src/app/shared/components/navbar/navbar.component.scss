@@ -462,3 +462,31 @@
     display: none;
   }
 }
+
+
+
+.sidebar-logout.landing {
+  color: var(--bright-blue);
+}
+
+
+.landing-navbar {
+  grid-template-columns: auto 1fr auto;
+}
+
+.landing-navbar .navbar-links {
+  justify-self: center;
+}
+
+.landing-navbar .navbar-actions {
+  justify-self: end;
+}
+
+
+@media (max-width: 1023px) {
+  .landing-navbar {
+    .navbar-actions {
+      display: none;
+    }
+  }
+}

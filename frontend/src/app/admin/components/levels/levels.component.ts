@@ -146,28 +146,34 @@ export class LevelsComponent implements OnInit {
 
   private uploadFiles(files: FileList): void {
     if (!this.activeLevel) return;
+
+    const level = this.activeLevel;
+
+    if (level.files.length > 0) {
+      this.fileError = 'This level already has a file. Remove it before uploading a new one.';
+      return;
+    }
+
     this.fileError = '';
     this.isUploadingFile = true;
 
-    const level = this.activeLevel;
-    const uploads = Array.from(files).map((file) =>
-    firstValueFrom(this.storageService.uploadLevelFile(this.hackathonId, level.id.toString(), file)));
+    const fileToUpload = files[0];
 
-    Promise.allSettled(uploads).then((results) => {
-      this.isUploadingFile = false;
-      const failed = results.filter((r) => r.status === 'rejected').length;
-      if (failed > 0) {
-        this.fileError = `${failed} files have failed to be uploaded`;
-      }
-      this.storageService.listLevelFiles(this.hackathonId, level.id).subscribe({
-        next: (updatedFiles: LevelFileResponse[]) => {
-          level.files = updatedFiles;
-          level.filesLoaded = true;
-          this.change.markForCheck();
-        }
+    firstValueFrom(this.storageService.uploadLevelFile(this.hackathonId, level.id.toString(), fileToUpload))
+      .catch(() => {
+        this.fileError = 'The file failed to be uploaded';
+      })
+      .finally(() => {
+        this.isUploadingFile = false;
+        this.storageService.listLevelFiles(this.hackathonId, level.id).subscribe({
+          next: (updatedFiles: LevelFileResponse[]) => {
+            level.files = updatedFiles;
+            level.filesLoaded = true;
+            this.change.markForCheck();
+          }
+        });
+        this.change.markForCheck();
       });
-      this.change.markForCheck();
-    });
   }
 
   private async persistOrder(previousOrder: UiLevel[]): Promise<void> {
@@ -319,6 +325,7 @@ export class LevelsComponent implements OnInit {
     this.storageService.deleteLevelFile(this.hackathonId, this.activeLevel.id, file.id).subscribe({
       next: () => {
         this.activeLevel!.files = this.activeLevel!.files.filter((f) => f.id !== file.id);
+        this.fileError = '';
         this.change.markForCheck();
       },
       error: (err: HttpErrorResponse) => {
