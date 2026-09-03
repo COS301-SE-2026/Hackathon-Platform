@@ -454,7 +454,7 @@ confirmRegistration(): void {
 
   private formatEventDates(startDateTime: string, durationHours: number): string {
     const start = new Date(startDateTime);
-    const end = new Date(start.getTime() + durationHours * 60 * 60 * 1000);
+    const end = new Date(start.getTime() + durationHours * 1000);
 
     return `${this.formatShortDate(start)} – ${this.formatShortDate(end)}`;
   }
