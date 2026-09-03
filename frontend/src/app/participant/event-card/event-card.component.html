@@ -20,14 +20,14 @@
 
         <div class="event-actions">
 
-          <div class="event-action-button"><app-button variant="secondary" (click)="goToEvent(event)"width="100%" (keydown)="null" (keyup)="null"> View Event</app-button></div>
+          <div class="event-action-button"><app-button variant="secondary" (click)="goToEvent.emit(event)" width="100%" (keydown)="null" (keyup)="null"> View Event</app-button></div>
 
           @if (type === 'upcoming'){
-            <div class="event-action-button"> <app-button variant="primary" [disabled]="registeredEventIds.has(event.eventId)" (click)="registerForEvent(event)" width="100%" (keydown)="null" (keyup)="null"> {{ registeredEventIds.has(event.eventId) ? 'Registered' : 'Register' }} </app-button></div>
+            <div class="event-action-button"> <app-button variant="primary" [disabled]="isRegistered" (click)="register.emit(event)" width="100%" (keydown)="null" (keyup)="null"> {{ isRegistered ? 'Registered' : 'Register' }} </app-button></div>
           } @else {
             <div class="event-action-button">
-              <app-button variant="primary" [disabled]="generatingCertificateEventId===event.eventId" (click)="generateCertificate(event)" width="100%" (keydown)="null" (keyup)="null">
-                {{ generatingCertificateEventId === event.eventId ? 'Generating' : 'Generate Certificate' }}
+              <app-button variant="primary" [disabled]="isGeneratingCertificate" (click)="generateCertificate.emit(event)" width="100%" (keydown)="null" (keyup)="null">
+                {{ isGeneratingCertificate ? 'Generating' : 'Generate Certificate' }}
               </app-button>
             </div>
           }

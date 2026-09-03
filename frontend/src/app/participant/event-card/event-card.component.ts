@@ -1,26 +1,27 @@
-import { Component, EventEmitter, Input, Output } from '@anglular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonComponent } from '../button/button.component';
-import { CardComponent } from '../card/card.component';
+import { ButtonComponent } from '../../shared/components/button/button.component';
+import { CardComponent } from '../../shared/components/card/card.component';
+import { OpenEventView } from '../home/home.component';
 
 @Component({
   selector: 'app-event-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule, ButtonComponent, CardComponent],
   templateUrl: './event-card.component.html',
-  stylyUrl: './event-card.component.scss',
+  styleUrl: './event-card.component.scss',
 })
 export class EventCardComponent {
-  @Input() event: any;
+  @Input() event!: OpenEventView;
   @Input() type: 'upcoming' | 'completed' = 'upcoming';
   @Input() isRegistered = false;
   @Input() isGeneratingCertificate = false;
 
-  @Output() goToEvent = newEventEmitter<any>();
-  @Output() register = new EventEmitter<any>();
-  @Output() generateCertificate = new EventEmitter<any>();
+  @Output() goToEvent = new EventEmitter<OpenEventView>();
+  @Output() register = new EventEmitter<OpenEventView>();
+  @Output() generateCertificate = new EventEmitter<OpenEventView>();
 
-  getDaysUntilStart(event: any): string | null {
+  getDaysUntilStart(event: OpenEventView): string | null {
     const now = new Date();
     const start = new Date(event.startDateTime);
 

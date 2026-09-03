@@ -12,9 +12,9 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ToastService } from '../../shared/components/toast/toast.service';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util';
+import { EventCardComponent } from '../event-card/event-card.component';
 
-
-interface OpenEventView {
+export interface OpenEventView {
   eventId: string;
   name: string;
   dates: string;
@@ -52,10 +52,11 @@ interface OpenEventView {
     ButtonComponent,
     InputComponent,
     ModalComponent,
-    LoaderComponent
+    LoaderComponent,
+    EventCardComponent
    ],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  templateUrl: '../home/home.component.html',
+  styleUrls: ['../home/home.component.scss']
 })
 
 export class HomeComponent implements OnInit, OnDestroy {

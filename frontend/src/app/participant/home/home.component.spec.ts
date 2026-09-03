@@ -40,12 +40,18 @@ describe('HomeComponent', () => {
   ];
 
   beforeEach(async () => {
-    eventServiceMock = jasmine.createSpyObj<EventService>( 'EventService', ['getOpenEvents', 'getUserActiveEvents', 'getMyRegistrations', 'getEventLogoUrl']
+    eventServiceMock = jasmine.createSpyObj<EventService>( 'EventService', ['getOpenEvents', 'getUserActiveEvents', 'getMyRegistrations', 'getEventLogoUrl', 'getCompletedEvents', 'getEventById', 'getMyTeamForEvent', 'getTeamMembers', 'getTeamSubmissions', 'getEventLeaderboard']
 );
 
 eventServiceMock.getOpenEvents.and.returnValue(of(mockEvents as any));
 eventServiceMock.getUserActiveEvents.and.returnValue(of([]));
 eventServiceMock.getMyRegistrations.and.returnValue(of([]));
+eventServiceMock.getCompletedEvents.and.returnValue(of([]));
+eventServiceMock.getEventById.and.returnValue(of({} as any));
+eventServiceMock.getMyTeamForEvent.and.returnValue(of({} as any));
+eventServiceMock.getTeamMembers.and.returnValue(of([]));
+eventServiceMock.getTeamSubmissions.and.returnValue(of([]));
+eventServiceMock.getEventLeaderboard.and.returnValue(of([]));
 eventServiceMock.getEventLogoUrl.and.returnValue(
   of({
     url: 'https://mock-storage.com/dummy-logo-key.png',
