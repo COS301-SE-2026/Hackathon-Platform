@@ -93,7 +93,7 @@
             </div>
 
             <div class="team-stat-info">
-              <span class="team-stat-value">18</span>
+              <span class="team-stat-value">{{ submissionCount }}</span>
               <span class="team-stat-label">Submissions</span>
             </div>
 
@@ -107,7 +107,7 @@
 
 
             <div class="team-stat-info">
-              <span class="team-stat-value">1,450</span>
+              <span class="team-stat-value">{{ teamScore | number }}</span>
               <span class="team-stat-label">Score</span>
             </div>
 
@@ -121,7 +121,7 @@
 
 
             <div class="team-stat-info">
-              <span class="team-stat-value">#1</span>
+              <span class="team-stat-value">#{{ teamRank }}</span>
               <span class="team-stat-label">Current Rank</span>
             </div>
 

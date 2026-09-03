@@ -8,6 +8,8 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import { LeaderboardService, LeaderboardEntry } from '../../../../services/leaderboard.service';
+import { SubmissionService } from '../../../../services/submission.service';
 
 
 interface DisplayTeamMember {
@@ -31,6 +33,11 @@ export class MyTeamComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly change = inject(ChangeDetectorRef);
   private readonly toast = inject(ToastService);
+  private readonly leaderboardService = inject(LeaderboardService);
+  private readonly submissionService = inject(SubmissionService);
+  submissionCount = 0;
+  teamScore = 0;
+  teamRank = 0;
 
   private eventID = '';
 
@@ -87,6 +94,7 @@ export class MyTeamComponent implements OnInit {
         this.team.name = response.teamName;
 
         this.loadTeamMembers(response.teamId);
+        this.loadTeamStats();
 
       } 
       else {
@@ -108,6 +116,52 @@ export class MyTeamComponent implements OnInit {
   refreshTeamMembers(): void {
   this.loadTeamMembers(this.team.teamId);
   }
+
+  private loadTeamStats(): void {
+  this.loadSubmissionCount();
+  this.loadLeaderboardStats();
+}
+
+
+  private loadSubmissionCount(): void {
+  this.submissionService.getTeamHistory(this.team.teamId).subscribe({
+    next: (submissions) => {
+      this.submissionCount = submissions.length;
+      this.change.markForCheck();
+    },
+    error: (error) => {
+      console.error('Error loading submission count:', error);
+      this.submissionCount = 0;
+    }
+  });
+}
+
+private loadLeaderboardStats(): void {
+  this.leaderboardService.getEventLeaderboard(this.eventID).subscribe({
+    next: (leaderboard) => {
+      const teamEntry = leaderboard.find(
+        entry => entry.teamId === this.team.teamId
+      );
+
+      if (teamEntry) {
+        this.teamScore = teamEntry.bestScore;
+        this.teamRank = teamEntry.rank;
+      } else {
+        this.teamScore = 0;
+        this.teamRank = 0;
+      }
+
+      this.change.markForCheck();
+    },
+    error: (error) => {
+      console.error('Error loading leaderboard stats:', error);
+      this.teamScore = 0;
+      this.teamRank = 0;
+    }
+  });
+}
+
+
 
   loadTeamMembers(teamId: string): void {
     this.teamService.getTeamMembers(teamId).subscribe({
