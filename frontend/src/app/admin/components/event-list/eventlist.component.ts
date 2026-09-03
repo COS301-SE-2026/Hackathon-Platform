@@ -57,6 +57,15 @@ export class EventlistComponent implements OnInit, OnDestroy {
   searchTerm = '';
   statusFilter = 'ALL';
 
+  get filteredEvents(): EventRow[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    return this.events.filter(event => {
+      const matchesSearch = !term || event.name.toLowerCase().includes(term);
+      const matchesStatus = this.statusFilter === 'ALL' || event.status === this.statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+  }
+
   expandedEventId: string | null = null;
   registrationsByEvent: Record<string, RegisteredTeam[]> = {};
   registrationsLoading: Record<string, boolean> = {};

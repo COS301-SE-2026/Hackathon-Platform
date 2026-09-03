@@ -356,23 +356,18 @@ onFileSelected(event: Event):void{
 }
 
   goBack(): void {
-    if (this.hackathonId){
-    this.router.navigate(['/admin/hackathons',this.hackathonId]);
-    }else {
-      this.router.navigate(['/admin/hackathons']);
-    }
+    this.router.navigate(['/admin/hackathons']);
   }
 
   deleteLevel(level?: UiLevel) : void {
     const targetLevel = level || this.editingLevel;
     if (!targetLevel) return;
-    if (!this.editingLevel) return;
 
-    if(!confirm(`Are you sure you want to delete "${this.editingLevel.name}"? This action is not reversible.`)) {
+    if(!confirm(`Are you sure you want to delete "${targetLevel.name}"? This action is not reversible.`)) {
       return;
     }
 
-    const levelId = this.editingLevel.id;
+    const levelId = targetLevel.id;
     this.isSavingLevel = true;
 
     this.levelService.deleteLevel(levelId).subscribe({
