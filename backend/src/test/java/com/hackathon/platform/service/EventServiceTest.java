@@ -604,6 +604,95 @@ class EventServiceTest {
     assertThat(response.isScoringPaused()).isTrue();
     assertThat(event.getScoringPaused()).isTrue();
     verify(eventRepository).save(event);
-    
+
   }
+
+  @Test
+  void setScoringPaused_withInvalidId_throwsRuntimeException() {
+
+    UUID randomEventId = UUID.randomUUID();
+    when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> eventService.setScoringPaused(randomEventId, true))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Event could not be found");
+
+    verify(eventRepository,  never()).save(any(Event.class));
+
+  }
+
+  @Test
+  void extendEvent_withValidSeconds_increasesDuration() {
+    int originalDuration =  event.getDuration();
+
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    
+    Event result =  eventService.extendEvent(eventId, 3600);
+
+    assertThat(result.getDuration()).isEqualTo(originalDuration + 3600);
+    verify(eventRepository).save(event);
+
+  }
+
+  @Test
+  void extendEvent_withNonPositiveSeconds_throwsIllegalArgumentException() {
+    assertThatThrownBy(() -> eventService.extendEvent(eventId, 0))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessageContaining("Invalid time");
+    
+    verify(eventRepository, never()).findById(any());
+  }
+
+  @Test
+  void extendEvent_onCanceledEvent_throwsIllegalArgumentException() {
+
+    event.setStatus("CANCELED");
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    assertThatThrownBy(() -> eventService.extendEvent(eventId, 3600))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Event was canceled");
+
+    verify(eventRepository, never()).save(any(Event.class));
+
+  }
+
+  @Test
+  void putUpdateEvent_withInvalidStatusTransition_throwsIllegalArgumentException() {
+    
+    event.setStartDateTime(OffsetDateTime.now().minusDays(10));
+    event.setDuration(3600);
+    event.setStatus("COMPLETED");
+    EventRequest req = new EventRequest();
+    req.setStatus("ACTIVE");
+
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    assertThatThrownBy(() -> eventService.putUpdateEvent(eventId, req))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("it cant change to");
+
+    verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void putUpdateEvent_withInvalidHackathonId_throwsIllegalArgumentException() {
+    UUID hackathonId = UUID.randomUUID();
+    EventRequest req = new EventRequest();
+    req.setHackathonId(hackathonId);
+
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(hackathonRepository.existsById(hackathonId)).thenReturn(false);
+
+    assertThatThrownBy(() -> eventService.putUpdateEvent(eventId, req))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessageContaining("Hackathon not found");
+
+    verify(eventRepository, never()).save(any(Event.class));
+
+  }
+
+
 }
