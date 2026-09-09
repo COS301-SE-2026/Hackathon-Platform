@@ -574,6 +574,36 @@ class EventServiceTest {
 
     assertThat(results).hasSize(1);
     verify(eventRepository).findByHackathon(hackathonId);
+
+  }
+
+  @Test
+  void getEventsByHackathonId_withInvalidId_throwsIllegalArgumentException() {
+
+    UUID hackathonId = UUID.randomUUID();
+    when(hackathonRepository.existsById(hackathonId)).thenReturn(false);
+
+    assertThatThrownBy(() -> eventService.getEventsByHackathonId(hackathonId))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessageContaining("Hackathon not found");
+    
+    verify(eventRepository, never()).findByHackathon(any());
+
+  }
+
+  @Test
+  void setScoringPaused_withValidId_updatesAndReturnResponse() {
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    var response = eventService.setScoringPaused(eventId, true);
+
+    assertThat(response).isNotNull();
+    assertThat(response.getEventId()).isEqualTo(eventId);
+    assertThat(response.isScoringPaused()).isTrue();
+    assertThat(event.getScoringPaused()).isTrue();
+    verify(eventRepository).save(event);
     
   }
 }
