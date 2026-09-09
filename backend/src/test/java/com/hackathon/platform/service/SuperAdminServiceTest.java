@@ -118,7 +118,45 @@ class SuperAdminServiceTest {
         assertThat(response.getRole()).isEqualTo("ADMIN");
 
         verify(userRepo).save(any(User.class));
+
+    }
+
+    @Test
+    void createAdmin_withExistingEmail_throwsIllegalArgumentException() {
         
+        CreateAdminRequest req = new CreateAdminRequest();
+        req.setFirstName("Jane");
+        req.setLastName("Doe");
+        req.setEmail("jane@test.com");
+        req.setPassword("password123");
+
+        when(userRepo.existsByEmail("jane@test.com")).thenReturn(true);
+
+        assertThatThrownBy(() -> superAdminService.createAdmin(req))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("An account with this email already exists");
+
+        verify(userRepo, never()).save(any(User.class));
+    }
+
+    @Test
+    void createAdmin_withMissingAdminRole_throwsIllegalArgumentException() {
+
+        CreateAdminRequest req = new CreateAdminRequest();
+        req.setFirstName("Jane");
+        req.setLastName("Doe");
+        req.setEmail("jane@test.com");
+        req.setPassword("password123");
+
+        when(userRepo.existsByEmail("jane@test.com")).thenReturn(false);
+        when(roleRepo.findByName("ADMIN")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> superAdminService.createAdmin(req))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("ADMIN role not found");
+
+
+        verify(userRepo, never()).save(any(User.class));
     }
 
 }
