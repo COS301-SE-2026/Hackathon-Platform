@@ -540,4 +540,40 @@ class EventServiceTest {
     assertThat(results).hasSize(1);
     verify(eventRepository).findByVisibilityAndStatusIn("PRIVATE", List.of("UPCOMING", "ACTIVE"));
   }
+
+  @Test
+  void getUserActiveEvents_returnsActiveEventsForCurrentUser() {
+    when(eventRepository.findUserActiveEvents(creatorUserId))
+      .thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getUserActiveEvents();
+
+    assertThat(results).hasSize(1);
+    verify(eventRepository).findUserActiveEvents(creatorUserId);
+  }
+
+  @Test
+  void getUserCompletedEvents_returnsCompletedEventsForCurrentUser() {
+    when(eventRepository.findUserCompletedEvents(creatorUserId))
+      .thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getUserCompletedEvents();
+
+    assertThat(results).hasSize(1);
+    verify(eventRepository).findUserCompletedEvents(creatorUserId);
+  }
+
+  @Test
+  void getEventsByHackathonId_withValidId_returnsEvents() {
+    UUID hackathonId = UUID.randomUUID();
+    when(hackathonRepository.existsById(hackathonId)).thenReturn(true);
+    when(eventRepository.findByHackathon(hackathonId))
+      .thenReturn(Collections.singletonList(event));
+    
+    List<Event> results = eventService.getEventsByHackathonId(hackathonId);
+
+    assertThat(results).hasSize(1);
+    verify(eventRepository).findByHackathon(hackathonId);
+    
+  }
 }
