@@ -87,4 +87,38 @@ class ForumAccessServiceTest {
         
         verify(eventRegRepo, never()).existsByEventIdAndUserId(eventId, superAdmin.getUserId());
     }
+
+    @Test
+    void requireForumAccess_nullUser_throwsAccessDeniedException() {
+        assertThatThrownBy( () -> forumAccSer.requireForumAccess(eventId, null)).isInstanceOf(AccessDeniedException.class);
+        verify(eventRepo, never()).findById(eventId);
+    }
+
+    @Test
+    void requireModeratorAccess_nonOwnerAdmin_throwsAccessDeniedException() {
+        when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+        assertThatThrownBy( () -> forumAccSer.requireModeratorAccess(eventId, otherAdmin)).isInstanceOf(AccessDeniedException.class).hasMessageContaining("cannot moderate");
+    }
+
+    @Test
+    void getPermissions_registeredParticipant_canPostAndCommentButCannotModerate() {
+        when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventRegRepo.existsByEventIdAndUserId(eventId, part.getUserId())).thenReturn(true);
+
+        ForumPermissionResponse perms = forumAccSer.getPermissions(eventId, part);
+        assertThat(perms.isCanCreatePost()).isTrue();
+        assertThat(perms.isCanComment()).isTrue();
+        assertThat(perms.isCanModerate()).isFalse();
+    }
+
+    @Test
+    void getPermissions_eventOwnerAdmin_canPostAndCommentAndModerate() {
+        when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventRegRepo.existsByEventIdAndUserId(eventId, ownerAdmin.getUserId())).thenReturn(true);
+
+        ForumPermissionResponse perms = forumAccSer.getPermissions(eventId, ownerAdmin);
+        assertThat(perms.isCanCreatePost()).isTrue();
+        assertThat(perms.isCanComment()).isTrue();
+        assertThat(perms.isCanModerate()).isTrue();
+    }
 }
