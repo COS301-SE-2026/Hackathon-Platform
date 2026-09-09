@@ -694,5 +694,55 @@ class EventServiceTest {
 
   }
 
+  @Test
+  void createEvent_withInvalidHackathonId_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
+    req.setName("My new name");
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setTeamSizeLimit((short) 4);
+    req.setStartDateTime(OffsetDateTime.now().minusHours(1));
+    req.setDuration(48 * 3600);
+
+    when(hackathonRepository.existsById(any())).thenReturn(false);
+
+    assertThatThrownBy(() -> eventService.createEvent(req))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Hackathon not found");
+
+    verify(eventRepository, never()).save(any(Event.class));
+
+  }
+
+  @Test
+  void getEventById_refreshesLifecycleStatusWhenEventHasEnded() {
+    event.setStatus("ACTIVE");
+    event.setStartDateTime(OffsetDateTime.now().minusHours(3));
+    event.setDuration(3600);
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    
+    Event result = eventService.getEventById(eventId);
+
+    assertThat(result.getStatus()).isEqualTo("COMPLETED");
+    verify(eventRepository).save(event);
+
+  }
+
+  @Test
+  void getEventById_doesNotRefreshCanceledEvent() {
+    
+    event.setStatus("CANCELED");
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    Event result = eventService.getEventById(eventId);
+
+    assertThat(result.getStatus()).isEqualTo("CANCELED");
+    verify(eventRepository, never()).save(any(Event.class));
+
+  }
+
 
 }
