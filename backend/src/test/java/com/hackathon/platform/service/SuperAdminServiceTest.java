@@ -75,4 +75,50 @@ class SuperAdminServiceTest {
 
     }
 
+    @Test
+    void getAdmins_withNoAdmins_returnsEmptyList() {
+        User participant =
+            buildUser(UUID.randomUUID(), "John", "Smith", "john@test.com", participantRole);
+        when(userRepo.findAll()).thenReturn(List.of(participant));
+
+        List<AdminResponse> results = superAdminService.getAdmins();
+
+        assertThat(results).isEmpty();
+
+    }
+
+    @Test
+    void createAdmin_withValidRequest_createsAndReturnAuthResponse() {
+        CreateAdminRequest req = new CreateAdminRequest();
+        req.setFirstName(" Jane ");
+        req.setLastName(" Doe ");
+        req.setEmail(" Jane@Test.com ");
+        req.setPassword("password123");
+
+        when(userRepo.existsByEmail("jane@test.com")).thenReturn(false);
+        when(roleRepo.findByName("ADMIN")).thenReturn(Optional.of(adminRole));
+        when(pswrdEnc.encode("password123")).thenReturn("encoded-password");
+        when(userRepo.save(any(User.class)))
+            .thenAnswer(
+                invocation -> {
+                    User u = invocation.getArgument(0);
+                    u.setUserId(UUID.randomUUID());
+                    return u;
+
+                }
+            );
+
+        AuthResponse response = superAdminService.createAdmin(req);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getUserId()).isNotNull();
+        assertThat(response.getFirstName()).isEqualTo("Jane");
+        assertThat(response.getLastName()).isEqualTo("Doe");
+        assertThat(response.getEmail()).isEqualTo("jane@test.com");
+        assertThat(response.getRole()).isEqualTo("ADMIN");
+
+        verify(userRepo).save(any(User.class));
+        
+    }
+
 }
