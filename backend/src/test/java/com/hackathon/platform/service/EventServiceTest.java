@@ -502,4 +502,42 @@ class EventServiceTest {
 
     verify(eventRepository, never()).save(any(Event.class));
   }
+
+  @Test
+  void getEventsByCurrentAdmin_returnsEventsForCurrentUser() {
+    when(eventRepository.fetchAllByAdmin(creatorUserId))
+        .thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getEventsByCurrentAdmin();
+
+    assertThat(results).hasSize(1);
+    assertThat(results.get(0).getCreatedByUserId()).isEqualTo(creatorUserId);
+    verify(eventRepository).fetchAllByAdmin(creatorUserId);
+  }
+
+  @Test
+  void getOpenEventsForParticipants_returnsPublicAndPrivateOpenEvents() {
+    when(eventRepository.findByVisibilityInAndStatusIn(
+      List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE")
+    ))
+      .thenReturn(Collections.singletonList(event));
+
+      List<Event> results = eventService.getOpenEventsForParticipants();
+
+      assertThat(results).hasSize(1);
+      verify(eventRepository)
+        .findByVisibilityInAndStatusIn(
+          List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE"));
+  }
+
+  @Test
+  void getPrivateEvents_returnsOpenPrivateEVents() {
+    when(eventRepository.findByVisibilityAndStatusIn("PRIVATE", List.of("UPCOMING", "ACTIVE")))
+        .thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getPrivateEvents();
+
+    assertThat(results).hasSize(1);
+    verify(eventRepository).findByVisibilityAndStatusIn("PRIVATE", List.of("UPCOMING", "ACTIVE"));
+  }
 }
