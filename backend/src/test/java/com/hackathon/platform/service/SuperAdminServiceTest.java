@@ -36,4 +36,43 @@ class SuperAdminServiceTest {
     private Role adminRole;
     private Role participantRole;
 
+    @BeforeEach
+    void setUp() {
+        superAdminService = new SuperAdminService(userRepo, roleRepo, pswrdEnc);
+
+        adminRole = Role.builder().roleId(1).name("ADMIN").build();
+        participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
+
+    }
+
+    private User buildUser(UUID id, String firstName, String lastName, String email, Role role) {
+        return User.builder()
+            .userId(id)
+            .firstName(firstName)
+            .lastName(lastName)
+            .email(email)
+            .passwordHash("hashed")
+            .role(role)
+            .status("ACTIVE")
+            .build();
+
+    }
+
+    @Test
+    void getAdmins_returnsOnlyUsersWithAdminRole() {
+        User admin = buildUser(UUID.randomUUID(), "Jane", "Doe", "jane@test.com", adminRole);
+        User participant =
+            buildUser(UUID.randomUUID(), "John", "Smith", "john@test.com", participantRole);
+        when(userRepo.findAll()).thenReturn(List.of(admin, participant));
+
+        List<AdminResponse> results = superAdminService.getAdmins();
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getEmail()).isEqualTo("jane@test.com");
+        assertThat(results.get(0).getFirstName()).isEqualTo("Jane");
+        assertThat(results.get(0).getStatus()).isEqualTo("ACTIVE");
+        verify(userRepo).findAll();
+
+    }
+
 }
