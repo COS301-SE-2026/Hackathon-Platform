@@ -62,10 +62,9 @@ class SuperAdminControllerTest {
             null,
             List.of(
                 new SimpleGrantedAuthority("ROLE_SUPERADMIN"),
-                new SimpleGrantedAuthority("ROLE_ADMIN")
-            )
+                new SimpleGrantedAuthority("ROLE_ADMIN"))
         );
-    
+
     Role adminRole = Role.builder().roleId(1).name("ADMIN").build();
     User adminUser =
         User.builder()
@@ -77,13 +76,11 @@ class SuperAdminControllerTest {
             .role(adminRole)
             .status("ACTIVE")
             .build();
-    
-    adminAuth = 
+    adminAuth =
         new UsernamePasswordAuthenticationToken(
             adminUser, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
         );
-    
-    Role participantRole = Role.builder().roleId.name("PARTICIPANT").build();
+    Role participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
     User participantUser =
         User.builder()
             .userId(UUID.randomUUID())
@@ -100,7 +97,120 @@ class SuperAdminControllerTest {
         );
   }
 
-  
+  @Test
+  void createAdmin_asSuperAdmin_returns201AndAuthResponse() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/superadmin/admin")
+                .with(authentication(superAdminAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(createAdminRequest)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.email").value("jane.newadmin@example.com"))
+        .andExpect(jsonPath("$.role").value("ADMIN"))
+        .andExpect(jsonPath("$.userId").exists());
+
+  }
+
+  @Test
+  void createAdmin_asAdmin_returns403Forbidden() throws Exception {
+
+    mockMvc
+        .perform(
+            post("/api/superadmin/admin")
+                .with(authentication(adminAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(createAdminRequest)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void createAdmin_asParticipant_returns403Forbidden() throws Exception {
+
+    mockMvc
+        .perform(
+            post("/api/superadmin/admin")
+                .with(authentication(participantAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(createAdminRequest)))
+        .andExpect(status().isForbidden());
+
+  }
+
+  @Test
+  void createAdmin_withMissingFields_returns400BadRequest() throws Exception {
+    createAdminRequest.setEmail(null);
+
+    mockMvc
+        .perform(
+            post("/api/superadmin/admin")
+                .with(authentication(superAdminAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(createAdminRequest)))
+        .andExpect(status().isBadRequest());
 
 
+  }
+
+  @Test
+  void createAdmin_withDuplicateEmail_returns409Conflict() throws Exception {
+
+    mockMvc
+        .perform(
+            post("/api/superadmin/admin")
+                .with(authentication(superAdminAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(createAdminRequest)))
+        .andExpect(status().isCreated());
+
+    mockMvc
+        .perform(
+            post("/api/superadmin/admin")
+                .with(authentication(superAdminAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(createAdminRequest)))
+        .andExpect(status().isConflict());
+
+  }
+
+  @Test
+  void getAdmins_asSuperAdmin_returns200AndListContainingAdmin() throws Exception {
+
+    mockMvc
+        .perform(
+            post("/api/superadmin/admin")
+                .with(authentication(superAdminAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(createAdminRequest)))
+        .andExpect(status().isCreated());
+
+    mockMvc
+        .perform(get("/api/superadmin/admins").with(authentication(superAdminAuth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[?(@.email == 'jane.newadmin@example.com')]").exists());
+
+  }
+
+  @Test
+  void getAdmins_asAdmin_returns403Forbidden() throws Exception {
+    mockMvc
+        .perform(get("/api/superadmin/admins").with(authentication(adminAuth)))
+        .andExpect(status().isForbidden());
+
+  }
+
+  @Test
+  void getAdmins_asParticipant_returns403Forbidden() throws Exception {
+    
+    mockMvc
+        .perform(get("/api/superadmin/admins").with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void getAdmins_withoutAuthentication_returns403Forbidden() throws Exception {
+   
+    mockMvc.perform(get("/api/superadmin/admins")).andExpect(status().isForbidden());
+  }
 }
