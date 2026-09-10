@@ -2,6 +2,7 @@ package com.hackathon.platform.controller;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -16,6 +17,8 @@ import com.hackathon.platform.dto.ForumAuthorResponse;
 import com.hackathon.platform.dto.ForumPostSummaryResponse;
 import com.hackathon.platform.dto.ForumPostDetailResponse;
 import com.hackathon.platform.dto.CreateForumPostRequest;
+import com.hackathon.platform.dto.CreateForumCommentRequest;
+import com.hackathon.platform.dto.ForumPermissionResponse;
 import com.hackathon.platform.repository.UserRepository;
 import com.hackathon.platform.service.ForumService;
 import com.hackathon.platform.service.ForumAccessService;
@@ -95,5 +98,42 @@ class ForumControllerTest {
         mockMvc.perform(post("/api/events/{id}/forum/posts", eventId).with(authentication(partAuth)).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated());
 
         verify(forumService).createPost(eq(eventId), eq(part), any(CreateForumPostRequest.class));
+    }
+
+    @Test
+    void createInvalidPost_returns400() throws Exception {
+        String body = """
+            {
+                "title": "",
+                "body": ""    
+            }
+                    """;
+        mockMvc.perform(post("/api/events/{id}/forum/posts", eventId).with(authentication(partAuth)).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isBadRequest());
+
+        verify(forumService, never()).createPost(eq(eventId), eq(part), any(CreateForumPostRequest.class));
+    }
+
+    @Test
+    void createComment_returns201() throws Exception {
+        String body = """
+            {
+                "body": "body"    
+            }
+                    """;
+        mockMvc.perform(post("/api/events/{id}/forum/posts/{postId}/comments", eventId, postId).with(authentication(partAuth)).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated());
+
+        verify(forumService).createComment(eq(eventId), eq(postId), eq(part), any(CreateForumCommentRequest.class));
+    }
+
+    @Test
+    void createInvalidComment_returns400() throws Exception {
+        String body = """
+            {
+                "body": ""    
+            }
+                    """;
+        mockMvc.perform(post("/api/events/{id}/forum/posts/{postId}/comments", eventId, postId).with(authentication(partAuth)).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isBadRequest());
+
+        verify(forumService, never()).createComment(eq(eventId), eq(postId), eq(part), any(CreateForumCommentRequest.class));
     }
 }
