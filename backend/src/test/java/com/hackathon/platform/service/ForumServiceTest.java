@@ -201,4 +201,49 @@ class ForumServiceTest {
         verify(postRepo).findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId);
         verify(commentRepo, never()).findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
     }
+
+    @Test
+    void deleteComment_author_success() {
+        ForumPost post = new ForumPost(eventId, part.getUserId(), "Test", "Post");
+        post.setPostId(postId);
+
+        ForumComment comment = new ForumComment(postId, part.getUserId(), "COMMENT");
+        comment.setCommentId(commentId);
+
+        when(commentRepo.findById(commentId)).thenReturn(Optional.of(comment));
+        when(postRepo.findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId)).thenReturn(Optional.of(post));
+
+        forumService.deleteComment(eventId, commentId, part);
+
+        assertThat(comment.isDeleted()).isTrue();
+        assertThat(comment.getDeletedAt()).isNotNull();
+        assertThat(comment.getDeletedByUserId()).isEqualTo(part.getUserId());
+
+        verify(forumAccSer).requireForumAccess(eventId, part);
+        verify(commentRepo).save(comment);
+    }
+
+    @Test
+    void deleteComment_nonAuthor_requiresModeratorAccess() {
+        User other = User.builder().userId(UUID.randomUUID()).build();
+        
+        ForumPost post = new ForumPost(eventId, part.getUserId(), "Test", "Post");
+        post.setPostId(postId);
+        
+        ForumComment comment = new ForumComment(postId, part.getUserId(), "COMMENT");
+        comment.setCommentId(commentId);
+
+        when(commentRepo.findById(commentId)).thenReturn(Optional.of(comment));
+        when(postRepo.findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId)).thenReturn(Optional.of(post));
+
+        forumService.deleteComment(eventId, commentId, other);
+
+        assertThat(comment.isDeleted()).isTrue();
+        assertThat(comment.getDeletedAt()).isNotNull();
+        assertThat(comment.getDeletedByUserId()).isEqualTo(other.getUserId());
+
+        verify(forumAccSer).requireForumAccess(eventId, other);
+        verify(forumAccSer).requireModeratorAccess(eventId, other);
+        verify(commentRepo).save(comment);
+    }
 }
