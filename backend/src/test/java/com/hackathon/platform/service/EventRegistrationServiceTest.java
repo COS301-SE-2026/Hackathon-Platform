@@ -34,4 +34,30 @@ class EventRegistrationServiceTest {
   private UUID userId;
   private Event event;
 
+  @BeforeEach
+  void setUp() {
+    eventId = UUID.randomUUID();
+    userId = UUID.randomUUID();
+
+    event = new Event();
+    event.setEventId(eventId);
+    event.setName("Test Hackathon");
+    event.setStatus("ACTIVE");
+    event.setVisibility("PUBLIC");
+    event.setRegistrationKey(null);
+    event.setInPerson(false);
+
+  }
+
+  private EventRegistration buildSavedRegistration() {
+    
+    EventRegistration reg = new EventRegistration();
+    reg.setRegistrationId(UUID.randomUUID());
+    reg.setEventId(eventId);
+    reg.setUserId(userId);
+    reg.setRegisteredAt(Instant.now());
+    return reg;
+
+  }
+
 }
