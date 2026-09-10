@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
@@ -52,7 +53,9 @@ class ForumControllerTest {
     private UUID postId;
     private UUID commentId;
     private User part;
+    private User admin;
     private UsernamePasswordAuthenticationToken partAuth;
+    private UsernamePasswordAuthenticationToken adminAuth;
 
     @BeforeEach
     void setUp() {
@@ -60,8 +63,11 @@ class ForumControllerTest {
         postId = UUID.randomUUID();
         commentId = UUID.randomUUID();
         Role partRole = Role.builder().roleId(2).name("PARTICIPANT").build();
+        Role adminRole = Role.builder().roleId(11).name("ADMIN").build();
         part = User.builder().userId(UUID.randomUUID()).firstName("Test").lastName("Part").email("test@test.com").passwordHash("hash").status("ACTIVE").role(partRole).build();
+        admin = User.builder().userId(UUID.randomUUID()).firstName("Test").lastName("Admin").email("testA@test.com").passwordHash("hash").status("ACTIVE").role(adminRole).build();
         partAuth = new UsernamePasswordAuthenticationToken(part, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+        adminAuth = new UsernamePasswordAuthenticationToken(admin, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
     }
 
     @Test
@@ -145,5 +151,35 @@ class ForumControllerTest {
 
         mockMvc.perform(get("/api/events/{id}/forum/permissions", eventId).with(authentication(partAuth))).andExpect(status().isOk());
         verify(forumAccSer).getPermissions(eventId, part);
+    }
+
+    @Test
+    void deletePost_returns204() throws Exception {
+        mockMvc.perform(delete("/api/events/{id}/forum/posts/{postId}", eventId, postId).with(authentication(partAuth))).andExpect(status().isNoContent());
+        verify(forumService).deletePost(eventId, postId, part);
+    }
+
+    @Test
+    void deleteComment_returns204() throws Exception {
+        mockMvc.perform(delete("/api/events/{id}/forum/comments/{commentId}", eventId, commentId).with(authentication(partAuth))).andExpect(status().isNoContent());
+        verify(forumService).deleteComment(eventId, commentId, part);
+    }
+
+    @Test
+    void deletePost_admin_return204() throws Exception {
+        mockMvc.perform(delete("/api/admin/events/{eid}/forum/posts/{pid}",eventId, postId).with(authentication(adminAuth))).andExpect(status().isNoContent());
+        verify(forumService).deletePost(eventId, postId, admin);
+    }
+
+    @Test
+    void deleteComment_admin_returns204() throws Exception {
+        mockMvc.perform(delete("/api/admin/events/{eventId}/forum/comments/{comId}", eventId, commentId).with(authentication(adminAuth))).andExpect(status().isNoContent());
+        verify(forumService).deleteComment(eventId, commentId, admin);
+    }
+
+    @Test
+    void deletePost_participant_returns403() throws Exception {
+        mockMvc.perform(delete("/api/admin/events/{eid}/forum/posts/{pid}",eventId, postId).with(authentication(partAuth))).andExpect(status().isForbidden());
+        verify(forumService, never()).deleteComment(eventId, commentId, admin);
     }
 }
