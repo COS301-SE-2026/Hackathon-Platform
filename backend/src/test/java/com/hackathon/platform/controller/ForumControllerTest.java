@@ -41,7 +41,6 @@ import org.springframework.http.MediaType;
 @AutoConfigureMockMvc
 class ForumControllerTest {
     @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objMapper;
     
     @MockBean private ForumService forumService;
     @MockBean private ForumAccessService forumAccSer;
