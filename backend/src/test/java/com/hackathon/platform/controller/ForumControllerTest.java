@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -180,6 +179,6 @@ class ForumControllerTest {
     @Test
     void deletePost_participant_returns403() throws Exception {
         mockMvc.perform(delete("/api/admin/events/{eid}/forum/posts/{pid}",eventId, postId).with(authentication(partAuth))).andExpect(status().isForbidden());
-        verify(forumService, never()).deleteComment(eventId, commentId, admin);
+        verify(forumService, never()).deletePost(eventId, postId, part);
     }
 }
