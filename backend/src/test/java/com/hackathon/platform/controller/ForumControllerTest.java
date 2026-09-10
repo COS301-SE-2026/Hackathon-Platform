@@ -136,4 +136,14 @@ class ForumControllerTest {
 
         verify(forumService, never()).createComment(eq(eventId), eq(postId), eq(part), any(CreateForumCommentRequest.class));
     }
+
+    @Test
+    void getPermissions_returns200() throws Exception {
+        ForumPermissionResponse perms = new ForumPermissionResponse(true, true, false);
+
+        when(forumAccSer.getPermissions(eventId, part)).thenReturn(perms);
+
+        mockMvc.perform(get("/api/events/{id}/forum/permissions", eventId).with(authentication(partAuth))).andExpect(status().isOk());
+        verify(forumAccSer).getPermissions(eventId, part);
+    }
 }
