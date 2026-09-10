@@ -31,5 +31,107 @@ class SuperAdminInitializerTest {
 
   private Role superAdminRole;
 
+  @BeforeEach
+  void setUp() {
+    initializer = new SuperAdminInitializer(userRepo, roleRepo, paswrdEncoder);
+    superAdminRole = Role.builder().roleId(1).name("SUPERADMIN").build();
+
+    ReflectionTestUtils.setField(initializer, "firstName", "Platform");
+    ReflectionTestUtils.setField(initializer, "lastName", "SuperAdmin");
+
+  }
+
+  private void setEmailAndPassword(String email, String password) {
+    ReflectionTestUtils.setField(initializer, "email", email);
+    ReflectionTestUtils.setField(initializer, "lastName", password);
+
+  }
+
+  @Test
+  void run_withValidConfig_createsSuperAdminUser() {
+
+    setEmailAndPassword(" SuperAdmin@Test.com ", "supersecret");
+
+    when(userRepo.existsByEmail("superadmin@test.com")).thenReturn(false);
+    when(roleRepo.findByName("SUPERADMIN")).thenReturn(Optional.of(superAdminRole));
+    when(paswrdEncoder.encode("supersecret")).thenReturn("encoded-password");
+
+    initializer.run(null);
+
+    ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+    verify(userRepo).save(captor.capture());
+
+    User saved = captor.getValue();
+    assertThat(saved.getEmail()).isEqualTo("superadmin@test.com");
+    assertThat(saved.getFirstName()).isEqualTo("Platform");
+    assertThat(saved.getLastName()).isEqualTo("SuperAdmin");
+    assertThat(saved.getPasswordHash()).isEqualTo("encoded-password");
+    assertThat(saved.getRole()).isEqualTo(superAdminRole);
+    assertThat(saved.getStatus()).isEqualTo("ACTIVE");
+
+  }
+
+  @Test
+  void run_withBlankEmail_doesNothing() {
+    setEmailAndPassword("", "supersecret");
+
+    initializer.run(null);
+
+    verify(userRepo, never()).existsByEmail(any());
+    verify(userRepo, never()).save(any(User.class));
+
+  }
+
+  @Test
+  void run_withNullEmail_doesNothing() {
+    setEmailAndPassword(null, "supersecret");
+
+    initializer.run(null);
+
+    verify(userRepo, never()).existsByEmail(any());
+    verify(userRepo, never()).save(any(User.class));
+
+  }
+
+  @Test
+  void run_withBlankPassword_doesNothing() {
+    setEmailAndPassword("superadmin@test.com", "");
+
+    initializer.run(null);
+
+    verify(userRepo, never()).existsByEmail(any());
+    verify(userRepo, never()).save(any(User.class));
+
+
+  }
+
+  @Test
+  void run_withNullPassword_doesNothing() {
+    setEmailAndPassword("superadmin@test.com", null);
+
+    initializer.run(null);
+
+    verify(userRepo, never()).existsByEmail(any());
+    verify(userRepo, never()).save(any(User.class));
+
+  }
+
+  @Test
+  void run_whenUserAlreadyExists_doesNotCreateUser() {
+
+    setEmailAndPassword("superadmin@test.com", "supersecret");
+
+    when(userRepo.existsByEmail("superadmin@test.com")).thenReturn(true);
+
+    initializer.run(null);
+
+    verify(userRepo, never()).save(any(User.class));
+
+    verify(roleRepo, never()).findByName(any());
+
+  }
+
   
+
+
 }
