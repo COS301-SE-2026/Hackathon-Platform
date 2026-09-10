@@ -155,4 +155,15 @@ class ForumServiceTest {
         verify(postRepo).findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId);
         verify(commentRepo).findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
     }
+
+    @Test
+    void getPost_postNotFound_throwsException() {
+        when(postRepo.findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> forumService.getPost(eventId, postId, part)).isInstanceOf(IllegalArgumentException.class);
+
+        verify(forumAccSer).requireForumAccess(eventId, part);
+        verify(postRepo).findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId);
+        verify(commentRepo, never()).findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
+    }
 }
