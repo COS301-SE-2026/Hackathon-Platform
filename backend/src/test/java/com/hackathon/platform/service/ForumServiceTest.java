@@ -183,4 +183,22 @@ class ForumServiceTest {
         verify(postRepo).findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId);
         verify(commentRepo, never()).findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
     }
+
+    @Test
+    void deletePost_nonAuthor_requiresModeratorAccess() {
+        User other = User.builder().userId(UUID.randomUUID()).build();
+        ForumPost post = new ForumPost(eventId, part.getUserId(), "Test", "Post");
+        post.setPostId(postId);
+
+        when(postRepo.findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId)).thenReturn(Optional.of(post));
+        forumService.deletePost(eventId, postId, part);
+
+        assertThat(post.isDeleted()).isTrue();
+        assertThat(post.getDeletedAt()).isNotNull();
+        assertThat(post.getDeletedByUserId()).isEqualTo(part.getUserId());
+
+        verify(forumAccSer).requireForumAccess(eventId, part);
+        verify(postRepo).findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId);
+        verify(commentRepo, never()).findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
+    }
 }
