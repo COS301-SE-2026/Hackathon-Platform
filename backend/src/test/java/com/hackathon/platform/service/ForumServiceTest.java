@@ -246,4 +246,17 @@ class ForumServiceTest {
         verify(forumAccSer).requireModeratorAccess(eventId, other);
         verify(commentRepo).save(comment);
     }
+
+    @Test
+    void deleteComment_commentNotFound_throwsException() {
+        when(commentRepo.findById(commentId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> forumService.deleteComment(eventId, commentId, part)).isInstanceOf(IllegalArgumentException.class);
+
+        verify(forumAccSer).requireForumAccess(eventId, part);
+        verify(commentRepo).findById(commentId);
+        verify(postRepo, never()).findByPostIdAndEventIdAndIsDeletedFalse(any(UUID.class), any(UUID.class));
+        verify(commentRepo, never()).save(any(ForumComment.class));
+        verify(forumAccSer, never()).requireModeratorAccess(eventId, part);
+    }
 }
