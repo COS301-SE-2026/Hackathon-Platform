@@ -129,4 +129,30 @@ class ForumServiceTest {
         verify(forumAccSer).requireForumAccess(eventId, part);
         verify(postRepo).findByEventIdAndIsDeletedFalseOrderByCreatedAtDesc(eventId);
     }
+
+    @Test
+    void getPost_success_returnsPostsWithComments() {
+        ForumPost post = new ForumPost(eventId, part.getUserId(), "Test", "Post");
+        post.setPostId(postId);
+
+        ForumComment comment = new ForumComment(postId, part.getUserId(), "COMMENT");
+        comment.setCommentId(commentId);
+
+        when(postRepo.findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId)).thenReturn(Optional.of(post));
+        when(commentRepo.findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId)).thenReturn(List.of(comment));
+        when(userRepo.findById(part.getUserId())).thenReturn(Optional.of(part));
+
+        ForumPostDetailResponse res = forumService.getPost(eventId, postId, part);
+        
+        assertThat(res.getPostId()).isEqualTo(postId);
+        assertThat(res.getTitle()).isEqualTo("Test");
+        assertThat(res.getBody()).isEqualTo("Post");
+        assertThat(res.getComments()).hasSize(1);
+        assertThat(res.getComments().get(0).getCommentId()).isEqualTo(commentId);
+        assertThat(res.getComments().get(0).getBody()).isEqualTo("COMMENT");
+
+        verify(forumAccSer).requireForumAccess(eventId, part);
+        verify(postRepo).findByPostIdAndEventIdAndIsDeletedFalse(postId, eventId);
+        verify(commentRepo).findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(postId);
+    }
 }
