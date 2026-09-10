@@ -1,0 +1,99 @@
+package com.hackathon.platform.controller;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hackathon.platform.model.Role;
+import com.hackathon.platform.model.User;
+import com.hackathon.platform.dto.ForumAuthorResponse;
+import com.hackathon.platform.dto.ForumPostSummaryResponse;
+import com.hackathon.platform.dto.ForumPostDetailResponse;
+import com.hackathon.platform.dto.CreateForumPostRequest;
+import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.service.ForumService;
+import com.hackathon.platform.service.ForumAccessService;
+import com.hackathon.platform.service.ForumUpdateService;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.MediaType;
+
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc
+class ForumControllerTest {
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objMapper;
+    
+    @MockBean private ForumService forumService;
+    @MockBean private ForumAccessService forumAccSer;
+    @MockBean private ForumUpdateService forumUpSer;
+    @MockBean private UserRepository userRepo;
+
+    private UUID eventId;
+    private UUID postId;
+    private UUID commentId;
+    private User part;
+    private UsernamePasswordAuthenticationToken partAuth;
+
+    @BeforeEach
+    void setUp() {
+        eventId = UUID.randomUUID();
+        postId = UUID.randomUUID();
+        commentId = UUID.randomUUID();
+        Role partRole = Role.builder().roleId(2).name("PARTICIPANT").build();
+        part = User.builder().userId(UUID.randomUUID()).firstName("Test").lastName("Part").email("test@test.com").passwordHash("hash").status("ACTIVE").role(partRole).build();
+        partAuth = new UsernamePasswordAuthenticationToken(part, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+    }
+
+    @Test
+    void getPosts_returns200() throws Exception {
+        ForumAuthorResponse author = new ForumAuthorResponse(part.getUserId(), "Test", "Part", "PARTICIPANT");
+        ForumPostSummaryResponse post = new ForumPostSummaryResponse(postId, "TEST", author, null, 2L);
+
+        when(forumService.getPosts(eventId, part)).thenReturn(List.of(post));
+
+        mockMvc.perform(get("/api/events/{id}/forum/posts", eventId).with(authentication(partAuth))).andExpect(status().isOk());
+        verify(forumService).getPosts(eventId, part);
+    }
+
+    @Test
+    void getPost_returns200() throws Exception {
+        ForumAuthorResponse author = new ForumAuthorResponse(part.getUserId(), "Test", "Part", "PARTICIPANT");
+        ForumPostDetailResponse post = new ForumPostDetailResponse(postId, "TEST", "BODY", author, null, List.of());
+
+        when(forumService.getPost(eventId, postId, part)).thenReturn(post);
+
+        mockMvc.perform(get("/api/events/{eId}/forum/posts/{pId}", eventId, postId).with(authentication(partAuth))).andExpect(status().isOk());
+
+        verify(forumService).getPost(eventId, postId, part);
+    }
+
+    @Test
+    void createPost_Returns201() throws Exception {
+        String body = """
+            {
+                "title": "TEST",
+                "body": "body"    
+            }
+                    """;
+        mockMvc.perform(post("/api/events/{id}/forum/posts", eventId).with(authentication(partAuth)).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated());
+
+        verify(forumService).createPost(eq(eventId), eq(part), any(CreateForumPostRequest.class));
+    }
+}
