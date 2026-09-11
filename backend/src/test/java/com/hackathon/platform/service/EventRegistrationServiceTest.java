@@ -60,4 +60,97 @@ class EventRegistrationServiceTest {
 
   }
 
+  @Test
+  void registerForEvent_withValidPublicEvent_returnsRegistrationResponse() {
+
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(false);
+    when(eventRegistrationRepo.save(any(EventRegistration.class)))
+        .thenReturn(buildSavedRegistration());
+    
+    EventRegistrationResponse response =
+        eventRegistrationService.registerForEvent(eventId, userId, null);
+    
+    assertThat(response).isNotNull();
+    assertThat(response.getEventId()).isEqualTo(eventId);
+    verify(eventRegistrationRepo).save(any(EventRegistration.class));
+
+  }
+
+  @Test
+  void registerForEvent_withNotInPersonEvent_ignoresDietaryAndAllergies() {
+
+    event.setInPerson(false);
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(false);
+    when(eventRegistrationRepo.save(any(EventRegistration.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    
+    ArgumentCaptor<EventRegistration> captor = ArgumentCaptor.forClass(EventRegistration.class);
+
+    eventRegistrationService.registerForEvent(
+      eventId, userId, null, "Vegetarian", "Peanuts"
+    );
+    
+    verify(eventRegistrationRepo).save(captor.capture());
+    assertThat(captor.getValue().getDietaryReq()).isNull();
+    assertThat(captor.getValue().getAllergies()).isNull();
+
+  }
+
+  @Test
+  void registerForEvent_withInPersonEvent_savesDietaryAndAllergies() {
+
+    event.setInPerson(true);
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(false);
+    when(eventRegistrationRepo.save(any(EventRegistration.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ArgumentCaptor<EventRegistration> captor = ArgumentCaptor.forClass(EventRegistration.class);
+
+    eventRegistrationService.registerForEvent(
+      eventId, userId, null, " Vegetarian ", "Peanuts"
+    );
+
+    verify(eventRegistrationRepo).save(captor.capture());
+    assertThat(captor.getValue().getDietaryReq()).isEqualTo("Vegetarian");
+    assertThat(captor.getValue().getAllergies()).isEqualTo("Peanuts");
+
+
+  }
+
+  @Test
+  void registerForEvent_withInPersonEventAndBlankDietaryReq_normalizesToNull() {
+
+    event.setInPerson(true);
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(false);
+    when(eventRegistrationRepo.save(any(EventRegistration.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    
+    ArgumentCaptor<EventRegistration> captor = ArgumentCaptor.forClass(EventRegistration.class);
+
+    eventRegistrationService.registerForEvent(eventId, userId, null, "  ", null);
+
+    verify(eventRegistrationRepo).save(captor.capture());
+    assertThat(captor.getValue().getDietaryReq()).isNull();
+
+  }
+
+  @Test
+  void registerForEvent_withInvalidEventId_throwRuntimeException() {
+    UUID randomEventId = UUID.randomUUID();
+    when(eventRepo.findById(randomEventId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> eventRegistrationService.registerForEvent(randomEventId, userId, null))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Event not found");
+
+    verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
+    
+  }
+
+
+
 }
