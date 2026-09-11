@@ -148,8 +148,108 @@ class EventRegistrationServiceTest {
         .hasMessageContaining("Event not found");
 
     verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
-    
+
   }
+
+  @Test
+  void registerForEvent_withCompletedEvent_throwsRuntimeException() {
+    event.setStatus("COMPLETED");
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+
+    assertThatThrownBy(() -> eventRegistrationService.registerForEvent(eventId, userId, null))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("This event is not accepting registrations");
+
+    verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
+
+  }
+
+  @Test
+  void registerForEvent_withCanceledEvent_throwsRuntimeException() {
+    event.setStatus("CANCELED");
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+
+    assertThatThrownBy(() -> eventRegistrationService.registerForEvent(eventId, userId, null))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("This event is not accepting registrations");
+
+    verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
+
+  }
+
+  @Test
+  void registerForEvent_withPrivateEventAndCorrectKey_registersSuccessfully() {
+
+    event.setVisibility("PRIVATE");
+    event.setRegistrationKey("SECRETKEY");
+
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(false);
+    when(eventRegistrationRepo.save(any(EventRegistration.class)))
+        .thenReturn(buildSavedRegistration());
+
+    EventRegistrationResponse response =
+        eventRegistrationService.registerForEvent(eventId, userId, "SECRETKEY");
+
+    assertThat(response).isNotNull();
+    verify(eventRegistrationRepo).save(any(EventRegistration.class));
+
+  }
+
+  @Test
+  void registerForEvent_withPrivateEventAndWrongKey_throwsRuntimeException() {
+    event.setVisibility("PRIVATE");
+    event.setRegistrationKey("SECRETKEY");
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+
+    assertThatThrownBy(
+      () -> eventRegistrationService.registerForEvent(eventId, userId, "WRONGKEY")
+
+    )
+      .isInstanceOf(RuntimeException.class)
+      .hasMessageContaining("Registration key is not correct");
+
+    verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
+
+  }
+
+  @Test
+  void registerForEvent_withPrivateEventAndNullKey_throwsRuntimeException() {
+    event.setVisibility("PRIVATE");
+    event.setRegistrationKey("SECRETKEY");
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+
+    assertThatThrownBy(
+      () -> eventRegistrationService.registerForEvent(eventId, userId, null)
+
+    )
+      .isInstanceOf(RuntimeException.class)
+      .hasMessageContaining("Registration key is not correct");
+
+    verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
+
+  }
+
+  @Test
+  void registerForEvent_withPrivateEventAndBlankKey_throwsRuntimeException() {
+    event.setVisibility("PRIVATE");
+    event.setRegistrationKey("SECRETKEY");
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+
+    assertThatThrownBy(
+      () -> eventRegistrationService.registerForEvent(eventId, userId, "  ")
+
+    )
+      .isInstanceOf(RuntimeException.class)
+      .hasMessageContaining("Registration key is not correct");
+
+    verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
+
+  }
+
+  
+
+
 
 
 
