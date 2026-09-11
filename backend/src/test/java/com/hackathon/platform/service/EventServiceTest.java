@@ -518,16 +518,14 @@ class EventServiceTest {
   @Test
   void getOpenEventsForParticipants_returnsPublicAndPrivateOpenEvents() {
     when(eventRepository.findByVisibilityInAndStatusIn(
-      List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE")
-    ))
-      .thenReturn(Collections.singletonList(event));
+            List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE")))
+        .thenReturn(Collections.singletonList(event));
 
-      List<Event> results = eventService.getOpenEventsForParticipants();
+    List<Event> results = eventService.getOpenEventsForParticipants();
 
-      assertThat(results).hasSize(1);
-      verify(eventRepository)
-        .findByVisibilityInAndStatusIn(
-          List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE"));
+    assertThat(results).hasSize(1);
+    verify(eventRepository)
+        .findByVisibilityInAndStatusIn(List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE"));
   }
 
   @Test
@@ -544,7 +542,7 @@ class EventServiceTest {
   @Test
   void getUserActiveEvents_returnsActiveEventsForCurrentUser() {
     when(eventRepository.findUserActiveEvents(creatorUserId))
-      .thenReturn(Collections.singletonList(event));
+        .thenReturn(Collections.singletonList(event));
 
     List<Event> results = eventService.getUserActiveEvents();
 
@@ -555,7 +553,7 @@ class EventServiceTest {
   @Test
   void getUserCompletedEvents_returnsCompletedEventsForCurrentUser() {
     when(eventRepository.findUserCompletedEvents(creatorUserId))
-      .thenReturn(Collections.singletonList(event));
+        .thenReturn(Collections.singletonList(event));
 
     List<Event> results = eventService.getUserCompletedEvents();
 
@@ -567,14 +565,12 @@ class EventServiceTest {
   void getEventsByHackathonId_withValidId_returnsEvents() {
     UUID hackathonId = UUID.randomUUID();
     when(hackathonRepository.existsById(hackathonId)).thenReturn(true);
-    when(eventRepository.findByHackathon(hackathonId))
-      .thenReturn(Collections.singletonList(event));
-    
+    when(eventRepository.findByHackathon(hackathonId)).thenReturn(Collections.singletonList(event));
+
     List<Event> results = eventService.getEventsByHackathonId(hackathonId);
 
     assertThat(results).hasSize(1);
     verify(eventRepository).findByHackathon(hackathonId);
-
   }
 
   @Test
@@ -584,11 +580,10 @@ class EventServiceTest {
     when(hackathonRepository.existsById(hackathonId)).thenReturn(false);
 
     assertThatThrownBy(() -> eventService.getEventsByHackathonId(hackathonId))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessageContaining("Hackathon not found");
-    
-    verify(eventRepository, never()).findByHackathon(any());
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Hackathon not found");
 
+    verify(eventRepository, never()).findByHackathon(any());
   }
 
   @Test
@@ -604,7 +599,6 @@ class EventServiceTest {
     assertThat(response.isScoringPaused()).isTrue();
     assertThat(event.getScoringPaused()).isTrue();
     verify(eventRepository).save(event);
-
   }
 
   @Test
@@ -617,31 +611,29 @@ class EventServiceTest {
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("Event could not be found");
 
-    verify(eventRepository,  never()).save(any(Event.class));
-
+    verify(eventRepository, never()).save(any(Event.class));
   }
 
   @Test
   void extendEvent_withValidSeconds_increasesDuration() {
-    int originalDuration =  event.getDuration();
+    int originalDuration = event.getDuration();
 
     when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
     when(eventRepository.save(any(Event.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    
-    Event result =  eventService.extendEvent(eventId, 3600);
+
+    Event result = eventService.extendEvent(eventId, 3600);
 
     assertThat(result.getDuration()).isEqualTo(originalDuration + 3600);
     verify(eventRepository).save(event);
-
   }
 
   @Test
   void extendEvent_withNonPositiveSeconds_throwsIllegalArgumentException() {
     assertThatThrownBy(() -> eventService.extendEvent(eventId, 0))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessageContaining("Invalid time");
-    
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Invalid time");
+
     verify(eventRepository, never()).findById(any());
   }
 
@@ -656,12 +648,11 @@ class EventServiceTest {
         .hasMessageContaining("Event was canceled");
 
     verify(eventRepository, never()).save(any(Event.class));
-
   }
 
   @Test
   void putUpdateEvent_withInvalidStatusTransition_throwsIllegalArgumentException() {
-    
+
     event.setStartDateTime(OffsetDateTime.now().minusDays(10));
     event.setDuration(3600);
     event.setStatus("COMPLETED");
@@ -687,11 +678,10 @@ class EventServiceTest {
     when(hackathonRepository.existsById(hackathonId)).thenReturn(false);
 
     assertThatThrownBy(() -> eventService.putUpdateEvent(eventId, req))
-          .isInstanceOf(IllegalArgumentException.class)
-          .hasMessageContaining("Hackathon not found");
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Hackathon not found");
 
     verify(eventRepository, never()).save(any(Event.class));
-
   }
 
   @Test
@@ -712,7 +702,6 @@ class EventServiceTest {
         .hasMessageContaining("Hackathon not found");
 
     verify(eventRepository, never()).save(any(Event.class));
-
   }
 
   @Test
@@ -723,17 +712,16 @@ class EventServiceTest {
     when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
     when(eventRepository.save(any(Event.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    
+
     Event result = eventService.getEventById(eventId);
 
     assertThat(result.getStatus()).isEqualTo("COMPLETED");
     verify(eventRepository).save(event);
-
   }
 
   @Test
   void getEventById_doesNotRefreshCanceledEvent() {
-    
+
     event.setStatus("CANCELED");
     when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
 
@@ -741,8 +729,5 @@ class EventServiceTest {
 
     assertThat(result.getStatus()).isEqualTo("CANCELED");
     verify(eventRepository, never()).save(any(Event.class));
-
   }
-
-
 }

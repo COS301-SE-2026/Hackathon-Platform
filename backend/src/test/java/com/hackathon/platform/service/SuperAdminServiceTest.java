@@ -27,136 +27,127 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 class SuperAdminServiceTest {
 
-    @Mock private UserRepository userRepo;
-    @Mock private RoleRepository roleRepo;
-    @Mock private PasswordEncoder pswrdEnc;
+  @Mock private UserRepository userRepo;
+  @Mock private RoleRepository roleRepo;
+  @Mock private PasswordEncoder pswrdEnc;
 
-    private SuperAdminService superAdminService;
+  private SuperAdminService superAdminService;
 
-    private Role adminRole;
-    private Role participantRole;
+  private Role adminRole;
+  private Role participantRole;
 
-    @BeforeEach
-    void setUp() {
-        superAdminService = new SuperAdminService(userRepo, roleRepo, pswrdEnc);
+  @BeforeEach
+  void setUp() {
+    superAdminService = new SuperAdminService(userRepo, roleRepo, pswrdEnc);
 
-        adminRole = Role.builder().roleId(1).name("ADMIN").build();
-        participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
+    adminRole = Role.builder().roleId(1).name("ADMIN").build();
+    participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
+  }
 
-    }
+  private User buildUser(UUID id, String firstName, String lastName, String email, Role role) {
+    return User.builder()
+        .userId(id)
+        .firstName(firstName)
+        .lastName(lastName)
+        .email(email)
+        .passwordHash("hashed")
+        .role(role)
+        .status("ACTIVE")
+        .build();
+  }
 
-    private User buildUser(UUID id, String firstName, String lastName, String email, Role role) {
-        return User.builder()
-            .userId(id)
-            .firstName(firstName)
-            .lastName(lastName)
-            .email(email)
-            .passwordHash("hashed")
-            .role(role)
-            .status("ACTIVE")
-            .build();
+  @Test
+  void getAdmins_returnsOnlyUsersWithAdminRole() {
+    User admin = buildUser(UUID.randomUUID(), "Jane", "Doe", "jane@test.com", adminRole);
+    User participant =
+        buildUser(UUID.randomUUID(), "John", "Smith", "john@test.com", participantRole);
+    when(userRepo.findAll()).thenReturn(List.of(admin, participant));
 
-    }
+    List<AdminResponse> results = superAdminService.getAdmins();
 
-    @Test
-    void getAdmins_returnsOnlyUsersWithAdminRole() {
-        User admin = buildUser(UUID.randomUUID(), "Jane", "Doe", "jane@test.com", adminRole);
-        User participant =
-            buildUser(UUID.randomUUID(), "John", "Smith", "john@test.com", participantRole);
-        when(userRepo.findAll()).thenReturn(List.of(admin, participant));
+    assertThat(results).hasSize(1);
+    assertThat(results.get(0).getEmail()).isEqualTo("jane@test.com");
+    assertThat(results.get(0).getFirstName()).isEqualTo("Jane");
+    assertThat(results.get(0).getStatus()).isEqualTo("ACTIVE");
+    verify(userRepo).findAll();
+  }
 
-        List<AdminResponse> results = superAdminService.getAdmins();
+  @Test
+  void getAdmins_withNoAdmins_returnsEmptyList() {
+    User participant =
+        buildUser(UUID.randomUUID(), "John", "Smith", "john@test.com", participantRole);
+    when(userRepo.findAll()).thenReturn(List.of(participant));
 
-        assertThat(results).hasSize(1);
-        assertThat(results.get(0).getEmail()).isEqualTo("jane@test.com");
-        assertThat(results.get(0).getFirstName()).isEqualTo("Jane");
-        assertThat(results.get(0).getStatus()).isEqualTo("ACTIVE");
-        verify(userRepo).findAll();
+    List<AdminResponse> results = superAdminService.getAdmins();
 
-    }
+    assertThat(results).isEmpty();
+  }
 
-    @Test
-    void getAdmins_withNoAdmins_returnsEmptyList() {
-        User participant =
-            buildUser(UUID.randomUUID(), "John", "Smith", "john@test.com", participantRole);
-        when(userRepo.findAll()).thenReturn(List.of(participant));
+  @Test
+  void createAdmin_withValidRequest_createsAndReturnAuthResponse() {
+    CreateAdminRequest req = new CreateAdminRequest();
+    req.setFirstName(" Jane ");
+    req.setLastName(" Doe ");
+    req.setEmail(" Jane@Test.com ");
+    req.setPassword("password123");
 
-        List<AdminResponse> results = superAdminService.getAdmins();
+    when(userRepo.existsByEmail("jane@test.com")).thenReturn(false);
+    when(roleRepo.findByName("ADMIN")).thenReturn(Optional.of(adminRole));
+    when(pswrdEnc.encode("password123")).thenReturn("encoded-password");
+    when(userRepo.save(any(User.class)))
+        .thenAnswer(
+            invocation -> {
+              User u = invocation.getArgument(0);
+              u.setUserId(UUID.randomUUID());
+              return u;
+            });
 
-        assertThat(results).isEmpty();
+    AuthResponse response = superAdminService.createAdmin(req);
 
-    }
+    assertThat(response).isNotNull();
+    assertThat(response.getUserId()).isNotNull();
+    assertThat(response.getFirstName()).isEqualTo("Jane");
+    assertThat(response.getLastName()).isEqualTo("Doe");
+    assertThat(response.getEmail()).isEqualTo("jane@test.com");
+    assertThat(response.getRole()).isEqualTo("ADMIN");
 
-    @Test
-    void createAdmin_withValidRequest_createsAndReturnAuthResponse() {
-        CreateAdminRequest req = new CreateAdminRequest();
-        req.setFirstName(" Jane ");
-        req.setLastName(" Doe ");
-        req.setEmail(" Jane@Test.com ");
-        req.setPassword("password123");
+    verify(userRepo).save(any(User.class));
+  }
 
-        when(userRepo.existsByEmail("jane@test.com")).thenReturn(false);
-        when(roleRepo.findByName("ADMIN")).thenReturn(Optional.of(adminRole));
-        when(pswrdEnc.encode("password123")).thenReturn("encoded-password");
-        when(userRepo.save(any(User.class)))
-            .thenAnswer(
-                invocation -> {
-                    User u = invocation.getArgument(0);
-                    u.setUserId(UUID.randomUUID());
-                    return u;
+  @Test
+  void createAdmin_withExistingEmail_throwsIllegalArgumentException() {
 
-                }
-            );
+    CreateAdminRequest req = new CreateAdminRequest();
+    req.setFirstName("Jane");
+    req.setLastName("Doe");
+    req.setEmail("jane@test.com");
+    req.setPassword("password123");
 
-        AuthResponse response = superAdminService.createAdmin(req);
+    when(userRepo.existsByEmail("jane@test.com")).thenReturn(true);
 
-        assertThat(response).isNotNull();
-        assertThat(response.getUserId()).isNotNull();
-        assertThat(response.getFirstName()).isEqualTo("Jane");
-        assertThat(response.getLastName()).isEqualTo("Doe");
-        assertThat(response.getEmail()).isEqualTo("jane@test.com");
-        assertThat(response.getRole()).isEqualTo("ADMIN");
+    assertThatThrownBy(() -> superAdminService.createAdmin(req))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("An account with this email already exists");
 
-        verify(userRepo).save(any(User.class));
+    verify(userRepo, never()).save(any(User.class));
+  }
 
-    }
+  @Test
+  void createAdmin_withMissingAdminRole_throwsIllegalArgumentException() {
 
-    @Test
-    void createAdmin_withExistingEmail_throwsIllegalArgumentException() {
-        
-        CreateAdminRequest req = new CreateAdminRequest();
-        req.setFirstName("Jane");
-        req.setLastName("Doe");
-        req.setEmail("jane@test.com");
-        req.setPassword("password123");
+    CreateAdminRequest req = new CreateAdminRequest();
+    req.setFirstName("Jane");
+    req.setLastName("Doe");
+    req.setEmail("jane@test.com");
+    req.setPassword("password123");
 
-        when(userRepo.existsByEmail("jane@test.com")).thenReturn(true);
+    when(userRepo.existsByEmail("jane@test.com")).thenReturn(false);
+    when(roleRepo.findByName("ADMIN")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> superAdminService.createAdmin(req))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("An account with this email already exists");
+    assertThatThrownBy(() -> superAdminService.createAdmin(req))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("ADMIN role not found");
 
-        verify(userRepo, never()).save(any(User.class));
-    }
-
-    @Test
-    void createAdmin_withMissingAdminRole_throwsIllegalArgumentException() {
-
-        CreateAdminRequest req = new CreateAdminRequest();
-        req.setFirstName("Jane");
-        req.setLastName("Doe");
-        req.setEmail("jane@test.com");
-        req.setPassword("password123");
-
-        when(userRepo.existsByEmail("jane@test.com")).thenReturn(false);
-        when(roleRepo.findByName("ADMIN")).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> superAdminService.createAdmin(req))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("ADMIN role not found");
-
-
-        verify(userRepo, never()).save(any(User.class));
-    }
-
+    verify(userRepo, never()).save(any(User.class));
+  }
 }

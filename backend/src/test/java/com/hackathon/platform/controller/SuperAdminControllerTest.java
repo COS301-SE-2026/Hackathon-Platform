@@ -55,15 +55,14 @@ class SuperAdminControllerTest {
             .role(superAdminRole)
             .status("ACTIVE")
             .build();
-    
+
     superAdminAuth =
         new UsernamePasswordAuthenticationToken(
             superAdminUser,
             null,
             List.of(
                 new SimpleGrantedAuthority("ROLE_SUPERADMIN"),
-                new SimpleGrantedAuthority("ROLE_ADMIN"))
-        );
+                new SimpleGrantedAuthority("ROLE_ADMIN")));
 
     Role adminRole = Role.builder().roleId(1).name("ADMIN").build();
     User adminUser =
@@ -78,8 +77,7 @@ class SuperAdminControllerTest {
             .build();
     adminAuth =
         new UsernamePasswordAuthenticationToken(
-            adminUser, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
-        );
+            adminUser, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
     Role participantRole = Role.builder().roleId(2).name("PARTICIPANT").build();
     User participantUser =
         User.builder()
@@ -93,8 +91,7 @@ class SuperAdminControllerTest {
             .build();
     participantAuth =
         new UsernamePasswordAuthenticationToken(
-            participantUser, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT"))
-        );
+            participantUser, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
   }
 
   @Test
@@ -109,7 +106,6 @@ class SuperAdminControllerTest {
         .andExpect(jsonPath("$.email").value("jane.newadmin@example.com"))
         .andExpect(jsonPath("$.role").value("ADMIN"))
         .andExpect(jsonPath("$.userId").exists());
-
   }
 
   @Test
@@ -134,7 +130,6 @@ class SuperAdminControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(createAdminRequest)))
         .andExpect(status().isForbidden());
-
   }
 
   @Test
@@ -148,8 +143,6 @@ class SuperAdminControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(createAdminRequest)))
         .andExpect(status().isBadRequest());
-
-
   }
 
   @Test
@@ -170,7 +163,6 @@ class SuperAdminControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objMapper.writeValueAsString(createAdminRequest)))
         .andExpect(status().isConflict());
-
   }
 
   @Test
@@ -189,7 +181,6 @@ class SuperAdminControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[?(@.email == 'jane.newadmin@example.com')]").exists());
-
   }
 
   @Test
@@ -197,12 +188,11 @@ class SuperAdminControllerTest {
     mockMvc
         .perform(get("/api/superadmin/admins").with(authentication(adminAuth)))
         .andExpect(status().isForbidden());
-
   }
 
   @Test
   void getAdmins_asParticipant_returns403Forbidden() throws Exception {
-    
+
     mockMvc
         .perform(get("/api/superadmin/admins").with(authentication(participantAuth)))
         .andExpect(status().isForbidden());
@@ -210,7 +200,7 @@ class SuperAdminControllerTest {
 
   @Test
   void getAdmins_withoutAuthentication_returns403Forbidden() throws Exception {
-   
+
     mockMvc.perform(get("/api/superadmin/admins")).andExpect(status().isForbidden());
   }
 }

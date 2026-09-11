@@ -38,13 +38,11 @@ class SuperAdminInitializerTest {
 
     ReflectionTestUtils.setField(initializer, "firstName", "Platform");
     ReflectionTestUtils.setField(initializer, "lastName", "SuperAdmin");
-
   }
 
   private void setEmailAndPassword(String email, String password) {
     ReflectionTestUtils.setField(initializer, "email", email);
     ReflectionTestUtils.setField(initializer, "password", password);
-
   }
 
   @Test
@@ -68,7 +66,6 @@ class SuperAdminInitializerTest {
     assertThat(saved.getPasswordHash()).isEqualTo("encoded-password");
     assertThat(saved.getRole()).isEqualTo(superAdminRole);
     assertThat(saved.getStatus()).isEqualTo("ACTIVE");
-
   }
 
   @Test
@@ -79,7 +76,6 @@ class SuperAdminInitializerTest {
 
     verify(userRepo, never()).existsByEmail(any());
     verify(userRepo, never()).save(any(User.class));
-
   }
 
   @Test
@@ -90,7 +86,6 @@ class SuperAdminInitializerTest {
 
     verify(userRepo, never()).existsByEmail(any());
     verify(userRepo, never()).save(any(User.class));
-
   }
 
   @Test
@@ -101,8 +96,6 @@ class SuperAdminInitializerTest {
 
     verify(userRepo, never()).existsByEmail(any());
     verify(userRepo, never()).save(any(User.class));
-
-
   }
 
   @Test
@@ -113,7 +106,6 @@ class SuperAdminInitializerTest {
 
     verify(userRepo, never()).existsByEmail(any());
     verify(userRepo, never()).save(any(User.class));
-
   }
 
   @Test
@@ -128,7 +120,6 @@ class SuperAdminInitializerTest {
     verify(userRepo, never()).save(any(User.class));
 
     verify(roleRepo, never()).findByName(any());
-
   }
 
   @Test
@@ -159,8 +150,5 @@ class SuperAdminInitializerTest {
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
     verify(userRepo).save(captor.capture());
     assertThat(captor.getValue().getEmail()).isEqualTo("mixedcase@example.com");
-    
   }
-
-
 }

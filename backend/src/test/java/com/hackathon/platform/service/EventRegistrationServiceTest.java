@@ -46,18 +46,16 @@ class EventRegistrationServiceTest {
     event.setVisibility("PUBLIC");
     event.setRegistrationKey(null);
     event.setInPerson(false);
-
   }
 
   private EventRegistration buildSavedRegistration() {
-    
+
     EventRegistration reg = new EventRegistration();
     reg.setRegistrationId(UUID.randomUUID());
     reg.setEventId(eventId);
     reg.setUserId(userId);
     reg.setRegisteredAt(Instant.now());
     return reg;
-
   }
 
   @Test
@@ -67,14 +65,13 @@ class EventRegistrationServiceTest {
     when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(false);
     when(eventRegistrationRepo.save(any(EventRegistration.class)))
         .thenReturn(buildSavedRegistration());
-    
+
     EventRegistrationResponse response =
         eventRegistrationService.registerForEvent(eventId, userId, null);
-    
+
     assertThat(response).isNotNull();
     assertThat(response.getEventId()).isEqualTo(eventId);
     verify(eventRegistrationRepo).save(any(EventRegistration.class));
-
   }
 
   @Test
@@ -85,17 +82,14 @@ class EventRegistrationServiceTest {
     when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(false);
     when(eventRegistrationRepo.save(any(EventRegistration.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    
+
     ArgumentCaptor<EventRegistration> captor = ArgumentCaptor.forClass(EventRegistration.class);
 
-    eventRegistrationService.registerForEvent(
-      eventId, userId, null, "Vegetarian", "Peanuts"
-    );
-    
+    eventRegistrationService.registerForEvent(eventId, userId, null, "Vegetarian", "Peanuts");
+
     verify(eventRegistrationRepo).save(captor.capture());
     assertThat(captor.getValue().getDietaryReq()).isNull();
     assertThat(captor.getValue().getAllergies()).isNull();
-
   }
 
   @Test
@@ -109,15 +103,11 @@ class EventRegistrationServiceTest {
 
     ArgumentCaptor<EventRegistration> captor = ArgumentCaptor.forClass(EventRegistration.class);
 
-    eventRegistrationService.registerForEvent(
-      eventId, userId, null, " Vegetarian ", "Peanuts"
-    );
+    eventRegistrationService.registerForEvent(eventId, userId, null, " Vegetarian ", "Peanuts");
 
     verify(eventRegistrationRepo).save(captor.capture());
     assertThat(captor.getValue().getDietaryReq()).isEqualTo("Vegetarian");
     assertThat(captor.getValue().getAllergies()).isEqualTo("Peanuts");
-
-
   }
 
   @Test
@@ -128,14 +118,13 @@ class EventRegistrationServiceTest {
     when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(false);
     when(eventRegistrationRepo.save(any(EventRegistration.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    
+
     ArgumentCaptor<EventRegistration> captor = ArgumentCaptor.forClass(EventRegistration.class);
 
     eventRegistrationService.registerForEvent(eventId, userId, null, "  ", null);
 
     verify(eventRegistrationRepo).save(captor.capture());
     assertThat(captor.getValue().getDietaryReq()).isNull();
-
   }
 
   @Test
@@ -148,7 +137,6 @@ class EventRegistrationServiceTest {
         .hasMessageContaining("Event not found");
 
     verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
-
   }
 
   @Test
@@ -161,7 +149,6 @@ class EventRegistrationServiceTest {
         .hasMessageContaining("This event is not accepting registrations");
 
     verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
-
   }
 
   @Test
@@ -174,7 +161,6 @@ class EventRegistrationServiceTest {
         .hasMessageContaining("This event is not accepting registrations");
 
     verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
-
   }
 
   @Test
@@ -193,7 +179,6 @@ class EventRegistrationServiceTest {
 
     assertThat(response).isNotNull();
     verify(eventRegistrationRepo).save(any(EventRegistration.class));
-
   }
 
   @Test
@@ -202,15 +187,11 @@ class EventRegistrationServiceTest {
     event.setRegistrationKey("SECRETKEY");
     when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
 
-    assertThatThrownBy(
-      () -> eventRegistrationService.registerForEvent(eventId, userId, "WRONGKEY")
-
-    )
-      .isInstanceOf(RuntimeException.class)
-      .hasMessageContaining("Registration key is not correct");
+    assertThatThrownBy(() -> eventRegistrationService.registerForEvent(eventId, userId, "WRONGKEY"))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Registration key is not correct");
 
     verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
-
   }
 
   @Test
@@ -219,15 +200,11 @@ class EventRegistrationServiceTest {
     event.setRegistrationKey("SECRETKEY");
     when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
 
-    assertThatThrownBy(
-      () -> eventRegistrationService.registerForEvent(eventId, userId, null)
-
-    )
-      .isInstanceOf(RuntimeException.class)
-      .hasMessageContaining("Registration key is not correct");
+    assertThatThrownBy(() -> eventRegistrationService.registerForEvent(eventId, userId, null))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Registration key is not correct");
 
     verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
-
   }
 
   @Test
@@ -236,20 +213,16 @@ class EventRegistrationServiceTest {
     event.setRegistrationKey("SECRETKEY");
     when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
 
-    assertThatThrownBy(
-      () -> eventRegistrationService.registerForEvent(eventId, userId, "  ")
-
-    )
-      .isInstanceOf(RuntimeException.class)
-      .hasMessageContaining("Registration key is not correct");
+    assertThatThrownBy(() -> eventRegistrationService.registerForEvent(eventId, userId, "  "))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Registration key is not correct");
 
     verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
-
   }
 
   @Test
   void registerForEvent_whenAlreadyRegistered_throwsRuntimeException() {
-    
+
     when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
     when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
 
@@ -258,7 +231,6 @@ class EventRegistrationServiceTest {
         .hasMessageContaining("You're already registered for this event");
 
     verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
-
   }
 
   @Test
@@ -269,7 +241,6 @@ class EventRegistrationServiceTest {
 
     assertThat(result).isTrue();
     verify(eventRegistrationRepo).existsByEventIdAndUserId(eventId, userId);
-
   }
 
   @Test
@@ -280,7 +251,6 @@ class EventRegistrationServiceTest {
 
     assertThat(result).isFalse();
     verify(eventRegistrationRepo).existsByEventIdAndUserId(eventId, userId);
-
   }
 
   @Test
@@ -294,23 +264,16 @@ class EventRegistrationServiceTest {
     assertThat(results.get(0).getRegId()).isEqualTo(reg.getRegistrationId());
     assertThat(results.get(0).getEventId()).isEqualTo(eventId);
     verify(eventRegistrationRepo).findByUserId(userId);
-
   }
 
   @Test
   void getMyRegistrations_withNoRegistrations_returnsEmptyList() {
     when(eventRegistrationRepo.findByUserId(userId)).thenReturn(List.of());
- 
+
     List<EventRegistrationResponse> results = eventRegistrationService.getMyRegistrations(userId);
- 
+
     assertThat(results).isEmpty();
 
     verify(eventRegistrationRepo).findByUserId(userId);
-
   }
-
-
-
-
-
 }
