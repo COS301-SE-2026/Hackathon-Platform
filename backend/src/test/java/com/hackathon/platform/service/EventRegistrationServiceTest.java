@@ -247,7 +247,67 @@ class EventRegistrationServiceTest {
 
   }
 
-  
+  @Test
+  void registerForEvent_whenAlreadyRegistered_throwsRuntimeException() {
+    
+    when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
+
+    assertThatThrownBy(() -> eventRegistrationService.registerForEvent(eventId, userId, null))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("You're already registered for this event");
+
+    verify(eventRegistrationRepo, never()).save(any(EventRegistration.class));
+
+  }
+
+  @Test
+  void isRegistered_whenRegistrationExists_returnsTrue() {
+    when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(true);
+
+    boolean result = eventRegistrationService.isRegistered(eventId, userId);
+
+    assertThat(result).isTrue();
+    verify(eventRegistrationRepo).existsByEventIdAndUserId(eventId, userId);
+
+  }
+
+  @Test
+  void isRegistered_whenRegistrationExists_returnsFalse() {
+    when(eventRegistrationRepo.existsByEventIdAndUserId(eventId, userId)).thenReturn(false);
+
+    boolean result = eventRegistrationService.isRegistered(eventId, userId);
+
+    assertThat(result).isFalse();
+    verify(eventRegistrationRepo).existsByEventIdAndUserId(eventId, userId);
+
+  }
+
+  @Test
+  void getMyRegistrations_returnsMappedResponses() {
+    EventRegistration reg = buildSavedRegistration();
+    when(eventRegistrationRepo.findByUserId(userId)).thenReturn(List.of(reg));
+
+    List<EventRegistrationResponse> results = eventRegistrationService.getMyRegistrations(userId);
+
+    assertThat(results).hasSize(1);
+    assertThat(results.get(0).getRegId()).isEqualTo(reg.getRegistrationId());
+    assertThat(results.get(0).getEventId()).isEqualTo(eventId);
+    verify(eventRegistrationRepo).findByUserId(userId);
+
+  }
+
+  @Test
+  void getMyRegistrations_withNoRegistrations_returnsEmptyList() {
+    when(eventRegistrationRepo.findByUserId(userId)).thenReturn(List.of());
+ 
+    List<EventRegistrationResponse> results = eventRegistrationService.getMyRegistrations(userId);
+ 
+    assertThat(results).isEmpty();
+
+    verify(eventRegistrationRepo).findByUserId(userId);
+
+  }
 
 
 
