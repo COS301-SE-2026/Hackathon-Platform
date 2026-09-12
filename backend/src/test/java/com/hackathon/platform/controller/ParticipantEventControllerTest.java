@@ -112,5 +112,16 @@ class ParticipantEventControllerTest {
         verify(eventRegService).registerForEvent(eventId, userId, null, null, null);
     }
 
+    @Test
+    void getMyRegistrations_returns200() throws Exception{
+        EventRegistrationResponse resp = new EventRegistrationResponse(UUID.randomUUID(), eventId, Instant.now(), "None", "None");
+        when(eventRegService.getMyRegistrations(userId)).thenReturn(List.of(resp));
+        mockMvc.perform(get("/api/events/my-registrations").with(authentication(auth))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray()).andExpect(jsonPath("$[0].eventId").value(eventId.toString()));
+        verify(eventRegService).getMyRegistrations(userId);
+    }
 
+    @Test
+    void getOpenEvents_return403() throws Exception{
+        mockMvc.perform(get("/api/events/open")).andExpect(status().isForbidden());
+    }
 }
