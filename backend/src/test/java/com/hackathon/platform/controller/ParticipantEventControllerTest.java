@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.platform.dto.EventRegistrationRequest;
 import com.hackathon.platform.dto.EventRegistrationResponse;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.EventRegistration;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.service.CertificateService;
@@ -89,4 +90,27 @@ class ParticipantEventControllerTest {
         when(eventService.getEventById(eventId)).thenReturn(event);
         mockMvc.perform(get("/api/events/{eventId}", eventId).with(authentication(auth))).andExpect(status().isOk()).andExpect(jsonPath("$.eventId").value(eventId.toString())).andExpect(jsonPath("$.name").value("FLY AT UP"));
     }
+
+    @Test
+    void registerForEvent_withReq_returns201() throws Exception{
+        EventRegistrationRequest evReq = new EventRegistrationRequest();
+        evReq.setRegKey("REG123");
+        evReq.setDietaryReq("Vegetarian");
+        evReq.setAllergies("Peanuts");
+
+        EventRegistrationResponse resp = new EventRegistrationResponse(UUID.randomUUID(), eventId, Instant.now(), "Vegetarian", "Peanuts");
+        when(eventRegService.registerForEvent(eventId, userId, "REG123", "Vegetarian", "Peanuts")).thenReturn(resp);
+        mockMvc.perform(post("/api/events/{eventId}/registered", eventId).with(authentication(auth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(evReq))).andExpect(status().isCreated()).andExpect(jsonPath("$.eventId").value(eventId.toString())).andExpect(jsonPath("$.dietaryReq").value("Vegetarian")).andExpect(jsonPath("$.allergies").value("Peanuts"));
+        verify(eventRegService).registerForEvent(eventId, userId, "REG123", "Vegetarian", "Peanuts");
+    }
+
+    @Test
+    void registerForEvent_withoutReq() throws Exception{
+        EventRegistrationResponse resp = new EventRegistrationResponse(UUID.randomUUID(), eventId, Instant.now(), null, null);
+        when(eventRegService.registerForEvent(eventId, userId, null, null, null)).thenReturn(resp);
+        mockMvc.perform(post("/api/events/{eventId}/registered", eventId).with(authentication(auth)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated()).andExpect(jsonPath("$.eventId").value(eventId.toString()));
+        verify(eventRegService).registerForEvent(eventId, userId, null, null, null);
+    }
+
+
 }
