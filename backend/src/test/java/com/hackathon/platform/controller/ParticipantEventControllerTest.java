@@ -52,4 +52,41 @@ class ParticipantEventControllerTest {
         user = User.builder().userId(userId).firstName("Varun").lastName("Dhawan").email("varunDhawan@gmail.com").passwordHash("helloIfYoureReadingThis").status("ACTIVE").role(Role.builder().roleId(2).name("PARTICIPANT").build()).build();
         auth = new UsernamePasswordAuthenticationToken(user, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
     }
+
+    @Test
+    void getOpenEvents_returns200() throws Exception{
+        Event event = new Event();
+        event.setEventId(eventId);
+        event.setName("Open Event");
+        when(eventService.getOpenEventsForParticipants()).thenReturn(List.of(event));
+        mockMvc.perform(get("/api/events/open").with(authentication(auth))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray()).andExpect(jsonPath("$[0].eventId").value(eventId.toString())).andExpect(jsonPath("$[0].name").value("Open Event"));
+        verify(eventService).getOpenEventsForParticipants();
+    }
+
+    @Test
+    void getUserActiveEvents_return200() throws Exception{
+        Event event = new Event();
+        event.setEventId(eventId);
+        event.setName("Active Event");
+        when(eventService.getUserActiveEvents()).thenReturn(List.of(event));
+        mockMvc.perform(get("/api/events/user-active-events").with(authentication(auth))).andExpect(status().isOk()).andExpect(jsonPath("$[0].name").value("Active Event"));
+    }
+
+    @Test
+    void getUserCompletedEvents_returns200() throws Exception{
+        Event event = new Event();
+        event.setEventId(eventId);
+        event.setName("Completed Event");
+        when(eventService.getUserCompletedEvents()).thenReturn(List.of(event));
+        mockMvc.perform(get("/api/events/completed").with(authentication(auth))).andExpect(status().isOk()).andExpect(jsonPath("$[0].name").value("Completed Event"));
+    }
+
+    @Test
+    void getEventById_returns200() throws Exception{
+        Event event = new Event();
+        event.setEventId(eventId);
+        event.setName("FLY AT UP");
+        when(eventService.getEventById(eventId)).thenReturn(event);
+        mockMvc.perform(get("/api/events/{eventId}", eventId).with(authentication(auth))).andExpect(status().isOk()).andExpect(jsonPath("$.eventId").value(eventId.toString())).andExpect(jsonPath("$.name").value("FLY AT UP"));
+    }
 }
