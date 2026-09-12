@@ -3,6 +3,7 @@ package com.hackathon.platform.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -368,4 +369,19 @@ class ScoringControllerTest {
             get("/api/scoring/events/{eventId}/levels/{levelId}/leaderboard", EVENT_ID, LEVEL_ID))
         .andExpect(status().isForbidden());
   }
+
+  @Test
+  void rescorreHackathon_returns202() throws Exception{
+    UUID hackathonId = UUID.randomUUID();
+    when(scoringJobProducer.enqueueAllForHackathon(hackathonId)).thenReturn(List.of("record-1", "record-2"));
+    mockMvc.perform(post("/api/scoring/admin/hackathons/{hackathonId}/rescore", hackathonId).with(authentication(adminAuth))).andExpect(status().isAccepted()).andExpect(jsonPath("$.hackathonId").value(hackathonId.toString())).andExpect(jsonPath("$.queuedCount").value(2)).andExpect(jsonPath("$.status").value("QUEUED"));
+    verify(scoringJobProducer).enqueueAllForHackathon(hackathonId);
+  }
+
+  @Test
+  void rescoreHackathon_returns403() throws Exception{
+    mockMvc.perform(post("/api/scoring/admin/hackathons/{hackathonId}/rescore", UUID.randomUUID()).with(authentication(participantAuth))).andExpect(status().isForbidden());
+  }
+
+
 }
