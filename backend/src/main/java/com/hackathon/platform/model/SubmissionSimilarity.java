@@ -58,5 +58,91 @@ public class SubmissionSimilarity {
   @Column(name = "run_at", nullable = false)
   private Instant runAt = Instant.now();
 
-  
+  public SubmissionSimilarity() {}
+
+  public SubmissionSimilarity(
+    UUID eventId,
+    short levelId,
+    Long submissionIdA,
+    Long submissionIdB,
+    UUID teamIdA,
+    UUID teamIdB,
+    BigDecimal structuralScore,
+    BigDecimal embeddingScore,
+    BigDecimal combinedScore,
+    int matchedKgramCount,
+    boolean flagged
+  ) {
+    this.eventId = eventId;
+    this.levelId = levelId;
+    this.submissionIdA = submissionIdA;
+    this.submissionIdB = submissionIdB;
+    this.teamIdA = teamIdA;
+    this.teamIdB = teamIdB;
+    this.structuralScore = structuralScore;
+    this.embeddingScore = embeddingScore;
+    this.combinedScore = combinedScore;
+    this.matchedKgramCount = matchedKgramCount;
+    this.flagged = flagged;
+
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public UUID getEventId() {
+    return eventId;
+  }
+
+  public short getLevelId() {
+
+    return levelId;
+  }
+
+  public Long getSubmissionIdA() {
+    return submissionIdA;
+  }
+
+  public Long getSubmissionIdB() {
+    return submissionIdB;
+
+  }
+
+  public UUID getTeamIdA() {
+    return teamIdA;
+  }
+
+  public UUID getTeamIdB() {
+    return teamIdB;
+
+  }
+
+  public BigDecimal getStructuralScore() {
+    return structuralScore;
+  }
+
+  public BigDecimal getEmbeddingScore() {
+    return embeddingScore;
+
+  }
+
+  public BigDecimal getCombinedScore() {
+    return combinedScore;
+  }
+
+  public int getMatchedKgramCount() {
+    return matchedKgramCount;
+  }
+
+  public boolean isFlagged() {
+    return flagged;
+  }
+
+  public Instant getRunAt() {
+    return runAt;
+
+  }
+
+
 }
