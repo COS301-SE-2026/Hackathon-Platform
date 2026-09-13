@@ -68,7 +68,7 @@ public class PlagiarismRun {
 
   }
 
-  public Long getEventId() {
+  public UUID getEventId() {
     return eventId;
   }
 
