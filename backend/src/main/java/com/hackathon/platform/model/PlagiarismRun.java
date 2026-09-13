@@ -18,7 +18,7 @@ public class PlagiarismRun {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
-  
+
 
   @Column(name = "event_id", nullable = false)
   private UUID eventId;
@@ -51,5 +51,86 @@ public class PlagiarismRun {
   @Column(name = "completed_at")
   private Instant completedAt;
 
-  
+
+  public  PlagiarismRun() {}
+
+  public PlagiarismRun(UUID eventId, Short levelId, int topN, UUID requestedBy) {
+
+    this.eventId = eventId;
+    this.levelId = levelId;
+    this.topN = topN;
+    this.requestedBy = requestedBy;
+
+  }
+
+  public Long getId() {
+    return id;
+
+  }
+
+  public Long getEventId() {
+    return eventId;
+  }
+
+  public Short getLevelId() {
+    return levelId;
+  }
+
+  public int getTopN() {
+    return topN;
+  }
+
+  public String getStatus() {
+
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  public int getPairsCompared() {
+    return pairsCompared;
+
+  }
+
+  public void setPairsCompared(int pairsCompared) {
+    this.pairsCompared = pairsCompared;
+  }
+
+  public int getPairsFlagged() {
+    return pairsFlagged;
+  }
+
+  public void setPairsFlagged(int pairsFlagged) {
+    this.pairsFlagged = pairsFlagged;
+  }
+
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+
+    this.errorMessage =  errorMessage;
+
+  }
+
+  public UUID getRequestedBy() {
+    return requestedBy;
+  }
+
+  public Instant getRequestedAt() {
+    return requestedAt;
+  }
+
+  public Instant getCompletedAt() {
+    return completedAt;
+
+  }
+
+  public void setCompletedAt(Instant completedAt) {
+    this.completedAt = completedAt;
+  }
+
 }
