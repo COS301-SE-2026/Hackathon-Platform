@@ -199,6 +199,24 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   List<LeaderboardEntry> findFrozenLeaderboardByEventId(
       @Param("eventId") UUID eventId, @Param("cutoff") java.time.OffsetDateTime cutoff);
 
+  /**
+   * Best SCORED submission per team for a given level, limited
+   * to the supplied team ids.
+   */
+  @Query(
+      value =
+          """
+        SELECT DISTINCT ON (s.team_id) s.*
+        FROM submissions s
+        WHERE s.level_id = :levelId
+          AND s.status = 'SCORED'
+          AND s.team_id IN (:teamIds)
+        ORDER BY s.team_id, s.score DESC, s.submitted_at ASC, s.id ASC
+        """,
+      nativeQuery = true)
+  List<Submission> findBestScoredForTeamsAndLevel(
+      @Param("levelId") short levelId, @Param("teamIds") List<UUID> teamIds);
+
   boolean existsByOutputStorageKey(String storageKey);
 
   boolean existsBySourceCodeStorageKey(String storageKey);
