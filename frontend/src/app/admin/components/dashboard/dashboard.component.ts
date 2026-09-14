@@ -276,7 +276,7 @@ export class DashboardComponent implements OnInit{
       activeTeams: insights.activeTeams,
       approvedParticipants: insights.approvedParticipants,
       submissionsLastHour: insights.submissionsLastHour,
-      errorRate: insights.errorRate ?? 0,
+      errorRate: Number((insights.errorRate ?? 0).toFixed(2)),
 
     };
 
