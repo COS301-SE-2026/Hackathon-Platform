@@ -4,31 +4,34 @@
 }
 
 .events-page{
-  min-width : 1440px;
-  margin: 0 auto;
+  min-height : 100vh;
+  background-color: #f4f6f9;
 }
 
 
 .content{
-  background-color: transparent;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 28px 60px;
 }
 
 .page-header{
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 26px;
 
   h1, h2{
-    font-size: 1.15rem;
+    font-size: 1.55rem;
     font-weight: 700;
     color:#13192d ;
+    letter-spacing: -0.01em;
    
   }
 
   .page-subtitle {
     color:#6b7588;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     margin-top: 3px;
   }
 }
@@ -36,15 +39,18 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  max-width: 1180px;
+  margin: 12px auto 20px;
   background-color: #ffffff;
   border: 1px solid #e7eaf0;
   border-radius: 14px;
-  padding: 22px 26px;
-  margin-bottom: 16px;
+  padding: 24px 28px;
   box-shadow: 0 1px 2px rgba(19,25,45,0.04);
+  flex-wrap: wrap;
+  gap: 24px;
 
   h1{
-    font-size: 1.5rem;
+    font-size: 1.65rem;
     font-weight: 700;
     color: #13192d;
     letter-spacing: -0.01em;
@@ -89,27 +95,32 @@
 
 .hackathon-tabs{
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 4px;
+  max-width: 1180px;
+  margin: 0 auto 24px;
   background-color: #ffffff;
   border: 1px solid #e7eaf0;
-  border-radius: 14px;
-  padding: 6px 10px;
-  margin-bottom: 20px;
+  border-radius: 12px;
+  padding: 0px 24px;
   box-shadow: 0 1px 2px rgba(19,25,45,0.04);
+  overflow-x: auto;
 
   
   a, .tab-disabled{
     display: flex;
     align-items: center;
-    gap: 7px;
-    padding: 12px 16px;
-    font-size: 0.86rem;
+    gap: 8px;
+    padding: 16px 14px;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #6b7588;
     text-decoration: none;
+    white-space: nowrap;
     border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
 
-    .pi{ font-size: 0.85rem;}
+    .pi{ font-size: 0.9rem;}
   }
 
   a{
@@ -248,24 +259,27 @@
  padding: 16px 22px;
 }
 .back-navigation{
-  margin-bottom: 16px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 20px 28px 0;
 }
 
 .back-btn{
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   background: none;
   border: none;
-  color: #3a4357;
-  font-size: 0.88rem;
+  color: #425066;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  padding: 0;
+  padding:8px 0;
   font-family: inherit;
+  transition: color 0.15s;
 
   .pi{
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
   &:hover{
     color: #146a9d;
