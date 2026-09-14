@@ -27,16 +27,20 @@
 
 .landing-cta-button {
   display: inline-flex;
-  justify-content: center;
   align-items: center;
-  padding: 18px 36px;
+  justify-content: center;
+  margin-top: var(--space-8);
+  padding: 15px 28px;
+  min-height: 48px;
   background: var(--bright-blue);
-  border-radius: var(--radius-sm);
-  font-size: 16px;
   color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
   text-decoration: none;
-  text-transform: uppercase;
-  font-weight: 600;
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-small);
+  box-shadow: var(--shadow-lg);
 }
 
 .landing-footer {
