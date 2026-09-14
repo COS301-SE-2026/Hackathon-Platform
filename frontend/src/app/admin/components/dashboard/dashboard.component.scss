@@ -599,8 +599,14 @@
 
 .trend-svg{
   width: 100%;
-  height: 90px;
+  height: 110px;
   display: block;
+}
+.trend-axis-label {
+  font-size: 7px;
+  fill: #8089a0;
+  font-weight: 600;
+  font-family: 'Inter', -apple-system, sans-serif;
 }
 .trend-area{
   fill: rgba(25,131,194,0.12);
