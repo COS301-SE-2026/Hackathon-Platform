@@ -13,4 +13,38 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PlagiarismJobConsumer
-    implements StreamListener<String, MapRecord<String, String, String>> {}
+    implements StreamListener<String, MapRecord<String, String, String>> {
+  private static final Logger logger = LoggerFactory.getLogger(PlagiarismJobConsumer.class);
+
+  private final StringRedisTemplate redis;
+  private final PlagiarismProperties properties;
+  private final PlagiarismCheckService checkService;
+
+  @Override
+  public void onMessage(MapRecord<String, String, String> msg) {
+    String runIdStr = msg.getValue().get("runId");
+    Long runId = runIdStr != null ? Long.valueOf(runIdStr) : null;
+
+    if(runId == null) {
+        logger.error("Plagiarism job record {} missing runId, dropping", msg.getId());
+        ack(msg);
+        return;
+
+    }
+    try {
+        logger.info("starting plagiarism run {} from record {}", runId, msg.getId());
+        checkService.execute(runId);
+        ack(msg);
+    } catch (Exception e) {
+        logger.error("error running plagiarism check for run {}, will retry", runId, e);
+
+    }
+  }
+
+  private void ack(MapRecord<String, String, String> record) {
+    redis.opsForStream().acknowledge(properties.getQueue().getConsumerKey(), record);
+    
+  }
+
+
+}
