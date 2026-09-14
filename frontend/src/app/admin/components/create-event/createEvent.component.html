@@ -205,8 +205,8 @@
           type = "checkbox"
           id = "isInPerson"
           name = "isInPerson"
+          class = "checkbox-input"
           [(ngModel)] = "form.isInPerson"/>
-          <span class = "checkbox-custom"></span>
           <span>This is an in-person event</span>
         </label>
       </div>
@@ -257,6 +257,12 @@
             </button>
             </div>
           }
+          <button
+            type = "button"
+            class = "btn-add-prize"
+            (click) = "addPrize()">
+            <i class = "pi pi-plus"></i>Add pri
+          </button>
         </div>
       
       </div>

@@ -436,27 +436,29 @@ textarea{
     color: #3a4357;
     user-select: none;
 
-    input[type = "checkbox"]{
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
+}
 
-    .checkbox-custom{
-        width: 20px;
-        height: 20px;
-        flex-shrink: 0;
-        border: 1.5px solid #dfe3ea;
-        border-radius: 6px;
-        background-color: #f9fafc;
-        transition: border-color 0.15s, background-color 0.15s;
-        position: relative;
+ .checkbox-input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    margin: 0;
+    border: 1.5px solid #dfe3ea;
+    border-radius: 6px;
+    background-color: #f9fafc;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s, background-color 0.15s;
+
+    &:checked{
+        background-color: #1983c2;
+        border-color: #1983c2;
 
         &::after{
-            content: '';
+            content:'';
             position: absolute;
-            display: none;
             left: 6px;
             top: 2px;
             width: 5px;
@@ -466,26 +468,40 @@ textarea{
             transform: rotate(45deg);
         }
     }
-
-    input[type="checkbox"]:checked + .checkbox-custom{
-        background-color: #1983c2;
-        border-color: #1983c2;
-
-        &::after{
-            display: block;
-        }
-    }
-
-    input[type = "checkbox"]:focus-visible + .checkbox-custom{
+    &:focus-visible{
         border-color: #1983c2;
         box-shadow: 0 0 0 3px rgba(25,131,194,0.15);
     }
-}
+ }
 
 .field-hint{
     font-size: 0.76rem;
     color: #8089a0;
     margin-top: 6px;
+}
+
+.btn-add-prize {
+    margin-top: 4px;
+    width: 100%;
+    padding: 10px;
+    border: 1.5px dashed #c4cbd8;
+    border-radius: 8px;
+    background-color: transparent;
+    color: #1983c2;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+
+    &:hover{
+        border-color: #1983c2;
+        background-color: #f4f9fd;
+    }
 }
 
 .prize-list{

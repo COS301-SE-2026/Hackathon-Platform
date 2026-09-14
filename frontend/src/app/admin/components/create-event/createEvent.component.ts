@@ -108,7 +108,9 @@ export class CreateEventComponent implements OnInit {
   onDragOver(event: DragEvent): void {
     event.preventDefault();
   }
-
+  addPrize(): void{
+    this.form.prizes.push({title: '', description: ''});
+  }
 
   removePrize(index: number): void {
     if (this.form.prizes.length > 1){
