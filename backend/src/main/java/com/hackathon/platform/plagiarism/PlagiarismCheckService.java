@@ -1,3 +1,32 @@
+package com.hackathon.platform.plagiarism;
+
+import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.dto.PlagiarismDiffResponse;
+import com.hackathon.platform.dto.SubmissionSimilarityResponse;
+import com.hackathon.platform.model.Level;
+import com.hackathon.platform.model.PlagiarismRun;
+import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.SubmissionSimilarity;
+import com.hackathon.platform.plagiarism.fingerprint.Winnowing;
+import com.hackathon.platform.plagiarism.fingerprint.Winnowing.FingerprintResult;
+import com.hackathon.platform.plagiarism.normalize.CodeNormalizer;
+import com.hackathon.platform.repository.LeaderboardEntry;
+import com.hackathon.platform.repository.LevelRepository;
+import com.hackathon.platform.repository.PlagiarismRunRepository;
+import com.hackathon.platform.repository.SubmissionRepository;
+import com.hackathon.platform.repository.SubmissionSimilarityRepository;
+import com.hackathon.platform.repository.TeamRepository;
+import com.hackathon.platform.service.StorageService;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -142,9 +171,9 @@ public class PlagiarismCheckService {
                 }
 
                 Long lower = Math.min(a.getId(), b.getId());
-                Long highter = Math.max(a.getId(), b.getId());
+                Long higher = Math.max(a.getId(), b.getId());
                 UUID teamLower = a.getId().equals(lower) ? a.getTeamId() : b.getTeamId();
-                UUID teamHighter = a.getId().equals(lower) ? b.getTeamId() : a.getTeamId();
+                UUID teamHigher = a.getId().equals(lower) ? b.getTeamId() : a.getTeamId();
 
                 BigDecimal score = BigDecimal.valueOf(structural).setScale(4, RoundingMode.HALF_UP);
                 toSave.add(
@@ -154,7 +183,7 @@ public class PlagiarismCheckService {
                         lower,
                         higher,
                         teamLower,
-                        teamHighter,
+                        teamHigher,
                         score,
                         null, // embedding_score reserved for future ML similarity signal
                         score, // combined_score is just structural score for now. Need to add second signal.
@@ -272,5 +301,112 @@ public class PlagiarismCheckService {
         }
     }
 
-    
+    @Transactional(readOnly = true)
+    public List<SubmissionSimilarityResponse> getResults(UUID eventId, Short levelId, boolean onlyFlagged) {
+        List<SubmissionSimilarity> rows =
+            levelId != null
+                ? (onlyFlagged
+                    ? similarityRepo.findByEventIdAndLevelIdAndFlaggedTrueOrderByCombinedScoreDesc(
+                        eventId, levelId
+                    )
+                    : similarityRepo.findByEventIdAndLevelIdOrderByCombinedScoreDesc(eventId, levelId))
+                : similarityRepo.findByEventIdOrderByCombinedScoreDesc(eventId);
+        
+        Map<UUID, String> teamNames = new HashMap<>();
+        List<SubmissionSimilarityResponse> out = new ArrayList<>(rows.size());
+
+        for(SubmissionSimilarity row : rows) {
+            if(onlyFlagged && levelId == null && !row.isFlagged()) {
+                continue;
+            }
+            String nameA =
+                teamNames.computeIfAbsent(
+                    row.getTeamIdA(), id -> teamRepo.findById(id).map(t -> t.getTeamName()).orElse("?")
+                );
+            String nameB =
+                teamNames.computeIfAbsent(
+                    row.getTeamIdB(), id -> teamRepo.findById(id).map(t -> t.getTeamName()).orElse("?")
+                );
+            
+            out.add(
+                new SubmissionSimilarityResponse(
+                    row.getId(),
+                    row.getLevelId(),
+                    row.getSubmissionIdA(),
+                    row.getSubmissionIdB(),
+                    row.getTeamIdA(),
+                    nameA,
+                    row.getTeamIdB(),
+                    nameB,
+                    row.getStructuralScore(),
+                    row.getEmbeddingScore(),
+                    row.getCombinedScore(),
+                    row.getMatchedKgramCount(),
+                    row.isFlagged(),
+                    row.getRunAt()
+                )
+            );
+        }
+        return out;
+    }
+
+    /**
+     * Recomputes normalized tokens for flagged pair on demand (not persisted) for the admin UI diff highlighting.
+     * Wow moment is showing which code matched, not just score.
+     */
+    @Transactional(readOnly = true)
+    public PlagiarismDiffResponse getDiff(Long submissionIdA, Long submissionIdB) {
+        Submission a =
+            submissionRepo
+                .findById(submissionIdA)
+                .orElseThrow(() -> new IllegalArgumentException("submission not found: " + submissionIdA));
+        
+        Submission b =
+            submissionRepo
+                .findById(submissionIdB)
+                .orElseThrow(() -> new IllegalArgumentException("submission not found: " + submissionIdB));
+
+        List<String> tokensA = fetchAndNormalize(a);
+        List<String> tokensB = fetchAndNormalize(b);
+
+        FingerprintResult fpA =  winnowing.fingerprint(tokensA, props.getKgramSize(), props.getWindowSize());
+        FingerprintResult fpB =  winnowing.fingerprint(tokensB, props.getKgramSize(), props.getWindowSize());
+
+        double structural = winnowing.jaccard(fpA.hashes(), fpB.hashes());
+
+        var sharedHashes = fpA.hashes();
+        sharedHashes.retainAll(fpB.hashes());
+
+        List<int[]> rangesA = matchedRanges(fpA, sharedHashes, props.getKgramSize());
+        List<int[]> rangesB = matchedRanges(fpB, sharedHashes, props.getKgramSize());
+
+        return new PlagiarismDiffResponse(submissionIdA, submissionIdB, tokensA, tokensB, rangesA, rangesB, structural);
+
+        
+    }
+
+    private List<int[]> matchedRanges(
+        FingerprintResult fp, java.util.Set<Long> sharedHashes, int kgramSize
+    ) {
+        List<int[]> ranges = new ArrayList<>();
+        for(var f : fp.fingerprints()) {
+            if(sharedHashes.contains(f.hash())) {
+                ranges.add(new int[] {f.position(), f.position() + kgramSize});
+
+            }
+        }
+
+        ranges.sort((x,y) -> Integer.compare(x[0], y[0]));
+        return ranges;
+
+    }
+
+    private String truncate(String s, int max) {
+        if(s == null) {
+            return null;
+        }
+        return s.length() <= max ? s : s.substring(0, max) + "...";
+    }
+
+
 }
