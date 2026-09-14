@@ -87,6 +87,10 @@
     <span class = "drop-zone-filename">{{ selectedFileName || 'No file selected' }}</span>
     </button>
 
+    @if(uploadSuccessMessage){
+        <p class = "upload-success">{{uploadSuccessMessage}}</p>
+    }
+
     @if(uploadError){
         <p class = "upload-error">{{uploadError}}</p>
     }
