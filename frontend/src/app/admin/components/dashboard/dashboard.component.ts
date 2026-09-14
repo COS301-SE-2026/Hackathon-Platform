@@ -300,10 +300,10 @@ export class DashboardComponent implements OnInit{
   }
 
   private buildTrendTicks(buckets: {bucketStart: string, count:number} []): void {
-    const chartLeft = 34;
-    const chartRight = 326;
+    const chartLeft = 50;
+    const chartRight = 385;
     const chartTop = 15;
-    const chartBottom = 70;
+    const chartBottom = 100;
 
     this.trendMaxCount = Math.max(1, ...buckets.map(b=>b.count));
     this.trendYAxisTicks = [
@@ -376,10 +376,10 @@ export class DashboardComponent implements OnInit{
     }
 
     const maxCount = Math.max(1, ...buckets.map(b => b.count));
-    const chartLeft = 34;
-    const chartRight = 326;
+    const chartLeft = 50;
+    const chartRight = 385;
     const chartTop = 15;
-    const chartBottom = 70;
+    const chartBottom = 100;
     const step = buckets.length > 1 ? (chartRight - chartLeft) / (buckets.length - 1) : 0;
 
     const points = buckets.map((bucket, i) => ({
