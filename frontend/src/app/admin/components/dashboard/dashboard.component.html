@@ -199,14 +199,20 @@
               <h2 class = "panel-title">Submissions per Minute</h2>
               <span class = "trend-window">Last 60 min</span>
             </div>
-            <svg viewBox = "0 0 300 80" class = "trend-svg" preserveAspectRatio = "none">
-              <line class = "trend-grid" x1 = "10" y1="16" x2="290" y2 ="16"></line>
-              <line class = "trend-grid" x1 = "10" y1="43" x2="290" y2 ="43"></line>
-              <line class = "trend-grid" x1 = "10" y1="70" x2="290" y2 ="70"></line>
-              <path class = "trend-area" [attr.d] ="submissionTrendArea"></path>
-              <polyline class = "trend-line" [attr.points] ="submissionTrendPoints"></polyline>
+            <svg viewBox = "0 0 340 100" class = "trend-svg" preserveAspectRatio = "none">
+              @for (tick of trendYAxisTicks; track tick.y){
+                <text class = "trend-axis-label" x = "2" [attr.y] = "tick.y + 3">{{ tick.label }}</text>
+                <line class = "trend-grid" x1 = "34" [attr.y1] = "tick.y" x2 = "326" [attr.y2] = "tick.y"></line>
+              }
+
+              <path class = "trend-area" [attr.d] = "submissionTrendArea"></path>
+              <polyline class = "trend-line" [attr.points] = "submissionTrendPoints"></polyline>
               @for (pt of submissionTrend; track pt.x){
                 <circle class = "trend-dot" [attr.cx] = "pt.x" [attr.cy] ="pt.y" r="2.75"></circle>
+              }
+
+              @for (t of trendTicks; track t.x){
+                <text class = "trend-axis-label" [attr.x] = "t.x" y = "88" text-anchor = "middle">{{ t.label}}</text>
               }
             </svg>
           </div>
