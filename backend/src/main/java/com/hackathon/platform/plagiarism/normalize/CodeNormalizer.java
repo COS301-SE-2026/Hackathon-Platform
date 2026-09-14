@@ -82,4 +82,87 @@ public class CodeNormalizer {
     return Lang.UNKNOWN;
   }
 
+
+  /**
+   * Produces normalized structural token sequence for the given source.
+   * 
+   * @param source raw file contents
+   * @param lang language family
+   * @return ordered list of normalized tokens
+   * 
+   */
+  public List<String> normalize(String source, Lang lang) {
+
+    if(source == null || source.isBlank()) {
+        return List.of();
+    }
+    String stripped = stripCommentsAndStrings(source, lang);
+
+    List<String> tokens = new ArrayList<>();
+    Matcher idMatcher = IDENTIFIER.matcher("");
+
+    Pattern combined =
+        Pattern.compile(
+            IDENTIFIER.pattern() + "|" + NUMBER_LITERAL.pattern() + "|" + SYMBOL.pattern()
+        );
+    Matcher m = combined.matcher(stripped);
+    while(m.find()) {
+        String tok = m.group();
+        if(tok.isBlank()) {
+            continue;
+
+        }
+
+        if(tok.equals(STRING_SENTINEL)) {
+            tokens.add("STR");
+            continue;
+        }
+
+        boolean looksLikeIdentifier = Character.isLetter(tok.charAt(0)) || tok.charAt(0) == '_';
+        if(looksLikeIdentifier && idMatcher.reset(tok).matches()) {
+
+            String lower = tok.toLowerCase(Locale.ROOT);
+            tokens.add(COMMON_KEYWORDS.contains(lower) ? lower : "ID");
+
+        } else if (Character.isDigit(tok.charAt(0))) {
+            tokens.add("NUM");
+
+        } else {
+            tokens.add(tok);
+
+        }
+    }
+    return tokens;
+  }
+
+  private String stripCommentsAndStrings(String source, Lang lang) {
+
+    String noStrings;
+    switch(lang) {
+        case PYTHON:
+
+            String noTriple = PY_TRIPLE_STRING.matcher(source).replaceAll(" STRTOKEN ");
+            String noComments = PY_COMMENT.matcher(noTriple).replaceAll(" ");
+            noStrings = STRING_LITERAL.matcher(noComments).replaceAll(" STRTOKEN ");
+            break;
+        
+        case C_LIKE:
+
+            String noBlock = C_BLOCK_COMMENT.matcher(source).replaceAll(" ");
+            String noLIne = C_LINE_COMMENT.matcher(noBlock).replaceAll(" ");
+            noStrings = STRING_LITERAL.matcher(noLIne).replaceAll(" STRTOKEN ");
+            break;
+        default:
+            //Unknown lang(still trip comment styles and string literals defensively)
+            String noBlockU = C_BLOCK_COMMENT.matcher(source).replaceAll(" ");
+            String noLineU = C_LINE_COMMENT.matcher(noBlockU).replaceAll(" ");
+            String noHashU = PY_COMMENT.matcher(noLineU).replaceAll(" ");
+            noStrings = STRING_LITERAL.matcher(noHashU).replaceAll(" STRTOKEN ");
+
+    }
+
+    return WHITESPACE.matcher(noStrings).replaceAll(" ");
+  }
+
+
 }
