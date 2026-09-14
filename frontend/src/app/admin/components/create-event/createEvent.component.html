@@ -251,7 +251,6 @@
               type = "button"
               class = "prize-remove-btn"
               (click) = "removePrize($index)"
-              [disabled] = "form.prizes.length === 1"
               aria-label = "Remove prize">
               <i class = "pi pi-trash"></i>
             </button>
@@ -261,7 +260,7 @@
             type = "button"
             class = "btn-add-prize"
             (click) = "addPrize()">
-            <i class = "pi pi-plus"></i>Add pri
+            <i class = "pi pi-plus"></i>Add prize
           </button>
         </div>
       
