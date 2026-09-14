@@ -199,22 +199,33 @@
               <h2 class = "panel-title">Submissions per Minute</h2>
               <span class = "trend-window">Last 60 min</span>
             </div>
-            <svg viewBox = "0 0 340 100" class = "trend-svg" preserveAspectRatio = "none">
-              @for (tick of trendYAxisTicks; track tick.y){
-                <text class = "trend-axis-label" x = "2" [attr.y] = "tick.y + 3">{{ tick.label }}</text>
-                <line class = "trend-grid" x1 = "34" [attr.y1] = "tick.y" x2 = "326" [attr.y2] = "tick.y"></line>
-              }
+            @if (submissionTrend.length === 0){
+              <div class = "empty-state">No submission activity in the last 60 minutes.</div>
+            } @else {
+              <svg viewBox = "0 0 400 140" class = "trend-svg">
+                <defs>
+                  <linearGradient id = "trendAreaGradient" x1 = "0" y1 = "0" x2 = "0" y2 = "1">
+                    <stop offset = "0%" stop-color = "#1983c2" stop-opacity = "0.28"></stop>
+                    <stop offset = "100%" stop-color = "#1983c2" stop-opacity = "0"></stop>
+                  </linearGradient>
+                </defs>
 
-              <path class = "trend-area" [attr.d] = "submissionTrendArea"></path>
-              <polyline class = "trend-line" [attr.points] = "submissionTrendPoints"></polyline>
-              @for (pt of submissionTrend; track pt.x){
-                <circle class = "trend-dot" [attr.cx] = "pt.x" [attr.cy] ="pt.y" r="2.75"></circle>
-              }
-
-              @for (t of trendTicks; track t.x){
-                <text class = "trend-axis-label" [attr.x] = "t.x" y = "88" text-anchor = "middle">{{ t.label}}</text>
-              }
-            </svg>
+                @for (tick of trendYAxisTicks; track tick.y){
+                  <text class = "trend-axis-label" x = "42" [attr.y] = "tick.y + 3" text-anchor="end">{{tick.label}}</text>
+                  <line class = "trend-grid" x1 ="50" [attr.y1] = "tick.y" x2 ="385" [attr.y2] = "tick.y"></line>
+                }
+                <path class = "trend-area" fill = "url(#trendAreaGradient)" [attr.d] = "submissionTrendArea"></path>
+                <polyline class = "trend-line" [attr.points] = "submissionTrendPoints"></polyline>
+                @for (pt of submissionTrend; track pt.x){
+                  <circle class = "trend-dot" [attr.cx] = "pt.x" [attr.cy] = "pt.y" r="3"></circle>
+                }
+                @for (t of trendTicks; track t.x){
+                  <text class = "trend-axis-label" [attr.x] = "t.x" y ="114" text-anchor = "middle">{{t.label}}</text>
+                }
+                <text class = "trend-axis-title" x = "217.5" y ="134" text-anchor = "middle">Time</text>
+                <text class = "trend-axis-title" x = "14" y ="57.5" text-anchor = "middle" transform = "rotate(-90 14 57.5)">Submissions</text>
+              </svg>
+            }
           </div>
 
           <div class = "panel-card">
