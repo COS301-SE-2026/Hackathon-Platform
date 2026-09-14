@@ -29,6 +29,7 @@ export class SolverComponent implements OnInit{
     hackathonId ='';
     isUploading = false;
     uploadError = '';
+    uploadSuccessMessage = '';
     hackathonName ='';
     hackathonDescription ='';
     levelsCount = 0;
@@ -91,6 +92,7 @@ onUploadAndActivate(): void{
 
     this.isUploading = true;
     this.uploadError ='';
+    this.uploadSuccessMessage = '';
 
     this.storageService.uploadHackathonSolver(
         this.hackathonId,
@@ -101,8 +103,9 @@ onUploadAndActivate(): void{
             console.log('Solver uploaded successfully:', response);
             this.isUploading = false;
 
-    alert(`Solver v${response.version} uploaded and activated successfully.`);
+            this.uploadSuccessMessage = `Solver v${response.version} uploaded and activated successfully.`;
 
+    
     this.selectedFile= null;
     this.selectedFileName ='';
     this.changeNotes= '';
