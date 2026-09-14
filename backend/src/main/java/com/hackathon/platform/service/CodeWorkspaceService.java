@@ -18,7 +18,7 @@ public class CodeWorkspaceService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public CodeWorkspace getOrCreateWorkspace(UUID eventId, UUID teamId, short levelId, User user) {
-        if(user == null || user.getUserId() == null) {
+        if (user == null || user.getUserId() == null) {
             throw new AccessDeniedException("you are not authenticated");
         }
 
@@ -32,5 +32,26 @@ public class CodeWorkspaceService {
         workspaceRepo.createIfMissing(eventId, teamId, hackId, levelId, userId);
 
         return workspaceRepo.findByEventIdAndTeamIdAndLevelId(eventId, teamId, levelId).orElseThrow(() -> new IllegalStateException("Workspace could not load"));
+    }
+
+    @Transactional(readOnly = true)
+    public CodeWorkspace getWorkspaceForUser(UUID workspaceId, User user) {
+        if (user == null || user.getUserId() == null) {
+            throw new AccessDeniedException("you are not authenticated");
+        }
+
+        if (workspaceId == null) {
+            throw new IllegalArgumentException("Workspace ID is required");
+        }
+
+        CodeWorkspace work = workspaceRepo.findById(workspaceId).orElseThrow(() -> new IllegalArgumentException("Could not find the workspace"));
+
+        UUID hackId = accService.requireParticipantAccess(work.getEventId(), work.getTeamId(), work.getLevelId(), user.getUserId());
+
+        if (!hackId.equals(work.getHackathonId())) {
+            throw new AccessDeniedException("Workspace does not match the event's hackathon");
+        }
+
+        return work;
     }
 }
