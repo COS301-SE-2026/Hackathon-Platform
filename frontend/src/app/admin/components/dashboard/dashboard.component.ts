@@ -67,6 +67,17 @@ interface ScoreLevelStat{
   count: number;
 }
 
+interface TrendTick{
+  x: number;
+  y: number;
+  label: string;
+}
+
+interface TrendYAxisTick {
+  y: number;
+  label: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -122,6 +133,10 @@ export class DashboardComponent implements OnInit{
   submissionTrend: {x:number; y:number}[]=[];
   submissionTrendPoints = '';
   submissionTrendArea = '';
+
+  trendTicks: TrendTick[] = [];
+  trendYAxisTicks: TrendYAxisTick[] = [];
+  trendMaxCount = 0; 
 
   scoreByLevel: ScoreLevelStat[]=[];
   recentAnnouncements: AnnouncementRow[]=[
@@ -280,8 +295,48 @@ export class DashboardComponent implements OnInit{
     this.submissionTrendPoints = trend.polyline;
     this.submissionTrendArea =  trend.area;
 
+    this.buildTrendTicks(insights.submissionRate || []);
+
   }
 
+  private buildTrendTicks(buckets: {bucketStart: string, count:number} []): void {
+    const chartLeft = 34;
+    const chartRight = 326;
+    const chartTop = 15;
+    const chartBottom = 70;
+
+    this.trendMaxCount = Math.max(1, ...buckets.map(b=>b.count));
+    this.trendYAxisTicks = [
+      {y: chartBottom, label: '0'},
+      {y: (chartTop + chartBottom)/ 2, label: String(Math.round(this.trendMaxCount / 2))},
+      {y: chartTop, label:String(this.trendMaxCount)},
+    ];
+
+    if (buckets.length ===0){
+      this.trendTicks = [];
+      return;
+    }
+
+    const tickCount = Math.min(5, buckets.length);
+    const tickStep = buckets.length > 1 ? (buckets.length - 1) / (tickCount - 1): 0;
+    const xStep = buckets.length > 1 ? (chartRight - chartLeft) / (buckets.length -1 ) : 0;
+
+    this.trendTicks = Array.from({length: tickCount}, (_,i)=>{
+      const idx = Math.round(i* tickStep);
+      return {
+        x: chartLeft + xStep * idx,
+        y: chartBottom,
+        label: this.formatBucketTime(buckets[idx]?.bucketStart),
+      };
+    });
+  }
+
+  private formatBucketTime(value?: string):string{
+    if (!value) return '';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString('en-US', {hour: '2-digit',minute:'2-digit'});
+  }
   private readonly statusColorMap: Record<string, string> = {
     QUEUED: 'seg-solo',
     SCORING: 'seg-small',
@@ -321,8 +376,8 @@ export class DashboardComponent implements OnInit{
     }
 
     const maxCount = Math.max(1, ...buckets.map(b => b.count));
-    const chartLeft = 10;
-    const chartRight = 290;
+    const chartLeft = 34;
+    const chartRight = 326;
     const chartTop = 15;
     const chartBottom = 70;
     const step = buckets.length > 1 ? (chartRight - chartLeft) / (buckets.length - 1) : 0;
