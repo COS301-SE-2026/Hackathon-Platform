@@ -25,6 +25,19 @@ scoring:
     poll-timeout-ms: 2000
     pending-min-idle-ms: 60000
 
+plagiarism:
+  default-top-n: ${PLAGIARISM_TOP_N:20}
+  kgram-size: 15
+  window-size: 6
+  flag-threshold: 0.6
+  min-token-count: 20
+  queue:
+    stream-key: plagiarism:jobs
+    consumer-key: plagiarism-workers
+    concurrency: ${PLAGIARISM_CONCURRENCY:2}
+    poll-timeout-ms: 2000
+
+
 spring:
   servlet:
     multipart:

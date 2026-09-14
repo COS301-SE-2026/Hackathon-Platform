@@ -47,7 +47,7 @@ public class Winnowing {
     int lastSelectedPos = -1;
     for(int i = 0; i < kgramHashes.length; i++) {
         while (!window.isEmpty() && kgramHashes[window.peekLast()] >= kgramHashes[i]) {
-            window.pollFirst();
+            window.pollLast();
 
         }
 
@@ -86,7 +86,7 @@ public class Winnowing {
   }
 
   /** Jaccard similarity between two fingerprint hash sets */
-  public double Jaccard(Set<Long> a, Set<Long> b) {
+  public double jaccard(Set<Long> a, Set<Long> b) {
 
     if(a.isEmpty() && b.isEmpty()) {
         return 0.0;
