@@ -1,45 +1,33 @@
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="brand">
-      <span class="brand-hackathon">Hackathon</span>
-      <span class="brand-platform">Platform</span>
-    </div>
-    <p class="auth-subtitle">Sign in to your account</p>
 
-    <form (ngSubmit)="onSignIn()">
-      <div class="form-group">
-        <label for="email">Email address</label>
-        <input
-          id="email"
-          type="email"
-          [(ngModel)]="email"
-          name="email"
-          placeholder="admin@example.com"
-          autocomplete="email"
-        />
-      </div>
+<div class="login-page">
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          [(ngModel)]="password"
-          name="password"
-          placeholder="••••••••"
-          autocomplete="current-password"
-        />
-        <div class="forgot-link-wrapper">
-          <a routerLink="/forgot-password">Forgot password?</a>
+<section class="login-hero">
+  <img src="assets/images/robots.jpg" alt="Robots Coding" class="login-hero-image"/>
+</section>
+
+  <section class="login-section">
+
+    <div class="login-container">
+
+      <h1 class="login-title">Login</h1>
+
+      <p class="login-subtitle"> Enter your email and password to continue.</p>
+
+
+      <form #loginForm="ngForm" (ngSubmit)="onSignIn()">
+
+        <div class="login-input">
+          <app-input id="email" label="Email" type="email" placeholder="Enter your email" [(value)]="email"/>
         </div>
-      </div>
 
-      <button type="submit" class="btn-primary btn-full">Sign in</button>
-    </form>
+        <div class="login-input">
+        <app-input id="password" label="Password" type="password" placeholder="Enter your password" [(value)]="password"/>
+        </div>
 
-    <p class="auth-footer">
-      Don't have an account?
-      <a routerLink="/register">Register</a>
-    </p>
-  </div>
+      </form>
+
+    </div>
+
+  </section>
+
 </div>
