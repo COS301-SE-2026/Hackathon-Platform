@@ -38,6 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import com.hackathon.platform.dto.RecentSubmissionResponse;
 import com.hackathon.platform.dto.ScoringLogResponse;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -422,5 +423,13 @@ class ScoringControllerTest {
     when(scoringJobProducer.enqueueAllForHackathon(any())).thenReturn(List.of());
     when(submissionQueryService.getScoringLogForSubmissionAsAdmin(SUBMISSION_ID)).thenReturn(null);
     mockMvc.perform(get("/api/scoring/admin/submissions/{submissionId}/log", SUBMISSION_ID).with(authentication(adminAuth))).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void updateLeaderboard_returnSseEmitter() throws Exception{
+    SseEmitter emitter = new SseEmitter();
+    when(leaderboardUpdateService.subscribe(EVENT_ID)).thenReturn(emitter);
+    mockMvc.perform(get("/api/scoring/events/{eventId}/leaderboard/update", EVENT_ID)).andExpect(status().isOk());
+    verify(leaderboardUpdateService).subscribe(EVENT_ID);
   }
 }
