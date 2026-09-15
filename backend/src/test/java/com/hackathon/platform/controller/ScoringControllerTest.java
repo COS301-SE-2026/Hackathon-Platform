@@ -36,6 +36,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import com.hackathon.platform.dto.RecentSubmissionResponse;
+import com.hackathon.platform.dto.ScoringLogResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -383,5 +385,42 @@ class ScoringControllerTest {
     mockMvc.perform(post("/api/scoring/admin/hackathons/{hackathonId}/rescore", UUID.randomUUID()).with(authentication(participantAuth))).andExpect(status().isForbidden());
   }
 
+  @Test
+  void getRecentSubmissionsForEvent_return200() throws Exception {
+    RecentSubmissionResponse resp = new RecentSubmissionResponse();
+    when(submissionQueryService.getRecentSubmissionsForEvent(EVENT_ID, adminUser.getUserId(), LIMIT)).thenReturn(List.of(resp));
+    mockMvc.perform(get("/api/scoring/admin/events/{eventId}/recentsubmissions/{limit}", EVENT_ID, LIMIT).with(authentication(adminAuth))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray()).andExpect(jsonPath("$[0]").exists());
+  }
 
+  @Test
+  void getRecentSubmissionsForEvent_returns403() throws Exception{
+    mockMvc.perform(get("/api/scoring/admin/events/{eventId}/recentsubmissions/{limit}", EVENT_ID, LIMIT).with(authentication(participantAuth))).andExpect(status().isForbidden());
+  }
+
+  @Test
+  void getSubmissionLog_returns200() throws Exception {
+    ScoringLogResponse resp = new ScoringLogResponse(SUBMISSION_ID, TEAM_ID, EVENT_ID, "logs/test.txt", Instant.now(), "score log");
+    when(submissionQueryService.getScoringLogForSubmission(SUBMISSION_ID, TEAM_ID)).thenReturn(resp);
+    mockMvc.perform(get("/api/scoring/teams/{teamId}/submissions/{submissionId}/log", TEAM_ID, SUBMISSION_ID).with(authentication(participantAuth))).andExpect(status().isOk()).andExpect(jsonPath("$.submissionId").value("SUBMISSION_ID")).andExpect(jsonPath("$.logContent").value("score log"));
+  }
+
+  @Test
+  void getSubmissionLog_returns404() throws Exception {
+    when(submissionQueryService.getScoringLogForSubmission(SUBMISSION_ID, TEAM_ID)).thenReturn(null);
+    mockMvc.perform(get("/api/scoring/teams/{teamId}/submissions/{submissionId}/log", TEAM_ID, SUBMISSION_ID).with(authentication(participantAuth))).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void getSubmissionLogAdmin_returns200() throws Exception{
+    ScoringLogResponse resp = new ScoringLogResponse(SUBMISSION_ID, TEAM_ID, EVENT_ID, "logs/admin.txt", Instant.now(),"admin log");
+    when(submissionQueryService.getScoringLogForSubmissionAsAdmin(SUBMISSION_ID)).thenReturn(resp);
+    mockMvc.perform(get("/api/scoring/admin/submissions/{submissionId}/log", SUBMISSION_ID).with(authentication(adminAuth))).andExpect(status().isOk()).andExpect(jsonPath("$.submissionId").value(SUBMISSION_ID)).andExpect(jsonPath("$.logContent").value("admin log"));
+  }
+
+  @Test
+  void getSubmissionLogAdmin_returns404() throws Exception {
+    when(scoringJobProducer.enqueueAllForHackathon(any())).thenReturn(List.of());
+    when(submissionQueryService.getScoringLogForSubmissionAsAdmin(SUBMISSION_ID)).thenReturn(null);
+    mockMvc.perform(get("/api/scoring/admin/submissions/{submissionId}/log", SUBMISSION_ID).with(authentication(adminAuth))).andExpect(status().isNotFound());
+  }
 }
