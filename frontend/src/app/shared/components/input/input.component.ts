@@ -11,7 +11,9 @@ export class InputComponent {
   @Input() disabled = false;
   @Input() id = 'input';
   @Input() label = 'Text input';
+  @Input() type = 'text';
   @Input() value = '';
+  showPassword = false;
 
   @Output() valueChange = new EventEmitter<string>();
 
@@ -19,6 +21,10 @@ export class InputComponent {
   onInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.valueChange.emit(input.value);
+  }
+
+   togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
   
 }

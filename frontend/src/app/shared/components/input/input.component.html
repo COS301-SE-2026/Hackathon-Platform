@@ -1,11 +1,32 @@
-<label [for]="id" class="input-label"> {{ label }}</label>
 
-<input
-  [id]="id"
-  class="input"
-  [value]="value"
-  type="text"
-  [placeholder]="placeholder"
-  [disabled]="disabled"
-  (input)="onInput($event)"
-/>
+<label [for]="id" class="input-label">{{ label }}</label>
+
+<div class="input-wrapper">
+
+  <input
+    [id]="id"
+    class="input"
+    [value]="value"
+    [type]="type === 'password' && !showPassword ? 'password' : 'text'"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    (input)="onInput($event)"
+  />
+
+  @if (type === 'password') {
+    <button
+      type="button"
+      class="password-toggle"
+      (click)="togglePassword()"
+      [disabled]="disabled"
+      [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+    >
+      <i
+        class="pi"
+        [class.pi-eye]="!showPassword"
+        [class.pi-eye-slash]="showPassword"
+      ></i>
+    </button>
+  }
+
+</div>
