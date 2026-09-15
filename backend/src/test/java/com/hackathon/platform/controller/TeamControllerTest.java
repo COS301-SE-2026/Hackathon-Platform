@@ -305,4 +305,21 @@ class TeamControllerTest {
         .andDo(print())
         .andExpect(status().isNoContent());
   }
+
+  @Test
+  void getMyTeam_return200() throws Exception{
+    mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated());
+    mockMvc.perform(get("/api/teams/my-teams").with(authentication(userAuth))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray()).andExpect(jsonPath("$[0].teamName").value("Test Team"));
+  }
+
+  @Test
+  void getmyTeamForEvent_returns200() throws Exception{
+    mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated());
+    mockMvc.perform(get("/api/teams/my-team").param("eventId", eventId.toString()).with(authentication(userAuth))).andExpect(status().isOk()).andExpect(jsonPath("$.teamName").value("Test Team"));
+  }
+
+  @Test
+  void getMyTeamForEvent_returns204() throws Exception{
+    mockMvc.perform(get("api/teams/my-team").param("eventId", eventId.toString()).with(authentication(userAuth))).andExpect(status().isNoContent());
+  }
 }
