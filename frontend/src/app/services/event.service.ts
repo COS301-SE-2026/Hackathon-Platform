@@ -150,4 +150,12 @@ export class EventService {
   getEventParticipants(eventId: string): Observable<EventParticipantResponse[]> {
     return this.http.get<EventParticipantResponse[]>(`${this.baseUrl}/admin/events/${eventId}/participants`);
   }
+
+  removeParticipant(eventId: string, userId:string): Observable<void>{
+    return this.http.delete<void>(`${this.baseUrl}/admin/events/${eventId}/participants/${userId}`);
+  }
+
+  addTeamMember(eventId: string, teamId: string, email: string): Observable<EventParticipantResponse>{
+    return this.http.post<EventParticipantResponse>(`${this.baseUrl}/admin/events/${eventId}/teams/${teamId}/members`,{ email });
+  }
 }
