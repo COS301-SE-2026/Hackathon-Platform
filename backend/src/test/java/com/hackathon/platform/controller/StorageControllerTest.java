@@ -1,10 +1,12 @@
 package com.hackathon.platform.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,6 +15,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,10 +42,15 @@ import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +61,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -736,6 +746,62 @@ class StorageControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.url").value(PRESIGNED_URL));
   }
+
+  @Test
+  void downloadSubmissionArchive_returns200WithZipContainingOutputAndSource() throws Exception {
+    when(config.getSubmissionsContainer()).thenReturn(SUBMISSIONS_CONTAINER);
+
+    Submission submission = new Submission();
+    submission.setId(SUBMISSION_ID);
+    submission.setEventId(UUID.fromString(EVENT_ID));
+    submission.setTeamId(UUID.fromString(TEAM_ID));
+    submission.setOutputStorageKey("submissions/.../levels/1/.../100/output/output.txt");
+    submission.setOutputFileName("output.txt");
+    submission.setSourceCodeStorageKey("submissions/.../levels/1/.../100/source/archive.zip");
+    submission.setSourceFileName("archive.zip");
+    when(subRepo.findById(SUBMISSION_ID)).thenReturn(Optional.of(submission));
+
+    when(storageService.exists(anyString(), anyString())).thenReturn(true);
+    when(storageService.download(anyString(), eq(submission.getOutputStorageKey())))
+        .thenReturn(new ByteArrayInputStream("output data".getBytes()));
+    when(storageService.download(anyString(), eq(submission.getSourceCodeStorageKey())))
+        .thenReturn(new ByteArrayInputStream("zip data".getBytes()));
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                get(
+                        "/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}/archive",
+                        EVENT_ID,
+                        TEAM_ID,
+                        LEVEL_ID,
+                        SUBMISSION_ID)
+                    .with(authentication(adminAuth)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/zip"))
+            .andExpect(
+                header()
+                    .string(
+                        "Content-Disposition",
+                        "attachment; filename=\"submission-" + SUBMISSION_ID + "-archive.zip\""))
+            .andReturn();
+
+    Map<String, String> entries = new HashMap<>();
+    try (ZipInputStream zipIn =
+        new ZipInputStream(new ByteArrayInputStream(result.getResponse().getContentAsByteArray()))) {
+      ZipEntry entry;
+      while ((entry = zipIn.getNextEntry()) != null) {
+        entries.put(entry.getName(), new String(zipIn.readAllBytes()));
+      }
+    }
+
+    assertThat(entries).containsKey("output/output.txt");
+    assertThat(entries).containsKey("source/archive.zip");
+    assertThat(entries.get("output/output.txt")).isEqualTo("output data");
+    assertThat(entries.get("source/archive.zip")).isEqualTo("zip data");
+
+  }
+
 
   @Test
   void uploadLevelFile_returns403WhenCallerIsNotAdmin() throws Exception {
