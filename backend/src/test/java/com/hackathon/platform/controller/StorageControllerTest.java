@@ -802,6 +802,54 @@ class StorageControllerTest {
 
   }
 
+  @Test
+  void downloadSubmissionArchive_skipsMissingBlobsInsteadOfFailing() throws Exception {
+
+    when(config.getSubmissionsContainer()).thenReturn(SUBMISSIONS_CONTAINER);
+
+    Submission submission = new Submission();
+    submission.setId(SUBMISSION_ID);
+    submission.setEventId(UUID.fromString(EVENT_ID));
+    submission.setTeamId(UUID.fromString(TEAM_ID));
+    submission.setOutputStorageKey("submissions/.../output/output.txt");
+    submission.setSourceCodeStorageKey("submissions/.../source/archive.zip");
+    when(subRepo.findById(SUBMISSION_ID)).thenReturn(Optional.of(submission));
+
+    when(storageService.exists(anyString(), eq(submission.getOutputStorageKey())))
+        .thenReturn(true);
+    when(storageService.exists(anyString(), eq(submission.getSourceCodeStorageKey())))
+        .thenReturn(false);
+    when(storageService.download(anyString(), eq(submission.getOutputStorageKey())))
+        .thenReturn(new ByteArrayInputStream("output data".getBytes()));
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                get(
+                        "/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}/archive",
+                        EVENT_ID,
+                        TEAM_ID,
+                        LEVEL_ID,
+                        SUBMISSION_ID)
+                    .with(authentication(adminAuth)))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    Map<String, String> entries = new HashMap<>();
+    try (ZipInputStream zipIn =
+        new ZipInputStream(new ByteArrayInputStream(result.getResponse().getContentAsByteArray()))) {
+      ZipEntry entry;
+      while ((entry = zipIn.getNextEntry()) != null) {
+        entries.put(entry.getName(), new String(zipIn.readAllBytes()));
+      }
+
+    }
+
+    assertThat(entries).containsKey("output/output.txt");
+    assertThat(entries).doesNotContainKey("source/archive.zip");
+    verify(storageService, never()).download(anyString(), eq(submission.getSourceCodeStorageKey()));
+  }
+
 
   @Test
   void uploadLevelFile_returns403WhenCallerIsNotAdmin() throws Exception {
