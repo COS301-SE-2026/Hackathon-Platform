@@ -850,6 +850,61 @@ class StorageControllerTest {
     verify(storageService, never()).download(anyString(), eq(submission.getSourceCodeStorageKey()));
   }
 
+  @Test
+  void downloadSubmissionArchive_returns403WhenCallerIsNotAdmin() throws Exception {
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}/archive",
+                    EVENT_ID,
+                    TEAM_ID,
+                    LEVEL_ID,
+                    SUBMISSION_ID)
+                .with(authentication(participantAuth)))
+        .andExpect(status().isForbidden());
+
+
+  }
+
+  @Test
+  void downloadSubmissionArchive_returns5xxWhenSubmissionBelongsToAnotherTeam() throws Exception {
+    Submission submission = new Submission();
+    submission.setId(SUBMISSION_ID);
+    submission.setEventId(UUID.fromString(EVENT_ID));
+    submission.setTeamId(UUID.randomUUID());
+    when(subRepo.findById(SUBMISSION_ID)).thenReturn(Optional.of(submission));
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}/archive",
+                    EVENT_ID,
+                    TEAM_ID,
+                    LEVEL_ID,
+                    SUBMISSION_ID)
+                .with(authentication(adminAuth)))
+        .andExpect(status().is5xxServerError());
+
+
+  }
+
+  @Test
+  void downloadSubmissionArchive_returns5xxWhenSubmissionNotFound() throws Exception {
+    
+    when(subRepo.findById(SUBMISSION_ID)).thenReturn(Optional.empty());
+
+    mockMvc
+        .perform(
+            get(
+                    "/api/storage/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}/archive",
+                    EVENT_ID,
+                    TEAM_ID,
+                    LEVEL_ID,
+                    SUBMISSION_ID)
+                .with(authentication(adminAuth)))
+        .andExpect(status().is5xxServerError());
+  }
 
   @Test
   void uploadLevelFile_returns403WhenCallerIsNotAdmin() throws Exception {
