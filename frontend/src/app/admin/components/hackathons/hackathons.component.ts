@@ -85,7 +85,7 @@ export class HackathonsComponent implements OnInit {
 
     this.hackathonService.getAllHackathons().subscribe({
         next: (hackathons) => {
-            this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0, levelCount: 0}));
+            this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0, levelCount: 0})).sort((a,b) => a.name.localeCompare(b.name));
             this.isLoading = false;
             this.change.markForCheck();
             this.loadEventCounts();
@@ -295,6 +295,7 @@ export class HackathonsComponent implements OnInit {
             } else {
                 this.hackathons.unshift({ ...saved, eventCount: 0, levelCount:0 });
             }
+            this.hackathons.sort((a,b) => a.name.localeCompare(b.name));
             this.change.markForCheck();
 
             this.handlePostSaveUploads(saved.hackathonId);
