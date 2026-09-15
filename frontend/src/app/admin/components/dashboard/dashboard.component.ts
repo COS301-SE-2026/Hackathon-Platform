@@ -23,7 +23,6 @@ interface Submissions {
   submissionId: number;
   team: string;
   teamInitials: string;
-  event: string;
   level: string;
   score: string;
   status: string;
@@ -418,7 +417,6 @@ export class DashboardComponent implements OnInit{
       submissionId: sub.submissionId,
   team,
   teamInitials: team.slice(0,2).toUpperCase(),
-  event: 'Event',
   level: `Level ${sub.levelId}`,
   challenge: `Level ${sub.levelId}`,
   score: sub.score === null || sub.score === undefined
