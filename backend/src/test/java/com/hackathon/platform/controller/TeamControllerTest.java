@@ -307,34 +307,85 @@ class TeamControllerTest {
   }
 
   @Test
-  void getMyTeam_return200() throws Exception{
-    mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated());
-    mockMvc.perform(get("/api/teams/my-teams").with(authentication(userAuth))).andExpect(status().isOk()).andExpect(jsonPath("$").isArray()).andExpect(jsonPath("$[0].teamName").value("Test Team"));
+  void getMyTeam_return200() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/teams")
+                .with(authentication(userAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(createTeamRequest)))
+        .andExpect(status().isCreated());
+    mockMvc
+        .perform(get("/api/teams/my-teams").with(authentication(userAuth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].teamName").value("Test Team"));
   }
 
   @Test
-  void getmyTeamForEvent_returns200() throws Exception{
-    mockMvc.perform(post("/api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated());
-    mockMvc.perform(get("/api/teams/my-team").param("eventId", eventId.toString()).with(authentication(userAuth))).andExpect(status().isOk()).andExpect(jsonPath("$.teamName").value("Test Team"));
+  void getmyTeamForEvent_returns200() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/teams")
+                .with(authentication(userAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(createTeamRequest)))
+        .andExpect(status().isCreated());
+    mockMvc
+        .perform(
+            get("/api/teams/my-team")
+                .param("eventId", eventId.toString())
+                .with(authentication(userAuth)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.teamName").value("Test Team"));
   }
 
   @Test
-  void getMyTeamForEvent_returns204() throws Exception{
-    mockMvc.perform(get("api/teams/my-team").param("eventId", eventId.toString()).with(authentication(userAuth))).andExpect(status().isNoContent());
+  void getMyTeamForEvent_returns204() throws Exception {
+    mockMvc
+        .perform(
+            get("api/teams/my-team")
+                .param("eventId", eventId.toString())
+                .with(authentication(userAuth)))
+        .andExpect(status().isNoContent());
   }
 
   @Test
-  void requestToJoin_returns201() throws Exception{
-    MvcResult res = mockMvc.perform(post("api/teams").with(authentication(userAuth)).contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(createTeamRequest))).andExpect(status().isCreated()).andReturn();
-    TeamResponse team = objMapper.readValue(res.getResponse().getContentAsString(), TeamResponse.class);
-    User member = User.builder().userId(UUID.randomUUID()).firstName("Kevin").lastName("Hart").email("kv@gmail.com").passwordHash("hash").role(roleRepository.findByName("PARTICIPANT").orElse(null)).status("ACTIVE").build();
+  void requestToJoin_returns201() throws Exception {
+    MvcResult res =
+        mockMvc
+            .perform(
+                post("api/teams")
+                    .with(authentication(userAuth))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objMapper.writeValueAsString(createTeamRequest)))
+            .andExpect(status().isCreated())
+            .andReturn();
+    TeamResponse team =
+        objMapper.readValue(res.getResponse().getContentAsString(), TeamResponse.class);
+    User member =
+        User.builder()
+            .userId(UUID.randomUUID())
+            .firstName("Kevin")
+            .lastName("Hart")
+            .email("kv@gmail.com")
+            .passwordHash("hash")
+            .role(roleRepository.findByName("PARTICIPANT").orElse(null))
+            .status("ACTIVE")
+            .build();
     User saveMem = userRepository.saveAndFlush(member);
     EventRegistration reg = new EventRegistration();
     reg.setEventId(eventId);
     reg.setUserId(saveMem.getUserId());
     eventRegRepo.saveAndFlush(reg);
 
-    UsernamePasswordAuthenticationToken memberAuth = new UsernamePasswordAuthenticationToken(saveMem, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
-    mockMvc.perform(post("/api/teams/join/{joinCode}", team.getJoinCode().toLowerCase()).with(authentication(memberAuth))).andExpect(status().isCreated());
+    UsernamePasswordAuthenticationToken memberAuth =
+        new UsernamePasswordAuthenticationToken(
+            saveMem, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
+    mockMvc
+        .perform(
+            post("/api/teams/join/{joinCode}", team.getJoinCode().toLowerCase())
+                .with(authentication(memberAuth)))
+        .andExpect(status().isCreated());
   }
 }
