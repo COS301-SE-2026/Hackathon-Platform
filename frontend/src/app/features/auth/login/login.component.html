@@ -24,6 +24,25 @@
         <app-input id="password" label="Password" type="password" placeholder="Enter your password" [(value)]="password"/>
         </div>
 
+        <div class="forgot-password">
+          <a routerLink="/forgot-password">Forgot password?</a>
+        </div>
+
+        <app-button variant="primary" type="submit" width="100%" [disabled]="isLoading"> {{ isLoading ? 'Logging in...' : 'Log in' }}</app-button>
+
+        <div class="divider">
+         <span></span><p>or</p><span></span>
+        </div>
+
+        <button type="button" class="google-button">
+          <img src="assets/images/google_icon.svg" alt="Google_Icon" class="google-icon"/>
+          <span>Continue with Google</span>
+        </button>
+
+        <p class="register-text"> Don't have an account yet?
+          <a routerLink="/register">Register</a>
+        </p>
+
       </form>
 
     </div>
