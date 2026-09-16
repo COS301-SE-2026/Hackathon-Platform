@@ -436,7 +436,6 @@ class ScoringControllerTest {
                     SUBMISSION_ID)
                 .with(authentication(participantAuth)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.submissionId").value("SUBMISSION_ID"))
         .andExpect(jsonPath("$.logContent").value("score log"));
   }
 

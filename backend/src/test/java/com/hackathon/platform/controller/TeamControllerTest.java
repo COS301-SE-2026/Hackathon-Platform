@@ -344,7 +344,7 @@ class TeamControllerTest {
   void getMyTeamForEvent_returns204() throws Exception {
     mockMvc
         .perform(
-            get("api/teams/my-team")
+            get("/api/teams/my-team")
                 .param("eventId", eventId.toString())
                 .with(authentication(userAuth)))
         .andExpect(status().isNoContent());
@@ -355,7 +355,7 @@ class TeamControllerTest {
     MvcResult res =
         mockMvc
             .perform(
-                post("api/teams")
+                post("/api/teams")
                     .with(authentication(userAuth))
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objMapper.writeValueAsString(createTeamRequest)))
@@ -432,6 +432,6 @@ class TeamControllerTest {
                 .with(authentication(userAuth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].userId").value(saveMem.getUserId()));
+        .andExpect(jsonPath("$[0].userId").value(saveMem.getUserId().toString()));
   }
 }

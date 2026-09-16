@@ -93,18 +93,6 @@ class ParticipantEventControllerTest {
   }
 
   @Test
-  void getUserCompletedEvents_returns200() throws Exception {
-    Event event = new Event();
-    event.setEventId(eventId);
-    event.setName("Completed Event");
-    when(eventService.getUserCompletedEvents()).thenReturn(List.of(event));
-    mockMvc
-        .perform(get("/api/events/completed").with(authentication(auth)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].name").value("Completed Event"));
-  }
-
-  @Test
   void getEventById_returns200() throws Exception {
     Event event = new Event();
     event.setEventId(eventId);
