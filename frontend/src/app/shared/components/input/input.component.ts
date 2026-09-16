@@ -16,6 +16,7 @@ export class InputComponent {
   showPassword = false;
 
   @Output() valueChange = new EventEmitter<string>();
+ @Output() touched = new EventEmitter<void>();
 
 
   onInput(event: Event): void {
@@ -25,6 +26,10 @@ export class InputComponent {
 
    togglePassword(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  onBlur(): void {
+  this.touched.emit();
   }
   
 }
