@@ -1,0 +1,70 @@
+<div class = "event-shell-page">
+ 
+  
+     <div class = "back-navigation">
+       <button class = "back-btn" (click) = "goBackToEvents()">
+        <i class = "pi pi-arrow-left"></i> Back to Events
+      </button>
+     </div>
+      
+    <div class = "event-header-card">
+      <div>
+        <h1>{{ event?.name || 'Loading...'}}</h1>
+        <p class = "event-description">{{event?.description || ''}}</p>
+      </div>
+
+      <div>
+        <div class = "event-stats">
+        <div class = "stat">
+          <i class = "pi pi-calendar"></i>
+          <div>
+            <p class = "stat-value">{{teamsCount}}</p>
+            <p class = "stat-label">Teams</p>
+          </div>
+        </div>
+          <div class = "stat">
+          <i class = "pi pi-user"></i>
+          <div>
+            <p class = "stat-value">{{participantsCount}}</p>
+            <p class = "stat-label">Participants</p>
+          </div>
+          </div>
+           <div class = "stat">
+          <i class = "pi pi-code"></i>
+          <div>
+            <p class = "stat-value">{{submissionsCount}}</p>
+            <p class = "stat-label">Submissions</p>
+          </div>
+          </div>
+
+    </div>
+    </div>
+    </div>
+
+    <div class = "event-tabs">
+       <a [routerLink]="['/admin/hackathons', hackathonId, 'events', eventId, 'dashboard']" routerLinkActive="active">
+      <i class="pi pi-th-large"></i> Dashboard
+    </a>
+       <a [routerLink]="['/admin/hackathons', hackathonId, 'events', eventId, 'live-control']" routerLinkActive="active">
+      <i class="pi pi-bolt"></i> Live Control
+    </a>
+       <a [routerLink]="['/admin/hackathons', hackathonId, 'events', eventId, 'announcements']" routerLinkActive="active">
+      <i class="pi pi-megaphone"></i> Announcements
+    </a>
+     <a [routerLink]="['/admin/hackathons', hackathonId, 'events', eventId, 'forum']" routerLinkActive="active">
+      <i class="pi pi-comments"></i> Forum
+    </a>
+     <a [routerLink]="['/admin/hackathons', hackathonId, 'events', eventId, 'participants']" routerLinkActive="active">
+      <i class="pi pi-users"></i> Participants
+    </a>
+     <a [routerLink]="['/admin/hackathons', hackathonId, 'events', eventId, 'manage']" routerLinkActive="active">
+      <i class="pi pi-cog"></i> Manage Events
+    </a>
+
+      
+</div>
+
+<main class = "content">
+    <router-outlet></router-outlet>
+</main>
+    </div>
