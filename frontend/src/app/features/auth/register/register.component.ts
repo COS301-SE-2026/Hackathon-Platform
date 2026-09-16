@@ -22,6 +22,11 @@ export class RegisterComponent {
 
   isLoading = false;
   errorMessage = '';
+  firstNameTouched = false;
+  lastNameTouched = false;
+  emailTouched = false;
+  passwordTouched = false;
+  confirmPasswordTouched = false;
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
@@ -30,14 +35,15 @@ export class RegisterComponent {
     console.log('onCreateAccount called, form valid:', form.valid);
 
     this.errorMessage = '';
-    Object.values(form.controls).forEach(control => control.markAsTouched());
-    if (form.invalid) {
-      this.errorMessage = 'Please fill in all required fields correctly';
-      return;
-    }
 
-    if (this.password !== this.confirmPassword) {
-      this.errorMessage = 'Passwords do not match';
+    this.firstNameTouched = true;
+    this.lastNameTouched = true;
+    this.emailTouched = true;
+    this.passwordTouched = true;
+    this.confirmPasswordTouched = true;
+
+    if (!this.isFormValid()) {
+      this.errorMessage = 'Please fill in all required fields correctly';
       return;
     }
 
@@ -74,5 +80,19 @@ export class RegisterComponent {
         }
       }
     });
+  }
+
+
+  isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+isValidPassword(): boolean {
+  return ( this.password.length >= 8 && /[A-Z]/.test(this.password) && /[a-z]/.test(this.password) &&/[0-9]/.test(this.password) && /[^A-Za-z0-9]/.test(this.password) );
+  }
+
+isFormValid(): boolean {
+  return ( !!this.firstName.trim() && !!this.lastName.trim() && this.isValidEmail(this.email.trim()) && this.isValidPassword() && !!this.confirmPassword && this.password === this.confirmPassword
+  );
   }
 }
