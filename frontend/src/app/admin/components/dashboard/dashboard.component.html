@@ -81,7 +81,10 @@
               
             </div>
             <div class = "announcement-rows">
-              @for (a of recentAnnouncements; track a.title){
+              @if (recentAnnouncements.length === 0){
+                <div class = "empty-state">No announcements yet.</div>
+              } @else {
+                @for (a of recentAnnouncements; track a.title){
                 <div class = "announcement-row">
                   <span class = "announcement-icon"><i class = "pi pi-megaphone"></i></span>
                   <div class = "announcement-info">
@@ -91,6 +94,7 @@
                   <span class = "announcement-date">{{a.date}}</span>
                 </div>
               }
+            }
             </div>
           </div>
 

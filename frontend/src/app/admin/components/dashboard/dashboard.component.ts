@@ -51,7 +51,7 @@ export class DashboardComponent implements OnInit{
 
   allEvents: Events[] = [];
   recentSubmissions: Submissions[] = [];
-
+  recentAnnouncements: AnnouncementRow[]=[];
   activeEvents = 0
   activeParticipants = 0;
   teamsCount = 0;
