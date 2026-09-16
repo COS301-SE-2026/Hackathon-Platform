@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { InputComponent } from '../../../shared/components/input/input.component';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, InputComponent, ButtonComponent],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
@@ -16,19 +19,19 @@ export class LoginComponent {
   email = '';
   password = '';
   isLoading = false;
-  errorMsg = '';
+  
 
  private readonly router = inject(Router);
  private readonly authService = inject(AuthService);
+ private readonly toast = inject(ToastService);
 
   onSignIn(): void {
     if(!this.email || !this.password){
-      this.errorMsg = 'Please enter email and passowrd';
+       this.toast.error( 'Missing Information','Please enter your email and password.');
       return;
     }
 
     this.isLoading = true;
-    this.errorMsg = '';
 
     this.authService.login({ email: this.email, password: this.password}).subscribe({
       next: (response) => {
@@ -45,7 +48,7 @@ export class LoginComponent {
       error: (error) => {
         console.error("password or email wrong or user doesnt exist", error);
         this.isLoading = false;
-        this.errorMsg = error.error?.error || 'wrong email or password';
+        this.toast.error('Login Failed',error.error?.error || 'Wrong email or password.' );
       }
     });
   }
