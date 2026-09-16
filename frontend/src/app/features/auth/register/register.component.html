@@ -38,7 +38,7 @@
         <div class="password-requirements"> 
  
             <p>Password must contain:</p> 
-            
+
             <ul> 
              <li [class.valid]="password.length >= 8"> At least 8 characters</li> 
               <li [class.valid]="/[A-Z]/.test(password)">One uppercase letter</li> 
@@ -48,6 +48,22 @@
             </ul> 
  
         </div> 
+
+        <app-button variant="primary" type="submit" width="100%" [disabled]="isLoading"> {{ isLoading ? 'Creating account...' : 'Create account' }}</app-button> 
+
+        <div class="divider"> 
+         <span></span><p>or</p><span></span> 
+        </div> 
+
+        <button type="button" class="google-button"> 
+          <img src="assets/images/google_icon.svg" alt="Google Icon" class="google-icon"/> 
+          <span>Continue with Google</span> 
+        </button> 
+
+        <p class="login-text">  
+          Already have an account? 
+          <a routerLink="/login"> Log in</a> 
+        </p> 
  
       </form> 
  

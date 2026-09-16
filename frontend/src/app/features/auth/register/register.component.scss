@@ -14,7 +14,6 @@
 }
 
 
-
 .register-hero-image {
   position: absolute;
   inset: 0;
@@ -65,9 +64,11 @@
 
 .password-requirements {
   margin-top: var(--space-2);
+  margin-bottom: var(--space-4);
   padding: var(--space-3) var(--space-4);
   background: var(--off-white);
   border-radius: var(--radius-sm);
+  border: 1px solid var(--mid-gray);
 }
 
 .password-requirements p {
@@ -90,7 +91,7 @@
   position: relative;
   margin-bottom: var(--space-1);
   padding-left: 20px;
-  color: var(--mid-gray);
+  color: var(--dark-gray);
   font-size: var(--font-size-small);
   line-height: var(--line-height-small);
 }
@@ -120,15 +121,76 @@
   color: var(--green);
 }
 
-.confirm-password {
-  margin-bottom: var(--space-4);
-}
-
-
 .password-error {
   margin: var(--space-2) 0 0;
   color: var(--red);
   font-size: var(--font-size-small);
   line-height: var(--line-height-small);
 
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-6) 0;
+}
+
+.divider span {
+  flex: 1;
+  height: 1px;
+  background: var(--mid-gray);
+}
+
+.divider p {
+  margin: 0;
+  color: var(--dark-gray);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-small);
+}
+
+.google-button {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+  background: transparent;
+  border: 1px solid var(--dark-gray);
+  border-radius: var(--radius-sm);
+  color: var(--dark-gray);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+}
+
+.google-button:hover {
+  background: var(--off-white);
+  border-color: var(--dark-gray);
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.login-text {
+  margin: var(--space-8) 0 0;
+  text-align: center;
+  color: var(--dark-gray);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+
+.login-text a {
+  margin-left: var(--space-1);
+  color: var(--bright-blue);
+  font-weight: var(--font-weight-semibold);
+}
+
+.login-text a:hover {
+  text-decoration: underline;
 }
