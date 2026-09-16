@@ -13,7 +13,27 @@
 
 <div class="page-container">
 
-<app-tabs [tabs]="eventTabs" [activeTab]="activeTab" activeQueryParam="tab" ariaLabel="Event categories"></app-tabs>
+  <div class="events-toolbar">
+
+        <div class="events-tabs">
+         <app-tabs [tabs]="eventTabs" [activeTab]="activeTab"  activeQueryParam="tab" ariaLabel="Event categories"></app-tabs>
+        </div>
+
+        <div class="events-search">
+         <app-search-bar placeholder="Search events"></app-search-bar>
+        </div>
+
+        <div class="events-sort">
+         <app-dropdown [options]="['Newest', 'Oldest']" value="Newest" id="event-sort" label="Sort events"></app-dropdown>
+        </div>
+
+  </div>
+
+
+
+
+
+
 
 
 

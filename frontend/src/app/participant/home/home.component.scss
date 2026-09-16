@@ -85,6 +85,72 @@
 }
 
 
+
+.events-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.events-tabs {
+  flex: 1;
+  min-width: 0;
+}
+
+.events-search {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.events-sort {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .events-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .events-tabs {
+    width: 100%;
+  }
+
+  .events-search,
+  .events-sort {
+    width: 100%;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .empty-active-content {
   flex: 1;
 
