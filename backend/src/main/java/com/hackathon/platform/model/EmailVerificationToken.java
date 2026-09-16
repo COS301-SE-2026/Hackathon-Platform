@@ -1,13 +1,19 @@
 package com.hackathon.platform.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.Setter;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "email_verification_tokens")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class EmailVerificationToken{
     @Getter
     @Id
