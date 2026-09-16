@@ -40,15 +40,22 @@ public class CodeWorkspace {
     @Column(name = "created_by_user_id", nullable = false, updatable = false)
     private UUID createdByUserId;
 
+    @Column(name = "initialized_at")
+    private Instant initializedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
         private Instant createdAt = Instant.now();
 
-        public CodeWorkspace(UUID eventId, UUID teamId, UUID hackathonId, short levelId, UUID createdByUserId) {
-            this.eventId = eventId;
-            this.teamId = teamId;
-            this.hackathonId = hackathonId;
-            this.levelId = levelId;
-            this.createdByUserId = createdByUserId;
-        }
+    public CodeWorkspace(UUID eventId, UUID teamId, UUID hackathonId, short levelId, UUID createdByUserId) {
+        this.eventId = eventId;
+        this.teamId = teamId;
+        this.hackathonId = hackathonId;
+        this.levelId = levelId;
+        this.createdByUserId = createdByUserId;
+    }
+
+    public void setInitializedAt(Instant initializedAt) {
+        this.initializedAt = initializedAt;
+    }
 
 }
