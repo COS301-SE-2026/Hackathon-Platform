@@ -9,6 +9,7 @@ import { TabsComponent, TabItem} from '../../../../shared/components/tabs/tabs.c
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { UploadAreaComponent } from '../../../../shared/components/upload-area/upload-area.component';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import { CodeWorkspaceService } from '../../../../services/code-workspace.service';
 
 @Component({
   selector: 'app-submissions',
@@ -26,6 +27,7 @@ export class SubmissionsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly codeWorkspaceService = inject(CodeWorkspaceService);
 
   levels: LevelResponse[] = [];
   levelTabs: TabItem[] = [];
@@ -278,6 +280,25 @@ onSolutionCleared(): void {
       return fileName;
     }
     return fileNameWithoutExtension.substring(0, 18) + '...' + fileExtension;
+  }
+
+
+  openIde(levelId: number): void {
+    if (!this.teamId || !this.eventID) {
+      this.toast.error('IDE unable to open', 'must belong to team');
+      return;
+    }
+
+    this.codeWorkspaceService.getOrCreateWorkspace(this.eventID, this.teamId, levelId).subscribe({
+      next: work => {
+        this.router.navigate(['/participant/events', this.eventID, 'levels', levelId, 'workspaces', work.workspaceId, 'ide']);
+      },
+
+      error: () => {
+        this.toast.error('Error', 'workspace could not open.');
+      }
+    });
+  
   }
 
 
