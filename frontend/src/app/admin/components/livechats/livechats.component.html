@@ -1,0 +1,159 @@
+<div class = "livechats-page">
+ 
+    @if (isHackathonScoped){
+     <div class = "back-navigation">
+       <button class = "back-btn" (click) = "goBack()">
+        <i class = "pi pi-arrow-left"></i> Back to Hackathons
+      </button>
+     </div>
+      
+    <div class = "hackathon-header-card">
+      <div>
+        <h1>{{ hackathon?.name || 'Loading...'}}</h1>
+        <p class = "hackathon-description">{{hackathon?.description || ''}}</p>
+      </div>
+
+      <div>
+        <div class = "hackathon-stats">
+        <div class = "stat">
+          <i class = "pi pi-clone"></i>
+          <div>
+            <p class = "stat-value">{{levelCount}}</p>
+            <p class = "stat-label">Levels</p>
+          </div>
+        </div>
+          <div class = "stat">
+          <i class = "pi pi-calendar"></i>
+          <div>
+            <p class = "stat-value">{{eventCount}}</p>
+            <p class = "stat-label">Events</p>
+          </div>
+          </div>
+          
+      </div>
+    </div>
+    </div>
+
+    <div class = "hackathon-tabs">
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/livechats" routerLinkActive = "active"><i class = "pi pi-comments"></i>Live Chats</a>
+      
+</div>
+
+}
+
+<main class = "content">
+  <div class = "page-header">
+    <div>
+      <h2>Live Chats</h2>
+      <p class = "page-subtitle">
+        Monitor live chat activity across this hackathon's events.
+      </p>
+    </div>
+  </div>
+
+  @if (isHackathonScoped){
+    <div class = "toolbar">
+      <div class = "search-box">
+        <i class = "pi pi-search search-icon"></i>
+        <input type = "text" placeholder = "Search events..." aria-label = "Search events"/>
+      </div>
+      <div class = "filter-select">
+        <select aria-label = "Filter by chat status" [(ngModel)]="statusFilter">
+          <option value = "ALL">All Chats</option>
+          <option value = "LIVE">Live</option>
+          <option value = "IDLE">Idle</option>
+          <option value = "ENDED">Ended</option>
+        </select>
+        <i class = "pi pi-chevron-down filter-chevron"></i>
+      </div>
+    </div>
+    @if (errorMessage){
+      <div class = "error-banner">{{errorMessage}}</div>
+    }
+    <div class = "events-table">
+      <div class = "events-table-header">
+        <span>Event Name</span>
+        <span>Participants</span>
+        <span>Messages</span>
+        <span>Status</span>
+        <span>Last Activity</span>
+        <span>Action</span>
+      </div>
+
+      @if (isLoading){
+        <div class = "empty-state">Loading live chats...</div>
+      } @else if (filteredChatRooms.length === 0){
+        <div class = "empty-state">No live chats to show for this hackathon yet.</div>
+      } @else {
+        @for (room of filteredChatRooms; track room.eventId){
+          <div class = "event-row-group">
+            <div class = "event-row">
+              <div class = "event-name-cell">
+                <span class = "event-logo">{{room.logoInitial}}</span>
+                <span class = "event-name">{{room.eventName}}</span>
+                @if (room.flaggedCount > 0){
+                    <span class = "flag-badge" title = "Flagged messages">
+                        <i class = "pi pi-flag"></i>{{room.flaggedCount}}
+                    </span>
+                }
+              </div>
+              <span class = "participant-count"><i class = "pi pi-users"></i>{{room.participantCount}}</span>
+              <span class = "message-count">{{room.messageCount}}</span>
+              <span class = "status-pill" [ngClass] = "room.statusClass">{{room.status}}</span>
+              <span class = "dates-cell">{{room.lastActivityLabel}}</span>
+              <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "expandedEventId === room.eventId"
+               [attr.aria-expanded] = "expandedEventId === room.eventId" (click) = "toggleChatPreview(room.eventId)">
+                {{expandedEventId === room.eventId ? 'Hide Preview' : 'Preview' }}
+                <i class = "pi" [ngClass] = "expandedEventId === room.eventId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+            </button>
+            </div>
+
+            @if (expandedEventId === room.eventId){
+              <div class = "event-registrations-panel chat-preview-panel">
+                  <div class = "registrations-summary-bar">
+                    <span><i class = "pi pi-comments"></i>Recent messages</span>
+                    <button type = "button" class = "btn-export-results"  (click) = "openFullChat(room.eventId)">
+                      <i class = "pi pi-external-link"></i>
+                      Open full chat
+                    </button>
+                  </div>
+
+            @if (messagesLoading[room.eventId]){
+                <div class = "registrations-loading">Loading recent messages...</div>
+
+            } @else if (messagesError[room.eventId]){
+              <div class = "registrations-error">{{messagesError[room.eventId]}}</div>
+  
+            } @else if (messagesByEvent[room.eventId]){
+                @if (messagesByEvent[room.eventId].length === 0){
+                    <p class = "registrations-empty">No messages have been sent in this chat yet.</p>
+            } @else {
+                <div class = "chat-message-list">
+                    @for (message of messagesByEvent[room.eventId]; track message.messageId){
+                        <div class = "chat-message" [class.flagged] = "message.flagged">
+                            <div class = "chat-message-header">
+                                <span class = "chat-message-author">{{message.senderName}}</span>
+                                 <span class = "chat-message-time">{{message.sentAtLabel}}</span>
+                                 @if (message.flagged){
+                                    <span class = "flag-badge"><i class = "pi pi-flag"></i>Flagged</span>
+                                 }
+                            </div>
+                            <p class = "chat-message-text">{{message.text}}</p>
+                              </div>
+                  }
+                </div>
+              }
+            }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</main>
+
+</div>
