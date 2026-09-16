@@ -13,6 +13,7 @@ import { ToastService } from '../../shared/components/toast/toast.service';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util';
 import { EventCardComponent } from '../event-card/event-card.component';
+import { TabsComponent, TabItem} from '../../shared/components/tabs/tabs.component';
 
 export interface OpenEventView {
   eventId: string;
@@ -53,7 +54,8 @@ export interface OpenEventView {
     InputComponent,
     ModalComponent,
     LoaderComponent,
-    EventCardComponent
+    EventCardComponent,
+    TabsComponent
    ],
   templateUrl: '../home/home.component.html',
   styleUrls: ['../home/home.component.scss']
@@ -68,7 +70,14 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private timerInterval: ReturnType<typeof setInterval> | undefined;
 
+  activeTab = 'your-events';
 
+  eventTabs: TabItem[] = [
+  {  label: 'Your Events', route: '/participant/home', queryParams: { tab: 'your-events' } },
+  { label: 'Upcoming Events', route: '/participant/home', queryParams: { tab: 'upcoming' } },
+  { label: 'Completed Events', route: '/participant/home', queryParams: { tab: 'completed' }}
+  ];
+  
   isLoadingEvents = false;
   registrationModal = false;
   isLoadingActiveEvents = false;
