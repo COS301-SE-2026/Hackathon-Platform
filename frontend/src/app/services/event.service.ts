@@ -20,6 +20,7 @@ export interface EventRequest {
 
 export interface EventResponse {
   eventId: string;
+  hackathonId:string;
   hackathon?: string;
   createdByUserId: string;
   name: string;
