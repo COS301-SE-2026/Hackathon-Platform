@@ -61,3 +61,74 @@
 .register-input {
   margin-bottom: var(--space-4);
 }
+
+
+.password-requirements {
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--off-white);
+  border-radius: var(--radius-sm);
+}
+
+.password-requirements p {
+  margin: 0 0 var(--space-2);
+  color: var(--dark-gray);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-small);
+}
+
+
+.password-requirements ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+
+.password-requirements li {
+  position: relative;
+  margin-bottom: var(--space-1);
+  padding-left: 20px;
+  color: var(--mid-gray);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+}
+
+
+.password-requirements li:last-child {
+  margin-bottom: 0;
+}
+
+
+.password-requirements li::before {
+  content: '○';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--mid-gray);
+  font-weight: var(--font-weight-semibold);
+}
+
+
+.password-requirements li.valid {
+  color: var(--green);
+}
+
+.password-requirements li.valid::before {
+  content: '✓';
+  color: var(--green);
+}
+
+.confirm-password {
+  margin-bottom: var(--space-4);
+}
+
+
+.password-error {
+  margin: var(--space-2) 0 0;
+  color: var(--red);
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
+
+}

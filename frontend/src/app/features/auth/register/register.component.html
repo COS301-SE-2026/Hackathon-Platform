@@ -31,7 +31,22 @@
         </div> 
  
         <div class="register-input"> 
-         <app-input id="confirmPassword" label="Confirm password" type="password" placeholder="Re-enter your password" [(value)]="confirmPassword"/> 
+         <app-input id="confirmPassword" label="Confirm password" type="password" placeholder="Re-enter your password" [(value)]="confirmPassword"/>
+          <p *ngIf="confirmPassword && password !== confirmPassword" class="password-error">Passwords do not match.</p>  
+        </div> 
+
+        <div class="password-requirements"> 
+ 
+            <p>Password must contain:</p> 
+            
+            <ul> 
+             <li [class.valid]="password.length >= 8"> At least 8 characters</li> 
+              <li [class.valid]="/[A-Z]/.test(password)">One uppercase letter</li> 
+              <li [class.valid]="/[a-z]/.test(password)">One lowercase letter</li> 
+              <li [class.valid]="/[0-9]/.test(password)">One number</li> 
+              <li [class.valid]="/[^A-Za-z0-9]/.test(password)">One special character</li> 
+            </ul> 
+ 
         </div> 
  
       </form> 
