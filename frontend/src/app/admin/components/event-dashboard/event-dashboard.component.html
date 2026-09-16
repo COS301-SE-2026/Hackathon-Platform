@@ -1,0 +1,189 @@
+<div class = "event-dashboard">
+
+    @if (insightsLoading) {
+            <div class = "empty-state">Loading insights...</div>
+          } @else if (insightsError) {
+            <div class = "empty-state">{{ insightsError }}</div>
+          } @else if (!selectedEventId) {
+            <div class = "empty-state">No events to show insights for yet.</div>
+          } @else {
+
+          <div class = "insights-strip">
+            <div class = "insight-mini-card">
+              <div class = "insight-mini-icon insight-icon-blue"><i class = "pi pi-users"></i></div>
+              <div>
+                <p class = "insight-mini-label">Active Teams</p>
+                <p class = "insight-mini-value">{{eventInsights.activeTeams}}</p>
+              </div>
+            </div>
+            <div class = "insight-mini-card">
+              <div class = "insight-mini-icon insight-icon-olive"><i class = "pi pi-check-circle"></i></div>
+              <div>
+                <p class = "insight-mini-label">Approved Participants</p>
+                <p class = "insight-mini-value">{{eventInsights.approvedParticipants}}</p>
+              </div>
+            </div>
+            <div class = "insight-mini-card">
+              <div class = "insight-mini-icon insight-icon-teal"><i class = "pi pi-clock"></i></div>
+              <div>
+                <p class = "insight-mini-label">Submissions (Last Hour)</p>
+                <p class = "insight-mini-value">{{eventInsights.submissionsLastHour}}</p>
+              </div>
+            </div>
+            <div class = "insight-mini-card">
+              <div class = "insight-mini-icon insight-icon-red"><i class = "pi pi-exclamation-triangle"></i></div>
+              <div>
+                <p class = "insight-mini-label">Error Rate</p>
+                <p class = "insight-mini-value">{{eventInsights.errorRate}}%</p>
+              </div>
+            </div>
+          </div>
+
+     <div class = "panels-row">
+     <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">Active Participants</h2>
+              
+            </div>
+
+            <div class = "participant-rows">
+              @if (participantsPreviewLoading) {
+                <div class = "empty-state">Loading participants...</div>
+              } @else if (activeParticipantRows.length === 0) {
+                <div class = "empty-state">No approved participants yet for this event.</div>
+              } @else {
+              @for (p of activeParticipantRows; track p.email){
+                <div class = "participant-row">
+                  <div class = "avatar-badge">{{ p.initials}}</div>
+                  <div class = "participant-row-info">
+                    <p class = "participant-row-name"> {{p.name}}</p>
+                    <p class = "participant-row-email"> {{p.email}}</p>
+                  </div>
+                  <div class = "participant-row-points">
+                    <p class = "points-value">{{ p.team}}</p>
+                    <p class = "points-label">Team</p>
+                  </div>
+                </div>
+              }
+              }
+            </div>
+          </div>
+
+          <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "section-title">Submission Status</h2>
+             
+            </div>
+
+            <div class = "donut-wrap">
+              <svg viewBox = "0 0 42 42" class = "donut-chart">
+                <circle class = "donut-ring" cx = "21" cy="21" r ="15.9" fill = "transparent" stroke = "#eef0f4" stroke-width = "5"></circle>
+                @for (seg of submissionStatusSegments; track seg.label){
+                  <circle class = "donut-segment {{seg.colorClass}}" cx = "21" cy="21" r ="15.9" fill = "transparent" stroke = "#eef0f4" stroke-width = "5" transform = "rotate(-90 21 21)"
+                [attr.stroke-dasharray] = "seg.percent + ' ' + (100 - seg.percent)"
+                [attr.stroke-dashoffset] = "-seg.offset"></circle>
+                }
+              </svg>
+              <div class = "donut-center">
+                <p class = "donut-total">{{submissionsCount}}</p>
+                <p class = "donut-label">Total Submissions</p>
+              </div>
+            </div>
+
+            <div class = "status-legend">
+              @for (seg of submissionStatusSegments; track seg.label){
+                <div class = "legend-row">
+                  <span class = "legend-dot {{seg.colorClass}}"></span>
+                <p class = "legend-label">{{seg.label}}</p>
+                <p class = "legend-sub">{{seg.count}} submissions ({{seg.percent}}%)</p>
+              </div>
+              } 
+            </div>
+          </div>
+
+               <div class = "panel-card">
+            <div class = "panel-header">
+              <h2 class = "panel-title">Top 3 Teams</h2>
+            </div>
+            @if (topTeamsLoading) {
+              <div class = "empty-state">Loading leaderboard...</div>
+            } @else if (topTeamsError) {
+              <div class = "empty-state">{{ topTeamsError }}</div>
+            } @else if (topTeams.length === 0) {
+              <div class = "empty-state">No scored submissions yet.</div>
+            } @else {
+              <div class = "top-teams-rows">
+                @for (team of topTeams; track team.teamId) {
+                  <div class = "top-team-row">
+                    <span class = "top-team-rank" [class.rank-1] = "team.rank === 1" [class.rank-2] = "team.rank === 2" [class.rank-3] = "team.rank === 3">{{ team.rank }}</span>
+                    <div class = "top-team-info">
+                      <p class = "top-team-name">{{ team.teamName }}</p>
+                      <p class = "top-team-score">Best score {{ team.bestScore }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        
+
+          <div class = "section">
+            <div class = "panel-header">
+              <h2 class = "section-title">Submissions per Minute</h2>
+              <span class = "trend-window">Last 60 min</span>
+            </div>
+            @if (submissionTrend.length === 0){
+              <div class = "empty-state">No submission activity in the last 60 minutes.</div>
+            } @else {
+              <svg viewBox = "0 0 400 140" class = "trend-svg">
+                <defs>
+                  <linearGradient id = "trendAreaGradient" x1 = "0" y1 = "0" x2 = "0" y2 = "1">
+                    <stop offset = "0%" stop-color = "#1983c2" stop-opacity = "0.28"></stop>
+                    <stop offset = "100%" stop-color = "#1983c2" stop-opacity = "0"></stop>
+                  </linearGradient>
+                </defs>
+
+                @for (tick of trendYAxisTicks; track tick.y){
+                  <text class = "trend-axis-label" x = "42" [attr.y] = "tick.y + 3" text-anchor="end">{{tick.label}}</text>
+                  <line class = "trend-grid" x1 ="50" [attr.y1] = "tick.y" x2 ="385" [attr.y2] = "tick.y"></line>
+                }
+                <path class = "trend-area" fill = "url(#trendAreaGradient)" [attr.d] = "submissionTrendArea"></path>
+                <polyline class = "trend-line" [attr.points] = "submissionTrendPoints"></polyline>
+                @for (pt of submissionTrend; track pt.x){
+                  <circle class = "trend-dot" [attr.cx] = "pt.x" [attr.cy] = "pt.y" r="3"></circle>
+                }
+                @for (t of trendTicks; track t.x){
+                  <text class = "trend-axis-label" [attr.x] = "t.x" y ="114" text-anchor = "middle">{{t.label}}</text>
+                }
+                <text class = "trend-axis-title" x = "217.5" y ="134" text-anchor = "middle">Time</text>
+                <text class = "trend-axis-title" x = "14" y ="57.5" text-anchor = "middle" transform = "rotate(-90 14 57.5)">Submissions</text>
+              </svg>
+            }
+          </div>
+
+            <div class = "section">
+            <div class = "panel-header">
+              <h2 class = "section-title">Score Distribution by Level</h2>
+            </div>
+            <div class = "score-bars">
+              @for (lvl of scoreByLevel; track lvl.level){
+                <div class = "score-bar-row">
+                  <div class = "score-bar-top">
+                    <span class = "score-bar-level">{{lvl.level}}</span>
+                    <span class = "score-bar-count">{{lvl.count}} submissions</span>
+                  </div>
+                  <div class = "score-bar-track">
+                    <div class = "score-bar-fill" [style.width.%] = "lvl.avg"></div>
+                  </div>
+                  <div class = "score-bar-range">
+                    <span>Min {{lvl.min}}</span>
+                    <span class = "score-bar-avg">Avg {{lvl.avg}}</span>
+                    <span>Max {{lvl.max}}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+</div>
