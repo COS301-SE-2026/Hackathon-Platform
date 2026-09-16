@@ -37,6 +37,43 @@ export const routes: Routes = [
         path: 'hackathons/:hackathonId/events/create',
         loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
       },
+      {
+        path: 'hackathons/:hackathonId/events/:eventId',
+        loadComponent: () => import ('./admin/components/event-shell/event-shell.component').then(m=> m.EventShellComponent),
+        children: [
+          {
+        path: 'dashboard',
+        loadComponent: () => import('./admin/components/event-dashboard/event-dashboard.component').then(m => m.EventDashboardComponent),
+          },
+           {
+        path: 'live-control',
+        loadComponent: () => import('./admin/components/live-control/live-control.component').then(m => m.LiveControlComponent),
+          },
+           {
+        path: 'announcements',
+        loadComponent: () => import('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
+          },
+           {
+        path: 'forum',
+        loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent),
+          },
+           {
+        path: 'participants',
+        loadComponent: () => import('./admin/components/event-participants/event-participants.component').then(m => m.EventParticipantsComponent),
+          },
+           {
+        path: 'manage',
+        loadComponent: () => import('./admin/components/event-manage/event-manage.component').then(m => m.EventManageComponent),
+          },
+           {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      }
+
+        ]
+
+      },
        {
         path: 'hackathons/:hackathonId/manage',
         loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
@@ -57,11 +94,7 @@ export const routes: Routes = [
         path: "settings",
         loadComponent: () => import ('./admin/components/profile/admin-profile.component').then(m => m.AdminProfileComponent),
       },
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-      }
+     
     ]
   },
 
