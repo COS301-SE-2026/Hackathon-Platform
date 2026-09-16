@@ -58,7 +58,7 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             language: 'java',
             theme: 'vs-dark',
             automaticLayout: true,
-            readOnly: true,
+            readOnly: false,
             minimap: {
                 enabled: false
             },
