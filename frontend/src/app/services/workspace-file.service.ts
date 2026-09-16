@@ -19,6 +19,13 @@ export interface WorkspaceFileContentRequest {
     content: string;
 }
 
+export interface WorkspaceRunResponse {
+    success: boolean;
+    exitCode: number;
+    output: string;
+    error: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class WorkspaceFileService {
     private readonly http = inject(HttpClient);
@@ -39,5 +46,9 @@ export class WorkspaceFileService {
         };
 
         return this.http.put<void>(`${this.baseUrl}/${workspaceId}/files/content`, req);
+    }
+
+    runWorkspace(workspaceId: string): Observable<WorkspaceRunResponse> {
+        return this.http.post<WorkspaceRunResponse>(`${this.baseUrl}/${workspaceId}/run`, {});
     }
 }

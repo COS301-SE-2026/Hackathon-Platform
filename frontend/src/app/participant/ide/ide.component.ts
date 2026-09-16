@@ -36,6 +36,7 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     loadingFiles = false;
     savingFiles = false;
+    runningCode = false;
 
     ngOnInit(): void {
         this.workspaceId = this.route.snapshot.paramMap.get('workspaceId') ?? '';
@@ -144,7 +145,52 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     runCode(): void {
-        this.toast.info('TBD', 'TBD');
+        if (this.runningCode) {
+            return;
+        }
+
+        this.runningCode = true;
+        this.output = 'Running...';
+
+        if (this.selectedFile && this.editor) {
+            const content = this.editor.getValue();
+            this.savingFiles = true;
+
+            this.workService.saveFile(this.workspaceId, this.selectedFile.path, content).subscribe({
+                next: () => {
+                    this.savingFiles = false;
+                    this.executeRun();
+                },
+                error: () => {
+                    this.savingFiles == false;
+                    this.runningCode = false;
+                    this.output = 'Could not save current file'
+                    this.toast.error('Run Error', 'Current file could not save');
+                }
+            });
+
+            return;
+        }
+
+        this.executeRun();
+    }
+
+    private executeRun(): void {
+        this.workService.runWorkspace(this.workspaceId).subscribe({
+            next: res => {
+                this.runningCode = false;
+                if (res.success) {
+                    this.output = res.output;
+                } else {
+                    this.output = res.error;
+                }
+            },
+            error: () => {
+                this.runningCode = false;
+                this.output = 'Workspace could not be executed.'
+                this.toast.error('Run Error', 'Workspace could not execute');
+            }
+        });
     }
 
     backToLevel(): void {
