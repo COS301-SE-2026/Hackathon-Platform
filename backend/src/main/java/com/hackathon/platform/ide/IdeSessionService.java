@@ -14,11 +14,13 @@ public class IdeSessionService {
     private final CodeWorkspaceService workService;
     private final IdeContainerManager management;
     private final IdeAccessManager accManager;
+    private final WorkspaceInitializationService initialService;
 
     public IdeSessionResponse startOrReuseSession(UUID workspaceId, User user) {
         CodeWorkspace work = workService.getWorkspaceForUser(workspaceId, user);
         IdeWorkspaceResources resources = IdeWorkspaceResources.forWorkspace(work.getWorkspaceId());
         IdeContainerSession session = management.startOrReuse(resources);
+        initialService.initializeIfNeeded(work.getWorkspaceId(), resources);
         String ideUrl = accManager.getIdeUrl(session);
 
         return new IdeSessionResponse(session.workspaceId(), ideUrl, session.status());
