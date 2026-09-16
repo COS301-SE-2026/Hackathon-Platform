@@ -22,16 +22,9 @@ public class DockerJavaWorkspaceRunner implements WorkspaceCodeRunner {
     private static final int MAX_OUTPUT_BYTES = 64_000;
     private static final String RUN_COMMAND = 
     """
+    set -e
     mkdir -p /tmp/build
-
-    if ! find /workspace -type f -name '*.java' -print -quit | grep -q .; then
-        echo "No Java source files found." >&2
-        exit 2
-    fi
-
-    find /workspace -type f -name '*.java' -print0 \
-        | xargs -0 javac -d /tmp/build
-
+    find /workspace -type f -name '*.java' -print0 | xargs -0 javac -d /tmp/build
     java -cp /tmp/build Main
     """;
 
