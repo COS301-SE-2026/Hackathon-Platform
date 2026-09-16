@@ -11,32 +11,25 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "email_verification_tokens")
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmailVerificationToken{
-    @Getter
     @Id
     private UUID id;
 
-    @Getter
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Getter
-    @Setter
     @Column(name = "token_hash", nullable = false, unique = true)
     private String tokenHash;
 
-    @Getter
-    @Setter
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    @Getter
-    @Setter
-    @Column(nullable = false)
+    @Column(name = "used", nullable = false)
     private boolean used = false;
 }

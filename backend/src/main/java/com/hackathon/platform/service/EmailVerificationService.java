@@ -40,4 +40,24 @@ public class EmailVerificationService{
         msg.setText("Hi "+user.getFirstName()+",\n\nVerify your email by clicking this link please"+link+"\n\nThis link expires in "+expiryHours+" hours.");
         email.send(msg);
     }
+
+    @Transactional
+    public User verify(String rawToken){
+        EmailVerificationService token = tokenRepo.findByTokenHash(hash(rawToken)).orElseThrow(() -> new IllegalArgumentException("Invalid or expired link"));
+        if(token.getUsed() != null || token.getExpiredAt().isBefore(LocalDateTime.now())){
+            throw new IllegalArgumentException("Invalid or expired verification link");
+        }
+        User user = token.getUser();
+        user.setEmailVerified(true);
+        token.setUsed(LocalDateTime.now());
+        return user;
+    }
+
+    private String hash(String value){
+        try{
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e){
+            throw new IllegalArgumentException("Couldnt hash");
+        }
+    }
 }
