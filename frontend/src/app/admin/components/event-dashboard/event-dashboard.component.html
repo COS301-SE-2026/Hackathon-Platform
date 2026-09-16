@@ -4,8 +4,6 @@
             <div class = "empty-state">Loading insights...</div>
           } @else if (insightsError) {
             <div class = "empty-state">{{ insightsError }}</div>
-          } @else if (!selectedEventId) {
-            <div class = "empty-state">No events to show insights for yet.</div>
           } @else {
 
           <div class = "insights-strip">
