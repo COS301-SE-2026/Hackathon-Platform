@@ -37,19 +37,19 @@ public class EmailVerificationService{
         msg.setFrom(from);
         msg.setTo(user.getEmail());
         msg.setSubject("Verify your Hackathon Platform email");
-        msg.setText("Hi "+user.getFirstName()+",\n\nVerify your email by clicking this link please"+link+"\n\nThis link expires in "+expiryHours+" hours.");
+        msg.setText("Hi "+user.getFirstName()+",\n\nVerify your email by clicking this link please\n"+link+"\n\nThis link expires in "+expiryHours+" hours.");
         email.send(msg);
     }
 
     @Transactional
     public User verify(String rawToken){
-        EmailVerificationService token = tokenRepo.findByTokenHash(hash(rawToken)).orElseThrow(() -> new IllegalArgumentException("Invalid or expired link"));
-        if(token.getUsed() != null || token.getExpiredAt().isBefore(LocalDateTime.now())){
+        EmailVerificationToken token = tokenRepo.findByTokenHash(hash(rawToken)).orElseThrow(() -> new IllegalArgumentException("Invalid or expired link"));
+        if(token.isUsed() || token.getExpiresAt().isBefore(LocalDateTime.now())){
             throw new IllegalArgumentException("Invalid or expired verification link");
         }
         User user = token.getUser();
         user.setEmailVerified(true);
-        token.setUsed(LocalDateTime.now());
+        token.setUsed(true);
         return user;
     }
 
