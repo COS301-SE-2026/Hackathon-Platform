@@ -12,7 +12,7 @@
  
       <p class="register-subtitle"> Join the Hackathon Platform and start building great solutions.</p> 
  
-      <form #registerForm="ngForm" (ngSubmit)="onCreateAccount(registerForm)"> 
+      <form #registerForm="ngForm" (ngSubmit)="onCreateAccount()"> 
  
         <div class="register-input"> 
           <app-input id="firstName" label="First name" type="text" placeholder="Enter your first name" [(value)]="firstName" (touched)="firstNameTouched = true"/> 
