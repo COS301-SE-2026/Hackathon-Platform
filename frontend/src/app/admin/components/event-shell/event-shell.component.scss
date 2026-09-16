@@ -118,12 +118,12 @@
    .pi{
     font-size: 0.9rem;
    }
+   &:hover{
+    color:#3a4357;
+   }
    &.active{
     color: #1983c2;
-    border-bottom-color:#1983c2 ;
-   }
-   &:hover:not(.active){
-    color:#13192d;
+    border-bottom-color: #1983c2;
    }
    }
 
