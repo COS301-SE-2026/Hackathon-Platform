@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   overflow: hidden;
-  background: var(--dark-navy);
+  background: var(--white);
 }
 
 .home-section-background {
@@ -27,14 +27,15 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
+
   background: linear-gradient(
-  90deg,
-  rgba(19, 25, 45, 0.98) 0%,
-  rgba(19, 25, 45, 0.8) 35%,
-  rgba(19, 25, 45, 0.35) 55%,
-  rgba(19, 25, 45, 0.08) 75%,
-  transparent 90%
-);
+    90deg,
+    rgba(6, 41, 81, 0.96) 0%,
+    rgba(6, 41, 81, 0.78) 32%,
+    rgba(6, 41, 81, 0.42) 55%,
+    rgba(6, 41, 81, 0.14) 78%,
+    rgba(6, 41, 81, 0.02) 100%
+  );
 }
 
 .home-section::after {
@@ -43,7 +44,12 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient( 180deg, transparent 60%, rgba(19, 25, 45, 0.08) 100%);
+
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(6, 41, 81, 0.18) 100%
+  );
 }
 
 .home-content {
@@ -59,7 +65,7 @@
   display: inline-flex;
   align-items: center;
   margin-bottom: var(--space-4);
-  color: var(--lime-green);
+  color: var(--white);
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-bold);
   line-height: 1;
@@ -109,7 +115,6 @@
 }
 
 @media (max-width: 768px) {
- 
   .home-section-background {
     img {
       object-position: 62% 45%;
@@ -117,15 +122,18 @@
   }
 
   .background-overlay {
-    background: linear-gradient( 90deg,  rgba(19, 25, 45, 0.98) 0%, rgba(19, 25, 45, 0.92) 30%,  rgba(19, 25, 45, 0.68) 55%,
-      rgba(19, 25, 45, 0.28) 75%,
-      rgba(19, 25, 45, 0.04) 100%
+    background: linear-gradient(
+      90deg,
+      rgba(6, 41, 81, 0.98) 0%,
+      rgba(6, 41, 81, 0.90) 30%,
+      rgba(6, 41, 81, 0.68) 55%,
+      rgba(6, 41, 81, 0.30) 78%,
+      rgba(6, 41, 81, 0.05) 100%
     );
   }
 
   .home-content {
     padding: 35px 24px 45px;
-
   }
 
   .tagline {
