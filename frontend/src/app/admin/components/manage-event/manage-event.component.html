@@ -2,16 +2,17 @@
 
    <div class = "back-navigation" >
       <button class = "back-btn" (click) = "goBack()">
+        &larr; Back to Events
       </button>
     </div>
   <div class="page-header">
     <div>
-      <h1>Manage Hackathon</h1>
-      <p class="page-subtitle">Edit hackathon details and upload resources</p>
+      <h1>Manage Event</h1>
+      <p class="page-subtitle">Edit event details and manage resources</p>
     </div>
     <div class="header-actions">
-      <button class="btn-secondary" (click)="goBack()">Back to Hackathons</button>
-      <button class="btn-danger" (click)="deleteHackathon()">Delete Hackathon</button>
+      <button class="btn-secondary" (click)="goBack()">Back to Events</button>
+      <button class="btn-danger" (click)="openDeleteConfirm()" [disabled]="isDeleting">Delete Event</button>
     </div>
   </div>
 
@@ -25,7 +26,7 @@
       <div class="success-message">{{ successMessage }}</div>
     }
 
-    <form (ngSubmit)="updateHackathon()" class="event-form">
+    <form (ngSubmit)="updateEvent()" class="event-form">
       <div class="form-section">
         <h2 class="section-heading">Basic Information</h2>
 
@@ -41,8 +42,8 @@
           </div>
 
             <div class="form-group">
-            <label for="endDate">End date & time *</label>
-            <input id="endDate" type="datetime-local" [(ngModel)]="form.endDate" name="endDate" required />
+            <label for="duration">Duration (hours)*</label>
+            <input id="duration" type="number" min ="1" [(ngModel)]="form.duration" name="duration" required />
           </div>
 
         </div>
@@ -66,10 +67,22 @@
             <span class="toggle-desc">Registration key required</span>
           </button>
         </div>
+
+      @if (form.visibility === 'PRIVATE'){
+      <div class="form-group">
+          <label for="registrationKey">Registration key</label>
+          <input id="registrationKey" type ="text" [(ngModel)]="form.registrationKey" name="registrationKey" placeholder="Enter a key teams must provide to register"/>
+        </div>
+      }
+      <div class="form-group">
+          <label for="teamSizeLimit">Team size limit *</label>
+          <input id="teamSizeLimit" type ="number"  [(ngModel)]="form.teamSizeLimit" name="teamSizeLimit" required />
+        </div>
       </div>
 
+
       <div class="form-section">
-        <h2 class="section-heading">Hackathon Status</h2>
+        <h2 class="section-heading">Event Status</h2>
         <div class="form-row">
           <div class="form-group">
             <label for="status">Status</label>
@@ -86,11 +99,39 @@
             </button>
           </div>
         </div>
-        <p class="field-hint">Status determines if event is active, upcoming, etc.</p>
+        <p class="field-hint">Status determines if event is upcoming, live, or completed.</p>
       </div>
 
+      <div class = "form-section">
+        <h2 class = "section-heading">Leaderboard</h2>
+        <div class = "toggle-group" role = "group">
+          <button type ="button" class = "toggle-option" [class.selected]="!form.leaderboardFrozen" (click) = "form.leaderboardFrozen = false">
+            <span class = "toggle-title">Live</span>
+            <span class = "toggle-desc">Rankings update in real time</span>
+          </button>
+          <button type ="button" class = "toggle-option toggle-option-freeze" [class.selected]="form.leaderboardFrozen" (click) = "form.leaderboardFrozen = true">
+          <span class = "toggle-title">
+            @if (form.leaderboardFrozen) {<i class = "pi pi-lock"></i>}
+            Frozen
+          </span>
+          <span class = "toggle-desc">Rankings are locked and hidden from updates</span>
+          </button>
+        </div>
+
+        <div class = "form-row leaderboard-quick-action">
+          <div class = "form-group">
+            <span class = "field-label-spacer" aria-hidden = "true">&nbsp;</span>
+            <button type ="button" class = "btn-patch" (click)="toggleLeaderboardFreeze()" [disabled]="isSaving">
+              {{form.leaderboardFrozen ? 'Unfreeze Leaderboard Now' : 'Freeze Leaderboard Now'}}
+            </button>
+          </div>
+        </div>
+        <p class = "field-hint">Freezing locks the current standings immediately, independent of Save Changes below.</p>
+      </div>
+
+
       <div class="form-section">
-        <h2 class="section-heading">Hackathon Resources</h2>
+        <h2 class="section-heading">Event Resources</h2>
         <div class="form-group">
           <label for="problemStatementFile">Problem Statement PDF</label>
           <div
@@ -143,5 +184,19 @@
         </button>
       </div>
     </form>
+  }
+  @if (showDeleteConfirm){
+    <div class = "modal-overlay" (click)="cancelDelete()">
+      <div class = "modal-card" (click)="$event.stopPropagation()">
+        <h3 class = "modal-title">Delete this event?</h3>
+        <p class = "modal-body">
+          This will permanently delete <strong>{{form.name || 'this event'}}</strong>, including its registrations, teams, submissions, and uploaded resources. This action cannot be undone. 
+        </p>
+        <div class = "modal-actions">
+          <button type="button" class = "btn-secondary" (click)="cancelDelete()" [disabled]="isDeleting">Cancel</button>
+          <button type="button" class = "btn-danger" (click)="confirmDeleteEvent()" [disabled]="isDeleting">{{isDeleting ? 'Deleting...' : 'Yes, Delete Event'}}</button>
+        </div>
+      </div>
+    </div>
   }
 </div>
