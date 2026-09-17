@@ -195,6 +195,70 @@
   }
 }
 
+.toggle-option-freeze{
+  .toggle-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  &.selected{
+    border-color: #c0392b;
+    background-color: rgba(192,57,43,0.06);
+  
+  .toggle-title{
+    color: #c0392b;
+  }
+}
+}
+
+.leaderboard-quick-action{
+  margin-top: 4px;
+}
+
+.modal-overlay{
+  position: fixed;
+  inset:0;
+  background-color: rgba(19,25,45,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal-card{
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: 28px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 12px 32px rgba(19,25,45,0.18);
+}
+
+.modal-title{
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #13192d;
+  margin: 0 0 12px;
+
+}
+
+.modal-body{
+  font-size: 0.88rem;
+  color: #6b7588;
+  line-height: 1.55;
+  margin: 0 0 22px;
+
+  strong{
+    color: #3a4357;
+  }
+}
+
+.modal-actions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
 .upload-hint{
   font-size: 0.85rem;
   color: #6b7588;
