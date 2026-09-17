@@ -45,6 +45,7 @@ export class EventlistComponent implements OnInit {
   eventCount = 0;
   participantCount: number | null = null;
   events: EventRow[] = [];
+  filteredEvents: EventRow[] = [];
   isLoading = true;
   errorMessage = '';
   searchTerm = '';
@@ -104,6 +105,7 @@ export class EventlistComponent implements OnInit {
       next: (events) => {
         this.eventCount = events.length;
         this.events = events.map((e) => this.toEventRow(e));
+        this.applyFilter();
         this.isLoading = false;
         this.change.markForCheck();
       },
@@ -115,7 +117,25 @@ export class EventlistComponent implements OnInit {
       }
     });
   }
+ applyFilter(): void {
+  const term = this.searchTerm.trim().toLowerCase();
+  const status = this.statusFilter;
 
+  this.filteredEvents = this.events.filter((event)=>{
+    const matchesSearch = 
+    !term ||
+    event.name.toLowerCase().includes(term) ||
+    event.visibility.toLowerCase().includes(term) ||
+    event.status.toLowerCase().includes(term) ||
+    event.dateRangeLabel.toLowerCase().includes(term);
+    const matchesStatus = 
+    status === 'ALL' || 
+    event.status.toUpperCase() === status;
+
+    return matchesSearch && matchesStatus;
+
+  });
+ }
   private titleCase(value:string): string {
     if (!value) return '';
     return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();

@@ -60,15 +60,15 @@
   <div class = "toolbar">
     <div class = "search-box">
       <i class = "pi pi-search search-icon"></i>
-      <input type = "text" placeholder = "Search events..." aria-label = "Search events"/>
+      <input type = "text" placeholder = "Search events..." aria-label = "Search events" [(ngModel)] = "searchTerm" (ngModelChange) = "applyFilter()"/>
     </div>
     <div class = "filter-select">
-      <select aria-label = "Filter by status">
-        <option>All Events</option>
-        <option>Live</option>
-        <option>Upcoming</option>
-        <option>Completed</option>
-        <option>Canceled</option>
+      <select aria-label = "Filter by status" [(ngModel)] = "statusFilter" (ngModelChange) = "applyFilter()">
+        <option value = "ALL">All Events</option>
+        <option value = "LIVE">Live</option>
+        <option value = "UPCOMING">Upcoming</option>
+        <option value = "COMPLETED">Completed</option>
+        <option value = "CANCELED">Canceled</option>
       </select>
       <i class = "pi pi-chevron-down filter-chevron"></i>
     </div>
@@ -89,12 +89,12 @@
 
     @if (isLoading){
       <div class = "empty-state">Loading events...</div>
-    } @else if (events.length === 0){
+    } @else if (filteredEvents.length === 0){
       <div class = "empty-state">
-        {{ isHackathonScoped ? 'No events created yet for this hackathon.' : 'No events available on the platform yet.' }}
+        {{ events.length === 0 ?(isHackathonScoped ? 'No events created yet for this hackathon.' : 'No events available on the platform yet.') : 'No events match your search.' }}
       </div>
     } @else {
-      @for (event of events; track event.eventId){
+      @for (event of filteredEvents; track event.eventId){
         <div class = "event-row-group">
           <div class = "event-row">
             <div class = "event-name-cell">
