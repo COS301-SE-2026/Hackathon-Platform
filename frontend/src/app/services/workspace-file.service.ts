@@ -26,6 +26,14 @@ export interface WorkspaceRunResponse {
     error: string;
 }
 
+export interface WorkspaceSubmissionResponse {
+    submissionId: string;
+    outputStorageKey: string;
+    sourceStorageKey: string;
+    status: string;
+    scoringRecordId: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class WorkspaceFileService {
     private readonly http = inject(HttpClient);
@@ -50,5 +58,9 @@ export class WorkspaceFileService {
 
     runWorkspace(workspaceId: string): Observable<WorkspaceRunResponse> {
         return this.http.post<WorkspaceRunResponse>(`${this.baseUrl}/${workspaceId}/run`, {});
+    }
+
+    submitWorkspace(workspaceId: string): Observable<WorkspaceSubmissionResponse> {
+        return this.http.post<WorkspaceSubmissionResponse>(`${this.baseUrl}/${workspaceId}/submit`, {});
     }
 }

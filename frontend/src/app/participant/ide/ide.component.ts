@@ -8,7 +8,7 @@ import { WorkspaceFileService, WorkspaceFileEntry } from '../../services/workspa
 import * as monaco from 'monaco-editor';
 
 @Component({
-  selector: './app-ide',
+  selector: 'app-ide',
   standalone: true,
   imports: [CommonModule, ButtonComponent],
   templateUrl: './ide.component.html',
@@ -30,13 +30,14 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     levelId = 0;
     startingIde = true;
     runtimeStatus = 'Starting...';
-    output = 'Stating...';
+    output = 'Starting...';
     files: WorkspaceFileEntry[] = [];
     selectedFile: WorkspaceFileEntry | null = null;
 
     loadingFiles = false;
     savingFiles = false;
     runningCode = false;
+    submittingCode = false;
 
     ngOnInit(): void {
         this.workspaceId = this.route.snapshot.paramMap.get('workspaceId') ?? '';
@@ -162,7 +163,7 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.executeRun();
                 },
                 error: () => {
-                    this.savingFiles == false;
+                    this.savingFiles = false;
                     this.runningCode = false;
                     this.output = 'Could not save current file'
                     this.toast.error('Run Error', 'Current file could not save');
@@ -173,6 +174,52 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         this.executeRun();
+    }
+
+    submitCode(): void {
+        if (this.submittingCode) {
+            return;
+        }
+
+        this.submittingCode = true;
+        this.output = "Submitting...";
+
+        if (this.selectedFile && this.editor) {
+            const content = this.editor.getValue();
+            this.savingFiles = true;
+            this.workService.saveFile(this.workspaceId, this.selectedFile.path, content).subscribe({
+                next: () => {
+                    this.savingFiles = false;
+                    this.executeSubmit();
+                },
+                error: () => {
+                    this.savingFiles = false;
+                    this.submittingCode = false;
+                    this.output = "Could not save current file before submitting";
+                    this.toast.error('Submission Error', 'Current file could not be saved');
+                }
+            });
+
+            return;
+        }
+
+        this.executeSubmit();
+    }
+
+    private executeSubmit(): void {
+        this.workService.submitWorkspace(this.workspaceId).subscribe({
+            next: res => {
+                this.submittingCode = false;
+                this.output = `Submission queued successfully. \n Submission Id: ${res.submissionId} \n Status: ${res.status}`;
+                this.toast.success('Submitted', 'You have beed placed in the queue');
+            },
+            error: err => {
+                this.submittingCode = false;
+                const message = err?.error?.message ?? 'Workspace could not be submitted';
+                this.output = message;
+                this.toast.error('Submission Error', message);
+            }
+        });
     }
 
     private executeRun(): void {

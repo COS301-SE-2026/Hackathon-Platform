@@ -24,14 +24,22 @@
                 }
             </app-button>
 
-            <app-button variant="secondary" [disabled]="startingIde" (click)="runCode()">
-                <i class="pi pi-play"></i>
-                    Run
+            <app-button variant="secondary" [disabled]="startingIde || runningCode || submittingCode" (click)="runCode()">
+                <i class="pi" [ngClass]="runningCode ? 'pi-spin pi-spinner' : 'pi-play'"></i>
+                    @if (runningCode) {
+                        Running...
+                    } @else {
+                        Run
+                    }
             </app-button>
 
-            <app-button variant="secondary" [disabled]="startingIde">
-                <i class="pi pi-send"></i>
-                    Submit
+            <app-button variant="secondary" [disabled]="startingIde || runningCode || submittingCode" (click)="submitCode()">
+                <i class="pi" [ngClass]="submittingCode ? 'pi-spin pi-spinner' : 'pi-send'"></i>
+                    @if (submittingCode) {
+                        Submitting...
+                    } @else {
+                        Submit
+                    }
             </app-button>
         </div>
     </header>
@@ -41,7 +49,7 @@
             <div class="panel-header">
                 <span>FILES</span>
                 <button type="button" class="panel-action" title="Refresh files" [disabled]="loadingFiles" (click)="loadFiles()">
-                    <i class="pi pi-refresh" [class.pi.spin]="loadingFiles"></i>
+                    <i class="pi pi-refresh" [class.pi-spin]="loadingFiles"></i>
                 </button>
             </div>
 
