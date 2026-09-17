@@ -421,6 +421,7 @@
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
+  width: fit-content;
   transition: background-color 0.15s;
 
   .pi{
@@ -430,6 +431,14 @@
   &:hover{
     background-color: #eaf4fb;
   }
+}
+
+.row-actions{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap:8px;
+  flex-wrap: nowrap;
 }
 
 .btn-secondary{

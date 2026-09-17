@@ -104,11 +104,16 @@
             <span class = "type-pill">{{event.visibility}}</span>
             <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
             <span class = "dates-cell">{{event.dateRangeLabel}}</span>
+            <div class = "row-actions">
             <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "expandedEventId === event.eventId" (click) = "toggleEventDetails(event.eventId)">
               <i class = "pi" [ngClass] = "expandedEventId === event.eventId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
               {{ expandedEventId === event.eventId ? 'Hide Event' : 'View Event' }}
             </button>
-            <button type = "button" class = "btn-view-event" (click) = "navigateToParticipants(event.eventId)">Participants</button>
+            <button type = "button" class = "btn-view-event btn-participants" (click) = "navigateToParticipants(event.eventId)">
+              <i class = "pi pi-users"></i>
+              Participants
+            </button>
+          </div>
           </div>
 
           @if (expandedEventId === event.eventId){
@@ -126,8 +131,8 @@
                 <a [routerLink]="['/admin/hackathons', event.hackathonId, 'events', event.eventId, 'forum']">
                   <i class = "pi pi-comments"></i> Forum
                 </a>
-                <a [routerLink]="['/admin/hackathons', event.hackathonId, 'events', event.eventId, 'participants']">
-                  <i class = "pi pi-user"></i> Participants
+                <a [routerLink]="['/admin/hackathons', event.hackathonId, 'events', event.eventId, 'dietary-requirements']">
+                  <i class = "pi pi-user"></i> Dietary Requirements
                 </a>
                 <a [routerLink]="['/admin/hackathons', event.hackathonId, 'events', event.eventId, 'manage']">
                   <i class = "pi pi-cog"></i> Manage Event
