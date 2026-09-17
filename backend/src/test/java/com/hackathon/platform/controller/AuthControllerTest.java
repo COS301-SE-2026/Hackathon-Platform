@@ -44,7 +44,7 @@ class AuthControllerTest {
   @BeforeEach
   void setUp() {
     validRequest = new RegisterRequest("Donald", "Trump", "donald@gmail.com", "TestPassword");
-    regResp = AuthResponse.builder().token("mock.jwt.token").userId(UUID.randomUUID()).firstName("Donald").lastName("Trump").email("donald@gmail.com").role("PARTICIPANT").emailVerified(true).build();
+    regResp = AuthResponse.builder().token(null).userId(UUID.randomUUID()).firstName("Donald").lastName("Trump").email("donald@gmail.com").role("PARTICIPANT").emailVerified(false).msg("Registration successful. Check your email for a verification link").build();
     verificationResp = AuthResponse.builder().token("verified.jwt.token").userId(UUID.randomUUID()).firstName("Donald").lastName("Trump").email("donald@gmail.com").role("PARTICIPANT").emailVerified(true).msg("Email verification complete").build();
     loginResp = AuthResponse.builder().token("mock.jwt.token").userId(UUID.randomUUID()).firstName("Donald").lastName("Trump").email("donald@gmail.com").role("PARTICIPANT").emailVerified(true).build();
   }
@@ -60,7 +60,7 @@ class AuthControllerTest {
                     .content(objMapper.writeValueAsString(validRequest)))
             .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token").doesNotExist())
-                .andExpect(jsonPath("$.email").value("donald@gamil.com"))
+                .andExpect(jsonPath("$.email").value("donald@gmail.com"))
                 .andExpect(jsonPath("$.role").value("PARTICIPANT"))
                 .andExpect(jsonPath("$.emailVerified").value(false))
                 .andExpect(jsonPath("$.msg").exists());
@@ -91,7 +91,7 @@ class AuthControllerTest {
   void verifyEmailWithToken_return200() throws Exception{
     when(authService.verifyEmail("valid-token")).thenReturn(verificationResp);
 
-    mockMvc.perform(get("/api/auth/verify-email").param("token", "valid-token")).andExpect(status().isOk()).andExpect(jsonPath("$.token").value("verified.jwt.token")).andExpect(jsonPath("$.emailVerification").value(true));
+    mockMvc.perform(get("/api/auth/verify-email").param("token", "valid-token")).andExpect(status().isOk()).andExpect(jsonPath("$.token").value("verified.jwt.token")).andExpect(jsonPath("$.emailVerified").value(true));
     verify(authService).verifyEmail("valid-token");
   }
 
@@ -124,7 +124,7 @@ class AuthControllerTest {
                     authentication(
                         new UsernamePasswordAuthenticationToken(
                             user, null, Collections.emptyList()))))
-        .andExpect(status().isOk()).andExpect(jsonPath("$.email").value("donald@gmail.com")).andExpect(jsonPath("$.emailVerified").value(true));
+        .andExpect(status().isOk()).andExpect(jsonPath("$.email").value("jane@example.com")).andExpect(jsonPath("$.emailVerified").value(true));
   }
 
   @Test

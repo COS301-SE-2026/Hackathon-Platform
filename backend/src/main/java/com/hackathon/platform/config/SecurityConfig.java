@@ -26,6 +26,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.http.HttpStatus;
 
 /** Spring Security config Handles: JWTs, CORS, password hashing */
 @Configuration
@@ -81,6 +85,10 @@ public class SecurityConfig {
                     .authenticated())
             .oauth2Login(oauth -> oauth
                     .successHandler(googleAuth))
+            .exceptionHandling(exception -> exception
+                    .defaultAuthenticationEntryPointFor(
+                            new HttpStatusEntryPoint(HttpStatus.FORBIDDEN),
+                            new AntPathRequestMatcher("/api/**")))
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }

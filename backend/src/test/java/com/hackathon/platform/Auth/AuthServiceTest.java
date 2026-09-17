@@ -62,7 +62,7 @@ class AuthServiceTest {
     when(userRepository.existsByEmail("jane@example.com")).thenReturn(false);
     when(roleRepository.findByName("PARTICIPANT")).thenReturn(Optional.of(participantRole));
     when(passwordEncoder.encode("password123")).thenReturn("$2a$12$hashedpassword");
-    when(userRepository.save(any(User.class))).thenReturn(verifiedUser);
+    when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
     AuthResponse response = authService.register(request);
 
@@ -190,7 +190,7 @@ class AuthServiceTest {
   void resendVerificationEmailVerified() throws Exception{
     User verified = User.builder().userId(UUID.randomUUID()).email("jane@example.com").firstName("Jane").emailVerified(true).build();
     when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(verified));
-    authService.resendVerificationEmail("jave@example.com");
+    authService.resendVerificationEmail("jane@example.com");
     verify(veriService, never()).sendVerificationEmail(any(User.class));
   }
 }
