@@ -6,9 +6,10 @@ import { HackathonService,HackathonResponse } from '../../../services/hackathon.
 import { EventService, EventResponse, EventRegistrationSummary } from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
-
+import { EventDashboardComponent } from '../event-dashboard/event-dashboard.component';
 interface EventRow {
   eventId : string;
+  hackathonId: string;
   name: string;
   logoInitial: string;
   visibility: string;
@@ -16,11 +17,12 @@ interface EventRow {
   statusClass: 'live' | 'upcoming' | 'completed' | 'canceled'| 'ended';
   dateRangeLabel: string;
 }
+type EventDetailTab = 'dashboard' | 'registrations';
 
 @Component({
   selector: 'app-eventlist',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent, EventDashboardComponent],
   templateUrl: './eventlist.component.html',
   styleUrls: ['./eventlist.component.scss']
 })
@@ -49,6 +51,7 @@ export class EventlistComponent implements OnInit {
   statusFilter = 'ALL';
 
   expandedEventId: string | null = null;
+  activeDetailTab: EventDetailTab = 'dashboard';
   registrationsByEvent: Record<string, EventRegistrationSummary> = {};
   registrationsLoading: Record<string, boolean> = {};
   registrationsError: Record<string, string> = {};
@@ -61,10 +64,9 @@ export class EventlistComponent implements OnInit {
     if(this.isHackathonScoped){
       this.loadHackathon();
       this.loadLevelCount();
-      this.loadEvents();
-    }else {
-      this.isLoading = false;
     }
+      this.loadEvents();
+    
 
   }
 
@@ -90,11 +92,15 @@ export class EventlistComponent implements OnInit {
   }
 
 
- private loadEvents(): void{
+  private loadEvents(): void{
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.eventService.getEventsForHackathon(this.hackathonId).subscribe({
+    const request$ = this.isHackathonScoped
+      ? this.eventService.getEventsForHackathon(this.hackathonId)
+      : this.eventService.getMyEvents();
+
+    request$.subscribe({
       next: (events) => {
         this.eventCount = events.length;
         this.events = events.map((e) => this.toEventRow(e));
@@ -103,6 +109,7 @@ export class EventlistComponent implements OnInit {
       },
       error: (error) => {
         console.error('not loading events', error);
+        this.errorMessage = 'Could not load events.';
         this.isLoading = false;
         this.change.markForCheck();
       }
@@ -117,6 +124,7 @@ export class EventlistComponent implements OnInit {
   private toEventRow(event:EventResponse): EventRow {
     return{
       eventId: event.eventId,
+       hackathonId: event.hackathonId, 
       name: event.name,
       logoInitial: event.name?.charAt(0)?.toUpperCase() || '?',
       visibility: this.titleCase(event.visibility),
@@ -188,9 +196,6 @@ export class EventlistComponent implements OnInit {
     this.router.navigate(['/admin/hackathons',this.hackathonId,'events','create']);
   }
 
-  navigateToViewEvent(eventId: string): void {
-    console.warn('No event-detail route exists in app.routes.ts yet for event', eventId);
-  }
 
   toggleEventDetails(eventId: string): void {
     if(this.expandedEventId === eventId){
@@ -198,11 +203,16 @@ export class EventlistComponent implements OnInit {
       return;
     }
     this.expandedEventId = eventId;
-    if (!this.registrationsByEvent[eventId]){
-      this.loadRegistrations(eventId);
-    }
+    this.activeDetailTab = 'dashboard';
   }
 
+  setActiveDetailTab(tab: EventDetailTab): void{
+    this.activeDetailTab = tab;
+    if (tab === 'registrations' && this.expandedEventId && !this.registrationsByEvent[this.expandedEventId]){
+      this.loadRegistrations(this.expandedEventId);
+    }
+
+  }
   private loadRegistrations(eventId: string): void {
     this.registrationsLoading[eventId] = true;
     this.registrationsError[eventId] ='';
