@@ -23,6 +23,7 @@ public class AuthService {
   private final RoleRepository roleRepository;
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
+  private final EmailVerificationService emailVerificationService;
 
   /**
    * Registers a new account.
@@ -49,12 +50,13 @@ public class AuthService {
             .passwordHash(passwordEncoder.encode(request.getPassword()))
             .role(participantRole)
             .status("ACTIVE")
+                .emailVerified(false)
             .build();
 
     User saved = userRepository.save(user);
-    String token = jwtService.generateToken(saved);
+    emailVerificationService.sendVerificationEmail(saved);
 
-    return buildResponse(saved, token);
+    return buildResponse(saved, null, "Registration successful, Check your amil for a verification link");
   }
 
   /**
@@ -69,7 +71,7 @@ public class AuthService {
             .findByEmail(request.getEmail().toLowerCase(Locale.ROOT))
             .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
-    if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+    if (user.getPasswordHash() == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
       throw new BadCredentialsException("Invalid email or password");
     }
 
@@ -78,7 +80,7 @@ public class AuthService {
     }
 
     String token = jwtService.generateToken(user);
-    return buildResponse(user, token);
+    return buildResponse(user, token, null);
   }
 
   /**
@@ -89,7 +91,7 @@ public class AuthService {
    */
   public AuthResponse getMe(User user) {
     String token = jwtService.generateToken(user);
-    return buildResponse(user, token);
+    return buildResponse(user, token, null);
   }
 
   /**
@@ -99,7 +101,7 @@ public class AuthService {
    * @param token
    * @return
    */
-  private AuthResponse buildResponse(User user, String token) {
+  private AuthResponse buildResponse(User user, String token, String msg) {
     return AuthResponse.builder()
         .token(token)
         .userId(user.getUserId())
@@ -107,6 +109,8 @@ public class AuthService {
         .lastName(user.getLastName())
         .email(user.getEmail())
         .role(user.getRole().getName())
+            .emailVerified(user.isEmailVerified())
+            .msg(msg)
         .build();
   }
 }
