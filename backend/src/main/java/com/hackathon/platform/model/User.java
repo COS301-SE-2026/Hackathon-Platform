@@ -63,6 +63,7 @@ public class User implements UserDetails {
   @Column(name = "email_verified", nullable = false)
   private boolean emailVerified = false;
 
+  @Builder.Default
   @Column(name = "auth_provider")
   private String authProvider = "LOCAL";
 

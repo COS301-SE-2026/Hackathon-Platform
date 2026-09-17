@@ -51,6 +51,7 @@ public class AuthService {
             .role(participantRole)
             .status("ACTIVE")
                 .emailVerified(false)
+                .authProvider("LOCAL")
             .build();
 
     User saved = userRepository.save(user);
@@ -73,6 +74,10 @@ public class AuthService {
 
     if (user.getPasswordHash() == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
       throw new BadCredentialsException("Invalid email or password");
+    }
+
+    if(!user.isEmailVerified()){
+      throw new BadCredentialsException("You need to verify your email before logging in");
     }
 
     if (!user.isEnabled()) {

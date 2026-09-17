@@ -61,7 +61,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/resend-verification")
                         .permitAll()
-                        .requestMatchers("/outh2/**", "/login/oauth2/**")
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**")
                         .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/events/*/forum/stream")
                     .permitAll()

@@ -21,7 +21,7 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
     private final UserRepository userRepo;
-    private RoleRepository roleRepo;
+    private final RoleRepository roleRepo;
     private final JwtService jwtService;
 
     @Value("${app.frontend-url:http://localhost:4200}")
@@ -52,7 +52,7 @@ public class GoogleOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         Role role = roleRepo.findByName("PARTICIPANT").orElseThrow(() -> new IllegalStateException("PARTICIPANT role not found"));
         String firstN = valueOr(oauth.getAttribute("given_name"), "Participant");
         String surN = valueOr(oauth.getAttribute("family_name"), "User");
-        return userRepo.save(User.builder().firstName(firstN).lastName(surN).email(email).passwordHash(null).role(role).status("ACTIVE").emailVerified(true).build());
+        return userRepo.save(User.builder().firstName(firstN).lastName(surN).email(email).passwordHash(null).role(role).status("ACTIVE").emailVerified(true).authProvider("GOOGLE").build());
     }
 
     private String valueOr(String value, String fallback){
