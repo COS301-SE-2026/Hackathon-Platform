@@ -5,13 +5,10 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EventService} from '../../../services/event.service';
 import { StorageService } from '../../../services/storage.service';
 
-interface HackathonData {
-  id?: string;
-  name?: string;
-  description?: string;
-  visibility?: 'PUBLIC' | 'PRIVATE';
-  status?: 'UPCOMING' | 'ONGOING'|'COMPLETED'| 'CANCELED'|'ACTIVE'|'INACTIVE';
-}
+
+ type Visibility = 'PUBLIC' | 'PRIVATE';
+ type EventStatus = 'UPCOMING' | 'ONGOING'|'COMPLETED'| 'CANCELED'|'ACTIVE'|'INACTIVE';
+
 
 
 
@@ -40,56 +37,74 @@ export class ManageEventComponent implements OnInit {
   eventId = '';
   isLoading = true;
   isSaving = false;
+  isDeleting = false;
   errorMessage = '';
   successMessage = '';
+
+  showDeleteConfirm = false;
 
   form = {
     name: '',
     startDate: '',
-    endDate:'',
+    duration: 1,
     description: '',
     visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
-    status: 'UPCOMING' as 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE',
+    registrationKey: '',
+    teamSizeLimit: 1,
+    status: 'UPCOMING' as EventStatus,
+    leaderboardFrozen: false,
+   
   };
 
-  originalHackathon: HackathonData | null = null;
-  statusOptions = ['UPCOMING', 'ONGOING', 'COMPLETED', 'CANCELED', 'ACTIVE', 'INACTIVE'];
-  visibilityOptions = ['PUBLIC', 'PRIVATE'];
+   statusOptions: EventStatus[] =['UPCOMING','ONGOING', 'COMPLETED','CANCELED', 'ACTIVE', 'INACTIVE'];
 
   ngOnInit(): void {
-
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
     this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
-    if (!this.hackathonId) {
-      this.errorMessage = 'No hackathon ID provided';
+    if (!this.eventId) {
+      this.errorMessage = 'No event ID provided';
       this.isLoading = false;
       return;
     }
-    this.loadHackathon();
+    this.loadEvent();
   }
 
-  loadHackathon(): void {
+  loadEvent(): void {
     this.isLoading = true;
+    this.errorMessage = '';
 
-    this.populateEmptyForm();
-    this.isLoading = false;
+    this.eventService.getEvent(this.eventId).subscribe({
+      next: (data: any) => {
+        this.populateForm(data);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.message || 'Failed to load event details.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  populateEmptyForm(): void {
-    this.form.name = '';
-    this.form.description = '';
-    this.form.startDate = '';
-    this.form.endDate = '';
-    this.form.visibility = 'PUBLIC';
-    this.form.status = 'UPCOMING';
+ private populateForm(data:any): void {
+    this.form.name = data.name || '';
+    this.form.description = data.description || '';
+    this.form.startDate = data.startDateTime ||'';
+    this.form.duration = Number(data.duration ?? 1);
+    this.form.visibility = (data.visibility as Visibility) || 'PUBLIC';
+    this.form.registrationKey = data.registrationKey || '';
+    this.form.teamSizeLimit = Number(data.teamSizeLimit ?? 1);
+    this.form.status = (data.status as EventStatus) || 'UPCOMING';
+    this.form.leaderboardFrozen = !!data.leaderboardFreezeDateTime;
 
   }
 
 
 
-  updateHackathon(): void {
+  updateEvent(): void {
     if (!this.form.name.trim()) {
-      this.errorMessage = 'Hackathon name is required';
+      this.errorMessage = 'Event name is required';
       return;
     }
    
@@ -98,18 +113,34 @@ export class ManageEventComponent implements OnInit {
       return;
     }
    
-
     this.isSaving = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    setTimeout(() =>{
-      this.isSaving = false;
-      this.successMessage = 'Hackathon updated successfully';
-      setTimeout(() =>(this.successMessage = ''), 30000
-      );
-    },1000);
-
+    const payload = {
+      name: this.form.name.trim(),
+      description:this.form.description,
+      startDateTime: this.form.startDate,
+      duration: this.form.duration,
+      visibility: this.form.visibility,
+      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined,
+      teamSizeLimit:this.form.teamSizeLimit,
+      status: this.form.status,
+      leaderboardFreezeDateTime: this.form.leaderboardFrozen ? new Date().toISOString() : undefined,
+    };
+    this.eventService.updateEvent(this.eventId, payload as any).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.successMessage = 'Event updated successfully';
+        this.cdr.detectChanges();
+        setTimeout(() => (this.successMessage = ''), 30000);
+      },
+      error: (err) => {
+        this.isSaving = false;
+        this.errorMessage = err?.error?.message || 'Failed to update event.';
+        this.cdr.detectChanges();
+      }
+    });
 
   }
 
@@ -117,27 +148,82 @@ export class ManageEventComponent implements OnInit {
     this.isSaving = true;
     this.errorMessage = '';
     this.successMessage = '';
+  
+    this.eventService.patchEventStatus(this.eventId, undefined, this.form.status).subscribe({
+      next: () => {
+       this.isSaving = false;
+        this.successMessage = 'Event updated successfully';
+        this.cdr.detectChanges();
+        setTimeout(() => (this.successMessage = ''), 30000); 
+      },
+      error: (err) => {
+        this.isSaving = false;
+        this.errorMessage = err?.error?.message || 'Failed to update event.';
+        this.cdr.detectChanges();
+      }
 
-       setTimeout(() =>{
-      this.isSaving = false;
-      this.successMessage = 'Hackathon updated successfully';
-      setTimeout(() =>(this.successMessage = ''), 30000
-      );
-    },1000);
-
-   
+    });   
   }
 
-  deleteHackathon(): void {
-    alert('Delete functionality not yet implemented');
+  toggleLeaderboardFreeze(): void {
+    const nextValue = !this.form.leaderboardFrozen;
+    this.isSaving = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const payload = {leaderboardFreezeDateTime: nextValue ? new Date().toISOString() : null,};
+    this.eventService.updateEvent(this.eventId, payload as any).subscribe({
+      next: () => {
+        this.form.leaderboardFrozen = nextValue;
+       this.isSaving = false;
+        this.successMessage = nextValue? 'Leaderboard frozen' : 'Leaderboard unfrozen';
+        this.cdr.detectChanges();
+        setTimeout(() => (this.successMessage = ''), 30000); 
+      },
+      error: (err) => {
+        this.isSaving = false;
+        this.errorMessage = err?.error?.message || 'Failed to update leaderboard state.';
+        this.cdr.detectChanges();
+      }
+
+    }); 
   }
 
+  openDeleteConfirm(): void {
+    this.showDeleteConfirm = true;
+  }
+
+   cancelDelete(): void {
+    this.showDeleteConfirm = false;
+  }
+  
+  confirmDeleteEvent(): void {
+    this.isDeleting = true;
+    this.errorMessage = '';
+
+    this.eventService.deleteEvent(this.eventId).subscribe({
+      next: () => {
+        this.isDeleting = false;
+        this.showDeleteConfirm = false;
+        this.router.navigate(['/admin/hackathons',this.hackathonId,'events']);
+        setTimeout(() => (this.successMessage = ''), 30000); 
+      },
+      error: (err) => {
+        this.isDeleting = false;
+        this.showDeleteConfirm = false;
+        this.errorMessage = err?.error?.message || 'Failed to delete event.';
+        this.cdr.detectChanges();
+      }
+
+    }); 
+
+  }
   goBack(): void {
      if (this.hackathonId){
-         this.router.navigate(['/admin/hackathons', this.hackathonId]);
+         this.router.navigate(['/admin/hackathons', this.hackathonId, 'events']);
 
     }else {
-        this.router.navigate(['/admin/hackathons']);
+        this.router.navigate(['/admin/events']);
     }
   }
 
@@ -170,8 +256,8 @@ export class ManageEventComponent implements OnInit {
       this.uploadError = 'No file selected.';
       return;
     }
-    if (!this.hackathonId) {
-      this.uploadError = 'Hackathon ID not available.';
+    if (!this.eventId) {
+      this.uploadError = 'Event ID not available.';
       return;
     }
 
@@ -182,7 +268,7 @@ export class ManageEventComponent implements OnInit {
    
     const renamedFile = new File([this.uploadFile], 'problem_statement.pdf', { type: this.uploadFile.type });
 
-    this.storageService.uploadHackathonProblemStatement(this.hackathonId, renamedFile).subscribe({
+    this.storageService.uploadHackathonProblemStatement(this.eventId, renamedFile).subscribe({
       next: (resp) => {
         console.log('Upload success:', resp);
         this.isUploading = false;
