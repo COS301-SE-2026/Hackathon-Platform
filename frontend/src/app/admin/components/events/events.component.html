@@ -1,0 +1,116 @@
+<div class = "events-page">
+ 
+    @if (isHackathonScoped){
+     <div class = "back-navigation">
+       <button class = "back-btn" (click) = "goBack()">
+        <i class = "pi pi-arrow-left"></i> Back to Hackathons
+      </button>
+     </div>
+      
+    <div class = "hackathon-header-card">
+      <div>
+        <h1>{{ hackathon?.name || 'Loading...'}}</h1>
+        <p class = "hackathon-description">{{hackathon?.description || ''}}</p>
+      </div>
+
+      <div>
+        <div class = "hackathon-stats">
+        <div class = "stat">
+          <i class = "pi pi-clone"></i>
+          <div>
+            <p class = "stat-value">{{levelCount}}</p>
+            <p class = "stat-label">Levels</p>
+          </div>
+        </div>
+          <div class = "stat">
+          <i class = "pi pi-calendar"></i>
+          <div>
+            <p class = "stat-value">{{eventCount}}</p>
+            <p class = "stat-label">Events</p>
+          </div>
+          </div>
+          
+      </div>
+    </div>
+    </div>
+
+    <div class = "hackathon-tabs">
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
+      <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
+</div>
+
+}
+
+<main class = "content">
+  <div class = "page-header">
+    <div>
+      <h2>{{isHackathonScoped ? 'Events' : 'All Events'}}</h2>
+      <p class = "page-subtitle">
+        {{isHackathonScoped ? 'View all events for this hackathon.' : 'View events across every hackathon on the platform.'}}
+      </p>
+    </div>
+    @if (isHackathonScoped){
+      <button type = "button" class = "btn-create-event" (click) = "navigateToCreateEvents()">
+        + Create Event
+      </button>
+    }
+  </div>
+
+  <div class = "toolbar">
+    <div class = "search-box">
+      <i class = "pi pi-search search-icon"></i>
+      <input type = "text" placeholder = "Search events..." aria-label = "Search events"/>
+    </div>
+    <div class = "filter-select">
+      <select aria-label = "Filter by status">
+        <option>All Events</option>
+        <option>Live</option>
+        <option>Upcoming</option>
+        <option>Completed</option>
+        <option>Canceled</option>
+      </select>
+      <i class = "pi pi-chevron-down filter-chevron"></i>
+    </div>
+  </div>
+
+  @if (errorMessage){
+    <div class = "error-banner">{{errorMessage}}</div>
+  }
+
+  <div class = "events-table">
+    <div class = "events-table-header">
+      <span>Event Name</span>
+      <span>Type</span>
+      <span>Status</span>
+      <span>Dates</span>
+      <span>Action</span>
+    </div>
+
+        @if (isLoading){
+      <div class = "empty-state">Loading events...</div>
+    } @else if (events.length === 0){
+      <div class = "empty-state">
+        {{ isHackathonScoped ? 'No events created yet for this hackathon.' : 'No events available on the platform yet.' }}
+      </div>
+    } @else {
+      @for (event of events; track event.eventId){
+          <div class = "event-row">
+            <div class = "event-name-cell">
+              <span class = "event-logo">{{event.logoInitial}}</span>
+              <span class = "event-name">{{event.name}}</span>
+            </div>
+            <span class = "type-pill">{{event.visibility}}</span>
+            <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
+            <span class = "dates-cell">{{event.dateRangeLabel}}</span>
+           <button type = "button" class = "btn-view-event" (click)="navigateToEvent(event.eventId)">
+           <i class = "pi pi-arrow-right"></i>
+           Go to Event
+           </button>
+          </div>
+        }
+    }
+        
+</div>
+</main>
+</div>
