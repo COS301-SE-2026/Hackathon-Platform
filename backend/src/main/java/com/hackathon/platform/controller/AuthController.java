@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Controller for auth endpoints. Contains: POST /api/auth/register, POST /api/auth/login, GET
@@ -61,5 +62,16 @@ public class AuthController {
   public ResponseEntity<AuthResponse> me(@AuthenticationPrincipal User currentUser) {
     AuthResponse response = authService.getMe(currentUser);
     return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/verify-email")
+  public ResponseEntity<AuthResponse> verifyEmail(@RequestParam String token){
+    return ResponseEntity.ok(authService.verifyEmail(token));
+  }
+
+  @GetMapping("/resend-verification")
+  public ResponseEntity<Void> resendVerification(@RequestParam String email){
+    authService.resendVerificationEmail(email);
+    return ResponseEntity.noContent().build();
   }
 }

@@ -113,4 +113,17 @@ public class AuthService {
             .msg(msg)
         .build();
   }
+
+  public AuthResponse verifyEmail(String rawToken){
+    User user = emailVerificationService.verify(rawToken);
+    String token = jwtService.generateToken(user);
+    return buildResponse(user, token, "Email verification complete");
+  }
+
+  public void resendVerificationEmail(String email){
+    User user = userRepository.findByEmail(email.toLowerCase(Locale.ROOT)).orElseThrow(() -> new IllegalArgumentException("No acccount found for this email."));
+    if(!user.isEmailVerified()){
+      emailVerificationService.sendVerificationEmail(user);
+    }
+  }
 }
