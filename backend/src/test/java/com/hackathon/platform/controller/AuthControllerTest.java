@@ -8,15 +8,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.platform.dto.AuthResponse;
 import com.hackathon.platform.dto.LoginRequest;
 import com.hackathon.platform.dto.RegisterRequest;
 import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
+import com.hackathon.platform.service.AuthService;
 import java.util.Collections;
 import java.util.UUID;
-import com.hackathon.platform.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 class AuthControllerTest {
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objMapper;
-  @MockBean
-  private AuthService authService;
+  @MockBean private AuthService authService;
   private RegisterRequest validRequest;
   private AuthResponse regResp;
   private AuthResponse loginResp;
@@ -44,26 +44,55 @@ class AuthControllerTest {
   @BeforeEach
   void setUp() {
     validRequest = new RegisterRequest("Donald", "Trump", "donald@gmail.com", "TestPassword");
-    regResp = AuthResponse.builder().token(null).userId(UUID.randomUUID()).firstName("Donald").lastName("Trump").email("donald@gmail.com").role("PARTICIPANT").emailVerified(false).msg("Registration successful. Check your email for a verification link").build();
-    verificationResp = AuthResponse.builder().token("verified.jwt.token").userId(UUID.randomUUID()).firstName("Donald").lastName("Trump").email("donald@gmail.com").role("PARTICIPANT").emailVerified(true).msg("Email verification complete").build();
-    loginResp = AuthResponse.builder().token("mock.jwt.token").userId(UUID.randomUUID()).firstName("Donald").lastName("Trump").email("donald@gmail.com").role("PARTICIPANT").emailVerified(true).build();
+    regResp =
+        AuthResponse.builder()
+            .token(null)
+            .userId(UUID.randomUUID())
+            .firstName("Donald")
+            .lastName("Trump")
+            .email("donald@gmail.com")
+            .role("PARTICIPANT")
+            .emailVerified(false)
+            .msg("Registration successful. Check your email for a verification link")
+            .build();
+    verificationResp =
+        AuthResponse.builder()
+            .token("verified.jwt.token")
+            .userId(UUID.randomUUID())
+            .firstName("Donald")
+            .lastName("Trump")
+            .email("donald@gmail.com")
+            .role("PARTICIPANT")
+            .emailVerified(true)
+            .msg("Email verification complete")
+            .build();
+    loginResp =
+        AuthResponse.builder()
+            .token("mock.jwt.token")
+            .userId(UUID.randomUUID())
+            .firstName("Donald")
+            .lastName("Trump")
+            .email("donald@gmail.com")
+            .role("PARTICIPANT")
+            .emailVerified(true)
+            .build();
   }
 
   @Test
   void register_withValidPayload_returns201() throws Exception {
     when(authService.register(any(RegisterRequest.class))).thenReturn(regResp);
 
-        mockMvc
-            .perform(
-                post("/api/auth/register")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objMapper.writeValueAsString(validRequest)))
-            .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.token").doesNotExist())
-                .andExpect(jsonPath("$.email").value("donald@gmail.com"))
-                .andExpect(jsonPath("$.role").value("PARTICIPANT"))
-                .andExpect(jsonPath("$.emailVerified").value(false))
-                .andExpect(jsonPath("$.msg").exists());
+    mockMvc
+        .perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(validRequest)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.token").doesNotExist())
+        .andExpect(jsonPath("$.email").value("donald@gmail.com"))
+        .andExpect(jsonPath("$.role").value("PARTICIPANT"))
+        .andExpect(jsonPath("$.emailVerified").value(false))
+        .andExpect(jsonPath("$.msg").exists());
 
     verify(authService).register(any(RegisterRequest.class));
   }
@@ -80,24 +109,37 @@ class AuthControllerTest {
   }
 
   @Test
-  void loginWithCreds_returns200() throws Exception{
+  void loginWithCreds_returns200() throws Exception {
     LoginRequest loginReq = new LoginRequest("donald@gmail.com", "TestPassword");
     when(authService.login(any(LoginRequest.class))).thenReturn(loginResp);
-    mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(objMapper.writeValueAsString(loginReq))).andExpect(status().isOk()).andExpect(jsonPath("$.token").value("mock.jwt.token")).andExpect(jsonPath("$.emailVerified").value(true));
+    mockMvc
+        .perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objMapper.writeValueAsString(loginReq)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.token").value("mock.jwt.token"))
+        .andExpect(jsonPath("$.emailVerified").value(true));
     verify(authService).login(any(LoginRequest.class));
   }
 
   @Test
-  void verifyEmailWithToken_return200() throws Exception{
+  void verifyEmailWithToken_return200() throws Exception {
     when(authService.verifyEmail("valid-token")).thenReturn(verificationResp);
 
-    mockMvc.perform(get("/api/auth/verify-email").param("token", "valid-token")).andExpect(status().isOk()).andExpect(jsonPath("$.token").value("verified.jwt.token")).andExpect(jsonPath("$.emailVerified").value(true));
+    mockMvc
+        .perform(get("/api/auth/verify-email").param("token", "valid-token"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.token").value("verified.jwt.token"))
+        .andExpect(jsonPath("$.emailVerified").value(true));
     verify(authService).verifyEmail("valid-token");
   }
 
   @Test
-  void resendVerificationWithEmail_returns204() throws Exception{
-    mockMvc.perform(post("/api/auth/resend-verification").param("email", "donald@gmail.com")).andExpect(status().isNoContent());
+  void resendVerificationWithEmail_returns204() throws Exception {
+    mockMvc
+        .perform(post("/api/auth/resend-verification").param("email", "donald@gmail.com"))
+        .andExpect(status().isNoContent());
     verify(authService).resendVerificationEmail("donald@gmail.com");
   }
 
@@ -114,7 +156,16 @@ class AuthControllerTest {
             .role(participantRole)
             .status("ACTIVE")
             .build();
-    AuthResponse meResp = AuthResponse.builder().token("mock.jwt.token").userId(user.getUserId()).firstName(user.getFirstName()).lastName(user.getLastName()).email(user.getEmail()).role("PARTICIPANT").emailVerified(true).build();
+    AuthResponse meResp =
+        AuthResponse.builder()
+            .token("mock.jwt.token")
+            .userId(user.getUserId())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .email(user.getEmail())
+            .role("PARTICIPANT")
+            .emailVerified(true)
+            .build();
     when(authService.getMe(any(User.class))).thenReturn(meResp);
 
     mockMvc
@@ -124,7 +175,9 @@ class AuthControllerTest {
                     authentication(
                         new UsernamePasswordAuthenticationToken(
                             user, null, Collections.emptyList()))))
-        .andExpect(status().isOk()).andExpect(jsonPath("$.email").value("jane@example.com")).andExpect(jsonPath("$.emailVerified").value(true));
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.email").value("jane@example.com"))
+        .andExpect(jsonPath("$.emailVerified").value(true));
   }
 
   @Test

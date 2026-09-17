@@ -50,14 +50,15 @@ public class AuthService {
             .passwordHash(passwordEncoder.encode(request.getPassword()))
             .role(participantRole)
             .status("ACTIVE")
-                .emailVerified(false)
-                .authProvider("LOCAL")
+            .emailVerified(false)
+            .authProvider("LOCAL")
             .build();
 
     User saved = userRepository.save(user);
     emailVerificationService.sendVerificationEmail(saved);
 
-    return buildResponse(saved, null, "Registration successful, Check your email for a verification link");
+    return buildResponse(
+        saved, null, "Registration successful, Check your email for a verification link");
   }
 
   /**
@@ -72,11 +73,12 @@ public class AuthService {
             .findByEmail(request.getEmail().toLowerCase(Locale.ROOT))
             .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
-    if (user.getPasswordHash() == null || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+    if (user.getPasswordHash() == null
+        || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
       throw new BadCredentialsException("Invalid email or password");
     }
 
-    if(!user.isEmailVerified()){
+    if (!user.isEmailVerified()) {
       throw new BadCredentialsException("You need to verify your email before logging in");
     }
 
@@ -114,20 +116,23 @@ public class AuthService {
         .lastName(user.getLastName())
         .email(user.getEmail())
         .role(user.getRole().getName())
-            .emailVerified(user.isEmailVerified())
-            .msg(msg)
+        .emailVerified(user.isEmailVerified())
+        .msg(msg)
         .build();
   }
 
-  public AuthResponse verifyEmail(String rawToken){
+  public AuthResponse verifyEmail(String rawToken) {
     User user = emailVerificationService.verify(rawToken);
     String token = jwtService.generateToken(user);
     return buildResponse(user, token, "Email verification complete");
   }
 
-  public void resendVerificationEmail(String email){
-    User user = userRepository.findByEmail(email.toLowerCase(Locale.ROOT)).orElseThrow(() -> new IllegalArgumentException("No account found for this email."));
-    if(!user.isEmailVerified()){
+  public void resendVerificationEmail(String email) {
+    User user =
+        userRepository
+            .findByEmail(email.toLowerCase(Locale.ROOT))
+            .orElseThrow(() -> new IllegalArgumentException("No account found for this email."));
+    if (!user.isEmailVerified()) {
       emailVerificationService.sendVerificationEmail(user);
     }
   }

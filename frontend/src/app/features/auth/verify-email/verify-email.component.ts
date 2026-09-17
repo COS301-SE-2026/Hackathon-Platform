@@ -47,7 +47,7 @@ export class VerifyEmailComponent implements OnInit{
           if(response.role === 'SUPERADMIN'){
             this.router.navigate(['/login']);
           } else if (response.role === 'ADMIN') {
-            this.router.navigate*['/admin/dashboard'];
+            this.router.navigate(['/admin/dashboard']);
           } else {
             this.router.navigate(['/participant/home']);
           }

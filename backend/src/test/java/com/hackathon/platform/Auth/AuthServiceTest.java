@@ -49,8 +49,8 @@ class AuthServiceTest {
             .passwordHash("$2a$12$hashedpassword")
             .role(participantRole)
             .status("ACTIVE")
-                .emailVerified(true)
-                .authProvider("LOCAL")
+            .emailVerified(true)
+            .authProvider("LOCAL")
             .build();
   }
 
@@ -58,7 +58,18 @@ class AuthServiceTest {
   void register_withNewEmail() {
     RegisterRequest request = new RegisterRequest("Jane", "Doe", "jane@example.com", "password123");
 
-    User savedUser = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("jane@example.com").passwordHash("$2a$12$hashedpassword").role(participantRole).status("ACTIVE").emailVerified(false).authProvider("LOCAL").build();
+    User savedUser =
+        User.builder()
+            .userId(UUID.randomUUID())
+            .firstName("Jane")
+            .lastName("Doe")
+            .email("jane@example.com")
+            .passwordHash("$2a$12$hashedpassword")
+            .role(participantRole)
+            .status("ACTIVE")
+            .emailVerified(false)
+            .authProvider("LOCAL")
+            .build();
     when(userRepository.existsByEmail("jane@example.com")).thenReturn(false);
     when(roleRepository.findByName("PARTICIPANT")).thenReturn(Optional.of(participantRole));
     when(passwordEncoder.encode("password123")).thenReturn("$2a$12$hashedpassword");
@@ -116,7 +127,18 @@ class AuthServiceTest {
 
   @Test
   void login_withUnverifiedEmail_throwsBadCredentialsException() {
-    User unverifiedUser = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("jane@example.com").passwordHash("$2a$12$hashedpassword").role(participantRole).status("ACTIVE").emailVerified(false).authProvider("LOCAL").build();
+    User unverifiedUser =
+        User.builder()
+            .userId(UUID.randomUUID())
+            .firstName("Jane")
+            .lastName("Doe")
+            .email("jane@example.com")
+            .passwordHash("$2a$12$hashedpassword")
+            .role(participantRole)
+            .status("ACTIVE")
+            .emailVerified(false)
+            .authProvider("LOCAL")
+            .build();
 
     LoginRequest request = new LoginRequest("jane@example.com", "password123");
 
@@ -124,7 +146,8 @@ class AuthServiceTest {
     when(passwordEncoder.matches("password123", unverifiedUser.getPasswordHash())).thenReturn(true);
 
     assertThatThrownBy(() -> authService.login(request))
-            .isInstanceOf(BadCredentialsException.class).hasMessageContaining("verify your email");
+        .isInstanceOf(BadCredentialsException.class)
+        .hasMessageContaining("verify your email");
     verify(jwtService, never()).generateToken(any(User.class));
   }
 
@@ -150,8 +173,8 @@ class AuthServiceTest {
             .passwordHash("$2a$12$hashedpassword")
             .role(participantRole)
             .status("INACTIVE")
-                .emailVerified(true)
-                .authProvider("LOCAL")
+            .emailVerified(true)
+            .authProvider("LOCAL")
             .build();
 
     LoginRequest request = new LoginRequest("jane@example.com", "password123");
@@ -165,9 +188,20 @@ class AuthServiceTest {
   }
 
   @Test
-  void verifyEmailWithToken_returnsJwt() throws Exception{
+  void verifyEmailWithToken_returnsJwt() throws Exception {
     String rawToken = "raw-token";
-    User unverifiedUser = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("jane@example.com").passwordHash("$2a$12$hashedpassword").role(participantRole).status("ACTIVE").emailVerified(false).authProvider("LOCAL").build();
+    User unverifiedUser =
+        User.builder()
+            .userId(UUID.randomUUID())
+            .firstName("Jane")
+            .lastName("Doe")
+            .email("jane@example.com")
+            .passwordHash("$2a$12$hashedpassword")
+            .role(participantRole)
+            .status("ACTIVE")
+            .emailVerified(false)
+            .authProvider("LOCAL")
+            .build();
 
     when(veriService.verify(rawToken)).thenReturn(unverifiedUser);
     when(jwtService.generateToken(unverifiedUser)).thenReturn("verified.jwt.token");
@@ -180,15 +214,32 @@ class AuthServiceTest {
 
   @Test
   void resendVerificationEmailUnverifiedUser() throws Exception {
-    User unverifiedUser = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("jane@example.com").passwordHash("$2a$12$hashedpassword").role(participantRole).status("ACTIVE").emailVerified(false).authProvider("LOCAL").build();
+    User unverifiedUser =
+        User.builder()
+            .userId(UUID.randomUUID())
+            .firstName("Jane")
+            .lastName("Doe")
+            .email("jane@example.com")
+            .passwordHash("$2a$12$hashedpassword")
+            .role(participantRole)
+            .status("ACTIVE")
+            .emailVerified(false)
+            .authProvider("LOCAL")
+            .build();
     when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(unverifiedUser));
     authService.resendVerificationEmail("jane@example.com");
     verify(veriService).sendVerificationEmail(unverifiedUser);
   }
 
   @Test
-  void resendVerificationEmailVerified() throws Exception{
-    User verified = User.builder().userId(UUID.randomUUID()).email("jane@example.com").firstName("Jane").emailVerified(true).build();
+  void resendVerificationEmailVerified() throws Exception {
+    User verified =
+        User.builder()
+            .userId(UUID.randomUUID())
+            .email("jane@example.com")
+            .firstName("Jane")
+            .emailVerified(true)
+            .build();
     when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(verified));
     authService.resendVerificationEmail("jane@example.com");
     verify(veriService, never()).sendVerificationEmail(any(User.class));

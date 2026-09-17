@@ -62,7 +62,7 @@ export class RegisterComponent {
         this.isLoading = false;
 
         this.router.navigate(['/verify-email'], {
-          qeuryParams: { email: registerData.email }
+          queryParams: { email: registerData.email }
         });
       },
       error: (error) => {
