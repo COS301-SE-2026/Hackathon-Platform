@@ -6,6 +6,7 @@ import { AuthService, RegisterRequest } from '../../../services/auth.service';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ToastService } from '../../../shared/components/toast/toast.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -59,14 +60,13 @@ export class RegisterComponent {
       next: (response) => {
         console.log('Registration successful:', response);
         this.isLoading = false;
-        if (response.role === 'ADMIN') {
-          this.router.navigate(['/admin/dashboard']);
-        } else {
-          this.router.navigate(['/participant/home']);
-        }
+
+        this.router.navigate(['/verify-email'], {
+          qeuryParams: { email: registerData.email }
+        });
       },
       error: (error) => {
-        console.error('Registration error — status:', error.status, 'body:', error.error);
+        console.error('Registration error - status:', error.status, 'body:', error.error);
         this.isLoading = false;
         if (error.status === 409) {
           this.toast.error('Registration Failed', 'An account with this email already exists.');
@@ -79,6 +79,10 @@ export class RegisterComponent {
     });
   }
 
+
+  continueWithGoogle(): void {
+    window.location.href = `${environment.apiUrl}/oauth2/authorization/google`;
+  }
 
   isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
