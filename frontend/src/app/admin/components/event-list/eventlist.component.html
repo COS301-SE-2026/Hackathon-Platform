@@ -122,26 +122,34 @@
                 <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'dashboard'" (click) = "setActiveDetailTab('dashboard')">
                   <i class = "pi pi-th-large"></i> Dashboard
                 </button>
-                <a [routerLink]="['/admin/hackathons', event.hackathonId, 'events', event.eventId, 'live-control']">
-                  <i class = "pi pi-bolt"></i> Live Control
-                </a>
-                <a [routerLink]="['/admin/hackathons', event.hackathonId, 'events', event.eventId, 'announcements']">
+                <!-- <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'live-control'" (click) = "setActiveDetailTab('live-control')">
+                 <i class = "pi pi-bolt"></i> Live Control
+                </button> -->
+                <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'announcements'" (click) = "setActiveDetailTab('announcements')">
                   <i class = "pi pi-megaphone"></i> Announcements
-                </a>
-                <a [routerLink]="['/admin/hackathons', event.hackathonId, 'events', event.eventId, 'forum']">
+                </button>
+                <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'forum'" (click) = "setActiveDetailTab('forum')">
                   <i class = "pi pi-comments"></i> Forum
-                </a>
-                <a [routerLink]="['/admin/hackathons', event.hackathonId, 'events', event.eventId, 'dietary-requirements']">
-                  <i class = "pi pi-user"></i> Dietary Requirements
-                </a>
-                <a [routerLink]="['/admin/hackathons', event.hackathonId, 'events', event.eventId, 'manage']">
-                  <i class = "pi pi-cog"></i> Manage Event
-                </a>
+                </button>
+                <!-- <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'dietary-requirements'" (click) = "setActiveDetailTab('dietary-requirements')">
+                   <i class = "pi pi-user"></i> Dietary Requirements
+                </button>
+                <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'manage'" (click) = "setActiveDetailTab('manage')">
+                 <i class = "pi pi-cog"></i> Manage Event
+                </button> -->
               </div>
+
 
               <div class = "event-detail-body">
                 @if (activeDetailTab === 'dashboard'){
                   <app-event-dashboard [eventId] = "event.eventId"></app-event-dashboard>
+                
+                  } @else if (activeDetailTab === 'announcements'){
+                    <app-announcements [hackathonId] = "event.hackathonId" [eventId] = "event.eventId"></app-announcements>
+                  } @else if (activeDetailTab === 'forum'){
+                    <app-forum [hackathonId] = "event.hackathonId" [eventId] = "event.eventId"></app-forum>  
+                    
+
                 } @else if (activeDetailTab === 'registrations'){
                   @if (registrationsLoading[event.eventId]){
                     <div class = "registrations-loading">Loading registrations...</div>

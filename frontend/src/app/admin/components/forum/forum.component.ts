@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component,inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component,inject, OnInit,Input } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import { FormsModule} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -33,11 +33,12 @@ interface ForumThread{
 export class ForumComponent implements OnInit {
     private readonly change = inject(ChangeDetectorRef);
     private readonly route = inject(ActivatedRoute);
-
+    @Input() hackathonId = '';
+    @Input() eventId = '';
     isLoading = false;
     errorMessage = '';
     searchTerm = '';
-    hackathonId ='';
+    
 
     expandedThreadId: string | null = null;
     replyDrafts: Record<string, string> = {};
@@ -45,7 +46,8 @@ export class ForumComponent implements OnInit {
     threads: ForumThread[] = [];
 
     ngOnInit(): void {
-        this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
+        this.hackathonId = this.hackathonId ||  this.route.snapshot.paramMap.get('hackathonId') || '';
+        this.eventId = this.eventId ||  this.route.snapshot.paramMap.get('eventId') || '';
 
         if (!this.hackathonId){
             
