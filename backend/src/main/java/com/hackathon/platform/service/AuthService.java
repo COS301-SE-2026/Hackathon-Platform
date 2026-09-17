@@ -57,7 +57,7 @@ public class AuthService {
     User saved = userRepository.save(user);
     emailVerificationService.sendVerificationEmail(saved);
 
-    return buildResponse(saved, null, "Registration successful, Check your amil for a verification link");
+    return buildResponse(saved, null, "Registration successful, Check your email for a verification link");
   }
 
   /**
@@ -126,7 +126,7 @@ public class AuthService {
   }
 
   public void resendVerificationEmail(String email){
-    User user = userRepository.findByEmail(email.toLowerCase(Locale.ROOT)).orElseThrow(() -> new IllegalArgumentException("No acccount found for this email."));
+    User user = userRepository.findByEmail(email.toLowerCase(Locale.ROOT)).orElseThrow(() -> new IllegalArgumentException("No account found for this email."));
     if(!user.isEmailVerified()){
       emailVerificationService.sendVerificationEmail(user);
     }
