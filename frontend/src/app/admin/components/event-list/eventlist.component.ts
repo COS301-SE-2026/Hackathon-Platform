@@ -10,6 +10,7 @@ import { EventDashboardComponent } from '../event-dashboard/event-dashboard.comp
 import { AnnouncementsComponent } from '../announcements/announcements.component';
 import { ForumComponent } from '../forum/forum.component';
 import { LiveControlComponent } from '../live-control/live-control.component';
+import { ManageEventComponent } from '../manage-event/manage-event.component';
 interface EventRow {
   eventId : string;
   hackathonId: string;
@@ -20,12 +21,12 @@ interface EventRow {
   statusClass: 'live' | 'upcoming' | 'completed' | 'canceled'| 'ended';
   dateRangeLabel: string;
 }
-type EventDetailTab = 'dashboard' | 'live-control' | 'announcements' | 'forum' | 'registrations';
+type EventDetailTab = 'dashboard' | 'live-control' | 'announcements' | 'forum' | 'registrations' | 'manage';
 
 @Component({
   selector: 'app-eventlist',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent, EventDashboardComponent,AnnouncementsComponent,ForumComponent, LiveControlComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent, EventDashboardComponent,AnnouncementsComponent,ForumComponent, LiveControlComponent,ManageEventComponent],
   templateUrl: './eventlist.component.html',
   styleUrls: ['./eventlist.component.scss']
 })

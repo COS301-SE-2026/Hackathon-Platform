@@ -133,10 +133,10 @@
                 </button>
                 <!-- <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'dietary-requirements'" (click) = "setActiveDetailTab('dietary-requirements')">
                    <i class = "pi pi-user"></i> Dietary Requirements
-                </button>
+                </button> -->
                 <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'manage'" (click) = "setActiveDetailTab('manage')">
                  <i class = "pi pi-cog"></i> Manage Event
-                </button> -->
+                </button>
               </div>
 
 
@@ -149,6 +149,9 @@
                     <app-announcements [hackathonId] = "event.hackathonId" [eventId] = "event.eventId"></app-announcements>
                   } @else if (activeDetailTab === 'forum'){
                     <app-forum [hackathonId] = "event.hackathonId" [eventId] = "event.eventId"></app-forum>  
+                    } @else if (activeDetailTab === 'manage'){
+                    <app-manage-event [hackathonId] = "event.hackathonId" [eventId] = "event.eventId"></app-manage-event>  
+                    
                     
 
                 } @else if (activeDetailTab === 'registrations'){

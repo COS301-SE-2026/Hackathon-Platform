@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef,Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -32,9 +32,9 @@ export class ManageEventComponent implements OnInit {
   uploadSuccess = false;
   uploadError = '';
 
-  hackathonId  ='';
+  @Input() hackathonId  ='';
 
-  eventId = '';
+ @Input() eventId = '';
   isLoading = true;
   isSaving = false;
   isDeleting = false;
@@ -59,8 +59,8 @@ export class ManageEventComponent implements OnInit {
    statusOptions: EventStatus[] =['UPCOMING','ONGOING', 'COMPLETED','CANCELED', 'ACTIVE', 'INACTIVE'];
 
   ngOnInit(): void {
-    this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
-    this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
+    this.hackathonId = this.hackathonId || this.route.snapshot.paramMap.get('hackathonId') || '';
+    this.eventId = this.eventId|| this.route.snapshot.paramMap.get('eventId') || '';
     if (!this.eventId) {
       this.errorMessage = 'No event ID provided';
       this.isLoading = false;
