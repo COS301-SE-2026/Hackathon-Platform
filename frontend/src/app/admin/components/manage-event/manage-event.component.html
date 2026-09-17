@@ -1,17 +1,11 @@
 <div class="manage-event-page">
 
-   <div class = "back-navigation" >
-      <button class = "back-btn" (click) = "goBack()">
-        &larr; Back to Events
-      </button>
-    </div>
   <div class="page-header">
     <div>
       <h1>Manage Event</h1>
       <p class="page-subtitle">Edit event details and manage resources</p>
     </div>
     <div class="header-actions">
-      <button class="btn-secondary" (click)="goBack()">Back to Events</button>
       <button class="btn-danger" (click)="openDeleteConfirm()" [disabled]="isDeleting">Delete Event</button>
     </div>
   </div>
