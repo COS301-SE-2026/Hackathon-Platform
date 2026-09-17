@@ -113,7 +113,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const user = this.authService.getUser();
-    this.userFirstName = user ? user.firstName : 'Participant';
+    this.userFirstName = user?.firstName ?? 'Participant';
     this.loadUpcomingEvents();
     this.loadUsersActiveEvents();
     this.loadMyRegistrations();
