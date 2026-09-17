@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit,inject } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit,inject, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ActivatedRoute } from "@angular/router";
 
@@ -62,7 +62,7 @@ export class EventDashboardComponent implements OnInit{
   private readonly route = inject(ActivatedRoute);
   private readonly change = inject(ChangeDetectorRef);
 
-  eventId = '';
+ @Input() eventId = '';
 
   insightsLoading = false;
   insightsError = '';
@@ -95,7 +95,7 @@ export class EventDashboardComponent implements OnInit{
   scoreByLevel: ScoreLevelStat[]=[];
 
   ngOnInit(): void {
-      this.eventId = this.route.parent?.snapshot.paramMap.get('eventId') || '';
+      this.eventId = this.eventId || this.route.parent?.snapshot.paramMap.get('eventId') || '';
 
       if (this.eventId){
         this.loadEventInsights(this.eventId);
