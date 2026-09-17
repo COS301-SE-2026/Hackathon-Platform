@@ -163,4 +163,34 @@ class AuthServiceTest {
         .isInstanceOf(BadCredentialsException.class)
         .hasMessageContaining("deactivated");
   }
+
+  @Test
+  void verifyEmailWithToken_returnsJwt() throws Exception{
+    String rawToken = "raw-token";
+    User unverifiedUser = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("jane@example.com").passwordHash("$2a$12$hashedpassword").role(participantRole).status("ACTIVE").emailVerified(false).authProvider("LOCAL").build();
+
+    when(veriService.verify(rawToken)).thenReturn(unverifiedUser);
+    when(jwtService.generateToken(unverifiedUser)).thenReturn("verified.jwt.token");
+    AuthResponse resp = authService.verifyEmail(rawToken);
+
+    assertThat(resp.getToken()).isEqualTo("verified.jwt.token");
+    assertThat(resp.getEmail()).isEqualTo("jane@example.com");
+    assertThat(resp.getMsg()).contains("verification");
+  }
+
+  @Test
+  void resendVerificationEmailUnverifiedUser() throws Exception {
+    User unverifiedUser = User.builder().userId(UUID.randomUUID()).firstName("Jane").lastName("Doe").email("jane@example.com").passwordHash("$2a$12$hashedpassword").role(participantRole).status("ACTIVE").emailVerified(false).authProvider("LOCAL").build();
+    when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(unverifiedUser));
+    authService.resendVerificationEmail("jane@example.com");
+    verify(veriService).sendVerificationEmail(unverifiedUser);
+  }
+
+  @Test
+  void resendVerificationEmailVerified() throws Exception{
+    User verified = User.builder().userId(UUID.randomUUID()).email("jane@example.com").firstName("Jane").emailVerified(true).build();
+    when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(verified));
+    authService.resendVerificationEmail("jave@example.com");
+    verify(veriService, never()).sendVerificationEmail(any(User.class));
+  }
 }
