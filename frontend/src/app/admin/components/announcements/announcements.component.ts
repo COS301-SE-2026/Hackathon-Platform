@@ -40,6 +40,7 @@ export class AnnouncementsComponent implements OnInit{
      private readonly hackathonService = inject(HackathonService);
 
     hackathonId = '';
+    eventId = '';
     hackathonName ='';
     hackathonDescription ='';
     levelsCount = 0;
@@ -84,7 +85,7 @@ export class AnnouncementsComponent implements OnInit{
 
     ngOnInit(): void {
         this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
-
+        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
         if (!this.hackathonId){
             this.errorMessage = 'There was no hackathon ID provided';
             this.isLoading = false;

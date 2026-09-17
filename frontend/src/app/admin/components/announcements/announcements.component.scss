@@ -149,7 +149,7 @@
 .content{
     max-width: 1180px;
     margin: 0 auto;
-    padding: 0 28px 60px;
+    padding: 24px 32px 60px;
 }
 
 .page-header{
@@ -161,15 +161,15 @@
     gap: 16px;
 
     h1{
-        font-size: 1.55rem;
+        font-size: 1.2rem;
         font-weight: 700;
         color:#13192d;
         letter-spacing: -0.01em;
     }
     .page-subtitle{
         color:#6b7588;
-        font-size: 0.9rem;
-        margin-top: 3px;
+        font-size: 0.85rem;
+        margin-top: 4px 0 0 ;
     }
 }
 .page-header-actions{
