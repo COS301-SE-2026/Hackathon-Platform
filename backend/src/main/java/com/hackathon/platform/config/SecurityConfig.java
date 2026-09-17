@@ -1,6 +1,7 @@
 package com.hackathon.platform.config;
 
 import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.service.GoogleOAuth2SuccessHandler;
 import com.hackathon.platform.shared.security.JwtAuthFilter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class SecurityConfig {
 
   private final JwtAuthFilter jwtAuthFilter;
   private final UserRepository userRepository;
+  private final GoogleOAuth2SuccessHandler googleAuth;
 
   /**
    * Defines security fillters.
@@ -55,6 +57,12 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login")
                     .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/verify-email")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/resend-verification")
+                        .permitAll()
+                        .requestMatchers("/outh2/**", "/login/oauth2/**")
+                        .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/events/*/forum/stream")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/events/*/announcements/stream")
@@ -71,6 +79,8 @@ public class SecurityConfig {
                     .hasRole("ADMIN")
                     .anyRequest()
                     .authenticated())
+            .oauth2Login(oauth -> oauth
+                    .successHandler(googleAuth))
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }
