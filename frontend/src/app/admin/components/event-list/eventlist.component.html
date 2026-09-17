@@ -122,9 +122,9 @@
                 <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'dashboard'" (click) = "setActiveDetailTab('dashboard')">
                   <i class = "pi pi-th-large"></i> Dashboard
                 </button>
-                <!-- <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'live-control'" (click) = "setActiveDetailTab('live-control')">
+                <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'live-control'" (click) = "setActiveDetailTab('live-control')">
                  <i class = "pi pi-bolt"></i> Live Control
-                </button> -->
+                </button>
                 <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'announcements'" (click) = "setActiveDetailTab('announcements')">
                   <i class = "pi pi-megaphone"></i> Announcements
                 </button>
@@ -143,7 +143,8 @@
               <div class = "event-detail-body">
                 @if (activeDetailTab === 'dashboard'){
                   <app-event-dashboard [eventId] = "event.eventId"></app-event-dashboard>
-                
+                } @else if (activeDetailTab === 'live-control'){
+                    <app-live-control [hackathonId] = "event.hackathonId" [eventId] = "event.eventId"></app-live-control>
                   } @else if (activeDetailTab === 'announcements'){
                     <app-announcements [hackathonId] = "event.hackathonId" [eventId] = "event.eventId"></app-announcements>
                   } @else if (activeDetailTab === 'forum'){
