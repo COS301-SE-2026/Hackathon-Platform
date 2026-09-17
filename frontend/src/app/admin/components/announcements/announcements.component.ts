@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, Input} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
@@ -39,8 +39,8 @@ export class AnnouncementsComponent implements OnInit{
      private readonly change = inject(ChangeDetectorRef);
      private readonly hackathonService = inject(HackathonService);
 
-    hackathonId = '';
-    eventId = '';
+    @Input() hackathonId = '';
+    @Input() eventId = '';
     hackathonName ='';
     hackathonDescription ='';
     levelsCount = 0;
@@ -84,8 +84,8 @@ export class AnnouncementsComponent implements OnInit{
     }
 
     ngOnInit(): void {
-        this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
-        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
+        this.hackathonId = this.hackathonId ||  this.route.snapshot.paramMap.get('hackathonId') || '';
+        this.eventId = this.eventId ||  this.route.snapshot.paramMap.get('eventId') || '';
         if (!this.hackathonId){
             this.errorMessage = 'There was no hackathon ID provided';
             this.isLoading = false;
