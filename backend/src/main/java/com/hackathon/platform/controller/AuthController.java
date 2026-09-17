@@ -69,7 +69,7 @@ public class AuthController {
     return ResponseEntity.ok(authService.verifyEmail(token));
   }
 
-  @GetMapping("/resend-verification")
+  @PostMapping("/resend-verification")
   public ResponseEntity<Void> resendVerification(@RequestParam String email){
     authService.resendVerificationEmail(email);
     return ResponseEntity.noContent().build();
