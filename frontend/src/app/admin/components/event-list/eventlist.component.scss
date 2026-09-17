@@ -515,11 +515,56 @@
     border-bottom: none;
   }
 }
+.event-detail-tabs{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+  padding: 0 16px;
+  margin-bottom: 18px;
+  overflow-x: auto;
 
-.event-registrations-panel{
+  a, .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #6b7588;
+    text-decoration: none;
+    white-space: nowrap;
+    border: none;
+    background:none ;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+
+    .pi{
+      font-size: 0.82rem;
+    }
+    &:hover:not(.active){
+      color: #13192d;
+    }
+    &.active{
+      color: #1983c2;
+      border-bottom-color:#1983c2 ;
+    }
+  }
+
+}
+
+.event-detail-body{
+  //body for the event details
+}
+
+.event-detail-panel{
   background-color: #f9fafc;
   border-top: 1px solid #f1f3f7;
-  padding: 18px 22px 22px 70px;
+  padding: 18px 22px 22px;
 }
 .registrations-summary-bar{
   display: flex;
@@ -787,7 +832,7 @@
 
 @media (max-width: 900px){
 
-  .event-registrations-panel{
+  .event-detail-panel{
     padding-left: 22px;
   }
   .team-card-list{
