@@ -9,7 +9,7 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
   selector: 'app-verify-email',
   standalone: true,
   imports: [CommonModule, RouterModule, ButtonComponent],
-  templateUrl: './verify-email.component.htnl',
+  templateUrl: './verify-email.component.html',
   styleUrls: ['./verify-email.component.scss']
 })
 export class VerifyEmailComponent implements OnInit{
@@ -71,6 +71,13 @@ export class VerifyEmailComponent implements OnInit{
     this.isResending = true;
     this.authService.resendVerification(this.email.trim().toLowerCase()).subscribe({
       next: () => {
+        this.isResending = false;
+        this.toast.success(
+          'Email sent',
+          'If the account exists a new link has been sent'
+        );
+        },
+      error: (error) => {
         this.isResending = false;
         this.toast.error(
           'Could not resend',

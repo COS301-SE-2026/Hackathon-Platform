@@ -29,7 +29,7 @@
       <p>Click the link in the email to verify your account and finish signing in.</p>
 
       @if (email) {
-        <app-button variant="primary" type="button" width="100%" [diabled]="isResending" (click)="resendVerification()">{{ isResending ? 'Sending' : 'Resend verification email' }}</app-button>
+        <app-button variant="primary" type="button" width="100%" [disabled]="isResending" (click)="resendVerification()">{{ isResending ? 'Sending' : 'Resend verification email' }}</app-button>
       }
 
       <p class="back-link">
