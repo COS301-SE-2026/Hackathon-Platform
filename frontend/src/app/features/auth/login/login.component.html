@@ -34,7 +34,15 @@
          <span></span><p>or</p><span></span>
         </div>
 
-        <button type="button" class="google-button">
+        @if (showVerificationPrompt) {
+          <div class="verification-prompt">
+            <button type="button" class="resend-button" [disabled]="isResending" (click)="resendVerification()">
+              {{ isResending ? 'Sending' : 'Resend verification email' }}
+            </button>
+          </div>
+        }
+
+        <button type="button" class="google-button" (click)="continueWithGoogle()">
           <img src="assets/images/google_icon.svg" alt="Google_Icon" class="google-icon"/>
           <span>Continue with Google</span>
         </button>
