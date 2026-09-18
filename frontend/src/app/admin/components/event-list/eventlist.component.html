@@ -104,10 +104,12 @@
             <span class = "type-pill">{{event.visibility}}</span>
             <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
             <span class = "dates-cell">{{event.dateRangeLabel}}</span>
+
+
             <div class = "row-actions">
-            <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "expandedEventId === event.eventId" (click) = "toggleEventDetails(event.eventId)">
-              <i class = "pi" [ngClass] = "expandedEventId === event.eventId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
-              {{ expandedEventId === event.eventId ? 'Hide Event' : 'View Event' }}
+            <button type = "button" class = "btn-view-event"  (click) = "openViewEventModal(event)">
+              <i class = "pi pi-external-link"></i>
+              View Event
             </button>
             <button type = "button" class = "btn-view-event btn-participants" (click) = "navigateToParticipants(event.eventId)">
               <i class = "pi pi-users"></i>
@@ -116,30 +118,7 @@
           </div>
           </div>
 
-          @if (expandedEventId === event.eventId){
-            <div class = "event-detail-panel">
-              <div class = "event-detail-tabs">
-                <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'dashboard'" (click) = "setActiveDetailTab('dashboard')">
-                  <i class = "pi pi-th-large"></i> Dashboard
-                </button>
-                <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'live-control'" (click) = "setActiveDetailTab('live-control')">
-                 <i class = "pi pi-bolt"></i> Live Control
-                </button>
-                <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'announcements'" (click) = "setActiveDetailTab('announcements')">
-                  <i class = "pi pi-megaphone"></i> Announcements
-                </button>
-                <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'forum'" (click) = "setActiveDetailTab('forum')">
-                  <i class = "pi pi-comments"></i> Forum
-                </button>
-                <!-- <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'dietary-requirements'" (click) = "setActiveDetailTab('dietary-requirements')">
-                   <i class = "pi pi-user"></i> Dietary Requirements
-                </button> -->
-                <button type = "button" class = "tab-btn" [class.active] = "activeDetailTab === 'manage'" (click) = "setActiveDetailTab('manage')">
-                 <i class = "pi pi-cog"></i> Manage Event
-                </button>
-              </div>
-
-
+       
               <div class = "event-detail-body">
                 @if (activeDetailTab === 'dashboard'){
                   <app-event-dashboard [eventId] = "event.eventId"></app-event-dashboard>
@@ -236,7 +215,7 @@
           }
         </div>
       }
-    }
+    
   </div>
 </main>
 
@@ -246,5 +225,15 @@
     [eventName] = "participantsModalEventName"
     (closed) = "closeParticipantsModal()"
   ></app-participants-modal>
+}
+
+@if (showViewEventModal){
+  <app-view-event-modal
+  [hackathonId] = "viewEventHackathonId"
+  [eventId] = "viewEventEventId"
+  [eventName] = "viewEventName"
+  (closed) = "closeViewEventModal()"
+
+></app-view-event-modal>
 }
 </div>
