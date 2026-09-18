@@ -9,9 +9,7 @@
 }
 
 .content{
-  max-width: none;
-  margin: 0 auto;
-  padding: 0;
+  padding: 24px 32px;
 }
 
 .page-header{
@@ -76,7 +74,7 @@
   background-color: #ffffff;
   border: 1px solid #e7eaf0;
   border-radius: 12px;
-  padding: 20px 22px;
+  padding: 18px 22px;
   margin-bottom: 16px;
   box-shadow: 0 1px 2px rgba(19,25,45,0.04);
 }
@@ -425,26 +423,6 @@
   
 }
 
-.back-navigation {
-    margin-bottom: 16px;
-}
-
-.back-btn{
-    background: none;
-    border: none;
-    color:#1983c2;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    padding:8px 0 ;
-    font-family: inherit;
-    transition: color 0.15s;
-
-    &:hover {
-        color:#146a9d;
-        text-decoration: underline;
-    }
-}
 
 @media (max-width : 600px){
   .form-row {
