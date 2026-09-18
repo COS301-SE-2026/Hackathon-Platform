@@ -3,14 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
-import { EventService, EventResponse, EventRegistrationSummary } from '../../../services/event.service';
+import { EventService, EventResponse } from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
-import { EventDashboardComponent } from '../event-dashboard/event-dashboard.component';
-import { AnnouncementsComponent } from '../announcements/announcements.component';
-import { ForumComponent } from '../forum/forum.component';
-import { LiveControlComponent } from '../live-control/live-control.component';
-import { ManageEventComponent } from '../manage-event/manage-event.component';
+import { ViewEventModalComponent } from '../view-event-modal/view-event-modal.component';
+
+
 interface EventRow {
   eventId : string;
   hackathonId: string;
@@ -21,14 +19,14 @@ interface EventRow {
   statusClass: 'live' | 'upcoming' | 'completed' | 'canceled'| 'ended';
   dateRangeLabel: string;
 }
-type EventDetailTab = 'dashboard' | 'live-control' | 'announcements' | 'forum' | 'registrations' | 'manage';
+
 
 @Component({
   selector: 'app-eventlist',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent, EventDashboardComponent,AnnouncementsComponent,ForumComponent, LiveControlComponent,ManageEventComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent, ViewEventModalComponent],
+  styleUrls: ['./eventlist.component.scss'],
   templateUrl: './eventlist.component.html',
-  styleUrls: ['./eventlist.component.scss']
 })
 export class EventlistComponent implements OnInit {
   private readonly levelService = inject(LevelService);
@@ -41,6 +39,12 @@ export class EventlistComponent implements OnInit {
   showParticipantsModal = false;
   participantsModalEventId: string | null = null;
   participantsModalEventName = '';
+
+  showViewEventModal = false;
+  viewEventHackathonId = '';
+  viewEventEventId: string | null = null;
+  viewEventName = '';
+
 
   hackathonId = '';
   isHackathonScoped = false;
@@ -55,12 +59,6 @@ export class EventlistComponent implements OnInit {
   searchTerm = '';
   statusFilter = 'ALL';
 
-  expandedEventId: string | null = null;
-  activeDetailTab: EventDetailTab = 'dashboard';
-  registrationsByEvent: Record<string, EventRegistrationSummary> = {};
-  registrationsLoading: Record<string, boolean> = {};
-  registrationsError: Record<string, string> = {};
-  exportingResults: Record<string, boolean> = {};
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
@@ -111,7 +109,6 @@ export class EventlistComponent implements OnInit {
         this.events = events.map((e) => this.toEventRow(e));
         this.applyFilter();
         this.isLoading = false;
-        this.expandEventFromQueryParam();
         this.change.markForCheck();
       },
       error: (error) => {
@@ -123,13 +120,6 @@ export class EventlistComponent implements OnInit {
     });
   }
 
-  private expandEventFromQueryParam(): void {
-    const eventId = this.route.snapshot.queryParamMap.get('eventId');
-    if (eventId && this.events.some(e => e.eventId === eventId)){
-      this.expandedEventId = eventId;
-      this.activeDetailTab = 'dashboard';
-    }
-  }
  applyFilter(): void {
   const term = this.searchTerm.trim().toLowerCase();
   const status = this.statusFilter;
@@ -230,64 +220,6 @@ export class EventlistComponent implements OnInit {
   }
 
 
-  toggleEventDetails(eventId: string): void {
-    if(this.expandedEventId === eventId){
-      this.expandedEventId = null;
-      return;
-    }
-    this.expandedEventId = eventId;
-    this.activeDetailTab = 'dashboard';
-  }
-
-  setActiveDetailTab(tab: EventDetailTab): void{
-    this.activeDetailTab = tab;
-    if (tab === 'registrations' && this.expandedEventId && !this.registrationsByEvent[this.expandedEventId]){
-      this.loadRegistrations(this.expandedEventId);
-    }
-
-  }
-  private loadRegistrations(eventId: string): void {
-    this.registrationsLoading[eventId] = true;
-    this.registrationsError[eventId] ='';
-
-    this.eventService.getEventRegistrations(eventId).subscribe({
-      next: (summary) =>{
-        this.registrationsByEvent[eventId] = summary;
-      this.registrationsLoading[eventId] = false;
-      this.change.markForCheck();
-      },
-      error:(error) =>{
-        console.error('Failed to load registrations for event',eventId,error);
-        this.registrationsError[eventId] = 'Could not load registered teams and participants.';
-        this.registrationsLoading[eventId] = false;
-        this.change.markForCheck();
-      }
-    });
-  }
-
-  downloadResults(eventId: string, eventName:string): void{
-    this.exportingResults[eventId] = true;
-
-    this.eventService.downloadEventResults(eventId).subscribe(
-      {
-        next: (blob) =>{
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href =url;
-          link.download = `${eventName || 'event'}-results.xlsx`;
-          link.click();
-          window.URL.revokeObjectURL(url);
-          this.exportingResults[eventId] = false;
-          this.change.markForCheck();
-        },
-        error: (error) =>{
-          console.error('Failed to export results for event', eventId, error);
-          this.exportingResults[eventId] =false;
-          this.change.markForCheck();
-        }
-  });
-  }
-
   navigateToParticipants(eventId: string): void {
     const event = this.events.find(e => e.eventId === eventId);
     this.participantsModalEventId = eventId;
@@ -298,5 +230,18 @@ export class EventlistComponent implements OnInit {
   closeParticipantsModal(): void {
     this.showParticipantsModal = false;
     this.participantsModalEventId = null;
+  }
+
+  openViewEventModal(event: EventRow): void {
+    this.viewEventHackathonId = event.hackathonId;
+    this.viewEventEventId = event.eventId;
+    this.viewEventName = event.name;
+    this.showViewEventModal = true;
+
+  }
+
+  closeViewEventModal(): void {
+    this.showViewEventModal = false;
+    this.viewEventEventId = null; 
   }
 }
