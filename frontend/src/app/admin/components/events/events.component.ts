@@ -191,7 +191,7 @@ export class EventsComponent implements OnInit {
     this.router.navigate(['/admin/hackathons',this.hackathonId,'events','create']);
   }
     navigateToEvent(eventId: string): void {
-    this.router.navigate(['/admin/hackathons',this.hackathonId,'events',eventId]);
+    this.router.navigate(['/admin/events'],{queryParams:{eventId}});
   }
 
 }

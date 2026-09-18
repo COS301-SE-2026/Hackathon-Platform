@@ -111,6 +111,7 @@ export class EventlistComponent implements OnInit {
         this.events = events.map((e) => this.toEventRow(e));
         this.applyFilter();
         this.isLoading = false;
+        this.expandEventFromQueryParam();
         this.change.markForCheck();
       },
       error: (error) => {
@@ -120,6 +121,14 @@ export class EventlistComponent implements OnInit {
         this.change.markForCheck();
       }
     });
+  }
+
+  private expandEventFromQueryParam(): void {
+    const eventId = this.route.snapshot.queryParamMap.get('eventId');
+    if (eventId && this.events.some(e => e.eventId === eventId)){
+      this.expandedEventId = eventId;
+      this.activeDetailTab = 'dashboard';
+    }
   }
  applyFilter(): void {
   const term = this.searchTerm.trim().toLowerCase();
