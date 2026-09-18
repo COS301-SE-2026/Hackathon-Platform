@@ -1,4 +1,3 @@
-#this auto deploys to azure
 name: CD
 
 on:
@@ -6,100 +5,58 @@ on:
     branches: [main]
   workflow_dispatch:
 
+
 concurrency:
   group: cd-production
   cancel-in-progress: false
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
-  REGISTRY: hackathonplatformacr.azurecr.io
-  RESOURCE_GROUP: hackathon-platform-rg
+  AWS_REGION: af-south-1
+
+  AWS_ROLE_ARN: arn:aws:iam::810876576740:role/GitHubActions-HackathonPlatform-Deploy
+
+  ECR_REPOSITORY: hackathon-backend
+
+  ECS_CLUSTER: hackathon-platform-cluster
+  ECS_SERVICE: hackathon-backend-service
+  ECS_TASK_DEFINITION_FAMILY: hackathon-backend
+  ECS_CONTAINER_NAME: backend
+
+  S3_BUCKET: hackathon-platform-frontend-810876576740
+  CLOUDFRONT_DISTRIBUTION_ID: E1XXY169KIIHU7
 
 jobs:
-  build-and-push:
-    name: Build and Push
+
+  build-backend:
+    name: Build Backend
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
     outputs:
-      image-tag: ${{ steps.tag.outputs.tag }}
+      image: ${{ steps.image.outputs.image }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Log In
-        uses: azure/docker-login@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
         with:
-          login-server: ${{ env.REGISTRY }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-CD
 
-      - name: Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-          driver-opts: network=host
-          use: true
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Compute image tag
-        id: tag
-        run: echo "tag=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-
-      - name: Build and push(backend)
-        uses: docker/build-push-action@v6
-        with:
-          context: backend
-          file: docker/backend.Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/backend:${{ steps.tag.outputs.tag }}
-            ${{ env.REGISTRY }}/backend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push(frontend)
-        uses: docker/build-push-action@v6
-        with:
-          context: frontend
-          file: docker/frontend.Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/frontend:${{ steps.tag.outputs.tag }}
-            ${{ env.REGISTRY }}/frontend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  deploy:
-    name: Deploy to Azure container
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: build-and-push
-    environment: production
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Deploy backend
-        uses: azure/container-apps-deploy-action@v2
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: hackathon-backend
-          imageToDeploy: ${{ env.REGISTRY }}/backend:${{ needs.build-and-push.outputs.image-tag }}
-
-      - name: Deploy frontend
-        uses: azure/container-apps-deploy-action@v2
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: hackathon-frontend
-          imageToDeploy: ${{ env.REGISTRY }}/frontend:${{ needs.build-and-push.outputs.image-tag }}
-
-      - name: Check health after deploy
+      - name: Set image
+        id: image
+        shell: bash
         run: |
-          sleep 20
-          BACKEND_URL=$(az containerapp show --name hackathon-backend \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query properties.configuration.ingress.fqdn -o tsv)
-          curl -f "https://${BACKEND_URL}/actuator/health" || exit 1
+          IMAGE="${{ steps.ecr.outputs.registry }}/${ECR_REPOSITORY}:${GITHUB_SHA}"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
