@@ -5,11 +5,16 @@
       <h1>Verifying your email</h1>
       <p>Please give us a few moments to verify your email address. Thank you.</p>
     } @else if (verified) {
-      <h1>Verification link unavailable</h1>
+      <h1>Email verification complete</h1>
+      <p>Your email address was verified successfully</p>
+    } @else if (errorMessage) {
+      <h1>Verification failed</h1>
       <p>{{ errorMessage }}</p>
 
-      @if (email) {
-        <app-button variant="primary" type="button" width="100%" [disabled]="isResending" (click)="resendVerification()">{{ isResending ? 'Sending' : 'Send me a new verification link' }}</app-button>
+      @if (email){
+        <app-button variant="primary" type="button" width="100%" [disabled]="isResending" (click)="resendVerification()">
+          {{ isResending ? 'Sending' : 'Send me a new link' }}
+        </app-button>
       }
 
       <p class="back-link">
@@ -19,19 +24,21 @@
       <h1>Check your email</h1>
       <p>
         We sent a verification link to
-        @if (email) {
-          <strong>{{ email }}</strong>
+        @if (email){
+          <string>{{ email }}</string>
         } @else {
           your email address
         }
       </p>
-
-      <p>Click the link in the email to verify your account and finish signing in.</p>
+      <p>
+        Click the link in the email to verify your email
+      </p>
 
       @if (email) {
-        <app-button variant="primary" type="button" width="100%" [disabled]="isResending" (click)="resendVerification()">{{ isResending ? 'Sending' : 'Resend verification email' }}</app-button>
+        <app-button variant="primary" type="button" width="100%" [disabled]="isResending" (click)="resendVerification()">
+          {{ isResending ? 'Sending' : 'Resend verification email' }}
+        </app-button>
       }
-
       <p class="back-link">
         Already verified?
         <a routerLink="/login">Log in</a>
