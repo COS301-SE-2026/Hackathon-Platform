@@ -8,8 +8,9 @@ import { AnnouncementsComponent } from "../announcements/announcements.component
 import { ForumComponent} from "../forum/forum.component";
 import { TeamsComponent } from "../teams/teams.component";
 import { ManageEventComponent } from "../manage-event/manage-event.component";
+import { DietaryRequirementsComponent } from "../dietary-requirements/dietary-requirements.component";
 
-type ViewEventTab = | 'dashboard' | 'live-control' | 'announcements' | 'forum' |'teams' |'manage';
+type ViewEventTab = | 'dashboard' | 'live-control' | 'announcements' | 'forum' |'teams' |'dietary'|'manage';
 
 @Component({
     selector: 'app-view-event-modal',
@@ -21,6 +22,7 @@ type ViewEventTab = | 'dashboard' | 'live-control' | 'announcements' | 'forum' |
         AnnouncementsComponent,
         ForumComponent,
         TeamsComponent,
+        DietaryRequirementsComponent,
         ManageEventComponent
     ],
     templateUrl: './view-event-modal.component.html',
