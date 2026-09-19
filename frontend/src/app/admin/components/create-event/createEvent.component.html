@@ -39,10 +39,10 @@
             (keyup.enter) = "triggerFileInput('banner')" (keyup.space) = "triggerFileInput('banner')"
             (dragover) = "onDragOver($event)" (drop)="onDrop($event, 'banner')" type="button">
 
-          <input  #fileInput id = "bannerFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg" (change) = "onFileSelected($event, 'banner')"/>
+          <input  #fileInput id = "bannerFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg,image/webp" (change) = "onFileSelected($event, 'banner')"/>
           <span class = "drop-zone-icon-lg"><i class = "pi pi-image"></i></span>
           <p><span class = "drop-zone-cta">Click to upload</span> or drag and drop</p>
-          <p class = "drop-zone-hint">PNG,JPG or JPEG</p>
+          <p class = "drop-zone-hint">PNG, JPG, JPEG or Webp</p>
           @if (form.bannerFileName){
             <p class = "drop-zone-filename">{{form.bannerFileName}}</p>
           }
@@ -56,10 +56,10 @@
             (keyup.enter) = "triggerFileInput('logo')" (keyup.space) = "triggerFileInput('logo')"
             (dragover) = "onDragOver($event)" (drop)="onDrop($event, 'logo')" type="button">
 
-          <input  #logoFileInput id = "logoFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg" (change) = "onFileSelected($event,'logo')"/>
+          <input  #logoFileInput id = "logoFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg,image/webp" (change) = "onFileSelected($event,'logo')"/>
           <span class = "drop-zone-icon-lg"><i class = "pi pi-image"></i></span>
           <p><span class = "drop-zone-cta">Click to upload</span> or drag and drop</p>
-          <p class = "drop-zone-hint">PNG,JPG or JPEG</p>
+          <p class = "drop-zone-hint">PNG, JPG, JPEG or Webp</p>
           @if (form.logoFileName){
             <p class = "drop-zone-filename">{{form.logoFileName}}</p>
           }
