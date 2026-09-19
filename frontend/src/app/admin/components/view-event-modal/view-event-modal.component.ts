@@ -6,10 +6,10 @@ import { EventDashboardComponent } from "../event-dashboard/event-dashboard.comp
 import { LiveControlComponent } from "../live-control/live-control.component";
 import { AnnouncementsComponent } from "../announcements/announcements.component";
 import { ForumComponent} from "../forum/forum.component";
-import { ParticipantsModalComponent } from "../participants-modal/participants-modal.component";
+import { TeamsComponent } from "../teams/teams.component";
 import { ManageEventComponent } from "../manage-event/manage-event.component";
 
-type ViewEventTab = | 'dashboard' | 'live-control' | 'announcements' | 'forum' |'participants' |'manage';
+type ViewEventTab = | 'dashboard' | 'live-control' | 'announcements' | 'forum' |'teams' |'manage';
 
 @Component({
     selector: 'app-view-event-modal',
@@ -20,7 +20,7 @@ type ViewEventTab = | 'dashboard' | 'live-control' | 'announcements' | 'forum' |
         LiveControlComponent,
         AnnouncementsComponent,
         ForumComponent,
-        ParticipantsModalComponent,
+        TeamsComponent,
         ManageEventComponent
     ],
     templateUrl: './view-event-modal.component.html',

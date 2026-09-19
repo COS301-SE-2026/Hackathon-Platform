@@ -55,8 +55,8 @@
     <button type="button" class = "tab-btn" [class.active] = "activeTab === 'forum'" (click)="setActiveTab('forum')">
         <i class = "pi pi-comments"></i> Forum
     </button>
-    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'participants'" (click)="setActiveTab('participants')">
-        <i class = "pi pi-users"></i> Participants
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'teams'" (click)="setActiveTab('teams')">
+        <i class = "pi pi-users"></i> Teams
     </button>
     <button type="button" class = "tab-btn" [class.active] = "activeTab === 'manage'" (click)="setActiveTab('manage')">
         <i class = "pi pi-cog"></i> Manage Event
@@ -66,14 +66,19 @@
 <div class = "modal-body">
     @if (activeTab === 'dashboard'){
         <app-event-dashboard [eventId] = "eventId || ''"></app-event-dashboard>
+
     } @else if (activeTab === 'live-control'){
         <app-live-control [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-live-control>
+
     } @else if (activeTab === 'announcements'){
         <app-announcements [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-announcements>
+
         } @else if (activeTab === 'forum'){
         <app-forum [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-forum>
-    <!-- }@else  @if (activeTab === 'Participants'){
-        <app-event-dashboard [eventId] = "eventId || ''"></app-event-dashboard> -->
+        
+    }@else if (activeTab === 'teams'){
+        <app-teams [eventId] = "eventId || ''"></app-teams>
+
     } @else if (activeTab === 'manage'){
         <app-manage-event [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-manage-event>
     }
