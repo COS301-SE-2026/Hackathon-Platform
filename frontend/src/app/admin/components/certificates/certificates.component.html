@@ -1,0 +1,86 @@
+<div class="certificates-page">
+
+  <div class="back-navigation">
+    <button class="back-btn" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i> Back to Events
+    </button>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <h1>Certificates</h1>
+      <p class="page-subtitle">{{ event?.name || 'Loading event' }}</p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading">Loading</div>
+  } @else {
+
+    @if (errorMessage) {
+      <div class="error-message"></div>
+    }
+    @if (successMessage) {
+      <div class="success-message">{{ successMessage }}</div>
+    }
+
+    <div class="certificate-layout">
+
+      <aside class="template-sidebar">
+        <div class="sidebar-header">
+          <h3>Templates</h3>
+          <button class="btn-secondary btn-sm" (click)="startNewTemplate()">
+            <i class="pi pi-plus"></i> New
+          </button>
+        </div>
+        <ul class="template-list">
+          @for (t of templates; track t.templateId) {
+            <li [class.active]="selectedTemplateId === t.templateId" (click)="selectTemplate(t.templateId)">
+              {{ t.name }}
+            </li>
+          }
+          @if (templates.length === 0) {
+            <li class="empty">No templates yet, make your first design to get started.</li>
+          }
+        </ul>
+      </aside>
+
+      <section class="designer-section">
+        <div class="designer-toolbar">
+          <imput class="template-name-input" type="text" [(ngModel)]="templateName" placeholder="Template name"/>
+          <div class="toolbar-actions">
+            <label class="btn-secondary btn-sm file-upload-btn">
+              <input type="file" accepts="image/*" (change)="onBackgroundSelected($event)" hidden/>
+            </label>
+            <button class="btn-primary btn-sm" (click)="saveTemplate()" [disabled]="isSaving">
+              {{ isSaving ? 'Saving' : 'Save Template' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="designer-palatte">
+          <button class="btn-secondary btn-sm" (click)="addTextElement(true)">
+            <i class="pi pi-user"></i> Bound Field
+          </button>
+          <button class="btn-secondary btn-sm" (click)="addTextElement(false)">
+            <i class="pi pi-align-left"></i> Static Label
+          </button>
+          <button class="btn-secondary btn-sm" (click)="addQrElement()">
+            <i class="pi pi-qrcode"></i> Qr Code
+          </button>
+          <label class="btn-secondary btn-sm file-upload-btn">
+            <i class="pi pi-image"></i>{{ isUploadingAsset ? 'Uploading' : 'Image/Signiture' }}
+            <input type="file" accept="image/*" (change)="onImageFileSelected($event)" [disabled]="isUploadingAsset" hidden/>
+          </label>
+          @if (selectedElementIndex !== null) {
+            <button class="btn-danger btn-sm" (click)="deleteSelectedElement()">
+              <i class="pi pi-trash"></i> Delete Selected
+            </button>
+          }
+        </div>
+
+
+      </section>
+    </div>
+  }
+</div>
