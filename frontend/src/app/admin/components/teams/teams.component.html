@@ -1,0 +1,211 @@
+<div class = "teams-page">
+    <main class = "content">
+        <div class = "page-header">
+            <div>
+                <h2>Teams</h2>
+                <p class = "page-subtitle">Create and manage the teams participating in this event.</p>
+            </div>
+            <button type = "button" class = "btn-create-team" (click) = "openCreateTeamModal()">
+                + Create Team
+            </button>
+        </div>
+
+        <div class = "toolbar">
+            <div class = "search-box">
+                <i class = "pi pi-search search-icon"></i>
+                <input type = "text"
+                placeholder="Search teams..."
+                aria-label="Search teams"
+                [(ngModel)] = "searchTerm"
+                name = "searchTerm"/>
+            </div>
+        </div>
+
+        @if (errorMessage){
+            <div class = "error-banner">{{ errorMessage }}</div>
+         }
+         <div class = "team-list">
+            @if (isLoading){
+                <div class = "empty-state">Loading...</div>
+            }@else if (filteredTeams.length === 0){
+                <div class = "empty-state">No teams found.</div>
+            }@else{
+                @for (team of filteredTeams; track team.teamId){
+                    <div class = "team-card">
+                        <div class = "team-row">
+                            <div class = "team-name-cell">
+                                <span class = "team-avatar">{{team.name.charAt(0)}}</span>
+                                <div class = "team-meta">
+                                    <div class = "team-title-row">
+                                        <span class = "team-title">{{team.name}}</span>
+                                        <span class = "status-tag" [ngClass] = "team.status === 'banned' ? 'status-tag-banned' : 'status-tag-active'">{{team.status === 'banned' ? 'Banned' : 'Active'}}</span>
+                                    </div>
+                                    <p class = "team-subline">
+                                        {{team.members.length}} member{{team.members.length === 1 ? '' : 's'}} &middot; Created {{team.createdAtLabel}}
+                                    </p>
+                                </div>
+                            </div>
+
+            <div class  = "team-row-actions">
+                <button
+                type ="button"
+                class = "btn-delete-team"
+                (click) = "deleteTeam(team.teamId)"
+                aria-label = "Delete team">
+                <i class = "pi pi-trash"></i>
+            </button>
+            <button
+            type="button"
+            class = "btn-view-team"
+            [class.btn-view-team-active] = "expandedTeamId === team.teamId"
+            [attr.aria-expanded]= "expandedTeamId === team.teamId"
+            (click) = "toggleTeam(team.teamId)">
+            {{expandedTeamId === team.teamId ? 'Hide Team' : 'View Team'}}
+            <i class = "pi" [ngClass] = "expandedTeamId === team.teamId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+           </button>
+             </div>
+            </div>
+
+            @if (expandedTeamId === team.teamId){
+                <div class = "team-panel">
+                    @if (team.members.length > 0){
+                        <div class = "member-list-wrap">
+                            <div class = "member-list">
+                                @for (member of team.members; track member.memberId){
+                                    <div class = "member-card" [class.member-card-banned] = "member.isBanned">
+                                        <div class = "member-header">
+                                            <div class = "member-author">
+                                                <span class = "member-avatar">{{member.initial}}</span>
+                                                <div>
+                                                    <span class = "member-name">{{member.name}}</span>
+                                                    <span class = "role-tag" [ngClass] = "member.isLeader ? 'role-tag-admin' : 'role-tag-participant'">{{member.isLeader ? 'Leader' : 'Member'}}</span>
+                                                    @if (member.isBanned){
+                                                        <span class = "role-tag role-tag-banned">Banned</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class = "member-header-right">
+                                                <span class = "member-timestamp">Joined {{member.joinedAtLabel}}</span>
+                                                <button
+                                                type ="button"
+                                                class = "btn-ban"
+                                                [class.btn-unban] = "member.isBanned"
+                                                (click) = "toggleBan(team.teamId, member.memberId)"> 
+                                                {{member.isBanned ? 'Unban' : 'Ban'}}
+                                            </button>
+                                             <button
+                                                type ="button"
+                                                class = "member-delete-btn"
+                                                (click) = "removeMember(team.teamId, member.memberId)"
+                                                aria-label = "Remove member">
+                                                <i class = "pi pi-times"></i>
+                                            </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    } @else {
+                        <p class = "member-empty">No members yet.</p>
+                    }
+                    <div class = "member-add-row">
+                        <input 
+                        type ="text"
+                        [(ngModel)] = "memberNameDrafts[team.teamId]"
+                        name = "memberName{{team.teamId}}"
+                        placeholder="Participant name"
+                        autocomplete = "off"/>
+                        <input 
+                        type ="email"
+                        [(ngModel)] = "memberEmailDrafts[team.teamId]"
+                        name = "memberEmail{{team.teamId}}"
+                        placeholder="Email"
+                        autocomplete = "off"/>
+                        <button
+                        type ="button"
+                        class = "btn-add-member"
+                        [disabled] = "!memberNameDrafts[team.teamId]?.trim()"
+                        (click) = "addMember(team.teamId)">
+                        Add Member
+                    </button>
+                    </div>
+                </div>
+            }
+             </div>
+                }
+            }
+         </div>
+
+
+    </main>
+</div>
+
+@if (showCreateTeamModal){
+    <div class = "create-team-backdrop" (click) = "closeCreateTeamModal()">
+        <div class = "create-team-panel" role = "dialog" aria-modal = "true" (click) = "$event.stopPropagation()">
+            <div class = "create-team-header">
+                <h3>Create Team</h3>
+                <button type = "button" class = "create-team-close-btn" (click) = "closeCreateTeamModal()" aria-label = "Close">
+                    <i class = "pi pi-times"></i>
+                </button>
+            </div>
+
+            <label for = "newTeamName" class = "create-team-label">Team name</label>
+            <input 
+            type = "text"
+            id = "newTeamName"
+            [(ngModel)] = "newTeamName"
+            name = "newTeamName"
+            placeholder="e.g. Byte Busters"
+            autocomplete="off"/>
+
+            <label class = "create-team-label create-team-label-spaced">Add participants (optional)</label>
+
+            <div class = "member-entry-row">
+                <input 
+                        type ="text"
+                        [(ngModel)] = "newMemberName"
+                        name = "newMemberName"
+                        placeholder="Participant name"
+                        autocomplete = "off"/>
+                        <input 
+                        type ="email"
+                        [(ngModel)] = "newMemberEmail"
+                        name = "newMemberEmail"
+                        placeholder="Email"
+                        autocomplete = "off"/>
+                        <button
+                        type ="button"
+                        class = "btn-add-pending"
+                        [disabled] = "!newMemberName.trim()"
+                        (click) = "addPendingMember()"
+                        aria-label = "Add participant">
+                        <i class = "pi pi-plus"></i>
+                    </button>
+            </div>
+            @if (pendingMembers.length > 0){
+                <div class = "pending-member-list">
+                    @for (member of pendingMembers; track $index){
+                        <div class = "pending-member-row">
+                            <span class = "member-avatar">{{member.name.charAt(0).toUpperCase()}}</span>
+                            <div class = "pending-member-text">
+                                <span class = "pending-member-name">{{member.name}}</span>
+                                @if (member.email){
+                                    <span class = "pending-member-email">{{member.email}}</span>
+                                }
+                            </div>
+                            <button type ="button" class = "pending-member-remove" (click)="removePendingMember($index)" aria-label = "Remove {{member.name}}">
+                                <i class = "pi pi-times"></i>
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+            <div class = "create-team-actions">
+                <button type ="button" class = "btn-cancel" (click) = "closeCreateTeamModal()">Cancel</button>
+                <button type ="button" class = "btn-confirm-create" [disabled] = "!newTeamName.trim()" (click) = "createTeam()">Create Team</button>
+            </div>
+        </div>
+    </div>
+}
