@@ -36,6 +36,21 @@ export class EventShellComponent implements OnInit{
           
       }
 
+      get statusLabel(): 'Live' | 'Upcoming' | 'Ended' | '' {
+        if (!this.event) return '';
+
+        const start = new Date(this.event.startDateTime);
+        if (Number.isNaN(start.getTime())) return '';
+
+        const end = new Date(start.getTime() + Number(this.event.duration || 0) * 60 * 60 * 1000);
+        const now = Date.now();
+
+        if (now< start.getTime()) return 'Upcoming';
+        if (now< end.getTime()) return 'Live';
+        return 'Ended';
+
+      }
+
       private loadEvent(): void {
         this.eventService.getEvent(this.eventId).subscribe({
             next: (event: EventResponse) => {
