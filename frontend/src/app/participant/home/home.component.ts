@@ -67,9 +67,14 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadRegisteredEvents();
-    this.loadUpcomingEvents();
-    this.loadCompletedEvents();
-    
+
+  }
+
+  onEventTabChange(tab: string): void {
+    this.activeEventTab = tab;
+    if (tab === 'your-events') { this.loadRegisteredEvents();} 
+    else if (tab === 'upcoming') { this.loadUpcomingEvents();}
+    else if (tab === 'completed') {this.loadCompletedEvents();}
   }
 
   private loadEventLogos(events: OpenEventView[]): void {
