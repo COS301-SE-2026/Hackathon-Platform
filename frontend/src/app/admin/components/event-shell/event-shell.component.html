@@ -1,47 +1,27 @@
 <div class = "event-shell-page">
  
   
-     <div class = "back-navigation">
-       <button class = "back-btn" (click) = "goBackToEvents()">
-        <i class = "pi pi-arrow-left"></i> Back to Events
-      </button>
-     </div>
-      
-    <div class = "event-header-card">
-      <div>
-        <h1>{{ event?.name || 'Loading...'}}</h1>
-        <p class = "event-description">{{event?.description || ''}}</p>
-      </div>
+    <header class = "event-bar-wrap">
+      <div class = "event-bar">
 
-      <div>
-        <div class = "event-stats">
-        <div class = "stat">
-          <i class = "pi pi-calendar"></i>
-          <div>
-            <p class = "stat-value">{{teamsCount}}</p>
-            <p class = "stat-label">Teams</p>
+        <div class = "event-bar-top">
+          <div class="event-title-group">
+            <button type="button" class = "back-btn" (click) = "goBackToEvents()" aria-label="Back to events" title="Back to events">
+              <i class = "pi pi-arrow-left"></i>
+            </button>
+            <h1 class = "event-title" [title] = "event?.description || ''">{{event?.name || 'Loading...'}}</h1>
+            @if (statusLabel){
+              <span class = "status-pill" [ngClass] = "statusLabel.toLowerCase()">{{statusLabel}}</span>
+            }
+          </div>
+          <div class = "event-stats">
+            <span class = "stat"><strong>{{teamsCount}}</strong> teams</span>
+            <span class = "stat"><strong>{{participantsCount}}</strong> participants</span>
+            <span class = "stat"><strong>{{submissionsCount}}</strong> submissions</span>
           </div>
         </div>
-          <div class = "stat">
-          <i class = "pi pi-user"></i>
-          <div>
-            <p class = "stat-value">{{participantsCount}}</p>
-            <p class = "stat-label">Participants</p>
-          </div>
-          </div>
-           <div class = "stat">
-          <i class = "pi pi-code"></i>
-          <div>
-            <p class = "stat-value">{{submissionsCount}}</p>
-            <p class = "stat-label">Submissions</p>
-          </div>
-          </div>
-
-    </div>
-    </div>
-    </div>
-
-    <div class = "event-tabs">
+    
+    <nav class = "event-tabs">
        <a [routerLink]="['/admin/hackathons', hackathonId, 'events', eventId, 'dashboard']" routerLinkActive="active">
       <i class="pi pi-th-large"></i> Dashboard
     </a>
@@ -65,7 +45,9 @@
     </a>
 
       
-</div>
+  </nav>
+      </div>
+    </header>
 
 <main class = "content">
     <router-outlet></router-outlet>
