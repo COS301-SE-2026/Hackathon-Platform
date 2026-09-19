@@ -58,6 +58,9 @@
     <button type="button" class = "tab-btn" [class.active] = "activeTab === 'teams'" (click)="setActiveTab('teams')">
         <i class = "pi pi-users"></i> Teams
     </button>
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'dietary'" (click)="setActiveTab('dietary')">
+        <i class = "pi pi-apple"></i> Dietary Requirements
+    </button>
     <button type="button" class = "tab-btn" [class.active] = "activeTab === 'manage'" (click)="setActiveTab('manage')">
         <i class = "pi pi-cog"></i> Manage Event
     </button>
@@ -78,6 +81,9 @@
         
     }@else if (activeTab === 'teams'){
         <app-teams [eventId] = "eventId || ''"></app-teams>
+
+    }@else if (activeTab === 'dietary'){
+        <app-dietary-requirements [eventId] = "eventId || ''"></app-dietary-requirements>
 
     } @else if (activeTab === 'manage'){
         <app-manage-event [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-manage-event>
