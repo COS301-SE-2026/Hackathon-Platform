@@ -42,12 +42,12 @@ export class HomeComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
 
-  activeTab = 'your-events';
-
+  activeEventTab = 'your-events';
+  
   eventTabs: TabItem[] = [
-  {  label: 'Your Events', route: '/participant/home', queryParams: { tab: 'your-events' } },
-  { label: 'Upcoming Events', route: '/participant/home', queryParams: { tab: 'upcoming' } },
-  { label: 'Completed Events', route: '/participant/home', queryParams: { tab: 'completed' }}
+  { label: 'Registered', value: 'your-events' },
+  { label: 'Upcoming', value: 'upcoming' },
+  { label: 'Completed', value: 'completed' }
   ];
   
   isLoadingEvents = false;

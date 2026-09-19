@@ -9,17 +9,13 @@
 
 </section>
 
-
-
 <div class="page-container">
 
   <div class="events-toolbar">
 
-        <div class="events-tabs">
-         <app-tabs [tabs]="eventTabs" [activeTab]="activeTab"  activeQueryParam="tab" ariaLabel="Event categories"></app-tabs>
-        </div>
-
-        <div class="events-search">
+     <app-tabs [tabs]="eventTabs" [local]="true" [activeLocalTab]="activeEventTab"(localTabChange)="activeEventTab = $event"> </app-tabs>
+        
+     <div class="events-search">
          <app-search-bar placeholder="Search events"></app-search-bar>
         </div>
 
@@ -29,8 +25,47 @@
 
   </div>
 
+  
+  @if (activeEventTab === 'your-events') {
 
+    <section class="events-section">
 
+      <div class="events-grid">
+       @for (event of registeredEvents; track event.eventId) { 
+        <app-event-card [event]="event" type="registered" (goToEvent)="goToEvent($event)"> </app-event-card>
+      }
+      </div>
+
+    </section>
+
+  } @else if (activeEventTab === 'upcoming') {
+
+    <section class="events-section">
+
+      <div class="events-grid">
+
+        @for (event of upcomingEvents; track event.eventId) {
+        <app-event-card [event]="event" type="upcoming" (goToEvent)="goToEvent($event)"></app-event-card>
+        }
+
+      </div>
+
+    </section>
+
+  } 
+  @else if (activeEventTab === 'completed') {
+
+    <section class="events-section">
+
+      <div class="events-grid">
+        @for (event of completedEvents; track event.eventId) {
+        <app-event-card [event]="event" type="completed" (goToEvent)="goToEvent($event)"></app-event-card>
+        }
+      </div>
+
+    </section>
+
+  }
 
 
 </div>
