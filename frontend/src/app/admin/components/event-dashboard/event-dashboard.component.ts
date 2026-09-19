@@ -1,10 +1,11 @@
 import { ChangeDetectorRef, Component, OnInit,inject, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { ActivatedRoute } from "@angular/router";
-
+import { CdkDragDrop, DragDropModule, moveItemInArray } from "@angular/cdk/drag-drop";
 import { EventParticipantResponse,EventService } from "../../../services/event.service";
 import { EventInsightsResponse,InsightsService } from "../../../services/insights.service";
 import { LeaderboardEntry, LeaderboardService } from "../../../services/leaderboard.service";
+
 
 interface ParticipantRow {
     initials: string;
@@ -13,13 +14,15 @@ interface ParticipantRow {
     team: string;
 }
 
-interface SubmissionStatusSegment {
-    label: string;
-    count: number;
-    percent: number;
-    offset: number;
-    colorClass: string;
+interface SubmissionStatusSegment{
+  label: string;
+  count: number;
+  percent: number;
+  offset: number;
+  dash: number;
+  colorClass: string;
 }
+
 
 interface EventInsightsSummary{
     activeTeams: number;
@@ -46,11 +49,19 @@ interface ScoreLevelStat{
   max: number;
   avg: number;
   count: number;
+  minPct: number;
+  rangePct: number;
+  avgPct: number;
 }
+
+export type DashboardBlockId = 'trend' | 'topTeams' | 'status' | 'scores' | 'participants';
+
+const DEFAULT_BLOCKS: DashboardBlockId[] = ['trend','topTeams', 'status','scores','participants'];
+const LAYOUT_STORAGE_KEY = 'hackathon.eventDashboard.layout.v1';
 @Component({
   selector: 'app-event-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DragDropModule],
   templateUrl: './event-dashboard.component.html',
   styleUrls: ['./event-dashboard.component.scss']
 })
@@ -63,6 +74,17 @@ export class EventDashboardComponent implements OnInit{
   private readonly change = inject(ChangeDetectorRef);
 
  @Input() eventId = '';
+
+ blocks: DashboardBlockId[] = [...DEFAULT_BLOCKS];
+ editing = false;
+
+ readonly blockTitles: Record<DashboardBlockId,string> ={
+  trend: 'Submissions per minute',
+  topTeams: 'Top 3 teams',
+  status: 'Submission status',
+  scores: 'Score by level',
+  participants: 'Active participants',
+ };
 
   insightsLoading = false;
   insightsError = '';
@@ -94,7 +116,10 @@ export class EventDashboardComponent implements OnInit{
 
   scoreByLevel: ScoreLevelStat[]=[];
 
+  private readonly chart = {left:44, right: 744, top:14, bottom:160};
+
   ngOnInit(): void {
+    this.loadLayout();
       this.eventId = this.eventId || this.route.parent?.snapshot.paramMap.get('eventId') || '';
 
       if (this.eventId){
@@ -103,6 +128,50 @@ export class EventDashboardComponent implements OnInit{
         this.loadTopTeams(this.eventId);
       }
   }
+  toggleEditing(): void {
+    this.editing = !this.editing;
+  }
+
+  drop(event: CdkDragDrop<DashboardBlockId[]>):void {
+    if (event.previousIndex === event.currentIndex) return;
+    moveItemInArray(this.blocks, event.previousIndex, event.currentIndex);
+    this.saveLayout();
+  }
+
+  resetLayout(): void {
+    this.blocks = [...DEFAULT_BLOCKS];
+    this.saveLayout();
+  }
+
+  private loadLayout(): void {
+    try{
+      const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
+      if (!raw) return;
+
+      const saved:unknown = JSON.parse(raw);
+      if (!Array.isArray(saved)) return;
+
+      const known = saved.filter((id): id is DashboardBlockId => DEFAULT_BLOCKS.includes(id as DashboardBlockId));
+      const unique = Array.from(new Set(known));
+      const missing = DEFAULT_BLOCKS.filter(id => !unique.includes(id));
+      this.blocks = [...unique, ...missing];
+
+
+    }catch {
+      this.blocks = [...DEFAULT_BLOCKS];
+    }
+  }
+
+  private saveLayout(): void {
+    try{
+      localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(this.blocks));
+
+    }catch{
+      //storage unavailable (private mode / quota).
+    }
+  }
+
+
  private loadTopTeams(eventId: string): void {
     this.topTeamsLoading = true;
     this.topTeamsError = '';
@@ -129,7 +198,7 @@ export class EventDashboardComponent implements OnInit{
     this.eventService.getEventParticipants(eventId).subscribe({
       next: participants => {
         this.activeParticipantRows = participants
-          .slice(0, 5)
+          .slice(0,4)
           .map(p => this.toParticipantRow(p));
         this.participantsPreviewLoading = false;
         this.change.markForCheck();
@@ -174,6 +243,7 @@ export class EventDashboardComponent implements OnInit{
       error: () => {
         this.insightsError = 'Could not load insights for this event.';
         this.insightsLoading = false;
+        this.change.markForCheck();
       }
     });
   }
@@ -190,14 +260,25 @@ export class EventDashboardComponent implements OnInit{
     this.submissionsCount = insights.totalSubmissions;
 
     this.submissionStatusSegments =  this.toStatusSegments(insights.submissionsByStatus, insights.totalSubmissions);
-    this.scoreByLevel = insights.scoreDistributionByLevel.map(lvl => ({
-      level: lvl.levelName || `Level ${lvl.levelId}`,
-      min: Number(lvl.minScore ?? 0),
-      max: Number(lvl.maxScore ?? 0),
-      avg: Number(lvl.avgScore ?? 0),
-      count: lvl.scoredSubmissions,
+     const clamp = (n: number) => Math.min(100, Math.max(0, n));
 
-    }));
+
+    this.scoreByLevel = (insights.scoreDistributionByLevel || []).map(lvl => {
+      const min = Number(lvl.minScore ?? 0);
+      const max = Number(lvl.maxScore ?? 0);
+      const avg = Number(lvl.avgScore ?? 0);
+      return{
+        level: lvl.levelName || `Level ${lvl.levelId}`,
+        min,
+        max,
+        avg,
+        count: lvl.scoredSubmissions,
+        minPct: clamp(min),
+        rangePct: Math.max(clamp(max) - clamp(min),1.5),
+        avgPct: clamp(avg),
+      };
+
+    });
 
     const trend = this.toTrendPoints(insights.submissionRate);
     this.submissionTrend =  trend.points;
@@ -209,16 +290,13 @@ export class EventDashboardComponent implements OnInit{
   }
 
   private buildTrendTicks(buckets: {bucketStart: string, count:number} []): void {
-    const chartLeft = 50;
-    const chartRight = 385;
-    const chartTop = 15;
-    const chartBottom = 100;
+    const {left, right, top, bottom} = this.chart;
 
     this.trendMaxCount = Math.max(1, ...buckets.map(b=>b.count));
     this.trendYAxisTicks = [
-      {y: chartBottom, label: '0'},
-      {y: (chartTop + chartBottom)/ 2, label: String(Math.round(this.trendMaxCount / 2))},
-      {y: chartTop, label:String(this.trendMaxCount)},
+      {y: bottom, label: '0'},
+      {y: (top + bottom)/ 2, label: String(Math.round(this.trendMaxCount / 2))},
+      {y: top, label:String(this.trendMaxCount)},
     ];
 
     if (buckets.length ===0){
@@ -228,13 +306,13 @@ export class EventDashboardComponent implements OnInit{
 
     const tickCount = Math.min(5, buckets.length);
     const tickStep = buckets.length > 1 ? (buckets.length - 1) / (tickCount - 1): 0;
-    const xStep = buckets.length > 1 ? (chartRight - chartLeft) / (buckets.length -1 ) : 0;
+    const xStep = buckets.length > 1 ? (right - left) / (buckets.length -1 ) : 0;
 
     this.trendTicks = Array.from({length: tickCount}, (_,i)=>{
       const idx = Math.round(i* tickStep);
       return {
-        x: chartLeft + xStep * idx,
-        y: chartBottom,
+        x: left + xStep * idx,
+        y: bottom,
         label: this.formatBucketTime(buckets[idx]?.bucketStart),
       };
     });
@@ -246,6 +324,7 @@ export class EventDashboardComponent implements OnInit{
     if (Number.isNaN(d.getTime())) return '';
     return d.toLocaleTimeString('en-US', {hour: '2-digit',minute:'2-digit'});
   }
+  private readonly statusOrder = ['SCORED','SCORING','QUEUED','FAILED'];
   private readonly statusColorMap: Record<string, string> = {
     QUEUED: 'seg-solo',
     SCORING: 'seg-small',
@@ -258,17 +337,25 @@ export class EventDashboardComponent implements OnInit{
       return [];
     }
 
+    const rank = (key:string) =>{
+      const i = this.statusOrder.indexOf(key?.toUpperCase());
+      return i === -1 ? 99 : i;
+    }
+
     let offset = 0;
-    return Object.entries(byStatus).map(([label, count]) => {
-      const percent = Math.round((count/total) * 100);
+    return Object.entries(byStatus)
+    .sort(([a], [b]) => rank(a) - rank(b))
+    .map(([label, count]) => {
+      const share = (count/total) * 100;
       const segment: SubmissionStatusSegment = {
         label: this.formatStatus(label),
         count,
-        percent,
+        percent: Math.round(share),
         offset,
+        dash: Math.max(share - (share > 2 ? 1 : 0),0),
         colorClass: this.statusColorMap[label?.toUpperCase()] || 'seg-medium',
       };
-      offset += percent;
+      offset += share;
       return segment;
     });
 
@@ -290,20 +377,17 @@ export class EventDashboardComponent implements OnInit{
     }
 
     const maxCount = Math.max(1, ...buckets.map(b => b.count));
-    const chartLeft = 50;
-    const chartRight = 385;
-    const chartTop = 15;
-    const chartBottom = 100;
-    const step = buckets.length > 1 ? (chartRight - chartLeft) / (buckets.length - 1) : 0;
+    const {left, right, top, bottom} = this.chart;
+    const step = buckets.length > 1 ? (right - left) / (buckets.length - 1) : 0;
 
     const points = buckets.map((bucket, i) => ({
-      x: chartLeft + step * i,
-      y: chartBottom - (bucket.count / maxCount) * (chartBottom - chartTop),
+      x: left + step * i,
+      y: bottom - (bucket.count / maxCount) * (bottom - top),
 
     }));
 
     const polyline = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-    const area = `M${polyline.split(' ').join(' L')} L${points[points.length - 1].x.toFixed(1)},${chartBottom} L${points[0].x.toFixed(1)},${chartBottom} Z`;
+    const area = `M${polyline.split(' ').join(' L')} L${points[points.length - 1].x.toFixed(1)},${bottom} L${points[0].x.toFixed(1)},${bottom} Z`;
 
     return { points, polyline, area };
 
