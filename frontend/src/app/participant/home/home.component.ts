@@ -14,7 +14,6 @@ export interface OpenEventView {
   eventId: string;
   name: string;
   dates: string;
-  teams: number;
   visibility: string;
   status: string;
   teamSizeLimit: number;
@@ -54,9 +53,10 @@ export class HomeComponent implements OnInit {
   isLoadingEvents = false;
   
 
-  activeEvents: OpenEventView[] = [];
+  registeredEvents: OpenEventView[] = [];
   upcomingEvents: OpenEventView[] = [];
   completedEvents: OpenEventView[] = [];
+  isLoadingRegisteredEvents = false;
   isLoadingCompletedEvents = false;
 
 
@@ -65,7 +65,7 @@ export class HomeComponent implements OnInit {
 
 
   ngOnInit(): void {
-   
+    this.loadRegisteredEvents();
     this.loadUpcomingEvents();
     this.loadCompletedEvents();
     
@@ -87,6 +87,50 @@ export class HomeComponent implements OnInit {
      });
   }
 
+
+    loadRegisteredEvents(): void {
+    this.isLoadingRegisteredEvents = true;
+    this.registeredEvents = [];
+
+    this.eventService.getMyRegistrations().subscribe({
+      
+      next: (registrations) => {
+        if (registrations.length === 0) {
+          this.isLoadingRegisteredEvents = false;
+          this.change.markForCheck();
+          return;
+        }
+
+        const eventRequests = registrations.map((registration) =>
+          this.eventService.getEventById(registration.eventId)
+        );
+
+        forkJoin(eventRequests).subscribe({
+          next: (events) => {
+            this.registeredEvents = events
+            .filter((event) => event.status === 'UPCOMING' || event.status === 'ACTIVE')
+              .map((event) => this.toOpenEventView(event))
+              .sort( (a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+            this.loadEventLogos(this.registeredEvents);
+            this.isLoadingRegisteredEvents = false;
+            this.change.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error loading registered events:', error);
+            this.registeredEvents = [];
+            this.isLoadingRegisteredEvents = false;
+            this.change.markForCheck();
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error loading registrations:', error);
+        this.registeredEvents = [];
+        this.isLoadingRegisteredEvents = false;
+        this.change.markForCheck();
+      }
+    });
+  }
 
  loadUpcomingEvents(): void {
   this.isLoadingEvents = true;
@@ -140,7 +184,6 @@ export class HomeComponent implements OnInit {
       eventId: event.eventId,
       name: event.name,
       dates: this.formatEventDates(event.startDateTime, event.duration),
-      teams: 0,
       visibility: event.visibility,
       status: event.status,
       teamSizeLimit: event.teamSizeLimit,
@@ -152,15 +195,25 @@ export class HomeComponent implements OnInit {
       totalPrizePool: event.totalPrizePool,
       inPerson: event.inPerson,
 
-      timer: {
-        label: '',
-        days: '00',
-        hours: '00',
-        minutes: '00',
-        seconds: '00'
-      }
+    
     };
   }
+
+    private formatEventDates(startDateTime: string, durationHours: number): string {
+    const start = new Date(startDateTime);
+    const end = new Date(start.getTime() + durationHours * 1000);
+
+    return `${this.formatShortDate(start)} – ${this.formatShortDate(end)}`;
+  }
+
+  private formatShortDate(date: Date): string {
+    return date.toLocaleDateString('en-ZA', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+
 
   loadCompletedEvents(): void {
     this.isLoadingCompletedEvents = true;
