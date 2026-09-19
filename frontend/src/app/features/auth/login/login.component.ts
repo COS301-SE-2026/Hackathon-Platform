@@ -35,7 +35,7 @@ export class LoginComponent {
         this.isLoading = false;
 
         if(response.role === 'ADMIN'){
-          this.router.navigate(['/admin/dashboard']);
+          this.router.navigate(['/admin/events']);
         } else{
           this.router.navigate(['/participant/home']);
         }
