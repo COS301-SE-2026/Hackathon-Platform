@@ -27,13 +27,6 @@
 
 
             <div class = "navbar-right">
-                <button class = "navbar-notifications" aria-label = "Notifications" (click) = "toggleNotifications()">
-                    <i class = "pi pi-bell"></i>
-                    @if (notificationCount > 0){
-                        <span class = "notification-badge">{{ notificationCount }}</span>
-                    }
-                </button>
-
                 <button class = "navbar-profile" (click) = "toggleProfileMenu()" aria-haspopup="true" [attr.aria-expanded]="isProfileMenuOpen">
                     <div class = "avatar-circle">{{ getInitials() }}</div>
                 <div class = "user-info">
