@@ -53,14 +53,14 @@ export const routes: Routes = [
         path: 'forum',
         loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent),
           },
-        //    {
-        // path: 'participants',
-        // loadComponent: () => import('./admin/components/event-participants/event-participants.component').then(m => m.EventParticipantsComponent),
-        //   },
-        //    {
-        // path: 'manage',
-        // loadComponent: () => import('./admin/components/event-manage/event-manage.component').then(m => m.EventManageComponent),
-        //   },
+           {
+        path: 'teams',
+        loadComponent: () => import('./admin/components/teams/teams.component').then(m => m.TeamsComponent),
+          },
+           {
+        path: 'manage',
+        loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
+          },
            {
         path: '',
         redirectTo: 'dashboard',
