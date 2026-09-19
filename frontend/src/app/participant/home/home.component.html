@@ -13,19 +13,16 @@
 
   <div class="events-toolbar">
 
-     <app-tabs [tabs]="eventTabs" [local]="true" [activeLocalTab]="activeEventTab"(localTabChange)="activeEventTab = $event"> </app-tabs>
+    <app-tabs [tabs]="eventTabs" [local]="true" [activeLocalTab]="activeEventTab"(localTabChange)="activeEventTab = $event"> </app-tabs>
         
-     <div class="events-search">
-         <app-search-bar placeholder="Search events"></app-search-bar>
-        </div>
+    <div class="events-search">
+      <app-search-bar placeholder="Search events" (searchChange)="onSearchChange($event)"></app-search-bar>
+    </div>
 
-        <div class="events-sort">
-         <app-dropdown [options]="['Newest', 'Oldest']" value="Newest" id="event-sort" label="Sort events"></app-dropdown>
-        </div>
+    <app-dropdown [options]="['Soonest', 'Latest']" [value]="sortOption" id="event-sort" label="Sort events" (selectionChange)="onSortChange($event)"></app-dropdown>
 
   </div>
 
-  
   @if (activeEventTab === 'your-events') {
 
     <section class="events-section">

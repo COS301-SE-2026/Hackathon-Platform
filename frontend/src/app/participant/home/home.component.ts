@@ -50,18 +50,19 @@ export class HomeComponent implements OnInit {
   { label: 'Completed', value: 'completed' }
   ];
   
-  isLoadingEvents = false;
-  
 
+
+  filteredRegisteredEvents: OpenEventView[] = [];
+  filteredUpcomingEvents: OpenEventView[] = [];
+  filteredCompletedEvents: OpenEventView[] = [];
   registeredEvents: OpenEventView[] = [];
   upcomingEvents: OpenEventView[] = [];
   completedEvents: OpenEventView[] = [];
-  isLoadingRegisteredEvents = false;
+  isLoadingUpcomingEvents = false;
   isLoadingCompletedEvents = false;
-
-
-
-
+  isLoadingRegisteredEvents = false;
+  searchTerm = '';
+  sortOption = 'Soonest';
 
 
   ngOnInit(): void {
@@ -112,6 +113,7 @@ export class HomeComponent implements OnInit {
               .map((event) => this.toOpenEventView(event))
               .sort( (a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
             this.loadEventLogos(this.registeredEvents);
+            this.applyFilters();
             this.isLoadingRegisteredEvents = false;
             this.change.markForCheck();
           },
@@ -133,28 +135,25 @@ export class HomeComponent implements OnInit {
   }
 
  loadUpcomingEvents(): void {
-  this.isLoadingEvents = true;
-
+  this.isLoadingUpcomingEvents = true;
 
   this.eventService.getOpenEvents().subscribe({
     next: (events) => {
-      this.isLoadingEvents = false;
+      this.isLoadingUpcomingEvents = false;
 
       this.upcomingEvents = events
+      .filter(event => event.status === 'UPCOMING')
         .map((event) => this.toOpenEventView(event))
-        .sort(
-          (a, b) =>
-            new Date(a.startDateTime).getTime() -
-            new Date(b.startDateTime).getTime()
-        );
+        .sort( (a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
 
         this.loadEventLogos(this.upcomingEvents);
+        this.applyFilters();
 
       this.change.markForCheck();
     },
 
     error: (error) => {
-      this.isLoadingEvents = false;
+      this.isLoadingUpcomingEvents = false;
       console.error('Error loading upcoming events:', error);
        this.toast.error('Unable to Load Events','We couldn’t load the upcoming events. Please try again.' );
       this.change.markForCheck();
@@ -163,15 +162,10 @@ export class HomeComponent implements OnInit {
 }
 
 
-
   goToEvent(event: OpenEventView): void {
   this.saveCurrentEvent(event);
-
-  this.router.navigate([
-    '/participant/events',
-    event.eventId
-  ]);
-}
+  this.router.navigate([ '/participant/events', event.eventId ]);
+  }
 
 
   private saveCurrentEvent(event: OpenEventView): void {
@@ -190,29 +184,21 @@ export class HomeComponent implements OnInit {
       description: event.description,
       startDateTime: event.startDateTime,
       duration: event.duration,
-
       tagline: event.tagline,
       totalPrizePool: event.totalPrizePool,
       inPerson: event.inPerson,
-
-    
     };
   }
 
     private formatEventDates(startDateTime: string, durationHours: number): string {
     const start = new Date(startDateTime);
     const end = new Date(start.getTime() + durationHours * 1000);
-
     return `${this.formatShortDate(start)} – ${this.formatShortDate(end)}`;
   }
 
   private formatShortDate(date: Date): string {
-    return date.toLocaleDateString('en-ZA', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  }
+    return date.toLocaleDateString('en-ZA', { month: 'short', day: 'numeric', year: 'numeric' });
+   }
 
 
   loadCompletedEvents(): void {
@@ -222,6 +208,7 @@ export class HomeComponent implements OnInit {
       next: (events) => {
         this.completedEvents = events.map((event) => this.toOpenEventView(event)).sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime());
         this.loadEventLogos(this.completedEvents);
+        this.applyFilters();
         this.isLoadingCompletedEvents = false;
         this.change.markForCheck();
       },
@@ -233,5 +220,33 @@ export class HomeComponent implements OnInit {
     });
   }
 
- 
+ onSortChange(sortOption: string): void {
+  this.sortOption = sortOption;
+  this.applyFilters();
+}
+
+  onSearchChange(searchTerm: string): void {
+  this.searchTerm = searchTerm.trim().toLowerCase();
+  this.applyFilters();
+}
+
+
+private applyFilters(): void {
+  this.filteredRegisteredEvents = this.filterAndSortEvents(this.registeredEvents);
+  this.filteredUpcomingEvents = this.filterAndSortEvents(this.upcomingEvents);
+  this.filteredCompletedEvents = this.filterAndSortEvents(this.completedEvents);
+}
+
+private filterAndSortEvents(events: OpenEventView[]): OpenEventView[] {
+  const filtered = events.filter((event) => {
+    if (!this.searchTerm) { return true;}
+    return ( event.name.toLowerCase().includes(this.searchTerm) || event.tagline?.toLowerCase().includes(this.searchTerm));
+  });
+
+  return filtered.sort((a, b) => {
+    const dateA = new Date(a.startDateTime).getTime();
+    const dateB = new Date(b.startDateTime).getTime();
+   return this.sortOption === 'Soonest' ? dateA - dateB : dateB - dateA; });
+  }
+
 }
