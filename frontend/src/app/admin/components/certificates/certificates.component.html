@@ -79,7 +79,31 @@
           }
         </div>
 
+        <div class="designer=body">
+          <div class="designer-canvas" [style.width.px]="canvasWidth" [style.height.px]="canvasHeight" [style.backgroundImage]="backgroundUrl ? 'url(' + backgroundUrl + ')': 'none'" (mousemove)="onCanvasMouseMove($event)" (mouseup)="onCanvasMouseUp()" (mouseleave)="onCanvasMouseUp()">
+            @for (el of layout.elements; track $index) {
+              <div class="canvas-element" [class.selected]="selectedElementIndex == $index" [class.qr-element]="el.type === 'QR'" [class.text-element]="el.type === 'TEXT'" [class.image-element]="el.type === 'IMAGE'" [style.left.px]="el.x" [style.top.px]="el.y" [style.fontFamily]="el.font || 'Helvetica'" [style.fontSize.px]="el.type == 'TEXT' ? (el.fontSize || 16) : 0" [style.color]="el.color || '#800'" [style.textAlign]="el.align || 'left'" (mousedown)="onElementMouseDown($event, $index)">
+                @if (el.type === 'TEXT') {
+                  {{ previewText(el) }}
+                } @else if (el.type == 'QR') {
+                  <div class="qr-placeholder" [style.width.px]="(el.fontSize || 18) * 5" [style.height.px]="(el.fontSize || 18) * 5">
+                    <i class="pi pi-qrcode"></i>
+                  </div>
+                } @else {
+                  @if (el.imageStorageKey && assetUrlByKey[el.imageStorageKey]) {
+                    <img [src]="asseturlByKey[el.imageStorageKey]" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80" draggable="false"/>
+                  } @else {
+                    <div class="image-placeholder" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80">
+                      <i class="pi pi-image"></i>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
 
+
+        </div>
       </section>
     </div>
   }
