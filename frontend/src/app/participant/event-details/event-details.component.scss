@@ -189,7 +189,9 @@
   line-height: var(--line-height-body-lg);
 }
 
-
+.event-meta-completed {
+  grid-template-columns: repeat(4, 1fr);
+}
 
 
 .event-status {
@@ -204,6 +206,11 @@
   line-height: var(--line-height-body);
 }
 
+.event-status-completed {
+  background: var(--off-white);
+  color: var(--black);
+}
+
 .event-meta-timezone {
   margin-top: var(--space-1);
   color: var(--dark-gray);
@@ -211,12 +218,6 @@
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-small);
 }
-
-
-
-
-
-
 
 
 
