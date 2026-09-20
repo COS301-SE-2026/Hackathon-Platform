@@ -124,5 +124,91 @@ LANGUAGE_CONFIG: dict[str, LangConfig] = {
     ),
     
 
-
 }
+
+# Node types whose text should collapse to a generic identifier placeholder
+# rather than being kept literally
+
+IDENTIFIER_NODE_TYPES = {
+    "identifier",
+    "type_identifier",
+    "field_identifier",
+    "property_identifier",
+    "shorthand_property_identifier",
+    "shorthand_property_identifier_pattern",
+}
+
+def _is_comment(node_type: str) -> bool:
+    return "comment" in node_type
+
+def _literal_placeholder(node_type: str) -> Optional[str]:
+    """Best effort mapping of a leaf literal node type to a placeholder.
+    Subtring match rather than exhaustive per-grammar table."""
+    t = node.type.lower()
+    if "string" in t or "char_literal" in t or t == "char":
+        return "STR"
+    if "true" == t or "false" == t or "boolean" in t:
+        return "BOOL"
+    if "null" in t or t == "none":
+        return "NULL"
+    if any(k in t for k in ("integer", "float", "number", "decimal", "hex", "octal", "int_literal")):
+        return "NUM"
+    return None
+
+def classify_identifier(node: Node, lang: LangConfig) -> str:
+    """FID (funtion/method name), TID (type/class name), or VID (everything
+    else: locals, params, fields, call arguments...)."""
+    if node.type == "type_identifier":
+        return "TID"
+    
+    parent = node.parent
+    if parent is None:
+        return "VID"
+
+    field_name = parent.field_name_for_child(_child_index(parent, node))
+
+    if parent.type in lang.class_decl_types and field_name == "name":
+        return "TID"
+    
+    if parent.type in lang.function_decl_types and field_name == "name":
+        return "FID"
+
+    if parent.type in lang.call_types and field_name == lang.call_function_field:
+        return "FID"
+
+    # a calls callee is sometimes wrapped one level down
+    # walk up one more level for that common shape.
+    grandparent = parent.parent
+    if (
+        grandparent is not None
+        and grandparent.type in lang.call_types
+        and field_name in ("attribute", "property", "field")
+    ):
+
+        return "FID"
+    
+    return "VID"
+
+def _child_index(parent: Node, child: Node) -> int:
+    for i in range(parent.child_count):
+        if parent.child(i).id == child.id:
+            return i
+    return -1
+
+@dataclass
+class FunctionSpan:
+    qualified_name: str
+    node_type: str
+    start_type: str
+    end_byte: int
+    start_line: int
+    end_line: int
+
+@dataclass
+class Token:
+    """One normalized token plus its original source byte offsets."""
+
+    text: str
+    start: int
+    end: int
+
