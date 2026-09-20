@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
  * Turns raw source code into a normalized structural token sequence.
  *
  * This implementation is a lexer-based approximation rather than a real per-language
- * AST parse (no tree-sitter / javaparser dependency required).
+ * AST parse (no tree-sitter / javaparser dependency required). Used as fallback
  */
 @Component
 public class CodeNormalizer {
 
     private static final Set<String> COMMON_KEYWORDS =
       Set.of(
-          // control flow / structure keywords shared across most C-like and Python languages
+          // control flow / structure keywords shared across most C-like + Python languages
           "if", "else", "elif", "for", "while", "do", "switch", "case", "default", "break",
           "continue", "return", "try", "catch", "except", "finally", "throw", "throws", "raise",
           "class", "interface", "enum", "struct", "def", "function", "func", "fn", "public",
@@ -37,19 +37,43 @@ public class CodeNormalizer {
     UNKNOWN
   }
 
-  private static final Pattern C_LINE_COMMENT = Pattern.compile("//.*");
-  private static final Pattern C_BLOCK_COMMENT = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
-  private static final Pattern PY_COMMENT = Pattern.compile("#.*");
-  private static final Pattern PY_TRIPLE_STRING =
-      Pattern.compile("(\"\"\".*?\"\"\"|'''.*?''')", Pattern.DOTALL);
-  private static final Pattern STRING_LITERAL =
-      Pattern.compile("\"(\\\\.|[^\"\\\\])*\"|'(\\\\.|[^'\\\\])*'");
-  private static final Pattern NUMBER_LITERAL = Pattern.compile("\\b\\d+(\\.\\d+)?[fFlLdD]?\\b");
-  private static final Pattern IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
-  private static final Pattern WHITESPACE = Pattern.compile("\\s+");
-  private static final String STRING_SENTINEL = "STRTOKEN";
-  private static final Pattern SYMBOL =
-      Pattern.compile("(==|!=|<=|>=|&&|\\|\\||\\+\\+|--|->|::|[{}()\\[\\];,.:+\\-*/%<>=!&|^~?])");
+  private static final String STRING_ALT = "\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*'";
+  private static final String ID_ALT = "[A-Za-z_][A-Za-z0-9_]*";
+  private static final String NUM_ALT = "\\b\\d+(?:\\.\\d+)?[fFlLdD]?\\b";
+  private static final String SYM_ALT =
+      "==|!=|<=|>=|&&|\\|\\||\\+\\+|--|->|::|[{}()\\[\\];,.:+\\-*/%<>=!&|^~?]";
+
+  // Group names must be [A-Za-z][A-Za-z0-9]* -- no underscores.
+  private static final Pattern PYTHON_PATTERN =
+      Pattern.compile(
+          "(?<TRIPLE>\"\"\".*?\"\"\"|'''.*?''')"
+              + "|(?<PYCOMMENT>#[^\\n]*)"
+              + "|(?<STRLIT>" + STRING_ALT + ")"
+              + "|(?<IDENT>" + ID_ALT + ")"
+              + "|(?<NUMLIT>" + NUM_ALT + ")"
+              + "|(?<SYMBOL>" + SYM_ALT + ")",
+          Pattern.DOTALL);
+
+  private static final Pattern C_LIKE_PATTERN =
+      Pattern.compile(
+          "(?<BLOCKCMT>/\\*.*?\\*/)"
+              + "|(?<LINECMT>//[^\\n]*)"
+              + "|(?<STRLIT>" + STRING_ALT + ")"
+              + "|(?<IDENT>" + ID_ALT + ")"
+              + "|(?<NUMLIT>" + NUM_ALT + ")"
+              + "|(?<SYMBOL>" + SYM_ALT + ")",
+          Pattern.DOTALL);
+
+  private static final Pattern UNKNOWN_PATTERN =
+      Pattern.compile(
+          "(?<BLOCKCMT>/\\*.*?\\*/)"
+              + "|(?<LINECMT>//[^\\n]*)"
+              + "|(?<PYCOMMENT>#[^\\n]*)"
+              + "|(?<STRLIT>" + STRING_ALT + ")"
+              + "|(?<IDENT>" + ID_ALT + ")"
+              + "|(?<NUMLIT>" + NUM_ALT + ")"
+              + "|(?<SYMBOL>" + SYM_ALT + ")",
+          Pattern.DOTALL);
 
   public Lang detectLanguage(String fileName) {
     if (fileName == null) {
@@ -92,76 +116,91 @@ public class CodeNormalizer {
    * 
    */
   public List<String> normalize(String source, Lang lang) {
-
-    if(source == null || source.isBlank()) {
-        return List.of();
+    List<NormalizedToken> tokens = normalizeWithOffsets(source, lang, "");
+    List<String> texts = new ArrayList<>(tokens.size());
+    for (NormalizedToken t : tokens) {
+      texts.add(t.text());
     }
-    String stripped = stripCommentsAndStrings(source, lang);
+    return texts;
+  }
 
-    List<String> tokens = new ArrayList<>();
-    Matcher idMatcher = IDENTIFIER.matcher("");
+  /**
+   * Produces the normalized structural token sequence for the given source, with each token
+   * carrying its real character offset.
+   *
+   * @param source raw file contents
+   * @param lang language family
+   * @param fileName logical file name to stamp onto every emitted token (purely metadata)
+   * @return ordered list of normalized tokens, each with its source position
+   */
+  public List<NormalizedToken> normalizeWithOffsets(String source, Lang lang, String fileName) {
+    if (source == null || source.isBlank()) {
+      return List.of();
+    }
 
-    Pattern combined =
-        Pattern.compile(
-            IDENTIFIER.pattern() + "|" + NUMBER_LITERAL.pattern() + "|" + SYMBOL.pattern()
-        );
-    Matcher m = combined.matcher(stripped);
-    while(m.find()) {
-        String tok = m.group();
-        if(tok.isBlank()) {
-            continue;
+    Pattern pattern =
+        switch (lang) {
+          case PYTHON -> PYTHON_PATTERN;
+          case C_LIKE -> C_LIKE_PATTERN;
+          default -> UNKNOWN_PATTERN;
+        };
 
-        }
+    List<NormalizedToken> tokens = new ArrayList<>();
+    Matcher m = pattern.matcher(source);
+    while (m.find()) {
 
-        if(tok.equals(STRING_SENTINEL)) {
-            tokens.add("STR");
-            continue;
-        }
+      // comments contribute no token at all
+      if (isSkipGroup(m, "TRIPLE") || isSkipGroup(m, "PYCOMMENT")
+          || isSkipGroup(m, "BLOCKCMT") || isSkipGroup(m, "LINECMT")) {
+        continue;
+      }
 
-        boolean looksLikeIdentifier = Character.isLetter(tok.charAt(0)) || tok.charAt(0) == '_';
-        if(looksLikeIdentifier && idMatcher.reset(tok).matches()) {
+      int start = m.start();
+      int end = m.end();
 
-            String lower = tok.toLowerCase(Locale.ROOT);
-            tokens.add(COMMON_KEYWORDS.contains(lower) ? lower : "ID");
+      if (isSkipGroup(m, "STRLIT")) {
+        tokens.add(new NormalizedToken(fileName, "STR", start, end));
+        continue;
+      }
 
-        } else if (Character.isDigit(tok.charAt(0))) {
-            tokens.add("NUM");
+      String idMatch = safeGroup(m, "IDENT");
+      if (idMatch != null) {
 
-        } else {
-            tokens.add(tok);
+        String lower = idMatch.toLowerCase(Locale.ROOT);
+        String text = COMMON_KEYWORDS.contains(lower) ? lower : "ID";
+        tokens.add(new NormalizedToken(fileName, text, start, end));
+        continue;
 
-        }
+        
+      }
+
+      if (safeGroup(m, "NUMLIT") != null) {
+        tokens.add(new NormalizedToken(fileName, "NUM", start, end));
+        continue;
+
+      }
+
+      String symMatch = safeGroup(m, "SYMBOL");
+      if (symMatch != null) {
+        tokens.add(new NormalizedToken(fileName, symMatch, start, end));
+
+      }
     }
     return tokens;
   }
 
-  private String stripCommentsAndStrings(String source, Lang lang) {
+  private boolean isSkipGroup(Matcher m, String groupName) {
+    return safeGroup(m, groupName) != null;
+  }
 
-    String noStrings;
-    switch(lang) {
-        case PYTHON:
-
-            String noTriple = PY_TRIPLE_STRING.matcher(source).replaceAll(" STRTOKEN ");
-            String noComments = PY_COMMENT.matcher(noTriple).replaceAll(" ");
-            noStrings = STRING_LITERAL.matcher(noComments).replaceAll(" STRTOKEN ");
-            break;
-        
-        case C_LIKE:
-
-            String noBlock = C_BLOCK_COMMENT.matcher(source).replaceAll(" ");
-            String noLIne = C_LINE_COMMENT.matcher(noBlock).replaceAll(" ");
-            noStrings = STRING_LITERAL.matcher(noLIne).replaceAll(" STRTOKEN ");
-            break;
-        default:
-            //Unknown lang(still trip comment styles and string literals defensively)
-            String noBlockU = C_BLOCK_COMMENT.matcher(source).replaceAll(" ");
-            String noLineU = C_LINE_COMMENT.matcher(noBlockU).replaceAll(" ");
-            String noHashU = PY_COMMENT.matcher(noLineU).replaceAll(" ");
-            noStrings = STRING_LITERAL.matcher(noHashU).replaceAll(" STRTOKEN ");
-
+  /** throws if the named group doesn't exist in this pattern at all
+   * (rather than just not matching), so guard every lookup*/
+  private String safeGroup(Matcher m, String groupName) {
+    try {
+      return m.group(groupName);
+    } catch (IllegalArgumentException e) {
+      return null;
     }
-
-    return WHITESPACE.matcher(noStrings).replaceAll(" ");
   }
 
 
