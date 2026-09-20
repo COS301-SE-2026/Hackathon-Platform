@@ -60,9 +60,17 @@
     }
 
       <div class="event-action-register">
-        <app-button variant="primary" width="100%" [disabled]="isCheckingRegistration || isRegistered" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
-          {{ isRegistered ? 'Registered' : 'Register' }}
-        </app-button>
+        @if (event.status === 'COMPLETED') {
+          <app-button variant="primary" width="100%" [disabled]="generatingCertificate" (click)="generateCertificate()" (keydown)="null" (keyup)="null">
+            {{ generatingCertificate ? 'Downloading Certificate...' : 'Download Certificate' }}
+          </app-button>
+
+        } 
+        @else {
+          <app-button variant="primary" width="100%" [disabled]="isCheckingRegistration || isRegistered" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
+            {{ isRegistered ? 'Registered' : 'Register' }}
+          </app-button>
+        }
       </div>
 
       <div class="event-action-download">

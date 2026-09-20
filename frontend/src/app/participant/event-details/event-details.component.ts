@@ -63,6 +63,7 @@ export class EventDetailsComponent implements OnDestroy {
   eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
   hackathonId = '';
   loading = false;
+  generatingCertificate = false;
   eventError = '';
   downloadingProblemStatement = false;
   problemStatementError = '';
@@ -392,5 +393,36 @@ confirmRegistration(): void {
     .formatToParts(new Date(this.event.startDateTime)) 
     .find(part => part.type === 'timeZoneName')?.value ?? '';
 }
+
+  generateCertificate(): void {
+      if (this.generatingCertificate) {
+        return;
+      }
+
+      this.generatingCertificate = true;
+
+      this.eventService.downloadCertificate(this.eventId).subscribe({
+        next: (blob) => {
+          const fileName = `${this.event.name.replace(/[^a-z0-9]+/gi, '-')}-certificate.pdf`;
+          const url = window.URL.createObjectURL(blob);
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName;
+          link.click();
+
+          window.URL.revokeObjectURL(url);
+
+          this.generatingCertificate = false;
+          this.change.markForCheck();
+        },
+
+        error: () => {
+          this.toast.error('Error', "Can't find the certificate");
+          this.generatingCertificate = false;
+          this.change.markForCheck();
+        }
+      });
+  }
 
 }
