@@ -259,5 +259,40 @@
         </div>
       }
     </section>
+
+    <section class="issued-section">
+      <h2 class="section-heading">Issued Certificates ({{ issued.length }})</h2>
+      @if (issued.length === 0) {
+        <p class="hint">No certificates issued for this event yet.</p>
+      } @else {
+        <table class="issued-table">
+          <thead>
+            <tr>
+              <th>Recipient</th>
+              <th>Type</th>
+              <th>Rank</th>
+              <th>Issued</th>
+              <th>Verification code</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cert of issued; track cert.certificateId) {
+              <tr>
+                <td>{{ cert.recipientName }}</td>
+                <td><span class="type-pill" [ngClass]="cert.certificateType.toLowerCase()">{{ cert.certificateType }}</span></td>
+                <td>{{ cert.rankAtIssue || '-' }}</td>
+                <td class="code-cell">{{ cert.issuedAt | date: 'medium' }}</td>
+                <td>
+                  <a [href]="cert.downloadUrl" target="_blank" class="btn-view-event">
+                    <i class="pi pi-download"></i> Download
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
   }
 </div>
