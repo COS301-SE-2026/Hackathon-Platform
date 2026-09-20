@@ -2,6 +2,8 @@ import { Component, ElementRef, ViewChild, inject, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule,ActivatedRoute } from '@angular/router';
+import { Observable, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { EventService, EventRequest } from '../../../services/event.service';
 
 @Component({
@@ -180,14 +182,13 @@ export class CreateEventComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
-
     const startDateTime = new Date(`${this.form.startDate}T${this.form.startTime}`);
     if (Number.isNaN(startDateTime.getTime())){
       this.errorMessage = 'Please enter a valid start date and time';
       return;
     }
+     this.isLoading = true;
+    this.errorMessage = '';
     
     const eventData: EventRequest = {
       name: this.form.eventName,
@@ -212,15 +213,12 @@ export class CreateEventComponent implements OnInit {
     this.eventService.createEventForHackathon(this.hackathonId, eventData).subscribe({
       next: (response) => {
         console.log('Event created successfully:', response);
-        this.isLoading = false;
-
-        if (this.hackathonId){
-         this.router.navigate(['/admin/hackathons',this.hackathonId,'events']);
-        }else {
-           this.router.navigate(['/admin/events']);
-        }
-       
+        this.uploadImages(response.eventId).subscribe(()=> {
+          this.isLoading = false;
+          this.goBack();
+        });
       },
+    
       error: (error) => {
         console.error('Error creating event:', error);
         this.isLoading = false;
@@ -235,6 +233,34 @@ export class CreateEventComponent implements OnInit {
       }
     });
   }
+
+  private uploadImages(eventId: string):Observable<unknown>{
+    const uploads: Observable<unknown>[] = [];
+
+    if (this.form.bannerFile){
+      uploads.push(
+        this.eventService.uploadEventBanner(eventId, this.form.bannerFile).pipe(
+          catchError((error) =>{
+            console.error('Banner upload failed:', error);
+            return of (null);
+          })
+        )
+      );
+    }
+    if (this.form.logoFile){
+      uploads.push(
+        this.eventService.uploadEventLogo(eventId, this.form.logoFile).pipe(
+         catchError((error) =>{
+            console.error('Logo upload failed:', error);
+            return of (null);
+          }) 
+        )
+      );
+    }
+    return uploads.length ? forkJoin(uploads) : of(null);
+
+  }
+
 
   onNextStep(): void {
     if (!this.form.eventName) {
