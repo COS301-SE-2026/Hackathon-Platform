@@ -78,6 +78,7 @@ export class EventDetailsComponent implements OnDestroy {
   event = {
     name: '',
     tagline: '',
+    status: '',
     description: 'Not specified',
     bannerUrl: '',
      prizePool: 0,
@@ -360,6 +361,7 @@ confirmRegistration(): void {
 
     return {
       name: event.name,
+      status: event.status,
       tagline: event.tagline ?? '',
       bannerUrl: '',
       description: event.description ?? 'Not specified',
