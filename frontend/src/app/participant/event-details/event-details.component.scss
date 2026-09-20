@@ -177,7 +177,6 @@
 .event-meta-label {
   margin-bottom: var(--space-3);
   color: var(--dark-gray);
-  font-family: var(--font-family-base);
   font-size: var(--font-size-body-lg);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-body-lg);
@@ -185,13 +184,33 @@
 
 .event-meta-value {
   color: var(--dark-navy);
-  font-family: var(--font-family-base);
   font-size: var(--font-size-body-lg);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-body-lg);
 }
 
 
+
+
+.event-status {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-4);
+  background: var(--green-bg);
+  border-radius: var(--radius-sm);
+  color: var(--green);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-body);
+}
+
+.event-meta-timezone {
+  margin-top: var(--space-1);
+  color: var(--dark-gray);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-small);
+}
 
 
 

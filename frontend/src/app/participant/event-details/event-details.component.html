@@ -103,14 +103,14 @@
     </div>
 
     <div class="event-meta-item event-meta-start">
-      <span class="event-meta-label">Submission Starts On</span>
+      <span class="event-meta-label">Submission Open</span>
 
       <strong class="event-meta-value">
-      
+         {{ formatDateTime(event.startDateTime) }}
       </strong>
 
       <span class="event-meta-timezone">
-      
+        {{ getTimeZone() }}
       </span>
     </div>
 

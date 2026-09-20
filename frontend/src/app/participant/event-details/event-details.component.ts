@@ -373,21 +373,24 @@ confirmRegistration(): void {
       inPerson: event.inPerson ?? false,
       startDateTime: event.startDateTime,
       duration: event.duration,
-      timer: {
-        label: '',
-        days: '00',
-        hours: '00',
-        minutes: '00',
-        seconds: '00'
-      } as EventTimer
+      timer: { label: '', days: '00', hours: '00',  minutes: '00', seconds: '00'} as EventTimer
     };
   }
 
   private formatDate(date: Date): string {
-    return date.toLocaleDateString('en-ZA', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    return date.toLocaleDateString('en-ZA', { day: '2-digit',  month: 'short', year: 'numeric'});
   }
+
+  formatDateTime(dateTime: string): string {
+  if (!dateTime) { return 'Not specified'; }
+  return new Date(dateTime).toLocaleString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true});
+
+  }
+
+  getTimeZone(): string {
+  return new Intl.DateTimeFormat('en-ZA', { timeZoneName: 'short'})
+    .formatToParts(new Date(this.event.startDateTime)) 
+    .find(part => part.type === 'timeZoneName')?.value ?? '';
+}
+
 }
