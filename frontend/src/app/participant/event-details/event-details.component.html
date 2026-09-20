@@ -101,21 +101,26 @@
       <strong class="event-meta-value">{{ event.inPerson ? 'In Person' : 'Virtual' }}</strong>
     </div>
 
-    @if (event.status !== 'COMPLETED') {
-    <div class="event-meta-item event-meta-start">
-      <span class="event-meta-label">Submissions Open</span>
 
-      <strong class="event-meta-value">
-         {{ formatDateTime(event.startDateTime) }}
-      </strong>
 
-      <span class="event-meta-timezone">
-        {{ getTimeZone() }}
-      </span>
-    </div>
-  }
+    @if (event.status === 'UPCOMING') {
+      <div class="event-meta-item event-meta-start">
+        <span class="event-meta-label">Submissions Open</span>
+        <strong class="event-meta-value">{{ formatDateTime(event.startDateTime) }}</strong>
+        <span class="event-meta-timezone">{{ getTimeZone() }}</span>
+      </div>
+    }
+
+    @if (event.status === 'ACTIVE') {
+      <div class="event-meta-item event-meta-start">
+        <span class="event-meta-label">Submissions Close</span>
+        <strong class="event-meta-value">{{ formatDateTime(event.endDateTime) }}</strong>
+        <span class="event-meta-timezone">{{ getTimeZone() }}</span>
+      </div>
+    }
+
+
   </div>
-
 
 
   <section class="event-tabs"><app-tabs [tabs]="tabs" [activeTab]="activeTab"></app-tabs> </section>
