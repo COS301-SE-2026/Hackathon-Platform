@@ -212,5 +212,52 @@
         </div>
       </section>
     </div>
+
+    <section class="generation-section">
+      <h2 class="section-heading">Generate Certificates</h2>
+      <p class="hint">Runs against the event's leaderboard, ONLY TRIGGER this once the event has ended and the results are confirmed. If the results have changed, a regeneration is needed.</p>
+
+      <div class="generation-controls">
+        <div class="toggle-group" role="group">
+          <button type="button" class="toggle-option" [class.selected]="generationScope === 'ALL_PARTICIPANTS'" (click)="generationScope = 'ALL_PARTICIPANTS'">
+            <span class="toggle-title">All Participants</span>
+            <span class="toggle-desc">Everyone gets a certificate</span>
+          </button>
+          <button type="button" class="toggle-option" [class.selected]="generationScope === 'TOP_N'" (click)="generationScope = 'TOP_N'">
+            <span class="toggle-title">Top N Teams</span>
+            <span class="toggle-desc">Only ranked finalists</span>
+          </button>
+        </div>
+
+        @if (generationScope === 'TOP_N') {
+          <div class="form-group top-n-input">
+            <label>Top N</label>
+            <input type="number" [(ngModel)]="topN" min="1" max="100" />
+          </div>
+        }
+
+        <button class="btn-primary"  (click)="startGeneration()" [disabled]="!canGenerate()">
+          {{ isGenerating ? 'Generating' : 'Generate Certificates' }}
+        </button>
+      </div>
+
+      @if (!selectedTemplateId) {
+        <p class="hint-warning">Select or save a template above before generating.</p>
+      }
+
+      @if (activeRun) {
+        <div class="run-progress">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" [style.width.%]="progressPercent()"></div>
+          </div>
+          <span class="progress-label">
+            {{ activeRun.status }} - {{ activeRun.completedCount }} / {{ activeRun.totalCount }}
+          </span>
+          @if (activeRun.status === 'FAILED') {
+            <p class="error-message">{{ activeRun.errorMessage }}</p>
+          }
+        </div>
+      }
+    </section>
   }
 </div>
