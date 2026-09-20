@@ -144,7 +144,7 @@ def _is_comment(node_type: str) -> bool:
 def _literal_placeholder(node_type: str) -> Optional[str]:
     """Best effort mapping of a leaf literal node type to a placeholder.
     Subtring match rather than exhaustive per-grammar table."""
-    t = node.type.lower()
+    t = node_type.lower()
     if "string" in t or "char_literal" in t or t == "char":
         return "STR"
     if "true" == t or "false" == t or "boolean" in t:
@@ -199,7 +199,7 @@ def _child_index(parent: Node, child: Node) -> int:
 class FunctionSpan:
     qualified_name: str
     node_type: str
-    start_type: str
+    start_byte: int
     end_byte: int
     start_line: int
     end_line: int
@@ -211,4 +211,77 @@ class Token:
     text: str
     start: int
     end: int
+
+def normalize_tree(root: Node, lang: LangConfig) -> tuple[list[Token], list[FunctionSpan]]:
+    """Pre-order traversal producing:
+    -a flattened normalized token stream
+    -the list of function/method spans found (byte + line
+    offsets into the original source, for COdeBERT-stage chunking,
+    which are not normalized)"""
+
+    tokens: list[Token] = []
+    functions: list[FunctionSpan] = []
+    class_name_stack: list[str] = []
+
+    def visit(node: Node) -> None:
+        if _is_comment(node.type):
+            return
+
+        if node.type in lang.class_decl_types:
+            class_name_stack.append(_decl_name(node, lang) or "?")
+            _emit_children_with_wrapper(node)
+            class_name_stack.pop()
+            return
+        
+        if node.type in lang.function_decl_types:
+            name = _decl_name(node, lang) or "?"
+            qualified = ".".join(class_name_stack + [name]) if class_name_stack else name
+            functions.append(
+                FunctionSpan(
+                    qualified_name=qualified,
+                    node_type=node.type,
+                    start_byte=node.start_byte,
+                    end_byte=node.end_byte,
+                    start_line=node.start_point[0] + 1,
+                    end_line=node.end_point[0] + 1,
+
+                )
+            )
+            _emit_children_with_wrapper(node)
+            return
+        
+        if node.child_count == 0:
+            _emit_leaf(node)
+            return
+        
+        _emit_children_with_wrapper(node)
+
+    def _emit_children_with_wrapper(node: Node) -> None:
+        tokens.append(Token(f"({node.type}", node.start_byte, node.start_byte))
+        for child in node.children:
+            visit(child)
+        tokens.append(Token(")", node.end_byte, node.end_byte))
+
+    def _emit_leaf(node: Node) -> None:
+        start, end = node.start_byte, node.end_byte
+        if node.type in IDENTIFIER_NODE_TYPES:
+            tokens.append(Token(classify_identifier(node, lang), start, end))
+            return
+        literal = _literal_placeholder(node.type)
+        if literal is not None:
+            tokens.append(Token(literal, start, end))
+            return
+        
+        tokens.append(Token(node.type, start, end))
+
+    def _decl_name(node: Node, lang: LangConfig) -> Optional[str]:
+        name_node = node.child_by_field_name(lang.decl_name_field)
+        if name_node is None:
+            return None
+        return name_node.text.decode("utf-8", errors="replace")
+    
+    visit(root)
+    return tokens, functions
+
+
 
