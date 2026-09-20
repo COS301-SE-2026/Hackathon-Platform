@@ -58,6 +58,7 @@ export class HackathonsComponent implements OnInit {
  showDialog = false;
  editingHackathon : HackathonVm | null = null;
  searchTerm = '';
+ viewMode: 'grid' | 'list' = 'grid';
 
  problemStatementFile: File | null = null;
  problemStatementFileName = '';
@@ -74,6 +75,25 @@ export class HackathonsComponent implements OnInit {
     description: '',
 
  };
+
+ get filteredHackathons(): HackathonVm[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term){
+        return this.hackathons;
+
+    }
+    return this.hackathons.filter((h) =>
+        h.name.toLowerCase().includes(term) || 
+    (h.description || '').toLowerCase().includes(term)
+    );
+ }
+
+ get totalEvents(): number{
+    return this.hackathons.reduce((sum,h)=> sum + h.eventCount,0);
+ }
+ get totalLevels(): number{
+    return this.hackathons.reduce((sum,h)=> sum + h.levelCount,0);
+ }
 
  ngOnInit(): void {
     this.loadHackathons();
