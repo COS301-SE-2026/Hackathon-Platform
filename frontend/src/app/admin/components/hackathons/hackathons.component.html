@@ -8,19 +8,36 @@
     </button>
 </div>
 
+<div class = "summary">
+    <div class = "summary-card">
+        <span class = "summary-label">Hackathons</span>
+        <span class = "summary-value">{{hackathons.length}}</span>
+    </div>
+    <div class = "summary-card">
+        <span class = "summary-label">Events</span>
+        <span class = "summary-value">{{totalEvents}}</span>
+    </div>
+    <div class = "summary-card">
+        <span class = "summary-label">Levels</span>
+        <span class = "summary-value">{{totalLevels}}</span>
+    </div>
+</div>
+
 <div class = "toolbar">
     <div class = "search-box">
         <i class = "pi pi-search search-icon"></i>
-        <input type = "text" placeholder = "Search hackathons..." aria-label="Search hackathons"/>
+        <input type = "text" placeholder = "Search hackathons..." aria-label="Search hackathons" [(ngModel)] = "searchTerm"/>
     </div>
 
     <div class = "toolbar-right">
-        <span class = "hackathon-count">{{ hackathons.length}} Hackathons</span>
+        <span class = "hackathon-count">{{ filteredHackathons.length}} {{filteredHackathons.length === 1 ? 'hackathon' : 'hackathons'}}</span>
         <div class = "view-toggle">
-            <button type = "button" class = "view-toggle-btn active" aria-label="Grid view">
+            <button type = "button" class = "view-toggle-btn" [class.active]="viewMode === 'grid'"
+        [attr.aria-pressed]="viewMode === 'grid'" aria-label="Grid view" (click) = "viewMode = 'grid'">
                 <i class = "pi pi-th-large"></i>
             </button>
-            <button type = "button" class = "view-toggle-btn" aria-label = "List view">
+            <button type = "button" class = "view-toggle-btn" [class.active]="viewMode === 'list'"
+        [attr.aria-pressed]="viewMode === 'list'" aria-label = "List view" (click) ="viewMode = 'list'">
                 <i class = "pi pi-bars"></i>
             </button>
         </div>
@@ -33,14 +50,28 @@
 
 @if (isLoading){
     <div class = "loading">Loading hackathons...</div>
-
-} @else {
+} @else if (filteredHackathons.length === 0){
+    <div class = "empty-state">
+        <i class = "pi pi-trophy"></i>
+        <p>{{hackathons.length === 0 ? 'No hackathons created yet' : 'No hackathons match your search.'}}</p>
+    </div>
+} @else if (viewMode === 'grid'){
     <div class = "hackathons-grid">
-        @for (hackathon of hackathons; track hackathon.hackathonId){
+        @for (hackathon of filteredHackathons; track hackathon.hackathonId){
             <div class = "hackathon-card">
+                <div class = "card-top">
+                    <div class = "hackathon-icon"><i class = "pi pi-trophy"></i></div>
+                    <h3 class = "hackathon-name" [title] = "hackathon.name">{{ hackathon.name }} </h3>
+                    <button type = "button" class = "icon-btn icon-btn-edit" aria-label = "Edit hackathon" title ="Edit" (click) = "openEditDialog(hackathon)">
+                        <i class = "pi pi-pencil"></i>
+                    </button>
+                    <button type = "button" class = "icon-btn icon-btn-delete" aria-label = "Delete hackathon" title ="Delete" (click) = "deleteHackathon(hackathon.hackathonId)">
+                        <i class = "pi pi-trash"></i>
+                    </button>
+                </div>
                 
-                    <h3 class = "hackathon-name">{{hackathon.name}}</h3>
-
+                <p class = "hackathon-description">{{hackathon.description || 'No description added yet.'}}</p>
+                    
                     <div class = "hackathon-stats">
                         <div class = "stat">
                             <span class = "stat-value">{{hackathon.levelCount}}</span>
@@ -50,27 +81,62 @@
                             <span class = "stat-value">{{hackathon.eventCount}}</span>
                             <span class = "stat-label">Events</span>
                         </div>
+                        <div class = "stat">
+                            @if (hackathon.problemStatementStorageKey){
+                                <span class = "ps-status ok"><i class = "pi pi-check-circle"></i>Attached</span>
+                            } @else {
+                              <span class = "ps-status missing"><i class = "pi pi-exclamation-triangle"></i>Missing</span>  
+                            }
+                            <span class = "stat-label">Problem statement</span>
+                        </div>
                     </div>
-
-
-                <div class = "hackathon-actions">
+                
                    <button type = "button" class = "btn-view-hackathon" (click) = "navigateToHackathon(hackathon.hackathonId)">
-                    <i class = "pi pi-calendar"></i> View Hackathon
+                    View Hackathon
+                    <i class = "pi pi-arrow-right"></i> 
                    </button>
-                   <button type = "button" class = "icon-btn icon-btn-edit" aria-label= "Edit hackathon" (click) = "openEditDialog(hackathon)">
-                    <i class = "pi pi-pencil"></i>
-                   </button>
-                   <button type = "button" class = "icon-btn icon-btn-delete" aria-label= "Delete hackathon" (click) = "deleteHackathon(hackathon.hackathonId)">
-                    <i class = "pi pi-trash"></i>
-                   </button>
+                    </div>
+                    }
+                 </div>
+                 } @else{
+            <div class = "hackathon-list">
+        <div class = "list-header">
+            <span>Hackathon</span>
+            <span>Levels</span>
+            <span>Events</span>
+            <span>Problem statement</span>
+            <span></span>
+        </div>
 
+        @for (hackathon of filteredHackathons; track hackathon.hackathonId){
+            <div class = "hackathon-row">
+                <div class = "row-main">
+                    <div class = "hackathon-icon"><i class = "pi pi-trophy"></i></div>
+                    <div class = "row-text">
+                        <h3 class = "hackathon-name"[title] ="hackathon.name">{{ hackathon.name }}</h3>
+                        <p class = "row-description">{{hackathon.description || 'No description added yet.'}}</p>
+                    </div>
                 </div>
-            </div>
-        }
-        @if (hackathons.length === 0) {
-            <div class = "empty-state">
-                <p>No hackathons created yet</p>
-
+                <span class = "row-num" data-label = "Levels">{{hackathon.levelCount}}</span>
+                <span class = "row-num" data-label = "Events">{{hackathon.eventCount}}</span>
+                <span class = "row-status">
+                    @if (hackathon.problemStatementStorageKey){
+                        <span class = "ps-status ok"><i class = "pi pi-check-circle"></i>Attached</span>
+                    } @else {
+                        <span class = "ps-status missing"><i class = "pi pi-exclamation-triangle"></i>Missing</span>
+                    }
+                </span>
+                <div class = "row-actions">
+                    <button type="button" class = "btn-view-hackathon btn-view-compact" (click) = "navigateToHackathon(hackathon.hackathonId)">
+                        View <i class = "pi pi-arrow-right"></i>
+                    </button>
+                    <button type="button" class = "icon-btn icon-btn-edit" aria-label = "Edit hackathon" title = "Edit" (click) = "openEditDialog(hackathon)">
+                    <i class = "pi pi-pencil"></i>
+                    </button>
+                    <button type="button" class = "icon-btn icon-btn-delete" aria-label = "Delete hackathon" title = "Delete" (click) = "deleteHackathon(hackathon.hackathonId)">
+                        <i class = "pi pi-trash"></i>
+                    </button>
+                </div>
             </div>
         }
     </div>
