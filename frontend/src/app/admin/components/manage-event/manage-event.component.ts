@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef,Input } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { EventService} from '../../../services/event.service';
+import { EventService,EventResponse,EventRequest} from '../../../services/event.service';
 import { StorageService } from '../../../services/storage.service';
 
 
@@ -74,7 +74,7 @@ export class ManageEventComponent implements OnInit {
     this.errorMessage = '';
 
     this.eventService.getEvent(this.eventId).subscribe({
-      next: (data: any) => {
+      next: (data: EventResponse) => {
         this.populateForm(data);
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -87,7 +87,7 @@ export class ManageEventComponent implements OnInit {
     });
   }
 
- private populateForm(data:any): void {
+ private populateForm(data:EventResponse): void {
     this.form.name = data.name || '';
     this.form.description = data.description || '';
     this.form.startDate = data.startDateTime ||'';
@@ -128,7 +128,7 @@ export class ManageEventComponent implements OnInit {
       status: this.form.status,
       leaderboardFreezeDateTime: this.form.leaderboardFrozen ? new Date().toISOString() : undefined,
     };
-    this.eventService.updateEvent(this.eventId, payload as any).subscribe({
+    this.eventService.updateEvent(this.eventId, payload).subscribe({
       next: () => {
         this.isSaving = false;
         this.successMessage = 'Event updated successfully';
@@ -171,8 +171,17 @@ export class ManageEventComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const payload = {leaderboardFreezeDateTime: nextValue ? new Date().toISOString() : null,};
-    this.eventService.updateEvent(this.eventId, payload as any).subscribe({
+    const payload: EventRequest = {
+      name: this.form.name,
+      startDateTime: this.form.startDate,
+      duration: this.form.duration,
+      visibility: this.form.visibility,
+      teamSizeLimit: this.form.teamSizeLimit,
+      status: this.form.status,
+      leaderboardFreezeDateTime: nextValue? new Date().toISOString() : undefined,
+
+    };
+    this.eventService.updateEvent(this.eventId, payload).subscribe({
       next: () => {
         this.form.leaderboardFrozen = nextValue;
        this.isSaving = false;
