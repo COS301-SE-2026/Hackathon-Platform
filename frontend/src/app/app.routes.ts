@@ -9,6 +9,8 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
   { path: 'super-admin', loadComponent: () => import('./admin/super-admin/super-admin.component').then(m => m.SuperAdminComponent), canActivate: [AuthGuard] },
   { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
+  { path: 'verify-email', loadComponent: () => import('./features/auth/verify-email/verify-email.component').then(m=>m.VerifyEmailComponent)},
+  { path: 'auth/oauth-success', loadComponent: () => import('./features/auth/oauth-success/oauth-success.component').then(m=>m.OAuthSuccessComponent)},
   {path: 'style-guide', loadComponent: () => import('./components/brand-style-guide/brand-style-guide.component').then( m => m.BrandStyleGuideComponent),},
 
   {
