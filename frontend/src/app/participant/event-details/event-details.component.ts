@@ -292,19 +292,18 @@ confirmRegistration(): void {
   const eventRoute = `/participant/events/${this.eventId}`;
 
   const tabDef = [
-    ['Overview', 'pi pi-list', 'overview'],
-    ['Rules', 'pi pi-file', 'rules'],
+    ['Overview', 'overview'],
+    ['Rules', 'rules'],
   ];
 
    if (this.isRegistered) {
-    tabDef.push( ['Team', 'pi pi-users', 'team'], ['Submissions', 'pi pi-code', 'submissions'],
-      ['History', 'pi pi-history', 'submission-history'], ['Rankings', 'pi pi-trophy', 'leaderboard'], ['Forum', 'pi pi-comments', 'forum'], ['Announcements', 'pi pi-megaphone', 'announcements'],
+    tabDef.push( ['Team', 'team'], ['Submissions', 'submissions'],
+      ['History',  'submission-history'], ['Rankings',  'leaderboard'], ['Forum',  'forum'], ['Announcements',  'announcements'],
     );
   }
 
-  this.tabs = tabDef.map(([label, icon, tab]) => ({
+  this.tabs = tabDef.map(([label, tab]) => ({
     label,
-    icon,
     route: eventRoute,
     queryParams: { tab }
   }));
