@@ -50,6 +50,7 @@
           <imput class="template-name-input" type="text" [(ngModel)]="templateName" placeholder="Template name"/>
           <div class="toolbar-actions">
             <label class="btn-secondary btn-sm file-upload-btn">
+              <i class="pi pi-image"></i> Background
               <input type="file" accepts="image/*" (change)="onBackgroundSelected($event)" hidden/>
             </label>
             <button class="btn-primary btn-sm" (click)="saveTemplate()" [disabled]="isSaving">
@@ -66,7 +67,7 @@
             <i class="pi pi-align-left"></i> Static Label
           </button>
           <button class="btn-secondary btn-sm" (click)="addQrElement()">
-            <i class="pi pi-qrcode"></i> Qr Code
+            <i class="pi pi-qrcode"></i> QR Code
           </button>
           <label class="btn-secondary btn-sm file-upload-btn">
             <i class="pi pi-image"></i>{{ isUploadingAsset ? 'Uploading' : 'Image/Signiture' }}
@@ -102,7 +103,112 @@
             }
           </div>
 
+          <div class="property-panel">
+            @if (selectedElement; as el) {
+              <h4>Element Properties</h4>
 
+              @if (el.type === 'TEXT') {
+                <div class="form-group">
+                  <label>Content</label>
+                  <select [(ngModel)]="el.field" (ngModelChange)="el.field ? (el.staticText = undefined) : null">
+                    <option [ngValue]="null">Static text</option>
+                    @for (f of fieldOptions; track f.value) {
+                      <option [ngValue]="f.value">{{ f.label }}</option>
+                    }
+                  </select>
+                </div>
+
+                @if (!el.field) {
+                  <div class="form-group">
+                    <label>Static text</label>
+                    <input type="text" [(ngModel)]="el.staticText"/>
+                  </div>
+                }
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Font</label>
+                    <select [(ngModel)]="el.font">
+                      <option value="helvetics">Helvetica</option>
+                      <option value="helvetica-bold">Helvetica bold</option>
+                      <option value="times">Times</option>
+                      <option value="times-bold">Times bold</option>
+                      <option value="times-italic">Times italic</option>
+                      <option value="courier">Courier</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Size</label>
+                    <input type="number" [(ngModel)]="el.fontSize" min="6" max="80" />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Colour</label>
+                    <input type="color" [(ngModel)]="el.color" />
+                  </div>
+                  <div class="form-group">
+                    <label>Align</label>
+                    <select [(ngModel)]="el.align">
+                      <option value="left">Left</option>
+                      <option value="center">Centre</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </div>
+                </div>
+              } @else if (el.type =='QR') {
+                <div class="form-group">
+                  <label>Size</label>
+                  <input type="number" [(ngModel)]="el.fontSize" min="10" max="60" />
+                </div>
+                <p class="hint">Encodes this certificate with a unique verification link</p>
+              } @else {
+                <div class="form-group">
+                  <label class="btn-secondary btn-sm file-upload-btn replace-image-btn">
+                    <i class="pi pi-refresh"></i> {{ isUploadingAsset ? 'Uploading' : 'Replace image' }}
+                    <input type="file" accept="image/*" (change)="onReplaceImageSelected($event)" [disabled]="isUploadingAsset" hidden />
+                  </label>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Width</label>
+                    <input type="number" [(ngModel)]="el.width" min="10" max="800" />
+                  </div>
+                  <div class="form-group">
+                    <label>Height</label>
+                    <input type="number" [(ngModel)]="el.height" min="10" max="800" />
+                  </div>
+                </div>
+              }
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>X</label>
+                  <input type="number" [(ngModel)]="el.x" />
+                </div>
+                <div class="form-group">
+                  <label>Y</label>
+                  <input type="number" [(ngModel)]="el.y" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>SHow certificate types</label>
+                <div class="cert-type-checkboxes">
+                  @for (type of certTypes; track type) {
+                    <label class="checkbox-label">
+                      <input type="checkbox-label" [checked]="isVisibleForType(el, type)" (change)="toggleVisibleForType(type)" />
+                      {{ type }}
+                    </label>
+                  }
+                </div>
+                <p class="hint">Unchecked types won't show this element. For example, hide rank for participation certificates</p>
+              </div>
+            } @else {
+              <p class="hint">Select an element on the canvas to edit it, or add a new element from the toolbar above the canvas.</p>
+            }
+          </div>
         </div>
       </section>
     </div>
