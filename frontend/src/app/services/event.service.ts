@@ -33,6 +33,8 @@ export interface EventResponse {
   status: string;
   isInPerson?: boolean;
   leaderboardFreezeDateTime?: string;
+  bannerUrl?: string | null;
+  logoUrl?: string | null;
   
 }
 
@@ -74,10 +76,6 @@ export interface EventParticipantResponse {
   joinedAt: string;
 }
 
-export interface EventRegistrationSummary{
-  teams: RegisteredTeams[];
-  topSubmissions: TeamSubmission[];
-}
 @Injectable({
   providedIn: 'root'
 })
@@ -144,6 +142,24 @@ export class EventService {
 
   createEventForHackathon(hackathonId: string, eventData: EventRequest): Observable<EventResponse> {
     return this.http.post<EventResponse>(`${this.baseUrl}/hackathon/${hackathonId}/events`, eventData);
+  }
+
+  uploadEventBanner(eventId: string, file: File): Observable<EventResponse> {
+    const body = new FormData();
+    body.append('file',file);
+    return this.http.post<EventResponse>(`${this.baseUrl}/admin/events/${eventId}/banner`,body);
+  }
+
+  uploadEventLogo(eventId: string, file: File): Observable<EventResponse> {
+    const body = new FormData();
+    body.append('file',file);
+    return this.http.post<EventResponse>(`${this.baseUrl}/admin/events/${eventId}/logo`,body);
+  }
+
+  resolveMediaUrl(url?: string | null): string | null {
+    if (!url) return null;
+    if (/^(https?:)?\/\//i.test(url) || url.startsWith('data:')) return url;
+    return `${environment.apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
   }
 
   downloadEventResults(eventId: string): Observable<Blob> {
