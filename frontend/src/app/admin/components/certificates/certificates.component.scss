@@ -158,4 +158,149 @@
   }
 }
 
+.file-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.designer-palette {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.designer-body {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  overflow-x: auto;
+}
+
+.designer-canvas {
+  position: relative;
+  background-color: #f4f1e8;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  flex-shrink: 0;
+  cursor: default;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.canvas-element {
+  position: absolute;
+  white-space: nowrap;
+  cursor: move;
+  user-select: none;
+  padding: 2px 4px;
+
+  &.text-element {
+    transform: translate(-50%, -50%);
+  }
+
+  &.selected {
+    outline: 1.5px dashed #b6942f;
+    outline-offset: 3px;
+  }
+
+  &.qr-element {
+    padding: 0;
+  }
+}
+
+.qr-element {
+  border: 1.5px dashed #9ca3af;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  color: #6b7280;
+  font-size: 20px;
+}
+
+.image-placeholder {
+  border: 1.5px dashed #9ca3af;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  color: #6b7280;
+  font-size: 20px;
+}
+
+.replace-image-btn {
+  margin-top: 4px;
+}
+
+.property-panel {
+  width: 260px;
+  flex-shrink: 0;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+
+  h4 {
+    margin: 0 012px;
+    font-size: 14px;
+    color: #1a2340;
+  }
+}
+
+.form-group {
+  margin-bottom: 12px;
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 7px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+    box-sizing: border-box;
+  }
+
+  input[type='color'] {
+    padding: 2px;
+    height: 32px;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cert-type-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #374151;
+
+  input {
+    width: auto;
+  }
+}
+
 
