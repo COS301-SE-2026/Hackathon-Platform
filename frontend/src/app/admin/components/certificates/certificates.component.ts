@@ -91,3 +91,109 @@ function blankLayout(): CertificateLayout {
     ],
   };
 }
+
+@Component({
+  selector: 'app-certificates',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
+  templateUrl: './certificates.component.html',
+  styleUrls: ['./certificates.component.scss'],
+})
+export class CertificatesComponent implements OnInit, OnDestroy {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly eventService = inject(EventService);
+  private readonly certificateService = inject(CertificateService);
+  readonly canvasWidth = CANVAS_WIDTH;
+  readonly canvasHeight = CANVAS_HEIGHT;
+  readonly fieldOptions = FIELD_OPTIONS;
+  readonly certTypes = CERT_TYPES;
+  eventId = '';
+  event: EventResponse | null = null;
+  isLoading = true;
+  errorMessage = '';
+  successMessage = '';
+  templates: CertificateTemplateResponse[] = [];
+  selectedTemplateId: string | null = null;
+  templateName = 'Untitled Certificate';
+  layout: CertificateLayout = blankLayout();
+  backgroundUrl: string | null = null;
+  backgroundFile: File | null = null;
+  isSaving = false;
+  assetUrlByKey: Record<string, string> = {};
+  isUploadingAsset = false;
+  selectedElementIndex: number | null = null;
+  private dragging = false;
+  private dragElementIndex = -1;
+  private dragOffsetX = 0;
+  private dragOffsetY = 0;
+  generationScope: GenerationScope = 'ALL_PARTICIPANTS';
+  topN = 10;
+  activeRun: CertificateGenerationRunResponse | null = null;
+  runs: CertificateGenerationRunResponse[] = [];
+  issued: CertificateIssuedResponse[] = [];
+  isGenerating = false;
+  private pollHandle: ReturnType<typeof setInterval> | null = null;
+
+  get selectedElement(): CertificateElement | null {
+    return this.selectedElementIndex === null ? null : this.layout.elements[this.selectedElementIndex];
+  }
+
+  ngOnInit(): void {
+    this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
+    if (!this.eventId) {
+      this.errorMessage = 'No event id provided';
+      this.isLoading = true;
+      return;
+    }
+    this.loadEvent();
+    this.loadTemplates();
+    this.loadRuns();
+    this.loadIssues();
+  }
+
+  ngOnDestroy(): void {
+    if(this.pollHandle) {
+      clearInterval(this.pollHandle);
+    }
+  }
+
+  private loadEvent(): void {
+    this.eventService.getEventById(this.eventId).subscribe({
+      next: (event) => {
+        this.event = event;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.errorMessage = 'Could not load the event';
+        this.isLoading = false;
+      },
+    });
+  }
+
+  private loadTemplates(): void {
+    this.certificateService.getTemplates(this.eventId, this.event?.hackathon).subscribe({
+      next: (templates) => (this.templates = templates),
+      error: () => (this.errorMessage = 'Could not load the templates.'),
+    });
+  }
+
+  private loadRuns(): void {
+    this.certificateService.getRuns(this.eventId).subscribe({
+      next: (runs) => {
+        this.runs = runs;
+        const running = runs.runs.find((r) => r.status === 'PENDING' || r.status === 'RUNNING');
+        if(running) {
+          this.activeRun = running;
+          this.startPolling();
+        }
+      },
+    });
+  }
+
+  private loadIssued(): void {
+    this.certificateService.getIssuedForEvent(this.eventId).subscribe({
+      next: (issued) => (this.issued = issued),
+    });
+  }
+}
