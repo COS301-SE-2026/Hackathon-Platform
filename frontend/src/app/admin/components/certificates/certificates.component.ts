@@ -196,4 +196,99 @@ export class CertificatesComponent implements OnInit, OnDestroy {
       next: (issued) => (this.issued = issued),
     });
   }
+
+  selectTemplate(template: string): void{
+    this.certificateService.getTemplate(templateId).subscribe({
+      next: (template) => {
+        this.selectedTemplateId = template.templateId;
+        this.templateName = template.name;
+        this.layout = template.layout;
+        this.backgroundUrl = template.backgroundUrl;
+        this.backgroundFile = null;
+        this.assetUrlByKey = template.assetUrls || {};
+        this.selectedElementIndex = null;
+      },
+    });
+  }
+
+  startNewTemplate(): void {
+    this.selectedTemplateId = null;
+    this.templateName = 'Untitled Certificate';
+    this.layout = blankLayout();
+    this.backgroundUrl = null;
+    this.backgroundFile = null;
+    this.assetUrlByKey = {};
+    this.selectedElementIndex = null;
+  }
+
+  addTextElement(bound: boolean): void {
+    const element: CertificateElement = {
+      type: 'TEXT',
+      field: bound ? 'participantName' : null,
+      staticText: bound ? undefined : 'New label',
+      x: this.canvasWidth/2,
+      y: this.canvasHeight/2,
+      font: 'helvetica',
+      fontSize: 16,
+      color: '#000000',
+      align: 'center',
+      visibleForTypes: null,
+    };
+    this.layout.elements.push(element);
+    this.selectedElementIndex = this.layout.elements.length-1;
+  }
+
+  addQrElement(): void {
+    const element: CertificateElement = {
+      type: 'QR',
+      x: this.canvasWidth-170,
+      y: this.canvasHeight-130,
+      fontSize: 18,
+      visibleForTypes: null,
+    };
+    this.layout.element.push(element);
+    this.selectedElementIndex = this.layout.elements.length-1;
+  }
+
+  onImageFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if(!file){
+      return;
+    }
+
+    this.isUploadingAsset = true;
+    this.errorMessage = '';
+    this.ensureTemplateSaved().subscribe({
+      next: (templateId) => {
+        this.certificateService.uploadAsset(templateId, file).subscribe({
+          next: (asset) => {
+            this.assetUrlByKey[asset.storageKey] = asset.url;
+            const element: CertificateElement = {
+              type: 'IMAGE',
+              imageStorageKey: asset.storageKey,
+              label: file.name,
+              width: 150,
+              height: 80,
+              x: this.canvasWidth/2-75,
+              y: this.canvasHeight/2-40,
+              visibleForTypes: null,
+            };
+            this.layout.elements.push(element);
+            this.selectedElementIndex = this.layout.elements.length-1;
+            this.isUploadingAsset = false;
+        },
+          error: () => {
+            this.errorMessage = 'Could not upload the image';
+            this.isUploadingAsset = false;
+          },
+        });
+      },
+      error: () => {
+        this.errorMessage = 'Could not save the template before uploading the image';
+        this.isUploadingAsset = false;
+      },
+    });
+  }
 }
