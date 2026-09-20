@@ -291,4 +291,28 @@ export class CertificatesComponent implements OnInit, OnDestroy {
       },
     });
   }
+
+  onReplaceImageSelected(event: Event): void{
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = '';
+    const el = this.selectedElement;
+    if(!file || !el || el.type !== 'IMAGE' || !this.selectedTemplateId){
+      return;
+    }
+
+    this.isUploadingAsset = true;
+    this.certificateService.uploadAsset(this.selectedTemplateId, file).subscribe({
+      next: (asset) => {
+        this.assetUrlByKey[asset.storageKey] =asset.url;
+        el.imageStorageKey = asset.storageKey;
+        el.label = file.name;
+        this.isUploadingAsset = false;
+      },
+      error: () => {
+        this.errorMessage = 'Could not upload the image';
+        this.isUploadingAsset = false;
+      },
+    });
+  }
 }
