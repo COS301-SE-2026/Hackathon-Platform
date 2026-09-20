@@ -303,4 +303,77 @@
   }
 }
 
+.generation-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+}
 
+.generation-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.toggle-group {
+  display: flex;
+  gap: 8px;
+}
+
+.toggle-option {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+
+  .toggle-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a2340;
+  }
+  .toggle-desc {
+    font-size: 11px;
+    color: #6b7280;
+  }
+
+  &.selected {
+    border-color: #1a2340;
+    background: #f3f4f6;
+  }
+}
+
+.top-n-input {
+  width: 100px;
+  margin-bottom: 0;
+}
+
+.run-progress {
+  margin-top: 12px;
+}
+
+.progress-bar-track {
+  background: #e5e7eb;
+  border-radius: 6px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background: #b6942f;
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.progress-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: #6b7280;
+}
