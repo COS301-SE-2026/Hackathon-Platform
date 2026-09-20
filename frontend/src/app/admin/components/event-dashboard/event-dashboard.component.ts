@@ -326,9 +326,9 @@ export class EventDashboardComponent implements OnInit{
   }
   private readonly statusOrder = ['SCORED','SCORING','QUEUED','FAILED'];
   private readonly statusColorMap: Record<string, string> = {
-    QUEUED: 'seg-solo',
-    SCORING: 'seg-small',
-    SCORED: 'seg-medium',
+    SCORED: 'seg-scored',
+    SCORING: 'seg-scoring',
+    QUEUED: 'seg-queued',
     FAILED: 'seg-failed',
   };
 
@@ -353,7 +353,7 @@ export class EventDashboardComponent implements OnInit{
         percent: Math.round(share),
         offset,
         dash: Math.max(share - (share > 2 ? 1 : 0),0),
-        colorClass: this.statusColorMap[label?.toUpperCase()] || 'seg-medium',
+        colorClass: this.statusColorMap[label?.toUpperCase()] || 'seg-other',
       };
       offset += share;
       return segment;

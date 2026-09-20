@@ -332,6 +332,7 @@ font-size: 0.9rem;
 
 .donut-segment{
   fill: none;
+  stroke:#8089a0;
   stroke-width:4.5;
   transition: stroke-dasharray 0.3s;
 }
@@ -377,6 +378,7 @@ font-size: 0.9rem;
   height: 9px;
   border-radius: 3px;
   flex-shrink: 0;
+  background-color: #8089a0;
 }
 
 .legend-label{
