@@ -462,4 +462,21 @@ confirmRegistration(): void {
   return Date.now() >= end;
 }
 
+
+  getEventStatus(): string {
+    if (!this.event.startDateTime || !this.event.duration) {
+      return this.event.status;
+    }
+
+    if (this.hasEventCompleted()) {
+      return 'COMPLETED';
+    }
+
+    if (this.hasEventStarted()) {
+      return 'ACTIVE';
+    }
+
+    return 'UPCOMING';
+  }
+  
 }

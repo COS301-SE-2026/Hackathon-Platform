@@ -18,7 +18,7 @@
 
     <div class="event-info-right">
 
-      @if (event.status !== 'COMPLETED'){
+      @if (getEventStatus() !== 'COMPLETED'){
       <div class="timer-section">
 
         <span class="timer-label">
@@ -60,7 +60,7 @@
     }
 
       <div class="event-action-register">
-        @if (event.status === 'COMPLETED') {
+        @if (getEventStatus() === 'COMPLETED') {
           <app-button variant="primary" width="100%" [disabled]="generatingCertificate" (click)="generateCertificate()" (keydown)="null" (keyup)="null">
             {{ generatingCertificate ? 'Downloading Certificate...' : 'Download Certificate' }}
           </app-button>
@@ -85,12 +85,12 @@
   </div>
 
 
-  <div class="event-meta" [class.event-meta-completed]="event.status === 'COMPLETED'">
+  <div class="event-meta" [class.event-meta-completed]="getEventStatus() === 'COMPLETED'">
 
     <div class="event-meta-item">
       <span class="event-meta-label">Status</span>
 
-      <span class="event-status" [class.event-status-completed]="event.status === 'COMPLETED'">{{ event.status | titlecase }}</span>
+      <span class="event-status" [class.event-status-completed]="getEventStatus() === 'COMPLETED'">{{ getEventStatus() | titlecase }}</span>
 
     </div>
 
@@ -111,7 +111,7 @@
 
 
 
-    @if (event.status === 'UPCOMING') {
+    @if (getEventStatus() === 'UPCOMING') {
       <div class="event-meta-item event-meta-start">
         <span class="event-meta-label">Submissions Open</span>
         <strong class="event-meta-value">{{ formatDateTime(event.startDateTime) }}</strong>
@@ -119,7 +119,7 @@
       </div>
     }
 
-    @if (event.status === 'ACTIVE') {
+    @if (getEventStatus() === 'ACTIVE') {
       <div class="event-meta-item event-meta-start">
         <span class="event-meta-label">Submissions Close</span>
         <strong class="event-meta-value">{{ formatDateTime(event.endDateTime) }}</strong>
