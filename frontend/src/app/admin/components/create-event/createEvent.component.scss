@@ -213,6 +213,18 @@ textarea{
         background-color: #f4f9fd;
     }
 }
+
+.drop-zone-spec{
+    margin-top: 6px !important;
+    font-size: 0.72rem !important;
+    color: #8089a0 !important;
+
+    strong{
+        color:#4a5468;
+        font-weight: 700;
+    }
+}
+
 .image-drop-zone{
     display: flex;
     flex-direction: column;
