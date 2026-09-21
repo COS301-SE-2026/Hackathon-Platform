@@ -11,11 +11,17 @@ export interface EventRequest {
   duration: number;
   description?: string;
   visibility: 'PUBLIC' | 'PRIVATE';
-  status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
-  isInPerson?: boolean;
+  status?: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
+  inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
-  tags?: string[];
-  allowedTechnologies?: string [];
+  freezeTime?: string;
+  rules?: string;
+  allowedTech?: string[];
+  tagline?: string;
+  firstPlacePrize?: number;
+  secondPlacePrize?: number;
+  thirdPlacePrize?: number;
+  totalPrizePool?: number;
 }
 
 export interface EventResponse {
@@ -28,14 +34,73 @@ export interface EventResponse {
   teamSizeLimit: number;
   startDateTime: string;
   duration: number;
+  endDateTime?: string;
   description?: string;
   visibility: string;
   status: string;
-  isInPerson?: boolean;
+  inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
-  bannerUrl?: string | null;
-  logoUrl?: string | null;
-  
+  scoringPaused: boolean;
+  allowedTech?: string[];
+  rules?: string;
+  tagline?: string;
+  firstPlacePrize?: number;
+  secondPlacePrize?: number;
+  thirdPlacePrize?: number;
+  totalPrizePool?: number;
+
+}
+
+export interface SubmissionResponse {
+  submissionId: number;
+  teamId: string;
+  levelId: number;
+  solverVersionId: number;
+  score?: number;
+  status: string;
+  submittedAt: string;
+  outputFileName?: string;
+  sourceFileName?: string;
+}
+
+export interface LeaderboardEntryResponse {
+  rank: number;
+  teamId: string;
+  teamName: string;
+  bestScore?: number;
+  lastScoredAt?: string;
+}
+
+export interface TeamResponse {
+  teamId: string;
+  teamName: string;
+  eventId: string;
+  createdByUserId: string;
+  createdAt: string;
+  status: string;
+  joinCode?: string;
+}
+
+export interface TeamMemberResponse {
+  userId: string;
+  fullName: string;
+  email: string;
+  joinedAt: string;
+  role: string;
+}
+
+export interface EventRegistrationRequest {
+  regKey?: string;
+  dietaryReq?: string;
+  allergies?: string;
+}
+
+export interface EventRegistrationResponse {
+  regId: string;
+  eventId: string;
+  registeredAt: string;
+  dietaryReq?: string;
+  allergies?: string;
 }
 
 export interface RegisteredParticipants {
@@ -64,6 +129,12 @@ export interface TeamSubmission {
 export interface EventRegistrationSummary {
   teams: RegisteredTeams[];
   topSubmissions: TeamSubmission[];
+}
+
+export interface ExtendTimerResponse {
+  eventId: string;
+  duration: number;
+  endDateTime: string;
 }
 
 export interface EventParticipantResponse {
@@ -162,6 +233,16 @@ export class EventService {
     return `${environment.apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
   }
 
+
+  getEventBannerUrl( eventId: string ): Observable<{ url: string; storageKey: string }> {
+    return this.http.get<{ url: string; storageKey: string }>( `${this.baseUrl}/storage/events/${eventId}/banner` );
+  }
+
+  getEventLogoUrl( eventId: string): Observable<{ url: string; storageKey: string }> {
+    return this.http.get<{ url: string; storageKey: string }>( `${this.baseUrl}/storage/events/${eventId}/logo`);
+  }
+
+
   downloadEventResults(eventId: string): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/admin/events/${eventId}/results/export`, {
       responseType: 'blob'
@@ -178,5 +259,52 @@ export class EventService {
 
   addTeamMember(eventId: string, teamId: string, email: string): Observable<EventParticipantResponse>{
     return this.http.post<EventParticipantResponse>(`${this.baseUrl}/admin/events/${eventId}/teams/${teamId}/members`,{ email });
+  registerForEvent( eventId: string, registrationData: EventRegistrationRequest): Observable<EventRegistrationResponse> {
+  return this.http.post<EventRegistrationResponse>( `${this.baseUrl}/events/${eventId}/registered`, registrationData);
+}
+
+getMyRegistrations(): Observable<EventRegistrationResponse[]> {
+  return this.http.get<EventRegistrationResponse[]>( `${this.baseUrl}/events/my-registrations`);
+}
+
+getMyTeamForEvent(eventId: string): Observable<TeamResponse | null> {
+  return this.http.get<TeamResponse | null>( `${this.baseUrl}/teams/my-team?eventId=${eventId}`);
+}
+
+getTeamMembers(teamId: string): Observable<TeamMemberResponse[]> {
+  return this.http.get<TeamMemberResponse[]>( `${this.baseUrl}/teams/${teamId}/members`);
+}
+
+getTeamSubmissions(teamId: string): Observable<SubmissionResponse[]> {
+  return this.http.get<SubmissionResponse[]>( `${this.baseUrl}/scoring/teams/${teamId}/submissions` );
+}
+
+getEventLeaderboard(eventId: string): Observable<LeaderboardEntryResponse[]> {
+  return this.http.get<LeaderboardEntryResponse[]>( `${this.baseUrl}/scoring/events/${eventId}/leaderboard`);
+}
+
+  pauseLeaderboard(eventId: string): Observable<{ eventId: string; scoringPaused: boolean }> {
+    return this.http.patch<{ eventId: string; scoringPaused: boolean }>(
+      `${this.baseUrl}/admin/events/${eventId}/scoring/pause`,
+      {}
+    );
+  }
+
+  resumeLeaderboard(eventId: string): Observable<{ eventId: string; scoringPaused: boolean }> {
+    return this.http.patch<{ eventId: string; scoringPaused: boolean }>(
+      `${this.baseUrl}/admin/events/${eventId}/scoring/resume`,
+      {}
+    );
+  }
+
+  extendTimer(eventId: string, additionalTimeSeconds: number): Observable<ExtendTimerResponse> {
+    return this.http.patch<ExtendTimerResponse>(
+      `${this.baseUrl}/admin/events/${eventId}/extend`,
+      { additionalTime: additionalTimeSeconds }
+    );
+  }
+
+  downloadCertificate(eventId: string): Observable<Blob>{
+    return this.http.get(`${this.baseUrl}/events/${eventId}/certificate`, {responseType: 'blob'});
   }
 }

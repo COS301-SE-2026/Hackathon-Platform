@@ -1,6 +1,7 @@
 package com.hackathon.platform.scoring;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.dto.RecentSubmissionResponse;
 import com.hackathon.platform.dto.ScoringLogResponse;
 import com.hackathon.platform.dto.SubmissionResponse;
 import com.hackathon.platform.model.ScoringLog;
@@ -58,6 +59,31 @@ public class SubmissionQueryService {
   public List<SubmissionResponse> getRecentSubmissions(UUID userId, int limit) {
     return submissionRepo.getRecentSubmissions(userId, PageRequest.of(0, limit)).stream()
         .map(s -> toResponse(s, false))
+        .collect(Collectors.toList());
+  }
+
+  /** Recent submissions for a single event */
+  @Transactional(readOnly = true)
+  public List<RecentSubmissionResponse> getRecentSubmissionsForEvent(
+      UUID eventId, UUID userId, int limit) {
+
+    return submissionRepo
+        .getRecentSubmissionsForEvent(eventId, userId, PageRequest.of(0, limit))
+        .stream()
+        .map(
+            row ->
+                new RecentSubmissionResponse(
+                    row.getSubmissionId(),
+                    row.getTeamId(),
+                    row.getTeamName(),
+                    row.getEventId(),
+                    row.getEventName(),
+                    row.getLevelId(),
+                    row.getLevelNumber(),
+                    row.getLevelName(),
+                    row.getScore(),
+                    row.getStatus(),
+                    row.getSubmittedAt()))
         .collect(Collectors.toList());
   }
 

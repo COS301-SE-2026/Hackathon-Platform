@@ -1,6 +1,7 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.LeaderboardEntryResponse;
+import com.hackathon.platform.dto.RecentSubmissionResponse;
 import com.hackathon.platform.dto.ScoringLogResponse;
 import com.hackathon.platform.dto.SubmissionResponse;
 import com.hackathon.platform.model.User;
@@ -117,6 +118,21 @@ public class ScoringController {
   public ResponseEntity<List<SubmissionResponse>> getRecentSubmissions(
       @PathVariable int limit, @AuthenticationPrincipal User user) {
     return ResponseEntity.ok(submissionQueryService.getRecentSubmissions(user.getUserId(), limit));
+  }
+
+  /**
+   * Recent submissions for a single event, with the team name and level number/name already
+   * resolved
+   *
+   * @param eventId the event to scope submissions to
+   * @param limit the maximum number of submissions to return
+   */
+  @GetMapping("/admin/events/{eventId}/recentsubmissions/{limit}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<List<RecentSubmissionResponse>> getRecentSubmissionsForEvent(
+      @PathVariable UUID eventId, @PathVariable int limit, @AuthenticationPrincipal User user) {
+    return ResponseEntity.ok(
+        submissionQueryService.getRecentSubmissionsForEvent(eventId, user.getUserId(), limit));
   }
 
   /**

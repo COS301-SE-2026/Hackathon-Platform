@@ -1,12 +1,23 @@
 <div class = "dashboard-page">
   <main class = "content">
     <div class = "page-header">
-      <div>
-        <h1>Welcome back, Admin! </h1>
-        <p class = "page-subtitle">Here's what's happening with your hackathons.</p>
-      </div>
+
+      @if (allEvents.length > 0) {
+        <div class = "event-context-picker">
+          <span class = "event-context-label"><i class = "pi pi-calendar"></i> Viewing insights for</span>
+          <select class = "event-insights-select" [ngModel] = "selectedEventId" (ngModelChange) = "onSelectedEventChange($event)">
+            @for (event of allEvents; track event.eventId) {
+              <option [value] = "event.eventId">{{ event.name }}</option>
+            }
+          </select>
+        </div>
+      }
     </div>
 
+    <div class = "scope-legend">
+      <span class = "scope-legend-item"><span class = "scope-swatch scope-swatch-global"></span>All events</span>
+      <span class = "scope-legend-item"><span class = "scope-swatch scope-swatch-event"></span>Selected event only</span>
+    </div>
 
     <div class = "stats-grid">
       <div class = "stat-card">
@@ -14,6 +25,7 @@
         <div>
           <p class = "stat-value">{{ activeEvents }}</p>
         <p class = "stat-label">Active events</p>
+        <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
         </div>
         
       </div>
@@ -23,7 +35,7 @@
         <div>
           <p class = "stat-value">{{ activeParticipants }}</p>
         <p class = "stat-label">Active Participants</p>
-        
+        <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
         </div>
        </div>
 
@@ -32,7 +44,7 @@
         <div>
           <p class = "stat-value">{{ teamsCount }}</p>
         <p class = "stat-label">Teams</p>
-       
+        <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
         </div>
         </div>
 
@@ -41,7 +53,7 @@
         <div>
           <p class = "stat-value">{{ submissionsCount}}</p>
         <p class = "stat-label">Submissions</p>
-       
+        <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
         </div>
         </div>
     </div>
@@ -49,8 +61,10 @@
         <div class = "panels-row panels-row-2">
           <div class = "panel-card">
             <div class = "panel-header">
-              <h2 class = "panel-title">Active Events</h2>
-             
+              <div class = "panel-header-titles">
+                <h2 class = "panel-title">Active Events</h2>
+                <span class = "scope-tag scope-tag-global"><i class = "pi pi-globe"></i>All events</span>
+              </div>
             </div>
 
             @if (eventLoading){
@@ -102,11 +116,13 @@
 
         <div class = "section">
           <div class = "panel-header">
-          <h2 class = "section-title">Recent submissions</h2>
-         
+          <div class = "panel-header-titles">
+            <h2 class = "section-title">Recent submissions</h2>
+            <span class = "scope-tag scope-tag-event" [title] = "'Scoped to ' + selectedEventName"><i class = "pi pi-map-marker"></i>This event</span>
+          </div>
           </div> 
         
-          <div class = "table-card">
+          <div class = "table-card panel-card-event">
             @if (recentSubmissions.length === 0){
               <div class = "empty-state">No submissions yet</div>
             } @else {

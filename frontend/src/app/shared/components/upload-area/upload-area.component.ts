@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'app-upload-area',
@@ -14,6 +14,8 @@ export class UploadAreaComponent {
   @Input() disabled = false;
 
   @Output() fileSelected = new EventEmitter<File>();
+  @Output() fileCleared = new EventEmitter<void>();
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   selectedFile: File | null = null;
   isDragging = false;
@@ -54,18 +56,14 @@ export class UploadAreaComponent {
     }
   }
 
-  removeFile(event: Event): void {
-    event.stopPropagation();
+removeFile(event: Event): void {
+  event.stopPropagation();
 
-    this.selectedFile = null;
+  this.selectedFile = null;
+  this.fileInput.nativeElement.value = '';
 
-    const uploadArea = (event.target as HTMLElement).closest('.upload-area');
-
-    const input = uploadArea?.querySelector('.upload-input') as HTMLInputElement;
-
-    if (input) {  input.value = '';
-    }
-  }
+  this.fileCleared.emit();
+}
 
   private selectFile(file: File): void {
   this.selectedFile = file;
@@ -92,4 +90,11 @@ export class UploadAreaComponent {
 
     return name.substring(0, 18) + '...' + extension;
   }
+
+
+  clear(): void {
+  this.selectedFile = null;
+  this.fileInput.nativeElement.value = '';
+  }
+
 }

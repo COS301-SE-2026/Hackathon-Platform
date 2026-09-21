@@ -1,9 +1,9 @@
-import { ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
-import { EventService, EventResponse } from '../../../services/event.service';
+import { EventService, EventResponse, EventParticipantResponse} from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 import { ViewEventModalComponent } from '../view-event-modal/view-event-modal.component';
@@ -34,6 +34,15 @@ interface EventRow {
   bannerUrl: string | null;
   logoUrl: string | null;
   palette: Palette;
+  scoringPaused: boolean;
+  startDateTime: string;
+  endDateTime: string | null;
+}
+
+interface RegisteredTeam {
+  teamId: string;
+  name: string;
+  members: EventParticipantResponse[];
 }
 
 const DEFAULT_PALETTES: Palette[]=[
@@ -57,7 +66,7 @@ const PAGE_SIZE = 12;
   styleUrls: ['./eventlist.component.scss'],
   templateUrl: './eventlist.component.html',
 })
-export class EventlistComponent implements OnInit {
+export class EventlistComponent implements OnInit, OnDestroy {
   private readonly levelService = inject(LevelService);
   private readonly hackathonService = inject(HackathonService);
   private readonly eventService = inject(EventService);
@@ -114,6 +123,28 @@ export class EventlistComponent implements OnInit {
     canceled: 0,
   };
 
+  get filteredEvents(): EventRow[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    return this.events.filter(event => {
+      const matchesSearch = !term || event.name.toLowerCase().includes(term);
+      const matchesStatus = this.statusFilter === 'ALL' || event.status === this.statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+  }
+
+  expandedEventId: string | null = null;
+  registrationsByEvent: Record<string, RegisteredTeam[]> = {};
+  registrationsLoading: Record<string, boolean> = {};
+  registrationsError: Record<string, string> = {};
+  leaderboardPaused: Record<string, boolean> = {};
+  leaderboardPauseLoading: Record<string, boolean> = {};
+
+  extendTimerOpenFor: string | null = null;
+  extendTimerHours: Record<string, number> = {};
+  extendTimerLoading: Record<string, boolean> = {};
+  extendTimerError: Record<string, string> = {};
+
+  private countdownIntervalId: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
@@ -142,6 +173,18 @@ export class EventlistComponent implements OnInit {
       : 'No events available on the platform yet.'
     }
     return 'No events match your search.';
+    // Refresh every 30s
+    this.countdownIntervalId = setInterval(() => {
+      if (this.events.length > 0) {
+        this.change.markForCheck();
+      }
+    }, 30000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.countdownIntervalId !== null) {
+      clearInterval(this.countdownIntervalId);
+    }
   }
 
   private loadHackathon(): void {
@@ -181,6 +224,9 @@ export class EventlistComponent implements OnInit {
         this.events = events.map((e) => this.toEventRow(e,now));
         this.updateStatusCount();
         this.applyFilter();
+        events.forEach((event) => {
+          this.leaderboardPaused[event.eventId] = event.scoringPaused;
+        });
         this.isLoading = false;
         this.change.markForCheck();
       },
@@ -280,7 +326,7 @@ export class EventlistComponent implements OnInit {
       logoInitial: event.name?.charAt(0)?.toUpperCase() || '?',
       visibility: this.titleCase(event.visibility),
       status: this.titleCase(statusClass),
-      statusClass,
+      statusClass: this.getStatusClass(event.status),
       dateRangeLabel: this.formatDateRange(start,end),
       teamSizeLimit: event.teamSizeLimit,
       isInPerson: !!event.isInPerson,
@@ -292,6 +338,13 @@ export class EventlistComponent implements OnInit {
       palette: statusClass === 'canceled' ? CANCELED_PALETTE : this.paletteFor(event.eventId || event.name),
 
     };
+      status: this.statusLabel(event.status),
+      statusClass: this.getStatusClass(event.status),
+      dateRangeLabel: this.formatDateRange(event),
+      scoringPaused: event.scoringPaused,
+      startDateTime: event.startDateTime,
+      endDateTime: event.endDateTime ?? this.computeEndDateTime(event),
+    }
   }
 
   private resolveStatus(event: EventResponse, start: number, end:number, now:number): StatusClass{
@@ -362,8 +415,63 @@ export class EventlistComponent implements OnInit {
     
     const startLabel = new Date(start).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const endLabel = new Date(end).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const end = event.endDateTime ? new Date(event.endDateTime) : new Date(start.getTime() + Number(event.duration || 0) * 1000);
 
     return `${startLabel} \u2013 ${endLabel}`;
+  }
+
+  private computeEndDateTime(event: EventResponse): string | null {
+    const start = new Date(event.startDateTime);
+    if (Number.isNaN(start.getTime())){
+      return null;
+
+    }
+    return new Date(start.getTime() + Number(event.duration || 0) * 1000).toISOString();
+
+  }
+
+  getTimeRemaining(event: EventRow): string {
+
+    if (event.statusClass === 'canceled' || event.statusClass === 'ended') {
+      return 'Canceled';
+    }
+    if (!event.endDateTime) {
+      return '\u2014';
+    }
+
+    const now = Date.now();
+    const start = new Date(event.startDateTime).getTime();
+    const end = new Date(event.endDateTime).getTime();
+
+    if (Number.isNaN(start) || Number.isNaN(end)) {
+      return '\u2014';
+    }
+
+    if (now < start) {
+      return `Starts in ${this.formatDurationMs(start - now)}`;
+    }
+    if (now >= end) {
+      return 'Ended';
+    }
+    return `${this.formatDurationMs(end - now)} left`;
+  }
+
+  private formatDurationMs(ms: number): string {
+
+    const totalMinutes = Math.max(0, Math.floor(ms / 60000));
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+    const minutes = totalMinutes % 60;
+
+    if (days > 0) {
+
+      return `${days}d ${hours}h`;
+    }
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+
   }
 
   navigateToCreateEvents(): void {
@@ -372,6 +480,8 @@ export class EventlistComponent implements OnInit {
 
   onBannerError(event: EventRow): void {
     event.bannerUrl = null;
+  navigateToViewEvent(eventId: string): void {
+    this.toggleEventDetails(eventId);
   }
 
   
@@ -379,12 +489,121 @@ export class EventlistComponent implements OnInit {
     event.logoUrl = null;
   }
 
+  private loadRegistrations(eventId: string): void {
+    this.registrationsLoading[eventId] = true;
+    this.registrationsError[eventId] ='';
+
+    this.eventService.getEventParticipants(eventId).subscribe({
+      next: (participants) =>{
+        const teams = new Map<string, RegisteredTeam>();
+
+        participants.forEach((participant) => {
+          if (!teams.has(participant.teamId)) {
+            teams.set(participant.teamId, {
+              teamId: participant.teamId,
+              name: participant.teamName,
+              members: []
+            });
+          }
+
+          teams.get(participant.teamId)?.members.push(participant);
+        });
+
+        this.registrationsByEvent[eventId] = Array.from(teams.values());
+        this.registrationsLoading[eventId] = false;
+        this.change.markForCheck();
+      },
+      error:(error) =>{
+        console.error('Failed to load registrations for event',eventId,error);
+        this.registrationsError[eventId] = 'Could not load registered teams.';
+        this.registrationsLoading[eventId] = false;
+        this.change.markForCheck();
+      }
+    });
+  }
 
   navigateToParticipants(eventId: string): void {
     const event = this.events.find(e => e.eventId === eventId);
     this.participantsModalEventId = eventId;
     this.participantsModalEventName = event?.name || '';
     this.showParticipantsModal = true;
+  }
+
+  navigateToAnnouncements(eventId: string): void {
+    this.router.navigate(['/admin/events', eventId, 'announcements']);
+  }
+
+  navigateToForum(eventId: string): void {
+    this.router.navigate(['/admin/events', eventId, 'forum']);
+  }
+
+  pauseLeaderboard(eventId: string): void {
+    if(this.leaderboardPauseLoading[eventId]) return;
+
+    this.leaderboardPauseLoading[eventId] = true;
+
+    const request = this.leaderboardPaused[eventId]
+      ? this.eventService.resumeLeaderboard(eventId)
+      : this.eventService.pauseLeaderboard(eventId);
+
+    request.subscribe({
+      next: (response) => {
+        this.leaderboardPaused[eventId] = response.scoringPaused;
+        this.leaderboardPauseLoading[eventId] = false;
+        this.change.markForCheck();
+      },
+      error: (error) => {
+        console.error('Failed to update leaderboard pause for event', eventId, error);
+        this.leaderboardPauseLoading[eventId] = false;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  toggleExtendTimer(eventId: string): void {
+    if (this.extendTimerOpenFor === eventId) {
+      this.extendTimerOpenFor = null;
+      return;
+
+    }
+    this.extendTimerOpenFor = eventId;
+    this.extendTimerError[eventId] = '';
+    if (!this.extendTimerHours[eventId]) {
+
+      this.extendTimerHours[eventId] = 1;
+    }
+  }
+
+  extendTimer(eventId: string): void {
+
+    if (this.extendTimerLoading[eventId]) return;
+
+    const hours = Number(this.extendTimerHours[eventId]);
+    if (!hours || hours <= 0) {
+      this.extendTimerError[eventId] = 'Enter a number of hours greater than 0.';
+      return;
+    }
+
+    this.extendTimerError[eventId] = '';
+    this.extendTimerLoading[eventId] = true;
+    const additionalTimeSeconds = Math.round(hours * 3600);
+
+
+    this.eventService.extendTimer(eventId, additionalTimeSeconds).subscribe({
+      next: () => {
+        this.extendTimerLoading[eventId] = false;
+        this.extendTimerOpenFor = null;
+        this.loadEvents(true);
+      },
+      error: (error) => {
+        console.error('Failed to extend timer for event', eventId, error);
+        this.extendTimerError[eventId] = 'Could not extend the timer. Please try again.';
+        this.extendTimerLoading[eventId] = false;
+        this.change.markForCheck();
+      }
+
+
+    });
   }
 
   closeParticipantsModal(): void {

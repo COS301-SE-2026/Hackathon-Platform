@@ -1,8 +1,9 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { forkJoin } from 'rxjs';
 import { Router, RouterModule } from '@angular/router';
-import { EventService, EventResponse } from '../../services/event.service';
+import { EventService, EventResponse, EventRegistrationRequest } from '../../services/event.service';
 import { CarouselModule, CarouselPageEvent } from 'primeng/carousel';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
@@ -11,9 +12,9 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ToastService } from '../../shared/components/toast/toast.service';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util';
+import { EventCardComponent } from '../event-card/event-card.component';
 
-
-interface OpenEventView {
+export interface OpenEventView {
   eventId: string;
   name: string;
   dates: string;
@@ -25,23 +26,37 @@ interface OpenEventView {
   startDateTime: string;
   duration: number;
   timer: EventTimer;
+
+  tagline?: string;
+  totalPrizePool?: number;
+  logoUrl?: string;
+  inPerson?: boolean;
+
+  teamName?: string;
+  teamMemberCount?: number;
+
+  latestSubmissionLevel?: number;
+  latestSubmissionScore?: number;
+  teamRank?: number;
+  totalTeams?: number;
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
-    CarouselModule, 
-    CardComponent, 
+    CommonModule,
+    RouterModule,
+    CarouselModule,
+    CardComponent,
     ButtonComponent,
-    InputComponent, 
+    InputComponent,
     ModalComponent,
-    LoaderComponent
+    LoaderComponent,
+    EventCardComponent
    ],
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  templateUrl: '../home/home.component.html',
+  styleUrls: ['../home/home.component.scss']
 })
 
 export class HomeComponent implements OnInit, OnDestroy {
@@ -53,20 +68,27 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private timerInterval: ReturnType<typeof setInterval> | undefined;
 
- 
+
   isLoadingEvents = false;
   registrationModal = false;
   isLoadingActiveEvents = false;
+  isRegistering = false;
   userFirstName = '';
   registrationKey = '';
+  dietaryReq = '';
+  allergies = '';
   currentActiveEventIndex = 0;
 
   activeEvents: OpenEventView[] = [];
   upcomingEvents: OpenEventView[] = [];
+  completedEvents: OpenEventView[] = [];
+  isLoadingCompletedEvents = false;
+  generatingCertificateEventId: string | null = null;
   selectedEvent: OpenEventView | null = null;
+  registeredEventIds = new Set<string>();
 
-  
-  
+
+
 
     responsiveOptionsForCarousel = [
     {
@@ -91,9 +113,11 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const user = this.authService.getUser();
-    this.userFirstName = user ? user.firstName : 'Participant';
+    this.userFirstName = user?.firstName ?? 'Participant';
     this.loadUpcomingEvents();
     this.loadUsersActiveEvents();
+    this.loadMyRegistrations();
+    this.loadCompletedEvents();
     this.timerInterval = setInterval(() => this.tick(), 1000);
   }
 
@@ -107,25 +131,132 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.currentActiveEventIndex = event.page ?? 0;
 }
 
+  private loadTeamDetails(events: OpenEventView[]): void {
+
+  events.forEach((event) => {
+
+     this.eventService.getMyTeamForEvent(event.eventId).subscribe({
+    next: (team) => {
+
+      if (!team) {
+        event.teamName = undefined;
+        event.teamMemberCount = 0;
+        event.latestSubmissionLevel = undefined;
+        event.latestSubmissionScore = undefined;
+        event.teamRank = undefined;
+        event.totalTeams = undefined;
+        this.change.markForCheck();
+        return;
+      }
+       event.teamName = team.teamName;
+
+      this.eventService.getTeamMembers(team.teamId).subscribe({
+        next: (members) => {
+           event.teamMemberCount = members.length;
+          this.change.markForCheck();
+        },
+
+        error: (error) => {
+              console.error(`Failed to load team members for ${event.eventId}:`, error);
+            }
+
+          });
+
+         this.eventService.getTeamSubmissions(team.teamId).subscribe({
+
+          next: (submissions) => {
+
+            if (submissions.length > 0) {
+               const latestSubmission = submissions.reduce( (latest, submission) =>  new Date(submission.submittedAt).getTime() >  new Date(latest.submittedAt).getTime() ? submission : latest  );
+               event.latestSubmissionLevel = latestSubmission.levelId;
+              event.latestSubmissionScore = latestSubmission.score;
+            }
+
+            this.change.markForCheck();
+          },
+
+          error: (error) => {
+             console.error( `Failed to load submissions for ${event.eventId}:`, error );
+          }
+        });
+
+        this.eventService.getEventLeaderboard(event.eventId).subscribe({
+           next: (leaderboard) => {
+
+            const teamEntry = leaderboard.find(  entry => entry.teamId === team.teamId );
+
+            if (teamEntry) {
+               event.teamRank = teamEntry.rank;
+              event.totalTeams = leaderboard.length;
+            }
+
+            this.change.markForCheck();
+          },
+
+          error: (error) => {
+            console.error( `Failed to load leaderboard for ${event.eventId}:`, error );
+          }
+        });
+    },
+        error: (error) => {
+         console.error(`Failed to load team for ${event.eventId}:`, error);
+        }
+
+      });
+    });
+
+  }
+
+  private loadMyRegistrations(): void {
+
+  this.eventService.getMyRegistrations().subscribe({
+    next: (registrations) => {
+
+      this.registeredEventIds = new Set( registrations.map((registration) => registration.eventId) );
+
+      this.change.markForCheck();
+    },
+
+     error: (error) => {
+        console.error('Error loading registrations:', error);
+     }
+   });
+}
+
+  private loadEventLogos(events: OpenEventView[]): void {
+
+   events.forEach((event) => {
+
+   this.eventService.getEventLogoUrl(event.eventId).subscribe({
+        next: (response) => {
+          if (response?.url) {
+           event.logoUrl = response.url;
+            this.change.markForCheck();
+          }
+        },
+      error: (error) => { console.error(`Failed to load logo for event ${event.eventId}:`, error); }
+       });
+     });
+  }
+
+
  loadUpcomingEvents(): void {
   this.isLoadingEvents = true;
-  
+
 
   this.eventService.getOpenEvents().subscribe({
     next: (events) => {
       this.isLoadingEvents = false;
 
-      const now = new Date();
-
       this.upcomingEvents = events
         .map((event) => this.toOpenEventView(event))
-        .filter((event) => new Date(event.startDateTime) > now)
         .sort(
           (a, b) =>
             new Date(a.startDateTime).getTime() -
             new Date(b.startDateTime).getTime()
-        )
-        .slice(0, 4);
+        );
+
+        this.loadEventLogos(this.upcomingEvents);
 
       this.change.markForCheck();
     },
@@ -140,40 +271,60 @@ export class HomeComponent implements OnInit, OnDestroy {
 }
 
 
-  loadUsersActiveEvents(): void{
-  
-    this.isLoadingActiveEvents = true;
-    
+loadUsersActiveEvents(): void {
+  this.isLoadingActiveEvents = true;
 
-   this.eventService.getUserActiveEvents().subscribe({
-    next: (events) => {
-      this.isLoadingActiveEvents = false;
-      
-      if (events && events.length > 0) {
-        
-        this.activeEvents = events.map(event => this.toOpenEventView(event));
-        this.currentActiveEventIndex = 0;
-        this.tick();
-      } 
-      
-      else {
-        
-        this.activeEvents = [];
-      
+  this.activeEvents = [];
+
+  this.eventService.getMyRegistrations().subscribe({
+    next: (registrations) => {
+
+      if (registrations.length === 0) {
+
+        this.isLoadingActiveEvents = false;
+
+        this.change.markForCheck();
+        return;
       }
-      this.change.markForCheck();
+
+      const eventRequests = registrations.map((registration) =>
+        this.eventService.getEventById(registration.eventId)
+      );
+
+      forkJoin(eventRequests).subscribe({
+        next: (events) => {
+          this.activeEvents = events.map((event) =>
+
+            this.toOpenEventView(event)
+          );
+
+          this.currentActiveEventIndex = 0;
+
+          this.loadEventLogos(this.activeEvents);
+          this.loadTeamDetails(this.activeEvents);
+          this.tick();
+
+          this.isLoadingActiveEvents = false;
+          this.change.markForCheck();
+        },
+
+        error: (error) => {
+          console.error('Error loading registered events:', error);
+          this.activeEvents = [];
+          this.isLoadingActiveEvents = false;
+          this.change.markForCheck();
+        }
+      });
     },
-    
-    error: (err) => {
-      
-      this.isLoadingActiveEvents = false;
-      console.error('Error loading active events:', err);
-      this.toast.error('Unable to Load Active Events','We couldn’t load your active events. Please try again.');
+
+    error: (error) => {
+      console.error('Error loading registrations:', error);
       this.activeEvents = [];
-      this.change.markForCheck();     
+      this.isLoadingActiveEvents = false;
+      this.change.markForCheck();
     }
   });
-  }
+}
 
   goToEvent(event: OpenEventView): void {
   this.saveCurrentEvent(event);
@@ -213,6 +364,8 @@ getDaysUntilStart(event: OpenEventView): string | null {
 registerForEvent(event: OpenEventView): void {
   this.selectedEvent = event;
   this.registrationKey = '';
+  this.dietaryReq = '';
+  this.allergies = '';
   this.registrationModal = true;
 }
 
@@ -220,16 +373,63 @@ closeRegistrationModal(): void {
   this.registrationModal = false;
   this.selectedEvent = null;
   this.registrationKey = '';
+  this.dietaryReq = '';
+  this.allergies = '';
 }
 
 confirmRegistration(): void {
-  if (!this.selectedEvent) {
+  if (!this.selectedEvent || this.isRegistering) {
     return;
   }
 
-  // Registration needs to be connected to backend.
-}
+  if (this.selectedEvent.visibility === 'PRIVATE' && !this.registrationKey.trim()) {
+    this.toast.error('Registration Key Required','Please enter the registration key for this private event.');
+    return;
+  }
 
+  const eventId = this.selectedEvent.eventId;
+  const eventName = this.selectedEvent.name;
+
+  const registrationData: EventRegistrationRequest = {};
+
+  if (this.selectedEvent.visibility === 'PRIVATE') {
+    registrationData.regKey = this.registrationKey.trim();
+  }
+
+  if (this.selectedEvent.inPerson) {
+    registrationData.dietaryReq = this.dietaryReq.trim() || undefined;
+    registrationData.allergies = this.allergies.trim() || undefined;
+  }
+
+  this.isRegistering = true;
+
+  this.eventService.registerForEvent(eventId, registrationData).subscribe({
+    next: () => {
+      this.registeredEventIds.add(eventId);
+
+      this.isRegistering = false;
+
+      this.closeRegistrationModal();
+
+      this.loadUsersActiveEvents();
+
+      this.toast.success('Registration Successful', `You are now registered for ${eventName}.`);
+
+      this.change.markForCheck();
+    },
+
+    error: (error) => {
+
+      this.isRegistering = false;
+
+      console.error('Error registering for event:', error);
+
+      this.toast.error('Registration Failed', error.error?.message || 'Unable to register for this event. Please try again.');
+
+      this.change.markForCheck();
+    }
+  });
+}
 
   private saveCurrentEvent(event: OpenEventView): void {
     localStorage.setItem('currentEventId', event.eventId);
@@ -248,6 +448,11 @@ confirmRegistration(): void {
       description: event.description,
       startDateTime: event.startDateTime,
       duration: event.duration,
+
+      tagline: event.tagline,
+      totalPrizePool: event.totalPrizePool,
+      inPerson: event.inPerson,
+
       timer: {
         label: '',
         days: '00',
@@ -260,7 +465,7 @@ confirmRegistration(): void {
 
   private formatEventDates(startDateTime: string, durationHours: number): string {
     const start = new Date(startDateTime);
-    const end = new Date(start.getTime() + durationHours * 60 * 60 * 1000);
+    const end = new Date(start.getTime() + durationHours * 1000);
 
     return `${this.formatShortDate(start)} – ${this.formatShortDate(end)}`;
   }
@@ -280,4 +485,49 @@ confirmRegistration(): void {
   this.change.markForCheck();
 }
 
+  loadCompletedEvents(): void {
+    this.isLoadingCompletedEvents = true;
+
+    this.eventService.getCompletedEvents().subscribe({
+      next: (events) => {
+        this.completedEvents = events.map((event) => this.toOpenEventView(event)).sort((a, b) => new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime());
+        this.loadEventLogos(this.completedEvents);
+        this.isLoadingCompletedEvents = false;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.completedEvents = [];
+        this.isLoadingCompletedEvents = false;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  generateCertificate(event: OpenEventView): void {
+    if(this.generatingCertificateEventId){
+      return;
+    }
+
+    this.generatingCertificateEventId = event.eventId;
+
+    this.eventService.downloadCertificate(event.eventId).subscribe({
+      next: (blob) =>{
+        const fileName = `${event.name.replace(/[^a-z0-9]+/gi, '-')}-certificate.pdf`;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.generatingCertificateEventId = null;
+        this.change.markForCheck();
+      },
+
+      error: () => {
+        this.toast.error("Error", "Cant find the certificate");
+        this.generatingCertificateEventId = null;
+        this.change.markForCheck();
+      }
+    })
+  }
 }
