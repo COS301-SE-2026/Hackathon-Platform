@@ -90,60 +90,6 @@
           <span class = "toggle-desc">Rankings are locked and hidden from updates</span>
           </button>
         </div>
-
-        <div class = "form-row leaderboard-quick-action">
-          <div class = "form-group">
-            <span class = "field-label-spacer" aria-hidden = "true">&nbsp;</span>
-            <button type ="button" class = "btn-patch" (click)="toggleLeaderboardFreeze()" [disabled]="isSaving">
-              {{form.leaderboardFrozen ? 'Unfreeze Leaderboard Now' : 'Freeze Leaderboard Now'}}
-            </button>
-          </div>
-        </div>
-        <p class = "field-hint">Freezing locks the current standings immediately, independent of Save Changes below.</p>
-      </div>
-
-
-      <div class="form-section">
-        <h2 class="section-heading">Event Resources</h2>
-        <div class="form-group">
-          <label for="problemStatementFile">Problem Statement PDF</label>
-          <div
-            class="file-upload-area"
-            role="button"
-            tabindex="0"
-            (click)="fileInput.click()"
-            (keydown.enter)="fileInput.click()"
-            (keydown.space)="fileInput.click(); $event.preventDefault()"
-            (dragover)="$event.preventDefault()"
-            (drop)="onDropFile($event)"
-          >
-            <input
-              id="problemStatementFile"
-              #fileInput
-              type="file"
-              accept=".pdf"
-              style="display:none"
-              (change)="onFileSelected($event)"
-            />
-
-            <span>{{ uploadFileName || 'Click or drag PDF here' }}</span>
-          </div>
-
-          <button
-            type="button"
-            class="btn-upload"
-            (click)="uploadResource()"
-            [disabled]="!uploadFile || isUploading"
-          >
-            {{ isUploading ? 'Uploading...' : 'Upload' }}
-          </button>
-          @if (uploadSuccess) {
-            <p class="success-message" style="margin-top: 8px;">File uploaded successfully</p>
-          }
-          @if (uploadError) {
-            <p class="error-message" style="margin-top: 8px;">{{ uploadError }}</p>
-          }
-        </div>
       </div>
 
       <div class="form-actions">
