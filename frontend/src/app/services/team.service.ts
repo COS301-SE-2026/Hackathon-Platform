@@ -16,6 +16,7 @@ export interface TeamResponse {
   createdByUserId: string;
   createdAt: string;
   status: string;
+  joinCode: string;
 }
 
 export interface TeamMemberResponse {
@@ -48,6 +49,10 @@ export class TeamService {
 
   requestToJoinTeam(teamId: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${teamId}/join-requests`, {});
+  }
+
+   requestToJoinTeamByCode(joinCode: string): Observable<void> {
+     return this.http.post<void>( `${this.baseUrl}/join/${joinCode}`, {} );
   }
 
   getJoinRequests(teamId: string): Observable<TeamMemberResponse[]> {

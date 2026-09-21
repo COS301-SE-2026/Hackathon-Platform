@@ -40,7 +40,7 @@ export class MyTeamComponent implements OnInit {
   submissionCount = 0;
   teamScore = 0;
   teamRank = 0;
-
+  isCopyingJoinCode = false;
   private eventID = '';
 
   @Input({ required: true })
@@ -56,7 +56,7 @@ export class MyTeamComponent implements OnInit {
     return this.eventID;
   }
 
-  teamIdToJoin = '';
+  joinCodeToUse = '';
   newTeamName = '';
   isLoading = false;
   isLoadingTeam = true;
@@ -73,6 +73,7 @@ export class MyTeamComponent implements OnInit {
   team = {
     name: '',
     teamId: '',
+    joinCode: '',
     members: [] as DisplayTeamMember[]
   };
 
@@ -94,6 +95,7 @@ export class MyTeamComponent implements OnInit {
         this.hasTeam = true;
         this.team.teamId = response.teamId;
         this.team.name = response.teamName;
+        this.team.joinCode = response.joinCode;
 
         this.loadTeamMembers(response.teamId);
         this.loadTeamStats();
@@ -241,7 +243,7 @@ openCreateTeamDialog(): void {
 openRequestToJoinDialog(): void {
   this.teamDialogMode = 'join';
   this.errorMessage = '';
-  this.teamIdToJoin = '';
+  this.joinCodeToUse = '';
   this.teamDialogVisible = true;
 }
 
@@ -249,19 +251,19 @@ openRequestToJoinDialog(): void {
   joinTeam(): void {
     this.clearMessages();
 
-    if (!this.teamIdToJoin.trim()) {
-      this.errorMessage = 'Please enter a team ID';
+    if (!this.joinCodeToUse.trim()) {
+      this.errorMessage = 'Please enter a join code';
       return;
     }
 
     this.isLoading = true;
 
-    this.teamService.requestToJoinTeam(this.teamIdToJoin.trim()).subscribe({
+     this.teamService.requestToJoinTeamByCode(this.joinCodeToUse.trim()).subscribe({
       next: () => {
         this.isLoading = false;
         this.successMessage = 'Join request sent! Waiting for the team lead to approve.';
           this.toast.success('Request Sent Successfully ',this.successMessage);
-        this.teamIdToJoin = '';
+        this.joinCodeToUse = '';
          this.teamDialogVisible = false;
         this.change.markForCheck();
       },
@@ -274,7 +276,7 @@ openRequestToJoinDialog(): void {
         } else if (error.error?.message?.includes('full')) {
           this.errorMessage = 'This team is full.';
         } else if (error.status === 404) {
-          this.errorMessage = 'Team not found. Check the team ID and try again.';
+           this.errorMessage = 'Join code not found. Check the join code and try again.';
         } else {
           this.errorMessage =
             error.error?.message || 'Failed to send join request.';
@@ -340,16 +342,23 @@ openRequestToJoinDialog(): void {
 }
 
   copyJoinCode(): void {
-    if (!this.team.teamId) return;
+  if (!this.team.joinCode || this.isCopyingJoinCode) return;
 
-    navigator.clipboard.writeText(this.team.teamId).then(
-      () => {
-        this.successMessage = 'Join code copied to clipboard.';
-      },
-      () => {
-        this.errorMessage = 'Could not copy the join code. Please copy it manually.';
-      }
-    );
+  this.isCopyingJoinCode = true;
+
+  navigator.clipboard.writeText(this.team.joinCode).then(
+    () => {
+      this.isCopyingJoinCode = false;
+      this.toast.success('Join Code Copied', 'The join code has been copied to your clipboard.');
+      this.change.markForCheck();
+     },
+
+     () => {
+       this.isCopyingJoinCode = false;
+       this.toast.error('Copy Failed', 'Could not copy the join code. Please copy it manually.');
+       this.change.markForCheck();
+     }
+   );
   }
 
   getInitials(name: string): string {
@@ -357,7 +366,7 @@ openRequestToJoinDialog(): void {
   }
 
   private resetTeamState(): void {
-    this.team = { name: '', teamId: '', members: [] };
+    this.team = { name: '', teamId: '', joinCode: '', members: [] };
     this.pendingRequests = [];
     this.isTeamLead = false;
   }

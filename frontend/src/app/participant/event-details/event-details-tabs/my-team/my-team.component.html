@@ -137,12 +137,10 @@
 
             <span class="join-code-label">JOIN CODE</span>
 
-            <span class="join-code">CAA1A3</span>
+            <span class="join-code">{{ team.joinCode }}</span>
 
           </div>
-
-          <app-button variant="secondary" width="100%" (click)="copyJoinCode()" (keydown)="null" (keyup)="null"> Copy</app-button>
-
+         <app-button variant="secondary" width="100%" (click)="copyJoinCode()" (keydown)="null" (keyup)="null"> {{ isCopyingJoinCode ? 'Copying...' : 'Copy' }}</app-button>
         </div>
 
       </section>
@@ -293,7 +291,7 @@
 
         <p class="team-dialog-prompt">Enter the join code shared by the team creator. </p>
 
-        <app-input id="teamJoinCode"  label="Join Code" placeholder="Enter join code"  [(value)]="teamIdToJoin"  (valueChange)="errorMessage = ''"> </app-input>
+        <app-input id="teamJoinCode"  label="Join Code" placeholder="Enter join code"  [(value)]="joinCodeToUse"  (valueChange)="errorMessage = ''"> </app-input>
 
       }
 
@@ -311,7 +309,7 @@
 
       } @else {
 
-        <app-button variant="primary" width="135px" (click)="joinTeam()" [disabled]="!teamIdToJoin.trim() || isLoading" (keydown)="null" (keyup)="null">Send </app-button>
+        <app-button variant="primary" width="135px" (click)="joinTeam()" [disabled]="!joinCodeToUse.trim() || isLoading" (keydown)="null" (keyup)="null">Send </app-button>
 
       }
 
