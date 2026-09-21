@@ -5,6 +5,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
+    margin-top: var(--space-6);
 }
 
 
@@ -25,8 +26,8 @@
 
 
 :host ::ng-deep .pagination .p-paginator-page, :host ::ng-deep .pagination .p-paginator-prev, :host ::ng-deep .pagination .p-paginator-next {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
 
   display: flex;
   align-items: center;
@@ -35,7 +36,7 @@
   padding: 0;
 
   border: 1px solid var(--light-gray);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
 
   background-color: var(--white);
   color: var(--dark-navy);
@@ -48,12 +49,13 @@
 }
 
 
-:host ::ng-deep .pagination .p-paginator-page:not(.p-disabled):hover, :host ::ng-deep .pagination .p-paginator-prev:not(.p-disabled):hover, :host ::ng-deep .pagination .p-paginator-next:not(.p-disabled):hover {
-  background-color: var(--bright-blue-bg);
-  border-color: var(--bright-blue);
-  color: var(--bright-blue);
+:host ::ng-deep .pagination .p-paginator-page:not(.p-disabled):not(.p-paginator-page-selected):hover,
+:host ::ng-deep .pagination .p-paginator-prev:not(.p-disabled):hover,
+:host ::ng-deep .pagination .p-paginator-next:not(.p-disabled):hover {
+  background-color: var(--white);
+  border-color: var(--light-gray);
+  color: var(--dark-navy);
 }
-
 
 :host ::ng-deep .pagination .p-paginator-page.p-paginator-page-selected {
   background-color: var(--bright-blue);
@@ -85,14 +87,3 @@
 }
 
 
-@media (max-width: 767px) {
-  :host ::ng-deep .pagination .p-paginator {
-    gap: var(--space-1);
-  }
-
-  :host ::ng-deep .pagination .p-paginator-page,:host ::ng-deep .pagination .p-paginator-prev, :host ::ng-deep .pagination .p-paginator-next {
-    width: 32px;
-
-    height: 32px;
-  }
-}

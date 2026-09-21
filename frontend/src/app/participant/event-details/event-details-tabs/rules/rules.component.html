@@ -1,1 +1,49 @@
+<div class="rules-page">
 
+  @if (loading) {
+  <div class="rules-message">
+     <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+     <p>Loading rules...</p>
+   </div>
+  }
+
+  @else if (errorMsg) {
+  <div class="rules-message"><p>{{ errorMsg }}</p></div>
+  }
+
+  @else if (event) {
+
+    <div class="rules-header">
+      <h2>Event Rules</h2>
+      <p>Please review the rules and requirements for this event.</p>
+    </div>
+
+  @if (event.rules) {
+
+      <section class="rules-section">
+
+        <div class="section-heading">
+          <i class="pi pi-book" aria-hidden="true"></i>
+
+          <div>
+          <h3>Rules & Requirements</h3>
+          </div>
+        </div>
+        <div class="rules-content"> {{ event.rules }}</div>
+      </section>
+
+  } 
+    
+    @else {
+
+      <div class="rules-message">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+         
+         <h3>No Rules Available</h3>
+         <p>No rules have been provided for this event yet.</p>
+      </div>
+
+     }
+  }
+
+</div>

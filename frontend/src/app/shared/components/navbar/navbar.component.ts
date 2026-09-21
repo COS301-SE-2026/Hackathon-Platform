@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output, HostListener } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, EventEmitter, Input, Output, HostListener, inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { ButtonComponent } from '../button/button.component';
 
 export interface NavbarLink {
   label: string;
@@ -15,11 +16,14 @@ route: string;
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, ButtonComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
+
+  @Input() variant: 'default' | 'landing' = 'default';
+
   @Input() links: NavbarLink[] = [];
 
   @Input() firstName = '';
@@ -32,6 +36,8 @@ export class NavbarComponent {
   @Input() profileMenuItems: NavbarProfileMenuItem[] = [];
 
   @Output() logout = new EventEmitter<void>();
+
+ readonly router = inject(Router);
 
   showMoreMenu = false;
   showProfileMenu = false;
@@ -119,4 +125,11 @@ const target = event.target as HTMLElement;
     this.showProfileMenu = false;
   }
  }
+
+ scrollTo(sectionId: string): void {
+  document.getElementById(sectionId)?.scrollIntoView({
+    behavior: 'smooth'
+  });
+}
+
 }

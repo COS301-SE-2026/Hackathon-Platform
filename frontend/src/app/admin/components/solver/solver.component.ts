@@ -1,4 +1,4 @@
-import {Component, ViewChild, ElementRef,inject,OnInit} from '@angular/core';
+import {Component, ViewChild, ElementRef,inject,OnInit,ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule,Router, ActivatedRoute } from '@angular/router';
@@ -6,6 +6,9 @@ import {ButtonModule} from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import {StorageService} from '../../../services/storage.service';
 import {SubmissionService} from '../../../services/submission.service';
+import {HackathonService} from '../../../services/hackathon.service';
+import {LevelService} from '../../../services/level.service';
+import {EventService} from '../../../services/event.service';
 
 
 @Component({
@@ -21,6 +24,10 @@ export class SolverComponent implements OnInit{
     private readonly route = inject(ActivatedRoute);
     private readonly storageService = inject(StorageService);
     private readonly submissionService = inject(SubmissionService);
+    private readonly hackathonService = inject(HackathonService);
+    private readonly levelService = inject(LevelService);
+    private readonly eventService = inject(EventService);
+    private readonly change = inject(ChangeDetectorRef);
 
     @ViewChild('uploadForm') uploadFormRef!: ElementRef<HTMLElement>;
     selectedFile: File | null = null;
@@ -109,11 +116,13 @@ onUploadAndActivate(): void{
     this.selectedFile= null;
     this.selectedFileName ='';
     this.changeNotes= '';
+    this.change.markForCheck();
         },
         error: (error) => {
             console.error('Upload failed:',error);
             this.isUploading = false;
             this.uploadError = error.error?.message || 'Upload failed. Please try again';
+            this.change.markForCheck();
         }
     });
 
@@ -137,27 +146,26 @@ rescoreAllSubmissions(): void {
         next: (response) => {
             this.isRescoring = false;
             this.rescoreSuccessMessage = `${response.queuedCount} submission(s) queued for rescoring.`;
+            this.change.markForCheck();
         },
         error: (error) => {
             console.error('Rescore failed:', error);
             this.isRescoring = false;
             this.rescoreError = error.error?.message || 'Rescore failed. Please try again';
+            this.change.markForCheck();
         }
     });
 }
 
   goBack(): void {
-    if (this.hackathonId){
-         this.router.navigate(['/admin/hackathons', this.hackathonId]);
-
-    }else {
-        this.router.navigate(['/admin/hackathons']);
-    }
-   
+    this.router.navigate(['/admin/hackathons']);
   }
 
   ngOnInit(): void {
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
+
+    const navigation = this.router.getCurrentNavigation();
+    this.hackathonName = navigation?.extras?.state?.['hackathonName'] || 'Loading...';
 
     if (!this.hackathonId){
         alert('No hackathon ID provided');
@@ -165,10 +173,51 @@ rescoreAllSubmissions(): void {
     }
 
     this.loadHackathonSummary();
+    this.loadLevelsCount();
+    this.loadEventsCount();
   }
 
   loadHackathonSummary(): void {
-    console.log('Loading hackathon summary for:', this.hackathonId);
+    this.hackathonService.getHackathon(this.hackathonId).subscribe({
+      next: (hackathon) => {
+        this.hackathonName = hackathon.name;
+        this.hackathonDescription = hackathon.description || '';
+        this.participantsCount = hackathon.participantsCount || 0;
+        this.change.markForCheck();
+      },
+      error: () => {
+        if (this.hackathonName === 'Loading...') {
+          this.hackathonName = '';
+        }
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  private loadLevelsCount(): void {
+    this.levelService.getLevels(this.hackathonId).subscribe({
+      next: (levels) => {
+        this.levelsCount = levels.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.levelsCount = 0;
+        this.change.markForCheck();
+      }
+    });
+  }
+
+  private loadEventsCount(): void {
+    this.eventService.getEventsForHackathon(this.hackathonId).subscribe({
+      next: (events) => {
+        this.eventsCount = events.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.eventsCount = 0;
+        this.change.markForCheck();
+      }
+    });
   }
 
 

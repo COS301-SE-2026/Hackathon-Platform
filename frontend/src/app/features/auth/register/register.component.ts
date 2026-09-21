@@ -1,13 +1,17 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule} from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService, RegisterRequest } from '../../../services/auth.service';
+import { InputComponent } from '../../../shared/components/input/input.component';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { ToastService } from '../../../shared/components/toast/toast.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, InputComponent, ButtonComponent],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
@@ -19,23 +23,25 @@ export class RegisterComponent {
   confirmPassword = '';
 
   isLoading = false;
-  errorMessage = '';
+  firstNameTouched = false;
+  lastNameTouched = false;
+  emailTouched = false;
+  passwordTouched = false;
+  confirmPasswordTouched = false;
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly toast = inject(ToastService);
 
-  onCreateAccount(form: NgForm): void {
-    console.log('onCreateAccount called, form valid:', form.valid);
+  onCreateAccount(): void {
 
-    this.errorMessage = '';
-    Object.values(form.controls).forEach(control => control.markAsTouched());
-    if (form.invalid) {
-      this.errorMessage = 'Please fill in all required fields correctly';
-      return;
-    }
+    this.firstNameTouched = true;
+    this.lastNameTouched = true;
+    this.emailTouched = true;
+    this.passwordTouched = true;
+    this.confirmPasswordTouched = true;
 
-    if (this.password !== this.confirmPassword) {
-      this.errorMessage = 'Passwords do not match';
+    if (!this.isFormValid()) {
       return;
     }
 
@@ -54,23 +60,40 @@ export class RegisterComponent {
       next: (response) => {
         console.log('Registration successful:', response);
         this.isLoading = false;
-        if (response.role === 'ADMIN') {
-          this.router.navigate(['/admin/dashboard']);
-        } else {
-          this.router.navigate(['/participant/home']);
-        }
+
+        this.router.navigate(['/verify-email'], {
+          queryParams: { email: registerData.email }
+        });
       },
       error: (error) => {
-        console.error('Registration error — status:', error.status, 'body:', error.error);
+        console.error('Registration error - status:', error.status, 'body:', error.error);
         this.isLoading = false;
         if (error.status === 409) {
-          this.errorMessage = 'An account with this email already exists.';
+          this.toast.error('Registration Failed', 'An account with this email already exists.');
         } else if (error.status === 0) {
-          this.errorMessage = 'Cannot connect to server. Is the backend running on port 8080?';
+         this.toast.error('Connection Failed', 'We couldn’t connect to the server. Please check your internet connection and try again.');
         } else {
-          this.errorMessage = error.error?.message || error.error?.error || 'Registration failed. Please try again.';
+          this.toast.error('Registration Failed', error.error?.message || error.error?.error || 'Registration failed. Please try again.');
         }
       }
     });
+  }
+
+
+  continueWithGoogle(): void {
+    window.location.href = `${environment.apiUrl}/oauth2/authorization/google`;
+  }
+
+  isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+isValidPassword(): boolean {
+  return ( this.password.length >= 8 && /[A-Z]/.test(this.password) && /[a-z]/.test(this.password) &&/[0-9]/.test(this.password) && /[^A-Za-z0-9]/.test(this.password) );
+  }
+
+isFormValid(): boolean {
+  return ( !!this.firstName.trim() && !!this.lastName.trim() && this.isValidEmail(this.email.trim()) && this.isValidPassword() && !!this.confirmPassword && this.password === this.confirmPassword
+  );
   }
 }

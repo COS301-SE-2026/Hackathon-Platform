@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { LevelService, LevelRequest, LevelResponse } from '../../../services/level.service';
 import { StorageService, LevelFileResponse } from '../../../services/storage.service';
 import { HackathonService } from '../../../services/hackathon.service';
+import { EventService } from '../../../services/event.service';
 
 
 interface UiLevel extends LevelResponse {
@@ -31,6 +32,7 @@ export class LevelsComponent implements OnInit {
   private readonly levelService = inject(LevelService);
   private readonly storageService = inject(StorageService);
   private readonly hackathonService = inject(HackathonService);
+  private readonly eventService = inject(EventService);
   private readonly change = inject(ChangeDetectorRef);
 
   hackathonId = '';
@@ -79,7 +81,21 @@ export class LevelsComponent implements OnInit {
     }
 
     this.loadHackathonName();
+    this.loadEventsCount();
     this.loadLevels();
+  }
+
+  private loadEventsCount(): void {
+    this.eventService.getEventsForHackathon(this.hackathonId).subscribe({
+      next: (events) => {
+        this.eventsCount = events.length;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.eventsCount = 0;
+        this.change.markForCheck();
+      }
+    });
   }
 
   private loadHackathonName(): void {
@@ -87,7 +103,6 @@ export class LevelsComponent implements OnInit {
       next: (hackathon) => {
         this.hackathonName = hackathon.name;
         this.hackathonDescription = hackathon.description || '';
-        this.eventsCount = hackathon.eventsCount || 0;
         this.participantsCount = hackathon.participantsCount|| 0 ;
         this.change.markForCheck();
       },
@@ -131,28 +146,34 @@ export class LevelsComponent implements OnInit {
 
   private uploadFiles(files: FileList): void {
     if (!this.activeLevel) return;
+
+    const level = this.activeLevel;
+
+    if (level.files.length > 0) {
+      this.fileError = 'This level already has a file. Remove it before uploading a new one.';
+      return;
+    }
+
     this.fileError = '';
     this.isUploadingFile = true;
 
-    const level = this.activeLevel;
-    const uploads = Array.from(files).map((file) =>
-    firstValueFrom(this.storageService.uploadLevelFile(this.hackathonId, level.id.toString(), file)));
+    const fileToUpload = files[0];
 
-    Promise.allSettled(uploads).then((results) => {
-      this.isUploadingFile = false;
-      const failed = results.filter((r) => r.status === 'rejected').length;
-      if (failed > 0) {
-        this.fileError = `${failed} files have failed to be uploaded`;
-      }
-      this.storageService.listLevelFiles(this.hackathonId, level.id).subscribe({
-        next: (updatedFiles: LevelFileResponse[]) => {
-          level.files = updatedFiles;
-          level.filesLoaded = true;
-          this.change.markForCheck();
-        }
+    firstValueFrom(this.storageService.uploadLevelFile(this.hackathonId, level.id.toString(), fileToUpload))
+      .catch(() => {
+        this.fileError = 'The file failed to be uploaded';
+      })
+      .finally(() => {
+        this.isUploadingFile = false;
+        this.storageService.listLevelFiles(this.hackathonId, level.id).subscribe({
+          next: (updatedFiles: LevelFileResponse[]) => {
+            level.files = updatedFiles;
+            level.filesLoaded = true;
+            this.change.markForCheck();
+          }
+        });
+        this.change.markForCheck();
       });
-      this.change.markForCheck();
-    });
   }
 
   private async persistOrder(previousOrder: UiLevel[]): Promise<void> {
@@ -304,6 +325,7 @@ export class LevelsComponent implements OnInit {
     this.storageService.deleteLevelFile(this.hackathonId, this.activeLevel.id, file.id).subscribe({
       next: () => {
         this.activeLevel!.files = this.activeLevel!.files.filter((f) => f.id !== file.id);
+        this.fileError = '';
         this.change.markForCheck();
       },
       error: (err: HttpErrorResponse) => {
@@ -334,23 +356,18 @@ onFileSelected(event: Event):void{
 }
 
   goBack(): void {
-    if (this.hackathonId){
-    this.router.navigate(['/admin/hackathons',this.hackathonId]);
-    }else {
-      this.router.navigate(['/admin/hackathons']);
-    }
+    this.router.navigate(['/admin/hackathons']);
   }
 
   deleteLevel(level?: UiLevel) : void {
     const targetLevel = level || this.editingLevel;
     if (!targetLevel) return;
-    if (!this.editingLevel) return;
 
-    if(!confirm(`Are you sure you want to delete "${this.editingLevel.name}"? This action is not reversible.`)) {
+    if(!confirm(`Are you sure you want to delete "${targetLevel.name}"? This action is not reversible.`)) {
       return;
     }
 
-    const levelId = this.editingLevel.id;
+    const levelId = targetLevel.id;
     this.isSavingLevel = true;
 
     this.levelService.deleteLevel(levelId).subscribe({
