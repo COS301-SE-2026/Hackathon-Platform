@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -6,6 +6,9 @@ import { ToastService } from '../../shared/components/toast/toast.service';
 import { IdeSessionService } from '../../services/ide-session.service';
 import { WorkspaceFileService, WorkspaceFileEntry } from '../../services/workspace-file.service';
 import * as monaco from 'monaco-editor';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
+import { WorkspaceCollaborationService } from '../../services/workspace-collaboration.service';
 
 @Component({
   selector: 'app-ide',
@@ -20,10 +23,18 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly ideSessionService = inject(IdeSessionService);
     private readonly toast = inject(ToastService);
     private readonly workService = inject(WorkspaceFileService);
+    private readonly authService = inject(AuthService);
+    private readonly collabService = inject(WorkspaceCollaborationService);
+    private readonly change = inject(ChangeDetectorRef);
 
     @ViewChild('editorContainer')
     editorContainer!: ElementRef<HTMLDivElement>;
     private editor?: monaco.editor.IStandaloneCodeEditor;
+    private collabSub?: Subscription;
+    private editorChangeDisposable?: monaco.IDisposable;
+    private applyingRemoteEdit = false;
+    private readonly fileVersions = new Map<string, number>();
+    private editTimer?: ReturnType<typeof setTimeout>;
 
     workspaceId = '';
     eventId = '';
@@ -66,9 +77,35 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             },
             fontSize: 14
         });
+
+        this.editorChangeDisposable = this.editor.onDidChangeModelContent(() => {
+            if (this.applyingRemoteEdit) {
+                return;
+            }
+
+            if (!this.selectedFile || !this.editor) {
+                return;
+            }
+
+            if (this.editTimer) {
+                clearTimeout(this.editTimer);
+            }
+
+            this.editTimer = setTimeout(() => {
+                this.sendCurrentEdit();
+            }, 300);
+        })
+
     }
 
     ngOnDestroy(): void {
+        if (this.editTimer) {
+            clearTimeout(this.editTimer);
+        }
+
+        this.editorChangeDisposable?.dispose();
+        this.collabSub?.unsubscribe();
+        this.collabService.disconnect();
         this.editor?.dispose();
     }
 
@@ -81,6 +118,8 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.startingIde = false;
                 this.output = 'Workspace runtime started successfully. \n' + `Workspace: ${session.workspaceId}`;
                 this.loadFiles();
+                this.connectCollaboration();
+                this.change.markForCheck();
             },
 
             error: () => {
@@ -88,6 +127,7 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.startingIde = false;
                 this.output = 'workspace could not be started';
                 this.toast.error('IDE Error', 'Workspace could not be started');
+                this.change.markForCheck();
             }
         });
     }
@@ -98,11 +138,13 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             next: files => {
                 this.files = files;
                 this.loadingFiles = false;
+                this.change.markForCheck();
             },
 
             error: () => {
                 this.loadingFiles = false;
                 this.toast.error('File Error', 'Workspace files could not be loaded');
+                this.change.markForCheck();
             }
         });
     }
@@ -112,14 +154,39 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
 
+        this.editor?.updateOptions({
+            readOnly: true
+        });
+
         this.workService.readFile(this.workspaceId, file.path).subscribe({
             next: res => {
                 this.selectedFile = file;
-                this.editor?.setValue(res.content);
+
+                if (this.editor) {
+                    this.applyingRemoteEdit = true;
+                    this.editor.setValue(res.content);
+                    this.applyingRemoteEdit = false;
+                }
+
+                this.collabService.getVersion(this.workspaceId, file.path).subscribe({
+                    next: versionRes => {
+                        const knownVersion = this.fileVersions.get(file.path) ?? 0;
+                        this.fileVersions.set(file.path, Math.max(knownVersion, versionRes.version));
+                        this.editor?.updateOptions({
+                            readOnly: false
+                        });
+                        this.change.markForCheck();
+                    }
+                })
+                this.change.markForCheck();
             },
 
             error: () => {
+                this.editor?.updateOptions({
+                    readOnly: false
+                });
                 this.toast.error('File Error', 'Workspace files could not be opened');
+                this.change.markForCheck();
             }
         });
     }
@@ -136,11 +203,13 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             next: () => {
                 this.savingFiles = false;
                 this.toast.success('Saved', `${this.selectedFile?.name} saved`);
+                this.change.markForCheck();
             }, 
 
             error: () => {
                 this.savingFiles = false;
                 this.toast.error('File Error', 'Workspace files could not be saved');
+                this.change.markForCheck();
             }
         });
     }
@@ -161,12 +230,14 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                 next: () => {
                     this.savingFiles = false;
                     this.executeRun();
+                    this.change.markForCheck();
                 },
                 error: () => {
                     this.savingFiles = false;
                     this.runningCode = false;
                     this.output = 'Could not save current file'
                     this.toast.error('Run Error', 'Current file could not save');
+                    this.change.markForCheck();
                 }
             });
 
@@ -191,12 +262,14 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                 next: () => {
                     this.savingFiles = false;
                     this.executeSubmit();
+                    this.change.markForCheck();
                 },
                 error: () => {
                     this.savingFiles = false;
                     this.submittingCode = false;
                     this.output = "Could not save current file before submitting";
                     this.toast.error('Submission Error', 'Current file could not be saved');
+                    this.change.markForCheck();
                 }
             });
 
@@ -212,12 +285,14 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.submittingCode = false;
                 this.output = `Submission queued successfully. \n Submission Id: ${res.submissionId} \n Status: ${res.status}`;
                 this.toast.success('Submitted', 'You have beed placed in the queue');
+                this.change.markForCheck();
             },
             error: err => {
                 this.submittingCode = false;
                 const message = err?.error?.message ?? 'Workspace could not be submitted';
                 this.output = message;
                 this.toast.error('Submission Error', message);
+                this.change.markForCheck();
             }
         });
     }
@@ -231,12 +306,46 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                 } else {
                     this.output = res.error;
                 }
+                this.change.markForCheck();
             },
             error: () => {
                 this.runningCode = false;
                 this.output = 'Workspace could not be executed.'
                 this.toast.error('Run Error', 'Workspace could not execute');
+                this.change.markForCheck();
             }
+        });
+    }
+
+    private connectCollaboration(): void {
+        const token = this.authService.getToken();
+        if (!token) {
+            this.toast.error('Collaboration Error', 'Authentication token cant be found');
+            return;
+        }
+
+        this.collabService.connect(this.workspaceId, token);
+        this.collabSub = this.collabService.edits$.subscribe(edit => {
+            this.fileVersions.set(edit.path, edit.version);
+            if (this.selectedFile?.path === edit.path && this.editor && this.editor.getValue() !== edit.content) {
+                this.applyingRemoteEdit = true;
+                this.editor.setValue(edit.content);
+                this.applyingRemoteEdit = false;
+            }
+        });
+    }
+
+    private sendCurrentEdit(): void {
+        if (!this.selectedFile || !this.editor) {
+            return;
+        }
+
+        const path = this.selectedFile.path;
+        const currentVersion = this.fileVersions.get(path) ?? 0;
+        this.collabService.sendEdit(this.workspaceId, {
+            path: path,
+            content: this.editor.getValue(),
+            baseVersion: currentVersion
         });
     }
 

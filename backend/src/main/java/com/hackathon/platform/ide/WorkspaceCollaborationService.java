@@ -39,4 +39,10 @@ public class WorkspaceCollaborationService {
             return new WorkspaceEditBroadcast(message.path(), message.content(), newVersion, user.getUserId());
         }
     }
+
+    public long getVersion(UUID workspaceId, String path, User user) {
+        codeService.getWorkspaceForUser(workspaceId, user);
+        String vKey = workspaceId + ":" + path;
+        return fileV.computeIfAbsent(vKey, key -> new AtomicLong(0)).get();
+    }
 }
