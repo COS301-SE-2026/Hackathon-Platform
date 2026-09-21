@@ -5,7 +5,8 @@ import { LeaderboardEntry, LeaderboardService } from '../../../../services/leade
 import { TeamService } from '../../../../services/team.service';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
-
+import { LevelService } from '../../../../services/level.service';
+import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown.component';
 
 
 interface LeaderboardInfo extends LeaderboardEntry {
@@ -15,17 +16,22 @@ interface LeaderboardInfo extends LeaderboardEntry {
 
 @Component({
   selector: 'app-leaderboard',
-  imports: [CommonModule, TableComponent, EmptyStateComponent, LoaderComponent],
+  imports: [CommonModule, TableComponent, EmptyStateComponent, LoaderComponent, DropdownComponent],
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',
 })
 export class LeaderboardComponent implements AfterViewInit, OnDestroy {
   private readonly leaderboardService = inject(LeaderboardService);
+  private readonly levelService = inject(LevelService);
   private readonly teamService = inject(TeamService);
   private readonly change = inject(ChangeDetectorRef);
   private readonly zone = inject(NgZone);
   private eventSource?: EventSource;
   private eventID = '';
+
+  levelOptions: string[] = ['Overall'];
+  selectedLevel = 'Overall';
+  levelIdByOption: Record<string, number> = {};
 
   ngAfterViewInit(): void {
     this.tableColumns = [
@@ -48,6 +54,55 @@ export class LeaderboardComponent implements AfterViewInit, OnDestroy {
 
   this.change.detectChanges();
 }
+
+
+private hackathonID = '';
+
+@Input({ required: true })
+
+  set hackathonId(value: string) {
+  if (!value || value === this.hackathonID) { return; 
+
+  }
+  this.hackathonID = value;
+  this.loadLevels();
+}
+
+  get hackathonId(): string {
+   return this.hackathonID;
+  }
+
+
+loadLevels(): void {
+  this.levelService.getLevels(this.hackathonID).subscribe({
+
+   next: levels => {
+     this.levelOptions = ['Overall'];
+     this.levelIdByOption = {};
+
+      levels
+        .sort((a, b) => a.levelNumber - b.levelNumber)
+        .forEach(level => {
+          const option = `Level ${level.levelNumber}`;
+          this.levelOptions.push(option);
+          this.levelIdByOption[option] = level.id;
+        });
+
+       this.change.detectChanges();
+    },
+    
+    error: () => {
+      this.levelOptions = ['Overall'];
+      this.levelIdByOption = {};
+      this.change.detectChanges();
+    }
+  });
+}
+
+onLevelChange(value: string): void {
+  this.selectedLevel = value;
+}
+
 
 
   @Input({ required: true })

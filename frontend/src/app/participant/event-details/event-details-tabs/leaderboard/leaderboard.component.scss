@@ -24,9 +24,12 @@
   
 }
 
-
 .performance-header {
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
 }
 
 
@@ -40,13 +43,21 @@
   line-height: var(--line-height-h3);
 }
 
+.rankings-filter {
+  flex-shrink: 0;
+  min-width: 160px;
+}
+
+.rankings-filter app-dropdown {
+  display: block;
+}
+
+
 
 .performance-content {
   width: 100%;
-
   display: flex;
   align-items: center;
-
   gap: var(--space-8);
 }
 
@@ -171,13 +182,23 @@
 
 @media (max-width: 767px) {
 
+  .performance-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .rankings-filter {
+    width: 100%;
+    min-width: 0;
+  }
+
   .performance-content {
     flex-direction: column;
     align-items: stretch;
 
     gap: var(--space-4);
   }
-
 
   .performance-stats {
     width: 100%;
@@ -188,6 +209,7 @@
   }
 
 }
+
 
 .rankings-section {
     margin-top: var(--space-12);

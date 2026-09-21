@@ -156,8 +156,8 @@
       <app-my-team [eventId]="eventId"></app-my-team>
     }
 
-    @if (activeTab === 'leaderboard' && eventId) {
-      <app-leaderboard [eventId]="eventId"> </app-leaderboard>
+    @if (activeTab === 'leaderboard' && eventId && hackathonId) {
+      <app-leaderboard [eventId]="eventId" [hackathonId]="hackathonId"></app-leaderboard>
     }
 
     @if (activeTab === 'announcements' && eventId) {

@@ -11,7 +11,15 @@
 
     <div class="my-team-performance">
 
-        <div class="performance-header"><h2>My Team Performance</h2></div>
+        <div class="performance-header">
+          
+          <h2>My Team Performance</h2>
+        
+          <div class="rankings-filter">
+            <app-dropdown id="leaderboard-level" label="Leaderboard level" [options]="levelOptions" [value]="selectedLevel" (selectionChange)="onLevelChange($event)"></app-dropdown>
+          </div>
+
+        </div>
 
         <div class="performance-content">
 
