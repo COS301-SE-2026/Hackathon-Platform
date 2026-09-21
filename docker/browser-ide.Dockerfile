@@ -38,6 +38,6 @@ WORKDIR /workspace
 
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "/usr/bin/code-server", "--auth", "password", "--disable-telemetry", "--user-data-dir", "/home/coder/.local/share/code-server", "--extensions-dir", "/opt/hackathon/extensions", "/workspace"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/usr/bin/code-server", "--auth", "none", "--disable-telemetry", "--user-data-dir", "/home/coder/.local/share/code-server", "--extensions-dir", "/opt/hackathon/extensions", "/workspace"]
 
 CMD ["--bind-addr", "0.0.0.0:8080"]

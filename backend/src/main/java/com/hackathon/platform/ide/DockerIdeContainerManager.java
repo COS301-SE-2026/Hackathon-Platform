@@ -64,7 +64,7 @@ public class DockerIdeContainerManager implements IdeContainerManager {
     }
 
     private void createContainer(IdeWorkspaceResources resources) {
-        runDockerCommand("create", "--name", resources.containerName(), "-p", "127.0.0.1::8080", "-e", "PASSWORD=test-password", "-v", resources.codeVolumeName() + ":/workspace", IDE_IMAGE);
+        runDockerCommand("create", "--name", resources.containerName(), "--memory", "768m", "--memory-swap", "768m", "--cpus", "1", "--pids-limit", "256", "--security-opt", "no-new-privileges:true", "--cap-drop", "ALL", "-p", "127.0.0.1::8080", "-v", resources.codeVolumeName() + ":/workspace", IDE_IMAGE);
     }
 
     private String getPublishedPort(String containerName) {

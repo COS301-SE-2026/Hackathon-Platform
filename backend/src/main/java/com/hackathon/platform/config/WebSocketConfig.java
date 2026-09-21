@@ -38,7 +38,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry reg) {
-        reg.addEndpoint("/ws").setAllowedOriginPatterns("*");
+        reg.addEndpoint("/ws").setAllowedOriginPatterns("http://localhost:4200", "https://hackathonplatform.co.za");
     }
 
     @Override
