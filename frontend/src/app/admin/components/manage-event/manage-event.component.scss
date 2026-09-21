@@ -92,11 +92,6 @@
   margin-top: 10px;
 }
 
-.field-label-spacer {
-  display :block;
-  font-size: 0.84rem;
-  margin-bottom: 7px;
-}
 
 .form-group {
   margin-bottom: 16px;
@@ -157,6 +152,10 @@
   gap : 12px;
 }
 
+.toggle-group + .form-group{
+  margin-top: 16px;
+}
+
 .toggle-option{
   display: flex;
   flex-direction: column;
@@ -210,9 +209,6 @@
 }
 }
 
-.leaderboard-quick-action{
-  margin-top: 4px;
-}
 
 .modal-overlay{
   position: fixed;
@@ -258,12 +254,6 @@
   justify-content: flex-end;
   gap: 12px;
 }
-.upload-hint{
-  font-size: 0.85rem;
-  color: #6b7588;
-  text-align: center;
-  padding: 10px 0;
-}
 
 .form-actions{
   display: flex;
@@ -272,25 +262,6 @@
   padding-top: 4px;
 }
 
-::ng-deep {
-  .p-fileupload .p-fileupload-content {
-    border : 1.5px dashed #c4cbd8;
-    border-radius: 10px;
-    background-color: #f9fafc;
-  }
-
-  .upload-azure-btn {
-    margin-top : 12px;
-    background-color: #268b42 !important;
-    border-color: #268b42 !important;
-
-    &:hover:not(:disabled){
-      background-color: #1f7236 !important;
-      border-color: #1f7236 !important;
-    }
-  }
-
-}
 
 .btn-secondary {
   background-color: transparent;
@@ -356,71 +327,6 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
-}
-
-.btn-patch {
-  background-color: transparent;
-  color:#6b7588;
-  border: 2px solid #6b7588;
-  border-radius: 9px;
-  padding:10px 24px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background-color 0.15s;
-
-  &:hover:not(:disabled){
-    background-color: rgba(107,117,136,0.08);
-  }
-
-  &:disabled{
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-
-.btn-upload{
-  margin-top: 12px;
-  background-color: #1f7236;
-  color:#ffffff;
-  border: none;
-  border-radius: 8px;
-  padding:10px 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background-color 0.15s;
-
-  &:hover:not(:disabled){
-    background-color: #195c2b;
-  }
-
-  &:disabled{
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.file-upload-area {
-  background-color: #f9fafc;
-  color:#424242;
-  border: 2px dashed #c4cbd8;
-  border-radius: 10px;
-  padding:30px 20px;
-  text-align: center;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.15s , border-color 0.15s;
-
-  &:hover{
-    background-color: #f0f4f8;
-    border-color: #1983c2;
-  }
-
-  
 }
 
 
