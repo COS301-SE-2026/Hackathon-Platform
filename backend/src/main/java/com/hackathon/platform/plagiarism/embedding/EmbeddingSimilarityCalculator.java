@@ -46,7 +46,7 @@ public class EmbeddingSimilarityCalculator {
         return mean;
     }
 
-    private float[] center(float[] vector. float[] meanVector){
+    private float[] center(float[] vector, float[] meanVector){
         if(meanVector.length == 0) {
             return vector;
         }
@@ -78,7 +78,7 @@ public class EmbeddingSimilarityCalculator {
                 double sim = cosineSimilarity(fa.vector(), fb.vector());
 
                 if (sim >= minSimilarity) {
-                    matches.add(new FunctionMatch(fa.qualifiedName(), fb.qualifiedName() sim));
+                    matches.add(new FunctionMatch(fa.qualifiedName(), fb.qualifiedName(), sim));
 
                 }
             }
@@ -88,4 +88,72 @@ public class EmbeddingSimilarityCalculator {
         return matches.size() > maxResults ? matches.subList(0, maxResults) : matches;
 
     }
+
+    public double cosineSimilarity(float[] a, float[] b) {
+        double dot = 0.0;
+        double normA = 0.0;
+        double normB = 0.0;
+
+        for (int i = 0; i < a.length; i++){
+
+            dot += a[i] * b[i];
+            normA += a[i] * a[i];
+            normB += b[i] * b[i];
+        }
+        if(normA == 0.0 || normB == 0.0){
+            return 0.0;
+        }
+        return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+
+    }
+
+    /**Average, over every function in "from", of its best cosine similarity to any
+     * function in code to.
+    */
+   private double bestMatchDirectional(List<StoredEmbedding> from, List<StoredEmbedding> to){
+
+    if (from.isEmpty() || to.isEmpty()) {
+        return 0.0;
+    }
+    double sum = 0.0;
+    for(StoredEmbedding f : from){
+        double best = -1.0;
+        for(StoredEmbedding t : to) {
+            double sim = cosineSimilarity(f.vector(), t.vector());
+            if (sim > best) {
+                best = sim;
+            }
+        }
+
+        sum += best;
+    }
+    return sum / from.size();
+
+   }
+
+   /**
+    * Symmetric greedy best match similarity between 2 submissions (already centered) function embeddings
+    * Difference is running pre-fetched, pre-centered vectors instead of raw stored ones.
+    */
+   public Optional<Double> symmetricBestMatch(List<StoredEmbedding> a, List<StoredEmbedding> b) {
+    if(a.isEmpty() || b.isEmpty()) {
+        return Optional.empty();
+    }
+
+    double aToB = bestMatchDirectional(a, b);
+    double bToA = bestMatchDirectional(b, a);
+    return Optional.of((aToB + bToA) / 2.0);
+
+   }
+
+   /** Applies center to every embedding in the list, returning new list. */
+   public List<StoredEmbedding> centerAll(List<StoredEmbedding> embeddings, float[] meanVector) {
+    return embeddings.stream()
+        .map(e -> new StoredEmbedding(e.submissionId(), e.qualifiedName(), center(e.vector(), meanVector)))
+        .toList();
+
+   }
+
+ 
+
 }
