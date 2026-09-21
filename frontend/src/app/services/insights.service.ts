@@ -9,7 +9,6 @@ export interface AdminDashboardResponse {
     totalEvents: number;
     totalParticipants: number;
     submissionsToday: number;
-    totalSubmissions: number;
 }
 
 export interface SubmissionRateBucket {

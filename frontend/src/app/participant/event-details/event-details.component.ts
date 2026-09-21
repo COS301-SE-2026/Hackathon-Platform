@@ -7,18 +7,14 @@ import { SubmissionsComponent } from './event-details-tabs/submissions/submissio
 import { SubmissionHistoryComponent } from './event-details-tabs/submission-history/submission-history.component';
 import { MyTeamComponent } from './event-details-tabs/my-team/my-team.component';
 import { LeaderboardComponent } from './event-details-tabs/leaderboard/leaderboard.component';
-import { AnnouncementsComponent } from './event-details-tabs/announcements/announcements.component';
 import { TabsComponent, TabItem} from '../../shared/components/tabs/tabs.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { ToastService } from '../../shared/components/toast/toast.service';
-import { EventService, EventResponse, EventRegistrationRequest } from '../../services/event.service';
+import {EventResponse,EventService } from '../../services/event.service';
 import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.util'
 import { StorageService } from '../../services/storage.service';
-import { ForumComponent } from '../../admin/components/forum/forum.component';
-import { LevelService } from '../../services/level.service';
 
 
 @Component({
@@ -32,8 +28,6 @@ import { LevelService } from '../../services/level.service';
     MyTeamComponent,
     LeaderboardComponent,
     SubmissionHistoryComponent,
-    AnnouncementsComponent,
-    ForumComponent,
     ModalComponent,
     InputComponent,
     TabsComponent,
@@ -51,13 +45,9 @@ export class EventDetailsComponent implements OnDestroy {
   private readonly eventService = inject(EventService);
   private readonly storageService = inject(StorageService);
   private readonly change = inject(ChangeDetectorRef);
-  private readonly toast = inject(ToastService);
-  private readonly levelService = inject(LevelService);
   private timerInterval: ReturnType<typeof setInterval> | undefined;
 
   tabs: TabItem[] = [];
-
-  private readonly protectedTabs = [ 'team','submissions', 'submission-history','leaderboard', 'forum', 'announcements'];
 
   activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'overview';
   eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
@@ -68,24 +58,15 @@ export class EventDetailsComponent implements OnDestroy {
   problemStatementError = '';
   registrationModal = false;
   registrationKey = '';
-  isRegistered = false;
-  isCheckingRegistration = true;
-  isRegistering = false;
-  dietaryReq = '';
-  allergies = '';
-  numberOfLevels: number | null = null;
 
   event = {
     name: '',
-    tagline: '',
     description: 'Not specified',
-    bannerUrl: '',
-     prizePool: 0,
+    prizePool: 'Not specified',
     startDate: '',
     endDate: '',
     teamSize: 0,
     visibility: '',
-    inPerson: false,
     startDateTime: '',
     duration: 0,
     timer: {
@@ -104,7 +85,6 @@ export class EventDetailsComponent implements OnDestroy {
       if (this.eventId) {
         this.setTabs();
         this.loadEvents();
-        this.loadRegistrationStatus();
       }
     });
 
@@ -122,7 +102,6 @@ export class EventDetailsComponent implements OnDestroy {
     }
 
     this.activeTab = tab;
-    this.validateActiveTab(tab);
 
   });
 
@@ -135,38 +114,9 @@ export class EventDetailsComponent implements OnDestroy {
     }
   }
 
-  private validateActiveTab(tab: string): void {
-  if ( this.isCheckingRegistration || this.isRegistered || !this.protectedTabs.includes(tab)) {
-    return;
-  }
-
-  this.router.navigate([], {
-    relativeTo: this.route,
-    queryParams: { tab: 'overview', subtab: null },
-    replaceUrl: true
-  });
-}
-
   goHome(): void {
   this.router.navigate(['/participant/home']);
   }
-
-  private loadRegistrationStatus(): void {
-  this.eventService.getMyRegistrations().subscribe({
-    next: (registrations) => {
-      this.isRegistered = registrations.some( registration => registration.eventId === this.eventId);
-      this.isCheckingRegistration = false;
-       this.setTabs();
-       this.validateActiveTab(this.activeTab);
-      this.change.markForCheck();
-    },
-    error: (error) => {
-      console.error('Error loading registration status:', error);
-       this.isCheckingRegistration = false;
-      this.change.markForCheck();
-    }
-  });
-}
 
  getEventTag(): string {
   const now = new Date();
@@ -176,13 +126,7 @@ export class EventDetailsComponent implements OnDestroy {
  }
 
   registerForEvent(): void {
-    if (this.isRegistered || this.isRegistering) {
-    return;
-  }
-
   this.registrationKey = '';
-  this.dietaryReq = '';
-  this.allergies = '';
   this.registrationModal = true;
 }
 
@@ -192,64 +136,7 @@ closeRegistrationModal(): void {
 }
 
 confirmRegistration(): void {
-
-  if (this.isRegistered || this.isRegistering) {
-    return;
-  }
-
-  if (  this.event.visibility === 'PRIVATE' && !this.registrationKey.trim()) {
-     this.toast.error( 'Registration Key Required','Please enter the registration key for this private event.'
-  );
-    return;
-  }
-
-  const registrationData: EventRegistrationRequest = {};
-
-  if (this.event.visibility === 'PRIVATE') {
-      registrationData.regKey = this.registrationKey.trim();
-  }
-
-    if (this.event.inPerson) {
-     registrationData.dietaryReq = this.dietaryReq.trim() || undefined;
-
-     registrationData.allergies = this.allergies.trim() || undefined;
-  }
-
-  this.isRegistering = true;
-
-  this.eventService.registerForEvent( this.eventId, registrationData).subscribe({
-    next: () => {
-      this.isRegistered = true;
-      this.isRegistering = false;
-      this.setTabs();
-      this.closeRegistrationModal();
-       this.toast.success('Registration Successful',`You are now registered for ${this.event.name}.`);
-      this.change.markForCheck();
-    },
-
-    error: (error) => {
-      this.isRegistering = false;
-
-      console.error('Error registering for event:', error);
-       this.toast.error( 'Registration Failed', error.error?.message || 'Unable to register for this event. Please try again.');
-      this.change.markForCheck();
-     }
-  });
- }
-
- loadNumberOfLevels(): void {
-  if (!this.hackathonId) {
-    return;
-  }
-
-  this.levelService.getLevels(this.hackathonId).subscribe({
-    next: levels => {
-      this.numberOfLevels = levels.length;
-    },
-    error: () => {
-      this.numberOfLevels = 0;
-    }
-  });
+  // Registration needs to be connected to backend.
 }
 
   loadEvents(): void {
@@ -260,19 +147,6 @@ confirmRegistration(): void {
       next: event => {
         this.event = this.toEventView(event);
         this.hackathonId = event.hackathon ?? '';
-        this.loadNumberOfLevels();
-
-       this.eventService.getEventBannerUrl(this.eventId).subscribe({
-          next: (response) => {
-            if (response?.url) {
-              this.event.bannerUrl = response.url;
-            }
-            this.change.markForCheck();
-          },
-        error: (error) => {
-          console.error('Failed to load event banner:', error);
-        }
-      });
 
         this.loading = false;
 
@@ -294,13 +168,11 @@ confirmRegistration(): void {
   const tabDef = [
     ['Overview', 'pi pi-list', 'overview'],
     ['Rules', 'pi pi-file', 'rules'],
+    ['My Team', 'pi pi-users', 'team'],
+    ['Submissions', 'pi pi-code', 'submissions'],
+    ['Submissions History', 'pi pi-history', 'submission-history'],
+    ['Leaderboard', 'pi pi-trophy', 'leaderboard']
   ];
-
-   if (this.isRegistered) {
-    tabDef.push( ['Team', 'pi pi-users', 'team'], ['Submissions', 'pi pi-code', 'submissions'],
-      ['History', 'pi pi-history', 'submission-history'], ['Rankings', 'pi pi-trophy', 'leaderboard'], ['Forum', 'pi pi-comments', 'forum'], ['Announcements', 'pi pi-megaphone', 'announcements'],
-    );
-  }
 
   this.tabs = tabDef.map(([label, icon, tab]) => ({
     label,
@@ -356,20 +228,17 @@ confirmRegistration(): void {
 
     const end = new Date(
       start.getTime() +
-      event.duration * 1000
+      event.duration * 60 * 60 * 1000
     );
 
     return {
       name: event.name,
-      tagline: event.tagline ?? '',
-      bannerUrl: '',
       description: event.description ?? 'Not specified',
-      prizePool: event.totalPrizePool ?? 0,
+      prizePool: 'Not specified',
       startDate: this.formatDate(start),
       endDate: this.formatDate(end),
       teamSize: event.teamSizeLimit,
       visibility: event.visibility,
-      inPerson: event.inPerson ?? false,
       startDateTime: event.startDateTime,
       duration: event.duration,
       timer: {

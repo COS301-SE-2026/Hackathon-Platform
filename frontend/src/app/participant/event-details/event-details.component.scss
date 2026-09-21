@@ -51,8 +51,7 @@
   width: 100%;
 
   aspect-ratio: 4 / 3;
-  border-top-left-radius: var(--radius-lg);
-  border-bottom-left-radius: var(--radius-lg);
+
   overflow: hidden;
 
 
@@ -318,7 +317,7 @@
 }
 
 .event-meta-item i {
- font-size: 20px;
+  font-size: 15px;
   flex-shrink: 0;
 }
 
@@ -327,24 +326,23 @@
 }
 
 .event-meta-members i {
- color: var(--bright-blue);
+  color: var(--teal);
 }
 
 .event-meta-visibility i {
-  color: var(--bright-blue);
+  color: var(--red);
 }
 
-.event-meta-location i {
-color: var(--bright-blue);
-
+.event-meta-participants i {
+  color: var(--lime-green);
 }
 
 .event-meta-levels i {
- color: var(--bright-blue);
+  color: var(--teal);
 }
 
 .event-meta-prize i {
-  color: var(--bright-blue);
+  color: var(--orange);
 }
 
 .event-banner-actions {
@@ -508,7 +506,6 @@ color: var(--bright-blue);
   background: var(--off-white);
   border: 1px solid var(--light-gray);
   border-radius: var(--radius-md);
-  margin-top: var(--space-4);
 }
 
 .confirmation-icon {

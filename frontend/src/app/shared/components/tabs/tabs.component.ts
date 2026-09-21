@@ -21,7 +21,5 @@ export class TabsComponent {
   @Input() tabs: TabItem[] = [];
   @Input() ariaLabel = 'Page navigation';
   @Input() activeTab = '';
-  @Input() activeQueryParam = 'tab';
-  @Input() variant: 'default' | 'subtabs' = 'default';
 
 }

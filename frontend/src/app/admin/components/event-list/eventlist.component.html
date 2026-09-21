@@ -46,6 +46,9 @@
   <div class = "page-header">
     <div>
       <h2>{{isHackathonScoped ? 'Events Management' : 'All Events'}}</h2>
+      <p class = "page-subtitle">
+        {{isHackathonScoped ? 'View and manage all events for this hackathon.' : 'View events across every hackathon on the platform.'}}
+      </p>
     </div>
     @if (isHackathonScoped){
       <button type = "button" class = "btn-create-event" (click) = "navigateToCreateEvents()">

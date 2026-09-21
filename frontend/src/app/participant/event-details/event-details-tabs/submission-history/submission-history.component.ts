@@ -1,127 +1,27 @@
-import { Component, Input, inject, ChangeDetectorRef, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
 import { TeamService } from '../../../../services/team.service';
 import { SubmissionService, SubmissionResponse } from '../../../../services/submission.service';
 import { LevelService } from '../../../../services/level.service';
-import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown.component';
-import { TableComponent, TableColumn, TableRow} from '../../../../shared/components/table/table.component';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-submission-history',
   standalone: true,
-  imports: [CommonModule , DropdownComponent, TableComponent, ButtonComponent, PaginationComponent],
+  imports: [CommonModule,  ButtonModule,TableModule],
   templateUrl: './submission-history.component.html',
   styleUrl: './submission-history.component.scss',
 })
-export class SubmissionHistoryComponent implements AfterViewInit {
-
+export class SubmissionHistoryComponent {
+  
 private readonly teamService = inject(TeamService);
 private readonly submissionService = inject(SubmissionService);
 private readonly levelService = inject(LevelService);
  private readonly change = inject(ChangeDetectorRef);
 
-currentPage = 1;
-itemsPerPage = 5;
 private eventID = '';
 private hackathonID = '';
-teamError = '';
-historyError = '';
-teamId: string | null = null;
-teamLoading = false;
-historyLoading = true;
-submissionHistory: SubmissionResponse[] = [];
-levelNumberByLevelId: Record<number, number> = {};
-
-levelOptions: string[] = ['All Levels'];
-statusOptions: string[] = ['All Status', 'Scored', 'Failed'];
-
-selectedLevel = 'All Levels';
-selectedStatus = 'All Status';
-
-tableColumns: TableColumn[] = [];
-
-tableData: TableRow[] = [];
-
-@ViewChild('statusTemplate') statusTemplate!: TemplateRef<unknown>;
-
-@ViewChild('logTemplate') logTemplate!: TemplateRef<unknown>;
-
-
-ngAfterViewInit(): void {
-
-  this.tableColumns = [
-    {
-      field: 'uploaded',
-      header: 'Uploaded'
-    },
-
-    {
-      field: 'level',
-      header: 'Level'
-    },
-
-    {
-      field: 'status',
-      header: 'Status',
-      template: this.statusTemplate
-    },
-
-    {
-      field: 'score',
-      header: 'Score'
-    },
-
-    {
-      field: 'log',
-      header: '',
-      template: this.logTemplate
-    }
-  ];
-
-  this.change.detectChanges();
-}
-
-get paginatedTableData(): TableRow[] {
-
-  const start = (this.currentPage - 1) * this.itemsPerPage;
-
-  const end = start + this.itemsPerPage;
-
-  return this.filteredTableData.slice(start, end);
-}
-
-onPageChange(page: number): void {
-  this.currentPage = page;
-}
-
-get filteredTableData(): TableRow[] {
-
-  return this.tableData.filter(row => {
-
-    const levelMatches =
-
-      this.selectedLevel === 'All Levels' || row['level'] === this.selectedLevel;
-
-    const statusMatches = this.selectedStatus === 'All Status' || (this.selectedStatus === 'Scored' && row['status'] === 'SCORED') || (this.selectedStatus === 'Failed' && row['status'] === 'FAILED');
-
-    return levelMatches && statusMatches;
-  });
-}
-
-onLevelChange(value: string): void {
-  this.selectedLevel = value;
-
-  this.currentPage = 1;
-}
-
-onStatusChange(value: string): void {
-  this.selectedStatus = value;
-
-  this.currentPage = 1;
-}
-
 
 @Input({ required: true })
 set eventId(value: string) {
@@ -151,21 +51,28 @@ get hackathonId(): string {
   return this.hackathonID;
 }
 
+teamId: string | null = null;
+teamLoading = false;
+teamError = '';
+
+submissionHistory: SubmissionResponse[] = [];
+historyLoading = true;
+historyError = '';
+
+levelNumberByLevelId: Record<number, number> = {};
+
+
+
 
   loadLevels(): void {
     this.levelService.getLevels(this.hackathonID).subscribe({
       next: levels => {
         this.levelNumberByLevelId = {};
-
-        this.levelOptions = ['All Levels'];
-
         levels.forEach(level => {
           this.levelNumberByLevelId[level.id] = level.levelNumber;
-          this.levelOptions.push(`Level ${level.levelNumber}`);
         });
         this.change.detectChanges();
       },
-
       error: () => {
         //fall back to showing the level id if levelno dont work.
       },
@@ -181,7 +88,7 @@ get hackathonId(): string {
     this.teamError = '';
     this.change.detectChanges();
 
-    this.teamService.getMyTeam(this.eventId).subscribe({
+    this.teamService.getMyTeam().subscribe({
       next: team => {
         this.teamLoading = false;
         if (team && team.eventId === this.eventID) {
@@ -190,7 +97,7 @@ get hackathonId(): string {
         } else {
           this.teamId = null;
             this.teamLoading = false;
-           this.historyLoading = false;
+           this.historyLoading = false;   
           this.teamError = 'Join or create a team for this event before submitting a solution.';
         }
         this.change.detectChanges();
@@ -215,25 +122,11 @@ get hackathonId(): string {
     this.change.detectChanges();
 
     this.submissionService.getTeamHistory(this.teamId).subscribe({
-     next: history => {
-  this.submissionHistory = history;
-
-  this.tableData = history.map(submission => ({
-
-    uploaded: this.formatDate(submission.submittedAt),
-
-    level: `Level ${this.levelNumber(submission.levelId)}`,
-
-    status: submission.status,
-
-    score: submission.status === 'SCORED' ? submission.score : '--',
-
-    log: submission
-  }));
-
-  this.historyLoading = false;
-  this.change.detectChanges();
-},
+      next: history => {
+        this.submissionHistory = history;
+        this.historyLoading = false;
+        this.change.detectChanges();
+      },
       error: () => {
         this.historyError = 'Submission history could not be loaded.';
         this.historyLoading = false;
@@ -247,9 +140,9 @@ get hackathonId(): string {
   downloadLog(submission: SubmissionResponse): void {
     if (!this.teamId) return;
 
-    this.submissionService.getSubmissionLog(this.teamId, submission.submissionId).subscribe({
-      next: logResponse => {
-        const content = logResponse?.logContent ?? "No log found";
+    this.submissionService.getSubmissionDetail(this.teamId, submission.submissionId).subscribe({
+      next: detail => {
+        const content = detail.scoringLog?.logContent ?? 'No log is available for this submission yet.';
         const blob = new Blob([content], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -258,13 +151,7 @@ get hackathonId(): string {
         link.click();
         URL.revokeObjectURL(url);
       },
-      error: (err) => {
-        if(err.status === 404){
-          alert('No log found');
-        } else {
-          alert('Cant download log');
-        }
-      }
+      error: () => alert('The log could not be downloaded.'),
     });
   }
 

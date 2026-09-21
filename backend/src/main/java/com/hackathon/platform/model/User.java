@@ -60,13 +60,6 @@ public class User implements UserDetails {
   @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
-  @Column(name = "email_verified", nullable = false)
-  private boolean emailVerified = false;
-
-  @Builder.Default
-  @Column(name = "auth_provider")
-  private String authProvider = "LOCAL";
-
   @PrePersist
   protected void onCreate() {
     createdAt = LocalDateTime.now();

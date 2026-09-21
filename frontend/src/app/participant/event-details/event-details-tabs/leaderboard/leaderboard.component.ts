@@ -1,6 +1,6 @@
-import { Component, Input, inject, ChangeDetectorRef, OnDestroy, NgZone, TemplateRef,ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Input, inject, ChangeDetectorRef, OnDestroy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TableComponent, TableColumn, TableRow } from '../../../../shared/components/table/table.component';
+import { TableModule } from 'primeng/table';
 import { LeaderboardEntry, LeaderboardService } from '../../../../services/leaderboard.service';
 import { TeamService } from '../../../../services/team.service';
 
@@ -11,40 +11,17 @@ interface LeaderboardInfo extends LeaderboardEntry {
 
 @Component({
   selector: 'app-leaderboard',
-  imports: [CommonModule, TableComponent],
+  imports: [CommonModule, TableModule],
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',
 })
-export class LeaderboardComponent implements AfterViewInit, OnDestroy {
+export class LeaderboardComponent implements OnDestroy {
   private readonly leaderboardService = inject(LeaderboardService);
   private readonly teamService = inject(TeamService);
   private readonly change = inject(ChangeDetectorRef);
   private readonly zone = inject(NgZone);
   private eventSource?: EventSource;
   private eventID = '';
-
-  ngAfterViewInit(): void {
-    this.tableColumns = [
-
-    {
-      field: 'rank',
-      header: 'Rank',
-      template: this.rankTemplate
-    },
-    {
-      field: 'team',
-      header: 'Team',
-      template: this.teamTemplate
-    },
-    {
-      field: 'score',
-      header: 'Score'
-    }
-  ];
-
-  this.change.detectChanges();
-}
-
 
   @Input({ required: true })
   set eventId(value: string) {
@@ -69,15 +46,6 @@ export class LeaderboardComponent implements AfterViewInit, OnDestroy {
 
   leaderboard: LeaderboardInfo[] = [];
 
-  tableColumns: TableColumn[] = [];
-
-  tableData: TableRow[] = [];
-
-  @ViewChild('rankTemplate') rankTemplate!: TemplateRef<unknown>;
-
-  @ViewChild('teamTemplate') teamTemplate!: TemplateRef<unknown>;
-
-
   loadLeaderboard(showSpinner = true): void {
     if (!this.eventID) {
       this.errorMsg = "The event ID is missing";
@@ -97,22 +65,13 @@ export class LeaderboardComponent implements AfterViewInit, OnDestroy {
 
     this.leaderboardService.getEventLeaderboard(this.eventId).subscribe({
       next: entries => {
-
         this.leaderboard = entries.map(entry => ({
           ...entry,
           name: entry.teamName,
           score: Number(entry.bestScore).toFixed(2),
         }));
 
-        this.tableData = this.leaderboard.map(team => ({
-        rank: team.rank,
-        team: team.name,
-        score: `${team.score} pts`,
-        teamId: team.teamId
-        }));
-
         this.loading = false;
-
         this.leaderboardAvailable = this.leaderboard.length > 0;
         this.change.detectChanges();
       },
@@ -139,7 +98,9 @@ connectToLeaderboardUpdates(): void {
   };
 }
 
-
+get topThree(): LeaderboardInfo[] {
+     return this.leaderboard.slice(0, 3);
+}
 
 get myTeam(): LeaderboardInfo | null{
   if (!this.currTeamId) {
@@ -162,7 +123,7 @@ getInitials(name: string): string {
   }
 
   loadMyTeam(): void {
-    this.teamService.getMyTeam(this.eventId).subscribe({
+    this.teamService.getMyTeam().subscribe({
       next: team => {
         if(team && team.eventId === this.eventId) {
           this.currTeamId = team.teamId;
@@ -182,7 +143,5 @@ getInitials(name: string): string {
   ngOnDestroy(): void {
     this.eventSource?.close();
   }
-
-  getRowClass = (row: TableRow): string => { return row['teamId'] === this.currTeamId ? 'my-team-row' : ''; };
 
 }

@@ -37,8 +37,8 @@ export class TeamService {
   }
 
 
-  getMyTeam(eventId: string): Observable<TeamResponse | null> {
-    return this.http.get<TeamResponse>(`${this.baseUrl}/my-team?eventId=${eventId}`).pipe(
+  getMyTeam(): Observable<TeamResponse | null> {
+    return this.http.get<TeamResponse>(`${this.baseUrl}/my-team`).pipe(
       catchError((error) => {
         if (error.status === 204) return of(null);
         throw error;

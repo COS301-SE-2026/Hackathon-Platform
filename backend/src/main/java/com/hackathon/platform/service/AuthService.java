@@ -7,7 +7,6 @@ import com.hackathon.platform.model.Role;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.RoleRepository;
 import com.hackathon.platform.repository.UserRepository;
-import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +22,6 @@ public class AuthService {
   private final RoleRepository roleRepository;
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
-  private final EmailVerificationService emailVerificationService;
 
   /**
    * Registers a new account.
@@ -46,19 +44,16 @@ public class AuthService {
         User.builder()
             .firstName(request.getFirstName())
             .lastName(request.getLastName())
-            .email(request.getEmail().toLowerCase(Locale.ROOT))
+            .email(request.getEmail())
             .passwordHash(passwordEncoder.encode(request.getPassword()))
             .role(participantRole)
             .status("ACTIVE")
-            .emailVerified(false)
-            .authProvider("LOCAL")
             .build();
 
     User saved = userRepository.save(user);
-    emailVerificationService.sendVerificationEmail(saved);
+    String token = jwtService.generateToken(saved);
 
-    return buildResponse(
-        saved, null, "Registration successful, Check your email for a verification link");
+    return buildResponse(saved, token);
   }
 
   /**
@@ -70,16 +65,11 @@ public class AuthService {
   public AuthResponse login(LoginRequest request) {
     User user =
         userRepository
-            .findByEmail(request.getEmail().toLowerCase(Locale.ROOT))
+            .findByEmail(request.getEmail())
             .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
-    if (user.getPasswordHash() == null
-        || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+    if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
       throw new BadCredentialsException("Invalid email or password");
-    }
-
-    if (!user.isEmailVerified()) {
-      throw new BadCredentialsException("You need to verify your email before logging in");
     }
 
     if (!user.isEnabled()) {
@@ -87,7 +77,7 @@ public class AuthService {
     }
 
     String token = jwtService.generateToken(user);
-    return buildResponse(user, token, null);
+    return buildResponse(user, token);
   }
 
   /**
@@ -98,7 +88,7 @@ public class AuthService {
    */
   public AuthResponse getMe(User user) {
     String token = jwtService.generateToken(user);
-    return buildResponse(user, token, null);
+    return buildResponse(user, token);
   }
 
   /**
@@ -108,7 +98,7 @@ public class AuthService {
    * @param token
    * @return
    */
-  private AuthResponse buildResponse(User user, String token, String msg) {
+  private AuthResponse buildResponse(User user, String token) {
     return AuthResponse.builder()
         .token(token)
         .userId(user.getUserId())
@@ -116,24 +106,6 @@ public class AuthService {
         .lastName(user.getLastName())
         .email(user.getEmail())
         .role(user.getRole().getName())
-        .emailVerified(user.isEmailVerified())
-        .msg(msg)
         .build();
-  }
-
-  public AuthResponse verifyEmail(String rawToken) {
-    User user = emailVerificationService.verify(rawToken);
-    String token = jwtService.generateToken(user);
-    return buildResponse(user, token, "Email verification complete");
-  }
-
-  public void resendVerificationEmail(String email) {
-    User user =
-        userRepository
-            .findByEmail(email.toLowerCase(Locale.ROOT))
-            .orElseThrow(() -> new IllegalArgumentException("No account found for this email."));
-    if (!user.isEmailVerified()) {
-      emailVerificationService.sendVerificationEmail(user);
-    }
   }
 }

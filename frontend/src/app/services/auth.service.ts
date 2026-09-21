@@ -16,22 +16,12 @@ export interface RegisterRequest {
 }
 
 export interface AuthResponse {
-  token?: string | null;
-  userId?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  role?: string;
-  emailVerified?: boolean;
-  message?: string | null;
-}
-
-export interface AdminResponse {
+  token: string;
   userId: string;
   firstName: string;
   lastName: string;
   email: string;
-  status: string;
+  role: string;
 }
 
 @Injectable({
@@ -48,36 +38,9 @@ export class AuthService {
   }
 
   register(userData: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/register`, userData);
-  }
-
-  verifyEmail(token: string): Observable<AuthResponse>{
-    return this.http.get<AuthResponse>(`${this.baseUrl}/verify-email`, { params: { token }}).pipe(
+    return this.http.post<AuthResponse>(`${this.baseUrl}/register`, userData).pipe(
       tap(response => this.saveSession(response))
     );
-  }
-
-  resendVerification(email: string): Observable<void>{
-    return this.http.post<void>(`${this.baseUrl}/resend-verification`, null, { params: { email }});
-  }
-
-  getMe(): Observable<AuthResponse>{
-    return this.http.get<AuthResponse>(`${this.baseUrl}/me`).pipe(
-      tap(response => this.saveSession(response))
-    );
-  }
-
-  completeGoogleLogin(token: string): void{
-    const response: AuthResponse = { token };
-    this.saveSession(response);
-  }
-
-  createAdmin(admin: { firstName: string; lastName: string; email: string; password: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/superadmin/admin`, admin);
-  }
-
-  getAdmins(): Observable<AdminResponse[]> {
-    return this.http.get<AdminResponse[]>(`${environment.apiUrl}/api/superadmin/admins`);
   }
 
   logout(): void {
@@ -102,13 +65,8 @@ export class AuthService {
     return this.getUser()?.role === 'ADMIN';
   }
 
-  saveSession(response: AuthResponse): void{
-    if(response.token){
-      localStorage.setItem('token', response.token);
-    }
-
-    if(response.userId || response.email || response.role){
-      localStorage.setItem('user', JSON.stringify(response));
-    }
+  private saveSession(response: AuthResponse): void {
+    localStorage.setItem('token', response.token);
+    localStorage.setItem('user', JSON.stringify(response));
   }
 }

@@ -1,16 +1,12 @@
 import { Component, Input,ChangeDetectorRef , inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { TeamService, TeamMemberResponse } from '../../../../services/team.service';
 import { AuthService } from '../../../../services/auth.service';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { ModalComponent } from '../../../../shared/components/modal/modal.component';
-import { InputComponent } from '../../../../shared/components/input/input.component';
-import { ToastService } from '../../../../shared/components/toast/toast.service';
-import { LeaderboardService } from '../../../../services/leaderboard.service';
-import { SubmissionService } from '../../../../services/submission.service';
-
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 
 interface DisplayTeamMember {
   name: string;
@@ -23,7 +19,7 @@ interface DisplayTeamMember {
 @Component({
   selector: 'app-my-team',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ButtonComponent, ModalComponent,InputComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ButtonModule, DialogModule, InputTextModule],
   templateUrl: './my-team.component.html',
   styleUrl: './my-team.component.scss',
 })
@@ -31,13 +27,8 @@ interface DisplayTeamMember {
 export class MyTeamComponent implements OnInit {
   private readonly teamService = inject(TeamService);
   private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
   private readonly change = inject(ChangeDetectorRef);
-  private readonly toast = inject(ToastService);
-  private readonly leaderboardService = inject(LeaderboardService);
-  private readonly submissionService = inject(SubmissionService);
-  submissionCount = 0;
-  teamScore = 0;
-  teamRank = 0;
 
   private eventID = '';
 
@@ -56,17 +47,21 @@ export class MyTeamComponent implements OnInit {
 
   teamIdToJoin = '';
   newTeamName = '';
+
   isLoading = false;
   isLoadingTeam = true;
   errorMessage = '';
   successMessage = '';
-  teamDialogVisible = false;
-  teamDialogMode: 'create' | 'join' = 'create';
+  createTeamDialogVisible = false;
+  requestToJoinDialogVisible = false;
   leaveTeamDialogVisible = false;
+
   hasTeam = false;
   currentUserId = '';
   isTeamLead = false;
 
+  /** Set when the user already belongs to an approved team, but for a different event. */
+  teamBelongsToOtherEvent = false;
 
   team = {
     name: '',
@@ -83,31 +78,38 @@ export class MyTeamComponent implements OnInit {
 
   loadUserTeam(): void {
     this.isLoadingTeam = true;
-
-    this.teamService.getMyTeam(this.eventID).subscribe({
+    this.teamService.getMyTeam().subscribe({
       next: (response) => {
         this.isLoadingTeam = false;
 
-        if (response) {
-        this.hasTeam = true;
-        this.team.teamId = response.teamId;
-        this.team.name = response.teamName;
-
-        this.loadTeamMembers(response.teamId);
-        this.loadTeamStats();
-
-      } 
-      else {
-        this.hasTeam = false;
-        this.resetTeamState();
-      }
-
-      this.change.markForCheck();
-    },
+        if (response && response.eventId === this.eventID) {
+          this.hasTeam = true;
+          this.teamBelongsToOtherEvent = false;
+          this.team.teamId = response.teamId;
+          this.team.name = response.teamName;
+          this.loadTeamMembers(response.teamId);
+        } else if (response) {
+          // The user already belongs to a team, but it's for a different event.
+          this.hasTeam = false;
+          this.teamBelongsToOtherEvent = true;
+          this.resetTeamState();
+        } else {
+          this.hasTeam = false;
+          this.teamBelongsToOtherEvent = false;
+          this.resetTeamState();
+        }
+        this.change.markForCheck();
+      },
       error: (error) => {
         this.isLoadingTeam = false;
         console.error('Error loading team:', error);
-        this.errorMessage = 'Could not load your team. Please refresh.';
+        if (error.status === 204) {
+          this.hasTeam = false;
+          this.teamBelongsToOtherEvent = false;
+          this.resetTeamState();
+        } else {
+          this.errorMessage = 'Could not load your team. Please refresh.';
+        }
         this.change.markForCheck();
       }
     });
@@ -116,52 +118,6 @@ export class MyTeamComponent implements OnInit {
   refreshTeamMembers(): void {
   this.loadTeamMembers(this.team.teamId);
   }
-
-  private loadTeamStats(): void {
-  this.loadSubmissionCount();
-  this.loadLeaderboardStats();
-}
-
-
-  private loadSubmissionCount(): void {
-  this.submissionService.getTeamHistory(this.team.teamId).subscribe({
-    next: (submissions) => {
-      this.submissionCount = submissions.length;
-      this.change.markForCheck();
-    },
-    error: (error) => {
-      console.error('Error loading submission count:', error);
-      this.submissionCount = 0;
-    }
-  });
-}
-
-private loadLeaderboardStats(): void {
-  this.leaderboardService.getEventLeaderboard(this.eventID).subscribe({
-    next: (leaderboard) => {
-      const teamEntry = leaderboard.find(
-        entry => entry.teamId === this.team.teamId
-      );
-
-      if (teamEntry) {
-        this.teamScore = teamEntry.bestScore;
-        this.teamRank = teamEntry.rank;
-      } else {
-        this.teamScore = 0;
-        this.teamRank = 0;
-      }
-
-      this.change.markForCheck();
-    },
-    error: (error) => {
-      console.error('Error loading leaderboard stats:', error);
-      this.teamScore = 0;
-      this.teamRank = 0;
-    }
-  });
-}
-
-
 
   loadTeamMembers(teamId: string): void {
     this.teamService.getTeamMembers(teamId).subscribe({
@@ -207,42 +163,40 @@ private loadLeaderboardStats(): void {
     this.teamService.createTeam({ teamName: this.newTeamName.trim(), eventId: this.eventID }).subscribe({
       next: () => {
         this.isLoading = false;
-         this.teamDialogVisible = false;
+        this.createTeamDialogVisible = false;
         this.successMessage = `Team "${this.newTeamName.trim()}" created successfully!`;
         this.newTeamName = '';
         this.loadUserTeam();
         this.change.markForCheck();
       },
-    error: (error) => {
-      this.isLoading = false;
-      console.error('Error creating team:', error);
-
-      if (error.status === 409 || error.error?.message?.includes('already exists')) {
-        this.errorMessage = 'A team with that name already exists. Choose a different name.';
-      } else {
-        this.errorMessage =
-          error.error?.message || 'Failed to create team. Please try again.';
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Error creating team:', error);
+        if (error.status === 409 || error.error?.message?.includes('already exists')) {
+          this.errorMessage = 'A team with that name already exists. Choose a different name.';
+        } else if (error.error?.message?.includes('already a member')) {
+         this.errorMessage = 'You are already a member of a team. Leave your current team first.';
+        } else {
+          this.errorMessage = error.error?.message || 'Failed to create team. Please try again.';
+        }
+        this.change.markForCheck();
       }
-
-      this.change.markForCheck();
-    }
     });
   }
 
-openCreateTeamDialog(): void {
-  this.teamDialogMode = 'create';
+  openCreateTeamDialog(): void {
   this.errorMessage = '';
   this.newTeamName = '';
-  this.teamDialogVisible = true;
+  this.createTeamDialogVisible = true;
+
 }
 
 openRequestToJoinDialog(): void {
-  this.teamDialogMode = 'join';
   this.errorMessage = '';
   this.teamIdToJoin = '';
-  this.teamDialogVisible = true;
-}
+  this.requestToJoinDialogVisible = true;
 
+}
 
   joinTeam(): void {
     this.clearMessages();
@@ -258,24 +212,23 @@ openRequestToJoinDialog(): void {
       next: () => {
         this.isLoading = false;
         this.successMessage = 'Join request sent! Waiting for the team lead to approve.';
-          this.toast.success('Request Sent Successfully ',this.successMessage);
         this.teamIdToJoin = '';
-         this.teamDialogVisible = false;
+        this.requestToJoinDialogVisible = false;
         this.change.markForCheck();
       },
-     error: (error) => {
+      error: (error) => {
         this.isLoading = false;
         console.error('Error requesting to join team:', error);
-
-        if (error.error?.message?.includes('already requested')) {
+        if (error.error?.message?.includes('already a member')) {
+          this.errorMessage = 'You are already in a team.';
+        } else if (error.error?.message?.includes('already requested')) {
           this.errorMessage = 'You have already sent a join request to this team.';
         } else if (error.error?.message?.includes('full')) {
           this.errorMessage = 'This team is full.';
         } else if (error.status === 404) {
           this.errorMessage = 'Team not found. Check the team ID and try again.';
         } else {
-          this.errorMessage =
-            error.error?.message || 'Failed to send join request.';
+          this.errorMessage = error.error?.message || 'Failed to send join request.';
         }
         this.change.markForCheck();
       }
@@ -310,7 +263,7 @@ openRequestToJoinDialog(): void {
   }
 
   leaveCurrentTeam(): void {
-   
+    // if (!confirm('Are you sure you want to leave this team?')) return;
 
     this.isLoading = true;
     this.clearMessages();

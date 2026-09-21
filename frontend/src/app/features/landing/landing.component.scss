@@ -1,6 +1,6 @@
 .landing-cta {
   padding: 110px 40px;
-  background: var(--dark-blue);
+  background: var(--primary-dark-navy);
 }
 
 .landing-cta-content {
@@ -8,10 +8,12 @@
   text-align: center;
   margin: 0 auto;
   padding: 70px 50px;
+  
+  
 }
 
 .landing-cta h2 {
-  color: var(--white);
+  color: var(--background-white);
   font-size: clamp(42px, 5vw, 60px);
   font-weight: 600;
   line-height: 1.15;
@@ -21,31 +23,28 @@
   max-width: 620px;
   margin: 28px auto 42px;
   line-height: 1.7;
-  color: var(--white);
+ color: var(--background-white);
   font-size: 16px;
 }
 
+
 .landing-cta-button {
   display: inline-flex;
-  align-items: center;
   justify-content: center;
-  margin-top: var(--space-8);
-  padding: 15px 28px;
-  min-height: 48px;
-  background: var(--bright-blue);
-  color: var(--white);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-sm);
+  align-items: center;
+  padding: 18px 36px;
+  background: var(--accent-bright-blue);
+  border-radius: 14px;
+  font-size: 16px;
+  color: var(--background-white);
   text-decoration: none;
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-small);
-  box-shadow: var(--shadow-lg);
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .landing-footer {
-  background: var(--dark-blue);
-  border-top: 1px solid rgba(255, 255, 255, .08);
+  background: var(--primary-dark-navy);
+  border-top: 1px solid rgba(255,255,255,.08);
 }
 
 .landing-footer-content {
@@ -56,33 +55,38 @@
 }
 
 .landing-footer p {
-  color: var(--white);
+  color: var(--text-muted);
   font-size: 14px;
 }
 
-@media (max-width: 768px) {
-  .landing-cta {
-    padding: 80px 24px;
+@media (max-width:768px){
+
+  .landing-cta{
+  padding:80px 24px;
   }
 
-  .landing-cta-content {
-    padding: 50px 28px;
+  .landing-cta-content{
+ padding:50px 28px;
   }
 
-  .landing-cta h2 {
-    font-size: 40px;
+  .landing-cta h2{
+   font-size:40px;
   }
 
-  .landing-cta p {
-    font-size: 16px;
+  .landing-cta p{
+    font-size:16px;
   }
 
-  .landing-cta-button {
-    width: 100%;
-    max-width: 320px;
+  .landing-cta-button{
+    width:100%;
+    max-width:320px;
   }
 
   .landing-footer-content {
     padding: 22px 24px;
   }
+
 }
+
+
+

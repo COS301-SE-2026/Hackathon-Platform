@@ -1,5 +1,5 @@
 .faq-section {
-  background: var(--off-white);
+  background: #f2f6fa;
   padding: 100px 40px;
   scroll-margin-top: 90px;
 }
@@ -18,14 +18,14 @@
 .faq-tag {
   margin-bottom: 18px;
   letter-spacing: 1px;
-  color: var(--bright-blue);
+color: var(--accent-bright-blue);
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .faq-header h2 {
-  color: var(--dark-navy);
+  color: var(--text-dark);
   font-size: clamp(36px, 5vw, 58px);
   font-weight: 700;
   line-height: 1.15;
@@ -33,40 +33,39 @@
 
 .section-description {
   margin-top: 24px;
-  color: var(--dark-gray);
+  color: var(--text-muted);
   font-size: 18px;
   line-height: 1.7;
 }
 
 :host ::ng-deep .p-accordionpanel {
   margin-bottom: 18px;
-  background: var(--white);
-  border: 1px solid var(--light-gray);
-  border-radius: var(--radius-lg);
+  background: var(--background-white);
   box-shadow: 0 8px 22px rgba(0, 0, 0, .05);
+    border: 1px solid var(--border-silver);
   overflow: hidden;
 }
 
 :host ::ng-deep .p-accordionheader-toggle {
   min-height: 82px;
   padding: 0 28px;
-  background: var(--white) !important;
-  color: var(--dark-navy) !important;
   font-size: 18px;
+   background: var(--background-white) !important;
+  color: var(--text-dark) !important;
   font-weight: 600;
 }
 
 :host ::ng-deep .p-accordionheader-toggle:hover {
-  background: var(--white) !important;
+  background: var(--background-white) !important;
 }
 
 :host ::ng-deep .p-accordionheader-toggle-icon {
-  color: var(--bright-blue);
+  color: var(--accent-bright-blue);
 }
 
 :host ::ng-deep .p-accordioncontent-content {
   padding: 0 28px 28px;
-  color: var(--dark-gray);
+  color: var(--text-muted);
   font-size: 16px;
   line-height: 1.7;
 }
@@ -86,12 +85,12 @@
 
   :host ::ng-deep .p-accordionheader-toggle {
     min-height: 72px;
-    padding: 0 20px;
+     padding: 0 20px;
     font-size: 16px;
   }
 
   :host ::ng-deep .p-accordioncontent-content {
-    padding: 0 20px 20px;
+     padding: 0 20px 20px;
     font-size: 15px;
   }
 }

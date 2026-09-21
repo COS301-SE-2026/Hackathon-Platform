@@ -5,8 +5,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../../services/auth.service';
-import { ToastService } from '../../../shared/components/toast/toast.service';
-
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -21,10 +19,6 @@ describe('LoginComponent', () => {
       imports: [FormsModule, RouterTestingModule, LoginComponent],
       providers: [
         { provide: AuthService, useValue: authMock },
-        {
-          provide: ToastService,
-          useValue: jasmine.createSpyObj<ToastService>('ToastService', ['error'])
-        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -52,13 +46,13 @@ describe('LoginComponent', () => {
   });
 
   it('updates email and password when user types', () => {
-    const emailInput = fixture.nativeElement.querySelector('#email input') as HTMLInputElement;
+    const emailInput = fixture.nativeElement.querySelector('#email') as HTMLInputElement;
     emailInput.value = 'test@example.com';
     emailInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     expect(component.email).toBe('test@example.com');
 
-    const passwordInput = fixture.nativeElement.querySelector('#password input') as HTMLInputElement;
+    const passwordInput = fixture.nativeElement.querySelector('#password') as HTMLInputElement;
     passwordInput.value = 'secret';
     passwordInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -71,8 +65,7 @@ describe('LoginComponent', () => {
 
     component.onSignIn();
 
-    const toastMock = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
-    expect(toastMock.error).toHaveBeenCalledWith('Missing Information', 'Please enter your email and password.');
+    expect(component.errorMsg).toBe('Please enter email and passowrd');
     expect(authMock.login).not.toHaveBeenCalled();
   });
 
@@ -106,9 +99,8 @@ describe('LoginComponent', () => {
 
     component.onSignIn();
 
-    const toastMock = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
     expect(component.isLoading).toBeFalse();
-    //expect(toastMock.error).toHaveBeenCalledWith('Login Failed', 'Invalid credentials');
+    expect(component.errorMsg).toBe('Invalid credentials');
   });
 
   it('form submit triggers onSignIn', () => {

@@ -137,8 +137,7 @@ public class EventService {
   }
 
   public List<Event> getOpenEventsForParticipants() {
-    return eventRepository.findByVisibilityInAndStatusIn(
-        List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE"));
+    return eventRepository.findByVisibilityAndStatusIn("PUBLIC", List.of("UPCOMING", "ACTIVE"));
   }
 
   public List<Event> getPrivateEvents() {
@@ -321,9 +320,6 @@ public class EventService {
     if (req.getRegistrationKey() != null || "PUBLIC".equals(req.getVisibility())) {
       event.setRegistrationKey(
           "PRIVATE".equals(event.getVisibility()) ? req.getRegistrationKey() : null);
-    }
-    if (req.getDescription() != null) {
-      event.setDescription(req.getDescription());
     }
     if (req.getStatus() != null && !creating) {
       event.setStatus(req.getStatus());

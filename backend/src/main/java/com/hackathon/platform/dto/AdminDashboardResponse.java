@@ -7,21 +7,15 @@ public class AdminDashboardResponse {
   private long totalEvents;
   private long totalParticipants;
   private long submissionsToday;
-  private long totalSubmissions;
 
   public AdminDashboardResponse() {}
 
   public AdminDashboardResponse(
-      long activeEvents,
-      long totalEvents,
-      long totalParticipants,
-      long submissionsToday,
-      long totalSubmissions) {
+      long activeEvents, long totalEvents, long totalParticipants, long submissionsToday) {
     this.activeEvents = activeEvents;
     this.totalEvents = totalEvents;
     this.totalParticipants = totalParticipants;
     this.submissionsToday = submissionsToday;
-    this.totalSubmissions = totalSubmissions;
   }
 
   public long getActiveEvents() {
@@ -38,9 +32,5 @@ public class AdminDashboardResponse {
 
   public long getSubmissionsToday() {
     return submissionsToday;
-  }
-
-  public long getTotalSubmissions() {
-    return totalSubmissions;
   }
 }

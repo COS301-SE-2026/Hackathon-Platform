@@ -1,14 +1,20 @@
-import { Component, inject, OnInit, ChangeDetectorRef} from '@angular/core';
+import { Component, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
+interface PendingApprovalRow {
+    username: string;
+    email: string;
+    role: string;
+}
+
 interface UserRow {
     username: string;
     email: string;
     role: string;
-    roleClass: 'admin';
+    roleClass: 'admin' | 'superAdmin'|'mentor';
     status: 'Active' | 'Inactive';
 }
 
@@ -19,15 +25,28 @@ interface UserRow {
     templateUrl: './super-admin.component.html',
     styleUrls:['./super-admin.component.scss']
 })
-export class SuperAdminComponent implements OnInit{
+export class SuperAdminComponent{
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
-    private readonly change = inject(ChangeDetectorRef);
 
     loggedInAsName = 'Admin';
 
-    allUsers: UserRow[]=[];
-    isLoadingAdmins = true;
+    pendingApprovals: PendingApprovalRow[] = [
+        {username: 'example', email: 'example.co.za', role:'Admin'},
+    ];
+
+    allUsers: UserRow[]=[
+        {username: 'example1', email: 'admin@example.com', role:'Admin',roleClass:'admin',status: 'Active'},
+        {username: 'example2', email: 'admin123@example.com', role:'Super-Admin', roleClass:'superAdmin',status: 'Active'},
+        {username: 'example3', email: 'admin1234@example.com', role:'Mentor', roleClass:'mentor',status: 'Active'}
+
+    ];
+    roleOptions = ['Admin','Super Admin','Mentor'];
+    selectedUsername = this.allUsers[0]?.username??'';
+    selectedRole = this.roleOptions[0];
+
+    isAssigningRole = false;
+    assignRoleMessage = '';
 
     newAdmin = {
         email: '',
@@ -38,30 +57,49 @@ export class SuperAdminComponent implements OnInit{
     createAdminError = '';
     createAdminSuccess = '';
 
-    ngOnInit(): void {
-        this.loadAdmins();
+    get pendingCount(): number {
+        return this.pendingApprovals.length;
     }
 
-    private loadAdmins(): void {
-        this.isLoadingAdmins = true;
-        this.authService.getAdmins().subscribe({
-            next: (admins) => {
-                this.allUsers = admins.map((admin) => ({
-                    username: `${admin.firstName} ${admin.lastName}`,
-                    email: admin.email,
-                    role: 'Admin',
-                    roleClass: 'admin',
-                    status: admin.status === 'ACTIVE' ? 'Active' : 'Inactive',
-                }));
-                this.isLoadingAdmins = false;
-                this.change.markForCheck();
-            },
-            error: () => {
-                this.isLoadingAdmins = false;
-                this.createAdminError = 'Unable to load admins.';
-                this.change.markForCheck();
-            },
+    approveUser(row: PendingApprovalRow): void {
+        this.pendingApprovals = this.pendingApprovals.filter((r)=> r.username !== row.username)
+        this.allUsers.push({
+            username: row.username,
+            email: row.email,
+            role: row.role,
+            roleClass: 'admin',
+            status: 'Active',
+
         });
+    }
+
+    rejectUser(row: PendingApprovalRow): void {
+        if (!confirm(`Reject the registration for "${row.username}"?`)) return;
+        this.pendingApprovals = this.pendingApprovals.filter((r)=>r.username !== row.username);
+    }
+
+    assignRole():void {
+        if (!this.selectedUsername) return;
+
+        this.isAssigningRole = true;
+        this.assignRoleMessage ='';
+
+        setTimeout(()=>{
+            const user = this.allUsers.find((u)=> u.username === this.selectedUsername);
+            if (user){
+                user.role = this.selectedRole;
+                const roleMap: Record<string, UserRow['roleClass']> = {
+                    'Admin': 'admin',
+                    'Super Admin': 'superAdmin',
+                    'Mentor':'mentor'
+
+                };
+                user.roleClass = roleMap[this.selectedRole] || 'mentor';
+            }
+            this.isAssigningRole = false;
+            this.assignRoleMessage = `${this.selectedUsername} is now ${this.selectedRole}.`;
+            setTimeout(()=>(this.assignRoleMessage=''),4000);
+        },500);
     }
 
     createAdminAccount(): void {
@@ -83,24 +121,12 @@ export class SuperAdminComponent implements OnInit{
 
         this.isCreatingAdmin = true;
 
-        this.authService.createAdmin({
-            firstName: 'Admin',
-            lastName: 'User',
-            email: this.newAdmin.email,
-            password: this.newAdmin.password,
-        }).subscribe({
-            next: () => {
-                this.isCreatingAdmin = false;
-                this.createAdminSuccess =`Admin account created for ${this.newAdmin.email}.`;
-                this.newAdmin = { email: '',password:'',confirmPassword:''};
-                this.loadAdmins();
-                setTimeout(()=>(this.createAdminSuccess =''),5000);
-            },
-            error: (error) => {
-                this.isCreatingAdmin = false;
-                this.createAdminError = error.error?.error || 'Unable to create admin account.';
-            },
-        });
+        setTimeout(()=>{
+            this.isCreatingAdmin = false;
+            this.createAdminSuccess =`Admin account created for ${this.newAdmin.email}.`;
+            this.newAdmin = { email: '',password:'',confirmPassword:''};
+            setTimeout(()=>(this.createAdminSuccess =''),5000);
+        },600);
 
     }
     logout():void {
@@ -108,3 +134,4 @@ export class SuperAdminComponent implements OnInit{
         this.router.navigate(['/login']);
     }
 }
+
