@@ -38,8 +38,6 @@
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/levels" routerLinkActive = "active"><i class = "pi pi-clone"></i>Levels</a>
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
       <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
-
-      
 </div>
 
 }
@@ -56,162 +54,147 @@
     }
   </div>
 
-  @if (isHackathonScoped){
-    <div class = "toolbar">
-      <div class = "search-box">
-        <i class = "pi pi-search search-icon"></i>
-        <input type = "text" placeholder = "Search events..." aria-label = "Search events" [(ngModel)]="searchTerm"/>
-      </div>
-      <div class = "filter-select">
-        <select aria-label = "Filter by status" [(ngModel)]="statusFilter">
-          <option value="ALL">All Events</option>
-          <option value="Live">Live</option>
-          <option value="Upcoming">Upcoming</option>
-          <option value="Completed">Completed</option>
-          <option value="Canceled">Canceled</option>
-        </select>
-        <i class = "pi pi-chevron-down filter-chevron"></i>
-      </div>
+  <div class = "toolbar">
+    <div class = "search-box">
+      <i class = "pi pi-search search-icon"></i>
+      <input type = "text" placeholder = "Search events..." aria-label = "Search events" [(ngModel)] = "searchTerm" (ngModelChange) = "applyFilter()"/>
     </div>
-    @if (errorMessage){
-      <div class = "error-banner">{{errorMessage}}</div>
+    <div class = "filter-select">
+      <select aria-label = "Sort events" [(ngModel)] = "sortBy" (ngModelChange) = "applyFilter()">
+        @for (option of sortOptions; track option.key){
+          <option [value] = "option.key">{{option.label}}</option>
+        }
+      </select>
+      <i class = "pi pi-chevron-down filter-chevron"></i>
+    </div>
+  </div>
+
+  <div class = "status-chips" role = "group" aria-label = "Filter by status">
+    @for (chip of statusChips; track chip.key){
+      <button type="button" class = "chip" [class.active]="statusFilter === chip.key"
+      [attr.aria-pressed] = "statusFilter === chip.key" (click) = "setStatusFilter(chip.key)">
+      {{ chip.label}}<span class ="chip-count">{{statusCounts[chip.key]}}</span>
+    </button>
     }
-    <div class = "events-table">
-      <div class = "events-table-header">
-        <span>Event Name</span>
-        <span>Type</span>
-        <span>Status</span>
-        <span>Dates</span>
-        <span>Action</span>
-      </div>
+  </div>
 
-      @if (isLoading){
-        <div class = "empty-state">Loading events...</div>
-      } @else if (filteredEvents.length === 0){
-        <div class = "empty-state">No events created yet for this hackathon.</div>
-      } @else {
-        @for (event of filteredEvents; track event.eventId){
-          <div class = "event-row-group">
-            <div class = "event-row">
-              <div class = "event-name-cell">
-                <span class = "event-logo">{{event.logoInitial}}</span>
-                <span class = "event-name">{{event.name}}</span>
+  @if (errorMessage){
+    <div class = "error-banner">{{errorMessage}}</div>
+  }
+
+
+    @if (isLoading){
+      <div class = "events-grid" aria-busy = "true" aria-label = "Loading events">
+        @for (i of skeletons; track i){
+          <div class = "event-card skeleton">
+            <div class = "sk-banner"></div>
+            <div class = "card-body">
+              <div class = "sk-row">
+                <div class = "sk-logo"></div>
+                <div class = "sk-lines">
+                  <div class = "sk-line sk-line-lg"></div>
+                  <div class = "sk-line sk-line-sm"></div>
+                </div>
               </div>
-              <span class = "type-pill">{{event.visibility}}</span>
-              <span class = "status-pill" [ngClass] = "event.statusClass">{{event.status}}</span>
-              <span class = "dates-cell">
-                <span class = "dates-range">{{event.dateRangeLabel}}</span>
-                <span class = "time-remaining" [class.time-remaining-urgent] = "event.statusClass === 'live'">{{getTimeRemaining(event)}}</span>
-              </span>
-              <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "expandedEventId === event.eventId"
-               [attr.aria-expanded] = "expandedEventId === event.eventId" (click) = "toggleEventDetails(event.eventId)">
-                {{expandedEventId === event.eventId ? 'Hide Event' : 'View Event' }}
-                <i class = "pi" [ngClass] = "expandedEventId === event.eventId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
-              </button>
-              <button type = "button" class = "btn-view-event" (click) = "navigateToParticipants(event.eventId)">Participants</button>
+              <div class = "sk-line sk-line-md"></div>
             </div>
+          </div>
+        }
+      </div>
+    } @else if (filteredEvents.length === 0){
+      <div class = "empty-state">
+        <i class = "pi pi-calendar"></i>
+        <p> {{ emptyMessage}}</p>
+      </div>
+    } @else {
+      <div class = "events-grid">
+        @for (event of visibleEvents; track event.eventId){
+          <article class = "event-card" [ngClass]="'is-' + event.statusClass">
 
-            @if (expandedEventId === event.eventId){
-              <div class = "event-registrations-panel">
-                @if (registrationsLoading[event.eventId]){
-                  <div class = "registrations-loading">Loading registered teams...</div>
-                } @else if (registrationsError[event.eventId]){
-                  <div class = "registrations-error">{{registrationsError[event.eventId]}}</div>
-                } @else if (registrationsByEvent[event.eventId]){
-                  <div class = "registrations-summary-bar">
-                    <span><i class = "pi pi-users"></i>{{registrationsByEvent[event.eventId].length}} teams</span>
-                  </div>
+            <div class = "card-banner" [style.background-color]="event.bannerUrl ? null : event.palette.banner">
+              @if (event.bannerUrl){
+                <img class = "banner-img" [src]="event.bannerUrl" alt="" loading="lazy" (error)="onBannerError(event)" />
 
-                  @if (registrationsByEvent[event.eventId].length === 0){
-                    <p class = "registrations-empty">No teams have registered for this event yet.</p>
-                  } @else {
-                    <div class = "registrations-section">
-                      <h4 class = "registrations-section-title">Registered Teams</h4>
-                      <div class = "team-card-list">
-                        @for (team of registrationsByEvent[event.eventId]; track team.teamId){
-                          <div class = "team-card">
-                            <div class = "team-card-header">
-                              <span class = "team-name">{{team.name}}</span>
-                              <span class = "team-member-count">{{team.members.length}} member{{ team.members.length === 1 ? '' : 's'}}</span>
-                            </div>
-                            <ul class = "team-member-list">
-                              @for (member of team.members; track member.userId){
-                                <li>
-                                  <span>{{ member.fullName }}</span>
-                                  <span class = "member-email">{{ member.email }}</span>
-                                </li>
-                              }
-                            </ul>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  }
+              } @else {
+                <span class = "deco deco-1"></span>
+                 <span class = "deco deco-2"></span>
+              }
+          
+            <span class = "status-badge">
+              @if (event.statusClass === 'live'){
+                <span class = "live-dot"></span>
+              } @else if (event.statusClass === 'upcoming'){
+                <i class = "pi pi-clock"></i>
+              } @else if (event.statusClass === 'completed'){
+                <i class = "pi pi-check"></i>
+              } @else {
+                <i class = "pi pi-ban"></i>
+              }
+              {{event.status}}
+            </span>
 
-                  <button type = "button" class = "btn-view-event" (click) = "navigateToAnnouncements(event.eventId)">
-                    <i class = "pi pi-megaphone"></i> Announcements
-                  </button>
-
-                  <button type = "button" class = "btn-view-event" (click) = "navigateToForum(event.eventId)">
-                    <i class = "pi pi-comments"></i> Forum
-                  </button>
-
-                  <button type = "button" class = "btn-view-event" (click) = "pauseLeaderboard(event.eventId)" [disabled] = "leaderboardPauseLoading[event.eventId]">
-                    <i class = "pi" [ngClass] = "leaderboardPaused[event.eventId] ? 'pi-play' : 'pi-pause'"></i>
-                    {{leaderboardPauseLoading[event.eventId] ? 'Updating...' : leaderboardPaused[event.eventId] ? 'Resume Scoring' : 'Pause Scoring'}}
-                  </button>
-
-                  <button type = "button" class = "btn-view-event" [class.btn-view-event-active] = "extendTimerOpenFor === event.eventId" (click) = "toggleExtendTimer(event.eventId)">
-                    <i class = "pi pi-clock"></i>
-                    Extend Timer
-                  </button>
-
-                  @if (extendTimerOpenFor === event.eventId) {
-                    <div class = "extend-timer-panel">
-                      <label [attr.for] = "'extend-timer-' + event.eventId">Add hours</label>
-                      <div class = "extend-timer-controls">
-                        <input
-                          type = "number"
-                          min = "0.25"
-                          step = "0.25"
-                          [id] = "'extend-timer-' + event.eventId"
-                          class = "extend-timer-input"
-                          [(ngModel)] = "extendTimerHours[event.eventId]"
-                          [disabled] = "extendTimerLoading[event.eventId]"
-                          aria-label = "Hours to extend event by"
-                        />
-                        <button
-                          type = "button"
-                          class = "btn-view-event"
-                          [disabled] = "extendTimerLoading[event.eventId]"
-                          (click) = "extendTimer(event.eventId)"
-                        >
-                          {{extendTimerLoading[event.eventId] ? 'Extending...' : 'Apply'}}
-                        </button>
-                        <button
-                          type = "button"
-                          class = "btn-view-event"
-                          [disabled] = "extendTimerLoading[event.eventId]"
-                          (click) = "toggleExtendTimer(event.eventId)"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                      @if (extendTimerError[event.eventId]) {
-                        <p class = "extend-timer-error">{{extendTimerError[event.eventId]}}</p>
-                      }
-                    </div>
-                  }
-                }
-              </div>
-            }
+            <span class = "visibility-badge">
+              <i class = "pi" [ngClass] = "event.visibility === 'Private' ? 'pi-lock' : 'pi-globe'"></i>
+              {{event.visibility}}
+            </span>
           </div>
 
-        }
-      }
+          <div class = "card-body">
+            <div class = "card-identity">
+              <div class = "event-logo" [style.background-color] = "event.logoUrl ? '#ffffff' : event.palette.dark">
+                @if (event.logoUrl){
+                  <img [src] ="event.logoUrl" alt = "" loading ="lazy" (error)="onLogoError(event)" />
+                } @else {
+                  {{event.logoInitial}}
+                }
+              </div>
+              <div class = "identity-text">
+                <h3 class = "event-name" [title] = "event.name">{{event.name}}</h3>
+                <p class = "event-dates">{{event.dateRangeLabel}}</p>
+              </div>
+            </div>
 
-    </div>
-  }
+            <div class = "card-meta">
+              <span><i class = "pi pi-users"></i>Teams of {{event.teamSizeLimit}}</span>
+              <span>
+                <i class = "pi" [ngClass]="event.isInPerson ? 'pi-map-marker' : 'pi-wifi'"></i>
+                {{event.isInPerson ? 'In person' : 'Online'}}
+              </span>
+              <span class = "time-label">{{event.timeLabel}}</span>
+            </div>
+
+            @if (event.statusClass === 'live'){
+              <div class = "progress" role = "progressbar" aria-label = "Event progress"
+              aria-valuemin = "0" aria-valuemax = "100" [attr.aria-valuenow]="event.progress">
+              <div class = "progress-fill" [style.width.%] = "event.progress"></div>
+            </div>
+            }
+
+            <div class = "card-actions">
+              <button type="button" class = "btn-card btn-card-primary"
+              [attr.aria-label]="'View ' +event.name" (click)="openViewEventModal(event)">
+              <i class = "pi pi-eye"></i> View event
+            </button>
+            <button type="button" class = "btn-card"
+              [attr.aria-label]="'Participants of ' +event.name" (click)="navigateToParticipants(event.eventId)">
+              <i class = "pi pi-users"></i> Participants
+            </button>
+            </div>
+          </div>
+
+          </article>
+        }
+          </div>
+
+          <div class = "list-footer">
+            <span>Showing {{visibleEvents.length}} of {{ filteredEvents.length}} events</span>
+            @if (canLoadMore){
+              <button type="button" class = "btn-load-more" (click) = "loadMore()">Load more</button>
+            }
+          </div>
+      }
+    
+
 </main>
 
 @if (showParticipantsModal) {
@@ -220,5 +203,15 @@
     [eventName] = "participantsModalEventName"
     (closed) = "closeParticipantsModal()"
   ></app-participants-modal>
+}
+
+@if (showViewEventModal){
+  <app-view-event-modal
+  [hackathonId] = "viewEventHackathonId"
+  [eventId] = "viewEventEventId"
+  [eventName] = "viewEventName"
+  (closed) = "closeViewEventModal()"
+
+></app-view-event-modal>
 }
 </div>

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, Input} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
@@ -26,9 +26,8 @@ export class AnnouncementsComponent implements OnInit{
      private readonly eventService = inject(EventService);
      private readonly announcementService = inject(AnnouncementService);
 
-    eventId = '';
-    eventName ='';
-    eventDescription ='';
+    @Input() hackathonId = '';
+    @Input() eventId = '';
 
     announcements: AnnouncementResponse[]=[];
     isLoading = true;
@@ -65,7 +64,8 @@ export class AnnouncementsComponent implements OnInit{
     }
 
     ngOnInit(): void {
-        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
+        this.hackathonId = this.hackathonId ||  this.route.snapshot.paramMap.get('hackathonId') || '';
+        this.eventId = this.eventId ||  this.route.snapshot.paramMap.get('eventId') || '';
 
         if (!this.eventId){
             this.errorMessage = 'There was no event ID provided';

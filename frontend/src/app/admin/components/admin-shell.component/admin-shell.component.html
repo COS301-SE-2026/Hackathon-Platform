@@ -2,7 +2,7 @@
     <nav class = "navbar">
         <div class = "navbar-container">
             <div class = "navbar-brand">
-                <a routerLink = "/admin/dashboard">
+                <a routerLink = "/admin/events">
                 <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform" class = "brand-logo" />
                 </a>
             </div>
@@ -12,8 +12,8 @@
         <div class = "navbar-links" [class.navbar-links-open] = "isMenuOpen">
             <ul>
                 <li>
-                    <a routerLink = "/admin/dashboard" routerLinkActive = "active" (click)="closeMenu()">
-                        <span>Home</span>
+                    <a routerLink = "/admin/events" routerLinkActive = "active" (click)="closeMenu()">
+                        <span>Events</span>
                     </a>
                 </li>
                 <li>
@@ -26,13 +26,6 @@
 
 
             <div class = "navbar-right">
-                <button class = "navbar-notifications" aria-label = "Notifications" (click) = "toggleNotifications()">
-                    <i class = "pi pi-bell"></i>
-                    @if (notificationCount > 0){
-                        <span class = "notification-badge">{{ notificationCount }}</span>
-                    }
-                </button>
-
                 <button class = "navbar-profile" (click) = "toggleProfileMenu()" aria-haspopup="true" [attr.aria-expanded]="isProfileMenuOpen">
                     <div class = "avatar-circle">{{ getInitials() }}</div>
                 <div class = "user-info">
@@ -49,10 +42,6 @@
 </div>
         @if(isProfileMenuOpen){
             <div class = "profile-dropdown">
-                <a routerLink = "/admin/settings" class = "dropdown-item" (click) = "closeProfileMenu()">
-                    <i class = "pi pi-cog"></i>
-                    Settings
-                </a>
                 <div class = "dropdown-divider"></div>
                 <button class = "dropdown-item" (click) = "logout()">
                     <i class = "pi pi-sign-out"></i>

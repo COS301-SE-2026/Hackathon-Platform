@@ -26,10 +26,6 @@ export const routes: Routes = [
         path: 'hackathons',
         loadComponent: () => import('./admin/components/hackathons/hackathons.component').then(m => m.HackathonsComponent),
       },
-      {
-        path: 'hackathons/:hackathonId/events',
-        loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
-      },
        {
         path: 'events',
         loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
@@ -44,6 +40,47 @@ export const routes: Routes = [
       {
         path: 'hackathons/:hackathonId/events/create',
         loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
+      },
+      {
+        path: 'hackathons/:hackathonId/events/:eventId',
+        loadComponent: () => import ('./admin/components/event-shell/event-shell.component').then(m=> m.EventShellComponent),
+        children: [
+          {
+        path: 'dashboard',
+        loadComponent: () => import('./admin/components/event-dashboard/event-dashboard.component').then(m => m.EventDashboardComponent),
+          },
+        //    {
+        // path: 'live-control',
+        // loadComponent: () => import('./admin/components/live-control/live-control.component').then(m => m.LiveControlComponent),
+        //   },
+           {
+        path: 'announcements',
+        loadComponent: () => import('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
+          },
+           {
+        path: 'forum',
+        loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent),
+          },
+           {
+        path: 'teams',
+        loadComponent: () => import('./admin/components/teams/teams.component').then(m => m.TeamsComponent),
+          },
+           {
+        path: 'manage',
+        loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
+          },
+           {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      }
+
+        ]
+
+      },
+        {
+        path: 'hackathons/:hackathonId/events',
+        loadComponent: () => import('./admin/components/events/events.component').then(m => m.EventsComponent),
       },
        {
         path: 'hackathons/:hackathonId/manage',
@@ -65,11 +102,7 @@ export const routes: Routes = [
         path: "settings",
         loadComponent: () => import ('./admin/components/profile/admin-profile.component').then(m => m.AdminProfileComponent),
       },
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-      }
+     
     ]
   },
 

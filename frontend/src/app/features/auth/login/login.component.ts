@@ -41,6 +41,8 @@ export class LoginComponent {
       next: (response) => {
         this.isLoading = false;
 
+        if(response.role === 'ADMIN'){
+          this.router.navigate(['/admin/events']);
         if(response.role === 'SUPERADMIN'){
           this.router.navigate(['/super-admin']);
         } else if(response.role === 'ADMIN'){

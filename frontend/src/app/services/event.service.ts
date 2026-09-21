@@ -26,6 +26,7 @@ export interface EventRequest {
 
 export interface EventResponse {
   eventId: string;
+  hackathonId:string;
   hackathon?: string;
   createdByUserId: string;
   name: string;
@@ -200,6 +201,10 @@ export class EventService {
     return this.http.put<EventResponse>(`${this.baseUrl}/admin/events/${eventId}`, eventData);
   }
 
+  deleteEvent(eventId: string):Observable<void>{
+    return this.http.delete<void>(`${this.baseUrl}/admin/events/${eventId}`);
+  }
+
   getEventStatus(eventId: string): Observable<{ eventId: string; status: string; visibility: string }> {
     return this.http.get<{ eventId: string; status: string; visibility: string }>(
       `${this.baseUrl}/admin/events/${eventId}/status`
@@ -208,6 +213,24 @@ export class EventService {
 
   createEventForHackathon(hackathonId: string, eventData: EventRequest): Observable<EventResponse> {
     return this.http.post<EventResponse>(`${this.baseUrl}/hackathon/${hackathonId}/events`, eventData);
+  }
+
+  uploadEventBanner(eventId: string, file: File): Observable<EventResponse> {
+    const body = new FormData();
+    body.append('file',file);
+    return this.http.post<EventResponse>(`${this.baseUrl}/admin/events/${eventId}/banner`,body);
+  }
+
+  uploadEventLogo(eventId: string, file: File): Observable<EventResponse> {
+    const body = new FormData();
+    body.append('file',file);
+    return this.http.post<EventResponse>(`${this.baseUrl}/admin/events/${eventId}/logo`,body);
+  }
+
+  resolveMediaUrl(url?: string | null): string | null {
+    if (!url) return null;
+    if (/^(https?:)?\/\//i.test(url) || url.startsWith('data:')) return url;
+    return `${environment.apiUrl}${url.startsWith('/') ? '' : '/'}${url}`;
   }
 
 
@@ -230,6 +253,12 @@ export class EventService {
     return this.http.get<EventParticipantResponse[]>(`${this.baseUrl}/admin/events/${eventId}/participants`);
   }
 
+  removeParticipant(eventId: string, userId:string): Observable<void>{
+    return this.http.delete<void>(`${this.baseUrl}/admin/events/${eventId}/participants/${userId}`);
+  }
+
+  addTeamMember(eventId: string, teamId: string, email: string): Observable<EventParticipantResponse>{
+    return this.http.post<EventParticipantResponse>(`${this.baseUrl}/admin/events/${eventId}/teams/${teamId}/members`,{ email });
   registerForEvent( eventId: string, registrationData: EventRegistrationRequest): Observable<EventRegistrationResponse> {
   return this.http.post<EventRegistrationResponse>( `${this.baseUrl}/events/${eventId}/registered`, registrationData);
 }

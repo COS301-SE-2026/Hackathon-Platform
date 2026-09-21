@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { EventParticipantResponse, EventResponse, EventService } from '../../../services/event.service';
@@ -18,25 +17,19 @@ interface Events {
   statusPill: 'Live' | 'Upcoming' |'Ended';
   participantsLabel: string;
   meta: string;
+  hackathonId: string;
 }
 
 interface Submissions {
   submissionId: number;
   team: string;
   teamInitials: string;
-  event: string;
   level: string;
   score: string;
   status: string;
   statusClass: string;
   challenge: string;
   time: string;
-}
-interface ParticipantRow {
-  initials: string;
-  name: string;
-  email: string;
-  team: string;
 }
 
 interface AnnouncementRow{
@@ -72,7 +65,7 @@ interface ScoreLevelStat{
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ParticipantsModalComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -86,7 +79,7 @@ export class DashboardComponent implements OnInit{
 
   allEvents: Events[] = [];
   recentSubmissions: Submissions[] = [];
-
+  recentAnnouncements: AnnouncementRow[]=[];
   activeEvents = 0
   activeParticipants = 0;
   teamsCount = 0;
@@ -493,14 +486,6 @@ export class DashboardComponent implements OnInit{
       next: events => {
         this.allEvents = events.map(event => this.toDashboardEvent(event));
         this.eventLoading = false;
-
-        if (!this.selectedEventId) {
-          const defaultEvent = events.find(event => this.isActiveEvent(event)) || events[0];
-          if (defaultEvent) {
-            this.onSelectedEventChange(defaultEvent.eventId);
-          }
-        }
-
         this.change.markForCheck();
       },
       error: () => {
@@ -518,6 +503,7 @@ export class DashboardComponent implements OnInit{
   private toDashboardEvent(event: EventResponse): Events {
     return {
       eventId: event.eventId,
+      hackathonId: event.hackathonId,
       name: event.name,
       logoInitial: event.name?.charAt(0)?.toUpperCase() || '?',
       dateRangeLabel: this.formatDateRange(event),

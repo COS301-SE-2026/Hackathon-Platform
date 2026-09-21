@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnInit, NgZone, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, NgZone, OnDestroy, Input } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import { FormsModule} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -37,6 +37,12 @@ interface ForumThread{
 export class ForumComponent implements OnInit, OnDestroy {
     private readonly change = inject(ChangeDetectorRef);
     private readonly route = inject(ActivatedRoute);
+    @Input() hackathonId = '';
+    @Input() eventId = '';
+    isLoading = false;
+    errorMessage = '';
+    searchTerm = '';
+    
     private readonly forumService = inject(ForumService);
     private readonly zone = inject(NgZone);
     private readonly authService = inject(AuthService);
@@ -60,7 +66,8 @@ export class ForumComponent implements OnInit, OnDestroy {
     threads: ForumThread[] = [];
 
     ngOnInit(): void {
-        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
+        this.hackathonId = this.hackathonId ||  this.route.snapshot.paramMap.get('hackathonId') || '';
+        this.eventId = this.eventId ||  this.route.snapshot.paramMap.get('eventId') || '';
 
         if (!this.eventId){
             
