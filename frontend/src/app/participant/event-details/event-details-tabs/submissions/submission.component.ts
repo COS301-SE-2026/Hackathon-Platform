@@ -9,11 +9,14 @@ import { TabsComponent, TabItem} from '../../../../shared/components/tabs/tabs.c
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { UploadAreaComponent } from '../../../../shared/components/upload-area/upload-area.component';
 import { ToastService } from '../../../../shared/components/toast/toast.service';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+
 
 @Component({
   selector: 'app-submissions',
   standalone: true,
-  imports: [CommonModule, TabsComponent, ButtonComponent, UploadAreaComponent],
+  imports: [CommonModule, TabsComponent, ButtonComponent, UploadAreaComponent, LoaderComponent, EmptyStateComponent],
   templateUrl: './submission.component.html',
   styleUrl: './submission.component.scss',
 })

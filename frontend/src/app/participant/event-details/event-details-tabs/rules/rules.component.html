@@ -13,12 +13,12 @@
 
   @else if (event) {
 
-    <div class="rules-header">
+  @if (event.rules) {
+
+      <div class="rules-header">
       <h2>Event Rules</h2>
       <p>Please review the rules and requirements for this event.</p>
     </div>
-
-  @if (event.rules) {
 
       <section class="rules-section">
 
@@ -35,14 +35,7 @@
   } 
     
     @else {
-
-      <div class="rules-message">
-        <i class="pi pi-info-circle" aria-hidden="true"></i>
-         
-         <h3>No Rules Available</h3>
-         <p>No rules have been provided for this event yet.</p>
-      </div>
-
+      <app-empty-state icon="pi-info-circle" title="No Rules Available" description="No rules have been provided for this event yet."></app-empty-state>
      }
   }
 

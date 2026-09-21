@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { TableComponent, TableColumn, TableRow } from '../../../../shared/components/table/table.component';
 import { LeaderboardEntry, LeaderboardService } from '../../../../services/leaderboard.service';
 import { TeamService } from '../../../../services/team.service';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+
+
 
 interface LeaderboardInfo extends LeaderboardEntry {
   name: string;
@@ -11,7 +15,7 @@ interface LeaderboardInfo extends LeaderboardEntry {
 
 @Component({
   selector: 'app-leaderboard',
-  imports: [CommonModule, TableComponent],
+  imports: [CommonModule, TableComponent, EmptyStateComponent, LoaderComponent],
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',
 })

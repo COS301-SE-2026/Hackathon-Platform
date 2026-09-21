@@ -1,7 +1,24 @@
 
  <div class="submission-history">
 
- <div class="history-header">
+ 
+ @if (historyLoading) {
+
+   <app-loader message="Loading submission history..." />
+
+} @else if (historyError) {
+
+  <div class="empty-history">
+    {{ historyError }}
+  </div>
+
+} 
+ @else if (filteredTableData.length === 0) {
+  <app-empty-state icon="pi-history" title="No Submission History" description="You have not made any submissions for this event yet."></app-empty-state>
+}
+@else {
+
+  <div class="history-header">
 
   <div class="history-header-content">
     <h2 class="history-title">Submission History</h2>
@@ -18,22 +35,6 @@
      </div>
 
  </div>
-
-
- @if (historyLoading) {
-
-  <div class="empty-history">
-    <i class="pi pi-spin pi-spinner"></i>
-    Loading submission history...
-  </div>
-
-} @else if (historyError) {
-
-  <div class="empty-history">
-    {{ historyError }}
-  </div>
-
-} @else {
 
 <app-table  [columns]="tableColumns" [data]="paginatedTableData" [loading]="false" emptyMessage="No submissions found."></app-table>
 

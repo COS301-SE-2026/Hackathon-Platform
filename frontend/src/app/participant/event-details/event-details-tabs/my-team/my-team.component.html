@@ -5,36 +5,17 @@
 
 <div class="my-team-page">
 
-  <div class="team-dashboard">
-
-  <div class="empty-state">
-
-   <div class="empty-state-illustration">
-
-     <img src="assets/images/team.svg" alt="Teamwork illustration">
-
-    </div>
-
-    <div class="empty-state-content">
-
-      <h2>You're not part of a team yet</h2>
-
-      <p>Hackathons are way more fun with a team! Join an existing team or create your own to collaborate and take on the challenge together.</p>
-
-    </div>
+    <app-empty-state
+        icon="pi-users"
+        title="You're not part of a team"
+        description="Join an existing team or create your own to collaborate and take on the challenge together.">
+    </app-empty-state>
 
     <div class="empty-state-actions">
-
       <app-button variant="primary"  width="100%" (click)="openCreateTeamDialog()" (keydown)="null" (keyup)="null" >Create Team</app-button>
-
       <app-button variant="secondary" width="100%"  (click)="openRequestToJoinDialog()" (keydown)="null" (keyup)="null" >Request To Join</app-button>
-
     </div>
 
-  </div>
-
-
-  </div>
 
 </div>
 
@@ -134,8 +115,6 @@
 
           <app-button variant="secondary" width="100%" (click)="leaveTeamDialogVisible = true" (keydown)="null" (keyup)="null">
 
-            <i class="pi pi-sign-out"></i>
-
             Leave Team
 
           </app-button>
@@ -162,7 +141,7 @@
 
           </div>
 
-          <app-button variant="secondary" width="100%" (click)="copyJoinCode()" (keydown)="null" (keyup)="null"> <i class="pi pi-copy"></i> Copy</app-button>
+          <app-button variant="secondary" width="100%" (click)="copyJoinCode()" (keydown)="null" (keyup)="null"> Copy</app-button>
 
         </div>
 

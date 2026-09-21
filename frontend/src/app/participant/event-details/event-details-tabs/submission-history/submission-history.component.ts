@@ -7,11 +7,14 @@ import { DropdownComponent } from '../../../../shared/components/dropdown/dropdo
 import { TableComponent, TableColumn, TableRow} from '../../../../shared/components/table/table.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+
 
 @Component({
   selector: 'app-submission-history',
   standalone: true,
-  imports: [CommonModule , DropdownComponent, TableComponent, ButtonComponent, PaginationComponent],
+  imports: [CommonModule , DropdownComponent, TableComponent, ButtonComponent, PaginationComponent, EmptyStateComponent, LoaderComponent],
   templateUrl: './submission-history.component.html',
   styleUrl: './submission-history.component.scss',
 })
