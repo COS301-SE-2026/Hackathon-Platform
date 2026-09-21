@@ -293,15 +293,15 @@ confirmRegistration(): void {
  private setTabs(): void {
   const eventRoute = `/participant/events/${this.eventId}`;
 
-  const tabDef = [
-    ['Overview', 'overview'],
-    ['Rules', 'rules'],
-  ];
+  const tabDef = [ ['Overview', 'overview'], ['Rules', 'rules'],];
 
    if (this.isRegistered) {
-    tabDef.push( ['Team', 'team'], ['Submissions', 'submissions'],
-      ['History',  'submission-history'], ['Rankings',  'leaderboard'], ['Forum',  'forum'], ['Announcements',  'announcements'],
-    );
+    tabDef.push( ['Team', 'team'], ['Forum',  'forum'], ['Announcements',  'announcements'],);
+
+     if (this.hasEventStarted()) {
+      tabDef.push( ['Submissions', 'submissions'], ['History', 'submission-history'], ['Rankings', 'leaderboard']);
+    }
+
   }
 
   this.tabs = tabDef.map(([label, tab]) => ({
@@ -348,7 +348,7 @@ confirmRegistration(): void {
     return;
   }
   this.event.timer = calculateEventTimer( this.event.startDateTime, this.event.duration );
-
+  this.setTabs();
   this.change.markForCheck();
 }
 
@@ -423,6 +423,11 @@ confirmRegistration(): void {
           this.change.markForCheck();
         }
       });
+  }
+
+  private hasEventStarted(): boolean {
+    if (!this.event.startDateTime) {  return false; }
+    return new Date() >= new Date(this.event.startDateTime);
   }
 
 }
