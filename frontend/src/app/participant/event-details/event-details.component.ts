@@ -58,6 +58,7 @@ export class EventDetailsComponent implements OnDestroy {
   tabs: TabItem[] = [];
 
   private readonly protectedTabs = [ 'team','submissions', 'submission-history','leaderboard', 'forum', 'announcements'];
+  private readonly eventStartedTabs = [ 'submissions', 'submission-history','leaderboard'];
 
   activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'overview';
   eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
@@ -138,16 +139,28 @@ export class EventDetailsComponent implements OnDestroy {
   }
 
   private validateActiveTab(tab: string): void {
-  if ( this.isCheckingRegistration || this.isRegistered || !this.protectedTabs.includes(tab)) {
-    return;
-  }
+    if (this.isCheckingRegistration) {
+      return;
+    }
 
-  this.router.navigate([], {
-    relativeTo: this.route,
-    queryParams: { tab: 'overview', subtab: null },
-    replaceUrl: true
-  });
-}
+    if (!this.isRegistered && this.protectedTabs.includes(tab)) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: 'overview', subtab: null },
+        replaceUrl: true
+      });
+
+      return;
+    }
+
+    if ( this.isRegistered && !this.hasEventStarted() && this.eventStartedTabs.includes(tab)) {
+      this.router.navigate([], {
+         relativeTo: this.route,
+         queryParams: { tab: 'overview', subtab: null },
+         replaceUrl: true
+      });
+    }
+  }
 
   goHome(): void {
   this.router.navigate(['/participant/home']);
