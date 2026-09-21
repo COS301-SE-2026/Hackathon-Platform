@@ -11,7 +11,7 @@ const CANVAS_HEIGHT = 595;
 
 
 const FIELD_OPTIONS: { value: CertificateField; label: string }[] = [
-  { value: 'participantName', label: 'Partcicipant Name' },
+  { value: 'participantName', label: 'Participant Name' },
   { value: 'teamName', label: 'Team Name' },
   { value: 'eventName', label: 'Event Name' },
   { value: 'rank', label: 'Rank (e.g. "1st")' },
@@ -314,5 +314,51 @@ export class CertificatesComponent implements OnInit, OnDestroy {
         this.isUploadingAsset = false;
       },
     });
+  }
+
+  private ensureTemplateSaved(): Observable<string> {
+    if(this.selectedTemplateId){
+      const id = this.selectedTemplateId;
+      return new Observable<string>((subscriber) => {
+        subscriber.next(id);
+        subscriber.complete();
+      });
+    }
+    const req = {
+      name: this.templateName,
+      eventId: this.eventId,
+      hackathonId: null,
+      layout: this.layout,
+    };
+    return new Observable<string>((subscriber) => {
+      this.certificateService.createTemplate(req).subscribe({
+        next: (template: CertificateTemplateResponse) => {
+          this.selectedTemplateId = template.templateId;
+          this.loadTemplates();
+          subscriber.next(template.templateId);
+          subscriber.complete();
+        },
+        error: (err: unkown) => subscriber.error(err),
+      });
+    });
+  }
+
+  selectElement(index: number): void {
+    this.selectedElementIndex = index;
+  }
+
+  deleteSelectedElement(): void {
+    if (this.selectedElementIndex === null){
+      return;
+    }
+    this.layout.elements.splice(this.selectedElementIndex, 1);
+    this.selectedElementIndex = null;
+  }
+
+  isVisibleForType(element: CertificateElement, type: string): boolean {
+    if(!element.visibleForTypes){
+      return true;
+    }
+    return element.visibleForTypes
   }
 }
