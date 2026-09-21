@@ -59,6 +59,7 @@ export class EventDetailsComponent implements OnDestroy {
 
   private readonly protectedTabs = [ 'team','submissions', 'submission-history','leaderboard', 'forum', 'announcements'];
   private readonly eventStartedTabs = [ 'submissions', 'submission-history','leaderboard'];
+  private readonly completedTabs = [ 'overview','rules','announcements','submission-history','leaderboard'];
 
   activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'overview';
   eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
@@ -149,16 +150,27 @@ export class EventDetailsComponent implements OnDestroy {
         queryParams: { tab: 'overview', subtab: null },
         replaceUrl: true
       });
+      return;
+    }
+
+    if ( this.isRegistered && this.hasEventCompleted() && !this.completedTabs.includes(tab)) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: 'overview', subtab: null },
+        replaceUrl: true
+      });
 
       return;
     }
 
     if ( this.isRegistered && !this.hasEventStarted() && this.eventStartedTabs.includes(tab)) {
       this.router.navigate([], {
-         relativeTo: this.route,
-         queryParams: { tab: 'overview', subtab: null },
-         replaceUrl: true
+        relativeTo: this.route,
+        queryParams: { tab: 'overview', subtab: null },
+        replaceUrl: true
       });
+
+      return;
     }
   }
 
@@ -303,26 +315,26 @@ confirmRegistration(): void {
     });
   }
 
- private setTabs(): void {
-  const eventRoute = `/participant/events/${this.eventId}`;
+  private setTabs(): void {
 
-  const tabDef = [ ['Overview', 'overview'], ['Rules', 'rules'],];
+    const eventRoute = `/participant/events/${this.eventId}`;
+    const tabDef = [ ['Overview', 'overview'], ['Rules', 'rules'] ];
 
-   if (this.isRegistered) {
-    tabDef.push( ['Team', 'team'], ['Forum',  'forum'], ['Announcements',  'announcements'],);
+    if (this.isRegistered) {
+      if (this.hasEventCompleted()) {
+        tabDef.push( ['Announcements', 'announcements'], ['History', 'submission-history'], ['Rankings', 'leaderboard'] );
+     } 
+      else {
+        tabDef.push( ['Team', 'team'], ['Forum', 'forum'], ['Announcements', 'announcements']);
 
-     if (this.hasEventStarted()) {
-      tabDef.push( ['Submissions', 'submissions'], ['History', 'submission-history'], ['Rankings', 'leaderboard']);
-    }
+        if (this.hasEventStarted()) {
+          tabDef.push( ['Submissions', 'submissions'], ['History', 'submission-history'], ['Rankings', 'leaderboard']);
+        }
+       }
+     }
 
+    this.tabs = tabDef.map(([label, tab]) => ({ label, route: eventRoute, queryParams: { tab }}));
   }
-
-  this.tabs = tabDef.map(([label, tab]) => ({
-    label,
-    route: eventRoute,
-    queryParams: { tab }
-  }));
-}
 
   downloadProblemStatement(): void {
     if (!this.hackathonId || this.downloadingProblemStatement) {
@@ -442,5 +454,12 @@ confirmRegistration(): void {
     if (!this.event.startDateTime) {  return false; }
     return new Date() >= new Date(this.event.startDateTime);
   }
+
+  private hasEventCompleted(): boolean {
+  if (!this.event.startDateTime || !this.event.duration) {  return false; }
+  const start = new Date(this.event.startDateTime).getTime();
+  const end = start + this.event.duration * 1000;
+  return Date.now() >= end;
+}
 
 }
