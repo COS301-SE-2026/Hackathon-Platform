@@ -387,7 +387,7 @@ export class EventDashboardComponent implements OnInit{
     }));
 
     const polyline = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-    const area = `M${polyline.replaceAll(' ',' L')} L${points[points.length - 1].x.toFixed(1)},${bottom} L${points[0].x.toFixed(1)},${bottom} Z`;
+    const area = `M${polyline.replaceAll(' ',' L')} L${points.at(- 1)!.x.toFixed(1)},${bottom} L${points.at(0)!.x.toFixed(1)},${bottom} Z`;
 
     return { points, polyline, area };
 
