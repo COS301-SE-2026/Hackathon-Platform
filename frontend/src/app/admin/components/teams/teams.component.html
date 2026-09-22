@@ -13,7 +13,12 @@
         <div class = "toolbar">
             <div class = "search-box">
                 <i class = "pi pi-search search-icon"></i>
+                 <label 
+                        for ="search-teams" 
+                        class = "sr-only">Search teams
+                       </label>
                 <input type = "text"
+                id = "search-teams"
                 placeholder="Search teams..."
                 aria-label="Search teams"
                 [(ngModel)] = "searchTerm"
@@ -110,14 +115,27 @@
                         <p class = "member-empty">No members yet.</p>
                     }
                     <div class = "member-add-row">
-                        <input 
+                         
+                        <label 
+                        [for] ="'memberName-' + team.teamId" 
+                        class = "sr-only">Participant name
+                       </label>
+                       <input
                         type ="text"
+                        [id] ="'memberName-' + team.teamId" 
                         [(ngModel)] = "memberNameDrafts[team.teamId]"
                         name = "memberName{{team.teamId}}"
                         placeholder="Participant name"
                         autocomplete = "off"/>
+
+                       <label 
+                        [for] ="'memberEmail-' + team.teamId" 
+                        class = "sr-only">Email
+                       </label>
+
                         <input 
                         type ="email"
+                        [id] ="'memberEmail-' + team.teamId" 
                         [(ngModel)] = "memberEmailDrafts[team.teamId]"
                         name = "memberEmail{{team.teamId}}"
                         placeholder="Email"
@@ -163,14 +181,25 @@
             <p class = "create-team-label create-team-label-spaced">Add participants (optional)</p>
 
             <div class = "member-entry-row">
+                <label 
+                        for ="newMemberName" 
+                        class = "sr-only">Participant name
+                       </label>
                 <input 
                         type ="text"
+                        id = "newMemberName" 
                         [(ngModel)] = "newMemberName"
                         name = "newMemberName"
                         placeholder="Participant name"
                         autocomplete = "off"/>
-                        <input 
+                        
+                        <label 
+                        for ="newMemberEmail" 
+                        class = "sr-only">Email
+                       </label>
+                       <input
                         type ="email"
+                        id = "newMemberEmail" 
                         [(ngModel)] = "newMemberEmail"
                         name = "newMemberEmail"
                         placeholder="Email"
