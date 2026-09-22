@@ -44,7 +44,7 @@ export class LoginComponent {
         if(response.role === 'SUPERADMIN'){
           this.router.navigate(['/super-admin']);
         } else if(response.role === 'ADMIN'){
-          this.router.navigate(['/admin/dashboard']);
+          this.router.navigate(['/admin/events']);
         } else{
           this.router.navigate(['/participant/home']);
         }
