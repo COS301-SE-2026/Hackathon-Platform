@@ -213,9 +213,56 @@ export class CreateEventComponent implements OnInit {
     this.eventService.createEventForHackathon(this.hackathonId, eventData).subscribe({
       next: (response) => {
         console.log('Event created successfully:', response);
-        this.uploadImages(response.eventId).subscribe(()=> {
+
+        const uploads = [];
+
+        if (this.form.bannerFile) {
+          uploads.push(
+            this.storageService.uploadEventBanner(response.eventId, this.form.bannerFile)
+          );
+        }
+
+        if (this.form.logoFile) {
+          uploads.push(
+            this.storageService.uploadEventLogo(response.eventId, this.form.logoFile)
+          );
+        }
+
+        if (uploads.length === 0) {
           this.isLoading = false;
-          this.goBack();
+
+          if (this.hackathonId){
+            this.router.navigate(['/admin/hackathons',this.hackathonId,'events']);
+          }else {
+            this.router.navigate(['/admin/events']);
+          }
+
+          return;
+        }
+
+        let completedUploads = 0;
+
+        uploads.forEach(upload => {
+          upload.subscribe({
+            next: () => {
+              completedUploads++;
+
+              if (completedUploads === uploads.length) {
+                this.isLoading = false;
+
+                if (this.hackathonId){
+                  this.router.navigate(['/admin/hackathons',this.hackathonId,'events']);
+                }else {
+                  this.router.navigate(['/admin/events']);
+                }
+              }
+            },
+            error: (error) => {
+              console.error('Error uploading event branding:', error);
+              this.isLoading = false;
+              this.errorMessage = 'Event created, but the branding image upload failed.';
+            }
+          });
         });
       },
     

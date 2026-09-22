@@ -39,13 +39,9 @@ export class AnnouncementsComponent implements OnInit{
      private readonly change = inject(ChangeDetectorRef);
      private readonly hackathonService = inject(HackathonService);
 
-    @Input() hackathonId = '';
-    @Input() eventId = '';
-    hackathonName ='';
-    hackathonDescription ='';
-    levelsCount = 0;
-    eventsCount = 0;
-    participantsCount =0;
+    eventId = '';
+    eventName ='';
+    eventDescription ='';
 
     announcements: AnnouncementResponse[]=[];
     isLoading = true;
@@ -84,10 +80,10 @@ export class AnnouncementsComponent implements OnInit{
     }
 
     ngOnInit(): void {
-        this.hackathonId = this.hackathonId ||  this.route.snapshot.paramMap.get('hackathonId') || '';
-        this.eventId = this.eventId ||  this.route.snapshot.paramMap.get('eventId') || '';
-        if (!this.hackathonId){
-            this.errorMessage = 'There was no hackathon ID provided';
+        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
+
+        if (!this.eventId){
+            this.errorMessage = 'There was no event ID provided';
             this.isLoading = false;
             return;
         }
