@@ -101,6 +101,7 @@ loadLevels(): void {
 
 onLevelChange(value: string): void {
   this.selectedLevel = value;
+  this.loadLeaderboard(false);
 }
 
 
@@ -137,52 +138,61 @@ onLevelChange(value: string): void {
   @ViewChild('teamTemplate') teamTemplate!: TemplateRef<unknown>;
 
 
-  loadLeaderboard(showSpinner = true): void {
-    if (!this.eventID) {
-      this.errorMsg = "The event ID is missing";
-      this.loading = false;
-      this.leaderboardAvailable = false;
-      this.change.detectChanges();
-      return;
-    }
-
-    if (showSpinner) {
-      this.loading = true;
-      this.leaderboardAvailable = false;
-    }
-
-    this.errorMsg = '';
+loadLeaderboard(showSpinner = true): void {
+  if (!this.eventID) {
+    this.errorMsg = "The event ID is missing";
+    this.loading = false;
+    this.leaderboardAvailable = false;
     this.change.detectChanges();
+    return;
+  }
 
-    this.leaderboardService.getEventLeaderboard(this.eventId).subscribe({
-      next: entries => {
+  if (showSpinner) {
+    this.loading = true;
+    this.leaderboardAvailable = false;
+  }
 
-        this.leaderboard = entries.map(entry => ({
-          ...entry,
-          name: entry.teamName,
-          score: Number(entry.bestScore).toFixed(2),
-        }));
+  this.errorMsg = '';
+  this.change.detectChanges();
 
-        this.tableData = this.leaderboard.map(team => ({
+  const leaderboardRequest =
+    this.selectedLevel === 'Overall'
+      ? this.leaderboardService.getEventLeaderboard(this.eventId)
+      : this.leaderboardService.getLevelLeaderboard(
+          this.eventId,
+          this.levelIdByOption[this.selectedLevel]
+        );
+
+  leaderboardRequest.subscribe({
+    next: entries => {
+
+      this.leaderboard = entries.map(entry => ({
+        ...entry,
+        name: entry.teamName,
+        score: Number(entry.bestScore).toFixed(2),
+      }));
+
+      this.tableData = this.leaderboard.map(team => ({
         rank: team.rank,
         team: team.name,
         score: `${team.score} pts`,
         teamId: team.teamId
-        }));
+      }));
 
-        this.loading = false;
+      this.loading = false;
 
-        this.leaderboardAvailable = this.leaderboard.length > 0;
-        this.change.detectChanges();
-      },
-      error: () => {
-        this.errorMsg = "The leaderboard could not be loaded.";
-        this.loading = false;
-        this.leaderboardAvailable = false;
-        this.change.detectChanges();
-      },
-    });
-  }
+      this.leaderboardAvailable = this.leaderboard.length > 0;
+      this.change.detectChanges();
+    },
+    error: () => {
+      this.errorMsg = "The leaderboard could not be loaded.";
+      this.loading = false;
+      this.leaderboardAvailable = false;
+      this.change.detectChanges();
+    },
+  });
+}
+
 
 connectToLeaderboardUpdates(): void {
   this.eventSource?.close();

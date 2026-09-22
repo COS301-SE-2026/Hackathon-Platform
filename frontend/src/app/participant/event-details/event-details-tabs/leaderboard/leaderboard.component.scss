@@ -109,7 +109,6 @@
   white-space: nowrap;
 
   color: var(--black);
-
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-h3);
@@ -331,10 +330,6 @@
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-body);
-}
-
-:host ::ng-deep .table-wrapper .p-datatable-tbody > tr.my-team-row > td {
-  background-color: var(--bright-blue-bg);
 }
 
 
