@@ -1,3 +1,85 @@
+@if (variant === 'landing') {
+
+  <nav class="navbar landing-navbar" aria-label="Landing navigation">
+
+    <div class="navbar-logo">
+     <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform"/>
+    </div>
+
+    <div class="navbar-links">
+
+      <a class="navbar-link" (click)="scrollTo('home')" > Home</a>
+
+      <a class="navbar-link"(click)="scrollTo('features')">Features</a>
+
+      <a class="navbar-link" (click)="scrollTo('how-it-works')" > How It Works</a>
+
+      <a class="navbar-link" (click)="scrollTo('faq')" >FAQ</a>
+
+    </div>
+
+   <div class="navbar-actions">
+  <app-button variant="primary" (click)="router.navigate(['/login'])" (keydown)="null" (keyup)="null">Login</app-button>
+</div>
+
+    <button type="button" class="navbar-menu-button" (click)="toggleSidebar()" [attr.aria-expanded]="showSidebar" aria-label="Open navigation menu" > <i class="pi pi-bars" aria-hidden="true"></i></button>
+
+  </nav>
+
+  @if (showSidebar) {
+
+    <button type="button" class="sidebar-overlay" aria-label="Close sidebar" (click)="closeSidebar()"></button>
+
+    <aside class="sidebar" aria-label="Landing navigation menu">
+
+      <div class="sidebar-header">
+
+        <div class="sidebar-profile">
+
+          <div class="sidebar-profile-info">
+            <span class="sidebar-profile-name"> Hackathon Platform </span>
+          </div>
+
+        </div>
+
+        <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="Close navigation menu" > <i class="pi pi-times" aria-hidden="true"></i> </button>
+
+      </div>
+
+      <div class="sidebar-section">
+
+        <span class="sidebar-section-title">Navigation</span>
+
+        <nav class="sidebar-links" aria-label="Landing navigation">
+
+          <a class="sidebar-link" (click)="scrollTo('home'); closeSidebar()" >Home</a>
+
+          <a class="sidebar-link" (click)="scrollTo('features'); closeSidebar()" > Features</a>
+
+          <a class="sidebar-link" (click)="scrollTo('how-it-works'); closeSidebar()">How It Works</a>
+
+          <a class="sidebar-link" (click)="scrollTo('faq'); closeSidebar()">FAQ</a>
+
+        </nav>
+
+      </div>
+
+      
+      <div class="sidebar-footer">
+
+      <button type="button"  class="sidebar-logout landing" (click)="router.navigate(['/login']); closeSidebar()" ><i class="pi pi-sign-in" aria-hidden="true"></i><span>Login</span></button>
+      </div>
+        
+
+    </aside>
+
+  }
+
+}
+
+@else {
+
+
 <nav class="navbar" aria-label="Main navigation">
 
  <div class="navbar-logo">
@@ -240,4 +322,6 @@ aria-label="Open navigation menu"
  </div>
 
 </aside>
+}
+
 }

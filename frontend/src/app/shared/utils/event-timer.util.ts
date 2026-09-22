@@ -12,7 +12,7 @@ export function calculateEventTimer( startDateTime: string, duration: number): E
   
   const start = new Date(startDateTime);
 
-  const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
+  const end = new Date(start.getTime() + duration * 1000);
 
   let target: Date;
   let label: string;

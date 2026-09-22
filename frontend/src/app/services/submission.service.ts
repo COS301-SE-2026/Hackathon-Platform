@@ -27,6 +27,20 @@ export interface SubmissionResponse {
   scoringLog: ScoringLogResponse | null;
 }
 
+export interface RecentSubmissionResponse {
+  submissionId: number;
+  teamId: string;
+  teamName: string;
+  eventId: string;
+  eventName: string;
+  levelId: number;
+  levelNumber: number;
+  levelName: string;
+  score: number;
+  status: SubmissionStatus;
+  submittedAt: string;
+}
+
 export interface SubmissionUploadResult {
   submissionId: string;
   outputStorageKey: string;
@@ -90,6 +104,13 @@ export class SubmissionService {
     return this.http.get<SubmissionResponse[]>(`${this.scoringUrl}/admin/recentsubmissions/${limit}`);
   }
 
+  /** Recent submissions for a single event, with team name and level number already resolved. */
+  getRecentSubmissionsForEvent(eventId: string, limit = 20): Observable<RecentSubmissionResponse[]> {
+    return this.http.get<RecentSubmissionResponse[]>(
+      `${this.scoringUrl}/admin/events/${eventId}/recentsubmissions/${limit}`
+    );
+  }
+
   /** Manually (re-)triggers scoring for a submission, e.g. after a solver hotfix. */
   scoreSubmission(submissionId: number): Observable<{ submissionId: string; status: string; recordId: string }> {
     return this.http.post<{ submissionId: string; status: string; recordId: string }>(
@@ -109,5 +130,9 @@ export class SubmissionService {
       `${this.scoringUrl}/admin/hackathons/${hackathonId}/rescore`,
       {}
     );
+  }
+
+  getSubmissionLog(teamId: string, submissionId: number){
+    return this.http.get<ScoringLogResponse>(`${this.scoringUrl}/teams/${teamId}/submissions/${submissionId}/log`);
   }
 }

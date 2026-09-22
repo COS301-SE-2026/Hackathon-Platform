@@ -10,7 +10,21 @@
 
 <ng-template #body let-rowData let-columns="columns">
 
-<tr> @for (column of columns; track column.field) {<td>{{ rowData[column.field] }}</td> }</tr>
+<tr [class]="rowClass ? rowClass(rowData) : ''" > @for (column of columns; track column.field) {
+    
+      <td>
+
+            @if (column.template) {
+
+              <ng-container [ngTemplateOutlet]="column.template"  [ngTemplateOutletContext]="{ $implicit: rowData }"> </ng-container>
+
+            } @else {
+              {{ rowData[column.field] }}
+            }
+
+          </td>
+
+}</tr>
 
 </ng-template>
 

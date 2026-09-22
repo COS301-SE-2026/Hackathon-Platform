@@ -1,26 +1,21 @@
 .table-wrapper {
   width: 100%;
-
   overflow-x: auto;
 
   background-color: var(--white);
-
   border: 1px solid var(--light-gray);
-
   border-radius: var(--radius-lg);
-
   box-shadow: var(--shadow-sm);
 }
 
 :host ::ng-deep .table-wrapper .p-datatable {
   width: 100%;
-
   border: none;
 }
 
 :host ::ng-deep .table-wrapper .p-datatable-table {
   width: 100%;
-
+  min-width: max-content;
   border-collapse: collapse;
 }
 
@@ -28,18 +23,15 @@
   padding: var(--space-4) var(--space-6);
 
   background-color: var(--off-white);
-
   border: none;
-
   border-bottom: 1px solid var(--light-gray);
 
   text-align: left;
   white-space: nowrap;
 
-    color: var(--black);
+  color: var(--black);
   font-family: var(--font-family-base);
   font-size: var(--font-size-small);
-
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-small);
 }
@@ -47,12 +39,10 @@
 :host ::ng-deep .table-wrapper .p-datatable-tbody > tr {
   background-color: var(--white);
 
-  transition: background-color var(--duration-normal) var(--easing-standard);
+  transition:
+    background-color var(--duration-normal) var(--easing-standard);
 }
 
-:host ::ng-deep .table-wrapper .p-datatable-tbody > tr:hover {
-  background-color: var(--bright-blue-bg);
-}
 
 :host ::ng-deep .table-wrapper .p-datatable-tbody > tr > td {
   padding: var(--space-4) var(--space-6);
@@ -66,6 +56,8 @@
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-body);
   vertical-align: middle;
+
+  white-space: nowrap;
 }
 
 :host ::ng-deep .table-wrapper .p-datatable-tbody > tr:last-child > td {
@@ -91,7 +83,9 @@
   text-align: center;
 }
 
-@media (max-width: 767px) {:host ::ng-deep .table-wrapper .p-datatable-thead > tr > th, :host ::ng-deep .table-wrapper .p-datatable-tbody > tr > td {
+@media (max-width: 767px) {
+  :host ::ng-deep .table-wrapper .p-datatable-thead > tr > th,
+  :host ::ng-deep .table-wrapper .p-datatable-tbody > tr > td {
     padding: var(--space-3) var(--space-4);
   }
 }
