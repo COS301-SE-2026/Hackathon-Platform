@@ -361,4 +361,40 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     }
     return element.visibleForTypes
   }
+
+  toggleVisibilityForType(type: string): void {
+    const el = this.selectedElement;
+    if(!el) return;
+    const curr = el.visibleForTypes ? el.visibleForTypes.split(',').map((s) => s.trim()) : [...CERT_TYPES];
+    const idx = curr.indexOf(type);
+    if(idx >= 0){
+      curr.splice(idx, 1);
+    } else {
+      curr.push(type);
+    }
+    el.visibleForTypes = current.length === CERT -TYPES.length ? null : current.join(',');
+  }
+
+  elementLabel(element: CertificateElement): string {
+    if(element.type === 'QR') {
+      return 'QR Code';
+    }
+    if(element.type === 'IMAGE') {
+      return element.label || 'Image';
+    }
+    if(element.field) {
+      return this.fieldOptions.find((f) => f.value === element.field)?.labal || element.field;
+    }
+    return element.staticText || 'Label';
+  }
+
+  previewText(element: CertificateElement): string {
+    if(element.field === 'participantName') return 'Full name';
+    if (element.field === 'teamName') return 'Team name';
+    if (element.field === 'eventName') return this.event?.name || 'Sample name';
+    if (element.field === 'rank') return '1st';
+    if (element.field === 'certificateType') return 'WINNER';
+    if (element.field === 'date') return 'Date issued';
+    return element.staticText || '';
+  }
 }
