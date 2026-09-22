@@ -237,39 +237,124 @@ public class PlagiarismCheckService {
 
                 double structural = winnowing.jaccard(fpA.hashes(), fpB.hashes());
                 int matchedCount = countSharedHashes(fpA, fpB);
-                boolean isFlagged = structural >= props.getFlagThreshold();
-                compared++;
-                if(isFlagged) {
-                    flagged++;
-                }
+                
+                Double embedding =
+                    embeddingSimilarityCalculator
+                        .symmetricBestMatch(
+                            centeredEmbeddingsBySubmission.getOrDefault(a.getId(), List.of()),
+                            centeredEmbeddingsBySubmission.getOrDefault(b.getId(), List.of()))
+                        .orElse(null);
 
-                Long lower = Math.min(a.getId(), b.getId());
-                Long higher = Math.max(a.getId(), b.getId());
-                UUID teamLower = a.getId().equals(lower) ? a.getTeamId() : b.getTeamId();
-                UUID teamHigher = a.getId().equals(lower) ? b.getTeamId() : a.getTeamId();
+                double combined = combinedScore(structural, embedding);
 
-                BigDecimal score = BigDecimal.valueOf(structural).setScale(4, RoundingMode.HALF_UP);
-                toSave.add(
-                    new SubmissionSimilarity(
-                        eventId,
-                        levelId,
-                        lower,
-                        higher,
-                        teamLower,
-                        teamHigher,
-                        score,
-                        null, // embedding_score reserved for future ML similarity signal
-                        score, // combined_score is just structural score for now. Need to add second signal.
-                        matchedCount,
-                        isFlagged
-                    )
-                );
-
+                pairResults.add(new PairResult(a, b, structural, embedding, combined, matchedCount));
             }
+        }
+
+        // Pass 2: decide flagged per pair using both the absolute threshold and the level-relative statistical threshold. 
+        double meanCombined = mean(pairResults);
+        double stddevCombined = stddev(pairResults, meanCombined);
+        boolean relativeThresholdTrusted =
+            props.isUseRelativeThreshold() && pairResults.size() >= props.getMinPairsForRelativeThreshold();
+        double relativeCutoff = meanCombined + props.getRelativeThresholdZScore() * stddevCombined;
+
+        int compared = 0;
+        int flagged = 0;
+        List<SubmissionSimilarity> toSave = new ArrayList<>();
+
+        for (PairResult pr : pairResults) {
+            boolean isFlagged =
+                pr.combinedScore() >= props.getFlagThreshold()
+                    || (relativeThresholdTrusted && pr.combinedScore() >= relativeCutoff);
+
+            compared++;
+            if (isFlagged) {
+                flagged++;
+            }
+
+            Long lower = Math.min(pr.a().getId(), pr.b().getId());
+            Long higher = Math.max(pr.a().getId(), pr.b().getId());
+            UUID teamLower = pr.a().getId().equals(lower) ? pr.a().getTeamId() : pr.b().getTeamId();
+            UUID teamHigher = pr.a().getId().equals(lower) ? pr.b().getTeamId() : pr.a().getTeamId();
+
+            BigDecimal structuralScore =
+                BigDecimal.valueOf(pr.structuralScore()).setScale(4, RoundingMode.HALF_UP);
+            BigDecimal embeddingScore =
+                pr.embeddingScore() == null
+                    ? null
+                    : BigDecimal.valueOf(pr.embeddingScore()).setScale(4, RoundingMode.HALF_UP);
+            BigDecimal combinedScoreValue =
+                BigDecimal.valueOf(pr.combinedScore()).setScale(4, RoundingMode.HALF_UP);
+
+            toSave.add(
+                new SubmissionSimilarity(
+                    eventId,
+                    levelId,
+                    lower,
+                    higher,
+                    teamLower,
+                    teamHigher,
+                    structuralScore,
+                    embeddingScore,
+                    combinedScoreValue,
+                    pr.matchedKgramCount(),
+                    isFlagged
+                )
+            );
+        
         }
         similarityRepo.saveAll(toSave);
         return new RunOutcome(compared, flagged);
     }
+
+    /**
+     * Weighted combination of the structural and semantic signals. Falls to just structual if no embedding signal.
+     */
+    private double combinedScore(double structual, Double embedding) {
+        if (embedding == null){
+            return structual;
+        }
+
+        double structualWeight = props.getStructuralWeight();
+        double embeddingWeight = props.getEmbeddingWeight();
+        double totalWeight = structualWeight + embeddingWeight;
+        if (totalWeight <= 0) {
+
+            return structual;
+        }
+        return (structualWeight * structual + embeddingWeight * embedding) / totalWeight;
+    }
+
+    private double mean(List<PairResult> pairs) {
+        if(pairs.isEmpty()) {
+            return 0.0;
+        }
+
+        double sum = 0.0;
+        for(PairResult p : pairs) {
+            sum += p.combinedScore();
+        }
+        return sum / pairs.size();
+    }
+
+    /**Population standard deviation */
+    private double stddev(List<PairResult> pairs, double mean) {
+        
+        if (pairs.size() < 2) {
+            return 0.0;
+        }
+
+        double sumSquaredDiff = 0.0;
+        for (PairResult p : pairs) {
+            double diff = p.combinedScore() - mean;
+            sumSquaredDiff += diff * diff;
+
+        }
+        return Math.sqrt(sumSquaredDiff / pairs.size());
+
+    }
+
+
 
     private int countSharedHashes(FingerprintResult a, FingerprintResult b) {
         var bHashes = b.hashes();
@@ -277,7 +362,7 @@ public class PlagiarismCheckService {
 
     }
 
-    private List<String> fetchAndNormalize(Submission sub) {
+    private SubmissionSource fetchAndNormalize(Submission sub) {
         byte[] bytes = downloadSourceBytes(sub);
         if(isZip(bytes)) {
             return normalizeZipArchive(bytes);
@@ -285,8 +370,14 @@ public class PlagiarismCheckService {
         }
 
         //Defensive fallback in case non-zip
-        CodeNormalizer.Lang lang = normalizer.detectLanguage(sub.getSourceFileName());
-        return normalizer.normalize(new String(bytes, StandardCharsets.UTF_8), lang);
+        String fileName = sub.getSourceFileName() == null ? "submission" : sub.getSourceFileName();
+        String content = new String(bytes, StandardCharsets.UTF_8);
+        StructuralNormalizationResult normalized = structuralNormalizer.normalize(fileName, content);
+        return new SubmissionSource(
+            Map.of(fileName, content),
+            normalized.tokens(),
+            Map.of(fileName, normalized.functions())
+        );
 
     }
 
@@ -307,7 +398,7 @@ public class PlagiarismCheckService {
      * in the archive, normalizes each, and concats the results in a stable order so fingerprinting sees
      * one continuous structural token stream per submission.
      */
-    private List<String> normalizeZipArchive(byte[] zipBytes) {
+    private SubmissionSource normalizeZipArchive(byte[] zipBytes) {
 
         java.util.Map<String, byte[]> entries = new java.util.TreeMap<>();
         try(java.util.zip.ZipInputStream zis =
@@ -332,16 +423,26 @@ public class PlagiarismCheckService {
 
         } catch (IOException e) {
             logger.warn("Could not read submission zip archive: {}", e.getMessage());
-            return List.of();
+            return new SubmissionSource(Map.of(), List.of(), Map.of());
         }
 
-        List<String> tokens =  new ArrayList<>();
+        Map<String, String> filesByName = new LinkedHashMap<>();
+        Map<String, List<AstFunctionSpan>> functionsByFile = new LinkedHashMap<>();
+        List<NormalizedToken> tokens =  new ArrayList<>();
+        
         for(var e : entries.entrySet()) {
-          CodeNormalizer.Lang lang = normalizer.detectLanguage(e.getKey());
-          tokens.addAll(normalizer.normalize(new String(e.getValue(), StandardCharsets.UTF_8), lang));
+
+          String fileName = e.getKey();
+          String content = new String(e.getValue(), StandardCharsets.UTF_8);
+          filesByName.put(fileName, content);
+
+          StructuralNormalizationResult normalized = structuralNormalizer.normalize(fileName, content);
+          tokens.addAll(normalized.tokens());
+          functionsByFile.put(fileName, normalized.functions());
 
         }
-        return tokens;
+        
+        return new SubmissionSource(filesByName, tokens, functionsByFile);
         
 
     }
