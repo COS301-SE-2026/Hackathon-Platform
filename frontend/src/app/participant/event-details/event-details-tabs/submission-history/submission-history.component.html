@@ -13,7 +13,7 @@
   </div>
 
 } 
- @else if (filteredTableData.length === 0) {
+ @else if (tableData.length === 0) {
   <app-empty-state icon="pi-history" title="No Submission History" description="You have not made any submissions for this event yet."></app-empty-state>
 }
 @else {
@@ -49,12 +49,11 @@
 
 
  <ng-template #logTemplate let-row>
- <app-button variant="secondary" width="100%" (click)="downloadLog(row.log)" (keydown)="null" (keyup)="null">  <i class="pi pi-download"></i>
-  Log
+
+  <app-button variant="secondary" width="100%" [disabled]="downloadingLogId === row.log.submissionId" (click)="downloadLog(row.log)" (keydown)="null" (keyup)="null">
+   {{ downloadingLogId === row.log.submissionId ? 'Downloading...' : 'Download Log' }}
   </app-button>
 
   </ng-template>
-
-
 
 </div>

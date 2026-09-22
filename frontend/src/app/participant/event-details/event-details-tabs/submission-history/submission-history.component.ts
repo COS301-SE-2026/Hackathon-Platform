@@ -36,6 +36,7 @@ teamLoading = false;
 historyLoading = true;
 submissionHistory: SubmissionResponse[] = [];
 levelNumberByLevelId: Record<number, number> = {};
+downloadingLogId: number | null = null;
 
 levelOptions: string[] = ['All Levels'];
 statusOptions: string[] = ['All Status', 'Scored', 'Failed'];
@@ -248,28 +249,45 @@ get hackathonId(): string {
 
 
   downloadLog(submission: SubmissionResponse): void {
-    if (!this.teamId) return;
 
-    this.submissionService.getSubmissionLog(this.teamId, submission.submissionId).subscribe({
-      next: logResponse => {
-        const content = logResponse?.logContent ?? "No log found";
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `submission-${submission.submissionId}-log.txt`;
-        link.click();
-        URL.revokeObjectURL(url);
-      },
-      error: (err) => {
-        if(err.status === 404){
-          alert('No log found');
-        } else {
-          alert('Cant download log');
-        }
+  if (!this.teamId || this.downloadingLogId) return;
+
+    this.downloadingLogId = submission.submissionId;
+    this.change.detectChanges();
+
+  this.submissionService.getSubmissionLog(this.teamId, submission.submissionId).subscribe({
+    next: logResponse => {
+      const content = logResponse?.logContent ?? 'No log found';
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = `submission-${submission.submissionId}-log.txt`;
+      link.click();
+
+      URL.revokeObjectURL(url);
+
+      this.downloadingLogId = null;
+      this.change.detectChanges();
+    },
+
+    error: (err) => {
+      this.downloadingLogId = null;
+
+      if (err.status === 404) {
+
+        alert('No log found');
+      } 
+      else {
+        
+        alert('Cant download log');
       }
-    });
-  }
+
+      this.change.detectChanges();
+     }
+   });
+ }
 
 
    statusLabel(status: string): string {
