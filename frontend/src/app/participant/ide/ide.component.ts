@@ -173,6 +173,11 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             next: res => {
                 this.selectedFile = file;
 
+                this.telService.recordEvent('FILE_OPENED', {
+                    path: file.path,
+                    name: file.name
+                });
+
                 if (this.editor) {
                     this.applyingRemoteEdit = true;
                     this.editor.setValue(res.content);
