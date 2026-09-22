@@ -405,6 +405,20 @@
   padding: 0 16px 16px;
 }
 
+.filer-select{
+  display: flex;
+  align-self: center;
+  gap:8px;
+  position: relative;
+
+  label{
+    font-size: 0.82rem;
+    font-weight: 600;
+    color:#6b7588;
+    white-space: nowrap;
+  }
+}
+
 .card-identity{
   display: flex;
   align-items: flex-start;

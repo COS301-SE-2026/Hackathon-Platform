@@ -57,10 +57,17 @@
   <div class = "toolbar">
     <div class = "search-box">
       <i class = "pi pi-search search-icon"></i>
-      <input type = "text" placeholder = "Search events..." aria-label = "Search events" [(ngModel)] = "searchTerm" (ngModelChange) = "applyFilter()"/>
+      <label for = "search-events" class = "sr-only">Search events</label>
+      <input 
+      type = "text"
+      id = "search-events" 
+      placeholder = "Search events..." 
+      [(ngModel)] = "searchTerm" 
+      (ngModelChange) = "applyFilter()"/>
     </div>
     <div class = "filter-select">
-      <select aria-label = "Sort events" [(ngModel)] = "sortBy" (ngModelChange) = "applyFilter()">
+      <label for = "sort-events" class = "sr-only">Sort events</label>
+      <select id = "sort-events" [(ngModel)] = "sortBy" (ngModelChange) = "applyFilter()">
         @for (option of sortOptions; track option.key){
           <option [value] = "option.key">{{option.label}}</option>
         }
