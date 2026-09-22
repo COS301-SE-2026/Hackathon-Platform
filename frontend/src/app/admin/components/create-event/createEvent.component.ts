@@ -131,7 +131,7 @@ export class CreateEventComponent implements OnInit {
      if(!prize) {
        return undefined;
      }
-     const match = prize.description.match(/\d[\d\s,]*(?:\.\d+)?/);
+     const match = /\d[\d\s,]*(?:\.\d+)?/.exec(prize.description);
      if(!match) {
        return undefined;
      }
