@@ -397,4 +397,32 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     if (element.field === 'date') return 'Date issued';
     return element.staticText || '';
   }
+
+  onElementMouseDown(event: MouseEvent, index: number): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectedElementIndex = index;
+    this.dragging = true;
+    this.dragElementIndex = index;
+    const el = this.layout.elements[index];
+    const canvasRect = (event.currentTarget as HTMLElement)
+      .closest('.designer-canvas')!
+      .getBoundingClientRect();
+    this.dragOffsetX = event.clientX-canvasRect.left-el.x;
+    this.dragOffsetY = event.clientY-canvasRect.top-el.y;
+  }
+
+  onCanvasMouseMove(event: MouseEvent): void {
+    if(!this.dragging){
+      return;
+    }
+    const canvasRect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const el =this.layout.elements[this.dragElementIndex];
+    el.x = Math.round(Math.max(0, Math.min(this.canvasWidth, event.clientX-canvasRect.left-this.dragOffsetX)));
+    el.y = Math.round(Math.max(0, Math.min(this.canvasHeight, event.clientY-canvasRect.top-this.dragOffsetY)));
+  }
+
+  onCanvasMouseUp(): void {
+    this.dragging = false;
+  }
 }
