@@ -481,4 +481,70 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     this.successMessage = 'Template saved';
     setTimeout(() => (this.successMessage = ''), 3000);
   }
+
+  canGenerate(): boolean {
+    return !!this.selectedTemplateId && !this.isGenerating;
+  }
+
+  startGeneration(): void {
+    if(!this.selectedTemplateId){
+      return;
+    }
+    this.isGenerating = true;
+    this.errorMessage = '';
+
+    this.certificateService
+      .generate(this.eventId, {
+        templateId: this.selectedTemplateId,
+        scope: this.generationScope,
+        topN: this.generationScope === 'TOP_N' ? this.topN : null,
+      })
+      .subscribe({
+        next: (run) => {
+          this.activeRun = run;
+          this.startPolling();
+        },
+        error: () => {
+          this.errorMessage = 'Could not start generation';
+          this.isGenerating = false;
+        },
+      });
+  }
+
+  private startPolling(): void {
+    this.isGenerating = true;
+    if(this.pollHandle){
+      clearInterval(this.pollHandle);
+    }
+    this.pollHandle = setInterval(() => {
+      if(!this.activeRun){
+        return;
+      }
+      this.certificateService.getRun(this.activeRun.runId).subscribe({
+        next: (run) => {
+          this.activeRun = run;
+          if (run.status === 'COMPLETED' || run.status === 'FAILED'){
+            this.isGenerating = false;
+            if(this.pollHandle){
+              clearInterval(this.pollHandle);
+              this.pollHandle = null;
+            }
+            this.loadIssued();
+            this.loadRuns();
+          }
+        },
+      });
+    }, 2000);
+  }
+
+  progressPercent(): number{
+    if(!this.activeRun || this.activeRun.totalCount === 0){
+      return 0;
+    }
+    return Math.round((this.activeRun.completedCount/this.activeRun.totalCount)*100);
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin/events']);
+  }
 }
