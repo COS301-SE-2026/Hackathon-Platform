@@ -37,7 +37,14 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     private pasteDisposable?: monaco.IDisposable;
     private applyingRemoteEdit = false;
     private readonly fileVersions = new Map<string, number>();
+    private readonly pendingOwnEdits = new Set<string>();
     private editTimer?: ReturnType<typeof setTimeout>;
+    private typingTimer?: ReturnType<typeof setTimeout>;
+    private typingCharacters = 0;
+    private typingEdits = 0;
+    private lastTypingTime?: number;
+    private typingIntervalTotal = 0;
+    private typingIntervalCount = 0;
 
     workspaceId = '';
     eventId = '';
@@ -103,7 +110,7 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             });
         });
 
-        this.editorChangeDisposable = this.editor.onDidChangeModelContent(() => {
+        this.editorChangeDisposable = this.editor.onDidChangeModelContent(event => {
             if (this.applyingRemoteEdit) {
                 return;
             }
@@ -112,6 +119,48 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                 return;
             }
 
+            for (const change of event.changes) {
+                const insertedCharacters = change.text.length;
+                const removedCharacters = change.rangeLength;
+                
+                if (insertedCharacters > 0 && removedCharacters === 0 && insertedCharacters <= 2) {
+                    this.typingCharacters += insertedCharacters;
+                    this.typingEdits++;
+                    const now = performance.now();
+
+                    if (this.lastTypingTime !== undefined) {
+                        this.typingIntervalTotal += now - this.lastTypingTime;
+                        this.typingIntervalCount++;
+                    }
+
+                    this.lastTypingTime = now;
+                }
+            }
+
+            if (this.typingTimer) {
+                clearTimeout(this.typingTimer);
+            }
+
+            this.typingTimer = setTimeout(() => {
+                if (this.typingCharacters > 0 && this.selectedFile) {
+                    const avgIntervalMs = this.typingIntervalCount > 0 ? this.typingIntervalTotal / this.typingIntervalCount : 0;
+
+                    this.telService.recordEvent('TYPING_BATCH', {
+                        path: this.selectedFile.path,
+                        name: this.selectedFile.name,
+                        characters: this.typingCharacters,
+                        edits: this.typingEdits,
+                        avgIntervalMs: Math.round(avgIntervalMs)
+                    });
+                }
+
+                this.typingCharacters = 0;
+                this.typingEdits = 0;
+                this.typingIntervalTotal = 0;
+                this.typingIntervalCount = 0;
+                this.lastTypingTime = undefined;
+            }, 1000);
+
             if (this.editTimer) {
                 clearTimeout(this.editTimer);
             }
@@ -119,8 +168,7 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             this.editTimer = setTimeout(() => {
                 this.sendCurrentEdit();
             }, 300);
-        })
-
+        });
     }
 
     ngOnDestroy(): void {
@@ -131,6 +179,10 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
         void this.telService.endSession().catch(error => {
             console.error('session could not be ended', error);
         });
+
+        if (this.typingTimer) {
+            clearTimeout(this.typingTimer);
+        }
 
         this.editorChangeDisposable?.dispose();
         this.collabSub?.unsubscribe();
@@ -367,6 +419,12 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.collabService.connect(this.workspaceId, token);
         this.collabSub = this.collabService.edits$.subscribe(edit => {
             this.fileVersions.set(edit.path, edit.version);
+
+            if (this.pendingOwnEdits.has(edit.content)) {
+                this.pendingOwnEdits.delete(edit.content);
+                return;
+            }
+
             if (this.selectedFile?.path === edit.path && this.editor && this.editor.getValue() !== edit.content) {
                 this.applyingRemoteEdit = true;
                 this.editor.setValue(edit.content);
@@ -382,6 +440,8 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
 
         const path = this.selectedFile.path;
         const currentVersion = this.fileVersions.get(path) ?? 0;
+        const content = this.editor.getValue();
+        this.pendingOwnEdits.add(content);
         this.collabService.sendEdit(this.workspaceId, {
             path: path,
             content: this.editor.getValue(),
