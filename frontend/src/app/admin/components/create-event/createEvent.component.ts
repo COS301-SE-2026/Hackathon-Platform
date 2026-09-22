@@ -75,7 +75,6 @@ export class CreateEventComponent implements OnInit {
       this.fileInput.nativeElement.click();
 
     }
-
   }
 
   onFileSelected(event: Event, target: 'banner'| 'logo' = 'banner'): void {
@@ -111,8 +110,8 @@ export class CreateEventComponent implements OnInit {
     this.form.prizes.push({title: '', description: ''});
   }
 
-  removePrize(): void {
-     this.form.prizes.push({ title: '', description: ''});
+  removePrize(index: number): void {
+     this.form.prizes.splice(index, 1);
   }
 
   addTechnology(event: Event): void {
@@ -184,8 +183,14 @@ export class CreateEventComponent implements OnInit {
      this.isLoading = true;
     this.errorMessage = '';
 
+    const first = this.parsePrizeAmount(this.form.prizes[0]);
+    const second = this.parsePrizeAmount(this.form.prizes[1]);
+    const third = this.parsePrizeAmount(this.form.prizes[2]);
+    const amounts = [first, second, third].filter((v): v is number => v!== undefined);
+    const totalPrizePool  = amounts.length ? amounts.reduce((sum, v) => sum+v, 0) : undefined;
+
     const eventData: EventRequest = {
-      name: this.form.eventName,
+      name: this.form.eventName.trim(),
       teamSizeLimit: this.form.teamSizeLimit,
       startDateTime: startDateTime.toISOString(),
       duration: this.form.duration * this.SECONDS_PER_HOUR,
@@ -202,7 +207,7 @@ export class CreateEventComponent implements OnInit {
       firstPlacePrize: first,
       secondPlacePrize: second,
       thirdPlacePrize: third,
-      totalPrizePool,
+      totalPrizePool: totalPrizePool,
     };
 
     this.eventService.createEventForHackathon(this.hackathonId, eventData).subscribe({

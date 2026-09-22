@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnInit, NgZone, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, NgZone, OnDestroy, Input } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import { FormsModule} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -71,8 +71,8 @@ export class ForumComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.eventId = this.eventId || this.findRouteParam('eventId');
-        this.hackathonId = this.eventId || this.findRouteParam('hackathonId')
+      this.hackathonId = this.hackathonId || this.findRouteParam('hackathonId');
+      this.eventId = this.eventId || this.findRouteParam('eventId');
         if (!this.eventId){
             this.errorMessage = 'No event ID provided.';
             return;

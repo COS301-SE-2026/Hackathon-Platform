@@ -235,6 +235,26 @@ export class EventService {
     return this.http.get<EventParticipantResponse[]>(`${this.baseUrl}/admin/events/${eventId}/participants`);
   }
 
+  addTeamMember(
+    eventId: string,
+    teamId: string,
+    email: string
+  ): Observable<EventParticipantResponse> {
+    return this.http.post<EventParticipantResponse>(
+      `${this.baseUrl}/admin/events/${eventId}/teams/${teamId}/members`,
+      { email }
+    );
+  }
+
+  removeParticipant(
+    eventId: string,
+    userId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/admin/events/${eventId}/participants/${userId}`
+    );
+  }
+
   registerForEvent( eventId: string, registrationData: EventRegistrationRequest): Observable<EventRegistrationResponse> {
   return this.http.post<EventRegistrationResponse>( `${this.baseUrl}/events/${eventId}/registered`, registrationData);
 }

@@ -33,8 +33,8 @@ interface EventRow {
   isInPerson: boolean;
   timeLabel: string;
   progress: number;
-  startDateTime: string;
-  endDateTime: string | null;
+  startTime: number;
+  endTime: number;
 }
 
 const DEFAULT_PALETTES: Palette[]=[
@@ -47,7 +47,7 @@ const DEFAULT_PALETTES: Palette[]=[
 ];
 
 const CANCELED_PALETTE: Palette = {banner: '#888780', dark:'#5F5E5A'}
-const DAY_MS = 24 *HOURS_MS;
+const DAY_MS = 24 *60*60*1000;
 const PAGE_SIZE = 12;
 
 @Component({
@@ -175,7 +175,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
     });
   }
 
- private loadEvents(silent = false): void{
+ private loadEvents(): void{
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -229,7 +229,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
     });
   }
 
-  private updateStatusCount(): void {
+  private updateStatusCounts(): void {
     const counts: Record<StatusFilter, number> = {
       all: this.events.length,
       live: 0,
@@ -299,10 +299,10 @@ export class EventlistComponent implements OnInit, OnDestroy {
       row.statusClass = this.statusFromTimes(row.startTime, row.endTime, now);
       row.status = this.titleCase(row.statusClass);
     }
-    row.timeLavel = this.buildTimeLabel(row.statusClass, row.startTime, row.endTime, now);
+    row.timeLabel = this.buildTimeLabel(row.statusClass, row.startTime, row.endTime, now);
     row.progress = this.progressFor(row.statusClass, row.startTime, row.endTime, now);
   }
-  this.updateStatusCount();
+  this.updateStatusCounts();
   this.applyFilter();
   this.change.markForCheck();
  }
@@ -314,17 +314,22 @@ export class EventlistComponent implements OnInit, OnDestroy {
 
   private toEventRow(event:EventResponse, now:number): EventRow {
     const start = new Date(event.startDateTime).getTime();
-    const end = event.endDateTime ? new Date(event.endDateTime).getTime() : start + Number(event.duration || 0)*1000;
+    const end = event.endDateTime
+      ? new Date(event.endDateTime).getTime()
+      : start + Number(event.duration || 0) * 1000;
     const statusClass = this.resolveStatus(event,start,end,now);
 
-    return{
+    return {
       eventId: event.eventId,
       hackathonId: event.hackathonId,
       name: event.name,
       logoInitial: event.name?.charAt(0)?.toUpperCase() || '?',
       logoUrl: null,
       bannerUrl: null,
-      palette: statusClass === 'canceled' ? CANCELED_PALETTE : this.paletteFor(this.eventId || event.name),
+      palette:
+        statusClass === 'canceled'
+          ? CANCELED_PALETTE
+          : this.paletteFor(event.eventId || event.name),
       visibility: this.titleCase(event.visibility),
       status: this.titleCase(statusClass),
       statusClass,
@@ -333,22 +338,19 @@ export class EventlistComponent implements OnInit, OnDestroy {
       isInPerson: !!event.inPerson,
       timeLabel: this.buildTimeLabel(statusClass, start, end, now),
       progress: this.progressFor(statusClass, start, end, now),
-      startTime: Number.isNan(start) ? 0 : start,
-      endDateTime: end,
+      startTime: Number.isNaN(start) ? 0 : start,
+      endTime: end,
     };
   }
 
   private resolveStatus(event: EventResponse, start: number, end:number, now:number): StatusClass{
     const raw = (event.status || '').toUpperCase();
     if (raw.startsWith('CANCEL')) return 'canceled';
-    if (Number.isNan(start)) {
+    if (Number.isNaN(start)) {
       return raw === 'ONGOING' || raw === 'ACTIVE' ? 'live' : 'upcoming';
     }
 
     return this.statusFromTimes(start, end, now, raw === 'COMPLETED');
-
-
-
   }
 
   private statusFromTimes(start: number, end: number, now: number, markedCompleted = false): StatusClass {
@@ -416,12 +418,17 @@ export class EventlistComponent implements OnInit, OnDestroy {
     if (Number.isNaN(start)){
       return 'date unavailable';
     }
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const startLabel = start.toLocaleDateString('en-US',{day:'numeric',month:'long'});
-    const endLabel = end.toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'});
 
-    return `${startLabel} \u2013 ${endLabel}`;
+    const startLabel = new Date(start).toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'long'
+    });
+    const endLabel = new Date(end).toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    return `${startLabel}-${endLabel}`;
   }
 
   navigateToCreateEvents(): void {
@@ -430,7 +437,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
 
   onLogoError(event: EventRow): void {
     event.logoUrl = null;
-    event.logoUrl = null;
+    this.change.markForCheck();
   }
 
   onBannerError(event: EventRow): void {
@@ -455,7 +462,6 @@ export class EventlistComponent implements OnInit, OnDestroy {
     this.viewEventEventId = event.eventId;
     this.viewEventName = event.name;
     this.showViewEventModal = true;
-
   }
 
   closeViewEventModal(): void {
