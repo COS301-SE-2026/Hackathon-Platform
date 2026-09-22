@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
 import { HackathonService,HackathonResponse } from '../../../services/hackathon.service';
-import { EventService, EventResponse, EventParticipantResponse} from '../../../services/event.service';
+import { EventService, EventResponse } from '../../../services/event.service';
 import { LevelService } from '../../../services/level.service';
 import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
 import { ViewEventModalComponent } from '../view-event-modal/view-event-modal.component';
@@ -22,19 +22,19 @@ interface EventRow {
   hackathonId: string;
   name: string;
   logoInitial: string;
+  logoUrl: string | null;
+  bannerUrl: string | null;
+  palette: Palette;
   visibility: string;
   status: string;
   statusClass: StatusClass;
   dateRangeLabel: string;
-  scoringPaused: boolean;
+  teamSizeLimit: number;
+  isInPerson: boolean;
+  timeLabel: string;
+  progress: number;
   startDateTime: string;
   endDateTime: string | null;
-}
-
-interface RegisteredTeam {
-  teamId: string;
-  name: string;
-  members: EventParticipantResponse[];
 }
 
 const DEFAULT_PALETTES: Palette[]=[
@@ -47,7 +47,6 @@ const DEFAULT_PALETTES: Palette[]=[
 ];
 
 const CANCELED_PALETTE: Palette = {banner: '#888780', dark:'#5F5E5A'}
-const HOURS_MS = 60 * 60 * 1000;
 const DAY_MS = 24 *HOURS_MS;
 const PAGE_SIZE = 12;
 
@@ -75,12 +74,12 @@ export class EventlistComponent implements OnInit, OnDestroy {
   viewEventEventId: string | null = null;
   viewEventName = '';
 
-
   hackathonId = '';
   isHackathonScoped = false;
   hackathon: HackathonResponse | null = null;
   levelCount = 0;
   eventCount = 0;
+
   events: EventRow[] = [];
   filteredEvents: EventRow[] = [];
   isLoading = true;
@@ -115,28 +114,22 @@ export class EventlistComponent implements OnInit, OnDestroy {
     canceled: 0,
   };
 
-  get filteredEvents(): EventRow[] {
-    const term = this.searchTerm.trim().toLowerCase();
-    return this.events.filter(event => {
-      const matchesSearch = !term || event.name.toLowerCase().includes(term);
-      const matchesStatus = this.statusFilter === 'ALL' || event.status === this.statusFilter;
-      return matchesSearch && matchesStatus;
-    })
+  private countdownIntervalId: ReturnType<typeof setInterval> | null = null;
+
+  get visibleEvents(): EventRow[] {
+    return this.filteredEvents.slice(0, this.visibleCount);
   }
 
-  expandedEventId: string | null = null;
-  registrationsByEvent: Record<string, RegisteredTeam[]> = {};
-  registrationsLoading: Record<string, boolean> = {};
-  registrationsError: Record<string, string> = {};
-  leaderboardPaused: Record<string, boolean> = {};
-  leaderboardPauseLoading: Record<string, boolean> = {};
+  get canLoadMore(): boolean {
+    return this.visibleCount < this.filteredEvents.length;
+  }
 
-  extendTimerOpenFor: string | null = null;
-  extendTimerHours: Record<string, number> = {};
-  extendTimerLoading: Record<string, boolean> = {};
-  extendTimerError: Record<string, string> = {};
-
-  private countdownIntervalId: ReturnType<typeof setInterval> | null = null;
+  get emptyMessage(): string {
+    if (this.events.length === 0) {
+      return this.isHackathonScoped ? 'No events have been created for this hackathon yet' : 'No events have been created yet';
+    }
+    return 'No events match the search or filters';
+  }
 
   ngOnInit(): void{
     this.hackathonId = this.route.snapshot.paramMap.get('hackathonId') || '';
@@ -146,14 +139,11 @@ export class EventlistComponent implements OnInit, OnDestroy {
       this.loadHackathon();
       this.loadLevelCount();
     }
-      this.loadEvents();
-
-  }
-
+    this.loadEvents();
     // Refresh every 30s
     this.countdownIntervalId = setInterval(() => {
       if (this.events.length > 0) {
-        this.change.markForCheck();
+        this.refreshRows();
       }
     }, 30000);
   }
@@ -185,11 +175,8 @@ export class EventlistComponent implements OnInit, OnDestroy {
     });
   }
 
-
  private loadEvents(silent = false): void{
-    if (!silent) {
-      this.isLoading = true;
-    }
+    this.isLoading = true;
     this.errorMessage = '';
 
     const request$ = this.isHackathonScoped
@@ -200,12 +187,12 @@ export class EventlistComponent implements OnInit, OnDestroy {
       next: (events) => {
         const now = Date.now()
         this.eventCount = events.length;
-        this.events = events.map((e) => this.toEventRow(e));
-        events.forEach((event) => {
-          this.leaderboardPaused[event.eventId] = event.scoringPaused;
-        });
+        this.events = events.map((e) => this.toEventRow(e, now));
+        this.updateStatusCounts();
+        this.applyFilter();
         this.isLoading = false;
         this.change.markForCheck();
+        this.loadImages(events);
       },
       error: (error) => {
         console.error('not loading events', error);
@@ -213,6 +200,32 @@ export class EventlistComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         this.change.markForCheck();
       }
+    });
+  }
+
+  private loadImages(events: EventResponse[]): void {
+    events.forEach((event) => {
+      this.eventService.getEventBannerUrl(event.eventId).subscribe({
+        next: (res) => {
+          const row = this.events.find(r => r.eventId === event.eventId);
+          if (row && res?.url) {
+            row.bannerUrl = res.url;
+            this.change.markForCheck();
+          }
+        },
+        error: () => {}
+      });
+
+      this.eventService.getEventLogoUrl(event.eventId).subscribe({
+        next: (res) => {
+          const row = this.events.find(r => r.eventId === event.eventId);
+          if (row && res?.url) {
+            row.logoUrl = res.url;
+            this.change.markForCheck();
+          }
+        },
+        error: () => {}
+      });
     });
   }
 
@@ -226,7 +239,6 @@ export class EventlistComponent implements OnInit, OnDestroy {
     };
     for (const event of this.events){
       counts[event.statusClass]++;
-
     }
     this.statusCounts = counts;
   }
@@ -238,22 +250,20 @@ export class EventlistComponent implements OnInit, OnDestroy {
 
  applyFilter(): void {
   const term = this.searchTerm.trim().toLowerCase();
- 
+
   const filtered = this.events.filter((event)=>{
-    const matchesSearch = 
-    !term ||
-    event.name.toLowerCase().includes(term) ||
-    event.visibility.toLowerCase().includes(term) ||
-    event.status.toLowerCase().includes(term) ||
-    event.dateRangeLabel.toLowerCase().includes(term);
-    const matchesStatus = 
-    this.statusFilter === 'all' || 
+    const matchesSearch =
+      !term ||
+      event.name.toLowerCase().includes(term) ||
+      event.visibility.toLowerCase().includes(term) ||
+      event.status.toLowerCase().includes(term) ||
+      event.dateRangeLabel.toLowerCase().includes(term);
+    const matchesStatus =
+    this.statusFilter === 'all' ||
     event.statusClass === this.statusFilter;
 
     return matchesSearch && matchesStatus;
-
   });
-
   this.filteredEvents = this.sortEvents(filtered);
   this.visibleCount = PAGE_SIZE;
  }
@@ -271,15 +281,32 @@ export class EventlistComponent implements OnInit, OnDestroy {
     case 'oldest':
       return sorted.sort((a,b) => a.startTime - b.startTime);
      case 'name':
-      return sorted.sort((a,b) => a.name.localeCompare(b.name)); 
+      return sorted.sort((a,b) => a.name.localeCompare(b.name));
     default:
       return sorted.sort (
-        (a, b) => 
-          order[a.statusClass] - order[b.statusClass] || 
+        (a, b) =>
+          order[a.statusClass] - order[b.statusClass] ||
         (a.statusClass === 'upcoming' ? a.startTime - b.startTime : b.startTime - a.startTime)
-      );    
+      );
   }
  }
+
+
+ private refreshRows(): void {
+  const now = Date.now();
+  for (const row of this.events) {
+    if (row.statusClass === 'upcoming' || row.statusClass === 'live') {
+      row.statusClass = this.statusFromTimes(row.startTime, row.endTime, now);
+      row.status = this.titleCase(row.statusClass);
+    }
+    row.timeLavel = this.buildTimeLabel(row.statusClass, row.startTime, row.endTime, now);
+    row.progress = this.progressFor(row.statusClass, row.startTime, row.endTime, now);
+  }
+  this.updateStatusCount();
+  this.applyFilter();
+  this.change.markForCheck();
+ }
+
   private titleCase(value:string): string {
     if (!value) return '';
     return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
@@ -287,44 +314,58 @@ export class EventlistComponent implements OnInit, OnDestroy {
 
   private toEventRow(event:EventResponse, now:number): EventRow {
     const start = new Date(event.startDateTime).getTime();
-    const durationMs = Number(event.duration || 0) * HOURS_MS;
-    const end = start + durationMs;
+    const end = event.endDateTime ? new Date(event.endDateTime).getTime() : start + Number(event.duration || 0)*1000;
     const statusClass = this.resolveStatus(event,start,end,now);
 
-    let progress = 0;
-    if (statusClass === 'live' && durationMs > 0){
-      progress = Math.min(100, Math.max(0,Math.round(((now-start)/durationMs) * 100)));
-
-    }
     return{
       eventId: event.eventId,
-       hackathonId: event.hackathonId, 
+      hackathonId: event.hackathonId,
       name: event.name,
       logoInitial: event.name?.charAt(0)?.toUpperCase() || '?',
+      logoUrl: null,
+      bannerUrl: null,
+      palette: statusClass === 'canceled' ? CANCELED_PALETTE : this.paletteFor(this.eventId || event.name),
       visibility: this.titleCase(event.visibility),
-      status: this.statusLabel(event.status),
-      statusClass: this.getStatusClass(event.status),
-      dateRangeLabel: this.formatDateRange(event),
-      scoringPaused: event.scoringPaused,
-      startDateTime: event.startDateTime,
-      endDateTime: event.endDateTime ?? this.computeEndDateTime(event),
-    }
+      status: this.titleCase(statusClass),
+      statusClass,
+      dateRangeLabel: this.formatDateRange(start, end),
+      teamSizeLimit: event.teamSizeLimit,
+      isInPerson: !!event.inPerson,
+      timeLabel: this.buildTimeLabel(statusClass, start, end, now),
+      progress: this.progressFor(statusClass, start, end, now),
+      startTime: Number.isNan(start) ? 0 : start,
+      endDateTime: end,
+    };
   }
 
   private resolveStatus(event: EventResponse, start: number, end:number, now:number): StatusClass{
     const raw = (event.status || '').toUpperCase();
-    if(raw.startsWith('CANCEL')) return 'canceled';
-    if(raw === ('COMPLETED')) return 'completed';
-
-    if(Number.isNaN(start)){
-      return raw === 'ONGOING' || raw === 'ACTIVE' ? 'live': 'upcoming';
-
+    if (raw.startsWith('CANCEL')) return 'canceled';
+    if (Number.isNan(start)) {
+      return raw === 'ONGOING' || raw === 'ACTIVE' ? 'live' : 'upcoming';
     }
 
+    return this.statusFromTimes(start, end, now, raw === 'COMPLETED');
+
+
+
+  }
+
+  private statusFromTimes(start: number, end: number, now: number, markedCompleted = false): StatusClass {
+    if(markedCompleted){
+      return 'completed';
+    }
     if (now< start) return 'upcoming';
     if (now < end) return 'live';
     return 'completed';
+  }
 
+  private progressFor(status: StatusClass, start: number, end: number, now: number): number {
+    const total = end -start;
+    if(status !== 'live' || !(total>0)) {
+      return 0;
+    }
+    return Math.min(100, Math.max(0, Math.round(((now-start)/total)*100)));
   }
 
   private paletteFor(key: string): Palette{
@@ -332,7 +373,6 @@ export class EventlistComponent implements OnInit, OnDestroy {
     for (let i =0; i< key.length; i++){
       hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
     }
-
     return DEFAULT_PALETTES[hash % DEFAULT_PALETTES.length];
   }
 
@@ -367,7 +407,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
     if (days < 3) return `${days}d ${hours %24}h`;
     return `${days} days`;
   }
- 
+
   goBack(): void {
     this.router.navigate(['/admin/hackathons']);
   }
@@ -376,111 +416,26 @@ export class EventlistComponent implements OnInit, OnDestroy {
     if (Number.isNaN(start)){
       return 'date unavailable';
     }
-    const end = event.endDateTime ? new Date(event.endDateTime) : new Date(start.getTime() + Number(event.duration || 0) * 1000);
+    const startDate = new Date(start);
+    const endDate = new Date(end);
     const startLabel = start.toLocaleDateString('en-US',{day:'numeric',month:'long'});
     const endLabel = end.toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'});
 
     return `${startLabel} \u2013 ${endLabel}`;
   }
 
-  private computeEndDateTime(event: EventResponse): string | null {
-    const start = new Date(event.startDateTime);
-    if (Number.isNaN(start.getTime())){
-      return null;
-
-    }
-    return new Date(start.getTime() + Number(event.duration || 0) * 1000).toISOString();
-
-  }
-
-  getTimeRemaining(event: EventRow): string {
-
-    if (event.statusClass === 'canceled' || event.statusClass === 'ended') {
-      return 'Canceled';
-    }
-    if (!event.endDateTime) {
-      return '\u2014';
-    }
-
-    const now = Date.now();
-    const start = new Date(event.startDateTime).getTime();
-    const end = new Date(event.endDateTime).getTime();
-
-    if (Number.isNaN(start) || Number.isNaN(end)) {
-      return '\u2014';
-    }
-
-    if (now < start) {
-      return `Starts in ${this.formatDurationMs(start - now)}`;
-    }
-    if (now >= end) {
-      return 'Ended';
-    }
-    return `${this.formatDurationMs(end - now)} left`;
-  }
-
-  private formatDurationMs(ms: number): string {
-
-    const totalMinutes = Math.max(0, Math.floor(ms / 60000));
-    const days = Math.floor(totalMinutes / (60 * 24));
-    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-    const minutes = totalMinutes % 60;
-
-    if (days > 0) {
-
-      return `${days}d ${hours}h`;
-    }
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
-
-  }
-
   navigateToCreateEvents(): void {
     this.router.navigate(['/admin/hackathons',this.hackathonId,'events','create']);
   }
 
-  navigateToViewEvent(eventId: string): void {
-    this.toggleEventDetails(eventId);
-  }
-
-  
   onLogoError(event: EventRow): void {
+    event.logoUrl = null;
     event.logoUrl = null;
   }
 
-  private loadRegistrations(eventId: string): void {
-    this.registrationsLoading[eventId] = true;
-    this.registrationsError[eventId] ='';
-
-    this.eventService.getEventParticipants(eventId).subscribe({
-      next: (participants) =>{
-        const teams = new Map<string, RegisteredTeam>();
-
-        participants.forEach((participant) => {
-          if (!teams.has(participant.teamId)) {
-            teams.set(participant.teamId, {
-              teamId: participant.teamId,
-              name: participant.teamName,
-              members: []
-            });
-          }
-
-          teams.get(participant.teamId)?.members.push(participant);
-        });
-
-        this.registrationsByEvent[eventId] = Array.from(teams.values());
-        this.registrationsLoading[eventId] = false;
-        this.change.markForCheck();
-      },
-      error:(error) =>{
-        console.error('Failed to load registrations for event',eventId,error);
-        this.registrationsError[eventId] = 'Could not load registered teams.';
-        this.registrationsLoading[eventId] = false;
-        this.change.markForCheck();
-      }
-    });
+  onBannerError(event: EventRow): void {
+    event.bannerUrl = null;
+    this.change.markForCheck();
   }
 
   navigateToParticipants(eventId: string): void {
@@ -488,83 +443,6 @@ export class EventlistComponent implements OnInit, OnDestroy {
     this.participantsModalEventId = eventId;
     this.participantsModalEventName = event?.name || '';
     this.showParticipantsModal = true;
-  }
-
-  navigateToAnnouncements(eventId: string): void {
-    this.router.navigate(['/admin/events', eventId, 'announcements']);
-  }
-
-  navigateToForum(eventId: string): void {
-    this.router.navigate(['/admin/events', eventId, 'forum']);
-  }
-
-  pauseLeaderboard(eventId: string): void {
-    if(this.leaderboardPauseLoading[eventId]) return;
-
-    this.leaderboardPauseLoading[eventId] = true;
-
-    const request = this.leaderboardPaused[eventId]
-      ? this.eventService.resumeLeaderboard(eventId)
-      : this.eventService.pauseLeaderboard(eventId);
-
-    request.subscribe({
-      next: (response) => {
-        this.leaderboardPaused[eventId] = response.scoringPaused;
-        this.leaderboardPauseLoading[eventId] = false;
-        this.change.markForCheck();
-      },
-      error: (error) => {
-        console.error('Failed to update leaderboard pause for event', eventId, error);
-        this.leaderboardPauseLoading[eventId] = false;
-        this.change.markForCheck();
-      }
-    });
-  }
-
-  toggleExtendTimer(eventId: string): void {
-    if (this.extendTimerOpenFor === eventId) {
-      this.extendTimerOpenFor = null;
-      return;
-
-    }
-    this.extendTimerOpenFor = eventId;
-    this.extendTimerError[eventId] = '';
-    if (!this.extendTimerHours[eventId]) {
-
-      this.extendTimerHours[eventId] = 1;
-    }
-  }
-
-  extendTimer(eventId: string): void {
-
-    if (this.extendTimerLoading[eventId]) return;
-
-    const hours = Number(this.extendTimerHours[eventId]);
-    if (!hours || hours <= 0) {
-      this.extendTimerError[eventId] = 'Enter a number of hours greater than 0.';
-      return;
-    }
-
-    this.extendTimerError[eventId] = '';
-    this.extendTimerLoading[eventId] = true;
-    const additionalTimeSeconds = Math.round(hours * 3600);
-
-
-    this.eventService.extendTimer(eventId, additionalTimeSeconds).subscribe({
-      next: () => {
-        this.extendTimerLoading[eventId] = false;
-        this.extendTimerOpenFor = null;
-        this.loadEvents(true);
-      },
-      error: (error) => {
-        console.error('Failed to extend timer for event', eventId, error);
-        this.extendTimerError[eventId] = 'Could not extend the timer. Please try again.';
-        this.extendTimerLoading[eventId] = false;
-        this.change.markForCheck();
-      }
-
-
-    });
   }
 
   closeParticipantsModal(): void {
@@ -582,6 +460,6 @@ export class EventlistComponent implements OnInit, OnDestroy {
 
   closeViewEventModal(): void {
     this.showViewEventModal = false;
-    this.viewEventEventId = null; 
+    this.viewEventEventId = null;
   }
 }

@@ -45,7 +45,8 @@ export class ForumComponent implements OnInit, OnDestroy {
     isLoading = false;
     errorMessage = '';
     searchTerm = '';
-    eventId ='';
+    @Input() hackathonId = '';
+    @Input() eventId = '';
     currUserId = this.authService.getUser()?.userId ?? '';
     showCreatePost = false;
 
@@ -59,11 +60,20 @@ export class ForumComponent implements OnInit, OnDestroy {
 
     threads: ForumThread[] = [];
 
-    ngOnInit(): void {
-        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
+    private findRouteParam(name: string): string {
+      let current: ActivatedRoute | null = this.route;
+      while (current) {
+        const value = current.snapshot.paramMap.get(name);
+        if (value) return value;
+        current = current.parent;
+      }
+      return '';
+    }
 
+    ngOnInit(): void {
+        this.eventId = this.eventId || this.findRouteParam('eventId');
+        this.hackathonId = this.eventId || this.findRouteParam('hackathonId')
         if (!this.eventId){
-            
             this.errorMessage = 'No event ID provided.';
             return;
         }
@@ -204,7 +214,7 @@ export class ForumComponent implements OnInit, OnDestroy {
         if (!thread) {
             return;
         }
-        
+
         this.errorMessage = '';
         this.forumService.createComment(this.eventId, threadId, {
             body: content

@@ -1,34 +1,31 @@
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-
-import { EventParticipantResponse, EventResponse, EventService } from '../../../services/event.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { EventResponse, EventService } from '../../../services/event.service';
 import { RecentSubmissionResponse, SubmissionService } from '../../../services/submission.service';
 import { AnnouncementResponse, AnnouncementService } from '../../../services/announcement.service';
-import { EventInsightsResponse, InsightsService } from '../../../services/insights.service';
-import { LeaderboardEntry, LeaderboardService } from '../../../services/leaderboard.service';
-import { ParticipantsModalComponent } from '../participants-modal/participants-modal.component';
+import { InsightsService } from '../../../services/insights.service';
 
-interface Events {
+type StatusPill = 'Live' | 'Upcoming' | 'Ended';
+
+interface DashboardEvent {
   eventId: string;
+  hackathonId: string;
   name: string;
   logoInitial: string;
   dateRangeLabel: string;
-  statusPill: 'Live' | 'Upcoming' |'Ended';
-  participantsLabel: string;
-  meta: string;
-  hackathonId: string;
+  statusPill: StatusPill;
 }
 
-interface Submissions {
+interface DashboardSubmission {
   submissionId: number;
   team: string;
   teamInitials: string;
-  level: string;
+  challenge: string;
   score: string;
   status: string;
-  statusClass: string;
-  challenge: string;
   time: string;
 }
 
@@ -37,29 +34,6 @@ interface AnnouncementRow{
   body: string;
   date: string;
 
-}
-
-interface SubmissionStatusSegment{
-  label: string;
-  count: number;
-  percent: number;
-  offset: number;
-  colorClass : string;
-}
-interface EventInsightsSummary{
-  activeTeams: number;
-  approvedParticipants: number;
-  submissionsLastHour: number;
-  totalSubmissions: number;
-  errorRate: number;
-}
-
-interface ScoreLevelStat{
-  level: string;
-  min: number;
-  max: number;
-  avg: number;
-  count: number;
 }
 
 @Component({
@@ -73,63 +47,31 @@ export class DashboardComponent implements OnInit{
   private readonly eventService = inject(EventService);
   private readonly submissionService = inject(SubmissionService);
   private readonly insightsService = inject(InsightsService);
-  private readonly leaderboardService = inject(LeaderboardService);
   private readonly announcementService = inject(AnnouncementService);
   private readonly change = inject(ChangeDetectorRef);
 
-  allEvents: Events[] = [];
-  recentSubmissions: Submissions[] = [];
-  recentAnnouncements: AnnouncementRow[]=[];
   activeEvents = 0
   activeParticipants = 0;
   teamsCount = 0;
   submissionsCount = 0;
 
+  allEvents: DashboardEvent[] = [];
   eventLoading = false;
-  submissionLoading = false;
   eventError = '';
+
+  selectedEventId = '';
+  recentSubmissions: DashboardSubmission[] = [];
+  submissionLoading = false;
   submissionError = '';
+
+  recentAnnouncements: AnnouncementRow[] = [];
+  announcementsLoading = false;
+  announcementsError = '';
 
   get selectedEventName(): string {
     const event = this.allEvents.find(e => e.eventId === this.selectedEventId);
     return event?.name || 'selected event';
   }
-
-  // Per-event insights
-  selectedEventId = '';
-  insightsLoading = false;
-  insightsError = '';
-
-  showParticipantsModal = false;
-  participantsModalEventId: string | null = null;
-  participantsModalEventName = '';
-
-  activeParticipantRows: ParticipantRow[] = [];
-  participantsPreviewLoading = false;
-
-  topTeams: LeaderboardEntry[] = [];
-  topTeamsLoading = false;
-  topTeamsError = '';
-
-  submissionStatusSegments: SubmissionStatusSegment[]=[];
-
-  eventInsights: EventInsightsSummary= {
-    activeTeams: 0,
-    approvedParticipants: 0,
-    submissionsLastHour: 0,
-    totalSubmissions: 0,
-    errorRate: 0,
-  };
-
-  submissionTrend: {x:number; y:number}[]=[];
-  submissionTrendPoints = '';
-  submissionTrendArea = '';
-
-  scoreByLevel: ScoreLevelStat[]=[];
-  recentAnnouncements: AnnouncementRow[]=[];
-  announcementsLoading = false;
-  announcementsError = '';
-
 
   ngOnInit(): void {
     this.loadDashboardSummary();
@@ -137,10 +79,8 @@ export class DashboardComponent implements OnInit{
   }
 
   private loadDashboardSummary(): void {
-
     this.insightsService.getAdminDashboard().subscribe({
       next: summary => {
-
         this.activeEvents = summary.activeEvents;
         this.teamsCount = summary.totalParticipants;
         this.activeParticipants = summary.totalParticipants;
@@ -149,25 +89,8 @@ export class DashboardComponent implements OnInit{
       },
       error: () => {
         // Fall back silent;
-
       }
     });
-  }
-
-  onSelectedEventChange(eventId: string): void {
-    this.selectedEventId = eventId;
-    if (eventId) {
-      this.loadEventInsights(eventId);
-      this.loadParticipantsPreview(eventId);
-      this.loadTopTeams(eventId);
-      this.loadRecentSubmissions(eventId);
-      this.loadRecentAnnouncements(eventId);
-
-    } else {
-      this.recentSubmissions = [];
-      this.recentAnnouncements = [];
-      
-    }
   }
 
   private loadTopTeams(eventId: string): void {
@@ -379,7 +302,7 @@ export class DashboardComponent implements OnInit{
       body: a.body,
       date: this.formatAnnouncementDate(a.createdAt),
     };
-     
+
   }
 
   private formatAnnouncementDate(value: string): string {
@@ -484,13 +407,16 @@ export class DashboardComponent implements OnInit{
 
     this.eventService.getMyEvents().subscribe({
       next: events => {
-        this.allEvents = events.map(event => this.toDashboardEvent(event));
+        this.allEvents = events.map(event => this.toDashboardEvent(event)).sort((a, b) => this.pillOrder(a.statusPill) - this.pillOrder(b.statusPill));
         this.eventLoading = false;
         this.change.markForCheck();
+        //this.selectDefaultEvent(events);
+        this.loadTeamsCount(events);
       },
       error: () => {
         this.eventError = "Could not load events."
         this.eventLoading = false;
+        this.change.markForCheck();
       }
     });
   }
@@ -548,5 +474,7 @@ export class DashboardComponent implements OnInit{
     return `${startLabel} \u2013 ${endLabel}`
   }
 
-
+  private pillOrder(pill: StatusPill): number {
+    return pill === 'Live' ? 0 : pill === 'Upcoming' ? 1 : 2;
+  }
 }
