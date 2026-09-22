@@ -425,4 +425,60 @@ export class CertificatesComponent implements OnInit, OnDestroy {
   onCanvasMouseUp(): void {
     this.dragging = false;
   }
+
+  onBackgroundSelected(event: Event): void {
+    const input = event.target as HTMLElement;
+    if(input.files && input.files.length > 0){
+      this.backgroundFile = input.files[0];
+    }
+  }
+
+  saveTemplate(): void {
+    this.isSaving = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const req = {
+      name: this.templateName,
+      eventId: this.eventId,
+      hackathonId: null,
+      layout: this.layout,
+    };
+
+    const save$ = this.selectedTemplateId
+      ? this.certificateService.uploadTemplate(this.selectedTemplateId, req)
+      : this.certificateService.createTemplate(req);
+
+    save$.subscribe({
+      next: (template) => {
+        this.selectedTemplateId = template.templateId;
+        if(this.backgroundFile){
+          this.certificateService.uploadBackground(template.templateId, this.backgroundFile).subscribe({
+            next: (updated) => {
+              this.backgroundUrl = updated.backgroundUrl;
+              this.backgroundFile = null;
+              this.finishSave();
+            },
+            error: () => {
+              this.errorMessage = 'Template saved, but background image failed to upload';
+              this.isSaving = false;
+            },
+          });
+        } else {
+          this.finishSave();
+        }
+        this.loadTemplates();
+      },
+      error: () => {
+        this.errorMessage = 'Couldnt save the template';
+        this.isSaving = false;
+      },
+    });
+  }
+
+  private finishSave(): void {
+    this.isSaving = false;
+    this.successMessage = 'Template saved';
+    setTimeout(() => (this.successMessage = ''), 3000);
+  }
 }
