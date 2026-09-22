@@ -373,7 +373,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
   private paletteFor(key: string): Palette{
     let hash =0;
     for (let i =0; i< key.length; i++){
-      hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+      hash = (hash * 31 + (key.codePointAt(i)?? 0)) >>> 0;
     }
     return DEFAULT_PALETTES[hash % DEFAULT_PALETTES.length];
   }
