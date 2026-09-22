@@ -26,6 +26,7 @@ export interface EventRequest {
 
 export interface EventResponse {
   eventId: string;
+  hackathonId:string;
   hackathon?: string;
   createdByUserId: string;
   name: string;
@@ -198,6 +199,10 @@ export class EventService {
 
   updateEvent(eventId: string, eventData: EventRequest): Observable<EventResponse> {
     return this.http.put<EventResponse>(`${this.baseUrl}/admin/events/${eventId}`, eventData);
+  }
+
+  deleteEvent(eventId: string):Observable<void>{
+    return this.http.delete<void>(`${this.baseUrl}/admin/events/${eventId}`);
   }
 
   getEventStatus(eventId: string): Observable<{ eventId: string; status: string; visibility: string }> {
