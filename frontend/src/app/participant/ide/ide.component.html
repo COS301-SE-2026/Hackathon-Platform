@@ -1,10 +1,6 @@
 <div class="ide-page">
     <header class="ide-toolbar">
         <div class="ide-heading">
-            <button type="button" class="back-button" (click)="backToLevel()" title="Back to level">
-                <i class="pi pi-arrow-left"></i>
-            </button>
-
             <div class="title-section">
                 <span class="runtime-status" [class.running]="runtimeStatus=== 'RUNNING'" [class.error]="runtimeStatus === 'ERROR'">
                     <span class="status-dot"></span>
