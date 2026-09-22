@@ -160,10 +160,23 @@
 </div>
 
 @if (showCreateTeamModal){
-    <div class = "create-team-backdrop" (click) = "closeCreateTeamModal()">
-        <div class = "create-team-panel" role = "dialog" aria-modal = "true" (click) = "$event.stopPropagation()">
+    <div 
+    class = "create-team-backdrop" 
+    (click)="closeCreateTeamModal()"
+    (keydown.escape) = "closeCreateTeamModal()"
+    tabindex="0"
+    role ="button"
+    aria-label="Close dialog">
+        <div 
+        class = "create-team-panel" 
+        role = "dialog" 
+        aria-modal = "true" 
+        (click) = "$event.stopPropagation()"
+        (keydown) = "$event.stopPropagation()"
+        tabindex="-1"
+        aria-labelledby="create-team-title">
             <div class = "create-team-header">
-                <h3>Create Team</h3>
+                <h3 id = "create-team-title">Create Team</h3>
                 <button type = "button" class = "create-team-close-btn" (click) = "closeCreateTeamModal()" aria-label = "Close">
                     <i class = "pi pi-times"></i>
                 </button>
