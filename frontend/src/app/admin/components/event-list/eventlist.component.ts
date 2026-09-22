@@ -187,13 +187,19 @@ export class EventlistComponent implements OnInit {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   private loadEvents(): void{
     this.isLoading = true;
 =======
+=======
+>>>>>>> 46671ee7548aef1d59b98878a74b3659e1a6b6af
  private loadEvents(silent = false): void{
     if (!silent) {
       this.isLoading = true;
     }
+<<<<<<< HEAD
+>>>>>>> 46671ee7548aef1d59b98878a74b3659e1a6b6af
+=======
 >>>>>>> 46671ee7548aef1d59b98878a74b3659e1a6b6af
     this.errorMessage = '';
 

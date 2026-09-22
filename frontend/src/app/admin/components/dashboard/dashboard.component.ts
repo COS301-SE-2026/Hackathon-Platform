@@ -74,6 +74,11 @@ export class DashboardComponent implements OnInit{
   private readonly submissionService = inject(SubmissionService);
   private readonly insightsService = inject(InsightsService);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+  private readonly leaderboardService = inject(LeaderboardService);
+  private readonly announcementService = inject(AnnouncementService);
+>>>>>>> 46671ee7548aef1d59b98878a74b3659e1a6b6af
 =======
   private readonly leaderboardService = inject(LeaderboardService);
   private readonly announcementService = inject(AnnouncementService);
