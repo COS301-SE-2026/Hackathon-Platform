@@ -364,7 +364,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
 
   private progressFor(status: StatusClass, start: number, end: number, now: number): number {
     const total = end -start;
-    if(status !== 'live' || !(total>0)) {
+    if(status !== 'live' || total <= 0) {
       return 0;
     }
     return Math.min(100, Math.max(0, Math.round(((now-start)/total)*100)));
