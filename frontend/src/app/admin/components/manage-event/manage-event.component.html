@@ -106,9 +106,23 @@
   }
   </main>
   @if (showDeleteConfirm){
-    <div class = "modal-overlay" (click)="cancelDelete()">
-      <div class = "modal-card" (click)="$event.stopPropagation()">
-        <h3 class = "modal-title">Delete this event?</h3>
+    <div 
+    class = "modal-overlay" 
+    (click)="cancelDelete()"
+    (keydown.escape) = "cancelDelete()"
+    tabindex="0"
+    role ="button"
+    aria-label="Close dialog">
+
+      <div 
+      class = "modal-card" 
+      (click)="$event.stopPropagation()"
+      (keydown) = "$event.stopPropagation()"
+      tabindex="-1"
+      role ="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-modal-title">
+        <h3 id = "delete-modal-title" class = "modal-title">Delete this event?</h3>
         <p class = "modal-body">
           This will permanently delete <strong>{{form.name || 'this event'}}</strong>, including its registrations, teams, submissions, and uploaded resources. This action cannot be undone. 
         </p>
