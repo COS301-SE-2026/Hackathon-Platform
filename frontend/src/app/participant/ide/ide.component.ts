@@ -9,6 +9,7 @@ import * as monaco from 'monaco-editor';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { WorkspaceCollaborationService } from '../../services/workspace-collaboration.service';
+import { WorkspaceTelemetryService } from '../../services/workspace-telemetry.service';
 
 @Component({
   selector: 'app-ide',
@@ -25,6 +26,7 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly workService = inject(WorkspaceFileService);
     private readonly authService = inject(AuthService);
     private readonly collabService = inject(WorkspaceCollaborationService);
+    private readonly telService = inject(WorkspaceTelemetryService);
     private readonly change = inject(ChangeDetectorRef);
 
     @ViewChild('editorContainer')
@@ -103,6 +105,10 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             clearTimeout(this.editTimer);
         }
 
+        void this.telService.endSession().catch(error => {
+            console.error('session could not be ended', error);
+        });
+
         this.editorChangeDisposable?.dispose();
         this.collabSub?.unsubscribe();
         this.collabService.disconnect();
@@ -117,6 +123,11 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.runtimeStatus = session.status;
                 this.startingIde = false;
                 this.output = 'Workspace runtime started successfully. \n' + `Workspace: ${session.workspaceId}`;
+
+                void this.telService.startSession(this.workspaceId).catch(error => {
+                    console.error('session could not be started', error)
+                });
+
                 this.loadFiles();
                 this.connectCollaboration();
                 this.change.markForCheck();

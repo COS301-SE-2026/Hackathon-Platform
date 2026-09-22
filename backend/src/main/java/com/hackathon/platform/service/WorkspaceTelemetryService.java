@@ -30,6 +30,16 @@ public class WorkspaceTelemetryService {
     public UUID startSession(UUID workspaceId, User user) {
         var workspace = codeService.getWorkspaceForUser(workspaceId, user);
         LocalDateTime now = LocalDateTime.now();
+
+        List<IdeTelemetrySession> openSessions = sessionRepo.findByWorkspaceIdAndUserIdAndEndedAtIsNull(workspaceId, user.getUserId());
+
+        for (IdeTelemetrySession openSession: openSessions) {
+            openSession.setLastSeenAt(now);
+            openSession.setEndedAt(now);
+        }
+
+        sessionRepo.saveAll(openSessions);
+        
         IdeTelemetrySession session = IdeTelemetrySession.builder().sessionId(UUID.randomUUID()).workspaceId(workspace.getWorkspaceId()).userId(user.getUserId()).startedAt(now).lastSeenAt(now).build();
         sessionRepo.save(session);
         return session.getSessionId();
