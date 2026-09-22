@@ -49,6 +49,22 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     private deletedCharacters = 0;
     private deletionEdits = 0;
 
+    private readonly visibilityHandler = (): void => {
+        if (document.hidden) {
+            this.telService.recordEvent('TAB_HIDDEN');
+        } else {
+            this.telService.recordEvent('TAB_VISIBLE');
+        }
+    };
+
+    private readonly focusGainedHandler = (): void => {
+        this.telService.recordEvent('FOCUS_GAINED');
+    }
+
+    private readonly focusLossedHandler = (): void => {
+        this.telService.recordEvent('FOCUS_LOST');
+    }
+
     workspaceId = '';
     eventId = '';
     levelId = 0;
@@ -195,6 +211,10 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.sendCurrentEdit();
             }, 300);
         });
+        
+        document.addEventListener('visibilitychange', this.visibilityHandler);
+        window.addEventListener('focus', this.focusGainedHandler);
+        window.addEventListener('blur', this.focusLossedHandler);
     }
 
     ngOnDestroy(): void {
@@ -219,6 +239,9 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.collabService.disconnect();
         this.editor?.dispose();
         this.pasteDisposable?.dispose();
+        document.removeEventListener('visibilitychange', this.visibilityHandler);
+        window.removeEventListener('focus', this.focusGainedHandler);
+        window.removeEventListener('blur', this.focusLossedHandler);
     }
 
     private startIdeRuntime(): void {
@@ -402,6 +425,10 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private executeSubmit(): void {
+        this.telService.recordEvent('SUBMIT', {
+            path: this.selectedFile?.path ?? null,
+            name: this.selectedFile?.name ?? null
+        });
         this.workService.submitWorkspace(this.workspaceId).subscribe({
             next: res => {
                 this.submittingCode = false;
@@ -420,9 +447,21 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private executeRun(): void {
+        this.telService.recordEvent('RUN', {
+            path: this.selectedFile?.path ?? null,
+            name: this.selectedFile?.name ?? null
+        });
         this.workService.runWorkspace(this.workspaceId).subscribe({
             next: res => {
                 this.runningCode = false;
+
+                this.telService.recordEvent('RUN_RESULT', {
+                    path: this.selectedFile?.path ?? null,
+                    name: this.selectedFile?.name ?? null,
+                    success: res.success,
+                    result: res.success ? 'SUCCESS' : 'CODE_ERROR'
+                });
+
                 if (res.success) {
                     this.output = res.output;
                 } else {
@@ -432,6 +471,14 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             },
             error: () => {
                 this.runningCode = false;
+
+                this.telService.recordEvent('RUN_RESULT', {
+                    path: this.selectedFile?.path ?? null,
+                    name: this.selectedFile?.name ?? null,
+                    success: false,
+                    result: 'REQUEST_ERROR'
+                })
+
                 this.output = 'Workspace could not be executed.'
                 this.toast.error('Run Error', 'Workspace could not execute');
                 this.change.markForCheck();
