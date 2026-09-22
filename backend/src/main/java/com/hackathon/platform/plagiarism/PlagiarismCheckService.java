@@ -80,7 +80,7 @@ public class PlagiarismCheckService {
         Map<String, String> filesByName,
         List<NormalizedToken> tokens,
         Map<String, List<AstFunctionSpan>> functionsByFile
-    ) [
+    ) {
         List<String> tokenTexts() {
             List<String> texts = new ArrayList<>(tokens.size());
             for(NormalizedToken t : tokens) {
@@ -90,7 +90,7 @@ public class PlagiarismCheckService {
 
         }
 
-    ]
+    }
 
     /** One compared pair before the final flag decision */
     private record PairResult(
@@ -188,7 +188,7 @@ public class PlagiarismCheckService {
         }
 
         //Centering embedding signal needs to see every function embedding across the whole level's run before any pair is compared.
-        List<Long> embeddedSubmissionIds = new ArrayList<>(fingerprint.keySet());
+        List<Long> embeddedSubmissionIds = new ArrayList<>(fingerprints.keySet());
         List<FunctionEmbeddingStore.StoredEmbedding> allEmbeddings =
             functionEmbeddingStore.findBySubmissionIds(embeddedSubmissionIds);
 
@@ -310,19 +310,19 @@ public class PlagiarismCheckService {
     /**
      * Weighted combination of the structural and semantic signals. Falls to just structual if no embedding signal.
      */
-    private double combinedScore(double structual, Double embedding) {
+    private double combinedScore(double structural, Double embedding) {
         if (embedding == null){
-            return structual;
+            return structural;
         }
 
-        double structualWeight = props.getStructuralWeight();
+        double structuralWeight = props.getStructuralWeight();
         double embeddingWeight = props.getEmbeddingWeight();
-        double totalWeight = structualWeight + embeddingWeight;
+        double totalWeight = structuralWeight + embeddingWeight;
         if (totalWeight <= 0) {
 
-            return structual;
+            return structural;
         }
-        return (structualWeight * structual + embeddingWeight * embedding) / totalWeight;
+        return (structuralWeight * structural + embeddingWeight * embedding) / totalWeight;
     }
 
     private double mean(List<PairResult> pairs) {
@@ -441,7 +441,7 @@ public class PlagiarismCheckService {
           functionsByFile.put(fileName, normalized.functions());
 
         }
-        
+
         return new SubmissionSource(filesByName, tokens, functionsByFile);
         
 
@@ -540,43 +540,220 @@ public class PlagiarismCheckService {
                 .findById(submissionIdB)
                 .orElseThrow(() -> new IllegalArgumentException("submission not found: " + submissionIdB));
 
-        List<String> tokensA = fetchAndNormalize(a);
-        List<String> tokensB = fetchAndNormalize(b);
+        SubmissionSource srcA = fetchAndNormalize(a);
+        SubmissionSource srcB = fetchAndNormalize(b);
 
-        FingerprintResult fpA =  winnowing.fingerprint(tokensA, props.getKgramSize(), props.getWindowSize());
-        FingerprintResult fpB =  winnowing.fingerprint(tokensB, props.getKgramSize(), props.getWindowSize());
+       FingerprintResult fpA =
+            winnowing.fingerprint(srcA.tokenTexts(), props.getKgramSize(), props.getWindowSize());
+        FingerprintResult fpB =
+            winnowing.fingerprint(srcB.tokenTexts(), props.getKgramSize(), props.getWindowSize());
+
 
         double structural = winnowing.jaccard(fpA.hashes(), fpB.hashes());
 
         var sharedHashes = fpA.hashes();
         sharedHashes.retainAll(fpB.hashes());
 
-        List<int[]> rangesA = matchedRanges(fpA, sharedHashes, props.getKgramSize());
-        List<int[]> rangesB = matchedRanges(fpB, sharedHashes, props.getKgramSize());
+        List<MatchedRangeResponse> rangesA =
+            matchedRanges(fpA, sharedHashes, props.getKgramSize(), srcA.tokens(), srcA.filesByName());
+        List<MatchedRangeResponse> rangesB =
+            matchedRanges(fpB, sharedHashes, props.getKgramSize(), srcB.tokens(), srcB.filesByName());
 
-        return new PlagiarismDiffResponse(submissionIdA, submissionIdB, tokensA, tokensB, rangesA, rangesB, structural);
+        List<SourceFileResponse> filesA = toFileResponses(srcA.filesByName());
+        List<SourceFileResponse> filesB = toFileResponses(srcB.filesByName());
 
-        
+        FunctionMatchOutcome functionOutcome = computeFunctionMatches(a, b, srcA, srcB);
+
+        return new PlagiarismDiffResponse(
+            submissionIdA,
+            submissionIdB,
+            filesA,
+            filesB,
+            rangesA,
+            rangesB,
+            structural,
+            functionOutcome.matches(),
+            functionOutcome.status());
     }
 
-    private List<int[]> matchedRanges(
-        FingerprintResult fp, java.util.Set<Long> sharedHashes, int kgramSize
+    /** Bundles the function-match list together with WHY it looks the way it does */
+    private record FunctionMatchOutcome(
+        List<FunctionMatchResponse> matches, PlagiarismDiffResponse.SemanticStatus status) {}
+
+    /**
+     * Function-level semantic matches for the diff view
+     */
+    private FunctionMatchOutcome computeFunctionMatches(
+        Submission a, Submission b, SubmissionSource srcA, SubmissionSource srcB) {
+
+        List<FunctionEmbeddingStore.StoredEmbedding> rawA =
+            functionEmbeddingStore.findBySubmissionId(a.getId());
+        List<FunctionEmbeddingStore.StoredEmbedding> rawB =
+            functionEmbeddingStore.findBySubmissionId(b.getId());
+
+        if (rawA.isEmpty() && rawB.isEmpty()) {
+            return new FunctionMatchOutcome(List.of(), PlagiarismDiffResponse.SemanticStatus.NO_DATA_FOR_EITHER);
+        }
+        if (rawA.isEmpty()) {
+            return new FunctionMatchOutcome(List.of(), PlagiarismDiffResponse.SemanticStatus.NO_DATA_FOR_A);
+        }
+        if (rawB.isEmpty()) {
+            return new FunctionMatchOutcome(List.of(), PlagiarismDiffResponse.SemanticStatus.NO_DATA_FOR_B);
+        }
+
+        Set<Long> corpusIds = new java.util.HashSet<>();
+        corpusIds.add(a.getId());
+        corpusIds.add(b.getId());
+
+        for (SubmissionSimilarity row :
+            similarityRepo.findByEventIdAndLevelIdOrderByCombinedScoreDesc(a.getEventId(), a.getLevelId())) {
+            corpusIds.add(row.getSubmissionIdA());
+            corpusIds.add(row.getSubmissionIdB());
+
+
+        }
+
+        List<FunctionEmbeddingStore.StoredEmbedding> corpus =
+            functionEmbeddingStore.findBySubmissionIds(new ArrayList<>(corpusIds));
+        float[] meanVector =
+            embeddingSimilarityCalculator.meanVector(corpus.stream().map(e -> e.vector()).toList());
+
+        List<FunctionEmbeddingStore.StoredEmbedding> centeredA =
+            embeddingSimilarityCalculator.centerAll(rawA, meanVector);
+        List<FunctionEmbeddingStore.StoredEmbedding> centeredB =
+            embeddingSimilarityCalculator.centerAll(rawB, meanVector);
+
+        List<EmbeddingSimilarityCalculator.FunctionMatch> matches =
+            embeddingSimilarityCalculator.topFunctionMatches(
+                centeredA, centeredB, props.getFunctionMatchThreshold(), props.getMaxFunctionMatches());
+
+        if (matches.isEmpty()) {
+            return new FunctionMatchOutcome(
+                List.of(), PlagiarismDiffResponse.SemanticStatus.NO_MATCHES_ABOVE_THRESHOLD);
+        }
+
+        Map<String, SpanLocation> locationsA = flattenSpans(srcA.functionsByFile());
+        Map<String, SpanLocation> locationsB = flattenSpans(srcB.functionsByFile());
+
+        List<FunctionMatchResponse> result = new ArrayList<>(matches.size());
+        for (EmbeddingSimilarityCalculator.FunctionMatch m : matches) {
+            SpanLocation locA = locationsA.get(m.qualifiedNameA());
+            SpanLocation locB = locationsB.get(m.qualifiedNameB());
+            if (locA == null || locB == null) {
+                continue; // shouldn't happen - embedding exists but its span disappeared on re-parse
+            }
+            result.add(
+                new FunctionMatchResponse(
+                    locA.fileName(),
+                    m.qualifiedNameA(),
+                    locA.span().startByte(),
+                    locA.span().endByte(),
+                    locB.fileName(),
+                    m.qualifiedNameB(),
+                    locB.span().startByte(),
+                    locB.span().endByte(),
+                    m.similarity()));
+        }
+
+        // Every match's span lookup failing is defensive-only and shouldn't happen in practice.
+        return result.isEmpty()
+            ? new FunctionMatchOutcome(List.of(), PlagiarismDiffResponse.SemanticStatus.NO_MATCHES_ABOVE_THRESHOLD)
+            : new FunctionMatchOutcome(result, PlagiarismDiffResponse.SemanticStatus.MATCHED);
+    }
+
+    /** Where one qualified function name lives: which file, and its byte span within it. */
+    private record SpanLocation(String fileName, AstFunctionSpan span) {}
+
+    private Map<String, SpanLocation> flattenSpans(Map<String, List<AstFunctionSpan>> functionsByFile) {
+        Map<String, SpanLocation> out = new HashMap<>();
+        for (var entry : functionsByFile.entrySet()) {
+            for (AstFunctionSpan span : entry.getValue()) {
+                out.put(span.qualifiedName(), new SpanLocation(entry.getKey(), span));
+            }
+        }
+        return out;
+    }
+
+    private List<SourceFileResponse> toFileResponses(Map<String, String> filesByName) {
+        List<SourceFileResponse> out = new ArrayList<>(filesByName.size());
+        for (var e : filesByName.entrySet()) {
+            out.add(new SourceFileResponse(e.getKey(), e.getValue()));
+        }
+        return out;
+    }
+
+    /**
+     * Maps each matched fingerprint's token-index position to one or more real character ranges
+     * in the file it came from.
+     */
+    private List<MatchedRangeResponse> matchedRanges(
+        FingerprintResult fp,
+        Set<Long> sharedHashes,
+        int kgramSize,
+        List<NormalizedToken> tokens,
+        Map<String, String> filesByName
     ) {
-        List<int[]> ranges = new ArrayList<>();
-        for(var f : fp.fingerprints()) {
-            if(sharedHashes.contains(f.hash())) {
-                ranges.add(new int[] {f.position(), f.position() + kgramSize});
+        List<MatchedRangeResponse> ranges = new ArrayList<>();
+        
+        for (var f : fp.fingerprints()) {
+            if (!sharedHashes.contains(f.hash())) {
+
+                continue;
+            }
+            int startIdx = f.position();
+            if (startIdx < 0 || startIdx >= tokens.size()) {
+
+                continue;
+            }
+            int endIdx = Math.min(startIdx + kgramSize, tokens.size());
+
+            int rangeStartIdx = startIdx;
+            NormalizedToken prev = tokens.get(startIdx);
+
+            boolean stoppedAtFileBoundary = false;
+
+            for (int idx = startIdx + 1; idx < endIdx; idx++) {
+                NormalizedToken cur = tokens.get(idx);
+                if (!cur.fileName().equals(prev.fileName())) {
+
+                    NormalizedToken rangeStart = tokens.get(rangeStartIdx);
+                    ranges.add(new MatchedRangeResponse(rangeStart.fileName(), rangeStart.start(), prev.end()));
+                    stoppedAtFileBoundary = true;
+                    break;
+
+
+                }
+                if (!isBlankGap(filesByName.get(prev.fileName()), prev.end(), cur.start())) {
+                    NormalizedToken rangeStart = tokens.get(rangeStartIdx);
+                    ranges.add(new MatchedRangeResponse(rangeStart.fileName(), rangeStart.start(), prev.end()));
+                    rangeStartIdx = idx;
+                }
+
+                prev = cur;
+            }
+            if (!stoppedAtFileBoundary) {
+                NormalizedToken rangeStart = tokens.get(rangeStartIdx);
+                ranges.add(new MatchedRangeResponse(rangeStart.fileName(), rangeStart.start(), prev.end()));
 
             }
         }
 
-        ranges.sort((x,y) -> Integer.compare(x[0], y[0]));
+        ranges.sort((x, y) -> Integer.compare(x.start(), y.start()));
         return ranges;
+    }
 
+    /** True if given file's "start, end" slice is empty or whitespace-only. */
+    private boolean isBlankGap(String source, int start, int end) {
+        if (source == null || start < 0 || end > source.length() || start > end) {
+            return true;
+
+        }
+        return source.substring(start, end).isBlank();
     }
 
     private String truncate(String s, int max) {
         if(s == null) {
+
             return null;
         }
         return s.length() <= max ? s : s.substring(0, max) + "...";
