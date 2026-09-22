@@ -34,6 +34,7 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     private editor?: monaco.editor.IStandaloneCodeEditor;
     private collabSub?: Subscription;
     private editorChangeDisposable?: monaco.IDisposable;
+    private pasteDisposable?: monaco.IDisposable;
     private applyingRemoteEdit = false;
     private readonly fileVersions = new Map<string, number>();
     private editTimer?: ReturnType<typeof setTimeout>;
@@ -80,6 +81,28 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
             fontSize: 14
         });
 
+        this.pasteDisposable = this.editor.onDidPaste(event => {
+            if (!this.selectedFile || !this.editor) {
+                return;
+            }
+
+            const model = this.editor.getModel();
+
+            if (!model) {
+                return;
+            }
+
+            const pastedTxt = model.getValueInRange(event.range);
+            const lines = pastedTxt.length === 0 ? 0 : pastedTxt.split(/\r\n|\r|\n/).length;
+
+            this.telService.recordEvent('PASTE', {
+                path: this.selectedFile.path,
+                name: this.selectedFile.name,
+                characters: pastedTxt.length,
+                lines: lines
+            });
+        });
+
         this.editorChangeDisposable = this.editor.onDidChangeModelContent(() => {
             if (this.applyingRemoteEdit) {
                 return;
@@ -113,6 +136,7 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.collabSub?.unsubscribe();
         this.collabService.disconnect();
         this.editor?.dispose();
+        this.pasteDisposable?.dispose();
     }
 
     private startIdeRuntime(): void {
