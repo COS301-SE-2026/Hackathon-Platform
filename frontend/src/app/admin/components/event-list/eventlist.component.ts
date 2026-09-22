@@ -213,7 +213,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
             this.change.markForCheck();
           }
         },
-        error: () => {}
+        error: (error) => {console.log(error);}
       });
 
       this.eventService.getEventLogoUrl(event.eventId).subscribe({
@@ -224,7 +224,7 @@ export class EventlistComponent implements OnInit, OnDestroy {
             this.change.markForCheck();
           }
         },
-        error: () => {}
+        error: (error) => {console.log(error);}
       });
     });
   }

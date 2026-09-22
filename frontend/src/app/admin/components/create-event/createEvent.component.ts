@@ -237,7 +237,7 @@ export class CreateEventComponent implements OnInit {
             this.isLoading = false;
             this.goBack();
           },
-          error: (error) => {
+          error: () => {
             this.isLoading = false;
             this.errorMessage = 'Event created, but branding upload failed.';
           }
