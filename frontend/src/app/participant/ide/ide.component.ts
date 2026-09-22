@@ -45,6 +45,9 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
     private lastTypingTime?: number;
     private typingIntervalTotal = 0;
     private typingIntervalCount = 0;
+    private deletionTimer?: ReturnType<typeof setTimeout>;
+    private deletedCharacters = 0;
+    private deletionEdits = 0;
 
     workspaceId = '';
     eventId = '';
@@ -135,7 +138,30 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
 
                     this.lastTypingTime = now;
                 }
+
+                if (removedCharacters > 0) {
+                    this.deletedCharacters += removedCharacters;
+                    this.deletionEdits++;
+                }
             }
+
+            if (this.deletionTimer) {
+                clearTimeout(this.deletionTimer);
+            }
+
+            this.deletionTimer = setTimeout (() => {
+                if (this.deletedCharacters > 0 && this.selectedFile) {
+                    this.telService.recordEvent('DELETE', {
+                        path: this.selectedFile.path,
+                        name: this.selectedFile.name,
+                        characters: this.deletedCharacters,
+                        edits: this.deletionEdits
+                    });
+                }
+
+                this.deletedCharacters = 0;
+                this.deletionEdits = 0;
+            }, 1000);
 
             if (this.typingTimer) {
                 clearTimeout(this.typingTimer);
@@ -182,6 +208,10 @@ export class IdeComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (this.typingTimer) {
             clearTimeout(this.typingTimer);
+        }
+
+        if (this.deletionTimer) {
+            clearTimeout(this.deletionTimer);
         }
 
         this.editorChangeDisposable?.dispose();
