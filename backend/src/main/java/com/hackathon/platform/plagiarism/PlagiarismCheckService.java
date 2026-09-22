@@ -1,15 +1,24 @@
 package com.hackathon.platform.plagiarism;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.dto.FunctionMatchResponse;
+import com.hackathon.platform.dto.MatchedRangeResponse;
 import com.hackathon.platform.dto.PlagiarismDiffResponse;
+import com.hackathon.platform.dto.SourceFileResponse;
 import com.hackathon.platform.dto.SubmissionSimilarityResponse;
 import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.PlagiarismRun;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.SubmissionSimilarity;
+import com.hackathon.platform.plagiarism.ast.AstFunctionSpan;
+import com.hackathon.platform.plagiarism.embedding.EmbeddingService;
+import com.hackathon.platform.plagiarism.embedding.EmbeddingSimilarityCalculator;
+import com.hackathon.platform.plagiarism.embedding.FunctionEmbeddingStore;
 import com.hackathon.platform.plagiarism.fingerprint.Winnowing;
 import com.hackathon.platform.plagiarism.fingerprint.Winnowing.FingerprintResult;
-import com.hackathon.platform.plagiarism.normalize.CodeNormalizer;
+import com.hackathon.platform.plagiarism.normalize.NormalizedToken;
+import com.hackathon.platform.plagiarism.normalize.StructuralNormalizationResult;
+import com.hackathon.platform.plagiarism.normalize.StructuralNormalizer;
 import com.hackathon.platform.repository.LeaderboardEntry;
 import com.hackathon.platform.repository.LevelRepository;
 import com.hackathon.platform.repository.PlagiarismRunRepository;
@@ -25,8 +34,10 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -38,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Batch, admin-triggered plagiarism check across the top N teams on a level's (or event's)
  * leaderboard. Deliberately NOT run on every submission: it's meant to run once a level (or the
  * whole event) has closed, against each team's best/final submission.
+ * Two independent similarity signals feed the combined score saved per pair
  */
 @Service
 @RequiredArgsConstructor
@@ -52,9 +64,43 @@ public class PlagiarismCheckService {
     private final TeamRepository teamRepo;
     private final StorageService storageService;
     private final AzureBlobConfig blobConfig;
-    private final CodeNormalizer normalizer;
+    private final StructuralNormalizer structuralNormalizer;
+    private final EmbeddingService embeddingService;
+    private final FunctionEmbeddingStore functionEmbeddingStore;
+    private final EmbeddingSimilarityCalculator embeddingSimilarityCalculator;
     private final Winnowing winnowing;
     private final PlagiarismProperties props;
+
+    /**
+     * A submission's normalized tokens (with source offsets, for diff highlighting), the raw
+     * content of every source file it contained (for rendering diff view), and any function
+     * spans discovered per file.
+     */
+    private record SubmissionSource(
+        Map<String, String> filesByName,
+        List<NormalizedToken> tokens,
+        Map<String, List<AstFunctionSpan>> functionsByFile
+    ) [
+        List<String> tokenTexts() {
+            List<String> texts = new ArrayList<>(tokens.size());
+            for(NormalizedToken t : tokens) {
+                texts.add(t.text());
+            }
+            return texts;
+
+        }
+
+    ]
+
+    /** One compared pair before the final flag decision */
+    private record PairResult(
+        Submission a,
+        Submission b,
+        double structuralScore,
+        Double embeddingScore,
+        double combinedScore,
+        int matchedKgramCount
+    ) {}
 
     /**Executes one plagiarism run */
     @Transactional
@@ -122,7 +168,8 @@ public class PlagiarismCheckService {
         //Fingerprint every sub once
         Map<Long, FingerprintResult> fingerprints = new HashMap<>();
         for(Submission sub : submissions) {
-            List<String> tokens = fetchAndNormalize(sub);
+            SubmissionSource source = fetchAndNormalize(sub);
+            List<String> tokens = source.tokenTexts();
             if(tokens.size() < props.getMinTokenCount()) {
                 logger.debug(
                     "Submission {} has only {} normalized tokens, skipping (too trivial to compare)",
@@ -136,13 +183,39 @@ public class PlagiarismCheckService {
                 sub.getId(),
                 winnowing.fingerprint(tokens, props.getKgramSize(), props.getWindowSize())
             );
+
+            embeddingService.embedAndStore(sub.getId(), source.filesByName(), source.functionsByFile());
+        }
+
+        //Centering embedding signal needs to see every function embedding across the whole level's run before any pair is compared.
+        List<Long> embeddedSubmissionIds = new ArrayList<>(fingerprint.keySet());
+        List<FunctionEmbeddingStore.StoredEmbedding> allEmbeddings =
+            functionEmbeddingStore.findBySubmissionIds(embeddedSubmissionIds);
+
+        Map<Long, List<FunctionEmbeddingStore.StoredEmbedding>> rawEmbeddingsBySubmission =
+            allEmbeddings.stream()
+                .collect(java.util.stream.Collectors.groupingBy(FunctionEmbeddingStore.StoredEmbedding::submissionId));
+
+        float[] levelMeanVector =
+            embeddingSimilarityCalculator.meanVector(
+                allEmbeddings.stream().map(FunctionEmbeddingStore.StoredEmbedding::vector).toList()
+            );
+
+        Map<Long, List<FunctionEmbeddingStore.StoredEmbedding>> centeredEmbeddingsBySubmission = new HashMap<>();
+        for (Long submissionId : embeddedSubmissionIds){
+
+            List<FunctionEmbeddingStore.StoredEmbedding> raw =
+                rawEmbeddingsBySubmission.getOrDefault(submissionId, List.of());
+            centeredEmbeddingsBySubmission.put(
+                submissionId, embeddingSimilarityCalculator.centerAll(raw, levelMeanVector)
+            );
+
         }
 
         similarityRepo.deleteByEventIdAndLevelId(eventId, levelId);
 
-        int compared = 0;
-        int flagged = 0;
-        List<SubmissionSimilarity> toSave = new ArrayList<>();
+        //Pass 1: compute every pair's scores without deciding flagged yet. Relative threshold needs whole level.
+        List<PairResult> pairResults = new ArrayList<>();
 
         for(int i = 0; i < submissions.size(); i++) {
             Submission a = submissions.get(i);
