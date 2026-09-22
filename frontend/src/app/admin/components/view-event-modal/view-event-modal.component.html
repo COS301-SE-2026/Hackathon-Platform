@@ -1,5 +1,11 @@
-<div class = "modal-backdrop" (click) = "onBackdropClick($event)">
-    <div class = "modal-panel" role = "dialog" aria-modal = "true">
+<div 
+class = "modal-backdrop" 
+(click) = "onBackdropClick($event)"
+(keydown.escape) = "close()"
+    tabindex="0"
+    role ="button"
+    aria-label="Close dialog">
+    <div class = "modal-panel" role = "dialog" aria-modal = "true" aria-labelledby="modal-title">
 
         <div class = "modal-header">
             <div class = "modal-header-left">
@@ -8,7 +14,7 @@
                 </button>
 
                 <div class = "modal-header-title-row">
-                    <h2>{{event?.name || eventName || 'Event'}}</h2>
+                    <h2 id = "modal-title">{{event?.name || eventName || 'Event'}}</h2>
 
 
                     <div class = "modal-header-stats">
