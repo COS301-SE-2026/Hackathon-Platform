@@ -37,6 +37,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  #Java runner
+  java-runner:
+    build:
+      context: .
+      dockerfile: docker/java-runner/Dockerfile
+    image: hackathon-java-runner:1
+    entrypoint:
+      - /bin/sh
+      - -c
+      - exit 0
+    restart: "no"
+
+  #Browser IDE
+  browser-ide:
+    build:
+      context: .
+      dockerfile: docker/browser-ide.Dockerfile
+    image: hackathon-browser-ide:1
+    entrypoint: 
+      - /bin/sh
+      - -c
+      - exit 0
+    restart: "no"
       
 volumes:
   postgres_data:

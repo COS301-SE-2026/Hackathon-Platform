@@ -1,0 +1,2 @@
+ALTER TABLE code_workspaces
+ADD COLUMN initialized_at TIMESTAMP WITH TIME ZONE;

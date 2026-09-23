@@ -114,6 +114,7 @@ export const routes: Routes = [
       { path: 'help',loadComponent: () =>import('./participant/help/help.component').then(m => m.HelpComponent) },
       { path: 'events/:eventId/forum', loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent) },
       { path: 'events/:eventId', loadComponent: () => import('./participant/event-details/event-details.component').then(m => m.EventDetailsComponent)},
+      { path: 'events/:eventId/levels/:levelId/workspaces/:workspaceId/ide', loadComponent: () => import('./participant/ide/ide.component').then(m => m.IdeComponent) },
       { path: '', redirectTo: 'home', pathMatch: 'full' }
     ]
   },
