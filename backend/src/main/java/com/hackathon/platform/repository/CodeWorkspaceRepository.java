@@ -3,6 +3,7 @@ package com.hackathon.platform.repository;
 import com.hackathon.platform.model.CodeWorkspace;
 import java.util.UUID;
 import java.util.Optional;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +21,6 @@ public interface CodeWorkspaceRepository extends JpaRepository<CodeWorkspace, UU
                         ON CONFLICT ON CONSTRAINT uq_code_workspaces_event_team_level DO NOTHING
                     """, nativeQuery = true)
                     int createIfMissing(@Param("eventId") UUID eventId, @Param("teamId") UUID teamId, @Param("hackathonId") UUID hackathonId, @Param("levelId") short levelId, @Param("createdByUserId") UUID createdByUserId);
+
+    List<CodeWorkspace>findByEventIdAndTeamIdOrderByLevelIdAsc(UUID eventId, UUID teamId);
 }

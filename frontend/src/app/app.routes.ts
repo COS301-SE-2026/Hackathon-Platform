@@ -19,6 +19,10 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
+        path: 'events/:eventId/participants/:userId/telemetry',
+        loadComponent: () => import('./admin/components/telemetry/telemetry-report.component').then(m => m.TelemetryReportComponent),
+      },
+      {
         path: 'dashboard',
         loadComponent: () => import('./admin/components/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
