@@ -12,6 +12,7 @@ export const routes: Routes = [
   { path: 'verify-email', loadComponent: () => import('./features/auth/verify-email/verify-email.component').then(m=>m.VerifyEmailComponent)},
   { path: 'auth/oauth-success', loadComponent: () => import('./features/auth/oauth-success/oauth-success.component').then(m=>m.OAuthSuccessComponent)},
   {path: 'style-guide', loadComponent: () => import('./components/brand-style-guide/brand-style-guide.component').then( m => m.BrandStyleGuideComponent),},
+  { path: 'verify/:code', loadComponent: () => import('./features/certificate-verify/certificate-verify.component').then(m => m.CertificateVerifyComponent) },
 
   {
     path: 'admin',
@@ -36,6 +37,10 @@ export const routes: Routes = [
       },
       { path: 'events/:eventId/forum',
         loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent),
+      },
+      {
+        path: 'events/:eventId/certificates',
+        loadComponent: () => import('./admin/components/certificates/certificates.component').then(m => m.CertificatesComponent),
       },
       {
         path: 'hackathons/:hackathonId/events/create',
@@ -102,7 +107,7 @@ export const routes: Routes = [
         path: "settings",
         loadComponent: () => import ('./admin/components/profile/admin-profile.component').then(m => m.AdminProfileComponent),
       },
-     
+
     ]
   },
 
