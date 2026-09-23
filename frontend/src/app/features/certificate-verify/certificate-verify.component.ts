@@ -21,7 +21,7 @@ export class CertificateVerifyComponent implements OnInit {
     this.certificateService.verify(code).subscribe({
       next: (res) => {
         this.result = res;
-        this.isLOading = false;
+        this.isLoading = false;
       },
       error: () => {
         this.result = { valid: false };
