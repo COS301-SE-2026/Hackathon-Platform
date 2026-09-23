@@ -26,14 +26,17 @@
   @if (activeEventTab === 'your-events') { 
  
     <section class="events-section"> 
-
+       <div class="events-count">{{ filteredRegisteredEvents.length }} hackathons found</div>
      @if (isLoadingRegisteredEvents) {<app-loader message="Loading events..."></app-loader>}
-      @else if (filteredRegisteredEvents.length > 0) {
+
+      @else if (paginatedRegisteredEvents.length > 0) {
         <div class="events-grid"> 
-         @for (event of filteredRegisteredEvents; track event.eventId) {  
+         @for (event of paginatedRegisteredEvents; track event.eventId) {  
           <app-event-card [event]="event" type="registered" (goToEvent)="goToEvent($event)"> </app-event-card> 
         } 
         </div> 
+
+        <app-pagination [currentPage]="currentPage" [totalItems]="filteredRegisteredEvents.length" [itemsPerPage]="itemsPerPage" itemLabel="hackathons" (pageChange)="onPageChange($event)"></app-pagination>
 
       } @else {
         <div class="empty-state">
@@ -52,14 +55,19 @@
   } @else if (activeEventTab === 'upcoming') { 
  
     <section class="events-section"> 
+
+         <div class="events-count">{{ filteredUpcomingEvents.length }} hackathons found</div>
+
     @if (isLoadingUpcomingEvents) {<app-loader message="Loading events..."></app-loader>}
 
-     @else if (filteredUpcomingEvents.length > 0) {
+     @else if (paginatedUpcomingEvents.length > 0) {
         <div class="events-grid"> 
-          @for (event of filteredUpcomingEvents; track event.eventId) { 
+          @for (event of paginatedUpcomingEvents; track event.eventId) { 
           <app-event-card [event]="event" type="upcoming" (goToEvent)="goToEvent($event)"></app-event-card> 
           } 
         </div> 
+
+        <app-pagination [currentPage]="currentPage" [totalItems]="filteredUpcomingEvents.length" [itemsPerPage]="itemsPerPage" itemLabel="hackathons" (pageChange)="onPageChange($event)"></app-pagination>
 
       } @else {
         <div class="empty-state">
@@ -78,14 +86,19 @@
   @else if (activeEventTab === 'completed') { 
  
     <section class="events-section"> 
+
+      <div class="events-count">{{ filteredCompletedEvents.length }} hackathons found</div>
+
       @if (isLoadingCompletedEvents) {<app-loader message="Loading events..."></app-loader>}
 
-     @else if (filteredCompletedEvents.length > 0) {
+     @else if (paginatedCompletedEvents.length > 0) {
         <div class="events-grid"> 
-          @for (event of filteredCompletedEvents; track event.eventId) { 
+          @for (event of paginatedCompletedEvents; track event.eventId) { 
           <app-event-card [event]="event" type="completed" (goToEvent)="goToEvent($event)"></app-event-card> 
           } 
         </div> 
+
+        <app-pagination [currentPage]="currentPage" [totalItems]="filteredCompletedEvents.length" [itemsPerPage]="itemsPerPage" itemLabel="hackathons" (pageChange)="onPageChange($event)"></app-pagination>
 
       } @else {
 

@@ -81,6 +81,14 @@
   margin-top: var(--space-6);
 }
 
+.events-count {
+  margin-bottom: var(--space-4);
+  color: var(--dark-gray);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-body);
+}
+
 .events-grid {
   width: 100%;
   min-width: 0;

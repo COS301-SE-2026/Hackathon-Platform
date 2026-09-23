@@ -10,6 +10,7 @@ import { TabsComponent, TabItem} from '../../shared/components/tabs/tabs.compone
 import { DropdownComponent } from '../../shared/components/dropdown/dropdown.component';
 import { SearchBarComponent } from '../../shared/components/search-bar/search-bar.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 export interface OpenEventView {
   eventId: string;
@@ -30,7 +31,7 @@ export interface OpenEventView {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ CommonModule, LoaderComponent, EventCardComponent, TabsComponent, DropdownComponent, SearchBarComponent, EmptyStateComponent],
+  imports: [ CommonModule, LoaderComponent, EventCardComponent, TabsComponent, DropdownComponent, SearchBarComponent, EmptyStateComponent, PaginationComponent],
   templateUrl: '../home/home.component.html',
   styleUrls: ['../home/home.component.scss']
 })
@@ -62,6 +63,8 @@ export class HomeComponent implements OnInit {
   isLoadingUpcomingEvents = false;
   isLoadingCompletedEvents = false;
   isLoadingRegisteredEvents = false;
+  currentPage = 1;
+  itemsPerPage = 6;
   searchTerm = '';
   sortOption = 'Soonest';
 
@@ -73,6 +76,7 @@ export class HomeComponent implements OnInit {
 
   onEventTabChange(tab: string): void {
     this.activeEventTab = tab;
+    this.currentPage = 1;
     if (tab === 'your-events') { this.loadRegisteredEvents();} 
     else if (tab === 'upcoming') { this.loadUpcomingEvents();}
     else if (tab === 'completed') {this.loadCompletedEvents();}
@@ -227,11 +231,13 @@ export class HomeComponent implements OnInit {
   }
 
  onSortChange(sortOption: string): void {
+  this.currentPage = 1;
   this.sortOption = sortOption;
   this.applyFilters();
 }
 
   onSearchChange(searchTerm: string): void {
+    this.currentPage = 1;
   this.searchTerm = searchTerm.trim().toLowerCase();
   this.applyFilters();
 }
@@ -254,5 +260,29 @@ private filterAndSortEvents(events: OpenEventView[]): OpenEventView[] {
     const dateB = new Date(b.startDateTime).getTime();
    return this.sortOption === 'Soonest' ? dateA - dateB : dateB - dateA; });
   }
+
+
+get paginatedRegisteredEvents(): OpenEventView[] {
+
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+
+  return this.filteredRegisteredEvents.slice(start, start + this.itemsPerPage);
+}
+
+ get paginatedUpcomingEvents(): OpenEventView[] {
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+
+  return this.filteredUpcomingEvents.slice(start, start + this.itemsPerPage);
+}
+
+get paginatedCompletedEvents(): OpenEventView[] {
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+
+  return this.filteredCompletedEvents.slice(start, start + this.itemsPerPage);
+}
+
+onPageChange(page: number): void {
+  this.currentPage = page;
+}
 
 }
