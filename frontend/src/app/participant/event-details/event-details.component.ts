@@ -10,7 +10,6 @@ import { LeaderboardComponent } from './event-details-tabs/leaderboard/leaderboa
 import { AnnouncementsComponent } from './event-details-tabs/announcements/announcements.component';
 import { TabsComponent, TabItem} from '../../shared/components/tabs/tabs.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { CardComponent } from '../../shared/components/card/card.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ToastService } from '../../shared/components/toast/toast.service';
@@ -37,8 +36,8 @@ import { LevelService } from '../../services/level.service';
     ModalComponent,
     InputComponent,
     TabsComponent,
-    ButtonComponent,
-    CardComponent,
+    ButtonComponent
+    
   ],
   templateUrl: './event-details.component.html',
   styleUrls: ['./event-details.component.scss']

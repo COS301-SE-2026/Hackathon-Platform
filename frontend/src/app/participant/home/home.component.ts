@@ -9,6 +9,7 @@ import { EventCardComponent } from '../event-card/event-card.component';
 import { TabsComponent, TabItem} from '../../shared/components/tabs/tabs.component';
 import { DropdownComponent } from '../../shared/components/dropdown/dropdown.component';
 import { SearchBarComponent } from '../../shared/components/search-bar/search-bar.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 
 export interface OpenEventView {
   eventId: string;
@@ -29,7 +30,7 @@ export interface OpenEventView {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ CommonModule, LoaderComponent, EventCardComponent, TabsComponent, DropdownComponent, SearchBarComponent],
+  imports: [ CommonModule, LoaderComponent, EventCardComponent, TabsComponent, DropdownComponent, SearchBarComponent, EmptyStateComponent],
   templateUrl: '../home/home.component.html',
   styleUrls: ['../home/home.component.scss']
 })

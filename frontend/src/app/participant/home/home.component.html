@@ -27,7 +27,7 @@
  
     <section class="events-section"> 
 
-     @if (isLoadingRegisteredEvents) {<app-loader message="Loading your events..."></app-loader>}
+     @if (isLoadingRegisteredEvents) {<app-loader message="Loading events..."></app-loader>}
       @else if (filteredRegisteredEvents.length > 0) {
         <div class="events-grid"> 
          @for (event of filteredRegisteredEvents; track event.eventId) {  
@@ -38,13 +38,11 @@
       } @else {
         <div class="empty-state">
           @if (searchTerm) {
-             <h2>Nothing found</h2>
-             <p>Try adjusting your search or filters.</p>
+          <app-empty-state icon="pi-search" title="Nothing found" description="Try adjusting your search or filters."></app-empty-state>
           } 
           @else 
           {
-           <h2>No registered events</h2>
-             <p>Register for a hackathon and get started!</p>
+          <app-empty-state icon="pi-calendar" title="No registered events" description="Register for a hackathon and get started!"></app-empty-state>
           }
         </div>
       }
@@ -54,7 +52,7 @@
   } @else if (activeEventTab === 'upcoming') { 
  
     <section class="events-section"> 
-    @if (isLoadingUpcomingEvents) {<app-loader message="Loading upcoming events..."></app-loader>}
+    @if (isLoadingUpcomingEvents) {<app-loader message="Loading events..."></app-loader>}
 
      @else if (filteredUpcomingEvents.length > 0) {
         <div class="events-grid"> 
@@ -66,11 +64,9 @@
       } @else {
         <div class="empty-state">
           @if (searchTerm) {
-            <h2>Nothing found</h2>
-            <p>Try adjusting your search or filters.</p>
+          <app-empty-state icon="pi-search" title="Nothing found" description="Try adjusting your search or filters."></app-empty-state>
           } @else  {
-            <h2>No upcoming events</h2>
-            <p>Stay tuned. New hackathons are on the way.</p>
+          <app-empty-state icon="pi-calendar-plus" title="No upcoming events" description="Stay tuned. New hackathons are on the way."></app-empty-state>
           }
         </div>
 
@@ -82,7 +78,7 @@
   @else if (activeEventTab === 'completed') { 
  
     <section class="events-section"> 
-      @if (isLoadingCompletedEvents) {<app-loader message="Loading completed events..."></app-loader>}
+      @if (isLoadingCompletedEvents) {<app-loader message="Loading events..."></app-loader>}
 
      @else if (filteredCompletedEvents.length > 0) {
         <div class="events-grid"> 
@@ -95,11 +91,9 @@
 
         <div class="empty-state">
           @if (searchTerm) {
-            <h2>Nothing found</h2>
-             <p>Try adjusting your search or filters.</p>
+            <app-empty-state icon="pi-search" title="Nothing found" description="Try adjusting your search or filters."></app-empty-state>
           } @else  {
-            <h2>No completed events</h2>
-            <p>Your completed hackathons will appear here.</p>
+           <app-empty-state icon="pi-check-circle" title="No completed events" description="Your completed hackathons will appear here."></app-empty-state>
           }
         </div>
 
