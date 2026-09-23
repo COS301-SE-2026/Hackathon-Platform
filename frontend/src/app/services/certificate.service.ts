@@ -143,4 +143,28 @@ export class CertificateService {
     formDate.append('file', file);
     return this.http.post<CertificateAssetResponse>(`${this.adminBase}/templates/${templateId}/assets`, formData);
   }
+
+  generate(eventId: string, req: GenerateCertificatesRequest): Observable<CertificateGenerationRunResponse> {
+    return this.http.post<CertificateGenerationRunResponse>(`${this.adminBase}/events/${eventId}/generate`, req);
+  }
+
+  getRuns(eventId: string): Observable<CertificateGenerationRunResponse[]> {
+    return this.http.get<CertificateGenerationRunResponse[]>(`${this.adminBase}/events/${eventId}/runs`);
+  }
+
+  getRun(runId: string): Observable<CertificateGenerationRunResponse> {
+    return this.http.get<CertificateGenerationRunResponse>(`${this.adminBase}/runs/${runId}`);
+  }
+
+  getIssuedForEvent(eventId: string): Observable<CertificateIssuedResponse> {
+    return this.http.get<CertificateIssuedResponse[]>(`${this.adminBase}/events/${eventId}/issued`);
+  }
+
+  getMyCertificates(): Observable<CertificateIssuedResponse[]> {
+    return this.http.get<CertificateIssuedResponse[]>(`${this.base}/mine`);
+  }
+
+  verify(verificationCode: string): Observable<CertificateVerificationResponse> {
+    return this.http.get<CertificateVerificationResponse>(`${this.base}/verify/${verificationCode}`);
+  }
 }
