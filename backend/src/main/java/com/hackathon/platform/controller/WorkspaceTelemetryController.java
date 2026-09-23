@@ -48,9 +48,4 @@ public class WorkspaceTelemetryController {
     public TelemetryFeatureService.TelemetryFeatures getFeatures(@PathVariable UUID workspaceId, @AuthenticationPrincipal User user) {
         return featureService.extractFeatures(workspaceId, user.getUserId());
     }
-
-    @GetMapping("/report")
-    public TelemetryRiskService.TelemetryRiskReport getReport(@PathVariable UUID workspaceId, @AuthenticationPrincipal User user) {
-        return riskService.analyze(workspaceId, user.getUserId());
-    }
 }

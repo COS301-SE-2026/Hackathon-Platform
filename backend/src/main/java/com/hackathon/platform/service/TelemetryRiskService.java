@@ -10,7 +10,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TelemetryRiskService {
-    final String SCORING_VERSION = "BEHAVIOR_V1";
+    private static final String SCORING_VERSION = "BEHAVIOR_V1";
     private final TelemetryFeatureService featureService;
 
     @Transactional(readOnly = true)
@@ -106,9 +106,10 @@ public class TelemetryRiskService {
 
     private int calcEvidenceConfidence(TelemetryFeatureService.TelemetryFeatures features) {
         int confidence = 0;
-        confidence += Math.min(25, (int) (features.activeDurationSeconds() / 15));
+        confidence += Math.min(25, (int) (features.eventCount()));
+        confidence += Math.min(20, (int) (features.activeDurationSeconds() / 15));
 
-        long insertedCharacters = features.typedCharacters();
+        long insertedCharacters = features.typedCharacters() + features.pastedCharacters();
         confidence += Math.min(25, (int) (insertedCharacters / 20));
 
         if (features.typingBatchCount() > 0) {
