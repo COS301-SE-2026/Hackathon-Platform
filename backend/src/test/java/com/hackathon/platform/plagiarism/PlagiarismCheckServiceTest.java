@@ -124,7 +124,7 @@ class PlagiarismCheckServiceTest {
     Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
     Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
 
-    when(submission.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
+    when(submissionRepo.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
         .thenReturn(List.of(subA, subB));
     
     when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
@@ -183,7 +183,92 @@ class PlagiarismCheckServiceTest {
     assertThat(row.getStructuralScore()).isEqualByComparingTo(new BigDecimal("0.8000"));
     assertThat(row.getEmbeddingScore()).isNull();
     assertThat(row.getCombinedScore()).isEqualByComparingTo(new BigDecimal("0.8000"));
+
+  }
+
+  @Test
+  void execute_throwsWhenRunNotFound() {
+
+    when(runRepo.findById(999L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> service.execute(999L)).isInstanceOf(IllegalArgumentException.class);
+
+  }
+
+  @Test
+  void execute_marksRunFailed_whenLevelProcessinhThrows() {
+
+    PlagiarismRun run = new PlagiarismRun(EVENT_ID, LEVEL_ID, 10, UUID.randomUUID());
+    when(runRepo.findById(200L)).thenReturn(Optional.of(run));
+    when(submissionRepo.findLeaderboardByEventIdAndLevelId(EVENT_ID, LEVEL_ID))
+        .thenThrow(new RuntimeException("leaderboard query failed"));
     
+    service.execute(200L);
+
+    assertThat(run.getStatus()).isEqualTo("FAILED");
+    assertThat(run.getErrorMessage()).isEqualTo("leaderboard query failed");
+    assertThat(run.getCompletedAt()).isNotNull();
+    verify(runRepo, times(2)).save(run);
+    verify(similarityRepo, never()).saveAll(any());
+
+  }
+
+  @Test
+  void execute_skipsLevel_whenFewerThanTwoScoredSubmissions() {
+
+    PlagiarismRun run = new PlagiarismRun(EVENT_ID, LEVEL_ID, 10, UUID.randomUUID());
+    when(runRepo.findById(300L)).thenReturn(Optional.of(run));
+
+    LeaderboardEntry entryA = org.mockito.Mockito.mock(LeaderboardEntry.class);
+    when(entryA.getTeamId()).thenReturn(TEAM_A_ID);
+    when(submissionRepo.findLeaderboardByEventIdAndLevelId(EVENT_ID, LEVEL_ID))
+        .thenReturn(List.of(entryA));
+
+    Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
+    when(submissionRepo.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
+        .thenReturn(List.of(subA));
+    
+    service.execute(300L);
+
+    assertThat(run.getStatus()).isEqualTo("COMPLETED");
+    assertThat(run.getPairsCompared()).isEqualTo(0);
+    assertThat(run.getPairsFlagged()).isEqualTo(0);
+    verify(similarityRepo, never())
+        .deleteByEventIdAndLevelId(any(), org.mockito.ArgumentMatchers.anyShort());
+    verify(similarityRepo, never()).saveAll(any());
+
+  }
+
+  private SubmissionSimilarity row(
+    Long subA, Long subB, UUID teamA, UUID teamB, double combined, boolean flagged
+  ) {
+    BigDecimal score = BigDecimal.valueOf(combined);
+    return new SubmissionSimilarity(
+        EVENT_ID, LEVEL_ID, subA, subB, teamA, teamB, score, null, score, 5, flagged
+    );
+  }
+
+  @Test
+  void getResults_levelSpecified_returnsRowWithResolvedTeamNames() {
+    
+    when(similarityRepo.findByEventIdAndLevelIdOrderByCombinedScoreDesc(EVENT_ID, LEVEL_ID))
+        .thenReturn(List.of(row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.62, true)));
+    
+    Team teamA = new Team();
+    teamA.setTeamName("Alpha");
+    Team teamB = new Team();
+    teamB.setTeamName("Beta");
+    when(teamRepo.findById(TEAM_A_ID)).thenReturn(Optional.of(teamA));
+    when(teamRepo.findById(TEAM_B_ID)).thenReturn(Optional.of(teamB));
+
+    List<SubmissionSimilarityResponse> results = service.getResults(EVENT_ID, LEVEL_ID, false);
+    
+    assertThat(results).hasSize(1);
+    SubmissionSimilarityResponse resp = results.get(0);
+    assertThat(resp.teamNameA()).isEqualTo("Alpha");
+    assertThat(resp.teamNameB()).isEqualTo("Beta");
+    assertThat(resp.flagged()).isTrue();
+
   }
 
 
