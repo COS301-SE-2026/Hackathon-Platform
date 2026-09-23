@@ -44,4 +44,80 @@ class ParseResponse(BaseModel):
     functions: list[FunctionSpanResponse] = []
     detail: Optional[str] = None
 
-    
+@app.get("/health")
+def health() -> dict;
+    return {"status": "ok", "supported_extensions": sorted(LANGUAGE_CONFIG.keys())}
+
+@app.post("/parse", response_model=ParseResponse)
+def parse(req: ParseRequest) -> ParseResponse:
+    ext = _extension_of(req.file_name)
+    lang_config = LANGUAGE_CONFIG.get(ext)
+
+    if lang_config is None:
+        return ParseResponse(
+            status="unsupported_language",
+            language=ext or None,
+            detail=f"no tree-sitter grammar configured for extension '.{ext}'",
+        )
+
+    if not req.content.strip():
+        return ParseResponse(
+            status="parse_error",
+            language=lang_config.ts_name,
+            detail="empty file content",
+        )
+
+    try:
+        parser = _get_parser(lang_config.ts_name)
+        source_bytes = req.content.encode("utf-8", errors="replace")
+        tree = parser.parse(source_bytes)
+    except Exception as e: # grammar load / parser crash
+        return ParseResponse(
+            status="parse_error",
+            language=lang_config.ts_name,
+            detail=f"parser raised: {e}",
+        )
+
+    if tree.root_node.has_error and _error_ratio(tree.root_node) > 0.15:
+
+        return ParseResponse(
+            status="parse_error",
+            language=lang_config.ts_name,
+            detail="parse tree exceeds error-node threshold",
+        )
+
+    tokens, functions = normalize_tree(tree.root_node, lang_config)
+
+    return ParseResponse(
+        status="ok",
+        language=lang_config.ts_name,
+        tokens=[TokenResponse(text=t.text, start=t.start, end=t.end) for t in tokens],
+        functions=[
+            FunctionSpanResponse(
+                qualified_name=f.qualified_name,
+                node_type=f.node_type,
+                start_byte=f.start_byte,
+                end_byte=f.end_byte,
+                start_line=f.start_line,
+                end_line=g.end_line,
+            )
+            for f in functions
+        ],
+    )
+
+def _error_ratio(root) -> float:
+    total = 0
+    errors = 0
+
+    def walk(node):
+        nonlocal total, errors
+        total += 1
+        if node.type == "ERROR":
+            errors += 1
+        for child in node.children:
+            walk(child)
+
+    walk(root)
+    return errors/ total if total else 0.0
+
+
