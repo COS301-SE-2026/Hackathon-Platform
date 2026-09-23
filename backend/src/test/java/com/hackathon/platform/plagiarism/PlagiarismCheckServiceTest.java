@@ -196,7 +196,7 @@ class PlagiarismCheckServiceTest {
   }
 
   @Test
-  void execute_marksRunFailed_whenLevelProcessinhThrows() {
+  void execute_marksRunFailed_whenLevelProcessingThrows() {
 
     PlagiarismRun run = new PlagiarismRun(EVENT_ID, LEVEL_ID, 10, UUID.randomUUID());
     when(runRepo.findById(200L)).thenReturn(Optional.of(run));
@@ -268,6 +268,143 @@ class PlagiarismCheckServiceTest {
     assertThat(resp.teamNameA()).isEqualTo("Alpha");
     assertThat(resp.teamNameB()).isEqualTo("Beta");
     assertThat(resp.flagged()).isTrue();
+
+  }
+
+  @Test
+  void getResults_unknownTeam_fallsBackToQuestionMark() {
+
+    when(similarityRepo.findByEventIdAndLevelIdOrderByCombinedScoreDesc(EVENT_ID, LEVEL_ID))
+        .thenReturn(List.of(row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.4, false)));
+    when(teamRepo.findById(TEAM_A_ID)).thenReturn(Optional.empty());
+    when(teamRepo.findById(TEAM_B_ID)).thenReturn(Optional.empty());
+
+    List<SubmissionSimilarityResponse> results = service.getResults(EVENT_ID, LEVEL_ID, false);
+
+    assertThat(results.get(0).teamNameA()).isEqualTo("?");
+    assertThat(results.get(0).teamNameB()).isEqualTo("?");
+    
+  }
+
+  @Test
+  void getResults_levelSpecifiedAndOnlyFlagged_usesFlaggedOnlyQuery() {
+
+    when(similarityRepo.findByEventIdAndLevelIdAndFlaggedTrueOrderByCombinedScoreDesc(
+            EVENT_ID, LEVEL_ID
+    ))
+    .thenReturn(List.of(row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.9, true)));
+    when(teamRepo.findById(any())).thenReturn(Optional.empty());
+
+    List<SubmissionSimilarityResponse> results = service.getResults(EVENT_ID, LEVEL_ID, true);
+
+    assertThat(results).hasSize(1);
+    verify(similarityRepo)
+        .findByEventIdAndLevelIdAndFlaggedTrueOrderByCombinedScoreDesc(EVENT_ID, LEVEL_ID);
+    verify(similarityRepo, never()).findByEventIdOrderByCombinedScoreDesc(any());
+
+  }
+
+  @Test
+  void getResults_noLevel_returnsEveryRowRegardlessOfFlag() {
+    when(similarityRepo.findByEventIdOrderByCombinedScoreDesc(EVENT_ID))
+        .thenReturn(
+            List.of(
+                row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.9, true),
+                row(3L, 4L, TEAM_A_ID, TEAM_B_ID, 0.2, false)
+            )
+        );
+    
+    when(teamRepo.findById(any())).thenReturn(Optional.empty());
+
+    List<SubmissionSimilarityResponse> results = service.getResults(EVENT_ID, null, false);
+
+    assertThat(results).hasSize(2);
+
+  }
+
+  @Test
+  void getResults_noLevelAndOnlyFlagged_filtersOutUnflaggedRowsManually() {
+
+    when(similarityRepo.findByEventIdOrderByCombinedScoreDesc(EVENT_ID))
+        .thenReturn(
+            List.of(
+                row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.9, true),
+                row(3L, 4L, TEAM_A_ID, TEAM_B_ID, 0.2, false)
+            )
+        );
+    when(teamRepo.findById(any())).thenReturn(Optional.empty());
+
+    List<SubmissionSimilarityResponse> results = service.getResults(EVENT_ID, null, true);
+
+    assertThat(results).hasSize(1);
+    assertThat(results.get(0).flagged()).isTrue();
+
+
+  }
+
+  @Test
+  void getDiff_throwsWhenSubmissionAMissing() {
+
+    when(submissionRepo.findById(1L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> service.getDiff(1L, 2L))
+    .isInstanceOf(IllegalArgumentException.class)
+    .hasMessageContaining("1");
+
+  }
+
+  @Test
+  void getDiff_noStoredFunctionEmbeddings_returnsNoDataForEitherStatus() {
+
+    props.setKgramSize(1);
+
+    Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
+    Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
+
+    when(submissionRepo.findById(1L)).thenReturn(Optional.of(subA));
+    when(submissionRepo.findById(2L)).thenReturn(Optional.of(subB));
+
+    when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.download("submissions", "key-a"))
+        .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
+    when(storageService.download("submissions", "key-b"))
+        .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
+    
+    when(structuralNormalizer.normalize("a.java", "code-a"))
+        .thenReturn(
+            StructuralNormalizationResult.lexer(
+                List.of(new NormalizedToken("a.java", "tok", 0, 3))
+            )
+        );
+    
+    when(structuralNormalizer.normalize("b.java", "code-b"))
+        .thenReturn(
+            StructuralNormalizationResult.lexer(
+                List.of(new NormalizedToken("b.java", "tok", 0, 3))
+            )
+        );
+    
+    FingerprintResult fpA = new FingerprintResult(1, Set.of(new Fingerprint(10, 0)));
+    FingerprintResult fpB = new FingerprintResult(1, Set.of(new Fingerprint(20L, 0)));
+
+    when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fpA, fpB);
+    when(winnowing.jaccard(any(), any())).thenReturn(0.5);
+
+    when(functionEmbeddingStore.findBySubmissionId(1L)).thenReturn(List.of());
+    when(functionEmbeddingStore.findBySubmissionId(2L)).thenReturn(List.of());
+
+    PlagiarismDiffResponse diff = service.getDiff(1L, 2L);
+
+    assertThat(diff.submissionIdA()).isEqualTo(1L);
+    assertThat(diff.submissionIdB()).isEqualTo(2L);
+    assertThat(diff.structuralScore()).isEqualTo(0.5);
+    assertThat(diff.matchedRangesA()).isEmpty();
+    assertThat(diff.matchedRangesB()).isEmpty();
+    assertThat(diff.functionMatches()).isEmpty();
+    assertThat(diff.semanticStatus())
+        .isEqualTo(PlagiarismDiffResponse.SemanticStatus.NO_DATA_FOR_EITHER);
+    assertThat(diff.filesA()).hasSize(1);
+    assertThat(diff.filesA().get(0).fileName()).isEqualTo("a.java");
 
   }
 
