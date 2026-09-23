@@ -10,7 +10,6 @@ import { LeaderboardComponent } from './event-details-tabs/leaderboard/leaderboa
 import { AnnouncementsComponent } from './event-details-tabs/announcements/announcements.component';
 import { TabsComponent, TabItem} from '../../shared/components/tabs/tabs.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { CardComponent } from '../../shared/components/card/card.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ToastService } from '../../shared/components/toast/toast.service';
@@ -37,8 +36,8 @@ import { LevelService } from '../../services/level.service';
     ModalComponent,
     InputComponent,
     TabsComponent,
-    ButtonComponent,
-    CardComponent,
+    ButtonComponent
+    
   ],
   templateUrl: './event-details.component.html',
   styleUrls: ['./event-details.component.scss']
@@ -58,11 +57,14 @@ export class EventDetailsComponent implements OnDestroy {
   tabs: TabItem[] = [];
 
   private readonly protectedTabs = [ 'team','submissions', 'submission-history','leaderboard', 'forum', 'announcements'];
+  private readonly eventStartedTabs = [ 'submissions', 'submission-history','leaderboard'];
+  private readonly completedTabs = [ 'overview','rules','announcements','submission-history','leaderboard'];
 
   activeTab = this.route.snapshot.queryParamMap.get('tab') ?? 'overview';
   eventId = this.route.snapshot.paramMap.get('eventId') ?? '';
   hackathonId = '';
   loading = false;
+  generatingCertificate = false;
   eventError = '';
   downloadingProblemStatement = false;
   problemStatementError = '';
@@ -78,11 +80,12 @@ export class EventDetailsComponent implements OnDestroy {
   event = {
     name: '',
     tagline: '',
+    status: '',
     description: 'Not specified',
     bannerUrl: '',
      prizePool: 0,
     startDate: '',
-    endDate: '',
+    endDateTime: '',
     teamSize: 0,
     visibility: '',
     inPerson: false,
@@ -136,16 +139,39 @@ export class EventDetailsComponent implements OnDestroy {
   }
 
   private validateActiveTab(tab: string): void {
-  if ( this.isCheckingRegistration || this.isRegistered || !this.protectedTabs.includes(tab)) {
-    return;
-  }
+    if (this.isCheckingRegistration) {
+      return;
+    }
 
-  this.router.navigate([], {
-    relativeTo: this.route,
-    queryParams: { tab: 'overview', subtab: null },
-    replaceUrl: true
-  });
-}
+    if (!this.isRegistered && this.protectedTabs.includes(tab)) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: 'overview', subtab: null },
+        replaceUrl: true
+      });
+      return;
+    }
+
+    if ( this.isRegistered && this.hasEventCompleted() && !this.completedTabs.includes(tab)) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: 'overview', subtab: null },
+        replaceUrl: true
+      });
+
+      return;
+    }
+
+    if ( this.isRegistered && !this.hasEventStarted() && this.eventStartedTabs.includes(tab)) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: 'overview', subtab: null },
+        replaceUrl: true
+      });
+
+      return;
+    }
+  }
 
   goHome(): void {
   this.router.navigate(['/participant/home']);
@@ -288,27 +314,26 @@ confirmRegistration(): void {
     });
   }
 
- private setTabs(): void {
-  const eventRoute = `/participant/events/${this.eventId}`;
+  private setTabs(): void {
 
-  const tabDef = [
-    ['Overview', 'pi pi-list', 'overview'],
-    ['Rules', 'pi pi-file', 'rules'],
-  ];
+    const eventRoute = `/participant/events/${this.eventId}`;
+    const tabDef = [ ['Overview', 'overview'], ['Rules', 'rules'] ];
 
-   if (this.isRegistered) {
-    tabDef.push( ['Team', 'pi pi-users', 'team'], ['Submissions', 'pi pi-code', 'submissions'],
-      ['History', 'pi pi-history', 'submission-history'], ['Rankings', 'pi pi-trophy', 'leaderboard'], ['Forum', 'pi pi-comments', 'forum'], ['Announcements', 'pi pi-megaphone', 'announcements'],
-    );
+    if (this.isRegistered) {
+      if (this.hasEventCompleted()) {
+        tabDef.push( ['Announcements', 'announcements'], ['History', 'submission-history'], ['Rankings', 'leaderboard'] );
+     } 
+      else {
+        tabDef.push( ['Team', 'team'], ['Forum', 'forum'], ['Announcements', 'announcements']);
+
+        if (this.hasEventStarted()) {
+          tabDef.push( ['Submissions', 'submissions'], ['History', 'submission-history'], ['Rankings', 'leaderboard']);
+        }
+       }
+     }
+
+    this.tabs = tabDef.map(([label, tab]) => ({ label, route: eventRoute, queryParams: { tab }}));
   }
-
-  this.tabs = tabDef.map(([label, icon, tab]) => ({
-    label,
-    icon,
-    route: eventRoute,
-    queryParams: { tab }
-  }));
-}
 
   downloadProblemStatement(): void {
     if (!this.hackathonId || this.downloadingProblemStatement) {
@@ -347,7 +372,7 @@ confirmRegistration(): void {
     return;
   }
   this.event.timer = calculateEventTimer( this.event.startDateTime, this.event.duration );
-
+  this.setTabs();
   this.change.markForCheck();
 }
 
@@ -361,32 +386,96 @@ confirmRegistration(): void {
 
     return {
       name: event.name,
+      status: event.status,
       tagline: event.tagline ?? '',
       bannerUrl: '',
       description: event.description ?? 'Not specified',
       prizePool: event.totalPrizePool ?? 0,
       startDate: this.formatDate(start),
-      endDate: this.formatDate(end),
+      endDateTime: end.toISOString(),
       teamSize: event.teamSizeLimit,
       visibility: event.visibility,
       inPerson: event.inPerson ?? false,
       startDateTime: event.startDateTime,
       duration: event.duration,
-      timer: {
-        label: '',
-        days: '00',
-        hours: '00',
-        minutes: '00',
-        seconds: '00'
-      } as EventTimer
+      timer: { label: '', days: '00', hours: '00',  minutes: '00', seconds: '00'} as EventTimer
     };
   }
 
   private formatDate(date: Date): string {
-    return date.toLocaleDateString('en-ZA', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
+    return date.toLocaleDateString('en-ZA', { day: '2-digit',  month: 'short', year: 'numeric'});
   }
+
+  formatDateTime(dateTime: string): string {
+  if (!dateTime) { return 'Not specified'; }
+  return new Date(dateTime).toLocaleString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true});
+
+  }
+
+  getTimeZone(): string {
+  return new Intl.DateTimeFormat('en-ZA', { timeZoneName: 'short'})
+    .formatToParts(new Date(this.event.startDateTime)) 
+    .find(part => part.type === 'timeZoneName')?.value ?? '';
+}
+
+  generateCertificate(): void {
+      if (this.generatingCertificate) {
+        return;
+      }
+
+      this.generatingCertificate = true;
+
+      this.eventService.downloadCertificate(this.eventId).subscribe({
+        next: (blob) => {
+          const fileName = `${this.event.name.replace(/[^a-z0-9]+/gi, '-')}-certificate.pdf`;
+          const url = window.URL.createObjectURL(blob);
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName;
+          link.click();
+
+          window.URL.revokeObjectURL(url);
+
+          this.generatingCertificate = false;
+          this.change.markForCheck();
+        },
+
+        error: () => {
+          this.toast.error('Error', "Can't find the certificate");
+          this.generatingCertificate = false;
+          this.change.markForCheck();
+        }
+      });
+  }
+
+  private hasEventStarted(): boolean {
+    if (!this.event.startDateTime) {  return false; }
+    return new Date() >= new Date(this.event.startDateTime);
+  }
+
+  private hasEventCompleted(): boolean {
+  if (!this.event.startDateTime || !this.event.duration) {  return false; }
+  const start = new Date(this.event.startDateTime).getTime();
+  const end = start + this.event.duration * 1000;
+  return Date.now() >= end;
+}
+
+
+  getEventStatus(): string {
+    if (!this.event.startDateTime || !this.event.duration) {
+      return this.event.status;
+    }
+
+    if (this.hasEventCompleted()) {
+      return 'COMPLETED';
+    }
+
+    if (this.hasEventStarted()) {
+      return 'ACTIVE';
+    }
+
+    return 'UPCOMING';
+  }
+  
 }

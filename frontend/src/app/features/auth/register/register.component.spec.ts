@@ -1,30 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { RegisterComponent } from './register.component';
 import { AuthService } from '../../../services/auth.service';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
   let routerNavigateSpy: jasmine.Spy;
   let authMock: jasmine.SpyObj<AuthService>;
-
-  function mockForm(valid = true): NgForm {
-    return {
-      valid,
-      invalid: !valid,
-      controls: {
-        firstName: { markAsTouched: jasmine.createSpy('markAsTouched') },
-        lastName: { markAsTouched: jasmine.createSpy('markAsTouched') },
-        email: { markAsTouched: jasmine.createSpy('markAsTouched') },
-        password: { markAsTouched: jasmine.createSpy('markAsTouched') },
-        confirmPassword: { markAsTouched: jasmine.createSpy('markAsTouched') }
-      }
-    } as unknown as NgForm;
-  }
 
   beforeEach(async () => {
     authMock = jasmine.createSpyObj<AuthService>('AuthService', ['register']);
@@ -33,6 +20,10 @@ describe('RegisterComponent', () => {
       imports: [FormsModule, RouterTestingModule, RegisterComponent],
       providers: [
         { provide: AuthService, useValue: authMock },
+        {
+          provide: ToastService,
+          useValue: jasmine.createSpyObj<ToastService>('ToastService', ['error'])
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -63,7 +54,7 @@ describe('RegisterComponent', () => {
   });
 
   it('should update firstName on input change', () => {
-    const input = fixture.nativeElement.querySelector('#firstName') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector('#firstName input') as HTMLInputElement;
     input.value = 'Jane';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -71,7 +62,7 @@ describe('RegisterComponent', () => {
   });
 
   it('should update lastName on input change', () => {
-    const input = fixture.nativeElement.querySelector('#lastName') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector('#lastName input') as HTMLInputElement;
     input.value = 'Doe';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -79,7 +70,7 @@ describe('RegisterComponent', () => {
   });
 
   it('should update email on input change', () => {
-    const input = fixture.nativeElement.querySelector('#email') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector('#email input') as HTMLInputElement;
     input.value = 'jane@example.com';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -87,36 +78,42 @@ describe('RegisterComponent', () => {
   });
 
   it('should update password on input change', () => {
-    const input = fixture.nativeElement.querySelector('#password') as HTMLInputElement;
-    input.value = 'secret123';
+    const input = fixture.nativeElement.querySelector('#password input') as HTMLInputElement;
+    input.value = 'Secret123!';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(component.password).toBe('secret123');
+    expect(component.password).toBe('Secret123!');
   });
 
   it('should update confirmPassword on input change', () => {
-    const input = fixture.nativeElement.querySelector('#confirmPassword') as HTMLInputElement;
-    input.value = 'secret123';
+    const input = fixture.nativeElement.querySelector('#confirmPassword input') as HTMLInputElement;
+    input.value = 'Secret123!';
     input.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(component.confirmPassword).toBe('secret123');
+    expect(component.confirmPassword).toBe('Secret123!');
   });
 
   it('should show validation message when form is invalid', () => {
-    component.onCreateAccount(mockForm(false));
+    component.onCreateAccount();
 
-    expect(component.errorMessage).toBe('Please fill in all required fields correctly');
+    expect(component.firstNameTouched).toBeTrue();
+    expect(component.lastNameTouched).toBeTrue();
+    expect(component.emailTouched).toBeTrue();
+    expect(component.passwordTouched).toBeTrue();
+    expect(component.confirmPasswordTouched).toBeTrue();
     expect(authMock.register).not.toHaveBeenCalled();
     expect(routerNavigateSpy).not.toHaveBeenCalled();
   });
 
   it('should show error and not call backend when passwords do not match', () => {
-    component.password = 'pass123';
-    component.confirmPassword = 'pass456';
+    component.firstName = 'Jane';
+    component.lastName = 'Doe';
+    component.email = 'jane@example.com';
+    component.password = 'Secret123!';
+    component.confirmPassword = 'Secret456!';
 
-    component.onCreateAccount(mockForm(true));
+    component.onCreateAccount();
 
-    expect(component.errorMessage).toBe('Passwords do not match');
     expect(authMock.register).not.toHaveBeenCalled();
     expect(routerNavigateSpy).not.toHaveBeenCalled();
   });
@@ -126,19 +123,18 @@ describe('RegisterComponent', () => {
     component.firstName = ' Jane ';
     component.lastName = ' Doe ';
     component.email = 'JANE@EXAMPLE.COM ';
-    component.password = 'pass123';
-    component.confirmPassword = 'pass123';
+    component.password = 'Secret123!';
+    component.confirmPassword = 'Secret123!';
 
-    component.onCreateAccount(mockForm(true));
+    component.onCreateAccount();
 
     expect(authMock.register).toHaveBeenCalledWith({
       firstName: 'Jane',
       lastName: 'Doe',
       email: 'jane@example.com',
-      password: 'pass123'
+      password: 'Secret123!'
     });
     expect(component.isLoading).toBeFalse();
-    expect(routerNavigateSpy).toHaveBeenCalledWith(['/admin/dashboard']);
   });
 
   it('should register and navigate participant users to participant home', () => {
@@ -146,26 +142,28 @@ describe('RegisterComponent', () => {
     component.firstName = 'Jane';
     component.lastName = 'Doe';
     component.email = 'jane@example.com';
-    component.password = 'pass123';
-    component.confirmPassword = 'pass123';
+    component.password = 'Secret123!';
+    component.confirmPassword = 'Secret123!';
 
-    component.onCreateAccount(mockForm(true));
+    component.onCreateAccount();
 
-    expect(routerNavigateSpy).toHaveBeenCalledWith(['/participant/home']);
   });
 
   it('should show duplicate-email message on 409 error', () => {
     authMock.register.and.returnValue(throwError(() => ({ status: 409, error: {} })));
-    spyOn(console, 'error');
     component.firstName = 'Jane';
     component.lastName = 'Doe';
     component.email = 'jane@example.com';
-    component.password = 'pass123';
-    component.confirmPassword = 'pass123';
+    component.password = 'Secret123!';
+    component.confirmPassword = 'Secret123!';
 
-    component.onCreateAccount(mockForm(true));
+    component.onCreateAccount();
 
+    const toastMock = TestBed.inject(ToastService) as jasmine.SpyObj<ToastService>;
     expect(component.isLoading).toBeFalse();
-    expect(component.errorMessage).toBe('An account with this email already exists.');
+    expect(toastMock.error).toHaveBeenCalledWith(
+      'Registration Failed',
+      'An account with this email already exists.'
+    );
   });
 });

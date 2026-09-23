@@ -12,7 +12,7 @@
   width: 100%;
   height: var(--navbar-height);
   padding: 0 var(--page-padding-x);
-  background-color: var(--dark-navy);
+  background-color: var(--dark-blue);
 }
 
 .navbar-logo {
@@ -44,6 +44,7 @@
   display: flex;
   align-items: center;
   color: var(--white);
+  text-transform: uppercase;
   font-size: var(--font-size-small);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-small);
@@ -56,7 +57,7 @@
   bottom: var(--space-6);
   left: 0;
   height: 2px;
-  background-color: var(--lime-green);
+  background-color: var(--white);
 }
 
 
