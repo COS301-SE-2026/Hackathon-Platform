@@ -31,11 +31,23 @@ plagiarism:
   window-size: 6
   flag-threshold: 0.6
   min-token-count: 20
+  structural-weight: 0.6
+  embedding-weight: 0.4
+  use-relative-threshold: true
+  relative-threshold-z-score: 2.0
+  min-pairs-for-relative-threshold: 5
   queue:
     stream-key: plagiarism:jobs
     consumer-key: plagiarism-workers
     concurrency: ${PLAGIARISM_CONCURRENCY:2}
     poll-timeout-ms: 2000
+  ast-service:
+    enabled: ${AST_SERVICE_ENABLED:true}
+    embedding-enabled: ${AST_EMBEDDING_ENABLED:true}
+    base-url: ${AST_SERVICE_BASE_URL:http://localhost:8008}
+    connect-timeout-ms: 2000
+    request-timeout-ms: 5000
+    embed-request-timeout-ms: 20000
 
 
 spring:

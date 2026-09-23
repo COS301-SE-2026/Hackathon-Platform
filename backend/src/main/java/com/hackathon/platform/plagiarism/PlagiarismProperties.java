@@ -30,6 +30,9 @@ public class PlagiarismProperties {
   /** Minimum token count a submission needs to be worth comparing at all (skips trivial stubs). */
   private int minTokenCount = 20;
 
+  /** Weight given to strucural (winnowing)  */
+  private double structuralWeight = 0.6;
+
   /**
    * Weight given to the semantic (embedding).
    */
@@ -44,7 +47,7 @@ public class PlagiarismProperties {
   /**
    * A level needs at least this many compared before trusting realtive threshold.
    */
-  private int getMinPairsForRelativeThreshold = 5;
+  private int minPairsForRelativeThreshold = 5;
 
   /**Minimun (corpus-centered) cosine similarity for a function pair to be surfaced in the diff view's function match list */
   private double functionMatchThreshold = 0.75;
