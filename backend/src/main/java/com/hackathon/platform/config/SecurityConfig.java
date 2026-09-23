@@ -1,12 +1,14 @@
 package com.hackathon.platform.config;
 
 import com.hackathon.platform.repository.UserRepository;
+import com.hackathon.platform.service.GoogleOAuth2SuccessHandler;
 import com.hackathon.platform.shared.security.JwtAuthFilter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -21,7 +23,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -35,6 +39,7 @@ public class SecurityConfig {
 
   private final JwtAuthFilter jwtAuthFilter;
   private final UserRepository userRepository;
+  private final GoogleOAuth2SuccessHandler googleAuth;
 
   /**
    * Defines security fillters.
@@ -53,7 +58,15 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers(HttpMethod.POST, "/api/auth/register")
                     .permitAll()
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                    .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/auth/verify-email")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/auth/resend-verification")
+                    .permitAll()
+                    .requestMatchers("/oauth2/**", "/login/oauth2/**")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/events/*/forum/stream")
                     .permitAll()
@@ -73,6 +86,12 @@ public class SecurityConfig {
                     .hasRole("ADMIN")
                     .anyRequest()
                     .authenticated())
+        .oauth2Login(oauth -> oauth.successHandler(googleAuth))
+        .exceptionHandling(
+            exception ->
+                exception.defaultAuthenticationEntryPointFor(
+                    new HttpStatusEntryPoint(HttpStatus.FORBIDDEN),
+                    new AntPathRequestMatcher("/api/**")))
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }

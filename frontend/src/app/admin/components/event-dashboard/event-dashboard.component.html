@@ -1,0 +1,195 @@
+<div class = "event-dashboard">
+
+  @if (insightsLoading){
+    <div class = "empty-state">Loading insights...</div>
+  } @else if (insightsError){
+    <div class = "empty-state">{{ insightsError}}</div>
+  } @else {
+
+    <div class = "toolbar">
+      <span class = "toolbar-hint">
+        {{ editing ? 'Drag any block onto another to move it.' : 'Arrange the dashboard to suit you.'}}
+      </span>
+
+      <div class = "toolbar-actions">
+        @if (editing){
+          <button type="button" class="toolbar-btn" (click) = "resetLayout()">
+            <i class = "pi pi-refresh"></i> Reset
+          </button>
+        }
+
+        <button type="button" class = "toolbar-btn" [class.active] = "editing" [attr.aria-pressed] = "editing" (click) = "toggleEditing()">
+          <i class = "pi" [ngClass] = "editing ? 'pi-check' : 'pi-sliders-h'"></i>
+          {{editing ? 'Done' : 'Customize layout'}}
+        </button>
+      </div>
+    </div>
+
+    <div 
+    class = "blocks"
+    cdkDropList
+    cdkDropListOrientation = "mixed"
+    [cdkDropListDisabled] = "!editing"
+    (cdkDropListDropped) = "drop($event)">
+
+    @for (id of blocks; track id){
+      <section
+      class = "block"
+      [class.block-wide] = "id === 'trend'"
+      [class.editing] = "editing"
+      cdkDrag
+      [cdkDragDisabled] = "!editing">
+
+      <header class = "block-header">
+        <h2 class = "block-title">{{blockTitles[id]}}</h2>
+        <div class = "block-header-right">
+          @if ( id === 'trend'){
+            <span class = "chip">{{eventInsights.submissionsLastHour}} last hour</span>
+            <span class = "chip" [class.chip-danger] = "eventInsights.errorRate > 0">{{eventInsights.errorRate}}% errors</span>
+          } 
+          @if (editing){
+            <i class = "pi pi-arrows-alt block-grip" aria-hidden="true"></i>
+          }
+        </div>
+      </header>
+
+      <div class = "block-body">
+        @switch (id) {
+
+          @case ('trend'){
+            @if (submissionTrend.length === 0){
+              <div class = "empty-state">No submission activity in the last 60 minutes.</div>
+            } @else {
+              <svg viewBox = "0 0 760 190" class = "trend-svg" preserveAspectRatio = "xMidYMid meet" role ="img" aria-label = "Submissions per minute over the last 60 minutes">
+                @for ( tick of trendYAxisTicks; track tick.y){
+                  <line class = "trend-grid" x1="44" [attr.y1]="tick.y" x2="744" [attr.y2]="tick.y"></line>
+                  <text class = "trend-axis-label" x ="36" [attr.y]="tick.y + 4" text-anchor="end">{{ tick.label }}</text>
+                }
+                <path class = "trend-area" [attr.d]="submissionTrendArea"></path>
+                <polyline class = "trend-line" [attr.points] ="submissionTrendPoints"></polyline>
+
+                @if (submissionTrend.length <= 24){
+                  @for (pt of submissionTrend; track pt.x){
+                    <circle class = "trend-dot" [attr.cx] = "pt.x" [attr.cy]="pt.y" r="3.5"></circle>
+                  }
+                }
+                @for ( t of trendTicks; track t.x){
+                  <text class = "trend-axis-label" [attr.x] = "t.x" y="182" text-anchor="middle">{{t.label}}</text>
+                }
+              </svg>
+            }
+          }
+
+          @case ('topTeams'){
+            @if (topTeamsLoading){
+              <div class = "empty-state">Loading leaderboard...</div>
+            } @else if (topTeamsError){
+              <div class = "empty-state">{{topTeamsError}}</div>
+            } @else if (topTeams.length === 0){
+              <div class = "empty-state">No scored submissions yet.</div>
+            } @else {
+              <div class = "row-list">
+                @for (team of topTeams; track team.teamId){
+                  <div class = "row">
+                    <span class = "rank" [class.rank-1] = "team.rank === 1" [class.rank-2]="team.rank === 2" [class.rank-3]="team.rank === 3">{{ team.rank }}</span>
+                    <p class = "row-name">{{team.teamName}}</p>
+                    <p class = "row-value" title = "Best score">{{team.bestScore}}</p>
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          @case ('status'){
+            @if (submissionStatusSegments.length === 0){
+              <div class = "empty-state">No submissions yet.</div>
+            } @else {
+              <div class = "status-body">
+                <div class = "donut-wrap">
+                  <svg viewBox = "0 0 42 42" class = "donut-chart" role="img" aria-label="Submission status breakdown">
+                    <circle class = "donut-ring" cx="21" cy="21" r="15.9"></circle>
+                    @for (seg of submissionStatusSegments; track seg.label){
+                      <circle
+                      class = "donut-segment"
+                      [ngClass] = "seg.colorClass"
+                      cx="21" cy="21" r="15.9"
+                      transform = "rotate(-90 21 21)"
+                      [attr.stroke-dasharray] = "seg.dash + ' ' + (100 - seg.dash)"
+                      [attr.stroke-dashoffset] = "-seg.offset"></circle>
+                    }
+                  </svg>
+                  <div class = "donut-center">
+                    <p class = "donut-total">{{ submissionsCount}}</p>
+                    <p class = "donut-label">Total</p>
+                  </div>
+                </div>
+
+                <div class = "status-legend">
+                  @for (seg of submissionStatusSegments; track seg.label){
+                    <div class = "legend-row">
+                      <span class = "legend-dot" [ngClass] = "seg.colorClass"></span>
+                      <p class = "legend-label">{{seg.label}}</p>
+                      <p class = "legend-sub">{{seg.count}}  · {{seg.percent}}%</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          @case ('scores'){
+            @if (scoreByLevel.length === 0){
+              <div class = "empty-state">No scored submissions yet.</div>
+            } @else {
+              <div class = "score-rows">
+                @for (lvl of scoreByLevel; track lvl.level){
+                  <div class = "score-row">
+                    <div class = "score-row-top">
+                      <span class = "score-level">{{ lvl.level}}</span>
+                      <span class = "score-avg">Avg {{ lvl.avg}}</span>
+                    </div>
+                    <div class = "score-track">
+                      <div class = "score-range" [style.left.%]="lvl.minPct" [style.width.%]="lvl.rangePct"></div>
+                      <div class = "score-marker" [style.left.%]="lvl.avgPct"></div>
+                    </div>
+                    <div class ="score-row-bottom">
+                      <span>Min {{lvl.min}}</span>
+                      <span>{{lvl.count}} scored</span>
+                      <span>Max {{lvl.max}}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+
+          @case ('participants'){
+            @if (participantsPreviewLoading){
+              <div class = "empty-state">Loading participants...</div>
+            } @else if (activeParticipantRows.length === 0){
+              <div class = "empty-state">No approved participants yet for this event.</div>
+            } @else {
+              <div class = "row-list">
+                @for (p of activeParticipantRows;  track p.email){
+                  <div class ="row" [title]="p.email">
+                    <div class = "avatar-badge">{{p.initials}}</div>
+                    <p class = "row-name">{{p.name}}</p>
+                    <span class = "team-pill">{{p.team}}</span>
+                  </div>
+                }
+              </div>
+            }
+          }
+
+
+        }
+      </div>
+    </section>
+    }
+
+
+  </div>
+
+
+  }
+</div>

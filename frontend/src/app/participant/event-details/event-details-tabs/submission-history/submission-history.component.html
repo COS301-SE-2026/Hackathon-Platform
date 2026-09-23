@@ -1,7 +1,24 @@
 
  <div class="submission-history">
 
- <div class="history-header">
+ 
+ @if (historyLoading) {
+
+   <app-loader message="Loading submission history..." />
+
+} @else if (historyError) {
+
+  <div class="empty-history">
+    {{ historyError }}
+  </div>
+
+} 
+ @else if (tableData.length === 0) {
+  <app-empty-state icon="pi-history" title="No Submission History" description="You have not made any submissions for this event yet."></app-empty-state>
+}
+@else {
+
+  <div class="history-header">
 
   <div class="history-header-content">
     <h2 class="history-title">Submission History</h2>
@@ -19,22 +36,6 @@
 
  </div>
 
-
- @if (historyLoading) {
-
-  <div class="empty-history">
-    <i class="pi pi-spin pi-spinner"></i>
-    Loading submission history...
-  </div>
-
-} @else if (historyError) {
-
-  <div class="empty-history">
-    {{ historyError }}
-  </div>
-
-} @else {
-
 <app-table  [columns]="tableColumns" [data]="paginatedTableData" [loading]="false" emptyMessage="No submissions found."></app-table>
 
 <app-pagination [currentPage]="currentPage" [totalItems]="filteredTableData.length" [itemsPerPage]="itemsPerPage" itemLabel="submissions" (pageChange)="onPageChange($event)"></app-pagination>
@@ -48,12 +49,11 @@
 
 
  <ng-template #logTemplate let-row>
- <app-button variant="secondary" width="100%" (click)="downloadLog(row.log)" (keydown)="null" (keyup)="null">  <i class="pi pi-download"></i>
-  Log
+
+  <app-button variant="secondary" width="100%" [disabled]="downloadingLogId === row.log.submissionId" (click)="downloadLog(row.log)" (keydown)="null" (keyup)="null">
+   {{ downloadingLogId === row.log.submissionId ? 'Downloading...' : 'Download Log' }}
   </app-button>
 
   </ng-template>
-
-
 
 </div>
