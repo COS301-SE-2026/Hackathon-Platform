@@ -16,12 +16,12 @@ public class PlagiarismAstProperties {
     /** Master switch for the embedding path. false = structural score only, no embedding score. */
     private boolean embeddingEnabled = true;
 
-    private String baseUrl = "http://localhost:8000";
+    private String baseUrl = "http://localhost:8008";
 
-    private int connectTimemoutMs = 2000;
+    private int connectTimeoutMs = 2000;
 
     /** Per-file /parse call timeout. */
-    private int RequestTimeoutMs = 5000;
+    private int requestTimeoutMs = 5000;
 
     /**
      * Per-file /embed call timeout. Longer because passing through CodeBERT for every funcion in a file.
