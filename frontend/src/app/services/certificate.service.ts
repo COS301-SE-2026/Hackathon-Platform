@@ -101,3 +101,46 @@ export interface CertificateAssetResponse {
   storageKey: string;
   url: string;
 }
+
+@Injectable({ providedIn: 'root'})
+export class CertificateService {
+  private readonly http = inject(HttpClient);
+  private readonly adminBase = `${environment.apiUrl}/api/admin/certificates`;
+  private readonly base = `${environment.apiUrl}/api/certificates`;
+
+  getTemplates(eventId: string, hackathonId?: string): Observable<CertificateTemplateResponse[]> {
+    let url = `${this.adminBase}/templates?eventId=${eventId}`;
+    if(hackathonId){
+      url += `&hackathonId=${hackathonId}`;
+    }
+    return this.http.get<CertificateTemplateResponse[]>(url);
+  }
+
+  getTemplate(templateId: string): Observable<CertificateTemplateResponse>{
+    return this.http.get<CertificateTemplateResponse>(`${this.adminBase}/templates/${templateId}`);
+  }
+
+  createTemplate(req: CertificateTemplateRequest): Observable<CertificateTemplateResponse> {
+    return this.http.post<CertificateTemplateResponse>(`${this.adminBase}/templates`, req);
+  }
+
+  updateTemplate(templateId: string, req: CertificateTemplateRequest): Observable<CertificateTemplateRespons> {
+    return this.http.put<CertificateTemplateResponse>(`${this.adminBase}/templates/${templateId}`, req);
+  }
+
+  deleteTemplate(templateId: string): Observable<void> {
+    return this.http.delete<void>(`${this.adminBase}/templates/${templateId}`);
+  }
+
+  uploadBackground(templateId: string, file: File): Observable<CertificateTemplateResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<CertificateTemplateResponse>(`${this.adminBase}/templates/${templateId}/background`, formData);
+  }
+
+  uploadAsset(templateId: string, file: File): Observable<CertificateAssetResponse> {
+    const formData = new formData();
+    formDate.append('file', file);
+    return this.http.post<CertificateAssetResponse>(`${this.adminBase}/templates/${templateId}/assets`, formData);
+  }
+}
