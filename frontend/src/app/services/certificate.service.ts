@@ -124,7 +124,7 @@ export class CertificateService {
     return this.http.post<CertificateTemplateResponse>(`${this.adminBase}/templates`, req);
   }
 
-  updateTemplate(templateId: string, req: CertificateTemplateRequest): Observable<CertificateTemplateRespons> {
+  updateTemplate(templateId: string, req: CertificateTemplateRequest): Observable<CertificateTemplateResponse> {
     return this.http.put<CertificateTemplateResponse>(`${this.adminBase}/templates/${templateId}`, req);
   }
 
@@ -139,8 +139,8 @@ export class CertificateService {
   }
 
   uploadAsset(templateId: string, file: File): Observable<CertificateAssetResponse> {
-    const formData = new formData();
-    formDate.append('file', file);
+    const formData = new FormData();
+    formData.append('file', file);
     return this.http.post<CertificateAssetResponse>(`${this.adminBase}/templates/${templateId}/assets`, formData);
   }
 
@@ -156,7 +156,7 @@ export class CertificateService {
     return this.http.get<CertificateGenerationRunResponse>(`${this.adminBase}/runs/${runId}`);
   }
 
-  getIssuedForEvent(eventId: string): Observable<CertificateIssuedResponse> {
+  getIssuedForEvent(eventId: string): Observable<CertificateIssuedResponse[]> {
     return this.http.get<CertificateIssuedResponse[]>(`${this.adminBase}/events/${eventId}/issued`);
   }
 

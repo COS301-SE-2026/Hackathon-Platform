@@ -1,4 +1,4 @@
-import { Component, OnInit, onDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -51,13 +51,13 @@ function blankLayout(): CertificateLayout {
       {
         type: 'TEXT',
         field: 'eventName',
-        x: CANVAS_WIDTH_/2,
+        x: CANVAS_WIDTH/2,
         y: 300,
         font: 'helvetica',
         fontSize: 16,
         color: '#4a4f57',
         align: 'center',
-        visibleForAllTypes: null,
+        visibleForTypes: null,
       },
       {
         type: 'TEXT',
@@ -149,7 +149,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     this.loadEvent();
     this.loadTemplates();
     this.loadRuns();
-    this.loadIssues();
+    this.loadIssued();
   }
 
   ngOnDestroy(): void {
@@ -182,7 +182,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     this.certificateService.getRuns(this.eventId).subscribe({
       next: (runs) => {
         this.runs = runs;
-        const running = runs.runs.find((r) => r.status === 'PENDING' || r.status === 'RUNNING');
+        const running = runs.find((r) => r.status === 'PENDING' || r.status === 'RUNNING');
         if(running) {
           this.activeRun = running;
           this.startPolling();
@@ -197,7 +197,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     });
   }
 
-  selectTemplate(template: string): void{
+  selectTemplate(templateId: string): void{
     this.certificateService.getTemplate(templateId).subscribe({
       next: (template) => {
         this.selectedTemplateId = template.templateId;
@@ -246,7 +246,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
       fontSize: 18,
       visibleForTypes: null,
     };
-    this.layout.element.push(element);
+    this.layout.elements.push(element);
     this.selectedElementIndex = this.layout.elements.length-1;
   }
 
@@ -338,7 +338,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
           subscriber.next(template.templateId);
           subscriber.complete();
         },
-        error: (err: unkown) => subscriber.error(err),
+        error: (err: unknown) => subscriber.error(err),
       });
     });
   }
@@ -359,7 +359,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     if(!element.visibleForTypes){
       return true;
     }
-    return element.visibleForTypes
+    return element.visibleForTypes.split(',').map((s) => s.trim()).includes(type);
   }
 
   toggleVisibilityForType(type: string): void {
@@ -372,7 +372,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     } else {
       curr.push(type);
     }
-    el.visibleForTypes = current.length === CERT -TYPES.length ? null : current.join(',');
+    el.visibleForTypes = curr.length === CERT_TYPES.length ? null : curr.join(',');
   }
 
   elementLabel(element: CertificateElement): string {
@@ -383,7 +383,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
       return element.label || 'Image';
     }
     if(element.field) {
-      return this.fieldOptions.find((f) => f.value === element.field)?.labal || element.field;
+      return this.fieldOptions.find((f) => f.value === element.field)?.label || element.field;
     }
     return element.staticText || 'Label';
   }
@@ -427,7 +427,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
   }
 
   onBackgroundSelected(event: Event): void {
-    const input = event.target as HTMLElement;
+    const input = event.target as HTMLInputElement;
     if(input.files && input.files.length > 0){
       this.backgroundFile = input.files[0];
     }
@@ -446,7 +446,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     };
 
     const save$ = this.selectedTemplateId
-      ? this.certificateService.uploadTemplate(this.selectedTemplateId, req)
+      ? this.certificateService.updateTemplate(this.selectedTemplateId, req)
       : this.certificateService.createTemplate(req);
 
     save$.subscribe({

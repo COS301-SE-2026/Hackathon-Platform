@@ -92,7 +92,7 @@
                   </div>
                 } @else {
                   @if (el.imageStorageKey && assetUrlByKey[el.imageStorageKey]) {
-                    <img [src]="asseturlByKey[el.imageStorageKey]" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80" draggable="false"/>
+                    <img [src]="assetUrlByKey[el.imageStorageKey]" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80" draggable="false"/>
                   } @else {
                     <div class="image-placeholder" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80">
                       <i class="pi pi-image"></i>
@@ -129,7 +129,7 @@
                   <div class="form-group">
                     <label>Font</label>
                     <select [(ngModel)]="el.font">
-                      <option value="helvetics">Helvetica</option>
+                      <option value="helvetica">Helvetica</option>
                       <option value="helvetica-bold">Helvetica bold</option>
                       <option value="times">Times</option>
                       <option value="times-bold">Times bold</option>
@@ -198,7 +198,7 @@
                 <div class="cert-type-checkboxes">
                   @for (type of certTypes; track type) {
                     <label class="checkbox-label">
-                      <input type="checkbox-label" [checked]="isVisibleForType(el, type)" (change)="toggleVisibleForType(type)" />
+                      <input type="checkbox-label" [checked]="isVisibleForType(el, type)" (change)="toggleVisibilityForType(type)" />
                       {{ type }}
                     </label>
                   }
