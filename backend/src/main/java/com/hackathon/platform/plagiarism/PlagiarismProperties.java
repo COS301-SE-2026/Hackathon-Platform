@@ -22,11 +22,35 @@ public class PlagiarismProperties {
   /** Winnowing guarantee window size (in k-grams). Smaller = more fingerprints, more sensitive. */
   private int windowSize = 6;
 
-  /** Jaccard similarity (0-1) on structural fingerprints at/above which a pair is auto-flagged. */
+  /** Jaccard similarity (0-1) on structural fingerprints at/above which a pair is auto-flagged.
+   * Applies to combined score when embedding signal and score available
+   */
   private double flagThreshold = 0.6;
 
   /** Minimum token count a submission needs to be worth comparing at all (skips trivial stubs). */
   private int minTokenCount = 20;
+
+  /**
+   * Weight given to the semantic (embedding).
+   */
+  private double embeddingWeight = 0.4;
+
+  /**When true, a pair is also flagged is its combined score is a stat outlier relative to every other compared pair in the same level. */
+  private boolean useRelativeThreshold = true;
+
+  /**How many standard deviations above the levels mean combined score counts as outlier */
+  private double relativeThresholdZScore = 2.0;
+
+  /**
+   * A level needs at least this many compared before trusting realtive threshold.
+   */
+  private int getMinPairsForRelativeThreshold = 5;
+
+  /**Minimun (corpus-centered) cosine similarity for a function pair to be surfaced in the diff view's function match list */
+  private double functionMatchThreshold = 0.75;
+
+  /** Caps how many function matches the diff view returns, to keep UI reabdle */
+  private int maxFunctionMatches = 15;
 
   private Queue queue = new Queue();
 
