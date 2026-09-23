@@ -76,7 +76,7 @@ class PlagiarismCheckServiceTest {
 
   @BeforeEach
   void setUp() {
-    
+
     props = new PlagiarismProperties();
     props.setMinTokenCount(1);
 
@@ -105,6 +105,85 @@ class PlagiarismCheckServiceTest {
     sub.setSourceFileName(fileName);
     return sub;
 
+  }
+
+  @Test
+  void execute_comparesTopTeamsAndSavesFlaggedPair() {
+
+    PlagiarismRun run = new PlagiarismRun(EVENT_ID, LEVEL_ID, 10, UUID.randomUUID());
+    when(runRepo.findById(100L)).thenReturn(Optional.of(run));
+
+    LeaderboardEntry entryA = org.mockito.Mockito.mock(LeaderboardEntry.class);
+    when(entryA.getTeamId()).thenReturn(TEAM_A_ID);
+    LeaderboardEntry entryB = org.mockito.Mockito.mock(LeaderboardEntry.class);
+    when(entryB.getTeamId()).thenReturn(TEAM_B_ID);
+
+    when(submissionRepo.findLeaderboardByEventIdAndLevelId(EVENT_ID, LEVEL_ID))
+        .thenReturn(List.of(entryA, entryB));
+
+    Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
+    Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
+
+    when(submission.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
+        .thenReturn(List.of(subA, subB));
+    
+    when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.download("submissions", "key-a"))
+        .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
+    when(storageService.download("submissions", "key-b"))
+        .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
+
+    when(structuralNormalizer.normalize("a.java", "code-a"))
+        .thenReturn(
+            StructuralNormalizationResult.lexer(
+                List.of(new NormalizedToken("a.java", "tok", 0, 3))
+            )
+        );
+    when(structuralNormalizer.normalize("b.java", "code-b"))
+        .thenReturn(
+            StructuralNormalizationResult.lexer(
+                List.of(new NormalizedToken("b.java", "tok", 0, 3))
+            )
+        );
+
+    FingerprintResult fpA =
+        new FingerprintResult(1, Set.of(new Fingerprint(10L, 0), new Fingerprint(20L, 1)));
+    
+    FingerprintResult fpB =
+        new FingerprintResult(1, Set.of(new Fingerprint(20L, 0), new Fingerprint(30L, 1)));
+    when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fpA, fpB);
+    when(winnowing.jaccard(any(), any())).thenReturn(0.8);
+
+    when(functionEmbeddingStore.findBySubmissionIds(anyList())).thenReturn(List.of());
+    when(embeddingSimilarityCalculator.meanVector(anyList())).thenReturn(new float[0]);
+    when(embeddingSimilarityCalculator.centerAll(anyList(), any())).thenReturn(List.of());
+    when(embeddingSimilarityCalculator.symmetricBestMatch(anyList(), anyList()))
+        .thenReturn(Optional.empty());
+
+    service.execute(100L);
+
+    assertThat(run.getStatus()).isEqualTo("COMPLETED");
+    assertThat(run.getPairsCompared()).isEqualTo(1);
+    assertThat(run.getPairsFlagged()).isEqualTo(1);
+    verify(runRepo, times(2)).save(run);
+    verify(similarityRepo).deleteByEventIdAndLevelId(EVENT_ID, LEVEL_ID);
+    verify(embeddingService, times(2)).embedAndStore(anyLong(), anyMap(), anyMap());
+
+    ArgumentCaptor<List<SubmissionSimilarity>> captor = ArgumentCaptor.forClass(List.class);
+    verify(similarityRepo).saveAll(captor.capture());
+    List<SubmissionSimilarity> saved = captor.getValue();
+    assertThat(saved).hasSize(1);
+    SubmissionSimilarity row = saved.get(0);
+    assertThat(row.isFlagged()).isTrue();
+    assertThat(row.getMatchedKgramCount()).isEqualTo(1);
+    assertThat(row.getSubmissionIdA()).isEqualTo(1L);
+    assertThat(row.getSubmissionIdB()).isEqualTo(2L);
+    assertThat(row.getTeamIdA()).isEqualTo(TEAM_A_ID);
+    assertThat(row.getTeamIdB()).isEqualTo(TEAM_B_ID);
+    assertThat(row.getStructuralScore()).isEqualByComparingTo(new BigDecimal("0.8000"));
+    assertThat(row.getEmbeddingScore()).isNull();
+    assertThat(row.getCombinedScore()).isEqualByComparingTo(new BigDecimal("0.8000"));
+    
   }
 
 
