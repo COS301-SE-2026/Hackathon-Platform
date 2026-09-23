@@ -64,4 +64,36 @@ class PlagiarismJobProducerTest {
 
   }
 
+  @Test
+  void enqueue_withNullLevelId_stillSavesAndEnqueues() {
+
+    PlagiarismProperties props = new PlagiarismProperties();
+    producer = new PlagiarismJobProducer(redis, props, runRepo);
+
+    UUID eventId = UUID.randomUUID();
+    UUID requestedBy = UUID.randomUUID();
+
+    when(runRepo.save(any(PlagiarismRun.class)))
+        .thenAnswer(
+            invocation -> {
+
+                PlagiarismRun run = invocation.getArgument(0);
+                java.lang.reflect.Field idField = PlagiarismRun.class.getDeclaredField("id");
+                idField.setAccessible(true);
+                idField.set(run, 9L);
+                return run;
+            }
+        );
+
+    when(redis.opsForStream()).thenReturn((StreamOperations) streamOps);
+    when(streamOps.add(eq(props.getQueue().getStreamKey()), any(Map.class)))
+        .thenReturn(RecordId.of("1-1"));
+
+    Long runId = producer.enqueue(eventId, null, props.getDefaultTopN(), requestedBy);
+
+    assertThat(runId).isEqualTo(9L);
+    verify(streamOps).add(eq(props.getQueue().getStreamKey()), eq(Map.of("runId", "9")));
+
+  }
+
 }
