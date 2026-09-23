@@ -45,7 +45,7 @@ class ParseResponse(BaseModel):
     detail: Optional[str] = None
 
 @app.get("/health")
-def health() -> dict;
+def health() -> dict:
     return {"status": "ok", "supported_extensions": sorted(LANGUAGE_CONFIG.keys())}
 
 @app.post("/parse", response_model=ParseResponse)
@@ -99,7 +99,7 @@ def parse(req: ParseRequest) -> ParseResponse:
                 start_byte=f.start_byte,
                 end_byte=f.end_byte,
                 start_line=f.start_line,
-                end_line=g.end_line,
+                end_line=f.end_line,
             )
             for f in functions
         ],
@@ -120,4 +120,57 @@ def _error_ratio(root) -> float:
     walk(root)
     return errors/ total if total else 0.0
 
+#Embedding semantic similarity stuff
 
+class SpanRequest(BaseModel):
+    qualified_name: str
+    start_byte: int
+    end_byte: int
+
+class EmbedRequest(BaseModel):
+    file_name: str
+    content: str
+    spans: list[SpanRequest]
+
+class EmbeddingResponse(BaseModel):
+    qualified_name: str
+    vector: list[float]
+    truncated: bool
+
+class EmbedResponse(BaseModel):
+    status: str # "ok" , "error"
+    model: Optional[str] = None
+    dimension: Optional[int] = None
+    embeddings: list[EmbeddingResponse] = []
+    detail: Optional[str] = None
+
+@app.post("/embed" , response_model=EmbedResponse)
+def embed(req: EmbedRequest) -> EmbedResponse:
+
+    try:
+        import embeddings
+    except Exception as e:
+        return EmbedResponse(status="error", detail=f"embedding backend unavailable: {e}")
+
+    if not req.spans:
+        return EmbedResponse(status="ok", model=embeddings.MODEL_NAME, embeddings=[])
+
+    try:
+        results = embeddings.embed_functions(
+            req.content, [s.model_dump() for s in req.spans]
+        )
+
+        dimension = embeddings.embedding_dimension()
+    except Exception as e:
+        return EmbedResponse(status="error", detail=f"embedding failed: {e}")
+
+    return EmbedResponse(
+        status="ok",
+        model=embeddings.MODEL_NAME,
+        dimension=dimension,
+        embeddings=[
+            EmbeddingResponse(qualified_name=r.qualified_name, vector=r.vector, truncated=r.truncated)
+            for r in results
+
+        ],
+    )
