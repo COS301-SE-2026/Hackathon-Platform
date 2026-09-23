@@ -4,7 +4,6 @@
      <div class = "modal-header">
      <div>
       <h1>Create Event</h1>
-      <p class = "page-subtitle">Create a new event {{hackathonName ? ' for ' + hackathonName : ''}}.</p>
     </div>
       <button type = "button" class = "modal-close" aria-label = "Close" (click) = "goBack()">
         <i class = "pi pi-times"></i>
@@ -40,10 +39,11 @@
             (keyup.enter) = "triggerFileInput('banner')" (keyup.space) = "triggerFileInput('banner')"
             (dragover) = "onDragOver($event)" (drop)="onDrop($event, 'banner')" type="button">
 
-          <input  #fileInput id = "bannerFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg" (change) = "onFileSelected($event, 'banner')"/>
+          <input  #fileInput id = "bannerFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg,image/webp" (change) = "onFileSelected($event, 'banner')"/>
           <span class = "drop-zone-icon-lg"><i class = "pi pi-image"></i></span>
           <p><span class = "drop-zone-cta">Click to upload</span> or drag and drop</p>
-          <p class = "drop-zone-hint">PNG,JPG or JPEG</p>
+          <p class = "drop-zone-hint">PNG, JPG, JPEG or Webp</p>
+          <p class = "drop-zone-spec"><strong>5:1</strong> aspect ratio · 2000 x 400 px recommended</p>
           @if (form.bannerFileName){
             <p class = "drop-zone-filename">{{form.bannerFileName}}</p>
           }
@@ -57,10 +57,11 @@
             (keyup.enter) = "triggerFileInput('logo')" (keyup.space) = "triggerFileInput('logo')"
             (dragover) = "onDragOver($event)" (drop)="onDrop($event, 'logo')" type="button">
 
-          <input  #logoFileInput id = "logoFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg" (change) = "onFileSelected($event,'logo')"/>
+          <input  #logoFileInput id = "logoFileInput" type = "file" style = "display:none" accept = "image/png,image/jpeg,image/webp" (change) = "onFileSelected($event,'logo')"/>
           <span class = "drop-zone-icon-lg"><i class = "pi pi-image"></i></span>
           <p><span class = "drop-zone-cta">Click to upload</span> or drag and drop</p>
-          <p class = "drop-zone-hint">PNG,JPG or JPEG</p>
+          <p class = "drop-zone-hint">PNG, JPG, JPEG or Webp</p>
+          <p class = "drop-zone-spec"><strong>2:1</strong> aspect ratio · 1600 x 800 px recommended</p>
           @if (form.logoFileName){
             <p class = "drop-zone-filename">{{form.logoFileName}}</p>
           }
@@ -192,8 +193,8 @@
           type = "checkbox"
           id = "isInPerson"
           name = "isInPerson"
+          class = "checkbox-input"
           [(ngModel)] = "form.isInPerson"/>
-          <span class = "checkbox-custom"></span>
           <span>This is an in-person event</span>
         </label>
       </div>
@@ -213,53 +214,42 @@
         <h2 class = "section-heading">Prizes</h2>
         <p class = "section-hint">Add the prizes participants can win.</p>
         <div class = "prize-list">
-          <div class = "form-group">
-            <label for = "firstPlacePrize">1st Place Prize</label>
-            <input
-            id = "firstPlacePrize"
-            type = "number"
-            min = "0"
-            step = "0.01"
-            [(ngModel)] = "form.firstPlacePrize"
-            name = "firstPlacePrize"
-            placeholder = "e.g. 10000"/>
-          </div>
-
-          <div class = "form-group">
-            <label for = "secondPlacePrize">2nd Place Prize</label>
-            <input
-            id = "secondPlacePrize"
-            type = "number"
-            min = "0"
-            step = "0.01"
-            [(ngModel)] = "form.secondPlacePrize"
-            name = "secondPlacePrize"
-            placeholder = "e.g. 5000"/>
-          </div>
-
-          <div class = "form-group">
-            <label for = "thirdPlacePrize">3rd Place Prize</label>
-            <input
-            id = "thirdPlacePrize"
-            type = "number"
-            min = "0"
-            step = "0.01"
-            [(ngModel)] = "form.thirdPlacePrize"
-            name = "thirdPlacePrize"
-            placeholder = "e.g. 2500"/>
-          </div>
-
-          <div class = "form-group">
-            <label for = "totalPrizePool">Total Prize Pool</label>
-            <input
-            id = "totalPrizePool"
-            type = "number"
-            min = "0"
-            step = "0.01"
-            [(ngModel)] = "form.totalPrizePool"
-            name = "totalPrizePool"
-            placeholder = "e.g. 20000"/>
-          </div>
+          @for (prize of form.prizes; track $index){
+            <div class = "prize-row">
+              <span class = "prize-row-index">{{$index +1}}</span>
+              <div class = "prize-row-fields">
+                <label for = "prizeTitle{{$index}}" class = "sr-only">Prize title {{$index + 1}}</label>
+                <input
+                id = "prizeTitle{{$index}}"
+                type ="text"
+                [(ngModel)] ="prize.title"
+                name = "prizeTitle{{$index}}"
+                placeholder = "e.g. 1st Place"
+                class = "prize-title-input"/>
+                <label for = "prizeDescription{{$index}}" class = "sr-only">Prize description {{$index + 1}}</label>
+                <input
+                id = "prizeDescription{{$index}}"
+                type ="text"
+                [(ngModel)] ="prize.description"
+                name = "prizeDescription{{$index}}"
+                placeholder = "e.g. R10,000 cash + mentorship"
+                class = "prize-description-input"/>
+              </div>
+              <button
+              type = "button"
+              class = "prize-remove-btn"
+              (click) = "removePrize($index)"
+              aria-label = "Remove prize">
+              <i class = "pi pi-trash"></i>
+            </button>
+            </div>
+          }
+          <button
+            type = "button"
+            class = "btn-add-prize"
+            (click) = "addPrize()">
+            <i class = "pi pi-plus"></i>Add prize
+          </button>
         </div>
       
       </div>

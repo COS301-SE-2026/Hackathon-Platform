@@ -26,6 +26,7 @@ export interface EventRequest {
 
 export interface EventResponse {
   eventId: string;
+  hackathonId:string;
   hackathon?: string;
   createdByUserId: string;
   name: string;
@@ -200,6 +201,10 @@ export class EventService {
     return this.http.put<EventResponse>(`${this.baseUrl}/admin/events/${eventId}`, eventData);
   }
 
+  deleteEvent(eventId: string):Observable<void>{
+    return this.http.delete<void>(`${this.baseUrl}/admin/events/${eventId}`);
+  }
+
   getEventStatus(eventId: string): Observable<{ eventId: string; status: string; visibility: string }> {
     return this.http.get<{ eventId: string; status: string; visibility: string }>(
       `${this.baseUrl}/admin/events/${eventId}/status`
@@ -228,6 +233,26 @@ export class EventService {
 
   getEventParticipants(eventId: string): Observable<EventParticipantResponse[]> {
     return this.http.get<EventParticipantResponse[]>(`${this.baseUrl}/admin/events/${eventId}/participants`);
+  }
+
+  addTeamMember(
+    eventId: string,
+    teamId: string,
+    email: string
+  ): Observable<EventParticipantResponse> {
+    return this.http.post<EventParticipantResponse>(
+      `${this.baseUrl}/admin/events/${eventId}/teams/${teamId}/members`,
+      { email }
+    );
+  }
+
+  removeParticipant(
+    eventId: string,
+    userId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl}/admin/events/${eventId}/participants/${userId}`
+    );
   }
 
   registerForEvent( eventId: string, registrationData: EventRegistrationRequest): Observable<EventRegistrationResponse> {
