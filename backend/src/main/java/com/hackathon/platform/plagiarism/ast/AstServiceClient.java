@@ -147,7 +147,7 @@ public class AstServiceClient {
         try {
             List<SpanRequestBody> spanBodies =
                 spans.stream()
-                    .map(s -> new SpanRequestBody(s.qualifiedName(), s.startByte, s.endByte()))
+                    .map(s -> new SpanRequestBody(s.qualifiedName(), s.startByte(), s.endByte()))
                     .toList();
 
                 String body = mapper.writeValueAsString(new EmbedRequestBody(fileName, content, spanBodies));
