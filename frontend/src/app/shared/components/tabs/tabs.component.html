@@ -12,9 +12,13 @@
 
   </span>
 
-    } @else {
+    } 
+    @else {
 
-    <a class="tab" [routerLink]="tab.route" [queryParams]="tab.queryParams" [class.active]="tab.queryParams?.[activeQueryParam] === activeTab">
+    <a class="tab" [routerLink]="local ? null : tab.route" [queryParams]="local ? null : tab.queryParams"
+      [class.active]="local ? tab.value === activeLocalTab : tab.queryParams?.[activeQueryParam] === activeTab"
+      (click)="local && onLocalTabClick(tab)"
+    >
 
      @if (tab.icon) { <i [class]="tab.icon" aria-hidden="true"></i>}
 
@@ -22,8 +26,8 @@
 
     </a>
 
-    }
-
   }
+
+ }
 
 </nav>

@@ -1,11 +1,14 @@
 import { Component, Input, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnnouncementResponse, AnnouncementService } from '../../../../services/announcement.service';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+
 
 @Component({
   selector: 'app-announcements',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoaderComponent, EmptyStateComponent],
   templateUrl: './announcements.component.html',
   styleUrls: ['./announcements.component.scss']
 })

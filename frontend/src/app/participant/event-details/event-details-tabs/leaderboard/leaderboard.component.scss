@@ -1,18 +1,13 @@
 .leaderboard-page {
   width: 100%;
   box-sizing: border-box;
-
   margin-top: var(--space-4);
-
   display: flex;
   flex-direction: column;
-
   padding: var(--card-padding);
-
   background-color: var(--white);
   border: 1px solid var(--light-gray);
   border-radius: var(--radius-lg);
-
   box-shadow: var(--shadow-sm);
 }
 
@@ -29,9 +24,12 @@
   
 }
 
-
 .performance-header {
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
 }
 
 
@@ -45,13 +43,21 @@
   line-height: var(--line-height-h3);
 }
 
+.rankings-filter {
+  flex-shrink: 0;
+  min-width: 160px;
+}
+
+.rankings-filter app-dropdown {
+  display: block;
+}
+
+
 
 .performance-content {
   width: 100%;
-
   display: flex;
   align-items: center;
-
   gap: var(--space-8);
 }
 
@@ -103,7 +109,6 @@
   white-space: nowrap;
 
   color: var(--black);
-
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-h3);
@@ -176,13 +181,23 @@
 
 @media (max-width: 767px) {
 
+  .performance-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .rankings-filter {
+    width: 100%;
+    min-width: 0;
+  }
+
   .performance-content {
     flex-direction: column;
     align-items: stretch;
 
     gap: var(--space-4);
   }
-
 
   .performance-stats {
     width: 100%;
@@ -193,6 +208,7 @@
   }
 
 }
+
 
 .rankings-section {
     margin-top: var(--space-12);
@@ -314,10 +330,6 @@
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-body);
-}
-
-:host ::ng-deep .table-wrapper .p-datatable-tbody > tr.my-team-row > td {
-  background-color: var(--bright-blue-bg);
 }
 
 
