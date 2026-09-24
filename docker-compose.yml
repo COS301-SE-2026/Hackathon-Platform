@@ -61,6 +61,23 @@ services:
       - -c
       - exit 0
     restart: "no"
+
+    
+  #AI DETECTION MODEL
+  ai-model:
+    build:
+      context: ./ML-AI
+      dockerfile: Dockerfile
+    image: hackathon-ai-model:1
+    container_name: hackathon-ai-model
+    ports: 
+      - "127.0.0.1:8001:8001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
       
 volumes:
   postgres_data:
