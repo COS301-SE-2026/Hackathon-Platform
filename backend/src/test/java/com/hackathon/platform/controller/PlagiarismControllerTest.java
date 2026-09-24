@@ -125,7 +125,7 @@ class PlagiarismControllerTest {
   void triggerRun_asParticipant_returns403() throws Exception {
     mockMvc
         .perform(
-            post("api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
+            post("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
                 .with(authentication(participantAuth))
         )
         .andExpect(status().isForbidden());
@@ -184,6 +184,19 @@ class PlagiarismControllerTest {
     
     when(checkService.getResults(EVENT_ID, (short) 1, false)).thenReturn(List.of(resp));
 
+    mockMvc
+        .perform(
+            get("/api/admin/events/{eventId}/plagiarism/pairs", EVENT_ID)
+                .param("levelId", "1")
+                .with(authentication(adminAuth))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].submissionIdA").value(10))
+        .andExpect(jsonPath("$[0].flagged").value(true));
+  }
+
+  @Test
+  void getPairs_asParticipant_returns403() throws Exception {
     mockMvc
         .perform(
             get("/api/admin/events/{eventId}/plagiarism/pairs", EVENT_ID)
