@@ -314,6 +314,111 @@ class PlagiarismCheckServiceTest {
 
   }
 
+  @Test
+  void execute_relativeThresholdDisabled_neverFlagsBelowAbsoluteThreshold() {
+
+    props.setFlagThreshold(1.5);
+    props.setUseRelativeThreshold(false);
+
+    PlagiarismRun run = new PlagiarismRun(EVENT_ID, LEVEL_ID, 10, UUID.randomUUID());
+    when(runRepo.findById(401L)).thenReturn(Optional.of(run));
+
+    LeaderboardEntry entryA = org.mockito.Mockito.mock(LeaderboardEntry.class);
+    when(entryA.getTeamId()).thenReturn(TEAM_A_ID);
+    LeaderboardEntry entryB = org.mockito.Mockito.mock(LeaderboardEntry.class);
+    when(entryB.getTeamId()).thenReturn(TEAM_B_ID);
+
+    when(submissionRepo.findLeaderboardByEventIdAndLevelId(EVENT_ID, LEVEL_ID))
+        .thenReturn(List.of(entryA, entryB));
+
+    Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
+    Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
+
+    when(submissionRepo.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
+        .thenReturn(List.of(subA, subB));
+    
+    when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.download(eq("submissions"), any()))
+        .thenAnswer(inv -> new ByteArrayInputStream("code".getBytes(StandardCharsets.UTF_8)));
+    when(structuralNormalizer.normalize(any(), any()))
+        .thenReturn(StructuralNormalizationResult.lexer(List.of(new NormalizedToken("f", "tok", 0, 3))));
+
+    FingerprintResult fp =
+        new FingerprintResult(1, Set.of(new Fingerprint(10L, 0)));
+    
+    when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fp, fp);
+    when(winnowing.jaccard(any(), any())).thenReturn(1.0);
+
+    when(functionEmbeddingStore.findBySubmissionIds(anyList())).thenReturn(List.of());
+    when(embeddingSimilarityCalculator.meanVector(anyList())).thenReturn(new float[0]);
+    when(embeddingSimilarityCalculator.centerAll(anyList(), any())).thenReturn(List.of());
+    when(embeddingSimilarityCalculator.symmetricBestMatch(anyList(), anyList()))
+        .thenReturn(Optional.empty());
+
+    service.execute(401L);
+
+    ArgumentCaptor<List<SubmissionSimilarity>> captor = ArgumentCaptor.forClass(List.class);
+    verify(similarityRepo).saveAll(captor.capture());
+
+    assertThat(captor.getValue()).hasSize(1);
+    assertThat(captor.getValue().get(0).isFlagged()).isFalse();
+
+  }
+
+  @Test
+  void execute_zeroTotalWeight_fallsBackToStructuralScoreOnly() {
+
+    props.setStructuralWeight(0.0);
+    props.setEmbeddingWeight(0.0);
+    props.setFlagThreshold(2.0);
+    props.setUseRelativeThreshold(false);
+
+    PlagiarismRun run = new PlagiarismRun(EVENT_ID, LEVEL_ID, 10, UUID.randomUUID());
+    when(runRepo.findById(402L)).thenReturn(Optional.of(run));
+
+    LeaderboardEntry entryA = org.mockito.Mockito.mock(LeaderboardEntry.class);
+    when(entryA.getTeamId()).thenReturn(TEAM_A_ID);
+    LeaderboardEntry entryB = org.mockito.Mockito.mock(LeaderboardEntry.class);
+    when(entryB.getTeamId()).thenReturn(TEAM_B_ID);
+
+    when(submissionRepo.findLeaderboardByEventIdAndLevelId(EVENT_ID, LEVEL_ID))
+        .thenReturn(List.of(entryA, entryB));
+
+    Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
+    Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
+
+    when(submissionRepo.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
+        .thenReturn(List.of(subA, subB));
+    
+    when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.download(eq("submissions"), any()))
+        .thenAnswer(inv -> new ByteArrayInputStream("code".getBytes(StandardCharsets.UTF_8)));
+    when(structuralNormalizer.normalize(any(), any()))
+        .thenReturn(StructuralNormalizationResult.lexer(List.of(new NormalizedToken("f", "tok", 0, 3))));
+
+    FingerprintResult fp =
+        new FingerprintResult(1, Set.of(new Fingerprint(1L, 0)));
+    
+    when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fp, fp);
+    when(winnowing.jaccard(any(), any())).thenReturn(0.5);
+
+    when(functionEmbeddingStore.findBySubmissionIds(anyList())).thenReturn(List.of());
+    when(embeddingSimilarityCalculator.meanVector(anyList())).thenReturn(new float[0]);
+    when(embeddingSimilarityCalculator.centerAll(anyList(), any())).thenReturn(List.of());
+    when(embeddingSimilarityCalculator.symmetricBestMatch(anyList(), anyList()))
+        .thenReturn(Optional.of(0.9));
+
+    service.execute(402L);
+
+    ArgumentCaptor<List<SubmissionSimilarity>> captor = ArgumentCaptor.forClass(List.class);
+    verify(similarityRepo).saveAll(captor.capture());
+    SubmissionSimilarity saved = captor.getValue().get(0);
+
+    assertThat(saved.getCombinedScore().doubleValue()).isEqualTo(0.5);
+    assertThat(saved.getEmbeddingScore().doubleValue()).isEqualTo(0.9);
+
+  }
+
   private SubmissionSimilarity row(
     Long subA, Long subB, UUID teamA, UUID teamB, double combined, boolean flagged
   ) {
