@@ -593,5 +593,105 @@ class PlagiarismCheckServiceTest {
 
   }
 
+  @Test
+  void getDiff_matchedRangeSpanningTwoFiles_splitsRangeAtFileBoundary() {
+
+
+    Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
+    Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
+
+    when(submissionRepo.findById(1L)).thenReturn(Optional.of(subA));
+    when(submissionRepo.findById(2L)).thenReturn(Optional.of(subB));
+
+    when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.download("submissions", "key-a"))
+        .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
+    when(storageService.download("submissions", "key-b"))
+        .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
+    
+    
+    List<NormalizedToken> tokensA =
+        List.of(
+            new NormalizedToken("File1.java", "tok1", 0, 4),
+            new NormalizedToken("File2.java", "tok2", 0, 4)
+        );
+    when(structuralNormalizer.normalize("a.java", "code-a"))
+        .thenReturn(
+            StructuralNormalizationResult.lexer(tokensA)
+        );
+    
+    List<NormalizedToken> tokensB = List.of(new NormalizedToken("b.java", "tokB", 0, 4));
+    when(structuralNormalizer.normalize("b.java", "code-b"))
+        .thenReturn(
+            StructuralNormalizationResult.lexer(tokensB)
+        );
+    
+    props.setKgramSize(2);
+    
+    FingerprintResult fpA = new FingerprintResult(2, Set.of(new Fingerprint(7L, 0)));
+    FingerprintResult fpB = new FingerprintResult(2, Set.of(new Fingerprint(7L, 0)));
+
+    when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fpA, fpB);
+    when(winnowing.jaccard(any(), any())).thenReturn(1.0);
+
+    when(functionEmbeddingStore.findBySubmissionId(any())).thenReturn(List.of());
+
+    PlagiarismDiffResponse diff = service.getDiff(1L, 2L);
+
+    assertThat(diff.matchedRangesA()).hasSize(1);
+    assertThat(diff.matchedRangesA().get(0).fileName()).isEqualTo("File1.java");
+    assertThat(diff.matchedRangesA().get(0).start()).isEqualTo(0);
+    assertThat(diff.matchedRangesA().get(0).end()).isEqualTo(4);
+
+
+  }
+
+  @Test
+  void getDiff_matchStartsPastTokenList_isSkippedWithoutError() {
+
+
+    Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
+    Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
+
+    when(submissionRepo.findById(1L)).thenReturn(Optional.of(subA));
+    when(submissionRepo.findById(2L)).thenReturn(Optional.of(subB));
+
+    when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.download("submissions", "key-a"))
+        .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
+    when(storageService.download("submissions", "key-b"))
+        .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
+    
+    
+    List<NormalizedToken> tokensA =
+        List.of(
+            new NormalizedToken("a.java", "tok", 0, 3)
+        );
+    when(structuralNormalizer.normalize("a.java", "code-a"))
+        .thenReturn(
+            StructuralNormalizationResult.lexer(tokensA)
+        );
+    
+    List<NormalizedToken> tokensB = List.of(new NormalizedToken("b.java", "tok", 0, 3));
+    when(structuralNormalizer.normalize("b.java", "code-b"))
+        .thenReturn(
+            StructuralNormalizationResult.lexer(tokensB)
+        );
+        
+    FingerprintResult fpA = new FingerprintResult(1, Set.of(new Fingerprint(1L, 5)));
+    FingerprintResult fpB = new FingerprintResult(1, Set.of(new Fingerprint(1L, 0)));
+
+    when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fpA, fpB);
+    when(winnowing.jaccard(any(), any())).thenReturn(1.0);
+
+    when(functionEmbeddingStore.findBySubmissionId(any())).thenReturn(List.of());
+
+    PlagiarismDiffResponse diff = service.getDiff(1L, 2L);
+
+    assertThat(diff.matchedRangesA()).isEmpty();
+
+
+  }
+
 
 }
