@@ -65,6 +65,17 @@ public class Event {
   @Column(name = "logo_storage_key", columnDefinition = "TEXT", nullable = true)
   private String logoStorageKey;
 
+  @Column(name ="use_ide", nullable = false)
+  private boolean useIde = false;
+
+  public boolean isUseIde() {
+    return useIde;
+  }
+
+  public void setUseIde(boolean useIde) {
+    this.useIde = useIde;
+  }
+
   public String getBannerStorageKey() {
     return bannerStorageKey;
   }

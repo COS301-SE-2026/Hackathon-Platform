@@ -73,17 +73,17 @@
         <app-button variant="secondary" width= "100%" (click)="downloadLevelFiles(level.id)" (keydown)="null" (keyup)="null">
          Download Resources
         </app-button>
-
-        <app-button variant="primary" width= "100%" (click)="openIde(level.id)" (keydown)="null" (keyup)="null">
-         <i class="pi pi-code"></i>
-         Open IDE
-        </app-button>
-
+        @if (useIde) {
+            <app-button variant="primary" width= "100%" (click)="openIde(level.id)" (keydown)="null" (keyup)="null">
+            <i class="pi pi-code"></i>
+            Open IDE
+            </app-button>
+        }
         </div>
 
     </section>
 
-
+    @if (!useIde) {
     <section class="submission-section solution-section">
 
     <div class="section-header"><h2>Submission</h2></div>
@@ -121,6 +121,7 @@
     </div>
 
     </section>
+}
 
 
     </div>

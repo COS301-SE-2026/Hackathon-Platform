@@ -78,6 +78,8 @@ export class SubmissionsComponent implements OnInit {
     return this.eventID;
   }
 
+  @Input() useIde = false;
+
   @Input({ required: true })
   set hackathonId(value: string) {
     if (!value || value === this.hackathonID) {

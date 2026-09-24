@@ -13,6 +13,7 @@ export interface EventRequest {
   visibility: 'PUBLIC' | 'PRIVATE';
   status?: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
   inPerson?: boolean;
+  useIde?: boolean;
   leaderboardFreezeDateTime?: string;
   freezeTime?: string;
   rules?: string;
@@ -38,6 +39,7 @@ export interface EventResponse {
   description?: string;
   visibility: string;
   status: string;
+  useIde: boolean;
   inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
   scoringPaused: boolean;
