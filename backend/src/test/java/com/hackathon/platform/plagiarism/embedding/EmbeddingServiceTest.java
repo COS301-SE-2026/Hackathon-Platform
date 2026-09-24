@@ -87,5 +87,55 @@ class EmbeddingServiceTest {
 
   }
 
+  @Test
+  void embedAndStore_multipleFilesAndFunctions_aggregatesAllRowsInOneReplaceCall() {
+
+    service = new EmbeddingService(astClient, store);
+
+    Map<String, String> files =
+        Map.of(
+            "A.java", "class A { void one() {} }",
+            "B.java", "class B { void two() {} }"
+        );
+    
+    Map<String, List<AstFunctionSpan>> functions =
+        Map.of(
+            "A.java", List.of(span("A.one")),
+            "B.java", List.of(span("B.two"))
+        );
+
+    when(astClient.embed(eq("A.java"), anyString(), any()))
+        .thenReturn(List.of(new FunctionEmbedding("A.one", new float[] {1f}, false)));
+    when(astClient.embed(eq("B.java"), anyString(), any()))
+        .thenReturn(List.of(new FunctionEmbedding("B.two", new float[] {2f}, false)));
+    
+    service.embedAndStore(9L, files, functions);
+
+    ArgumentCaptor<List<FunctionEmbeddingStore.Row>> captor = ArgumentCaptor.forClass(List.class);
+    verify(store).replaceEmbeddings(eq(9L), captor.capture());
+
+    assertThat(captor.getValue()).hasSize(2);
+
+
+  }
+
+  @Test
+  void embedAndStore_clientReturnsEmptyEmbeddings_stillReplacesWithEmptyList(){
+
+    service = new EmbeddingService(astClient, store);
+
+    Map<String, String> files = Map.of("Main.java", "class Main { void run() {} }");
+    List<AstFunctionSpan> spans = List.of(span("Main.run"));
+    Map<String, List<AstFunctionSpan>> functions = Map.of("Main.java", spans);
+
+    when(astClient.embed("Main.java", files.get("Main.java"), spans)).thenReturn(List.of());
+
+    service.embedAndStore(1L, files, functions);
+
+    verify(store).replaceEmbeddings(eq(1L), eq(List.of()));
+
+
+  }
+
 
 }
