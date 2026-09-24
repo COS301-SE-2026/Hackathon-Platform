@@ -159,6 +159,81 @@ class AstServiceClientTest {
 
   }
 
+  @Test
+  void embed_noSpans_returnsEmptyListWithoutCallingNetwork() {
+
+    PlagiarismAstProperties props = new PlagiarismAstProperties();
+    AstServiceClient client = new AstServiceClient(props);
+
+    List<FunctionEmbedding> result =
+        client.embed("Main.java", "content", List.of());
+
+    assertThat(result).isEmpty();
+
+
+  }
+
+  @Test
+  void embed_serviceReturnsOk_mapsEmbeddingsFromWireFormat() throws IOException {
+
+    String body =
+        "{\"status\":\"ok\",\"model\":\"codebert\",\"dimension\":2,"
+            + "\"embeddings\":[{\"qualified_name\":\"Main.run\",\"vector\":[0.1,0.2],\"truncated\":false}]}";
+    server = startServer("/embed", 200, body);
+
+    AstServiceClient client = new AstServiceClient(propsFor(server));
+    List<FunctionEmbedding> result =
+        client.embed("Main.java", "class Main { void run() {}}", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0).qualifiedName()).isEqualTo("Main.run");
+    assertThat(result.get(0).vector()).containsExactly(0.1f, 0.2f);
+    assertThat(result.get(0).truncated()).isFalse();
+
+  }
+
+  @Test
+  void embed_serviceReportsNonOkStatus_returnsEmptyList() throws IOException {
+
+    server = startServer("/embed", 200, "{\"status\":\"model_unavailable\",\"detail\":\"cold start\"}");
+
+    AstServiceClient client = new AstServiceClient(propsFor(server));
+    List<FunctionEmbedding> result =
+        client.embed("Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+
+    assertThat(result).isEmpty();
+
+  }
+
+  @Test
+  void embed_serviceReportsNon200_returnsEmptyList() throws IOException {
+
+    server = startServer("/embed", 503, "{\"error\":\"overloaded\"}");
+
+    AstServiceClient client = new AstServiceClient(propsFor(server));
+    List<FunctionEmbedding> result =
+        client.embed("Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+
+    assertThat(result).isEmpty();
+
+  }
+
+  @Test 
+  void embed_connectionRefused_returnsEmptyListRatherThanThrowing() {
+
+    PlagiarismAstProperties props = new PlagiarismAstProperties();
+    props.setBaseUrl("http://localhost:1");
+    props.setConnectTimeoutMs(500);
+    AstServiceClient client = new AstServiceClient(props);
+
+    List<FunctionEmbedding> result =
+        client.embed("Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+
+    assertThat(result).isEmpty();
+
+
+  }
+
 
 
 }
