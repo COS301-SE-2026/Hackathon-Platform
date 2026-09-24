@@ -75,4 +75,26 @@ class WinnowingTest {
     
   }
 
+  void jaccard_bothEmptySets_returnsZero() {
+
+    assertThat(winnowing.jaccard(Set.of(), Set.of())).isEqualTo(0.0);
+  }
+
+  @Test
+  void jaccard_partialOverlap_returnsExpectedRatio() {
+    Set<Long> a = Set.of(1L, 2L, 3L, 4L);
+    Set<Long> b = Set.of(3L, 4L, 5L, 6L);
+
+    assertThat(winnowing.jaccard(a,b)).isCloseTo(2.0/ 6.0, within(1e-9));
+
+  }
+
+  @Test
+  void jaccard_disjointNonEmptySets_returnsZero() {
+    Set<Long> a = Set.of(1L, 2L);
+    Set<Long> b = Set.of(3L, 4L);
+
+    assertThat(winnowing.jaccard(a,b)).isEqualTo(0.0);
+  }
+
 }
