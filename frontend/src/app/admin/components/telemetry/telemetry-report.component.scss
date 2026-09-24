@@ -220,3 +220,83 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+.content-column {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.ai-prediction-card {
+    border-color: #ddd5f7;
+    background: #fcfbff;
+}
+
+.ai-title,
+.ai-title i {
+    color: #4b2ca3;
+}
+
+.ai-score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.ai-score {
+    color: #32138c;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.ai-score {
+    color: #32138c;
+    font-size: 0.78rem;
+    margin-left: 8px;
+}
+
+.progress-fill.ai {
+    background: #7047d7;
+}
+
+.ai-review-badge {
+    background: rgba(192, 57, 43, 0.12);
+    color: #c0392b;
+    border-radius: 12px;
+    padding: 5px 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.ai-threshold {
+    margin-top: 14px;
+    span {
+        display: block;
+        color: #8b96ab;
+        font-size: 0.72rem;
+        margin-bottom: 3px;
+    }
+
+    strong {
+        color: #13192d;
+        font-size: 0.85rem;
+    }
+}
+
+.ai-info-card {
+    border-color: #cfe3f5;
+    background: #f8fbfe;
+
+    p {
+        margin: 0 0 10px 0;
+        color: #526079;
+        font-size: 0.82rem;
+        line-height: 1.5;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}

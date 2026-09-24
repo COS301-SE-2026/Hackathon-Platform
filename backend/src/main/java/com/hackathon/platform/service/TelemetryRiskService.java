@@ -2,7 +2,6 @@ package com.hackathon.platform.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -12,8 +11,8 @@ import java.util.UUID;
 public class TelemetryRiskService {
     private static final String SCORING_VERSION = "BEHAVIOR_V1";
     private final TelemetryFeatureService featureService;
+    private final AiModelClient aiClient;
 
-    @Transactional(readOnly = true)
     public TelemetryRiskReport analyze(UUID workspaceId, UUID userId) {
         TelemetryFeatureService.TelemetryFeatures features = featureService.extractFeatures(workspaceId, userId);
 
@@ -24,7 +23,8 @@ public class TelemetryRiskService {
                 "INSUFFICIENT_DATA",
                 0,
                 List.of("There is not enough telemetry to perform behavioral analysis"),
-                features
+                features,
+                null
             );
         }
 
@@ -44,13 +44,16 @@ public class TelemetryRiskService {
             indicators.add("no indicators were triggered");
         }
 
+        AiModelClient.AiPredictionResponse aiPrediction = aiClient.predict(features).orElse(null);
+
         return new TelemetryRiskReport(
             SCORING_VERSION,
             riskScore,
             reviewLevel,
             evidenceConfidence,
             indicators,
-            features
+            features,
+            aiPrediction
         );
     }
 
@@ -169,5 +172,7 @@ public class TelemetryRiskService {
         return indicators;
     }
 
-    public record TelemetryRiskReport(String scoringVersion, int riskScore, String reviewLevel, int evidenceConfidence, List<String> indicators, TelemetryFeatureService.TelemetryFeatures features){}
+    public record TelemetryRiskReport(String scoringVersion, int riskScore, String reviewLevel, int evidenceConfidence, List<String> indicators, TelemetryFeatureService.TelemetryFeatures features, AiModelClient.AiPredictionResponse aiPrediction){}
+
+
 }

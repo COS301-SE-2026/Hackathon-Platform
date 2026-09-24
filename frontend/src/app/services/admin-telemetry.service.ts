@@ -49,6 +49,15 @@ export interface TelemetryRiskReport {
     evidenceConfidence: number;
     indicators: string[];
     features: TelemetryFeatures;
+    aiPrediction: AiPrediction | null;
+}
+
+export interface AiPrediction {
+    modelVersion: string;
+    aiAssistanceLikelihood: number;
+    aiAssistanceLikelihoodPercent: number;
+    reviewThreshold: number;
+    flaggedForReview: boolean;
 }
 
 @Injectable({
