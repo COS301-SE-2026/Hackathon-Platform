@@ -1,18 +1,28 @@
 package com.hackathon.platform.service;
 
+import com.hackathon.platform.certificate.CertificateGenerator;
+import com.hackathon.platform.certificate.CertificateRecipientResolver;
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.dto.CertificateTemplateRequest;
+import com.hackathon.platform.model.CertificateTemplate;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Hackathon;
 import com.hackathon.platform.model.User;
-import com.hackathon.platform.repository.EventRegistrationRepository;
-import com.hackathon.platform.repository.EventRepository;
-import com.hackathon.platform.repository.HackathonRepository;
+import com.hackathon.platform.repository.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
+import com.hackathon.platform.storage.BlobPath;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -22,6 +32,8 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class CertificateService {
@@ -32,23 +44,39 @@ public class CertificateService {
   private static final float[] GOLD = {0.72f, 0.58f, 0.20f};
   private static final float[] GREY = {0.35f, 0.38f, 0.45f};
 
+  private static final SecureRandom RANDOM = new SecureRandom();
+  private static final String VERIFICATION_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  private final String VERIFICATION_BASE_URL = "https://hackathonplatform.co.za/verify/";
+
   private final EventRepository eventRepo;
   private final HackathonRepository hackRepo;
   private final EventRegistrationRepository eventRegRepo;
   private final StorageService storageService;
+  private final TeamRepository teamRepository;
   private AzureBlobConfig blob;
+  private final CertificateTemplateRepository templateRepo;
+  private final CertificateGenerationRunRepository runRepo;
+  private final CertificateIssuedRepository issuedRepo;
+  private final CertificateRecipientResolver recipientResolver;
+  private final CertificateGenerator certificateGenerator;
 
   public CertificateService(
-      EventRepository eventRepo,
-      HackathonRepository hackRepo,
-      EventRegistrationRepository eventRegRepo,
-      StorageService storageService,
-      AzureBlobConfig blobConfig) {
+          EventRepository eventRepo,
+          HackathonRepository hackRepo,
+          EventRegistrationRepository eventRegRepo,
+          StorageService storageService,
+          AzureBlobConfig blobConfig, CertificateTemplateRepository templateRepo, CertificateGenerationRunRepository runRepo, CertificateIssuedRepository issuedRepo, CertificateRecipientResolver recipientResolver, CertificateGenerator certificateGenerator, TeamRepository teamRepository) {
     this.eventRepo = eventRepo;
     this.hackRepo = hackRepo;
     this.eventRegRepo = eventRegRepo;
     this.storageService = storageService;
     this.blob = blobConfig;
+    this.templateRepo = templateRepo;
+    this.runRepo = runRepo;
+    this.issuedRepo = issuedRepo;
+    this.recipientResolver = recipientResolver;
+    this.certificateGenerator = certificateGenerator;
+    this.teamRepository = teamRepository;
   }
 
   public byte[] genCertificate(UUID eventId, User user) {
@@ -239,5 +267,84 @@ public class CertificateService {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  @Transactional
+  public CertificateTemplate createTemplate(CertificateTemplateRequest req, UUID createdByUserId){
+    CertificateTemplate template = new CertificateTemplate();
+    template.setName(req.getName());
+    template.setEventId(req.getEventId());
+    template.setHackathonId(req.getHackathonId());
+    template.setLayout(req.getLayout());
+    template.setCreatedByUserId(createdByUserId);
+    return templateRepo.save(template);
+  }
+
+  @Transactional
+  public CertificateTemplate updateTemplate(UUID templateId, CertificateTemplateRequest req){
+    CertificateTemplate template = getTemplate(templateId);
+    template.setName(req.getName());
+    template.setLayout(req.getLayout());
+    template.setUpdatedAt(OffsetDateTime.now());
+    return templateRepo.save(template);
+  }
+
+  @Transactional
+  public String uploadBackground(UUID templateId, MultipartFile file){
+    CertificateTemplate template = getTemplate(templateId);
+    String storageKey = BlobPath.certificateBackground(templateId.toString(), file.getOriginalFilename());
+    storageService.upload(blob.getEventResourcesContainer(), storageKey, file);
+    template.setBackgroundStorageKey(storageKey);
+    template.setUpdatedAt(OffsetDateTime.now());
+    templateRepo.save(template);
+    return storageKey;
+  }
+
+  @Transactional(readOnly = true)
+  public String uploadTemplateAsset(UUID templateId, MultipartFile file){
+    getTemplate(templateId);
+    String storageKey = BlobPath.certificateAsset(templateId.toString(), file.getOriginalFilename());
+    storageService.upload(blob.getEventResourcesContainer(), storageKey, file);
+    return storageKey;
+  }
+
+  public String resolveAssetUrl(String storageKey){
+    return storageService.generatePresignedUrl(blob.getEventResourcesContainer(), storageKey, 60);
+  }
+
+  public Map<String, String> resolveTemplateAssetUrls(CertificateTemplate template){
+    Map<String, String> urls = new HashMap<>();
+    for(var el : template.getLayout().getElements()){
+      if("IMAGE".equals(el.getType()) && el.getImageStorageKey() != null){
+        urls.computeIfAbsent(el.getImageStorageKey(), this::resolveAssetUrl);
+      }
+    }
+    return urls;
+  }
+
+  @Transactional(readOnly = true)
+  public CertificateTemplate getTemplate(UUID templateId){
+    return templateRepo.findById(templateId).orElseThrow(() -> new IllegalArgumentException("Certificate template not found"));
+  }
+
+  @Transactional(readOnly = true)
+  public List<CertificateTemplate> getTemplatesForEvent(UUID eventId, UUID hackathonId){
+    List<CertificateTemplate> templates = templateRepo.findByEventId(eventId);
+    if(hackathonId != null){
+      templates.addAll(templateRepo.findByHackathonIdAndEventIdIsNull(hackathonId));
+    }
+    return templates;
+  }
+
+  @Transactional
+  public void deleteTemplate(UUID templateId){
+    templateRepo.deleteById(templateId);
+  }
+
+  public String resolveBackgroundUrl(CertificateTemplate template){
+    if(template.getBackgroundStorageKey() == null){
+      return null;
+    }
+    return storageService.generatePresignedUrl(blob.getEventResourcesContainer(), template.getBackgroundStorageKey(), 60);
   }
 }

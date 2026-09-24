@@ -78,6 +78,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/storage/events/*/logo")
                     .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/certificates/verify/**")
+                        .permitAll()
                     .requestMatchers("/actuator/health")
                     .permitAll()
                     .requestMatchers("/api/admin/**")
