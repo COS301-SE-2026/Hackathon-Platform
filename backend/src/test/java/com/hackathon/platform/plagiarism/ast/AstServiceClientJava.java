@@ -91,5 +91,74 @@ class AstServiceClientTest {
 
   }
 
+  @Test
+  void parse_serviceReturnsUnsupportedLanguage_isNotOk() throws IOException {
+
+    server = startServer("/parse", 200, "{\"status\":\"unsupported_language\",\"tokens\":[],\"functions\":[]}");
+
+    AstServiceClient client = new AstServiceClient(propsFor(server));
+    AstParseResponse response = client.parse("script.rb", "puts 1");
+
+    assertThat(response.isOk()).isFalse();
+    assertThat(response.status()).isEqualTo("unsupported_language");
+
+  }
+
+  @Test
+  void parse_serviceReturnsNon200_fallsBackToServiceUnavailable() throws IOException {
+
+    server = startServer("/parse", 500, "{\"error\":\"boom\"}");
+
+    AstServiceClient client = new AstServiceClient(propsFor(server));
+    AstParseResponse response = client.parse("Main.java", "class Main {}");
+
+    assertThat(response.status()).isEqualTo("service_unavailable");
+    assertThat(response.detail()).isEqualTo("http 500");
+
+  }
+
+  @Test 
+  void parse_connectionRefused_fallsBackToServiceUnavailable() {
+
+    PlagiarismAstProperties props = new PlagiarismAstProperties();
+    props.setBaseUrl("http://localhost:1");
+    props.setConnectTimeoutMs(500);
+    AstServiceClient client = new AstServiceClient(props);
+
+    AstParseResponse response = client.parse("Main.java", "class Main {}");
+
+    assertThat(response.status()).isEqualTo("service_unavailable");
+    assertThat(response.functions()).isEmpty();
+    assertThat(response.tokens()).isEmpty();
+
+  }
+
+  @Test
+  void parse_malformedJsonResponse_fallsBackToServiceUnavailable() throws IOException {
+
+    server = startServer("/parse", 200, "not json at all {{{");
+
+    AstServiceClient client = new AstServiceClient(propsFor(server));
+    AstParseResponse response = client.parse("Main.java", "class Main {}");
+
+    assertThat(response.status()).isEqualTo("service_unavailable");
+
+  }
+
+  @Test 
+  void embed_embeddingDisabled_returnsEmptyListWithoutCallingNetwork() {
+
+    PlagiarismAstProperties props = new PlagiarismAstProperties();
+    props.setEmbeddingEnabled(false);
+    AstServiceClient client = new AstServiceClient(props);
+
+    List<FunctionEmbedding> result =
+        client.embed("Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+
+    assertThat(result).isEmpty();
+
+  }
+
+
 
 }
