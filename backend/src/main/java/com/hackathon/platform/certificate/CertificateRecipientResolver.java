@@ -76,5 +76,27 @@ public class CertificateRecipientResolver{
         return recipients;
     }
 
+    private String certificateTypeForRank(Integer rank){
+        if(rank == null){
+            return "PARTICIPATION";
+        }
+        return switch (rank){
+            case 1 -> "WINNER";
+            case 2 -> "RUNNER_UP";
+            case 3 -> "THIRD_PLACE";
+            default -> "PARTICIPATION";
+        };
+    }
 
+    private String ordinal(int n){
+        if(n%100>=11&&n%100 <= 13){
+            return n + "th";
+        }
+        return switch(n%10){
+            case 1 -> n+"st";
+            case 2-> n+"nd";
+            case 3 -> n+"rd";
+            default -> n+"th";
+        };
+    }
 }
