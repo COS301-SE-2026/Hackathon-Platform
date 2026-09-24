@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -163,10 +163,12 @@ export class CertificatesComponent implements OnInit, OnDestroy {
       next: (event) => {
         this.event = event;
         this.isLoading = false;
+        this.change.markForCheck();
       },
       error: () => {
         this.errorMessage = 'Could not load the event';
         this.isLoading = false;
+        this.change.markForCheck();
       },
     });
   }
@@ -187,6 +189,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
           this.activeRun = running;
           this.startPolling();
         }
+        this.change.markForCheck();
       },
     });
   }
@@ -207,6 +210,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
         this.backgroundFile = null;
         this.assetUrlByKey = template.assetUrls || {};
         this.selectedElementIndex = null;
+        this.change.markForCheck();
       },
     });
   }
@@ -271,17 +275,19 @@ export class CertificatesComponent implements OnInit, OnDestroy {
               label: file.name,
               width: 150,
               height: 80,
-              x: this.canvasWidth/2-75,
-              y: this.canvasHeight/2-40,
+              x: this.canvasWidth / 2 - 75,
+              y: this.canvasHeight / 2 - 40,
               visibleForTypes: null,
             };
             this.layout.elements.push(element);
             this.selectedElementIndex = this.layout.elements.length-1;
             this.isUploadingAsset = false;
+            this.change.markForCheck();
         },
           error: () => {
             this.errorMessage = 'Could not upload the image';
             this.isUploadingAsset = false;
+            this.change.markForCheck();
           },
         });
       },
@@ -308,10 +314,12 @@ export class CertificatesComponent implements OnInit, OnDestroy {
         el.imageStorageKey = asset.storageKey;
         el.label = file.name;
         this.isUploadingAsset = false;
+        this.change.markForCheck();
       },
       error: () => {
         this.errorMessage = 'Could not upload the image';
         this.isUploadingAsset = false;
+        this.change.markForCheck();
       },
     });
   }
@@ -337,6 +345,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
           this.loadTemplates();
           subscriber.next(template.templateId);
           subscriber.complete();
+          this.change.markForCheck();
         },
         error: (err: unknown) => subscriber.error(err),
       });
@@ -458,6 +467,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
               this.backgroundUrl = updated.backgroundUrl;
               this.backgroundFile = null;
               this.finishSave();
+              this.change.markForCheck();
             },
             error: () => {
               this.errorMessage = 'Template saved, but background image failed to upload';
@@ -468,6 +478,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
           this.finishSave();
         }
         this.loadTemplates();
+        this.change.markForCheck();
       },
       error: () => {
         this.errorMessage = 'Couldnt save the template';
@@ -503,10 +514,12 @@ export class CertificatesComponent implements OnInit, OnDestroy {
         next: (run) => {
           this.activeRun = run;
           this.startPolling();
+          this.change.markForCheck();
         },
         error: () => {
           this.errorMessage = 'Could not start generation';
           this.isGenerating = false;
+          this.change.markForCheck();
         },
       });
   }
@@ -532,6 +545,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
             this.loadIssued();
             this.loadRuns();
           }
+          this.change.markForCheck();
         },
       });
     }, 2000);
