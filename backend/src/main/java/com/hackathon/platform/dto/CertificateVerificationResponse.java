@@ -28,4 +28,8 @@ public class CertificateVerificationResponse {
     this.rankAtIssue = rankAtIssue;
     this.issuedAt = issuedAt;
   }
+
+  public static CertificateVerificationResponse invalid(){
+    return new CertificateVerificationResponse(false, null, null, null, null, null);
+  }
 }

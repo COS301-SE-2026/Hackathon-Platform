@@ -13,7 +13,7 @@ public class CertificateRecipient {
   private final String recipientName;
   private final Integer rank;
   private final String certificateType;
-  private final Map<String, String> findValue;
+  private final Map<String, String> fieldValues;
 
   public CertificateRecipient(
       UUID userId,
@@ -27,6 +27,6 @@ public class CertificateRecipient {
     this.recipientName = recipientName;
     this.rank = rank;
     this.certificateType = certificateType;
-    this.findValue = fieldValues;
+    this.fieldValues = fieldValues;
   }
 }

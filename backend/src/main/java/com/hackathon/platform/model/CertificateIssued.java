@@ -22,6 +22,9 @@ public class CertificateIssued {
   private UUID certificateId;
 
   @Column(name = "run_id", nullable = false)
+  private UUID runId;
+
+  @Column(name = "template_id", nullable = false)
   private UUID templateId;
 
   @Column(name = "event_id", nullable = false)

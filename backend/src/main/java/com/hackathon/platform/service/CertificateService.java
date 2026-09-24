@@ -1,13 +1,12 @@
 package com.hackathon.platform.service;
 
 import com.hackathon.platform.certificate.CertificateGenerator;
+import com.hackathon.platform.certificate.CertificateRecipient;
 import com.hackathon.platform.certificate.CertificateRecipientResolver;
 import com.hackathon.platform.config.AzureBlobConfig;
 import com.hackathon.platform.dto.CertificateTemplateRequest;
-import com.hackathon.platform.model.CertificateTemplate;
-import com.hackathon.platform.model.Event;
-import com.hackathon.platform.model.Hackathon;
-import com.hackathon.platform.model.User;
+import com.hackathon.platform.dto.CertificateVerificationResponse;
+import com.hackathon.platform.model.*;
 import com.hackathon.platform.repository.*;
 
 import java.io.ByteArrayOutputStream;
@@ -31,6 +30,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -346,5 +346,144 @@ public class CertificateService {
       return null;
     }
     return storageService.generatePresignedUrl(blob.getEventResourcesContainer(), template.getBackgroundStorageKey(), 60);
+  }
+
+  @Transactional
+  public CertificateGenerationRun startGeneration(UUID eventId, UUID templateId, String scope, Integer topN, UUID requestedByUserId){
+    if(!eventRepo.existsById(eventId)){
+      throw new IllegalArgumentException("Event not found");
+    }
+    getTemplate(templateId);
+    CertificateGenerationRun run = new CertificateGenerationRun();
+    run.setEventId(eventId);
+    run.setTemplateId(templateId);
+    run.setScope(scope == null ? "ALL_PARTICIPANTS" : scope);
+    run.setTopN(topN);
+    run.setStatus("PENDING");
+    run.setRequestedByUserId(requestedByUserId);
+    run = runRepo.save(run);
+    runGeneration(run.getRunId());
+    return run;
+  }
+
+  @Async
+  @Transactional
+  public void runGeneration(UUID runId) {
+    CertificateGenerationRun run = runRepo.findById(runId).orElse(null);
+    if(run == null){
+      return;
+    }
+    try{
+      run.setStatus("RUNNING");
+      runRepo.save(run);
+      Event event = eventRepo.findById(run.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+      CertificateTemplate template = getTemplate(run.getTemplateId());
+      byte[] backgroundBytes = null;
+      if(template.getBackgroundStorageKey() != null){
+        backgroundBytes = storageService.download(blob.getEventResourcesContainer(), template.getBackgroundStorageKey()).readAllBytes();
+      }
+      Map<String, byte[]> imageAssetBytes = new HashMap<>();
+      for(var el : template.getLayout().getElements()){
+        if("IMAGE".equals(el.getType()) && el.getImageStorageKey() != null){
+          imageAssetBytes.computeIfAbsent(el.getImageStorageKey(), key -> {
+            try {
+              return storageService.download(blob.getEventResourcesContainer(), key).readAllBytes();
+            } catch (IOException e) {
+              return null;
+            }
+          });
+        }
+      }
+
+      List<CertificateRecipient> recipients = recipientResolver.resolve(event, run.getScope(), run.getTopN());
+      run.setTotalCount(recipients.size());
+      runRepo.save(run);
+
+      int completed = 0;
+      for (CertificateRecipient recipient : recipients){
+        issueOne(run, template, backgroundBytes, imageAssetBytes, recipient, event);
+        completed++;
+        run.setCompletedCount(completed);
+        runRepo.save(run);
+      }
+
+      run.setStatus("COMPLETED");
+      run.setCompletedAt(OffsetDateTime.now());
+      runRepo.save(run);
+    } catch (Exception e) {
+      run.setStatus("FAILED");
+      run.setErrorMessage(e.getMessage());
+      run.setCompletedAt(OffsetDateTime.now());
+      runRepo.save(run);
+    }
+  }
+
+  private void issueOne(CertificateGenerationRun run, CertificateTemplate template, byte[] backgroundBytes, Map<String, byte[]> imageAssetBytes, CertificateRecipient recipient, Event event) throws Exception {
+    UUID certificateId = UUID.randomUUID();
+    String verificationCode = generateVerificationCode();
+    String verificationUrl = VERIFICATION_BASE_URL + verificationCode;
+
+    byte[] pdfBytes = certificateGenerator.generate(template.getLayout(), backgroundBytes, imageAssetBytes, recipient.getFieldValues(), verificationUrl, recipient.getCertificateType());
+    String storageKey = BlobPath.certificatePdf(event.getEventId().toString(), run.getRunId().toString(), certificateId.toString());
+    storageService.uploadBytes(blob.getEventResourcesContainer(), storageKey, pdfBytes, "application/pdf");
+
+    CertificateIssued issued = new CertificateIssued();
+    issued.setCertificateId(certificateId);
+    issued.setRunId((run.getRunId()));
+    issued.setTemplateId(template.getTemplateId());
+    issued.setEventId(event.getEventId());
+    issued.setTeamId(recipient.getTeamId());
+    issued.setUserId(recipient.getUserId());
+    issued.setCertificateType(recipient.getCertificateType());
+    issued.setRecipientName(recipient.getRecipientName());
+    issued.setRankAtIssue(recipient.getRank());
+    issued.setStorageKey(storageKey);
+    issued.setVerificationCode(verificationCode);
+    issuedRepo.save(issued);
+  }
+
+  private String generateVerificationCode(){
+    String code;
+    do{
+      StringBuilder sb = new StringBuilder(10);
+      for (int i=0; i<10;i++){
+        sb.append(VERIFICATION_ALPHABET.chatAt(RANDOM.nextInt(VERIFICATION_ALPHABET.length())));
+      }
+      code = sb.toString();
+    } while (issuedRepo.existsByVerificationCode(code));
+    return code;
+  }
+
+  @Transactional(readOnly = true)
+  public CertificateGenerationRun getRun(UUID runId){
+    return runRepo.findById(runId).orElseThrow(() -> new IllegalArgumentException("Generation run not found"));
+  }
+
+  @Transactional(readOnly = true)
+  public List<CertificateGenerationRun> getRunsForEvent(UUID eventId){
+    return runRepo.findByEventIdOrderByRequestedAtDesc(eventId);
+  }
+
+  @Transactional(readOnly = true)
+  public List<CertificateIssued> getIssuedForUser(UUID userId, List<UUID> teamIds){
+    return issuedRepo.findByUserIdOrTeamIdInOrderByIssuedAtDesc(userId, teamIds);
+  }
+
+  @Transactional(readOnly = true)
+  public CertificateIssued getIssued(UUID certificateId){
+    return issuedRepo.findById(certificateId).orElseThrow(() -> new IllegalArgumentException("Certificate not found"));
+  }
+
+  public String resolveDownloadUrl(CertificateIssued cert){
+    return storageService.generatePresignedUrl(blob.getEventResourcesContainer(), cert.getStorageKey(), 60, "certificate-"+cert.getRecipientName().replace(" ", "-")+".pdf");
+  }
+
+  @Transactional(readOnly = true)
+  public CertificateVerificationResponse verify(String verificationCode){
+    return issuedRepo.findByVerificationCode(verificationCode).map(
+            cert -> {
+              Event event = eventRepo.findById(cert.getEventId()).orElse(null);
+              return new CertificateVerificationResponse(true, cert.getRecipientName(), event == null ? "Unknown event" : event.getName(), cert.getCertificateType(), cert.getRankAtIssue(), cert.getIssuedAt());
+            }).orElse(CertificateVerificationResponse.invalid());
   }
 }
