@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CertificateGenerationRunRepository extends JpaRepository<CertificateGenerationRun, UUID>{
-    List<CertificateGenerationRun> findByEventIdOrderByRequestedAtDesc(UUID eventId);
+public interface CertificateGenerationRunRepository
+    extends JpaRepository<CertificateGenerationRun, UUID> {
+  List<CertificateGenerationRun> findByEventIdOrderByRequestedAtDesc(UUID eventId);
 }

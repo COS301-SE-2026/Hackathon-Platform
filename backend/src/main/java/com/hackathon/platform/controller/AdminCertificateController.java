@@ -1,12 +1,12 @@
 package com.hackathon.platform.controller;
 
+import com.hackathon.platform.dto.CertificateAssetResponse;
 import com.hackathon.platform.dto.CertificateGenerationRunResponse;
 import com.hackathon.platform.dto.CertificateIssuedResponse;
 import com.hackathon.platform.dto.CertificateTemplateRequest;
 import com.hackathon.platform.dto.CertificateTemplateResponse;
 import com.hackathon.platform.dto.GenerateCertificatesRequest;
 import com.hackathon.platform.model.CertificateGenerationRun;
-import com.hackathon.platform.model.CertificateIssued;
 import com.hackathon.platform.model.CertificateTemplate;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.service.CertificateService;
@@ -26,93 +26,119 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.hackathon.platform.dto.CertificateAssetResponse;
 
 @RestController
-@RequestMapping
+@RequestMapping("/api/admin/certificates")
 public class AdminCertificateController {
-    private final CertificateService certificateService;
-    public AdminCertificateController(CertificateService cert){
-        this.certificateService = cert;
-    }
+  private final CertificateService certificateService;
 
-    @PostMapping("/templates")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CertificateTemplateResponse> createTemplate(@Valid @RequestBody CertificateTemplateRequest req, @AuthenticationPrincipal User user){
-        CertificateTemplate template = certificateService.createTemplate(req, user.getUserId());
-        return ResponseEntity.ok(toResponse(template));
-    }
+  public AdminCertificateController(CertificateService cert) {
+    this.certificateService = cert;
+  }
 
-    @GetMapping("/templates")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<CertificateTemplateResponse>> getTemplates(@RequestParam UUID eventId, @RequestParam(required = false) UUID hackathonId) {
-        List<CertificateTemplateResponse> resp = certificateService.getTemplatesForEvent(eventId, hackathonId).stream().map(this::toResponse).toList();
-        return ResponseEntity.ok(resp);
-    }
+  @PostMapping("/templates")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<CertificateTemplateResponse> createTemplate(
+      @Valid @RequestBody CertificateTemplateRequest req, @AuthenticationPrincipal User user) {
+    CertificateTemplate template = certificateService.createTemplate(req, user.getUserId());
+    return ResponseEntity.ok(toResponse(template));
+  }
 
-    @GetMapping("/templates/{templateId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CertificateTemplateResponse> getTemplate(@PathVariable UUID templateId){
-        return ResponseEntity.ok(toResponse(certificateService.getTemplate(templateId)));
-    }
+  @GetMapping("/templates")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<List<CertificateTemplateResponse>> getTemplates(
+      @RequestParam UUID eventId, @RequestParam(required = false) UUID hackathonId) {
+    List<CertificateTemplateResponse> resp =
+        certificateService.getTemplatesForEvent(eventId, hackathonId).stream()
+            .map(this::toResponse)
+            .toList();
+    return ResponseEntity.ok(resp);
+  }
 
-    @PutMapping("/templates/{templateId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CertificateTemplateResponse> updateTemplate(@PathVariable UUID templateId, @Valid @RequestBody CertificateTemplateRequest req){
-        CertificateTemplate template = certificateService.updateTemplate(templateId, req);
-        return ResponseEntity.ok(toResponse(template));
-    }
+  @GetMapping("/templates/{templateId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<CertificateTemplateResponse> getTemplate(@PathVariable UUID templateId) {
+    return ResponseEntity.ok(toResponse(certificateService.getTemplate(templateId)));
+  }
 
-    @DeleteMapping("/templates{templateId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteTemplate(@PathVariable UUID templateId){
-        certificateService.deleteTemplate(templateId);
-        return ResponseEntity.noContent().build();
-    }
+  @PutMapping("/templates/{templateId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<CertificateTemplateResponse> updateTemplate(
+      @PathVariable UUID templateId, @Valid @RequestBody CertificateTemplateRequest req) {
+    CertificateTemplate template = certificateService.updateTemplate(templateId, req);
+    return ResponseEntity.ok(toResponse(template));
+  }
 
-    @PostMapping("templates/{templateId}/background")
-    @PreAuthorize("hasRole('ADMON')")
-    public ResponseEntity<CertificateTemplateResponse> uploadBackground(@PathVariable UUID templateId, @RequestParam("file") MultipartFile file){
-        certificateService.uploadBackground(templateId, file);
-        return ResponseEntity.ok(toResponse(certificateService.getTemplate(templateId)));
-    }
+  @DeleteMapping("/templates{templateId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> deleteTemplate(@PathVariable UUID templateId) {
+    certificateService.deleteTemplate(templateId);
+    return ResponseEntity.noContent().build();
+  }
 
-    @PostMapping("/templates/{templateId}/assets")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CertificateAssetResponse> uploadAsset(@PathVariable UUID templateId, @RequestParam("file") MultipartFile file){
-        String storageKey = certificateService.uploadTemplateAsset(templateId, file);
-        String url = certificateService.resolveAssetUrl(storageKey);
-        return ResponseEntity.ok(new CertificateAssetResponse(storageKey, url));
-    }
+  @PostMapping("templates/{templateId}/background")
+  @PreAuthorize("hasRole('ADMON')")
+  public ResponseEntity<CertificateTemplateResponse> uploadBackground(
+      @PathVariable UUID templateId, @RequestParam("file") MultipartFile file) {
+    certificateService.uploadBackground(templateId, file);
+    return ResponseEntity.ok(toResponse(certificateService.getTemplate(templateId)));
+  }
 
-    @PostMapping("/events/{eventId}/generate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CertificateGenerationRunResponse> generate(@PathVariable UUID eventId, @Valid @RequestBody GenerateCertificatesRequest req, @AuthenticationPrincipal User user){
-        CertificateGenerationRun run = certificateService.startGeneration(eventId, req.getTemplateId(), req.getScope(), req.getTopN(), user.getUserId());
-        return ResponseEntity.ok(new CertificateGenerationRunResponse(run));
-    }
+  @PostMapping("/templates/{templateId}/assets")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<CertificateAssetResponse> uploadAsset(
+      @PathVariable UUID templateId, @RequestParam("file") MultipartFile file) {
+    String storageKey = certificateService.uploadTemplateAsset(templateId, file);
+    String url = certificateService.resolveAssetUrl(storageKey);
+    return ResponseEntity.ok(new CertificateAssetResponse(storageKey, url));
+  }
 
-    @GetMapping("/events/{eventId}/runs")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<CertificateGenerationRunResponse>> getRuns(@PathVariable UUID eventId){
-        List<CertificateGenerationRunResponse> resp = certificateService.getRunsForEvent(eventId).stream().map(CertificateGenerationRunResponse::new).toList();
-        return ResponseEntity.ok(resp);
-    }
+  @PostMapping("/events/{eventId}/generate")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<CertificateGenerationRunResponse> generate(
+      @PathVariable UUID eventId,
+      @Valid @RequestBody GenerateCertificatesRequest req,
+      @AuthenticationPrincipal User user) {
+    CertificateGenerationRun run =
+        certificateService.startGeneration(
+            eventId, req.getTemplateId(), req.getScope(), req.getTopN(), user.getUserId());
+    return ResponseEntity.ok(new CertificateGenerationRunResponse(run));
+  }
 
-    @GetMapping("/runs/{runId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CertificateGenerationRunResponse> getRun(@PathVariable UUID runId) {
-        return ResponseEntity.ok(new CertificateGenerationRunResponse(certificateService.getRun(runId)));
-    }
+  @GetMapping("/events/{eventId}/runs")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<List<CertificateGenerationRunResponse>> getRuns(
+      @PathVariable UUID eventId) {
+    List<CertificateGenerationRunResponse> resp =
+        certificateService.getRunsForEvent(eventId).stream()
+            .map(CertificateGenerationRunResponse::new)
+            .toList();
+    return ResponseEntity.ok(resp);
+  }
 
-    @GetMapping("/events/{eventId}/issued")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<CertificateIssuedResponse>> getIssued(@PathVariable UUID eventId) {
-        List<CertificateIssuedResponse> resp = certificateService.getIssuedForEvent(eventId).stream().map(cert -> new CertificateIssuedResponse(cert, certificateService.resolveDownload(cert))).toList();
-        return ResponseEntity.ok(resp);
-    }
+  @GetMapping("/runs/{runId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<CertificateGenerationRunResponse> getRun(@PathVariable UUID runId) {
+    return ResponseEntity.ok(
+        new CertificateGenerationRunResponse(certificateService.getRun(runId)));
+  }
 
-    private CertificateTemplateResponse toResponse(CertificateTemplate template){
-        return new CertificateTemplateResponse(template, certificateService.resolveBackgroundUrl(template), certificateService.resolveTemplateAssetUrls(template));
-    }
+  @GetMapping("/events/{eventId}/issued")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<List<CertificateIssuedResponse>> getIssued(@PathVariable UUID eventId) {
+    List<CertificateIssuedResponse> resp =
+        certificateService.getIssuedForEvent(eventId).stream()
+            .map(
+                cert ->
+                    new CertificateIssuedResponse(cert, certificateService.resolveDownload(cert)))
+            .toList();
+    return ResponseEntity.ok(resp);
+  }
+
+  private CertificateTemplateResponse toResponse(CertificateTemplate template) {
+    return new CertificateTemplateResponse(
+        template,
+        certificateService.resolveBackgroundUrl(template),
+        certificateService.resolveTemplateAssetUrls(template));
+  }
 }

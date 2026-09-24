@@ -18,33 +18,33 @@ import org.hibernate.type.SqlTypes;
 @Getter
 @Setter
 public class CertificateTemplate {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "template_id", updatable = false, nullable = false)
-    private UUID templateId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "template_id", updatable = false, nullable = false)
+  private UUID templateId;
 
-    @Column(name = "event_id")
-    private UUID eventId;
+  @Column(name = "event_id")
+  private UUID eventId;
 
-    @Column(name = "hackathon_id")
-    private UUID hackathonId;
+  @Column(name = "hackathon_id")
+  private UUID hackathonId;
 
-    @Column(nullable = false, length = 255)
-    private String name;
+  @Column(nullable = false, length = 255)
+  private String name;
 
-    @Column(name = "background_storage_key", columnDefinition = "TEXT")
-    private String backgroundStorageKey;
+  @Column(name = "background_storage_key", columnDefinition = "TEXT")
+  private String backgroundStorageKey;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(nullable  = false, columnDefinition = "jsonb")
-    private CertificateLayout layout;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(nullable = false, columnDefinition = "jsonb")
+  private CertificateLayout layout;
 
-    @Column(name = "created_by_user_id", nullable = false)
-    private UUID createdByUserId;
+  @Column(name = "created_by_user_id", nullable = false)
+  private UUID createdByUserId;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+  @Column(name = "created_at", nullable = false)
+  private OffsetDateTime createdAt = OffsetDateTime.now();
 
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt = OffsetDateTime.now();
+  @Column(name = "updated_at", nullable = false)
+  private OffsetDateTime updatedAt = OffsetDateTime.now();
 }

@@ -9,9 +9,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CertificateTemplateRequest{
-    @NotBlank private String name;
-    private UUID eventId;
-    private UUID hackathonId;
-    @NotNull private CertificateLayout layout;
+public class CertificateTemplateRequest {
+  @NotBlank private String name;
+  private UUID eventId;
+  private UUID hackathonId;
+  @NotNull private CertificateLayout layout;
 }

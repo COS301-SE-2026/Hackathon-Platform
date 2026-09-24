@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GenerateCertificatesRequest {
-    @NotNull private UUID templateId;
-    private String scope = "ALL_PARTICIPANTS";
-    private Integer topN;
+  @NotNull private UUID templateId;
+  private String scope = "ALL_PARTICIPANTS";
+  private Integer topN;
 }
