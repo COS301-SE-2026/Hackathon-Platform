@@ -693,5 +693,123 @@ class PlagiarismCheckServiceTest {
 
   }
 
+  @Test
+  void getDiff_functionEmbeddingsAboveThreshold_returnsMatchedFunctionsWithResolvedSpans() {
+
+
+    Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
+    Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
+
+    when(submissionRepo.findById(1L)).thenReturn(Optional.of(subA));
+    when(submissionRepo.findById(2L)).thenReturn(Optional.of(subB));
+
+    when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.download("submissions", "key-a"))
+        .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
+    when(storageService.download("submissions", "key-b"))
+        .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
+    
+    
+    AstFunctionSpan spanA = new AstFunctionSpan("A.run", "method", 0, 10, 1, 2);
+    AstFunctionSpan spanB = new AstFunctionSpan("B.run", "method", 0, 10, 1, 2);
+    when(structuralNormalizer.normalize("a.java", "code-a"))
+        .thenReturn(
+            StructuralNormalizationResult.ast(List.of(), List.of(spanA))
+        );
+    when(structuralNormalizer.normalize("b.java", "code-b"))
+        .thenReturn(
+            StructuralNormalizationResult.ast(List.of(), List.of(spanB))
+        );
+        
+    FingerprintResult emptyFp = new FingerprintResult(1, Set.of());
+
+    when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(emptyFp, emptyFp);
+    when(winnowing.jaccard(any(), any())).thenReturn(0.0);
+
+    StoredEmbedding storedA = new StoredEmbedding(1L, "A.run", new float[] {1f, 0f});
+    StoredEmbedding storedB = new StoredEmbedding(2L, "B.run", new float[] {1f, 0f});
+
+    when(functionEmbeddingStore.findBySubmissionId(1L)).thenReturn(List.of(storedA));
+    when(functionEmbeddingStore.findBySubmissionId(2L)).thenReturn(List.of(storedB));
+
+    when(similarityRepo.findByEventIdAndLevelIdOrderByCombinedScoreDesc(EVENT_ID, LEVEL_ID))
+        .thenReturn(List.of());
+    when(functionEmbeddingStore.findBySubmissionIds(anyList())).thenReturn(List.of(storedA, storedB));
+    when(embeddingSimilarityCalculator.meanVector(anyList())).thenReturn(new float[] {0f, 0f});
+    when(embeddingSimilarityCalculator.centerAll(List.of(storedA), new float[] {0f, 0f}))
+        .thenReturn(List.of(storedA));
+    when(embeddingSimilarityCalculator.centerAll(List.of(storedB), new float[] {0f, 0f}))
+        .thenReturn(List.of(storedB));
+    when(embeddingSimilarityCalculator.topFunctionMatches(
+        List.of(storedA), List.of(storedB), props.getFunctionMatchThreshold(), props.getMaxFunctionMatches()))
+        .thenReturn(List.of(new FunctionMatch("A.run", "B.run", 0.95)
+    ));
+
+    PlagiarismDiffResponse diff = service.getDiff(1L, 2L);
+
+    assertThat(diff.semanticStatus()).isEqualTo(PlagiarismDiffResponse.SemanticStatus.MATCHED);
+    assertThat(diff.functionMatches()).hasSize(1);
+    assertThat(diff.functionMatches().get(0).functionNameA()).isEqualTo("A.run");
+    assertThat(diff.functionMatches().get(0).fileNameA()).isEqualTo("a.java");
+    assertThat(diff.functionMatches().get(0).functionNameB()).isEqualTo("B.run");
+    assertThat(diff.functionMatches().get(0).fileNameB()).isEqualTo("b.java");
+    assertThat(diff.functionMatches().get(0).similarity()).isEqualTo(0.95);
+
+
+  }
+
+  @Test
+  void getDiff_noMatchesAboveThreshold_returnsEmptyListWithThatStatus() {
+
+
+    Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
+    Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
+    subA.setLevelId(LEVEL_ID);
+    subA.setEventId(EVENT_ID);
+
+    when(submissionRepo.findById(1L)).thenReturn(Optional.of(subA));
+    when(submissionRepo.findById(2L)).thenReturn(Optional.of(subB));
+
+    when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
+    when(storageService.download("submissions", "key-a"))
+        .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
+    when(storageService.download("submissions", "key-b"))
+        .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
+    
+    
+    when(structuralNormalizer.normalize(any(), any()))
+        .thenReturn(
+            StructuralNormalizationResult.lexer(List.of())
+        );
+        
+    FingerprintResult emptyFp = new FingerprintResult(1, Set.of());
+
+    when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(emptyFp, emptyFp);
+    when(winnowing.jaccard(any(), any())).thenReturn(0.0);
+
+    StoredEmbedding storedA = new StoredEmbedding(1L, "A.run", new float[] {1f, 0f});
+    StoredEmbedding storedB = new StoredEmbedding(2L, "B.run", new float[] {1f, 0f});
+
+    when(functionEmbeddingStore.findBySubmissionId(1L)).thenReturn(List.of(storedA));
+    when(functionEmbeddingStore.findBySubmissionId(2L)).thenReturn(List.of(storedB));
+
+    when(similarityRepo.findByEventIdAndLevelIdOrderByCombinedScoreDesc(EVENT_ID, LEVEL_ID))
+        .thenReturn(List.of());
+    when(functionEmbeddingStore.findBySubmissionIds(anyList())).thenReturn(List.of(storedA, storedB));
+    when(embeddingSimilarityCalculator.meanVector(anyList())).thenReturn(new float[] {0f, 0f});
+    when(embeddingSimilarityCalculator.centerAll(any(), any()))
+        .thenReturn(List.of());
+    when(embeddingSimilarityCalculator.topFunctionMatches(
+        any(), any(), anyDouble(), anyInt()))
+        .thenReturn(List.of()
+    );
+
+    PlagiarismDiffResponse diff = service.getDiff(1L, 2L);
+
+    assertThat(diff.semanticStatus()).isEqualTo(PlagiarismDiffResponse.SemanticStatus.NO_MATCHES_ABOVE_THRESHOLD);
+    assertThat(diff.functionMatches()).isEmpty();
+
+  }
+
 
 }
