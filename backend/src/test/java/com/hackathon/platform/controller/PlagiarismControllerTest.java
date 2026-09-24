@@ -87,5 +87,110 @@ class PlagiarismControllerTest {
             participantUser, null, List.of(new SimpleGrantedAuthority("ROLE_PARTICIPANT")));
   }
 
-  
+  @Test
+  void triggerRun_asAdmin_returns202WithRunId() throws Exception {
+    
+    PlagiarismRunRequest request = new PlagiarismRunRequest((short) 3, 15);
+    when(producer.enqueue(eq(EVENT_ID), eq(Short.valueOf((short) 3)), eq(15), eq(USER_ID)))
+        .thenReturn(42L);
+
+    mockMvc
+        .perform(
+            post("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
+                .with(authentication(adminAuth))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.runId").value(42));
+
+  }
+
+  @Test
+  void triggerRun_withNoBody_usesDefaultTopN() throws Exception {
+
+    when(producer.enqueue(eq(EVENT_ID), isNull(), anyInt(), eq(USER_ID))).thenReturn(7L);
+
+    mockMvc
+        .perform(
+            post("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
+                .with(authentication(adminAuth))
+        )
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.runId").value(7));
+
+  }
+
+  @Test
+  void triggerRun_asParticipant_returns403() throws Exception {
+    mockMvc
+        .perform(
+            post("api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
+                .with(authentication(participantAuth))
+        )
+        .andExpect(status().isForbidden());
+
+  }
+
+  @Test
+  void listRuns_asAdmin_returnsRunsOrderedByRequestedAt() throws Exception {
+    PlagiarismRun run = new PlagiarismRun(EVENT_ID, (short) 1, 20, USER_ID);
+    when(runRepo.findByEventIdOrderByRequestedAtDesc(EVENT_ID)).thenReturn(List.of(run));
+
+    mockMvc
+        .perform(
+            get("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
+                .with(authentication(adminAuth))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].status").value("QUEUED"))
+        .andExpect(jsonPath("$[0].topN").value(20));
+
+  }
+
+  @Test
+  void listRuns_asParticipant_returns403() throws Exception {
+
+    mockMvc
+        .perform(
+            get("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
+                .with(authentication(participantAuth))
+        )
+        .andExpect(status().isForbidden());
+
+  }
+
+  @Test
+  void getPairs_asAdmin_returnsSimilarityPairs() throws Exception {
+
+    SubmissionSimilarityResponse resp =
+        new SubmissionSimilarityResponse(
+            1L,
+            (short) 1,
+            10L,
+            11L,
+            UUID.randomUUID(),
+            "Team A",
+            UUID.randomUUID(),
+            "Team B",
+            new java.math.BigDecimal("0.70"),
+            new java.math.BigDecimal("0.50"),
+            new java.math.BigDecimal("0.62"),
+            8,
+            true,
+            Instant.now()
+        );
+    
+    when(checkService.getResults(EVENT_ID, (short) 1, false)).thenReturn(List.of(resp));
+
+    mockMvc
+        .perform(
+            get("/api/admin/events/{eventId}/plagiarism/pairs", EVENT_ID)
+                .with(authentication(participantAuth))
+        )
+        .andExpect(status().isForbidden());
+  }
+
+
 }
