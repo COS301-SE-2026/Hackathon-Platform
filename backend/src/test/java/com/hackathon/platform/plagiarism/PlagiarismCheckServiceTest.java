@@ -3,6 +3,7 @@ package com.hackathon.platform.plagiarism;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -20,9 +21,12 @@ import com.hackathon.platform.model.PlagiarismRun;
 import com.hackathon.platform.model.Submission;
 import com.hackathon.platform.model.SubmissionSimilarity;
 import com.hackathon.platform.model.Team;
+import com.hackathon.platform.plagiarism.ast.AstFunctionSpan;
 import com.hackathon.platform.plagiarism.embedding.EmbeddingService;
 import com.hackathon.platform.plagiarism.embedding.EmbeddingSimilarityCalculator;
+import com.hackathon.platform.plagiarism.embedding.EmbeddingSimilarityCalculator.FunctionMatch;
 import com.hackathon.platform.plagiarism.embedding.FunctionEmbeddingStore;
+import com.hackathon.platform.plagiarism.embedding.FunctionEmbeddingStore.StoredEmbedding;
 import com.hackathon.platform.plagiarism.fingerprint.Winnowing;
 import com.hackathon.platform.plagiarism.fingerprint.Winnowing.Fingerprint;
 import com.hackathon.platform.plagiarism.fingerprint.Winnowing.FingerprintResult;
@@ -49,6 +53,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 
 @ExtendWith(MockitoExtension.class)
 class PlagiarismCheckServiceTest {
