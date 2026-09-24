@@ -205,5 +205,44 @@ class PlagiarismControllerTest {
         .andExpect(status().isForbidden());
   }
 
+  @Test
+  void getDiff_asAdmin_returnsDiffResponse() throws Exception {
+    PlagiarismDiffResponse diff =
+        new PlagiarismDiffResponse(
+            1L,
+            2L,
+            List.of(),
+            List.of(),
+            List.of(),
+            List.of(),
+            0.8,
+            List.of(),
+            PlagiarismDiffResponse.SemanticStatus.NO_MATCHES_ABOVE_THRESHOLD
+
+        );
+    when(checkService.getDiff(1L, 2L)).thenReturn(diff);
+
+    mockMvc
+        .perform(
+            get("/api/admin/plagiarism/diff")
+                .param("submissionIdA", "1")
+                .param("submissionIdB", "2")
+                .with(authentication(adminAuth))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.submissionIdA").value(1))
+        .andExpect(jsonPath("$.structuralScore").value(0.8))
+        .andExpect(jsonPath("$.semanticStatus").value("NO_MATCHES_ABOVE_THRESHOLD"));
+
+  }
+
+  @Test
+  void triggerRun_returns403WhenCallerIsNotAuthenticated() throws Exception{
+    mockMvc
+        .perform(post("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID))
+        .andExpect(status().isForbidden());
+
+  }
+ 
 
 }
