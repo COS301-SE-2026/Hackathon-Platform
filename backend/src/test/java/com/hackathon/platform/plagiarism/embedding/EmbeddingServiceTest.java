@@ -32,7 +32,7 @@ class EmbeddingServiceTest {
   }
 
   @Test
-  void embedAndStore_skipsFileWithNoFunctionSpans(){
+  void embedAndStore_skipsFileWithNoFunctionSpans() {
 
     service = new EmbeddingService(astClient, store);
 
@@ -43,11 +43,10 @@ class EmbeddingServiceTest {
 
     verify(astClient, never()).embed(anyString(), anyString(), any());
     verify(store).replaceEmbeddings(eq(1L), eq(List.of()));
-
   }
 
   @Test
-  void embedAndStore_skipsFunctionsWhoseFileContentIsMissing(){
+  void embedAndStore_skipsFunctionsWhoseFileContentIsMissing() {
 
     service = new EmbeddingService(astClient, store);
 
@@ -58,11 +57,10 @@ class EmbeddingServiceTest {
 
     verify(astClient, never()).embed(anyString(), anyString(), any());
     verify(store).replaceEmbeddings(eq(1L), eq(List.of()));
-
   }
 
   @Test
-  void embedAndStore_callsClientAndMapsResultsIntoStoreRows(){
+  void embedAndStore_callsClientAndMapsResultsIntoStoreRows() {
 
     service = new EmbeddingService(astClient, store);
 
@@ -84,7 +82,6 @@ class EmbeddingServiceTest {
     assertThat(rows.get(0).qualifiedName()).isEqualTo("Main.run");
     assertThat(rows.get(0).vector()).containsExactly(0.1f, 0.2f);
     assertThat(rows.get(0).truncated()).isFalse();
-
   }
 
   @Test
@@ -95,32 +92,28 @@ class EmbeddingServiceTest {
     Map<String, String> files =
         Map.of(
             "A.java", "class A { void one() {} }",
-            "B.java", "class B { void two() {} }"
-        );
-    
+            "B.java", "class B { void two() {} }");
+
     Map<String, List<AstFunctionSpan>> functions =
         Map.of(
             "A.java", List.of(span("A.one")),
-            "B.java", List.of(span("B.two"))
-        );
+            "B.java", List.of(span("B.two")));
 
     when(astClient.embed(eq("A.java"), anyString(), any()))
         .thenReturn(List.of(new FunctionEmbedding("A.one", new float[] {1f}, false)));
     when(astClient.embed(eq("B.java"), anyString(), any()))
         .thenReturn(List.of(new FunctionEmbedding("B.two", new float[] {2f}, false)));
-    
+
     service.embedAndStore(9L, files, functions);
 
     ArgumentCaptor<List<FunctionEmbeddingStore.Row>> captor = ArgumentCaptor.forClass(List.class);
     verify(store).replaceEmbeddings(eq(9L), captor.capture());
 
     assertThat(captor.getValue()).hasSize(2);
-
-
   }
 
   @Test
-  void embedAndStore_clientReturnsEmptyEmbeddings_stillReplacesWithEmptyList(){
+  void embedAndStore_clientReturnsEmptyEmbeddings_stillReplacesWithEmptyList() {
 
     service = new EmbeddingService(astClient, store);
 
@@ -133,9 +126,5 @@ class EmbeddingServiceTest {
     service.embedAndStore(1L, files, functions);
 
     verify(store).replaceEmbeddings(eq(1L), eq(List.of()));
-
-
   }
-
-
 }

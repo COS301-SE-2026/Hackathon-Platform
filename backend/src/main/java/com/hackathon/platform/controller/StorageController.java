@@ -638,13 +638,10 @@ public class StorageController {
               + resolveFileName(
                   submission.getSourceFileName(), submission.getSourceCodeStorageKey()));
       zipOut.finish();
-
     }
   }
 
-  /**
-   * Streams a single blob into the given ZIP output stream as a new entry.
-   */
+  /** Streams a single blob into the given ZIP output stream as a new entry. */
   private void addBlobToZip(
       ZipOutputStream zipOut, String containerName, String storageKey, String entryName)
       throws IOException {
@@ -660,11 +657,8 @@ public class StorageController {
     zipOut.putNextEntry(new ZipEntry(entryName));
     try (InputStream in = storageService.download(containerName, storageKey)) {
       in.transferTo(zipOut);
-      
     }
     zipOut.closeEntry();
-
-
   }
 
   private static String resolveFileName(String fileName, String storageKey) {

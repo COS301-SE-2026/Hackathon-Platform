@@ -16,34 +16,35 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EmbeddingService {
 
-    private final AstServiceClient astClient;
-    private final FunctionEmbeddingStore store;
+  private final AstServiceClient astClient;
+  private final FunctionEmbeddingStore store;
 
-    public void embedAndStore(
-        Long submissionId, Map<String, String> filesByName, Map<String, List<AstFunctionSpan>> functionsByFile
-    ) {
-        List<FunctionEmbeddingStore.Row> rows = new ArrayList<>();
+  public void embedAndStore(
+      Long submissionId,
+      Map<String, String> filesByName,
+      Map<String, List<AstFunctionSpan>> functionsByFile) {
+    List<FunctionEmbeddingStore.Row> rows = new ArrayList<>();
 
-        for (var entry : functionsByFile.entrySet()) {
-            String fileName = entry.getKey();
-            List<AstFunctionSpan> spans = entry.getValue();
-            if (spans.isEmpty()) {
-                continue;
-            }
+    for (var entry : functionsByFile.entrySet()) {
+      String fileName = entry.getKey();
+      List<AstFunctionSpan> spans = entry.getValue();
+      if (spans.isEmpty()) {
+        continue;
+      }
 
-            String content = filesByName.get(fileName);
-            if (content == null) {
-                continue;
-            }
+      String content = filesByName.get(fileName);
+      if (content == null) {
+        continue;
+      }
 
-            List<FunctionEmbedding> embeddings = astClient.embed(fileName, content, spans);
-            for (FunctionEmbedding e : embeddings) {
-                rows.add(new FunctionEmbeddingStore.Row(fileName, e.qualifiedName(), e.vector(), e.truncated()));
-
-            }
-        }
-
-        // Replace even when empty.
-        store.replaceEmbeddings(submissionId, rows);
+      List<FunctionEmbedding> embeddings = astClient.embed(fileName, content, spans);
+      for (FunctionEmbedding e : embeddings) {
+        rows.add(
+            new FunctionEmbeddingStore.Row(fileName, e.qualifiedName(), e.vector(), e.truncated()));
+      }
     }
+
+    // Replace even when empty.
+    store.replaceEmbeddings(submissionId, rows);
+  }
 }

@@ -28,12 +28,25 @@ class CodeNormalizerTest {
 
     List<String> cLikeNames =
         List.of(
-            "Main.java", "a.c", "a.h", "a.cpp", "a.hpp", "a.cs", "a.js", "a.ts", "a.jsx", "a.tsx",
-            "a.go", "a.rs", "a.kt", "a.swift"
-        );
-    
+            "Main.java",
+            "a.c",
+            "a.h",
+            "a.cpp",
+            "a.hpp",
+            "a.cs",
+            "a.js",
+            "a.ts",
+            "a.jsx",
+            "a.tsx",
+            "a.go",
+            "a.rs",
+            "a.kt",
+            "a.swift");
+
     for (String name : cLikeNames) {
-        assertThat(normalizer.detectLanguage(name)).as("extension of %s", name).isEqualTo(Lang.C_LIKE);
+      assertThat(normalizer.detectLanguage(name))
+          .as("extension of %s", name)
+          .isEqualTo(Lang.C_LIKE);
     }
   }
 
@@ -45,10 +58,9 @@ class CodeNormalizerTest {
   }
 
   @Test
-  void normalizeWithOffsets_nullSource_returnsEmptyList(){
+  void normalizeWithOffsets_nullSource_returnsEmptyList() {
 
     assertThat(normalizer.normalizeWithOffsets(null, Lang.C_LIKE, "f.java")).isEmpty();
-
   }
 
   @Test
@@ -57,7 +69,7 @@ class CodeNormalizerTest {
     assertThat(normalizer.normalizeWithOffsets("  \n\t", Lang.C_LIKE, "f.java")).isEmpty();
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_cLike_blockAndLineCommentsProduceNoTokens() {
 
     String source = "/* block\ncomment */ int /* mid */ x; // trailing\n";
@@ -67,7 +79,7 @@ class CodeNormalizerTest {
     assertThat(tokens).extracting(NormalizedToken::text).containsExactly("int", "ID", ";");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_cLike_stringLiteralBecomesStrToken() {
 
     String source = "x = \"hello, world\";";
@@ -77,47 +89,60 @@ class CodeNormalizerTest {
     assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "STR", ";");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_cLike_singleQuotesStringAlsoBecomesStrToken() {
 
-    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("char c = 'x';", Lang.C_LIKE, "f.java");
+    List<NormalizedToken> tokens =
+        normalizer.normalizeWithOffsets("char c = 'x';", Lang.C_LIKE, "f.java");
 
-    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("char", "ID", "=", "STR", ";");
+    assertThat(tokens)
+        .extracting(NormalizedToken::text)
+        .containsExactly("char", "ID", "=", "STR", ";");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_cLike_keywordsAreLowercasedAndPreserved() {
 
-    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("PUBLIC static Void run", Lang.C_LIKE, "f.java");
+    List<NormalizedToken> tokens =
+        normalizer.normalizeWithOffsets("PUBLIC static Void run", Lang.C_LIKE, "f.java");
 
-    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("public", "static", "void", "ID");
+    assertThat(tokens)
+        .extracting(NormalizedToken::text)
+        .containsExactly("public", "static", "void", "ID");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_cLike_unknownIdentifierBecomesIdToken() {
 
-    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("myVariableName", Lang.C_LIKE, "f.java");
+    List<NormalizedToken> tokens =
+        normalizer.normalizeWithOffsets("myVariableName", Lang.C_LIKE, "f.java");
 
     assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_cLike_numericLiteralBecomeNumToken() {
 
-    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("int x = 42; double y = 3.14f;", Lang.C_LIKE, "f.java");
+    List<NormalizedToken> tokens =
+        normalizer.normalizeWithOffsets("int x = 42; double y = 3.14f;", Lang.C_LIKE, "f.java");
 
-    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("int", "ID", "=", "NUM", ";", "double", "ID", "=", "NUM", ";");
+    assertThat(tokens)
+        .extracting(NormalizedToken::text)
+        .containsExactly("int", "ID", "=", "NUM", ";", "double", "ID", "=", "NUM", ";");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_cLike_multiCharSymbolsAreMatchedAsSingleTokens() {
 
-    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("a == b && c->d", Lang.C_LIKE, "f.java");
+    List<NormalizedToken> tokens =
+        normalizer.normalizeWithOffsets("a == b && c->d", Lang.C_LIKE, "f.java");
 
-    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "==", "ID", "&&", "ID", "->", "ID");
+    assertThat(tokens)
+        .extracting(NormalizedToken::text)
+        .containsExactly("ID", "==", "ID", "&&", "ID", "->", "ID");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_cLike_tokenOffsetsMatchOriginalSource() {
 
     String source = "int x;";
@@ -133,15 +158,16 @@ class CodeNormalizerTest {
     assertThat(tokens.get(2).end()).isEqualTo(6);
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_cLike_fileNameStampedOntoEveryToken() {
 
-    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("int x;", Lang.C_LIKE, "Main.java");
+    List<NormalizedToken> tokens =
+        normalizer.normalizeWithOffsets("int x;", Lang.C_LIKE, "Main.java");
 
     assertThat(tokens).extracting(NormalizedToken::fileName).containsOnly("Main.java");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_python_tripleQuotedStringProducesNoToken() {
 
     String source = "\"\"\"docstring\nspanning lines\"\"\"\nx = 1";
@@ -151,25 +177,28 @@ class CodeNormalizerTest {
     assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "NUM");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_python_tripleSingleQuoteAlsoProducesNoToken() {
 
-    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("'''doc'''\ny = 2", Lang.PYTHON, "f.py");
+    List<NormalizedToken> tokens =
+        normalizer.normalizeWithOffsets("'''doc'''\ny = 2", Lang.PYTHON, "f.py");
 
     assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "NUM");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_python_hashCommentProducesNoToken() {
 
     String source = "x = 1 # this is a comment\ny = 2";
 
     List<NormalizedToken> tokens = normalizer.normalizeWithOffsets(source, Lang.PYTHON, "f.py");
 
-    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "NUM", "ID", "=", "NUM");
+    assertThat(tokens)
+        .extracting(NormalizedToken::text)
+        .containsExactly("ID", "=", "NUM", "ID", "=", "NUM");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_python_stringLiteralBecomesStrToken() {
 
     List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("x = 'hi'", Lang.PYTHON, "f.py");
@@ -177,33 +206,41 @@ class CodeNormalizerTest {
     assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "STR");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_python_keywordsRecognized() {
 
-    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("def run(self):", Lang.PYTHON, "f.py");
+    List<NormalizedToken> tokens =
+        normalizer.normalizeWithOffsets("def run(self):", Lang.PYTHON, "f.py");
 
-    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("def", "ID", "(", "self", ")", ":");
+    assertThat(tokens)
+        .extracting(NormalizedToken::text)
+        .containsExactly("def", "ID", "(", "self", ")", ":");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_unknownLang_recognizesBothCommentStyles() {
 
     String source = "x = 1 // c-style\ny = 2 # python-style\n/* block */ z = 3";
 
     List<NormalizedToken> tokens = normalizer.normalizeWithOffsets(source, Lang.UNKNOWN, "f.txt");
 
-    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "NUM", "ID", "=", "NUM", "ID", "=", "NUM");
+    assertThat(tokens)
+        .extracting(NormalizedToken::text)
+        .containsExactly("ID", "=", "NUM", "ID", "=", "NUM", "ID", "=", "NUM");
   }
 
-  @Test 
+  @Test
   void normalizeWithOffsets_unknownLang_classifiesLiteralAndSymbolsLikeCLike() {
 
-    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("total += 1;", Lang.UNKNOWN, "f.txt");
+    List<NormalizedToken> tokens =
+        normalizer.normalizeWithOffsets("total += 1;", Lang.UNKNOWN, "f.txt");
 
-    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "+", "=", "NUM", ";");
+    assertThat(tokens)
+        .extracting(NormalizedToken::text)
+        .containsExactly("ID", "+", "=", "NUM", ";");
   }
 
-  @Test 
+  @Test
   void normalize_returnsJustTokenTextsInOrder() {
 
     List<String> texts = normalizer.normalize("int x = 1;", Lang.C_LIKE);
@@ -212,8 +249,7 @@ class CodeNormalizerTest {
   }
 
   @Test
-  void normalize_blankSource_returnsEmptyList(){
+  void normalize_blankSource_returnsEmptyList() {
     assertThat(normalizer.normalize("", Lang.C_LIKE)).isEmpty();
   }
-
 }

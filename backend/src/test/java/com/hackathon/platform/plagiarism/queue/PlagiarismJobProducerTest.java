@@ -42,15 +42,12 @@ class PlagiarismJobProducerTest {
     when(runRepo.save(any(PlagiarismRun.class)))
         .thenAnswer(
             invocation -> {
-
-                PlagiarismRun run = invocation.getArgument(0);
-                java.lang.reflect.Field idField = PlagiarismRun.class.getDeclaredField("id");
-                idField.setAccessible(true);
-                idField.set(run, 55L);
-                return run;
-
-            }
-        );
+              PlagiarismRun run = invocation.getArgument(0);
+              java.lang.reflect.Field idField = PlagiarismRun.class.getDeclaredField("id");
+              idField.setAccessible(true);
+              idField.set(run, 55L);
+              return run;
+            });
 
     when(redis.opsForStream()).thenReturn((StreamOperations) streamOps);
     when(streamOps.add(eq(props.getQueue().getStreamKey()), any(Map.class)))
@@ -61,7 +58,6 @@ class PlagiarismJobProducerTest {
     assertThat(runId).isEqualTo(55L);
     verify(runRepo).save(any(PlagiarismRun.class));
     verify(streamOps).add(eq(props.getQueue().getStreamKey()), eq(Map.of("runId", "55")));
-
   }
 
   @Test
@@ -76,14 +72,12 @@ class PlagiarismJobProducerTest {
     when(runRepo.save(any(PlagiarismRun.class)))
         .thenAnswer(
             invocation -> {
-
-                PlagiarismRun run = invocation.getArgument(0);
-                java.lang.reflect.Field idField = PlagiarismRun.class.getDeclaredField("id");
-                idField.setAccessible(true);
-                idField.set(run, 9L);
-                return run;
-            }
-        );
+              PlagiarismRun run = invocation.getArgument(0);
+              java.lang.reflect.Field idField = PlagiarismRun.class.getDeclaredField("id");
+              idField.setAccessible(true);
+              idField.set(run, 9L);
+              return run;
+            });
 
     when(redis.opsForStream()).thenReturn((StreamOperations) streamOps);
     when(streamOps.add(eq(props.getQueue().getStreamKey()), any(Map.class)))
@@ -93,7 +87,5 @@ class PlagiarismJobProducerTest {
 
     assertThat(runId).isEqualTo(9L);
     verify(streamOps).add(eq(props.getQueue().getStreamKey()), eq(Map.of("runId", "9")));
-
   }
-
 }

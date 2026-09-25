@@ -10,9 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Result of comparing two submissions for the same level during a plagiarism run.
- */
+/** Result of comparing two submissions for the same level during a plagiarism run. */
 @Entity
 @Table(name = "submission_similarity", schema = "public")
 public class SubmissionSimilarity {
@@ -61,18 +59,17 @@ public class SubmissionSimilarity {
   public SubmissionSimilarity() {}
 
   public SubmissionSimilarity(
-    UUID eventId,
-    short levelId,
-    Long submissionIdA,
-    Long submissionIdB,
-    UUID teamIdA,
-    UUID teamIdB,
-    BigDecimal structuralScore,
-    BigDecimal embeddingScore,
-    BigDecimal combinedScore,
-    int matchedKgramCount,
-    boolean flagged
-  ) {
+      UUID eventId,
+      short levelId,
+      Long submissionIdA,
+      Long submissionIdB,
+      UUID teamIdA,
+      UUID teamIdB,
+      BigDecimal structuralScore,
+      BigDecimal embeddingScore,
+      BigDecimal combinedScore,
+      int matchedKgramCount,
+      boolean flagged) {
     this.eventId = eventId;
     this.levelId = levelId;
     this.submissionIdA = submissionIdA;
@@ -84,7 +81,6 @@ public class SubmissionSimilarity {
     this.combinedScore = combinedScore;
     this.matchedKgramCount = matchedKgramCount;
     this.flagged = flagged;
-
   }
 
   public Long getId() {
@@ -106,7 +102,6 @@ public class SubmissionSimilarity {
 
   public Long getSubmissionIdB() {
     return submissionIdB;
-
   }
 
   public UUID getTeamIdA() {
@@ -115,7 +110,6 @@ public class SubmissionSimilarity {
 
   public UUID getTeamIdB() {
     return teamIdB;
-
   }
 
   public BigDecimal getStructuralScore() {
@@ -124,7 +118,6 @@ public class SubmissionSimilarity {
 
   public BigDecimal getEmbeddingScore() {
     return embeddingScore;
-
   }
 
   public BigDecimal getCombinedScore() {
@@ -141,8 +134,5 @@ public class SubmissionSimilarity {
 
   public Instant getRunAt() {
     return runAt;
-
   }
-
-
 }

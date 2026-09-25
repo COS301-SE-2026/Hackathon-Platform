@@ -3,7 +3,6 @@ package com.hackathon.platform.controller;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -89,7 +88,7 @@ class PlagiarismControllerTest {
 
   @Test
   void triggerRun_asAdmin_returns202WithRunId() throws Exception {
-    
+
     PlagiarismRunRequest request = new PlagiarismRunRequest((short) 3, 15);
     when(producer.enqueue(eq(EVENT_ID), eq(Short.valueOf((short) 3)), eq(15), eq(USER_ID)))
         .thenReturn(42L);
@@ -99,11 +98,9 @@ class PlagiarismControllerTest {
             post("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
                 .with(authentication(adminAuth))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
+                .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.runId").value(42));
-
   }
 
   @Test
@@ -114,11 +111,9 @@ class PlagiarismControllerTest {
     mockMvc
         .perform(
             post("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
-                .with(authentication(adminAuth))
-        )
+                .with(authentication(adminAuth)))
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.runId").value(7));
-
   }
 
   @Test
@@ -126,10 +121,8 @@ class PlagiarismControllerTest {
     mockMvc
         .perform(
             post("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
-                .with(authentication(participantAuth))
-        )
+                .with(authentication(participantAuth)))
         .andExpect(status().isForbidden());
-
   }
 
   @Test
@@ -140,13 +133,11 @@ class PlagiarismControllerTest {
     mockMvc
         .perform(
             get("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
-                .with(authentication(adminAuth))
-        )
+                .with(authentication(adminAuth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].status").value("QUEUED"))
         .andExpect(jsonPath("$[0].topN").value(20));
-
   }
 
   @Test
@@ -155,10 +146,8 @@ class PlagiarismControllerTest {
     mockMvc
         .perform(
             get("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID)
-                .with(authentication(participantAuth))
-        )
+                .with(authentication(participantAuth)))
         .andExpect(status().isForbidden());
-
   }
 
   @Test
@@ -179,17 +168,15 @@ class PlagiarismControllerTest {
             new java.math.BigDecimal("0.62"),
             8,
             true,
-            Instant.now()
-        );
-    
+            Instant.now());
+
     when(checkService.getResults(EVENT_ID, (short) 1, false)).thenReturn(List.of(resp));
 
     mockMvc
         .perform(
             get("/api/admin/events/{eventId}/plagiarism/pairs", EVENT_ID)
                 .param("levelId", "1")
-                .with(authentication(adminAuth))
-        )
+                .with(authentication(adminAuth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].submissionIdA").value(10))
         .andExpect(jsonPath("$[0].flagged").value(true));
@@ -200,8 +187,7 @@ class PlagiarismControllerTest {
     mockMvc
         .perform(
             get("/api/admin/events/{eventId}/plagiarism/pairs", EVENT_ID)
-                .with(authentication(participantAuth))
-        )
+                .with(authentication(participantAuth)))
         .andExpect(status().isForbidden());
   }
 
@@ -217,9 +203,8 @@ class PlagiarismControllerTest {
             List.of(),
             0.8,
             List.of(),
-            PlagiarismDiffResponse.SemanticStatus.NO_MATCHES_ABOVE_THRESHOLD
+            PlagiarismDiffResponse.SemanticStatus.NO_MATCHES_ABOVE_THRESHOLD);
 
-        );
     when(checkService.getDiff(1L, 2L)).thenReturn(diff);
 
     mockMvc
@@ -227,22 +212,17 @@ class PlagiarismControllerTest {
             get("/api/admin/plagiarism/diff")
                 .param("submissionIdA", "1")
                 .param("submissionIdB", "2")
-                .with(authentication(adminAuth))
-        )
+                .with(authentication(adminAuth)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.submissionIdA").value(1))
         .andExpect(jsonPath("$.structuralScore").value(0.8))
         .andExpect(jsonPath("$.semanticStatus").value("NO_MATCHES_ABOVE_THRESHOLD"));
-
   }
 
   @Test
-  void triggerRun_returns403WhenCallerIsNotAuthenticated() throws Exception{
+  void triggerRun_returns403WhenCallerIsNotAuthenticated() throws Exception {
     mockMvc
         .perform(post("/api/admin/events/{eventId}/plagiarism/runs", EVENT_ID))
         .andExpect(status().isForbidden());
-
   }
- 
-
 }

@@ -199,10 +199,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
   List<LeaderboardEntry> findFrozenLeaderboardByEventId(
       @Param("eventId") UUID eventId, @Param("cutoff") java.time.OffsetDateTime cutoff);
 
-  /**
-   * Best SCORED submission per team for a given level, limited
-   * to the supplied team ids.
-   */
+  /** Best SCORED submission per team for a given level, limited to the supplied team ids. */
   @Query(
       value =
           """

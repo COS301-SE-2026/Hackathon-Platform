@@ -24,9 +24,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Admin-only endpoints for the batch plagiarism similarity check. This is meant to
- * be run once a level (or the event) has wrapped up - typically against the top N teams on the
- * leaderboard
+ * Admin-only endpoints for the batch plagiarism similarity check. This is meant to be run once a
+ * level (or the event) has wrapped up - typically against the top N teams on the leaderboard
  */
 @RestController
 @RequiredArgsConstructor
@@ -37,51 +36,45 @@ public class PlagiarismController {
   private final PlagiarismCheckService checkService;
   private final PlagiarismProperties props;
 
-  /**Starts async batch run. Returns immediately with runid to poll */
+  /** Starts async batch run. Returns immediately with runid to poll */
   @PostMapping("/api/admin/events/{eventId}/plagiarism/runs")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Map<String, Long>> triggerRun(
-    @PathVariable UUID eventId,
-    @RequestBody(required = false) PlagiarismRunRequest request,
-    @AuthenticationPrincipal User user
-  ) {
-   Short levelId = request != null ? request.levelId() : null;
-   int topN =
+      @PathVariable UUID eventId,
+      @RequestBody(required = false) PlagiarismRunRequest request,
+      @AuthenticationPrincipal User user) {
+    Short levelId = request != null ? request.levelId() : null;
+    int topN =
         (request != null && request.topN() != null) ? request.topN() : props.getDefaultTopN();
     Long runId = producer.enqueue(eventId, levelId, topN, user.getUserId());
     return ResponseEntity.accepted().body(Map.of("runId", runId));
-
   }
 
-  /**Poll run status plus summary counts */
+  /** Poll run status plus summary counts */
   @GetMapping("/api/admin/events/{eventId}/plagiarism/runs")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<PlagiarismRun>> listRuns(@PathVariable UUID eventId) {
     return ResponseEntity.ok(runRepo.findByEventIdOrderByRequestedAtDesc(eventId));
-
   }
 
-  /**Similarity matrix data for a level (or event if level left out): score per pair */
+  /** Similarity matrix data for a level (or event if level left out): score per pair */
   @GetMapping("/api/admin/events/{eventId}/plagiarism/pairs")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<List<SubmissionSimilarityResponse>> getPairs(
-    @PathVariable UUID eventId,
-    @RequestParam(required = false) Short levelId,
-    @RequestParam(defaultValue = "false") boolean onlyFlagged
-  ) {
-   return ResponseEntity.ok(checkService.getResults(eventId, levelId, onlyFlagged));
+      @PathVariable UUID eventId,
+      @RequestParam(required = false) Short levelId,
+      @RequestParam(defaultValue = "false") boolean onlyFlagged) {
+    return ResponseEntity.ok(checkService.getResults(eventId, levelId, onlyFlagged));
   }
 
-  /** Side-by-side normalized-AST/token diff for one flagged pair
-   * Highlights which structural fragments matched
+  /**
+   * Side-by-side normalized-AST/token diff for one flagged pair Highlights which structural
+   * fragments matched
    */
   @GetMapping("/api/admin/plagiarism/diff")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<PlagiarismDiffResponse> getDiff(
-    @RequestParam Long submissionIdA, @RequestParam Long submissionIdB
-  ) {
-   return ResponseEntity.ok(checkService.getDiff(submissionIdA, submissionIdB));
+      @RequestParam Long submissionIdA, @RequestParam Long submissionIdB) {
+    return ResponseEntity.ok(checkService.getDiff(submissionIdA, submissionIdB));
   }
-
-
 }

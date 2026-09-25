@@ -21,7 +21,6 @@ class AstServiceClientTest {
     if (server != null) {
       server.stop(0);
     }
-
   }
 
   private PlagiarismAstProperties propsFor(HttpServer started) {
@@ -31,7 +30,6 @@ class AstServiceClientTest {
     props.setRequestTimeoutMs(1000);
     props.setEmbedRequestTimeoutMs(1000);
     return props;
-
   }
 
   private HttpServer startServer(String path, int status, String responseBody) throws IOException {
@@ -40,7 +38,6 @@ class AstServiceClientTest {
     s.createContext(
         path,
         exchange -> {
-
           byte[] bytes = responseBody.getBytes(StandardCharsets.UTF_8);
           exchange.getResponseHeaders().add("Content-Type", "application/json");
           exchange.sendResponseHeaders(status, bytes.length);
@@ -50,7 +47,6 @@ class AstServiceClientTest {
         });
     s.start();
     return s;
-
   }
 
   @Test
@@ -65,7 +61,6 @@ class AstServiceClientTest {
     assertThat(response.status()).isEqualTo("service_unavailable");
     assertThat(response.isOk()).isFalse();
     assertThat(response.detail()).isEqualTo("ast service disabled");
-
   }
 
   @Test
@@ -87,21 +82,20 @@ class AstServiceClientTest {
     assertThat(response.tokens().get(0).text()).isEqualTo("ID");
     assertThat(response.functions()).hasSize(1);
     assertThat(response.functions().get(0).qualifiedName()).isEqualTo("Main.run");
-
-
   }
 
   @Test
   void parse_serviceReturnsUnsupportedLanguage_isNotOk() throws IOException {
 
-    server = startServer("/parse", 200, "{\"status\":\"unsupported_language\",\"tokens\":[],\"functions\":[]}");
+    server =
+        startServer(
+            "/parse", 200, "{\"status\":\"unsupported_language\",\"tokens\":[],\"functions\":[]}");
 
     AstServiceClient client = new AstServiceClient(propsFor(server));
     AstParseResponse response = client.parse("script.rb", "puts 1");
 
     assertThat(response.isOk()).isFalse();
     assertThat(response.status()).isEqualTo("unsupported_language");
-
   }
 
   @Test
@@ -114,10 +108,9 @@ class AstServiceClientTest {
 
     assertThat(response.status()).isEqualTo("service_unavailable");
     assertThat(response.detail()).isEqualTo("http 500");
-
   }
 
-  @Test 
+  @Test
   void parse_connectionRefused_fallsBackToServiceUnavailable() {
 
     PlagiarismAstProperties props = new PlagiarismAstProperties();
@@ -130,7 +123,6 @@ class AstServiceClientTest {
     assertThat(response.status()).isEqualTo("service_unavailable");
     assertThat(response.functions()).isEmpty();
     assertThat(response.tokens()).isEmpty();
-
   }
 
   @Test
@@ -142,10 +134,9 @@ class AstServiceClientTest {
     AstParseResponse response = client.parse("Main.java", "class Main {}");
 
     assertThat(response.status()).isEqualTo("service_unavailable");
-
   }
 
-  @Test 
+  @Test
   void embed_embeddingDisabled_returnsEmptyListWithoutCallingNetwork() {
 
     PlagiarismAstProperties props = new PlagiarismAstProperties();
@@ -153,10 +144,10 @@ class AstServiceClientTest {
     AstServiceClient client = new AstServiceClient(props);
 
     List<FunctionEmbedding> result =
-        client.embed("Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+        client.embed(
+            "Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
 
     assertThat(result).isEmpty();
-
   }
 
   @Test
@@ -165,12 +156,9 @@ class AstServiceClientTest {
     PlagiarismAstProperties props = new PlagiarismAstProperties();
     AstServiceClient client = new AstServiceClient(props);
 
-    List<FunctionEmbedding> result =
-        client.embed("Main.java", "content", List.of());
+    List<FunctionEmbedding> result = client.embed("Main.java", "content", List.of());
 
     assertThat(result).isEmpty();
-
-
   }
 
   @Test
@@ -183,26 +171,29 @@ class AstServiceClientTest {
 
     AstServiceClient client = new AstServiceClient(propsFor(server));
     List<FunctionEmbedding> result =
-        client.embed("Main.java", "class Main { void run() {}}", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+        client.embed(
+            "Main.java",
+            "class Main { void run() {}}",
+            List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
 
     assertThat(result).hasSize(1);
     assertThat(result.get(0).qualifiedName()).isEqualTo("Main.run");
     assertThat(result.get(0).vector()).containsExactly(0.1f, 0.2f);
     assertThat(result.get(0).truncated()).isFalse();
-
   }
 
   @Test
   void embed_serviceReportsNonOkStatus_returnsEmptyList() throws IOException {
 
-    server = startServer("/embed", 200, "{\"status\":\"model_unavailable\",\"detail\":\"cold start\"}");
+    server =
+        startServer("/embed", 200, "{\"status\":\"model_unavailable\",\"detail\":\"cold start\"}");
 
     AstServiceClient client = new AstServiceClient(propsFor(server));
     List<FunctionEmbedding> result =
-        client.embed("Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+        client.embed(
+            "Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
 
     assertThat(result).isEmpty();
-
   }
 
   @Test
@@ -212,13 +203,13 @@ class AstServiceClientTest {
 
     AstServiceClient client = new AstServiceClient(propsFor(server));
     List<FunctionEmbedding> result =
-        client.embed("Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+        client.embed(
+            "Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
 
     assertThat(result).isEmpty();
-
   }
 
-  @Test 
+  @Test
   void embed_connectionRefused_returnsEmptyListRatherThanThrowing() {
 
     PlagiarismAstProperties props = new PlagiarismAstProperties();
@@ -227,13 +218,9 @@ class AstServiceClientTest {
     AstServiceClient client = new AstServiceClient(props);
 
     List<FunctionEmbedding> result =
-        client.embed("Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
+        client.embed(
+            "Main.java", "content", List.of(new AstFunctionSpan("Main.run", "method", 0, 5, 1, 1)));
 
     assertThat(result).isEmpty();
-
-
   }
-
-
-
 }

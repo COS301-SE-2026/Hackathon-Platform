@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Single entry point for turning one source file into a normalized structural token stream. Tries
- * the tree-sitter AST service first; falls back to the regex-lexer CodeNormalizer whenever
- * the AST service reports the language is unsupported, fails to parse, or is unreachable.
+ * the tree-sitter AST service first; falls back to the regex-lexer CodeNormalizer whenever the AST
+ * service reports the language is unsupported, fails to parse, or is unreachable.
  */
 @Component
 @RequiredArgsConstructor
@@ -30,15 +30,12 @@ public class StructuralNormalizer {
     if (response.isOk()) {
 
       List<NormalizedToken> tokens =
-          response.tokens().stream()
-              .map(t -> toNormalizedToken(fileName, t))
-              .toList();
+          response.tokens().stream().map(t -> toNormalizedToken(fileName, t)).toList();
       return StructuralNormalizationResult.ast(tokens, response.functions());
-
-
     }
 
-    // "unsupported_language" / "parse_error" / "service_unavailable" all take the same fallback path
+    // "unsupported_language" / "parse_error" / "service_unavailable" all take the same fallback
+    // path
     logger.debug(
         "Falling back to regex lexer for {} (ast status={}, detail={})",
         fileName,
@@ -48,13 +45,10 @@ public class StructuralNormalizer {
     CodeNormalizer.Lang lang = lexerNormalizer.detectLanguage(fileName);
     List<NormalizedToken> tokens = lexerNormalizer.normalizeWithOffsets(content, lang, fileName);
     return StructuralNormalizationResult.lexer(tokens);
-
-
   }
 
   private NormalizedToken toNormalizedToken(String fileName, AstToken token) {
-    
-    return new NormalizedToken(fileName, token.text(), token.start(), token.end());
 
+    return new NormalizedToken(fileName, token.text(), token.start(), token.end());
   }
 }

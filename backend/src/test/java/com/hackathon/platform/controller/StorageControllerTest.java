@@ -788,7 +788,8 @@ class StorageControllerTest {
 
     Map<String, String> entries = new HashMap<>();
     try (ZipInputStream zipIn =
-        new ZipInputStream(new ByteArrayInputStream(result.getResponse().getContentAsByteArray()))) {
+        new ZipInputStream(
+            new ByteArrayInputStream(result.getResponse().getContentAsByteArray()))) {
       ZipEntry entry;
       while ((entry = zipIn.getNextEntry()) != null) {
         entries.put(entry.getName(), new String(zipIn.readAllBytes()));
@@ -799,7 +800,6 @@ class StorageControllerTest {
     assertThat(entries).containsKey("source/archive.zip");
     assertThat(entries.get("output/output.txt")).isEqualTo("output data");
     assertThat(entries.get("source/archive.zip")).isEqualTo("zip data");
-
   }
 
   @Test
@@ -815,8 +815,7 @@ class StorageControllerTest {
     submission.setSourceCodeStorageKey("submissions/.../source/archive.zip");
     when(subRepo.findById(SUBMISSION_ID)).thenReturn(Optional.of(submission));
 
-    when(storageService.exists(anyString(), eq(submission.getOutputStorageKey())))
-        .thenReturn(true);
+    when(storageService.exists(anyString(), eq(submission.getOutputStorageKey()))).thenReturn(true);
     when(storageService.exists(anyString(), eq(submission.getSourceCodeStorageKey())))
         .thenReturn(false);
     when(storageService.download(anyString(), eq(submission.getOutputStorageKey())))
@@ -837,12 +836,12 @@ class StorageControllerTest {
 
     Map<String, String> entries = new HashMap<>();
     try (ZipInputStream zipIn =
-        new ZipInputStream(new ByteArrayInputStream(result.getResponse().getContentAsByteArray()))) {
+        new ZipInputStream(
+            new ByteArrayInputStream(result.getResponse().getContentAsByteArray()))) {
       ZipEntry entry;
       while ((entry = zipIn.getNextEntry()) != null) {
         entries.put(entry.getName(), new String(zipIn.readAllBytes()));
       }
-
     }
 
     assertThat(entries).containsKey("output/output.txt");
@@ -863,8 +862,6 @@ class StorageControllerTest {
                     SUBMISSION_ID)
                 .with(authentication(participantAuth)))
         .andExpect(status().isForbidden());
-
-
   }
 
   @Test
@@ -885,13 +882,11 @@ class StorageControllerTest {
                     SUBMISSION_ID)
                 .with(authentication(adminAuth)))
         .andExpect(status().is5xxServerError());
-
-
   }
 
   @Test
   void downloadSubmissionArchive_returns5xxWhenSubmissionNotFound() throws Exception {
-    
+
     when(subRepo.findById(SUBMISSION_ID)).thenReturn(Optional.empty());
 
     mockMvc

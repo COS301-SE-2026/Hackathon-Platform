@@ -20,7 +20,6 @@ class EmbeddingSimilarityCalculatorTest {
     float[] b = {1f, 2f, 3f};
 
     assertThat(calculator.cosineSimilarity(a, b)).isCloseTo(1.0, within(1e-9));
-
   }
 
   @Test
@@ -30,7 +29,6 @@ class EmbeddingSimilarityCalculatorTest {
     float[] b = {0f, 1f};
 
     assertThat(calculator.cosineSimilarity(a, b)).isCloseTo(0.0, within(1e-9));
-    
   }
 
   @Test
@@ -40,7 +38,6 @@ class EmbeddingSimilarityCalculatorTest {
     float[] b = {-1f, -2f, -3f};
 
     assertThat(calculator.cosineSimilarity(a, b)).isCloseTo(-1.0, within(1e-9));
-    
   }
 
   @Test
@@ -50,14 +47,12 @@ class EmbeddingSimilarityCalculatorTest {
     float[] b = {1f, 2f, 3f};
 
     assertThat(calculator.cosineSimilarity(a, b)).isEqualTo(0.0);
-
   }
 
   @Test
   void meanVector_emptyList_returnsEmptyArray() {
 
     assertThat(calculator.meanVector(List.of())).isEmpty();
-
   }
 
   @Test
@@ -84,8 +79,7 @@ class EmbeddingSimilarityCalculatorTest {
     List<StoredEmbedding> embeddings =
         List.of(
             new StoredEmbedding(1L, "a.foo", new float[] {2f, 4f}),
-            new StoredEmbedding(1L, "a.bar", new float[] {4f, 8f})
-        );
+            new StoredEmbedding(1L, "a.bar", new float[] {4f, 8f}));
     float[] mean = {3f, 6f};
 
     List<StoredEmbedding> centered = calculator.centerAll(embeddings, mean);
@@ -96,12 +90,12 @@ class EmbeddingSimilarityCalculatorTest {
 
     assertThat(centered.get(0).submissionId()).isEqualTo(1L);
     assertThat(centered.get(0).qualifiedName()).isEqualTo("a.foo");
-
   }
 
   @Test
-  void centerAll_emptyMeanVector_returnsVectorsUnchanged(){
-    List<StoredEmbedding> embeddings = List.of(new StoredEmbedding(1L, "a.foo", new float[] {2f, 4f}));
+  void centerAll_emptyMeanVector_returnsVectorsUnchanged() {
+    List<StoredEmbedding> embeddings =
+        List.of(new StoredEmbedding(1L, "a.foo", new float[] {2f, 4f}));
 
     List<StoredEmbedding> centered = calculator.centerAll(embeddings, new float[0]);
 
@@ -123,20 +117,17 @@ class EmbeddingSimilarityCalculatorTest {
     List<StoredEmbedding> a =
         List.of(
             new StoredEmbedding(1L, "a.foo", new float[] {1f, 0f}),
-            new StoredEmbedding(1L, "a.bar", new float[] {0f, 1f})
-        );
+            new StoredEmbedding(1L, "a.bar", new float[] {0f, 1f}));
 
-        List<StoredEmbedding> b =
+    List<StoredEmbedding> b =
         List.of(
             new StoredEmbedding(2L, "b.foo", new float[] {1f, 0f}),
-            new StoredEmbedding(2L, "b.bar", new float[] {0f, 1f})
-        );
+            new StoredEmbedding(2L, "b.bar", new float[] {0f, 1f}));
 
-        Optional<Double> result = calculator.symmetricBestMatch(a, b);
+    Optional<Double> result = calculator.symmetricBestMatch(a, b);
 
-        assertThat(result).isPresent();
-        assertThat(result.get()).isCloseTo(1.0, within(1e-9));
-
+    assertThat(result).isPresent();
+    assertThat(result.get()).isCloseTo(1.0, within(1e-9));
   }
 
   @Test
@@ -146,14 +137,12 @@ class EmbeddingSimilarityCalculatorTest {
     List<StoredEmbedding> b =
         List.of(
             new StoredEmbedding(2L, "b.foo", new float[] {1f, 0f}),
-            new StoredEmbedding(2L, "b.bar", new float[] {0f, 1f})
-        );
-    
+            new StoredEmbedding(2L, "b.bar", new float[] {0f, 1f}));
+
     Optional<Double> result = calculator.symmetricBestMatch(a, b);
 
-        assertThat(result).isPresent();
-        assertThat(result.get()).isCloseTo(0.75, within(1e-9));
-
+    assertThat(result).isPresent();
+    assertThat(result.get()).isCloseTo(0.75, within(1e-9));
   }
 
   @Test
@@ -162,18 +151,15 @@ class EmbeddingSimilarityCalculatorTest {
     List<StoredEmbedding> a =
         List.of(
             new StoredEmbedding(1L, "a.close", new float[] {1f, 0f}),
-            new StoredEmbedding(1L, "a.far", new float[] {0f, 1f})
-        );
+            new StoredEmbedding(1L, "a.far", new float[] {0f, 1f}));
     List<StoredEmbedding> b = List.of(new StoredEmbedding(2L, "b.target", new float[] {1f, 0f}));
 
-    
     List<FunctionMatch> matches = calculator.topFunctionMatches(a, b, 0.5, 10);
 
     assertThat(matches).hasSize(1);
     assertThat(matches.get(0).qualifiedNameA()).isEqualTo("a.close");
     assertThat(matches.get(0).qualifiedNameB()).isEqualTo("b.target");
     assertThat(matches.get(0).similarity()).isCloseTo(1.0, within(1e-9));
-
   }
 
   @Test
@@ -181,17 +167,15 @@ class EmbeddingSimilarityCalculatorTest {
 
     List<StoredEmbedding> a =
         List.of(
-            new StoredEmbedding(1L, "a.one", new float[] {1f,0f}),
-            new StoredEmbedding(1L, "a.two", new float[] {1f,0f}),
-            new StoredEmbedding(1L, "a.three", new float[] {1f,0f})
+            new StoredEmbedding(1L, "a.one", new float[] {1f, 0f}),
+            new StoredEmbedding(1L, "a.two", new float[] {1f, 0f}),
+            new StoredEmbedding(1L, "a.three", new float[] {1f, 0f}));
 
-        );
     List<StoredEmbedding> b = List.of(new StoredEmbedding(2L, "b.target", new float[] {1f, 0f}));
 
     List<FunctionMatch> matches = calculator.topFunctionMatches(a, b, 0.0, 2);
 
     assertThat(matches).hasSize(2);
-
   }
 
   @Test
@@ -203,8 +187,5 @@ class EmbeddingSimilarityCalculatorTest {
     List<FunctionMatch> matches = calculator.topFunctionMatches(a, b, 0.9, 10);
 
     assertThat(matches).isEmpty();
-
   }
-
-
 }

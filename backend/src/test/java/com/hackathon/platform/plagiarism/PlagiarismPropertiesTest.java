@@ -24,7 +24,6 @@ class PlagiarismPropertiesTest {
     assertThat(props.getFunctionMatchThreshold()).isEqualTo(0.75);
     assertThat(props.getMaxFunctionMatches()).isEqualTo(15);
     assertThat(props.getQueue()).isNotNull();
-
   }
 
   @Test
@@ -57,7 +56,6 @@ class PlagiarismPropertiesTest {
     assertThat(props.getMinPairsForRelativeThreshold()).isEqualTo(3);
     assertThat(props.getFunctionMatchThreshold()).isEqualTo(0.8);
     assertThat(props.getMaxFunctionMatches()).isEqualTo(25);
-
   }
 
   @Test
@@ -72,7 +70,6 @@ class PlagiarismPropertiesTest {
     b.setKgramSize(99);
 
     assertThat(a).isNotEqualTo(b);
-
   }
 
   @Test
@@ -84,7 +81,6 @@ class PlagiarismPropertiesTest {
     assertThat(queue.getConsumerKey()).isEqualTo("plagiarism-workers");
     assertThat(queue.getConcurrency()).isEqualTo(2);
     assertThat(queue.getPollTimeoutMs()).isEqualTo(2000L);
-
   }
 
   @Test
@@ -101,7 +97,6 @@ class PlagiarismPropertiesTest {
     assertThat(queue.getConsumerKey()).isEqualTo("custom-workers");
     assertThat(queue.getConcurrency()).isEqualTo(8);
     assertThat(queue.getPollTimeoutMs()).isEqualTo(5000L);
-    
   }
 
   @Test
@@ -114,9 +109,5 @@ class PlagiarismPropertiesTest {
     props.setQueue(newQueue);
 
     assertThat(props.getQueue().getStreamKey()).isEqualTo("replaced:stream");
-
-
   }
-
-
 }

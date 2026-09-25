@@ -31,10 +31,10 @@ class StructuralNormalizerTest {
     normalizer = new StructuralNormalizer(astClient, lexerNormalizer);
 
     List<AstToken> tokens = List.of(new AstToken("ID", 0, 2), new AstToken("=", 3, 4));
-    List<AstFunctionSpan> functions = List.of(new AstFunctionSpan("Main.run", "function_definition", 0, 10, 1, 2));
-    when(astClient.parse("Main.java", "content")).thenReturn(
-        new AstParseResponse("ok", "java", tokens, functions, null)
-    );
+    List<AstFunctionSpan> functions =
+        List.of(new AstFunctionSpan("Main.run", "function_definition", 0, 10, 1, 2));
+    when(astClient.parse("Main.java", "content"))
+        .thenReturn(new AstParseResponse("ok", "java", tokens, functions, null));
 
     StructuralNormalizationResult result = normalizer.normalize("Main.java", "content");
 
@@ -46,7 +46,6 @@ class StructuralNormalizerTest {
     assertThat(result.tokens().get(0).fileName()).isEqualTo("Main.java");
 
     verify(lexerNormalizer, never()).normalizeWithOffsets(any(), any(), any());
-
   }
 
   @Test
@@ -54,21 +53,20 @@ class StructuralNormalizerTest {
 
     normalizer = new StructuralNormalizer(astClient, lexerNormalizer);
 
-    when(astClient.parse("script.rb", "content")).thenReturn(
-        new AstParseResponse("unsupported_language", null, List.of(), List.of(), "no ruby grammar")
-    );
+    when(astClient.parse("script.rb", "content"))
+        .thenReturn(
+            new AstParseResponse(
+                "unsupported_language", null, List.of(), List.of(), "no ruby grammar"));
     when(lexerNormalizer.detectLanguage("script.rb")).thenReturn(CodeNormalizer.Lang.UNKNOWN);
-    when(lexerNormalizer.normalizeWithOffsets(eq("content"), eq(CodeNormalizer.Lang.UNKNOWN), eq("script.rb")))
+    when(lexerNormalizer.normalizeWithOffsets(
+            eq("content"), eq(CodeNormalizer.Lang.UNKNOWN), eq("script.rb")))
         .thenReturn(List.of(new NormalizedToken("script.rb", "tok", 0, 3)));
-    
 
     StructuralNormalizationResult result = normalizer.normalize("script.rb", "content");
 
     assertThat(result.source()).isEqualTo("lexer");
     assertThat(result.functions()).isEmpty();
     assertThat(result.tokens()).hasSize(1);
-    
-
   }
 
   @Test
@@ -76,20 +74,19 @@ class StructuralNormalizerTest {
 
     normalizer = new StructuralNormalizer(astClient, lexerNormalizer);
 
-    when(astClient.parse("Main.java", "content")).thenReturn(
-        new AstParseResponse("service_unavailable", null, List.of(), List.of(), "connection refused")
-    );
+    when(astClient.parse("Main.java", "content"))
+        .thenReturn(
+            new AstParseResponse(
+                "service_unavailable", null, List.of(), List.of(), "connection refused"));
     when(lexerNormalizer.detectLanguage("Main.java")).thenReturn(CodeNormalizer.Lang.C_LIKE);
-    when(lexerNormalizer.normalizeWithOffsets(eq("content"), eq(CodeNormalizer.Lang.C_LIKE), eq("Main.java")))
+    when(lexerNormalizer.normalizeWithOffsets(
+            eq("content"), eq(CodeNormalizer.Lang.C_LIKE), eq("Main.java")))
         .thenReturn(List.of());
-    
-    
+
     StructuralNormalizationResult result = normalizer.normalize("Main.java", "content");
 
     assertThat(result.source()).isEqualTo("lexer");
     assertThat(result.functions()).isEmpty();
-    
-
   }
 
   @Test
@@ -97,19 +94,15 @@ class StructuralNormalizerTest {
 
     normalizer = new StructuralNormalizer(astClient, lexerNormalizer);
 
-    when(astClient.parse("Broken.java", "not valid {{{")).thenReturn(
-        new AstParseResponse("parse_error", "java", List.of(), List.of(), "unexpected token")
-    );
+    when(astClient.parse("Broken.java", "not valid {{{"))
+        .thenReturn(
+            new AstParseResponse("parse_error", "java", List.of(), List.of(), "unexpected token"));
     when(lexerNormalizer.detectLanguage("Broken.java")).thenReturn(CodeNormalizer.Lang.C_LIKE);
-    when(lexerNormalizer.normalizeWithOffsets(any(), any(), any()))
-        .thenReturn(List.of());
-    
-    
+    when(lexerNormalizer.normalizeWithOffsets(any(), any(), any())).thenReturn(List.of());
+
     StructuralNormalizationResult result = normalizer.normalize("Broken.java", "not valid {{{");
 
     assertThat(result.source()).isEqualTo("lexer");
     verify(lexerNormalizer).detectLanguage("Broken.java");
-    
-
   }
 }

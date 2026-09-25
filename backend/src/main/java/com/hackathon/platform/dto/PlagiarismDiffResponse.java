@@ -25,21 +25,23 @@ public record PlagiarismDiffResponse(
     List<FunctionMatchResponse> functionMatches,
     SemanticStatus semanticStatus) {
 
+  /**
+   * Distinguishes "we never had a semantic signal for this pair" from "we had one and it just
+   * didn't find anything worth flagging"
+   */
+  public enum SemanticStatus {
+    /** Both submissions have stored function embeddings, but no pair cleared the threshold. */
+    NO_MATCHES_ABOVE_THRESHOLD,
     /**
-     * Distinguishes "we never had a semantic signal for this pair" from "we had one and it just
-     * didn't find anything worth flagging" 
+     * A has no stored function embeddings (every file fell back to the lexer, or embedding was
+     * unavailable when it was last processed).
      */
-    public enum SemanticStatus {
-        /** Both submissions have stored function embeddings, but no pair cleared the threshold. */
-        NO_MATCHES_ABOVE_THRESHOLD,
-        /** A has no stored function embeddings (every file fell back to the lexer, or embedding
-         * was unavailable when it was last processed). */
-        NO_DATA_FOR_A,
-        /** Same as NO_DATA_FOR_A, but for B. */
-        NO_DATA_FOR_B,
-        /** Neither submission has stored function embeddings. */
-        NO_DATA_FOR_EITHER,
-        /** At least one function pair cleared the threshold*/
-        MATCHED,
-    }
+    NO_DATA_FOR_A,
+    /** Same as NO_DATA_FOR_A, but for B. */
+    NO_DATA_FOR_B,
+    /** Neither submission has stored function embeddings. */
+    NO_DATA_FOR_EITHER,
+    /** At least one function pair cleared the threshold */
+    MATCHED,
+  }
 }

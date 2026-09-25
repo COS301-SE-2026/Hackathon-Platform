@@ -9,17 +9,14 @@ import java.util.List;
  */
 public record StructuralNormalizationResult(
     List<NormalizedToken> tokens, List<AstFunctionSpan> functions, String source) {
-        
 
   /** source is "ast" or "lexer" - purely for logging/metrics, not used in scoring. */
-  public static StructuralNormalizationResult ast(List<NormalizedToken> tokens, List<AstFunctionSpan> functions) {
+  public static StructuralNormalizationResult ast(
+      List<NormalizedToken> tokens, List<AstFunctionSpan> functions) {
     return new StructuralNormalizationResult(tokens, functions, "ast");
   }
 
   public static StructuralNormalizationResult lexer(List<NormalizedToken> tokens) {
     return new StructuralNormalizationResult(tokens, List.of(), "lexer");
-
   }
-
 }
-

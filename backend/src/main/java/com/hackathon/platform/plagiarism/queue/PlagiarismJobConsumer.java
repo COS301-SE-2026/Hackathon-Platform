@@ -25,26 +25,21 @@ public class PlagiarismJobConsumer
     String runIdStr = msg.getValue().get("runId");
     Long runId = runIdStr != null ? Long.valueOf(runIdStr) : null;
 
-    if(runId == null) {
-        logger.error("Plagiarism job record {} missing runId, dropping", msg.getId());
-        ack(msg);
-        return;
-
+    if (runId == null) {
+      logger.error("Plagiarism job record {} missing runId, dropping", msg.getId());
+      ack(msg);
+      return;
     }
     try {
-        logger.info("starting plagiarism run {} from record {}", runId, msg.getId());
-        checkService.execute(runId);
-        ack(msg);
+      logger.info("starting plagiarism run {} from record {}", runId, msg.getId());
+      checkService.execute(runId);
+      ack(msg);
     } catch (Exception e) {
-        logger.error("error running plagiarism check for run {}, will retry", runId, e);
-
+      logger.error("error running plagiarism check for run {}, will retry", runId, e);
     }
   }
 
   private void ack(MapRecord<String, String, String> record) {
     redis.opsForStream().acknowledge(properties.getQueue().getConsumerKey(), record);
-    
   }
-
-
 }

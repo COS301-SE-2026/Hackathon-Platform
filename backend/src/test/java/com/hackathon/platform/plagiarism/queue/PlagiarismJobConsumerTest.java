@@ -34,19 +34,17 @@ class PlagiarismJobConsumerTest {
     when(redis.opsForStream()).thenReturn((StreamOperations) streamOps);
 
     MapRecord<String, String, String> record =
-      MapRecord.create("plagiarism:jobs", Map.of("runId", "7")).withId(RecordId.of("1-1"));
+        MapRecord.create("plagiarism:jobs", Map.of("runId", "7")).withId(RecordId.of("1-1"));
 
     consumer.onMessage(record);
 
     verify(checkService).execute(7L);
     verify(streamOps).acknowledge(eq(props.getQueue().getConsumerKey()), eq(record));
-
-
   }
 
   @Test
   void onMessage_doesNotAck_whenExecuteThrowsUnexpectedException() {
-  
+
     PlagiarismProperties props = new PlagiarismProperties();
     props.getQueue().setConsumerKey("plagiarism-workers");
 
@@ -54,18 +52,17 @@ class PlagiarismJobConsumerTest {
     doThrow(new RuntimeException("DB connection lost")).when(checkService).execute(7L);
 
     MapRecord<String, String, String> record =
-      MapRecord.create("plagiarism:jobs", Map.of("runId", "7")).withId(RecordId.of("1-1"));
+        MapRecord.create("plagiarism:jobs", Map.of("runId", "7")).withId(RecordId.of("1-1"));
 
     consumer.onMessage(record);
 
     verify(checkService).execute(7L);
     verify(redis, never()).opsForStream();
-
   }
 
   @Test
   void onMessage_acksAndDrops_malformedRecordMissingRunId() {
-  
+
     PlagiarismProperties props = new PlagiarismProperties();
     props.getQueue().setConsumerKey("plagiarism-workers");
 
@@ -73,32 +70,30 @@ class PlagiarismJobConsumerTest {
     when(redis.opsForStream()).thenReturn((StreamOperations) streamOps);
 
     MapRecord<String, String, String> record =
-      MapRecord.create("plagiarism:jobs", Map.<String, String>of()).withId(RecordId.of("1-1"));
+        MapRecord.create("plagiarism:jobs", Map.<String, String>of()).withId(RecordId.of("1-1"));
 
     consumer.onMessage(record);
 
     verifyNoInteractions(checkService);
     verify(streamOps).acknowledge(eq(props.getQueue().getConsumerKey()), eq(record));
-
   }
 
   @Test
   void onMessage_throwsNumberFormatException_whenRunIdInvalid() {
-  
+
     PlagiarismProperties props = new PlagiarismProperties();
     props.getQueue().setConsumerKey("plagiarism-workers");
 
     consumer = new PlagiarismJobConsumer(redis, props, checkService);
 
     MapRecord<String, String, String> record =
-      MapRecord.create("plagiarism:jobs", Map.of("runId", "not-a-number")).withId(RecordId.of("1-1"));
+        MapRecord.create("plagiarism:jobs", Map.of("runId", "not-a-number"))
+            .withId(RecordId.of("1-1"));
 
     org.junit.jupiter.api.Assertions.assertThrows(
         NumberFormatException.class, () -> consumer.onMessage(record));
 
     verifyNoInteractions(checkService);
     verify(redis, never()).opsForStream();
-
   }
-
 }

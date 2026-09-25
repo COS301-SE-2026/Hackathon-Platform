@@ -17,12 +17,11 @@ class WinnowingTest {
 
     List<String> tokens = List.of("a", "b", "c", "d", "e", "f", "g", "h");
 
-    FingerprintResult first =  winnowing.fingerprint(tokens, 3, 2);
+    FingerprintResult first = winnowing.fingerprint(tokens, 3, 2);
     FingerprintResult second = winnowing.fingerprint(tokens, 3, 2);
 
     assertThat(first.hashes()).isEqualTo(second.hashes());
     assertThat(winnowing.jaccard(first.hashes(), second.hashes())).isEqualTo(1.0);
-
   }
 
   @Test
@@ -34,7 +33,6 @@ class WinnowingTest {
 
     assertThat(result.fingerprints()).isEmpty();
     assertThat(result.tokenCount()).isEqualTo(2);
-
   }
 
   @Test
@@ -44,14 +42,14 @@ class WinnowingTest {
 
     assertThat(result.fingerprints()).isEmpty();
     assertThat(result.tokenCount()).isEqualTo(0);
-
   }
 
   @Test
   void fingerprint_completelyDifferentTokenStreams_haveLowJaccardSimilarity() {
 
     List<String> tokensA = List.of("int", "x", "=", "1", ";", "return", "x", ";");
-    List<String> tokensB = List.of("string", "greet", "=", "\"hi\"", ";", "print", "greet", ";", "end");
+    List<String> tokensB =
+        List.of("string", "greet", "=", "\"hi\"", ";", "print", "greet", ";", "end");
 
     FingerprintResult fpA = winnowing.fingerprint(tokensA, 3, 2);
     FingerprintResult fpB = winnowing.fingerprint(tokensB, 3, 2);
@@ -59,20 +57,20 @@ class WinnowingTest {
     double similarity = winnowing.jaccard(fpA.hashes(), fpB.hashes());
 
     assertThat(similarity).isLessThan(0.5);
-
   }
 
   @Test
   void fingerprint_renamedIdentifiers_stillMatchAfterNormalization() {
 
-    List<String> tokensA = List.of("for", "(", "ID", "=", "0", ";", "ID", "<", "N", ";", "ID", "++", ")");
-    List<String> tokensB = List.of("for", "(", "ID", "=", "0", ";", "ID", "<", "N", ";", "ID", "++", ")");
+    List<String> tokensA =
+        List.of("for", "(", "ID", "=", "0", ";", "ID", "<", "N", ";", "ID", "++", ")");
+    List<String> tokensB =
+        List.of("for", "(", "ID", "=", "0", ";", "ID", "<", "N", ";", "ID", "++", ")");
 
     FingerprintResult fpA = winnowing.fingerprint(tokensA, 4, 3);
     FingerprintResult fpB = winnowing.fingerprint(tokensB, 4, 3);
 
     assertThat(winnowing.jaccard(fpA.hashes(), fpB.hashes())).isEqualTo(1.0);
-    
   }
 
   void jaccard_bothEmptySets_returnsZero() {
@@ -85,8 +83,7 @@ class WinnowingTest {
     Set<Long> a = Set.of(1L, 2L, 3L, 4L);
     Set<Long> b = Set.of(3L, 4L, 5L, 6L);
 
-    assertThat(winnowing.jaccard(a,b)).isCloseTo(2.0/ 6.0, within(1e-9));
-
+    assertThat(winnowing.jaccard(a, b)).isCloseTo(2.0 / 6.0, within(1e-9));
   }
 
   @Test
@@ -94,7 +91,6 @@ class WinnowingTest {
     Set<Long> a = Set.of(1L, 2L);
     Set<Long> b = Set.of(3L, 4L);
 
-    assertThat(winnowing.jaccard(a,b)).isEqualTo(0.0);
+    assertThat(winnowing.jaccard(a, b)).isEqualTo(0.0);
   }
-
 }

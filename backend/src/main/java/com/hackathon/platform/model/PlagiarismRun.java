@@ -19,7 +19,6 @@ public class PlagiarismRun {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
-
   @Column(name = "event_id", nullable = false)
   private UUID eventId;
 
@@ -51,8 +50,7 @@ public class PlagiarismRun {
   @Column(name = "completed_at")
   private Instant completedAt;
 
-
-  public  PlagiarismRun() {}
+  public PlagiarismRun() {}
 
   public PlagiarismRun(UUID eventId, Short levelId, int topN, UUID requestedBy) {
 
@@ -60,12 +58,10 @@ public class PlagiarismRun {
     this.levelId = levelId;
     this.topN = topN;
     this.requestedBy = requestedBy;
-
   }
 
   public Long getId() {
     return id;
-
   }
 
   public UUID getEventId() {
@@ -91,7 +87,6 @@ public class PlagiarismRun {
 
   public int getPairsCompared() {
     return pairsCompared;
-
   }
 
   public void setPairsCompared(int pairsCompared) {
@@ -112,8 +107,7 @@ public class PlagiarismRun {
 
   public void setErrorMessage(String errorMessage) {
 
-    this.errorMessage =  errorMessage;
-
+    this.errorMessage = errorMessage;
   }
 
   public UUID getRequestedBy() {
@@ -126,11 +120,9 @@ public class PlagiarismRun {
 
   public Instant getCompletedAt() {
     return completedAt;
-
   }
 
   public void setCompletedAt(Instant completedAt) {
     this.completedAt = completedAt;
   }
-
 }

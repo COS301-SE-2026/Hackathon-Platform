@@ -20,9 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer.StreamMessageListenerContainerOptions;
 
-/**
- * Never contend with the per-submission scoring pipeline.
- */
+/** Never contend with the per-submission scoring pipeline. */
 @Configuration
 @RequiredArgsConstructor
 public class PlagiarismQueueConfig {
@@ -34,37 +32,36 @@ public class PlagiarismQueueConfig {
   @PostConstruct
   public void createConsumerGroup() {
     try {
-        redis
-            .opsForStream()
-            .createGroup(
-                properties.getQueue().getStreamKey(),
-                ReadOffset.from("0"),
-                properties.getQueue().getConsumerKey()
-            );
-        logger.info("Created consumer group {} on stream {}",
-            properties.getQueue().getConsumerKey(), properties.getQueue().getStreamKey());
-        
+      redis
+          .opsForStream()
+          .createGroup(
+              properties.getQueue().getStreamKey(),
+              ReadOffset.from("0"),
+              properties.getQueue().getConsumerKey());
+      logger.info(
+          "Created consumer group {} on stream {}",
+          properties.getQueue().getConsumerKey(),
+          properties.getQueue().getStreamKey());
+
     } catch (Exception e) {
 
-        if(isBusyGroupError(e)) {
-            logger.info("Consumer group {} exists", properties.getQueue().getConsumerKey());
+      if (isBusyGroupError(e)) {
+        logger.info("Consumer group {} exists", properties.getQueue().getConsumerKey());
 
-        } else {
-            throw e;
-
-        }
+      } else {
+        throw e;
+      }
     }
   }
 
   private boolean isBusyGroupError(Throwable e) {
     Throwable curr = e;
 
-    while(curr != null) {
-        if(curr.getMessage() != null && curr.getMessage().contains("BUSYGROUP")) {
-            return true;
-        }
-        curr = curr.getCause();
-
+    while (curr != null) {
+      if (curr.getMessage() != null && curr.getMessage().contains("BUSYGROUP")) {
+        return true;
+      }
+      curr = curr.getCause();
     }
     return false;
   }
@@ -72,15 +69,13 @@ public class PlagiarismQueueConfig {
   @Bean(destroyMethod = "shutdown")
   public ExecutorService plagiarismStreamExecutor() {
     return Executors.newFixedThreadPool(properties.getQueue().getConcurrency());
-
   }
 
   @Bean(initMethod = "start", destroyMethod = "stop")
   public StreamMessageListenerContainer<String, MapRecord<String, String, String>>
       plagiarismStreamContainer(
-        RedisConnectionFactory connection,
-        @Qualifier("plagiarismStreamExecutor") ExecutorService executor
-      ) {
+          RedisConnectionFactory connection,
+          @Qualifier("plagiarismStreamExecutor") ExecutorService executor) {
     StreamMessageListenerContainerOptions<String, MapRecord<String, String, String>> options =
         StreamMessageListenerContainerOptions.builder()
             .pollTimeout(Duration.ofMillis(properties.getQueue().getPollTimeoutMs()))
@@ -90,16 +85,14 @@ public class PlagiarismQueueConfig {
 
     StreamMessageListenerContainer<String, MapRecord<String, String, String>> container =
         StreamMessageListenerContainer.create(connection, options);
-    
-    for(int i = 0; i < properties.getQueue().getConcurrency(); i++) {
-        String name = "worker-" + i;
-        container.receive(
-            Consumer.from(properties.getQueue().getConsumerKey(), name),
-            StreamOffset.create(properties.getQueue().getStreamKey(), ReadOffset.lastConsumed()),
-            consumer 
-        );
+
+    for (int i = 0; i < properties.getQueue().getConcurrency(); i++) {
+      String name = "worker-" + i;
+      container.receive(
+          Consumer.from(properties.getQueue().getConsumerKey(), name),
+          StreamOffset.create(properties.getQueue().getStreamKey(), ReadOffset.lastConsumed()),
+          consumer);
     }
     return container;
-    
-    }
+  }
 }

@@ -54,7 +54,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
 @ExtendWith(MockitoExtension.class)
 class PlagiarismCheckServiceTest {
 
@@ -79,8 +78,6 @@ class PlagiarismCheckServiceTest {
   private static final UUID TEAM_A_ID = UUID.randomUUID();
   private static final UUID TEAM_B_ID = UUID.randomUUID();
   private static final UUID TEAM_C_ID = UUID.randomUUID();
-
-
 
   @BeforeEach
   void setUp() {
@@ -112,7 +109,6 @@ class PlagiarismCheckServiceTest {
     sub.setEventId(EVENT_ID);
     sub.setSourceFileName(fileName);
     return sub;
-
   }
 
   @Test
@@ -134,7 +130,7 @@ class PlagiarismCheckServiceTest {
 
     when(submissionRepo.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
         .thenReturn(List.of(subA, subB));
-    
+
     when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
     when(storageService.download("submissions", "key-a"))
         .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
@@ -144,19 +140,15 @@ class PlagiarismCheckServiceTest {
     when(structuralNormalizer.normalize("a.java", "code-a"))
         .thenReturn(
             StructuralNormalizationResult.lexer(
-                List.of(new NormalizedToken("a.java", "tok", 0, 3))
-            )
-        );
+                List.of(new NormalizedToken("a.java", "tok", 0, 3))));
     when(structuralNormalizer.normalize("b.java", "code-b"))
         .thenReturn(
             StructuralNormalizationResult.lexer(
-                List.of(new NormalizedToken("b.java", "tok", 0, 3))
-            )
-        );
+                List.of(new NormalizedToken("b.java", "tok", 0, 3))));
 
     FingerprintResult fpA =
         new FingerprintResult(1, Set.of(new Fingerprint(10L, 0), new Fingerprint(20L, 1)));
-    
+
     FingerprintResult fpB =
         new FingerprintResult(1, Set.of(new Fingerprint(20L, 0), new Fingerprint(30L, 1)));
     when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fpA, fpB);
@@ -191,7 +183,6 @@ class PlagiarismCheckServiceTest {
     assertThat(row.getStructuralScore()).isEqualByComparingTo(new BigDecimal("0.8000"));
     assertThat(row.getEmbeddingScore()).isNull();
     assertThat(row.getCombinedScore()).isEqualByComparingTo(new BigDecimal("0.8000"));
-
   }
 
   @Test
@@ -200,7 +191,6 @@ class PlagiarismCheckServiceTest {
     when(runRepo.findById(999L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> service.execute(999L)).isInstanceOf(IllegalArgumentException.class);
-
   }
 
   @Test
@@ -210,7 +200,7 @@ class PlagiarismCheckServiceTest {
     when(runRepo.findById(200L)).thenReturn(Optional.of(run));
     when(submissionRepo.findLeaderboardByEventIdAndLevelId(EVENT_ID, LEVEL_ID))
         .thenThrow(new RuntimeException("leaderboard query failed"));
-    
+
     service.execute(200L);
 
     assertThat(run.getStatus()).isEqualTo("FAILED");
@@ -218,7 +208,6 @@ class PlagiarismCheckServiceTest {
     assertThat(run.getCompletedAt()).isNotNull();
     verify(runRepo, times(2)).save(run);
     verify(similarityRepo, never()).saveAll(any());
-
   }
 
   @Test
@@ -235,7 +224,7 @@ class PlagiarismCheckServiceTest {
     Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
     when(submissionRepo.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
         .thenReturn(List.of(subA));
-    
+
     service.execute(300L);
 
     assertThat(run.getStatus()).isEqualTo("COMPLETED");
@@ -244,7 +233,6 @@ class PlagiarismCheckServiceTest {
     verify(similarityRepo, never())
         .deleteByEventIdAndLevelId(any(), org.mockito.ArgumentMatchers.anyShort());
     verify(similarityRepo, never()).saveAll(any());
-
   }
 
   @Test
@@ -254,7 +242,7 @@ class PlagiarismCheckServiceTest {
     props.setUseRelativeThreshold(true);
     props.setMinPairsForRelativeThreshold(1);
     props.setRelativeThresholdZScore(0.1);
-    
+
     PlagiarismRun run = new PlagiarismRun(EVENT_ID, LEVEL_ID, 10, UUID.randomUUID());
     when(runRepo.findById(400L)).thenReturn(Optional.of(run));
 
@@ -274,21 +262,19 @@ class PlagiarismCheckServiceTest {
 
     when(submissionRepo.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
         .thenReturn(List.of(subA, subB, subC));
-    
+
     when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
     when(storageService.download(eq("submissions"), any()))
         .thenAnswer(inv -> new ByteArrayInputStream("code".getBytes(StandardCharsets.UTF_8)));
     when(structuralNormalizer.normalize(any(), any()))
-        .thenReturn(StructuralNormalizationResult.lexer(List.of(new NormalizedToken("f", "tok", 0, 3))));
+        .thenReturn(
+            StructuralNormalizationResult.lexer(List.of(new NormalizedToken("f", "tok", 0, 3))));
 
-    FingerprintResult fpA =
-        new FingerprintResult(1, Set.of(new Fingerprint(1L, 0)));
-    
-    FingerprintResult fpB =
-        new FingerprintResult(1, Set.of(new Fingerprint(1L, 0)));
-    
-    FingerprintResult fpC =
-        new FingerprintResult(1, Set.of(new Fingerprint(99L, 0)));
+    FingerprintResult fpA = new FingerprintResult(1, Set.of(new Fingerprint(1L, 0)));
+
+    FingerprintResult fpB = new FingerprintResult(1, Set.of(new Fingerprint(1L, 0)));
+
+    FingerprintResult fpC = new FingerprintResult(1, Set.of(new Fingerprint(99L, 0)));
     when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fpA, fpB, fpC);
     when(winnowing.jaccard(any(), any())).thenReturn(0.9, 0.1, 0.1);
 
@@ -308,15 +294,13 @@ class PlagiarismCheckServiceTest {
     long flaggedCount = saved.stream().filter(SubmissionSimilarity::isFlagged).count();
     assertThat(flaggedCount).isEqualTo(1);
     assertThat(
-        saved.stream()
-            .filter(SubmissionSimilarity::isFlagged)
-            .findFirst()
-            .orElseThrow()
-            .getCombinedScore()
-            .doubleValue()
-    )
-    .isEqualTo(0.9);
-
+            saved.stream()
+                .filter(SubmissionSimilarity::isFlagged)
+                .findFirst()
+                .orElseThrow()
+                .getCombinedScore()
+                .doubleValue())
+        .isEqualTo(0.9);
   }
 
   @Test
@@ -341,16 +325,16 @@ class PlagiarismCheckServiceTest {
 
     when(submissionRepo.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
         .thenReturn(List.of(subA, subB));
-    
+
     when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
     when(storageService.download(eq("submissions"), any()))
         .thenAnswer(inv -> new ByteArrayInputStream("code".getBytes(StandardCharsets.UTF_8)));
     when(structuralNormalizer.normalize(any(), any()))
-        .thenReturn(StructuralNormalizationResult.lexer(List.of(new NormalizedToken("f", "tok", 0, 3))));
+        .thenReturn(
+            StructuralNormalizationResult.lexer(List.of(new NormalizedToken("f", "tok", 0, 3))));
 
-    FingerprintResult fp =
-        new FingerprintResult(1, Set.of(new Fingerprint(10L, 0)));
-    
+    FingerprintResult fp = new FingerprintResult(1, Set.of(new Fingerprint(10L, 0)));
+
     when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fp, fp);
     when(winnowing.jaccard(any(), any())).thenReturn(1.0);
 
@@ -367,7 +351,6 @@ class PlagiarismCheckServiceTest {
 
     assertThat(captor.getValue()).hasSize(1);
     assertThat(captor.getValue().get(0).isFlagged()).isFalse();
-
   }
 
   @Test
@@ -394,16 +377,16 @@ class PlagiarismCheckServiceTest {
 
     when(submissionRepo.findBestScoredForTeamsAndLevel(eq(LEVEL_ID), anyList()))
         .thenReturn(List.of(subA, subB));
-    
+
     when(blobConfig.getSubmissionsContainer()).thenReturn("submissions");
     when(storageService.download(eq("submissions"), any()))
         .thenAnswer(inv -> new ByteArrayInputStream("code".getBytes(StandardCharsets.UTF_8)));
     when(structuralNormalizer.normalize(any(), any()))
-        .thenReturn(StructuralNormalizationResult.lexer(List.of(new NormalizedToken("f", "tok", 0, 3))));
+        .thenReturn(
+            StructuralNormalizationResult.lexer(List.of(new NormalizedToken("f", "tok", 0, 3))));
 
-    FingerprintResult fp =
-        new FingerprintResult(1, Set.of(new Fingerprint(1L, 0)));
-    
+    FingerprintResult fp = new FingerprintResult(1, Set.of(new Fingerprint(1L, 0)));
+
     when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(fp, fp);
     when(winnowing.jaccard(any(), any())).thenReturn(0.5);
 
@@ -421,24 +404,21 @@ class PlagiarismCheckServiceTest {
 
     assertThat(saved.getCombinedScore().doubleValue()).isEqualTo(0.5);
     assertThat(saved.getEmbeddingScore().doubleValue()).isEqualTo(0.9);
-
   }
 
   private SubmissionSimilarity row(
-    Long subA, Long subB, UUID teamA, UUID teamB, double combined, boolean flagged
-  ) {
+      Long subA, Long subB, UUID teamA, UUID teamB, double combined, boolean flagged) {
     BigDecimal score = BigDecimal.valueOf(combined);
     return new SubmissionSimilarity(
-        EVENT_ID, LEVEL_ID, subA, subB, teamA, teamB, score, null, score, 5, flagged
-    );
+        EVENT_ID, LEVEL_ID, subA, subB, teamA, teamB, score, null, score, 5, flagged);
   }
 
   @Test
   void getResults_levelSpecified_returnsRowWithResolvedTeamNames() {
-    
+
     when(similarityRepo.findByEventIdAndLevelIdOrderByCombinedScoreDesc(EVENT_ID, LEVEL_ID))
         .thenReturn(List.of(row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.62, true)));
-    
+
     Team teamA = new Team();
     teamA.setTeamName("Alpha");
     Team teamB = new Team();
@@ -447,13 +427,12 @@ class PlagiarismCheckServiceTest {
     when(teamRepo.findById(TEAM_B_ID)).thenReturn(Optional.of(teamB));
 
     List<SubmissionSimilarityResponse> results = service.getResults(EVENT_ID, LEVEL_ID, false);
-    
+
     assertThat(results).hasSize(1);
     SubmissionSimilarityResponse resp = results.get(0);
     assertThat(resp.teamNameA()).isEqualTo("Alpha");
     assertThat(resp.teamNameB()).isEqualTo("Beta");
     assertThat(resp.flagged()).isTrue();
-
   }
 
   @Test
@@ -468,16 +447,14 @@ class PlagiarismCheckServiceTest {
 
     assertThat(results.get(0).teamNameA()).isEqualTo("?");
     assertThat(results.get(0).teamNameB()).isEqualTo("?");
-    
   }
 
   @Test
   void getResults_levelSpecifiedAndOnlyFlagged_usesFlaggedOnlyQuery() {
 
     when(similarityRepo.findByEventIdAndLevelIdAndFlaggedTrueOrderByCombinedScoreDesc(
-            EVENT_ID, LEVEL_ID
-    ))
-    .thenReturn(List.of(row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.9, true)));
+            EVENT_ID, LEVEL_ID))
+        .thenReturn(List.of(row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.9, true)));
     when(teamRepo.findById(any())).thenReturn(Optional.empty());
 
     List<SubmissionSimilarityResponse> results = service.getResults(EVENT_ID, LEVEL_ID, true);
@@ -486,7 +463,6 @@ class PlagiarismCheckServiceTest {
     verify(similarityRepo)
         .findByEventIdAndLevelIdAndFlaggedTrueOrderByCombinedScoreDesc(EVENT_ID, LEVEL_ID);
     verify(similarityRepo, never()).findByEventIdOrderByCombinedScoreDesc(any());
-
   }
 
   @Test
@@ -495,16 +471,13 @@ class PlagiarismCheckServiceTest {
         .thenReturn(
             List.of(
                 row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.9, true),
-                row(3L, 4L, TEAM_A_ID, TEAM_B_ID, 0.2, false)
-            )
-        );
-    
+                row(3L, 4L, TEAM_A_ID, TEAM_B_ID, 0.2, false)));
+
     when(teamRepo.findById(any())).thenReturn(Optional.empty());
 
     List<SubmissionSimilarityResponse> results = service.getResults(EVENT_ID, null, false);
 
     assertThat(results).hasSize(2);
-
   }
 
   @Test
@@ -514,17 +487,13 @@ class PlagiarismCheckServiceTest {
         .thenReturn(
             List.of(
                 row(1L, 2L, TEAM_A_ID, TEAM_B_ID, 0.9, true),
-                row(3L, 4L, TEAM_A_ID, TEAM_B_ID, 0.2, false)
-            )
-        );
+                row(3L, 4L, TEAM_A_ID, TEAM_B_ID, 0.2, false)));
     when(teamRepo.findById(any())).thenReturn(Optional.empty());
 
     List<SubmissionSimilarityResponse> results = service.getResults(EVENT_ID, null, true);
 
     assertThat(results).hasSize(1);
     assertThat(results.get(0).flagged()).isTrue();
-
-
   }
 
   @Test
@@ -533,9 +502,8 @@ class PlagiarismCheckServiceTest {
     when(submissionRepo.findById(1L)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> service.getDiff(1L, 2L))
-    .isInstanceOf(IllegalArgumentException.class)
-    .hasMessageContaining("1");
-
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("1");
   }
 
   @Test
@@ -554,21 +522,17 @@ class PlagiarismCheckServiceTest {
         .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
     when(storageService.download("submissions", "key-b"))
         .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
-    
+
     when(structuralNormalizer.normalize("a.java", "code-a"))
         .thenReturn(
             StructuralNormalizationResult.lexer(
-                List.of(new NormalizedToken("a.java", "tok", 0, 3))
-            )
-        );
-    
+                List.of(new NormalizedToken("a.java", "tok", 0, 3))));
+
     when(structuralNormalizer.normalize("b.java", "code-b"))
         .thenReturn(
             StructuralNormalizationResult.lexer(
-                List.of(new NormalizedToken("b.java", "tok", 0, 3))
-            )
-        );
-    
+                List.of(new NormalizedToken("b.java", "tok", 0, 3))));
+
     FingerprintResult fpA = new FingerprintResult(1, Set.of(new Fingerprint(10, 0)));
     FingerprintResult fpB = new FingerprintResult(1, Set.of(new Fingerprint(20L, 0)));
 
@@ -590,12 +554,10 @@ class PlagiarismCheckServiceTest {
         .isEqualTo(PlagiarismDiffResponse.SemanticStatus.NO_DATA_FOR_EITHER);
     assertThat(diff.filesA()).hasSize(1);
     assertThat(diff.filesA().get(0).fileName()).isEqualTo("a.java");
-
   }
 
   @Test
   void getDiff_matchedRangeSpanningTwoFiles_splitsRangeAtFileBoundary() {
-
 
     Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
     Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
@@ -608,26 +570,20 @@ class PlagiarismCheckServiceTest {
         .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
     when(storageService.download("submissions", "key-b"))
         .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
-    
-    
+
     List<NormalizedToken> tokensA =
         List.of(
             new NormalizedToken("File1.java", "tok1", 0, 4),
-            new NormalizedToken("File2.java", "tok2", 0, 4)
-        );
+            new NormalizedToken("File2.java", "tok2", 0, 4));
     when(structuralNormalizer.normalize("a.java", "code-a"))
-        .thenReturn(
-            StructuralNormalizationResult.lexer(tokensA)
-        );
-    
+        .thenReturn(StructuralNormalizationResult.lexer(tokensA));
+
     List<NormalizedToken> tokensB = List.of(new NormalizedToken("b.java", "tokB", 0, 4));
     when(structuralNormalizer.normalize("b.java", "code-b"))
-        .thenReturn(
-            StructuralNormalizationResult.lexer(tokensB)
-        );
-    
+        .thenReturn(StructuralNormalizationResult.lexer(tokensB));
+
     props.setKgramSize(2);
-    
+
     FingerprintResult fpA = new FingerprintResult(2, Set.of(new Fingerprint(7L, 0)));
     FingerprintResult fpB = new FingerprintResult(2, Set.of(new Fingerprint(7L, 0)));
 
@@ -642,13 +598,10 @@ class PlagiarismCheckServiceTest {
     assertThat(diff.matchedRangesA().get(0).fileName()).isEqualTo("File1.java");
     assertThat(diff.matchedRangesA().get(0).start()).isEqualTo(0);
     assertThat(diff.matchedRangesA().get(0).end()).isEqualTo(4);
-
-
   }
 
   @Test
   void getDiff_matchStartsPastTokenList_isSkippedWithoutError() {
-
 
     Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
     Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
@@ -661,23 +614,15 @@ class PlagiarismCheckServiceTest {
         .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
     when(storageService.download("submissions", "key-b"))
         .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
-    
-    
-    List<NormalizedToken> tokensA =
-        List.of(
-            new NormalizedToken("a.java", "tok", 0, 3)
-        );
+
+    List<NormalizedToken> tokensA = List.of(new NormalizedToken("a.java", "tok", 0, 3));
     when(structuralNormalizer.normalize("a.java", "code-a"))
-        .thenReturn(
-            StructuralNormalizationResult.lexer(tokensA)
-        );
-    
+        .thenReturn(StructuralNormalizationResult.lexer(tokensA));
+
     List<NormalizedToken> tokensB = List.of(new NormalizedToken("b.java", "tok", 0, 3));
     when(structuralNormalizer.normalize("b.java", "code-b"))
-        .thenReturn(
-            StructuralNormalizationResult.lexer(tokensB)
-        );
-        
+        .thenReturn(StructuralNormalizationResult.lexer(tokensB));
+
     FingerprintResult fpA = new FingerprintResult(1, Set.of(new Fingerprint(1L, 5)));
     FingerprintResult fpB = new FingerprintResult(1, Set.of(new Fingerprint(1L, 0)));
 
@@ -689,13 +634,10 @@ class PlagiarismCheckServiceTest {
     PlagiarismDiffResponse diff = service.getDiff(1L, 2L);
 
     assertThat(diff.matchedRangesA()).isEmpty();
-
-
   }
 
   @Test
   void getDiff_functionEmbeddingsAboveThreshold_returnsMatchedFunctionsWithResolvedSpans() {
-
 
     Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
     Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
@@ -708,19 +650,14 @@ class PlagiarismCheckServiceTest {
         .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
     when(storageService.download("submissions", "key-b"))
         .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
-    
-    
+
     AstFunctionSpan spanA = new AstFunctionSpan("A.run", "method", 0, 10, 1, 2);
     AstFunctionSpan spanB = new AstFunctionSpan("B.run", "method", 0, 10, 1, 2);
     when(structuralNormalizer.normalize("a.java", "code-a"))
-        .thenReturn(
-            StructuralNormalizationResult.ast(List.of(), List.of(spanA))
-        );
+        .thenReturn(StructuralNormalizationResult.ast(List.of(), List.of(spanA)));
     when(structuralNormalizer.normalize("b.java", "code-b"))
-        .thenReturn(
-            StructuralNormalizationResult.ast(List.of(), List.of(spanB))
-        );
-        
+        .thenReturn(StructuralNormalizationResult.ast(List.of(), List.of(spanB)));
+
     FingerprintResult emptyFp = new FingerprintResult(1, Set.of());
 
     when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(emptyFp, emptyFp);
@@ -734,16 +671,19 @@ class PlagiarismCheckServiceTest {
 
     when(similarityRepo.findByEventIdAndLevelIdOrderByCombinedScoreDesc(EVENT_ID, LEVEL_ID))
         .thenReturn(List.of());
-    when(functionEmbeddingStore.findBySubmissionIds(anyList())).thenReturn(List.of(storedA, storedB));
+    when(functionEmbeddingStore.findBySubmissionIds(anyList()))
+        .thenReturn(List.of(storedA, storedB));
     when(embeddingSimilarityCalculator.meanVector(anyList())).thenReturn(new float[] {0f, 0f});
     when(embeddingSimilarityCalculator.centerAll(List.of(storedA), new float[] {0f, 0f}))
         .thenReturn(List.of(storedA));
     when(embeddingSimilarityCalculator.centerAll(List.of(storedB), new float[] {0f, 0f}))
         .thenReturn(List.of(storedB));
     when(embeddingSimilarityCalculator.topFunctionMatches(
-        List.of(storedA), List.of(storedB), props.getFunctionMatchThreshold(), props.getMaxFunctionMatches()))
-        .thenReturn(List.of(new FunctionMatch("A.run", "B.run", 0.95)
-    ));
+            List.of(storedA),
+            List.of(storedB),
+            props.getFunctionMatchThreshold(),
+            props.getMaxFunctionMatches()))
+        .thenReturn(List.of(new FunctionMatch("A.run", "B.run", 0.95)));
 
     PlagiarismDiffResponse diff = service.getDiff(1L, 2L);
 
@@ -754,13 +694,10 @@ class PlagiarismCheckServiceTest {
     assertThat(diff.functionMatches().get(0).functionNameB()).isEqualTo("B.run");
     assertThat(diff.functionMatches().get(0).fileNameB()).isEqualTo("b.java");
     assertThat(diff.functionMatches().get(0).similarity()).isEqualTo(0.95);
-
-
   }
 
   @Test
   void getDiff_noMatchesAboveThreshold_returnsEmptyListWithThatStatus() {
-
 
     Submission subA = submission(1L, TEAM_A_ID, "a.java", "key-a");
     Submission subB = submission(2L, TEAM_B_ID, "b.java", "key-b");
@@ -775,13 +712,10 @@ class PlagiarismCheckServiceTest {
         .thenReturn(new ByteArrayInputStream("code-a".getBytes(StandardCharsets.UTF_8)));
     when(storageService.download("submissions", "key-b"))
         .thenReturn(new ByteArrayInputStream("code-b".getBytes(StandardCharsets.UTF_8)));
-    
-    
+
     when(structuralNormalizer.normalize(any(), any()))
-        .thenReturn(
-            StructuralNormalizationResult.lexer(List.of())
-        );
-        
+        .thenReturn(StructuralNormalizationResult.lexer(List.of()));
+
     FingerprintResult emptyFp = new FingerprintResult(1, Set.of());
 
     when(winnowing.fingerprint(anyList(), anyInt(), anyInt())).thenReturn(emptyFp, emptyFp);
@@ -795,21 +729,17 @@ class PlagiarismCheckServiceTest {
 
     when(similarityRepo.findByEventIdAndLevelIdOrderByCombinedScoreDesc(EVENT_ID, LEVEL_ID))
         .thenReturn(List.of());
-    when(functionEmbeddingStore.findBySubmissionIds(anyList())).thenReturn(List.of(storedA, storedB));
+    when(functionEmbeddingStore.findBySubmissionIds(anyList()))
+        .thenReturn(List.of(storedA, storedB));
     when(embeddingSimilarityCalculator.meanVector(anyList())).thenReturn(new float[] {0f, 0f});
-    when(embeddingSimilarityCalculator.centerAll(any(), any()))
+    when(embeddingSimilarityCalculator.centerAll(any(), any())).thenReturn(List.of());
+    when(embeddingSimilarityCalculator.topFunctionMatches(any(), any(), anyDouble(), anyInt()))
         .thenReturn(List.of());
-    when(embeddingSimilarityCalculator.topFunctionMatches(
-        any(), any(), anyDouble(), anyInt()))
-        .thenReturn(List.of()
-    );
 
     PlagiarismDiffResponse diff = service.getDiff(1L, 2L);
 
-    assertThat(diff.semanticStatus()).isEqualTo(PlagiarismDiffResponse.SemanticStatus.NO_MATCHES_ABOVE_THRESHOLD);
+    assertThat(diff.semanticStatus())
+        .isEqualTo(PlagiarismDiffResponse.SemanticStatus.NO_MATCHES_ABOVE_THRESHOLD);
     assertThat(diff.functionMatches()).isEmpty();
-
   }
-
-
 }

@@ -13,7 +13,6 @@ public interface SubmissionSimilarityRepository extends JpaRepository<Submission
 
   Optional<SubmissionSimilarity> findBySubmissionIdAAndSubmissionIdB(Long a, Long b);
 
-
   List<SubmissionSimilarity> findByEventIdAndLevelIdOrderByCombinedScoreDesc(
       UUID eventId, short levelId);
 
@@ -23,9 +22,6 @@ public interface SubmissionSimilarityRepository extends JpaRepository<Submission
       UUID eventId, short levelId);
 
   @Modifying
-  @Query(
-      "DELETE FROM SubmissionSimilarity s WHERE s.eventId = :eventId AND s.levelId = :levelId")
+  @Query("DELETE FROM SubmissionSimilarity s WHERE s.eventId = :eventId AND s.levelId = :levelId")
   void deleteByEventIdAndLevelId(@Param("eventId") UUID eventId, @Param("levelId") short levelId);
-
-
 }
