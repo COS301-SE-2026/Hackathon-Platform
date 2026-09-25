@@ -8,7 +8,7 @@ services:
 # connextion string: localhost:5432/hackathon_db
 
   postgres:
-    image: postgres:16
+    image: pgvector/pgvector:pg16
     container_name: hackathon-postgres
     environment:
       POSTGRES_DB: hackathon_db
@@ -37,6 +37,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+#tree-sitter AST parsing + CodeBERT embedding sidecar for plagiarism detection
+
+  ast-service:
+    build:
+      context: ./ast-service
+    container_name: hackathon-ast-service
+    ports:
+      - "8008:8008"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
       
 volumes:
   postgres_data:
