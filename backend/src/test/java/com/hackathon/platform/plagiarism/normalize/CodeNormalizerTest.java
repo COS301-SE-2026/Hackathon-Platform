@@ -151,4 +151,69 @@ class CodeNormalizerTest {
     assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "NUM");
   }
 
+  @Test 
+  void normalizeWithOffsets_python_tripleSingleQuoteAlsoProducesNoToken() {
+
+    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("'''doc'''\ny = 2", Lang.PYTHON, "f.py");
+
+    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "NUM");
+  }
+
+  @Test 
+  void normalizeWithOffsets_python_hashCommentProducesNoToken() {
+
+    String source = "x = 1 # this is a comment\ny = 2";
+
+    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets(source, Lang.PYTHON, "f.py");
+
+    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "NUM", "ID", "=", "NUM");
+  }
+
+  @Test 
+  void normalizeWithOffsets_python_stringLiteralBecomesStrToken() {
+
+    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("x = 'hi'", Lang.PYTHON, "f.py");
+
+    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "STR");
+  }
+
+  @Test 
+  void normalizeWithOffsets_python_keywordsRecognized() {
+
+    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("def run(self):", Lang.PYTHON, "f.py");
+
+    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("def", "ID", "(", "self", ")", ":");
+  }
+
+  @Test 
+  void normalizeWithOffsets_unknownLang_recognizesBothCommentStyles() {
+
+    String source = "x = 1 // c-style\ny = 2 # python-style\n/* block */ z = 3";
+
+    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets(source, Lang.UNKNOWN, "f.txt");
+
+    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "=", "NUM", "ID", "=", "NUM", "ID", "=", "NUM");
+  }
+
+  @Test 
+  void normalizeWithOffsets_unknownLang_classifiesLiteralAndSymbolsLikeCLike() {
+
+    List<NormalizedToken> tokens = normalizer.normalizeWithOffsets("total += 1;", Lang.UNKNOWN, "f.txt");
+
+    assertThat(tokens).extracting(NormalizedToken::text).containsExactly("ID", "+", "=", "NUM", ";");
+  }
+
+  @Test 
+  void normalize_returnsJustTokenTextsInOrder() {
+
+    List<String> texts = normalizer.normalize("int x = 1;", Lang.C_LIKE);
+
+    assertThat(texts).containsExactly("int", "ID", "=", "NUM", ";");
+  }
+
+  @Test
+  void normalize_blankSource_returnsEmptyList(){
+    assertThat(normalizer.normalize("", Lang.C_LIKE)).isEmpty();
+  }
+
 }
