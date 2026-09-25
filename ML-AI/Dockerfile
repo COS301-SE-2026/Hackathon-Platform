@@ -7,8 +7,8 @@ COPY requirements.txt .
 RUN pip install  \
     --no-cache-dir \
     --only-binary=:all: -r \
-    requirements.txt
-RUN useradd --create-home --shell /usr/sbin/nologin appuser
+    requirements.txt \
+    && useradd --create-home --shell /usr/sbin/nologin appuser
 COPY predict_service.py .
 COPY ai_usage_model.joblib .
 USER appuser
