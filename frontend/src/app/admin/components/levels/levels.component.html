@@ -91,7 +91,10 @@
               <span class = "level-name">Level {{ level.levelNumber }} : {{level.name}} </span>
               <span class = "level-description">{{ level.description || 'No description' }}</span>
               <div class="resources-cell">
-                <input #starterZipInput type="file" accept=".zip,application/zip" hidden (change)="onStarterZipSelected($event, level)"/>
+                <label class="sr-only" [attr.for]="'starterZipInput-' + level.id">
+                  Upload Starter ZIP for level {{ level.levelNumber }}
+              </label>
+                <input #starterZipInput [id]="'starterZipInput-' + level.id" type="file" accept=".zip,application/zip" hidden (change)="onStarterZipSelected($event, level)"/>
                 <button type="button" class="btn-view-level" [disabled]="uploadingStarterZip[level.id]" (click)="starterZipInput.click()">
                 @if (uploadingStarterZip[level.id]) {
                   <i class="pi pi-spin pi-spinner"></i>

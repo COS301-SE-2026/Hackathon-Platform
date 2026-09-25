@@ -112,17 +112,17 @@
 
     &.high {
         background: rgba(192, 57, 43, 0.12);
-        color: #c0392b;
+        color: #9e2f24;
     }
 
     &.medium {
         background: rgba(161, 191, 36, 0.2);
-        color: #5d7112;
+        color: #4c5d0e;
     }
 
     &.low {
         background: rgba(38, 139, 66, 0.12);
-        color: #268b42;
+        color: #1d6f34;
     }
 
     &.insufficient {
@@ -246,14 +246,10 @@
 
 .ai-score {
     color: #32138c;
+    font-size: 0.78rem;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-}
-
-.ai-score {
-    color: #32138c;
-    font-size: 0.78rem;
     margin-left: 8px;
 }
 
@@ -263,7 +259,7 @@
 
 .ai-review-badge {
     background: rgba(192, 57, 43, 0.12);
-    color: #c0392b;
+    color: #9e2f24;
     border-radius: 12px;
     padding: 5px 12px;
     font-size: 0.72rem;

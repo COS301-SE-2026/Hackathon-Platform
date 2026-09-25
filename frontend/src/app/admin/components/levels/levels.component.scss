@@ -316,7 +316,7 @@
     .resources-cell {
         display:flex;
         flex-direction: column;
-        align-items: center;
+        align-items: flex-start;
         justify-self: start;
         gap:4px;
         min-width: 120px;
@@ -772,13 +772,6 @@
     .search-box input {
         width: 160px;
     }
-}
-
-.resources-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
 }
 
 .resources-title {
