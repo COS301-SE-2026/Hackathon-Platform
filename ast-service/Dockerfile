@@ -10,11 +10,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY requirements.lock.txt .
 
 RUN pip install --no-cache-dir --only-binary=:all: \
         torch==2.4.1 --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir --only-binary=:all: -r requirements.txt \
+    && pip install --no-cache-dir --only-binary=:all: --require-hashes \
+        -r requirements.lock.txt \
     && python -c "from transformers import AutoTokenizer, AutoModel; \
         AutoTokenizer.from_pretrained('microsoft/codebert-base'); \
         AutoModel.from_pretrained('microsoft/codebert-base')"
@@ -22,6 +23,7 @@ RUN pip install --no-cache-dir --only-binary=:all: \
 COPY normalize.py app.py embeddings.py ./
 
 RUN chown -R appuser:appuser /app
+
 USER appuser
 
 EXPOSE 8008
