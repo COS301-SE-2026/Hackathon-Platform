@@ -105,19 +105,21 @@ def parse(req: ParseRequest) -> ParseResponse:
         ],
     )
 
+def _count_nodes(node) -> tuple[int, int]:
+    total = 1
+    errors = 1 if node.type == "ERROR" else 0
+    for child in node.children:
+        child_total, child_errors = _count_nodes(child)
+        total += child_total
+        errors += child_errors
+    return total, errors
+
 def _error_ratio(root) -> float:
-    total = 0
-    errors = 0
-
-    def walk(node):
-        nonlocal total, errors
-        total += 1
-        if node.type == "ERROR":
-            errors += 1
-        for child in node.children:
-            walk(child)
-
-    walk(root)
+    if root is None:
+        return 0.0
+    total, errors = _count_nodes(root)
+    if total == 0:
+        return 0.0
     return errors / total
 
 #Embedding semantic similarity stuff
