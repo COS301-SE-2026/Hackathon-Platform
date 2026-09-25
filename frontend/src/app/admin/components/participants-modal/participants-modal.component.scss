@@ -138,6 +138,42 @@
   }
 }
 
+.btn-view-report{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ffffff;
+  color: #146a9d;
+  border: 1.5px solid #1983c2;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+
+  .pi{
+    font-size: 0.75rem;
+  }
+
+  &:hover:not(:disabled){
+    background-color: #eaf4fb;
+  }
+  &:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.participant-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 6px;
+}
+
 .add-participant-form{
   display: flex;
   align-items: flex-end;
