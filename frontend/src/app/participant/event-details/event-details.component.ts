@@ -18,7 +18,7 @@ import { calculateEventTimer, EventTimer } from '../../shared/utils/event-timer.
 import { StorageService } from '../../services/storage.service';
 import { ForumComponent } from '../../admin/components/forum/forum.component';
 import { LevelService } from '../../services/level.service';
-
+import { CertificateService } from '../../services/certificate.service';
 
 @Component({
   selector: 'app-event-details',
@@ -37,7 +37,7 @@ import { LevelService } from '../../services/level.service';
     InputComponent,
     TabsComponent,
     ButtonComponent
-    
+
   ],
   templateUrl: './event-details.component.html',
   styleUrls: ['./event-details.component.scss']
@@ -52,6 +52,7 @@ export class EventDetailsComponent implements OnDestroy {
   private readonly change = inject(ChangeDetectorRef);
   private readonly toast = inject(ToastService);
   private readonly levelService = inject(LevelService);
+  private readonly certificateService = inject(CertificateService);
   private timerInterval: ReturnType<typeof setInterval> | undefined;
 
   tabs: TabItem[] = [];
@@ -322,7 +323,7 @@ confirmRegistration(): void {
     if (this.isRegistered) {
       if (this.hasEventCompleted()) {
         tabDef.push( ['Announcements', 'announcements'], ['History', 'submission-history'], ['Rankings', 'leaderboard'] );
-     } 
+     }
       else {
         tabDef.push( ['Team', 'team'], ['Forum', 'forum'], ['Announcements', 'announcements']);
 
@@ -414,7 +415,7 @@ confirmRegistration(): void {
 
   getTimeZone(): string {
   return new Intl.DateTimeFormat('en-ZA', { timeZoneName: 'short'})
-    .formatToParts(new Date(this.event.startDateTime)) 
+    .formatToParts(new Date(this.event.startDateTime))
     .find(part => part.type === 'timeZoneName')?.value ?? '';
 }
 
@@ -425,28 +426,45 @@ confirmRegistration(): void {
 
       this.generatingCertificate = true;
 
-      this.eventService.downloadCertificate(this.eventId).subscribe({
-        next: (blob) => {
-          const fileName = `${this.event.name.replace(/[^a-z0-9]+/gi, '-')}-certificate.pdf`;
-          const url = window.URL.createObjectURL(blob);
-
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = fileName;
-          link.click();
-
-          window.URL.revokeObjectURL(url);
-
-          this.generatingCertificate = false;
-          this.change.markForCheck();
+      this.certificateService.getMyCertificates().subscribe({
+        next: (certificates) => {
+          const issuedForThisEvent = certificates.filter(c => c.eventId === this.eventId).sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime())[0];
+          if(issuedForThisEvent) {
+            const link = document.createElement('a');
+            link.href = issuedForThisEvent.downloadUrl;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.click();
+            this.generatingCertificate = false;
+            this.change.markForCheck();
+          } else{
+           this.downloadCertificate();
+          }
         },
 
-        error: () => {
-          this.toast.error('Error', "Can't find the certificate");
-          this.generatingCertificate = false;
-          this.change.markForCheck();
-        }
+        error: () => this.downloadOldCertificate(),
       });
+  }
+
+  private downloadOldCertificate(): void {
+    this.eventService.downloadCertificate(this.eventId).subscribe({
+      next: (blob) => {
+        const fileName = `${this.event.name.replace(/[^a-z0-9]+/gi, '-')}-certificate.pdf`;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.generatingCertificate = false;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.toast.error('Error', "Cant find your certificate. Please contact the event organiser.");
+        this.generatingCertificate = false;
+        this.change.markForCheck();
+      }
+    });
   }
 
   private hasEventStarted(): boolean {
@@ -477,5 +495,5 @@ confirmRegistration(): void {
 
     return 'UPCOMING';
   }
-  
+
 }
