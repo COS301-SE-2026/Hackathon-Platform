@@ -3,11 +3,6 @@
   font-family: 'Inter' , -apple-system, sans-serif;
 }
 
-.events-page{
-  min-height : 100vh;
-  background-color: #f4f6f9;
-}
-
 
 .content{
   max-width: 1180px;
@@ -328,14 +323,16 @@
   }
 }
 
-.card-banner{
+.card-banner {
   position: relative;
-  height: 96px;
+  aspect-ratio: 5 / 1;
+  height: auto;
+  min-height: 0;
   overflow: hidden;
   background-color: #e7eaf0;
 }
 
-.banner-img{
+.banner-img {
   position: absolute;
   inset: 0;
   width: 100%;
