@@ -24,22 +24,22 @@ public class CertificateRecipientResolver {
   private final TeamRepository teamRepo;
   private final TeamMemberRepository teamMemRepo;
   private final UserRepository userRepo;
-  private final LeaderboardService leaderboard;
+  private final LeaderboardService leaderboardService;
 
   public CertificateRecipientResolver(
       TeamRepository teamRepo,
       TeamMemberRepository teamMemRepo,
       UserRepository userRepo,
-      LeaderboardService leaderboard) {
+      LeaderboardService leaderboardService) {
     this.teamRepo = teamRepo;
     this.teamMemRepo = teamMemRepo;
     this.userRepo = userRepo;
-    this.leaderboard = leaderboard;
+    this.leaderboardService = leaderboardService;
   }
 
   public List<CertificateRecipient> resolve(Event event, String scope, Integer topN) {
     List<LeaderboardEntryResponse> leaderboard =
-        leaderboard.getEventLeaderboard(event.getEventId());
+        leaderboardService.getEventLeaderboard(event.getEventId());
     Map<UUID, Integer> rankByTeam = new HashMap<>();
     for (LeaderboardEntryResponse entry : leaderboard) {
       rankByTeam.put(entry.getTeamId(), entry.getRank());
