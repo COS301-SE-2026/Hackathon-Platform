@@ -17,45 +17,45 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CodeWorkspace {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "workspace_id", nullable = false, updatable = false)
-    private UUID workspaceId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(name = "workspace_id", nullable = false, updatable = false)
+  private UUID workspaceId;
 
-    @Column(name = "event_id", nullable = false, updatable = false)
-    private UUID eventId;
+  @Column(name = "event_id", nullable = false, updatable = false)
+  private UUID eventId;
 
-    @Column(name = "team_id", nullable = false, updatable = false)
-    private UUID teamId;
+  @Column(name = "team_id", nullable = false, updatable = false)
+  private UUID teamId;
 
-    @Column(name = "hackathon_id", nullable = false, updatable = false)
-    private UUID hackathonId;
+  @Column(name = "hackathon_id", nullable = false, updatable = false)
+  private UUID hackathonId;
 
-    @Column(name = "level_id", nullable = false, updatable = false)
-    private short levelId;
+  @Column(name = "level_id", nullable = false, updatable = false)
+  private short levelId;
 
-    @Column(name = "language", nullable = false, updatable = false, length = 20)
-    private String language = "JAVA";
+  @Column(name = "language", nullable = false, updatable = false, length = 20)
+  private String language = "JAVA";
 
-    @Column(name = "created_by_user_id", nullable = false, updatable = false)
-    private UUID createdByUserId;
+  @Column(name = "created_by_user_id", nullable = false, updatable = false)
+  private UUID createdByUserId;
 
-    @Column(name = "initialized_at")
-    private Instant initializedAt;
+  @Column(name = "initialized_at")
+  private Instant initializedAt;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-        private Instant createdAt = Instant.now();
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt = Instant.now();
 
-    public CodeWorkspace(UUID eventId, UUID teamId, UUID hackathonId, short levelId, UUID createdByUserId) {
-        this.eventId = eventId;
-        this.teamId = teamId;
-        this.hackathonId = hackathonId;
-        this.levelId = levelId;
-        this.createdByUserId = createdByUserId;
-    }
+  public CodeWorkspace(
+      UUID eventId, UUID teamId, UUID hackathonId, short levelId, UUID createdByUserId) {
+    this.eventId = eventId;
+    this.teamId = teamId;
+    this.hackathonId = hackathonId;
+    this.levelId = levelId;
+    this.createdByUserId = createdByUserId;
+  }
 
-    public void setInitializedAt(Instant initializedAt) {
-        this.initializedAt = initializedAt;
-    }
-
+  public void setInitializedAt(Instant initializedAt) {
+    this.initializedAt = initializedAt;
+  }
 }

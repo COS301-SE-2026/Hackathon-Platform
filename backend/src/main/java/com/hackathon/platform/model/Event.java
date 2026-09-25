@@ -65,7 +65,7 @@ public class Event {
   @Column(name = "logo_storage_key", columnDefinition = "TEXT", nullable = true)
   private String logoStorageKey;
 
-  @Column(name ="use_ide", nullable = false)
+  @Column(name = "use_ide", nullable = false)
   private boolean useIde = false;
 
   public boolean isUseIde() {

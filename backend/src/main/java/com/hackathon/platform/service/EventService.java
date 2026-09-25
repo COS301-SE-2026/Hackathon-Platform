@@ -378,6 +378,4 @@ public class EventService {
       throw new IllegalArgumentException("Hackathon not found");
     }
   }
-
-
 }

@@ -1,12 +1,9 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.config.AzureBlobConfig;
-import com.hackathon.platform.model.Event;
-import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
-import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
@@ -445,9 +442,9 @@ public class StorageController {
       @RequestParam("levelId") short levelId,
       @AuthenticationPrincipal User currUser) {
 
-    Map<String, String> res = createService.createSubmission(eventId, teamId, outputFile, sourceFile, levelId, currUser);
+    Map<String, String> res =
+        createService.createSubmission(eventId, teamId, outputFile, sourceFile, levelId, currUser);
     return ResponseEntity.ok(res);
-
   }
 
   /**

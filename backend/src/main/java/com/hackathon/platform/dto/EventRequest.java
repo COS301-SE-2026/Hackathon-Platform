@@ -18,7 +18,6 @@ public class EventRequest {
   private String visibility;
   private String status;
 
-
   @Setter @Getter private Boolean useIde;
 
   @Setter @Getter private Boolean inPerson;

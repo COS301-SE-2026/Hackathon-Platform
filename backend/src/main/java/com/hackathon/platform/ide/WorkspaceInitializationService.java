@@ -27,151 +27,169 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class WorkspaceInitializationService {
-    private static final int MAX_FILES = 500;
-    private static final long MAX_FILE_SIZE = 1_000_000;
-    private static final long MAX_TOTAL_SIZE = 20_000_000;
-    private static final String STARTER_FILE_TYPE = "STARTER_ZIP";
+  private static final int MAX_FILES = 500;
+  private static final long MAX_FILE_SIZE = 1_000_000;
+  private static final long MAX_TOTAL_SIZE = 20_000_000;
+  private static final String STARTER_FILE_TYPE = "STARTER_ZIP";
 
-    private final CodeWorkspaceRepository workRepo;
-    private final LevelFileRepository levelRepo;
-    private final StorageService storeService;
-    private final AzureBlobConfig blobConfig;
-    private final WorkspaceFileStore fileStore;
+  private final CodeWorkspaceRepository workRepo;
+  private final LevelFileRepository levelRepo;
+  private final StorageService storeService;
+  private final AzureBlobConfig blobConfig;
+  private final WorkspaceFileStore fileStore;
 
-    private final ConcurrentMap<UUID, Object> workspaceLocks = new ConcurrentHashMap<>();
+  private final ConcurrentMap<UUID, Object> workspaceLocks = new ConcurrentHashMap<>();
 
-    public void initializeIfNeeded(UUID workspaceId, IdeWorkspaceResources resources) {
-        Object lock = workspaceLocks.computeIfAbsent(workspaceId, id -> new Object());
+  public void initializeIfNeeded(UUID workspaceId, IdeWorkspaceResources resources) {
+    Object lock = workspaceLocks.computeIfAbsent(workspaceId, id -> new Object());
 
-        synchronized (lock) {
-            initializeWorkspace(workspaceId, resources);
-        }
+    synchronized (lock) {
+      initializeWorkspace(workspaceId, resources);
+    }
+  }
+
+  private void initializeWorkspace(UUID workspaceId, IdeWorkspaceResources resources) {
+    CodeWorkspace workspace =
+        workRepo
+            .findById(workspaceId)
+            .orElseThrow(() -> new IllegalArgumentException("Workspace not found"));
+
+    if (workspace.getInitializedAt() != null) {
+      return;
     }
 
-    private void initializeWorkspace(UUID workspaceId, IdeWorkspaceResources resources) {
-        CodeWorkspace workspace = workRepo.findById(workspaceId).orElseThrow(() -> new IllegalArgumentException("Workspace not found"));
-
-        if (workspace.getInitializedAt() != null) {
-            return;
-        }
-
-        if (!fileStore.listFiles(resources).isEmpty()) {
-            markInitialized(workspace);
-            return;
-        }
-
-        List<LevelFile> starterFiles = levelRepo.findByLevelIdAndFileType(Long.valueOf(workspace.getLevelId()), STARTER_FILE_TYPE);
-
-        if (starterFiles.isEmpty()) {
-            markInitialized(workspace);
-            return;
-        }
-
-        LevelFile starterFile = starterFiles.stream().max(Comparator.comparing(LevelFile::getUpdatedAt)).orElseThrow();
-
-        if (starterFile.getFileName() == null || !starterFile.getFileName().toLowerCase().endsWith(".zip")) {
-            throw new IllegalStateException("Starter file must be zipped");
-        }
-
-        try (InputStream input = storeService.download(blobConfig.getEventResourcesContainer(), starterFile.getStorageKey())) {
-            extractStarterZip(input, resources);
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not initialize", e);
-        }
-
-        markInitialized(workspace);
+    if (!fileStore.listFiles(resources).isEmpty()) {
+      markInitialized(workspace);
+      return;
     }
 
-    private void extractStarterZip(InputStream input, IdeWorkspaceResources resources) throws IOException {
-        int fileCount = 0;
-        int totalSize = 0;
+    List<LevelFile> starterFiles =
+        levelRepo.findByLevelIdAndFileType(Long.valueOf(workspace.getLevelId()), STARTER_FILE_TYPE);
 
-        try (ZipInputStream zip = new ZipInputStream(input)) {
-            ZipEntry entry;
-
-            while ((entry = zip.getNextEntry()) != null) {
-                if (entry.isDirectory()) {
-                    zip.closeEntry();
-                    continue;
-                }
-
-                String path = validateZipPath(entry.getName());
-
-                fileCount++;
-
-                if (fileCount > MAX_FILES) {
-                    throw new IllegalStateException("Starter ZIP contains too many files");
-                }
-
-                byte[] contents = readEntry(zip);
-
-                totalSize += contents.length;
-
-                if (totalSize > MAX_TOTAL_SIZE) {
-                    throw new IllegalStateException("Starter ZIP is too large");
-                }
-
-                String text = decodeUtf8(contents, path);
-                fileStore.writeFile(resources, path, text);
-                zip.closeEntry();
-            }
-        }
+    if (starterFiles.isEmpty()) {
+      markInitialized(workspace);
+      return;
     }
 
-    private byte[] readEntry(ZipInputStream zip) throws IOException {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buffer = new byte[8192];
-        long size = 0;
-        int read;
+    LevelFile starterFile =
+        starterFiles.stream().max(Comparator.comparing(LevelFile::getUpdatedAt)).orElseThrow();
 
-        while ((read = zip.read(buffer)) != -1) {
-            size += read;
-            if (size > MAX_FILE_SIZE) {
-                throw new IllegalStateException("Starter file exceeds maximum size");
-            }
-
-            output.write(buffer, 0, read);
-        }
-
-        return output.toByteArray();
+    if (starterFile.getFileName() == null
+        || !starterFile.getFileName().toLowerCase().endsWith(".zip")) {
+      throw new IllegalStateException("Starter file must be zipped");
     }
 
-    private String decodeUtf8(byte[] data, String path) {
-        try {
-            return StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(data)).toString();
-        } catch (CharacterCodingException e) {
-            throw new IllegalStateException("Starter ZIP contains a non-text file: " + path, e);
-        }
+    try (InputStream input =
+        storeService.download(
+            blobConfig.getEventResourcesContainer(), starterFile.getStorageKey())) {
+      extractStarterZip(input, resources);
+    } catch (IOException e) {
+      throw new IllegalStateException("Could not initialize", e);
     }
 
-    private String validateZipPath(String path) {
-        if (path == null || path.isBlank()) {
-            throw new IllegalArgumentException("Starter ZIP contains an invalid path");
+    markInitialized(workspace);
+  }
+
+  private void extractStarterZip(InputStream input, IdeWorkspaceResources resources)
+      throws IOException {
+    int fileCount = 0;
+    int totalSize = 0;
+
+    try (ZipInputStream zip = new ZipInputStream(input)) {
+      ZipEntry entry;
+
+      while ((entry = zip.getNextEntry()) != null) {
+        if (entry.isDirectory()) {
+          zip.closeEntry();
+          continue;
         }
 
-        String norm = path.replace('\\', '/');
+        String path = validateZipPath(entry.getName());
 
-        while (norm.startsWith("./")) {
-            norm = norm.substring(2);
+        fileCount++;
+
+        if (fileCount > MAX_FILES) {
+          throw new IllegalStateException("Starter ZIP contains too many files");
         }
 
-        if (norm.isBlank() || norm.startsWith("/") || norm.contains("\0") || norm.contains("\n") || norm.contains("\r")) {
-            throw new IllegalArgumentException("Starter ZIP contains an invalid path");
+        byte[] contents = readEntry(zip);
+
+        totalSize += contents.length;
+
+        if (totalSize > MAX_TOTAL_SIZE) {
+          throw new IllegalStateException("Starter ZIP is too large");
         }
 
-        String[] parts = norm.split("/");
+        String text = decodeUtf8(contents, path);
+        fileStore.writeFile(resources, path, text);
+        zip.closeEntry();
+      }
+    }
+  }
 
-        for (String part : parts) {
-            if (part.isBlank() || part.equals(".") || part.equals("..")) {
-                throw new IllegalArgumentException("Starter ZIP contains an unsafe path");
-            }
-        }
+  private byte[] readEntry(ZipInputStream zip) throws IOException {
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    byte[] buffer = new byte[8192];
+    long size = 0;
+    int read;
 
-        return norm;
+    while ((read = zip.read(buffer)) != -1) {
+      size += read;
+      if (size > MAX_FILE_SIZE) {
+        throw new IllegalStateException("Starter file exceeds maximum size");
+      }
+
+      output.write(buffer, 0, read);
     }
 
-    private void markInitialized(CodeWorkspace workspace) {
-        workspace.setInitializedAt(Instant.now());
-        workRepo.save(workspace);
+    return output.toByteArray();
+  }
+
+  private String decodeUtf8(byte[] data, String path) {
+    try {
+      return StandardCharsets.UTF_8
+          .newDecoder()
+          .onMalformedInput(CodingErrorAction.REPORT)
+          .onUnmappableCharacter(CodingErrorAction.REPORT)
+          .decode(ByteBuffer.wrap(data))
+          .toString();
+    } catch (CharacterCodingException e) {
+      throw new IllegalStateException("Starter ZIP contains a non-text file: " + path, e);
     }
+  }
+
+  private String validateZipPath(String path) {
+    if (path == null || path.isBlank()) {
+      throw new IllegalArgumentException("Starter ZIP contains an invalid path");
+    }
+
+    String norm = path.replace('\\', '/');
+
+    while (norm.startsWith("./")) {
+      norm = norm.substring(2);
+    }
+
+    if (norm.isBlank()
+        || norm.startsWith("/")
+        || norm.contains("\0")
+        || norm.contains("\n")
+        || norm.contains("\r")) {
+      throw new IllegalArgumentException("Starter ZIP contains an invalid path");
+    }
+
+    String[] parts = norm.split("/");
+
+    for (String part : parts) {
+      if (part.isBlank() || part.equals(".") || part.equals("..")) {
+        throw new IllegalArgumentException("Starter ZIP contains an unsafe path");
+      }
+    }
+
+    return norm;
+  }
+
+  private void markInitialized(CodeWorkspace workspace) {
+    workspace.setInitializedAt(Instant.now());
+    workRepo.save(workspace);
+  }
 }

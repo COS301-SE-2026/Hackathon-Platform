@@ -1,3 +1,3 @@
 package com.hackathon.platform.dto;
 
-public record WorkspaceFileContentResponse(String path, String content){}
+public record WorkspaceFileContentResponse(String path, String content) {}
