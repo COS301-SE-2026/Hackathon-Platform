@@ -1,0 +1,107 @@
+<div class = "plagiarism-page">
+    <div class="plagiarism-header">
+        <h1>Plagiarism Check</h1>
+        <div class="plagiarism-actions">
+            <input
+                type="search"
+                class="team-search"
+                placeholder="Search by team name..."
+                [value]="searchQuery()"
+                (input)="onSearchInput($any($event.target).value)"
+            />
+            <select class="level-select" [value]="selectedLevelId() ?? ''" (change)="onLevelSelectChange($any($event.target).value)">
+                <option value="">All levels</option>
+                @for (level of levels(); track level.id) {
+                    <option [value]="level.id.toString()">{{ level.name }}</option>
+                }
+            </select>
+            <app-button variant="secondary" (click)="toggleOnlyFlagged()">
+                {{ onlyFlagged() ? 'Showing flagged only' : 'Showing all pairs' }}
+            </app-button>
+            <app-button [disabled]="running()" (click)="runCheck()">
+                {{ running() ? 'Starting...' : 'Run Check' }}
+            </app-button>
+        </div>
+    </div>
+
+    @if (latestRun() && (latestRun()!.status === 'QUEUED' || latestRun()!.status === 'RUNNING')) {
+        <p class="run-status run-status-active">
+            @if (latestRun()!.status === 'QUEUED'){
+                Plagiarism check queued{{ latestRun()!.levelId ? ' for this level' : ''}}.
+            } @else {
+                Plagiarism check running{{ latestRun()!.levelId ? ' for this level' : ''}} -- this page will update automatically when it finishes.
+            }
+        </p>
+    } @else if (latestRun()?.status === 'FAILED') {
+        <p class="run-status run-status-failed">
+            The last run failed: {{ latestRun()?.errorMessage || 'unknown error' }}. Try running it again.
+        </p>
+    }
+
+    @if (loading()) {
+        <p>Loading...</p>
+
+    } @else if (visiblePairs().length === 0 && searchQuery().trim()) {
+        <p class="plagiarism-empty">
+            No {{ onlyFlagged() ? 'flagged ' : '' }}pairs match "{{ searchQuery() }}".
+        </p>
+    } @else if (visiblePairs().length === 0) {
+        <p class="plagiarism-empty">
+            @if (!latestRun()) {
+                No plagiarism check has been run yet {{ selectedLevelId() ? ' for this level' : '' }}. Click "Run Check" to start one.
+            } @else if (onlyFlagged() && allPairs().length > 0) {
+                The last run compared {{ allPairs().length }} pair{{ allPairs().length === 1 ? '' : 's' }} and flagged none of them. Toggle "Showing flagged only" to see all compared pairs.
+            } @else if (latestRun()?.status === 'COMPLETED') {
+                The last run finished but compared 0 pairs -- check that this level has at least two scored submissions.
+            } @else {
+                No plagiarism results yet{{ selectedLevelId() ? ' for this level' : '' }}. Click "Run Check" to start one.
+            }
+        </p>
+    } @else {
+        @if (searchQuery().trim()) {
+            <p class="plagiarism-result-count">{{ visiblePairs().length }} pair{{ visiblePairs().length === 1 ? '' : 's' }} match "{{ searchQuery() }}"</p>
+        }
+        <table class="plagiarism-table">
+            <thead>
+                <tr>
+                    <th>Team A</th>
+                    <th>Team B</th>
+                    <th>Structural Score</th>
+                    <th>Matched Fragments</th>
+                    <th>Flagged</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (pair of visiblePairs(); track pair.id) {
+                    <tr [class.flagged-row]="pair.flagged">
+                        <td>{{ pair.teamNameA }}</td>
+                        <td>{{ pair.teamNameB }}</td>
+                        <td>{{ (pair.structuralScore * 100) | number: '1.1-1' }}%</td>
+                        <td>{{ pair.matchedKgramCount }}</td>
+                        <td>
+                            @if (pair.flagged) {
+                                <span class="flagged-badge">Flagged</span>
+                            } @else {
+                                <span class="ok-badge">OK</span>
+                            }
+                        </td>
+                        <td>
+                            <app-button variant="ghost" (click)="openDiff(pair)">View Diff</app-button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @if (selectedPair(); as pair) {
+        <app-plagiarism-diff
+            [submissionIdA]="pair.submissionIdA"
+            [submissionIdB]="pair.submissionIdB"
+            [teamNameA]="pair.teamNameA"
+            [teamNameB]="pair.teamNameB"
+            (closed)="closeDiff()"
+        ></app-plagiarism-diff>
+    }
+</div>
