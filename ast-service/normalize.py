@@ -212,76 +212,80 @@ class Token:
     start: int
     end: int
 
-def normalize_tree(root: Node, lang: LangConfig) -> tuple[list[Token], list[FunctionSpan]]:
-    """Pre-order traversal producing:
-    -a flattened normalized token stream
-    -the list of function/method spans found (byte + line
-    offsets into the original source, for COdeBERT-stage chunking,
-    which are not normalized)"""
+class _TreeNormalizer:
 
-    tokens: list[Token] = []
-    functions: list[FunctionSpan] = []
-    class_name_stack: list[str] = []
+    def __init__(self, lang: LangConfig) -> None:
+        self.lang = lang
+        self.tokens: list[Token] = []
+        self.functions: list[FunctionSpan] = []
+        self.class_name_stack: list[str] = []
 
-    def visit(node: Node) -> None:
+    def run(self, root: Node) -> tuple[list[Token], list[FunctionSpan]]:
+        self._visit(root)
+        return self.tokens, self.functions
+
+    def _visit(self, node: Node) -> None:
         if _is_comment(node.type):
             return
-
-        if node.type in lang.class_decl_types:
-            class_name_stack.append(_decl_name(node, lang) or "?")
-            _emit_children_with_wrapper(node)
-            class_name_stack.pop()
+        if node.type in self.lang.class_decl_types:
+            self._visit_class(node)
             return
-        
-        if node.type in lang.function_decl_types:
-            name = _decl_name(node, lang) or "?"
-            qualified = ".".join(class_name_stack + [name]) if class_name_stack else name
-            functions.append(
-                FunctionSpan(
-                    qualified_name=qualified,
-                    node_type=node.type,
-                    start_byte=node.start_byte,
-                    end_byte=node.end_byte,
-                    start_line=node.start_point[0] + 1,
-                    end_line=node.end_point[0] + 1,
-
-                )
-            )
-            _emit_children_with_wrapper(node)
+        if node.type in self.lang.function_decl_types:
+            self._visit_function(node)
             return
-        
         if node.child_count == 0:
-            _emit_leaf(node)
+            self._emit_leaf(node)
             return
-        
-        _emit_children_with_wrapper(node)
+        self._emit_children_with_wrapper(node)
 
-    def _emit_children_with_wrapper(node: Node) -> None:
-        tokens.append(Token(f"({node.type}", node.start_byte, node.start_byte))
+    def _visit_class(self, node: Node) -> None:
+        self.class_name_stack.append(self._decl_name(node) or "?")
+        self._emit_children_with_wrapper(node)
+        self.class_name_stack.pop()
+
+    def _visit_function(self, node: Node) -> None:
+        name = self._decl_name(node) or "?"
+        qualified = ".".join(self.class_name_stack + [name]) if self.class_name_stack else name
+        self.functions.append(
+            FunctionSpan(
+                qualified_name=qualified,
+                node_type=node.type,
+                start_byte=node.start_byte,
+                end_byte=node.end_byte,
+                start_line=node.start_point[0] + 1,
+                end_line=node.end_point[0] + 1,
+            )
+        )
+        self._emit_children_with_wrapper(node)
+
+    def _emit_children_with_wrapper(self, node: Node) -> None:
+        self.tokens.append(Token(f"({node.type}", node.start_byte, node.start_byte))
         for child in node.children:
-            visit(child)
-        tokens.append(Token(")", node.end_byte, node.end_byte))
+            self._visit(child)
+        self.tokens.append(Token(")", node.end_byte, node.end_byte))
 
-    def _emit_leaf(node: Node) -> None:
+    def _emit_leaf(self, node: Node) -> None:
         start, end = node.start_byte, node.end_byte
         if node.type in IDENTIFIER_NODE_TYPES:
-            tokens.append(Token(classify_identifier(node, lang), start, end))
+            self.tokens.append(Token(classify_identifier(node, self.lang), start, end))
             return
         literal = _literal_placeholder(node.type)
         if literal is not None:
-            tokens.append(Token(literal, start, end))
+            self.tokens.append(Token(literal, start, end))
             return
-        
-        tokens.append(Token(node.type, start, end))
+        self.tokens.append(Token(node.type, start, end))
 
-    def _decl_name(node: Node, lang: LangConfig) -> Optional[str]:
-        name_node = node.child_by_field_name(lang.decl_name_field)
+    def _decl_name(self, node: Node) -> Optional[str]:
+        name_node = node.child_by_field_name(self.lang.decl_name_field)
         if name_node is None:
             return None
         return name_node.text.decode("utf-8", errors="replace")
-    
-    visit(root)
-    return tokens, functions
 
 
-
+def normalize_tree(root: Node, lang: LangConfig) -> tuple[list[Token], list[FunctionSpan]]:
+    """Pre-order traversal producing:
+    - a flattened normalized token stream
+    - the list of function/method spans found (byte + line offsets into the
+      original source, for CodeBERT-stage chunking, which are not normalized)
+    """
+    return _TreeNormalizer(lang).run(root)

@@ -48,7 +48,7 @@ class ParseResponse(BaseModel):
 def health() -> dict:
     return {"status": "ok", "supported_extensions": sorted(LANGUAGE_CONFIG.keys())}
 
-@app.post("/parse", response_model=ParseResponse)
+@app.post("/parse")
 def parse(req: ParseRequest) -> ParseResponse:
     ext = _extension_of(req.file_name)
     lang_config = LANGUAGE_CONFIG.get(ext)
@@ -118,7 +118,7 @@ def _error_ratio(root) -> float:
             walk(child)
 
     walk(root)
-    return errors/ total if total else 0.0
+    return errors / total
 
 #Embedding semantic similarity stuff
 
@@ -144,7 +144,7 @@ class EmbedResponse(BaseModel):
     embeddings: list[EmbeddingResponse] = []
     detail: Optional[str] = None
 
-@app.post("/embed" , response_model=EmbedResponse)
+@app.post("/embed")
 def embed(req: EmbedRequest) -> EmbedResponse:
 
     try:
