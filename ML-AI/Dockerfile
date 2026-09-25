@@ -4,10 +4,11 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
-RUN pip install  \
+RUN pip install \
     --no-cache-dir \
-    --only-binary=:all: -r \
-    requirements.txt \
+    --only-binary=:all: \
+    --require-hashes \
+    -r requirements.txt \
     && useradd --create-home --shell /usr/sbin/nologin appuser
 COPY predict_service.py .
 COPY ai_usage_model.joblib .
