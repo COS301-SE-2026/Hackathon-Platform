@@ -60,5 +60,63 @@ class PlagiarismPropertiesTest {
 
   }
 
-  
+  @Test
+  void equalsAndHashCode_dependOnFieldValues() {
+
+    PlagiarismProperties a = new PlagiarismProperties();
+    PlagiarismProperties b = new PlagiarismProperties();
+
+    assertThat(a).isEqualTo(b);
+    assertThat(a.hashCode()).isEqualTo(b.hashCode());
+
+    b.setKgramSize(99);
+
+    assertThat(a).isNotEqualTo(b);
+
+  }
+
+  @Test
+  void queue_defaultsMatchDocumentedValues() {
+
+    PlagiarismProperties.Queue queue = new PlagiarismProperties.Queue();
+
+    assertThat(queue.getStreamKey()).isEqualTo("plagiarism:jobs");
+    assertThat(queue.getConsumerKey()).isEqualTo("plagiarism-workers");
+    assertThat(queue.getConcurrency()).isEqualTo(2);
+    assertThat(queue.getPollTimeoutMs()).isEqualTo(2000L);
+
+  }
+
+  @Test
+  void queue_settersAndGetters_roundTrip() {
+
+    PlagiarismProperties.Queue queue = new PlagiarismProperties.Queue();
+
+    queue.setStreamKey("custom:stream");
+    queue.setConsumerKey("custom-workers");
+    queue.setConcurrency(8);
+    queue.setPollTimeoutMs(5000L);
+
+    assertThat(queue.getStreamKey()).isEqualTo("custom:stream");
+    assertThat(queue.getConsumerKey()).isEqualTo("custom-workers");
+    assertThat(queue.getConcurrency()).isEqualTo(8);
+    assertThat(queue.getPollTimeoutMs()).isEqualTo(5000L);
+    
+  }
+
+  @Test
+  void setQueue_replacesQueueInstance() {
+
+    PlagiarismProperties props = new PlagiarismProperties();
+    PlagiarismProperties.Queue newQueue = new PlagiarismProperties.Queue();
+    newQueue.setStreamKey("replaced:stream");
+
+    props.setQueue(newQueue);
+
+    assertThat(props.getQueue().getStreamKey()).isEqualTo("replaced:stream");
+
+
+  }
+
+
 }
