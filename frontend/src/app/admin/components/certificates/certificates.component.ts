@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
-import { EventService, EventResponse } from '../../../services/event.service.js';
+import { EventService, EventResponse } from '../../../services/event.service';
 import { CertificateService, CertificateTemplateResponse, CertificateLayout, CertificateElement, CertificateElementType, CertificateField, CertificateGenerationRunResponse, CertificateIssuedResponse, GenerationScope } from '../../../services/certificate.service';
 
 const CANVAS_WIDTH = 842;
@@ -104,6 +104,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly eventService = inject(EventService);
   private readonly certificateService = inject(CertificateService);
+  private readonly change = inject(ChangeDetectorRef);
   readonly canvasWidth = CANVAS_WIDTH;
   readonly canvasHeight = CANVAS_HEIGHT;
   readonly fieldOptions = FIELD_OPTIONS;

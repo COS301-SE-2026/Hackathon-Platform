@@ -39,7 +39,7 @@ public class CertificateRecipientResolver {
 
   public List<CertificateRecipient> resolve(Event event, String scope, Integer topN) {
     List<LeaderboardEntryResponse> leaderboard =
-        leaderboard.getEventLeaderBoard(event.getEventId());
+        leaderboard.getEventLeaderboard(event.getEventId());
     Map<UUID, Integer> rankByTeam = new HashMap<>();
     for (LeaderboardEntryResponse entry : leaderboard) {
       rankByTeam.put(entry.getTeamId(), entry.getRank());

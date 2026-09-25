@@ -447,11 +447,16 @@ public class CertificateService {
     do{
       StringBuilder sb = new StringBuilder(10);
       for (int i=0; i<10;i++){
-        sb.append(VERIFICATION_ALPHABET.chatAt(RANDOM.nextInt(VERIFICATION_ALPHABET.length())));
+        sb.append(VERIFICATION_ALPHABET.charAt(RANDOM.nextInt(VERIFICATION_ALPHABET.length())));
       }
       code = sb.toString();
     } while (issuedRepo.existsByVerificationCode(code));
     return code;
+  }
+
+  @Transactional(readOnly = true)
+  public List<CertificateIssued> getIssuedForEvent(UUID eventId){
+    return issuedRepo.findByEventIdOrderByIssuedAtDesc(eventId);
   }
 
   @Transactional(readOnly = true)

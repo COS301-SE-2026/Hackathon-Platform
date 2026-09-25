@@ -69,15 +69,15 @@ public class AdminCertificateController {
     return ResponseEntity.ok(toResponse(template));
   }
 
-  @DeleteMapping("/templates{templateId}")
+  @DeleteMapping("/templates/{templateId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Void> deleteTemplate(@PathVariable UUID templateId) {
     certificateService.deleteTemplate(templateId);
     return ResponseEntity.noContent().build();
   }
 
-  @PostMapping("templates/{templateId}/background")
-  @PreAuthorize("hasRole('ADMON')")
+  @PostMapping("/templates/{templateId}/background")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<CertificateTemplateResponse> uploadBackground(
       @PathVariable UUID templateId, @RequestParam("file") MultipartFile file) {
     certificateService.uploadBackground(templateId, file);
@@ -130,7 +130,7 @@ public class AdminCertificateController {
         certificateService.getIssuedForEvent(eventId).stream()
             .map(
                 cert ->
-                    new CertificateIssuedResponse(cert, certificateService.resolveDownload(cert)))
+                    new CertificateIssuedResponse(cert, certificateService.resolveDownloadUrl(cert)))
             .toList();
     return ResponseEntity.ok(resp);
   }

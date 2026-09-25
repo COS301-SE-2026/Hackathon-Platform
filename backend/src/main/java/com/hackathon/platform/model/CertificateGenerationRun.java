@@ -36,7 +36,7 @@ public class CertificateGenerationRun {
   @Column(nullable = false, length = 20)
   private String status = "PENDING";
 
-  @Column(name = "total_column", nullable = false)
+  @Column(name = "total_count", nullable = false)
   private int totalCount = 0;
 
   @Column(name = "completed_count", nullable = false)
