@@ -1,12 +1,12 @@
 FROM codercom/code-server:4.137.0
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-21-jdk-headless && rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p /opt/java \
-    && ln -s "$(dirname "$(dirname "$(readlink -f /usr/bin/javac)")")" \
-    /opt/java/openjdk
-
-RUN rm -f /etc/sudoers.d/nopasswd /usr/local/bin/fixuid && chmod a-s /usr/bin/sudo
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openjdk-21-jdk-headless \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /opt/java \
+    && ln -s "$(dirname "$(dirname "$(readlink -f /usr/bin/javac)")")" /opt/java/openjdk \
+    && rm -f /etc/sudoers.d/nopasswd /usr/local/bin/fixuid \
+    && chmod a-s /usr/bin/sudo
 
 ENV HOME=/home/coder
 ENV JAVA_HOME=/opt/java/openjdk

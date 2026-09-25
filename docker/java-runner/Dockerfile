@@ -1,13 +1,14 @@
-From eclipse-temurin:21-jdk-jammy
+FROM eclipse-temurin:21-jdk-jammy
 
-run apt-get update \
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     findutils \
     grep \
     coreutils \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN useradd --create-home --uid 10001 runner
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid 10001 runner \
+    && mkdir -p /workspace \
+    && chown -R runner:runner /workspace
 
 ENV HOME=/tmp
 USER runner
