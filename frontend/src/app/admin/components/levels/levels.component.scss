@@ -236,7 +236,7 @@
 
 .levels-table-row-grid{
     display: grid;
-    grid-template-columns: 26px 56px 1.3fr 1.7fr 110px auto;
+    grid-template-columns: 26px 56px 1.3fr 1.7fr 135px auto;
     align-items: center;
     column-gap: 18px;
 }
@@ -315,10 +315,11 @@
 
     .resources-cell {
         display:flex;
-        align-items: center;
-        gap:6px;
-        font-size: 0.85rem;
-        color: #6b7588;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-self: start;
+        gap:4px;
+        min-width: 120px;
 
         .pi{
             font-size: 0.8rem;
@@ -771,4 +772,12 @@
     .search-box input {
         width: 160px;
     }
+}
+
+.resources-title {
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dark-gray);
 }

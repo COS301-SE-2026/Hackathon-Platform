@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EventParticipantResponse, EventService } from '../../../services/event.service';
@@ -17,6 +18,7 @@ interface TeamOption {
 export class ParticipantsModalComponent implements OnChanges {
   private readonly eventService = inject(EventService);
   private readonly change = inject(ChangeDetectorRef);
+  private readonly router = inject(Router);
 
   @Input() eventId: string | null = null;
   @Input() eventName = '';
@@ -178,6 +180,17 @@ export class ParticipantsModalComponent implements OnChanges {
           this.removingUserId = null;
           this.confirmingRemoveId = null;
           this.change.markForCheck();
+        }
+      });
+    }
+
+    openTelemetryReport(p: EventParticipantResponse): void {
+      if (!this.eventId) {
+        return;
+      }
+      this.router.navigate(['/admin/events', this.eventId, 'participants', p.userId, 'telemetry'], {
+        queryParams: {
+          teamId: p.teamId
         }
       });
     }
