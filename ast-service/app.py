@@ -118,6 +118,8 @@ def _error_ratio(root) -> float:
             walk(child)
 
     walk(root)
+    if total == 0:
+        return 0.0
     return errors / total
 
 #Embedding semantic similarity stuff
