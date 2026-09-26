@@ -49,7 +49,6 @@ export class CreateEventComponent implements OnInit {
     registrationKey: '',
     rules: '',
     isInPerson: false,
-    useIde: false,
     leaderboardFreezeDateTime: '',
     prizes: [] as PrizeRow[],
     tagline: '',
@@ -199,7 +198,6 @@ export class CreateEventComponent implements OnInit {
       visibility: this.form.visibility,
       registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined,
       inPerson: this.form.isInPerson,
-      useIde: this.form.useIde,
       rules: this.form.rules,
       freezeTime: this.form.leaderboardFreezeDateTime
       ? new Date(this.form.leaderboardFreezeDateTime).toISOString()

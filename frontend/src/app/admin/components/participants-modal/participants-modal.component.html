@@ -120,14 +120,9 @@
 
                     </div>
                   } @else {
-                    <div class="participant-actions">
-                      <button type="button" class="btn-view-report" (click)="openTelemetryReport(p)"> <i class="pi pi-chart-bar"></i>
-                        Report
-                      </button>
-                      <button type = "button" class = "btn-remove-participant" (click) = "requestRemove(p.userId)">
-                        <i class = "pi pi-user-minus"></i>Remove
-                      </button>
-                    </div>
+                    <button type = "button" class = "btn-remove-participant" (click) = "requestRemove(p.userId)">
+                      <i class = "pi pi-user-minus"></i>Remove
+                    </button>
                   }
                 </td>
               </tr>

@@ -20,9 +20,6 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "loader": {
-              ".ttf": "file"
-            },
             "assets": [
               {
                 "glob": "**/*",

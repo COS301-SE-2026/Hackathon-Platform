@@ -145,7 +145,7 @@
     @if (activeTab === 'forum') { <app-forum />}
 
     @if (activeTab === 'submissions' && eventId && hackathonId) {
-      <app-submissions [eventId]="eventId" [hackathonId]="hackathonId" [useIde]="event.useIde"></app-submissions>
+      <app-submissions [eventId]="eventId" [hackathonId]="hackathonId"></app-submissions>
     }
 
     @if (activeTab === 'submission-history' && eventId && hackathonId) {

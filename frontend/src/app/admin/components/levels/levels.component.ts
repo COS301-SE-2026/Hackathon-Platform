@@ -45,8 +45,6 @@ export class LevelsComponent implements OnInit {
   eventsCount = 0;
   participantsCount = 0;
 
-  uploadingStarterZip: Record<number, boolean> = {};
-
 
   get levelsCount(): number {
     return this.levels.length;
@@ -389,47 +387,6 @@ onFileSelected(event: Event):void{
         }else {
          this.errorMessage = err.error?.message || 'The level failed to delete';
         }
-        this.change.markForCheck();
-      }
-    });
-  }
-
-  onStarterZipSelected(event: Event, level: UiLevel): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    if (!file.name.toLowerCase().endsWith('.zip')) {
-      this.errorMessage = "Starter project must be a ZIP";
-      input.value = '';
-      return;
-    }
-
-    this.uploadingStarterZip[level.id] = true;
-    this.errorMessage = '';
-
-    this.storageService.uploadStarterZip(this.hackathonId, level.id, file).subscribe({
-      next: () => {
-        this.uploadingStarterZip[level.id] = false;
-        this.storageService.listLevelFiles(this.hackathonId, level.id).subscribe({
-          next: files => {
-            level.files = files;
-            level.filesLoaded = true;
-            this.change.markForCheck();
-          }
-        });
-        input.value = '';
-        this.change.markForCheck(); 
-      },
-
-      error: (err: HttpErrorResponse) => {
-        this.uploadingStarterZip[level.id] = false;
-        this.errorMessage = err.error?.message || 'failed to load';
-
-        input.value = '';
         this.change.markForCheck();
       }
     });
