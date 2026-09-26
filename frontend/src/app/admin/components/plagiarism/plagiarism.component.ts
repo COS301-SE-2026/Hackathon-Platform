@@ -88,7 +88,7 @@ export class PlagiarismComponent implements OnInit, OnDestroy {
 
         this.levelService.getLevels(this.hackathonId).subscribe({
             next: (levels) => this.levels.set(levels),
-            error: () => this.toast.error('Error'. 'Could not load levels for this event. '),
+            error: () => this.toast.error('Error', 'Could not load levels for this event. '),
         });
     }
 
@@ -98,7 +98,7 @@ export class PlagiarismComponent implements OnInit, OnDestroy {
         return id ? Number(id) : undefined;
     }
 
-    OnLevelSelectChange(value: string): void {
+    onLevelSelectChange(value: string): void {
 
         this.selectedLevelId.set(value === '' ? null : value);
         this.pollSub?.unsubscribe();
@@ -145,8 +145,65 @@ export class PlagiarismComponent implements OnInit, OnDestroy {
                 if (latest && (latest.status === 'QUEUED' || latest.status === 'RUNNING')) {
                     this.pollRunStatus(latest.id);
                 }
-            }
-        })
+
+            },
+            error: () => {
+
+            },
+        });
     }
+
+   private pollRunStatus(runId: number): void {
+
+    this.pollSub?.unsubscribe();
+    const deadline = Date.now() + RUN_POLL_TIMEOUT_MS;
+
+    this.pollSub = interval(RUN_POLL_INTERVAL_MS)
+        .pipe(
+            switchMap(() => this.plagiarismService.listRuns(this.eventId)),
+            takeWhile((runs) => {
+
+                const run = runs.find((r) => r.id === runId);
+                const stillRunning = !!run && (run.status === 'QUEUED' || run.status === 'RUNNING');
+                return stillRunning && Date.now() < deadline;
+
+            }, true),
+
+        )
+        .subscribe((runs) => {
+
+            const run = runs.find((r) => r.id === runId) ?? null;
+            this.latestRun.set(run);
+            if(run && run.status != 'QUEUED' && run.status != 'RUNNING') {
+                this.loadPairs();
+            }
+
+        });
+   } 
+
+   runCheck(): void {
+    this.running.set(true);
+    this.plagiarismService.triggerRun(this.eventId, this.levelIdNumber).subscribe({
+        next: ({ runId }) => {
+            this.toast.success('Started', 'Plagiarism check started. This page will update automatically. ');
+            this.running.set(false);
+            this.pollRunStatus(runId);
+        },
+        error : () => {
+            this.toast.error('Error', 'Could not start plagiarism check.');
+            this.running.set(false);
+
+        },
+    });
+   }
+
+   openDiff(pair: SubmissionSimilarity): void {
+
+    this.selectedPair.set(pair);
+   }
+
+   closeDiff(): void {
+    this.selectedPair.set(null);
+   }
 
 }
