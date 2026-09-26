@@ -147,6 +147,7 @@ export interface EventParticipantResponse {
   teamName: string;
   teamRole: 'LEADER' | 'MEMBER';
   joinedAt: string;
+  banned: boolean;
 }
 
 @Injectable({
@@ -248,12 +249,8 @@ export class EventService {
     );
   }
 
-  removeParticipant(
-    eventId: string,
-    userId: string
-  ): Observable<void> {
-    return this.http.delete<void>(
-      `${this.baseUrl}/admin/events/${eventId}/participants/${userId}`
+  banParticipant( eventId: string, userId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/admin/events/${eventId}/participants/${userId}/ban`,{}
     );
   }
 
