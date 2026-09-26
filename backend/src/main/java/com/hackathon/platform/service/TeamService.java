@@ -245,13 +245,46 @@ public class TeamService {
     }
   }
 
-  /** View all approved members of a team. */
+  /** Ban a participant from an event, mark them as LEFT, and deactivate an empty team. */
+  @Transactional
+  public void banParticipant(UUID eventId, UUID userId) {
+    EventRegistration registration =
+        eventRegistrationRepository
+            .findByEventIdAndUserId(eventId, userId)
+            .orElseThrow(() -> new RuntimeException("Event registration not found"));
+
+    registration.setBanned(true);
+    eventRegistrationRepository.save(registration);
+
+    TeamMember membership =
+        teamMemberRepository
+            .findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId)
+            .stream()
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Approved team membership not found"));
+
+     membership.setStatus("LEFT");
+     teamMemberRepository.save(membership);
+
+    long approvedCount =
+        teamMemberRepository.countByTeamIdAndStatus(membership.getTeamId(), "APPROVED");
+
+    if (approvedCount == 0) {
+      Team team =
+          teamRepository
+              .findById(membership.getTeamId())
+              .orElseThrow(() -> new RuntimeException("Team not found"));
+
+      team.setStatus("INACTIVE");
+      teamRepository.save(team);
+    }
+}
+
   public List<TeamMemberResponse> viewTeamMembers(UUID teamId) {
     teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
     return toMemberResponses(teamId, "APPROVED");
   }
 
-  /** List every approved participant across all teams for an event for admin use */
   public List<EventParticipantResponse> listEventParticipants(UUID eventId) {
     List<Team> teams = teamRepository.findByEventId(eventId);
     if (teams.isEmpty()) {
