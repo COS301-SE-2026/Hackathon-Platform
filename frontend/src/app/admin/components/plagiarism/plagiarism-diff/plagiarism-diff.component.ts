@@ -80,7 +80,7 @@ export class PlagiarismDiffComponent implements OnChanges, OnDestroy {
     });
 
     ngOnChanges(changes: SimpleChanges): void {
-        if(changes['submissionIdaA'] || changes['submissionIdB']) {
+        if(changes['submissionIdA'] || changes['submissionIdB']) {
             this.request$.next({ a: this.submissionIdA, b: this.submissionIdB });
 
         }
@@ -173,6 +173,105 @@ export class PlagiarismDiffComponent implements OnChanges, OnDestroy {
             fileName: f.fileName,
             matchCount: ranges.filter((r) => r.fileName === f.fileName).length,
         }));
+    }
+
+    private defaultFile(tabs: FileTab[]): string {
+        if (tabs.length === 0) {
+            return '';
+        
+        }
+        return [...tabs].sort((a, b) => b.matchCount - a.matchCount)[0].fileName;
+    }
+
+    private renderA(): void {
+
+        const diff = this.diff();
+        if(!diff) {
+            return;
+        }
+        const match = this.selectedFunctionMatch();
+        const semantic = match ? { fileName: match.fileNameA, start: match.startA, end: match.endA } : null;
+        this.highlightedA.set(this.renderFile(diff.filesA, diff.matchedRangesA, this.selectedFileA(), semantic));
+
+    }
+
+    private renderB(): void {
+        const diff = this.diff();
+        if (!diff) {
+            return;
+        }
+
+        const match = this.selectedFunctionMatch();
+        const semantic = match ? { fileName: match.fileNameB, start: match.startB, end: match.endB } : null;
+        this.highlightedB.set(this.renderFile(diff.filesB, diff.matchedRangesB, this.selectedFileB(), semantic));
+
+    }
+
+    private renderFile(
+        files: SourceFile[],
+        structuralRanges: MatchedRange[],
+        fileName: string,
+        semanticRange: { fileName: string; start: number; end: number } | null,
+    ): SafeHtml {
+
+        const file = files.find((f) => f.fileName === fileName);
+        if (!file) {
+            return '';
+        }
+
+        const length = file.content.length;
+
+        const tagged: TaggedRange[] = structuralRanges
+            .filter((r) => r.fileName === fileName)
+            .map((r) => ({ start: Math.max(0, r.start), end: Math.min(length, r.end), cls: 'diff-match' }));
+
+        if (semanticRange && semanticRange.fileName === fileName) {
+            tagged.push({
+                start: Math.max(0, semanticRange.start),
+                end: Math.min(length, semanticRange.end),
+                cls: 'diff-semantic',
+            });
+        }
+
+        if (tagged.length === 0) {
+            return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(file.content));
+
+        }
+
+        const points = new Set<number>([0, length]);
+        for (const r of tagged) {
+            if (r.end > r.start) {
+                points.add(r.start);
+                points.add(r.end);
+            }
+        }
+
+        const sorted = [...points].sort((a, b) => a - b);
+
+        let html = '';
+        for (let i = 0; i < sorted.length - 1; i++) {
+
+            const segStart = sorted[i];
+            const segEnd = sorted[i + 1];
+            if (segEnd <= segStart) {
+                continue;
+            }
+
+            const classes = [...new Set(tagged.filter((r) => r.start <= segStart && r.end >= segEnd).map((r) => r.cls))];
+            const text = this.escapeHtml(file.content.slice(segStart, segEnd));
+            html += classes.length > 0 ? `<mark class="${classes.join(' ')}">${text}</mark>` : text;
+
+        }
+
+        return this.sanitizer.bypassSecurityTrustHtml(html);
+    }
+
+    private escapeHtml(text: string): string {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
     }
 
 }
