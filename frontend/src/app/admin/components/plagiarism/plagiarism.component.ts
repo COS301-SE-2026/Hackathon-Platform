@@ -61,6 +61,92 @@ export class PlagiarismComponent implements OnInit, OnDestroy {
 
     private pollSub: Subscription | null = null;
 
-    
+    ngOnInit(): void {
+        this.hackathonId = this.hackathonId || this.route.snapshot.paramMap.get('hackathonId') || '';
+        this.eventId = this.eventId || this.route.snapshot.paramMap.get('eventId') || '';
+
+        if(!this.eventId) {
+            this.toast.error('Error', 'No event ID provided.');
+            return;
+        }
+
+        this.loadLevels();
+        this.refreshRunStatus();
+        this.loadPairs();
+
+    }
+
+    ngOnDestroy(): void {
+        
+        this.pollSub?.unsubscribe();
+    }
+
+    private loadLevels(): void {
+        if(!this.hackathonId) {
+            return;
+        }
+
+        this.levelService.getLevels(this.hackathonId).subscribe({
+            next: (levels) => this.levels.set(levels),
+            error: () => this.toast.error('Error'. 'Could not load levels for this event. '),
+        });
+    }
+
+    private get levelIdNumber(): number | undefined {
+
+        const id = this.selectedLevelId();
+        return id ? Number(id) : undefined;
+    }
+
+    OnLevelSelectChange(value: string): void {
+
+        this.selectedLevelId.set(value === '' ? null : value);
+        this.pollSub?.unsubscribe();
+        this.refreshRunStatus();
+        this.loadPairs();
+    }
+
+    loadPairs(): void {
+
+        if(!this.eventId) {
+            return;
+        }
+
+        this.loading.set(true);
+
+        this.plagiarismService.getPairs(this.eventId, this.levelIdNumber, false).subscribe({
+            next: (pairs) => {
+                this.allPairs.set(pairs);
+                this.loading.set(false);
+            },
+            error : () => {
+                this.toast.error('Error', 'Could not load plagiarism results. ');
+                this.loading.set(false);
+            },
+
+        });
+    }
+
+    toggleOnlyFlagged(): void {
+        this.onlyFlagged.update((v) => !v);
+    }
+
+    onSearchInput(value: string): void {
+        this.searchQuery.set(value);
+    }
+
+    private refreshRunStatus(): void {
+        this.plagiarismService.listRuns(this.eventId).subscribe({
+            next: (runs) => {
+                const selected = this.selectedLevelId();
+                const forLevel = selected ? runs.filter((r) => r.levelId === this.levelIdNumber) : runs;
+                const latest = forLevel[0] ?? null;
+                this.latestRun.set(latest);
+                if (latest && (latest.status === 'QUEUED' || latest.status === 'RUNNING')) {
+                    this.pollRunStatus(latest.id);
+                }
+            }
+        })
+    }
 
 }
