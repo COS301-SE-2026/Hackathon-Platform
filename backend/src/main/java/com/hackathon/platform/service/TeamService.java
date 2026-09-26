@@ -7,6 +7,7 @@ import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.TeamMember;
+import com.hackathon.platform.model.EventRegistration;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
@@ -279,6 +280,11 @@ public class TeamService {
               String role =
                   member.getUserId().equals(team.getCreatedByUserId()) ? "LEADER" : "MEMBER";
 
+                EventRegistration registration = 
+                  eventRegistrationRepository
+                    .findByEventIdAndUserId(eventId, member.getUserId())
+                    .orElseThrow(() -> new RuntimeException("Event registration not found"));
+
               return new EventParticipantResponse(
                   user.getUserId(),
                   user.getFirstName() + " " + user.getLastName(),
@@ -286,7 +292,9 @@ public class TeamService {
                   team.getTeamId(),
                   team.getTeamName(),
                   role,
-                  member.getJoinedAt());
+                  member.getJoinedAt(),
+                  registration.isBanned()
+                  );
             })
         .filter(response -> response != null)
         .collect(Collectors.toList());

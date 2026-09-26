@@ -12,6 +12,7 @@ public class EventParticipantResponse {
   private String teamName;
   private String teamRole;
   private Instant joinedAt;
+  private boolean banned;
 
   public EventParticipantResponse() {}
 
@@ -22,7 +23,8 @@ public class EventParticipantResponse {
       UUID teamId,
       String teamName,
       String teamRole,
-      Instant joinedAt) {
+      Instant joinedAt,
+      boolean banned) {
     this.userId = userId;
     this.fullName = fullName;
     this.email = email;
@@ -30,6 +32,7 @@ public class EventParticipantResponse {
     this.teamName = teamName;
     this.teamRole = teamRole;
     this.joinedAt = joinedAt;
+    this.banned = banned;
   }
 
   public UUID getUserId() {
@@ -86,5 +89,13 @@ public class EventParticipantResponse {
 
   public void setJoinedAt(Instant joinedAt) {
     this.joinedAt = joinedAt;
+  }
+
+  public boolean isBanned() {
+  return banned;
+  }
+
+  public void setBanned(boolean banned) {
+  this.banned = banned;
   }
 }
