@@ -11,7 +11,7 @@ import { UploadAreaComponent } from '../../../../shared/components/upload-area/u
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
-
+import { CodeWorkspaceService } from '../../../../services/code-workspace.service';
 
 @Component({
   selector: 'app-submissions',
@@ -29,6 +29,7 @@ export class SubmissionsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly codeWorkspaceService = inject(CodeWorkspaceService);
 
   levels: LevelResponse[] = [];
   levelTabs: TabItem[] = [];
@@ -76,6 +77,8 @@ export class SubmissionsComponent implements OnInit {
   get eventId(): string {
     return this.eventID;
   }
+
+  @Input() useIde = false;
 
   @Input({ required: true })
   set hackathonId(value: string) {
@@ -281,6 +284,25 @@ onSolutionCleared(): void {
       return fileName;
     }
     return fileNameWithoutExtension.substring(0, 18) + '...' + fileExtension;
+  }
+
+
+  openIde(levelId: number): void {
+    if (!this.teamId || !this.eventID) {
+      this.toast.error('IDE unable to open', 'must belong to team');
+      return;
+    }
+
+    this.codeWorkspaceService.getOrCreateWorkspace(this.eventID, this.teamId, levelId).subscribe({
+      next: work => {
+        this.router.navigate(['/participant/events', this.eventID, 'levels', levelId, 'workspaces', work.workspaceId, 'ide']);
+      },
+
+      error: () => {
+        this.toast.error('Error', 'workspace could not open.');
+      }
+    });
+  
   }
 
 
