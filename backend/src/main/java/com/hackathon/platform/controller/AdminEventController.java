@@ -98,6 +98,16 @@ public class AdminEventController {
       @PathVariable("id") UUID eventId) {
     return ResponseEntity.ok(teamService.listEventParticipants(eventId));
   }
+  
+  /** Ban a participant from the event /api/admin/events/{id}/participants/{userId}/ban */
+  @PostMapping("/{id}/participants/{userId}/ban")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> banParticipant(
+    @PathVariable("id") UUID eventId, @PathVariable("userId") UUID userId) {
+
+    teamService.banParticipant(eventId, userId);
+    return ResponseEntity.noContent().build();
+  }
 
   @PatchMapping("/{id}/extend")
   @PreAuthorize("hasRole('ADMIN')")
