@@ -1,0 +1,62 @@
+:host {
+    color-scheme: light;
+}
+
+.plagiarism-page {
+    padding: 1rem;
+}
+
+.plagiarism-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.plagiarism-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.team-search {
+    padding: 0.45rem 0.7rem;
+    border: 1.5px solid var(--light-gray, #dfe3ea);
+    border-radius: 9px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    background-color: var(--white, #ffffff);
+    color: var(--dark-navy, #13192d);
+    width: 14rem;
+    max-width: 100%;
+    color-scheme: light;
+
+    &::placeholder {
+        color: var(--mid-gray, #8089a0);
+    }
+
+}
+
+.level-select {
+
+    appearance: none;
+    padding: 0.45rem 2rem 0.45rem 0.6rem;
+    border: 1.5px solid var(--light-gray, #dfe3ea);
+    border-radius: 9px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    background-color: var(--white, #ffffff);
+    color: var(--dark-navy, #13192d);
+    color-scheme: light;
+
+}
+
+.run-status {
+
+    margin: 0 0 1rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
