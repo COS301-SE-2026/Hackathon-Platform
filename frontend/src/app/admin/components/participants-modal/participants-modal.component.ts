@@ -29,8 +29,8 @@ export class ParticipantsModalComponent implements OnChanges {
   searchTerm = '';
   isLoading = false;
   errorMessage = '';
-  confirmingRemoveId: string | null = null;
-  removingUserId: string | null = null;
+  confirmingBanId: string | null = null;
+  banningUserId: string | null = null;
 
   showAddForm = false;
   addEmail= '';
@@ -42,7 +42,7 @@ export class ParticipantsModalComponent implements OnChanges {
     
     if (changes['eventId'] && this.eventId) {
       this.searchTerm = '';
-      this.confirmingRemoveId = null;
+      this.confirmingBanId = null;
       this.showAddForm = false;
       this.addError = '';
       this.loadParticipants(this.eventId);
@@ -151,38 +151,41 @@ export class ParticipantsModalComponent implements OnChanges {
       });
     }
 
-    requestRemove(userId: string): void{
-      this.confirmingRemoveId = userId;
+  
+  requestBan(userId: string): void {
+    this.confirmingBanId = userId;
+  }
+
+  cancelBan(): void {
+    this.confirmingBanId = null;
+  }
+
+  confirmBan(participant: EventParticipantResponse): void {
+    if (!this.eventId) {
+      return;
     }
 
-    cancelRemove(): void {
-      this.confirmingRemoveId = null;
-    }
+    this.banningUserId = participant.userId;
 
-    confirmRemove(participant: EventParticipantResponse): void {
-      if (!this.eventId){
-        return;
+    this.eventService.banParticipant(this.eventId, participant.userId).subscribe({
+      next: () => {
+        this.participants = this.participants.filter(
+          p => p.userId !== participant.userId
+        );
+
+        this.applyFilter();
+        this.banningUserId = null;
+        this.confirmingBanId = null;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.errorMessage = 'Could not ban this participant. Please try again.';
+        this.banningUserId = null;
+        this.confirmingBanId = null;
+        this.change.markForCheck();
       }
-
-      this.removingUserId = participant.userId;
-
-      this.eventService.removeParticipant(this.eventId, participant.userId).subscribe({
-        next: () => {
-          this.participants = this.participants.filter(p => p.userId !== participant.userId);
-
-          this.applyFilter();
-          this.removingUserId = null;
-          this.confirmingRemoveId = null;
-          this.change.markForCheck();
-        },
-        error: () =>{
-          this.errorMessage = 'Could not remove this participant. Please try again.';
-          this.removingUserId = null;
-          this.confirmingRemoveId = null;
-          this.change.markForCheck();
-        }
-      });
-    }
+    });
+}
 
     openTelemetryReport(p: EventParticipantResponse): void {
       if (!this.eventId) {

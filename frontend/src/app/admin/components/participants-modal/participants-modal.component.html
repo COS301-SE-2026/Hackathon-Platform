@@ -26,46 +26,11 @@
         <i class="pi pi-users"></i>
         {{ filteredParticipants.length }} of {{ participants.length }}
       </span>
-      <button
-      type = "button"
-      class = "btn-add-participant"
-      [disabled] = "availableTeams.length === 0"
-      [title] = "availableTeams.length === 0 ? 'No teams to add a member to yet' : ''"
-      (click) = "toggleAddForm()"
-      >
-      <i class = "pi" [ngClass]="showAddForm ? 'pi-times' : 'pi-user-plus'"></i>
-      {{ showAddForm ? 'Cancel' : 'Add Participant'}}
-    </button>
+
     </div>
     </div>
 
-    @if (showAddForm){
-      <div class = "add-participant-form">
-        <div class = "add-form-field">
-          <label for = "add-participant-email">Email</label>
-          <input
-          id = "add-participant-email"
-          type = "email"
-          placeholder ="participant@example.com"
-          [(ngModel)] = "addEmail"/>
-        </div>
-        <div class = "add-form-field">
-          <label for = "add-participant-team">Team</label>
-          <select id = "add-participant-team" [(ngModel)] = "addTeamId">
-            @for (team of availableTeams; track team.teamId){
-              <option [value] = "team.teamId">{{team.teamName}}</option>
-            }
-          </select>
-        </div>
-        <button type = "button" class = "btn-confirm-add" [disabled]="isAdding" (click)="submitAdd()">
-          {{isAdding ? 'Adding...' : 'Add'}}
-        </button>
-      </div>
-      @if (addError){
-        <div class = "error-banner add-form-error">{{addError}}</div>
-      }
-    }
-
+  
     @if (errorMessage) {
       <div class="error-banner">{{ errorMessage }}</div>
     }
@@ -105,30 +70,49 @@
                 </td>
                 <td>{{ p.joinedAt | date: 'mediumDate' }}</td>
                 <td>
-                  @if (confirmingRemoveId === p.userId){
-                    <div class = "confirm-remove">
-                      <span>Remove?</span>
-                      <button
-                      type = "button"
-                      class = "btn-confirm-yes"
-                      [disabled] = "removingUserId === p.userId"
-                      (click) = "confirmRemove(p)"
-                      >
-                    {{ removingUserId === p.userId ? '...' : 'Yes'}}
-                  </button>
-                  <button type = "button" class = "btn-confirm-no" (click) = "cancelRemove()">No</button>
 
-                    </div>
-                  } @else {
-                    <div class="participant-actions">
-                      <button type="button" class="btn-view-report" (click)="openTelemetryReport(p)"> <i class="pi pi-chart-bar"></i>
-                        Report
-                      </button>
-                      <button type = "button" class = "btn-remove-participant" (click) = "requestRemove(p.userId)">
-                        <i class = "pi pi-user-minus"></i>Remove
-                      </button>
-                    </div>
-                  }
+          @if (confirmingBanId === p.userId) {
+            <div class="confirm-remove">
+              <span>Ban?</span>
+
+              <button
+                type="button"
+                class="btn-confirm-yes"
+                [disabled]="banningUserId === p.userId"
+                (click)="confirmBan(p)"
+              >
+                {{ banningUserId === p.userId ? '...' : 'Yes' }}
+              </button>
+
+              <button
+                type="button"
+                class="btn-confirm-no"
+                (click)="cancelBan()"
+              >
+                No
+              </button>
+            </div>
+          } @else {
+            <div class="participant-actions">
+              <button
+                type="button"
+                class="btn-view-report"
+                (click)="openTelemetryReport(p)"
+              >
+                <i class="pi pi-chart-bar"></i>
+                Report
+              </button>
+
+              <button
+                type="button"
+                class="btn-remove-participant"
+                (click)="requestBan(p.userId)"
+              >
+                <i class="pi pi-ban"></i>
+                Ban
+              </button>
+            </div>
+          }
                 </td>
               </tr>
             }
