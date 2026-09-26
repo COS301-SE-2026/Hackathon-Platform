@@ -65,7 +65,7 @@
             {{ generatingCertificate ? 'Downloading Certificate...' : 'Download Certificate' }}
           </app-button>
 
-        } 
+        }
         @else {
           <app-button variant="primary" width="100%" [disabled]="isCheckingRegistration || isRegistered" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
             {{ isRegistered ? 'Registered' : 'Register' }}
@@ -174,7 +174,7 @@
 
   <app-modal title="Register for Event"  size="small" footerLayout="center" (closed)="closeRegistrationModal()">
     <div modal-body>
-      
+
       <h3 class="registration-event-name">{{ event.name }}</h3>
 
       @if (event.visibility === 'PRIVATE') {
@@ -192,10 +192,10 @@
         </div>
         <div class="registration-input">
 
-          <app-input id="registration-key"  label="Registration Key"placeholder="Enter registration key" [(value)]="registrationKey"> </app-input>
+          <app-input id="registration-key"  label="Registration Key" placeholder="Enter registration key" [(value)]="registrationKey"> </app-input>
         </div>
 
-      } 
+      }
       @else {
         <div class="registration-confirmation">
           <div class="confirmation-icon">
@@ -239,7 +239,7 @@
     </div>
 
     <div modal-footer-right>
-      
+
       <app-button variant="secondary" (click)="closeRegistrationModal()" width="135px" (keydown)="null" (keyup)="null"> Cancel</app-button>
 
       <app-button variant="primary" (click)="confirmRegistration()" width="135px" [disabled]="isRegistering" (keydown)="null" (keyup)="null"> {{ isRegistering ? 'Registering...' : 'Register' }}</app-button>

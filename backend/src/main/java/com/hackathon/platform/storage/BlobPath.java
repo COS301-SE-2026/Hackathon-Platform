@@ -114,6 +114,18 @@ public final class BlobPath {
         "logs/%s/%s/%s/%s/scoring_log.txt", eventId, teamId, levelId, submissionId);
   }
 
+  public static String certificateAsset(String templateId, String filename) {
+    return String.format("certificates/templates/%s/assets/%s", templateId, sanitise(filename));
+  }
+
+  public static String certificateBackground(String templateId, String filename){
+    return String.format("certificates/templates/%s/background/%s", templateId, sanitise(filename));
+  }
+
+  public static String certificatePdf(String eventId, String runId, String certificateId){
+    return String.format("certificates/events/%s/runs/%s/%s.pdf", eventId, runId, certificateId);
+  }
+
   /**
    * Strips path traversal characters from a filename to prevent directory traversal attacks.
    *

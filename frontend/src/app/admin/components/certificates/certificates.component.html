@@ -1,0 +1,299 @@
+<div class="certificates-page">
+
+  <div class="back-navigation">
+    <button class="back-btn" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i> Back to Events
+    </button>
+  </div>
+
+  <div class="page-header">
+    <div>
+      <h1>Certificates</h1>
+      <p class="page-subtitle">{{ event?.name || 'Loading event' }}</p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading">Loading</div>
+  } @else {
+
+    @if (errorMessage) {
+      <div class="error-message"></div>
+    }
+    @if (successMessage) {
+      <div class="success-message">{{ successMessage }}</div>
+    }
+
+    <div class="certificates-layout">
+
+      <aside class="template-sidebar">
+        <div class="sidebar-header">
+          <h3>Templates</h3>
+          <button class="btn-secondary btn-sm" (click)="startNewTemplate()">
+            <i class="pi pi-plus"></i> New
+          </button>
+        </div>
+        <ul class="template-list">
+          @for (t of templates; track t.templateId) {
+            <li [class.active]="selectedTemplateId === t.templateId" (click)="selectTemplate(t.templateId)">
+              {{ t.name }}
+            </li>
+          }
+          @if (templates.length === 0) {
+            <li class="empty">No templates yet, make your first design to get started.</li>
+          }
+        </ul>
+      </aside>
+
+      <section class="designer-section">
+        <div class="designer-toolbar">
+          <input class="template-name-input" type="text" [(ngModel)]="templateName" placeholder="Template name"/>
+          <div class="toolbar-actions">
+            <label class="btn-secondary btn-sm file-upload-btn">
+              <i class="pi pi-image"></i> Background
+              <input type="file" accept="image/*" (change)="onBackgroundSelected($event)" hidden/>
+            </label>
+            <button class="btn-primary btn-sm" (click)="saveTemplate()" [disabled]="isSaving">
+              {{ isSaving ? 'Saving' : 'Save Template' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="designer-palatte">
+          <button class="btn-secondary btn-sm" (click)="addTextElement(true)">
+            <i class="pi pi-user"></i> Bound Field
+          </button>
+          <button class="btn-secondary btn-sm" (click)="addTextElement(false)">
+            <i class="pi pi-align-left"></i> Static Label
+          </button>
+          <button class="btn-secondary btn-sm" (click)="addQrElement()">
+            <i class="pi pi-qrcode"></i> QR Code
+          </button>
+          <label class="btn-secondary btn-sm file-upload-btn">
+            <i class="pi pi-image"></i>{{ isUploadingAsset ? 'Uploading' : 'Image/Signiture' }}
+            <input type="file" accept="image/*" (change)="onImageFileSelected($event)" [disabled]="isUploadingAsset" hidden/>
+          </label>
+          @if (selectedElementIndex !== null) {
+            <button class="btn-danger btn-sm" (click)="deleteSelectedElement()">
+              <i class="pi pi-trash"></i> Delete Selected
+            </button>
+          }
+        </div>
+
+        <div class="designer-body">
+          <div class="designer-canvas" [style.width.px]="canvasWidth" [style.height.px]="canvasHeight" [style.backgroundImage]="backgroundUrl ? 'url(' + backgroundUrl + ')': 'none'" (mousemove)="onCanvasMouseMove($event)" (mouseup)="onCanvasMouseUp()" (mouseleave)="onCanvasMouseUp()">
+            @for (el of layout.elements; track $index) {
+              <div class="canvas-element" [class.selected]="selectedElementIndex == $index" [class.qr-element]="el.type === 'QR'" [class.text-element]="el.type === 'TEXT'" [class.image-element]="el.type === 'IMAGE'" [style.left.px]="el.x" [style.top.px]="el.y" [style.fontFamily]="el.font || 'Helvetica'" [style.fontSize.px]="el.type == 'TEXT' ? (el.fontSize || 16) : 0" [style.color]="el.color || '#000'" [style.textAlign]="el.align || 'left'" (mousedown)="onElementMouseDown($event, $index)">
+                @if (el.type === 'TEXT') {
+                  {{ previewText(el) }}
+                } @else if (el.type == 'QR') {
+                  <div class="qr-placeholder" [style.width.px]="(el.fontSize || 18) * 5" [style.height.px]="(el.fontSize || 18) * 5">
+                    <i class="pi pi-qrcode"></i>
+                  </div>
+                } @else {
+                  @if (el.imageStorageKey && assetUrlByKey[el.imageStorageKey]) {
+                    <img [src]="assetUrlByKey[el.imageStorageKey]" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80" draggable="false"/>
+                  } @else {
+                    <div class="image-placeholder" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80">
+                      <i class="pi pi-image"></i>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+
+          <div class="property-panel">
+            @if (selectedElement; as el) {
+              <h4>Element Properties</h4>
+
+              @if (el.type === 'TEXT') {
+                <div class="form-group">
+                  <label>Content</label>
+                  <select [(ngModel)]="el.field" (ngModelChange)="el.field ? (el.staticText = undefined) : null">
+                    <option [ngValue]="null">Static text</option>
+                    @for (f of fieldOptions; track f.value) {
+                      <option [ngValue]="f.value">{{ f.label }}</option>
+                    }
+                  </select>
+                </div>
+
+                @if (!el.field) {
+                  <div class="form-group">
+                    <label>Static text</label>
+                    <input type="text" [(ngModel)]="el.staticText"/>
+                  </div>
+                }
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Font</label>
+                    <select [(ngModel)]="el.font">
+                      <option value="helvetica">Helvetica</option>
+                      <option value="helvetica-bold">Helvetica bold</option>
+                      <option value="times">Times</option>
+                      <option value="times-bold">Times bold</option>
+                      <option value="times-italic">Times italic</option>
+                      <option value="courier">Courier</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Size</label>
+                    <input type="number" [(ngModel)]="el.fontSize" min="6" max="80" />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Colour</label>
+                    <input type="color" [(ngModel)]="el.color" />
+                  </div>
+                  <div class="form-group">
+                    <label>Align</label>
+                    <select [(ngModel)]="el.align">
+                      <option value="left">Left</option>
+                      <option value="center">Centre</option>
+                      <option value="right">Right</option>
+                    </select>
+                  </div>
+                </div>
+              } @else if (el.type =='QR') {
+                <div class="form-group">
+                  <label>Size</label>
+                  <input type="number" [(ngModel)]="el.fontSize" min="10" max="60" />
+                </div>
+                <p class="hint">Encodes this certificate with a unique verification link</p>
+              } @else {
+                <div class="form-group">
+                  <label class="btn-secondary btn-sm file-upload-btn replace-image-btn">
+                    <i class="pi pi-refresh"></i> {{ isUploadingAsset ? 'Uploading' : 'Replace image' }}
+                    <input type="file" accept="image/*" (change)="onReplaceImageSelected($event)" [disabled]="isUploadingAsset" hidden />
+                  </label>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Width</label>
+                    <input type="number" [(ngModel)]="el.width" min="10" max="800" />
+                  </div>
+                  <div class="form-group">
+                    <label>Height</label>
+                    <input type="number" [(ngModel)]="el.height" min="10" max="800" />
+                  </div>
+                </div>
+              }
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>X</label>
+                  <input type="number" [(ngModel)]="el.x" />
+                </div>
+                <div class="form-group">
+                  <label>Y</label>
+                  <input type="number" [(ngModel)]="el.y" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>SHow certificate types</label>
+                <div class="cert-type-checkboxes">
+                  @for (type of certTypes; track type) {
+                    <label class="checkbox-label">
+                      <input type="checkbox" [checked]="isVisibleForType(el, type)" (change)="toggleVisibilityForType(type)" />
+                      {{ type }}
+                    </label>
+                  }
+                </div>
+                <p class="hint">Unchecked types won't show this element. For example, hide rank for participation certificates</p>
+              </div>
+            } @else {
+              <p class="hint">Select an element on the canvas to edit it, or add a new element from the toolbar above the canvas.</p>
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="generation-section">
+      <h2 class="section-heading">Generate Certificates</h2>
+      <p class="hint">Runs against the event's leaderboard, ONLY TRIGGER this once the event has ended and the results are confirmed. If the results have changed, a regeneration is needed.</p>
+
+      <div class="generation-controls">
+        <div class="toggle-group" role="group">
+          <button type="button" class="toggle-option" [class.selected]="generationScope === 'ALL_PARTICIPANTS'" (click)="generationScope = 'ALL_PARTICIPANTS'">
+            <span class="toggle-title">All Participants</span>
+            <span class="toggle-desc">Everyone gets a certificate</span>
+          </button>
+          <button type="button" class="toggle-option" [class.selected]="generationScope === 'TOP_N'" (click)="generationScope = 'TOP_N'">
+            <span class="toggle-title">Top N Teams</span>
+            <span class="toggle-desc">Only ranked finalists</span>
+          </button>
+        </div>
+
+        @if (generationScope === 'TOP_N') {
+          <div class="form-group top-n-input">
+            <label>Top N</label>
+            <input type="number" [(ngModel)]="topN" min="1" max="100" />
+          </div>
+        }
+
+        <button class="btn-primary"  (click)="startGeneration()" [disabled]="!canGenerate()">
+          {{ isGenerating ? 'Generating' : 'Generate Certificates' }}
+        </button>
+      </div>
+
+      @if (!selectedTemplateId) {
+        <p class="hint-warning">Select or save a template above before generating.</p>
+      }
+
+      @if (activeRun) {
+        <div class="run-progress">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" [style.width.%]="progressPercent()"></div>
+          </div>
+          <span class="progress-label">
+            {{ activeRun.status }} - {{ activeRun.completedCount }} / {{ activeRun.totalCount }}
+          </span>
+          @if (activeRun.status === 'FAILED') {
+            <p class="error-message">{{ activeRun.errorMessage }}</p>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="issued-section">
+      <h2 class="section-heading">Issued Certificates ({{ issued.length }})</h2>
+      @if (issued.length === 0) {
+        <p class="hint">No certificates issued for this event yet.</p>
+      } @else {
+        <table class="issued-table">
+          <thead>
+            <tr>
+              <th>Recipient</th>
+              <th>Type</th>
+              <th>Rank</th>
+              <th>Issued</th>
+              <th>Verification code</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cert of issued; track cert.certificateId) {
+              <tr>
+                <td>{{ cert.recipientName }}</td>
+                <td><span class="type-pill" [ngClass]="cert.certificateType.toLowerCase()">{{ cert.certificateType }}</span></td>
+                <td>{{ cert.rankAtIssue || '-' }}</td>
+                <td>{{ cert.issuedAt | date: 'medium' }}</td>
+                <td class="code-cell">{{ cert.verificationCode }}</td>
+                <td>
+                  <a [href]="cert.downloadUrl" target="_blank" class="btn-view-event">
+                    <i class="pi pi-download"></i> Download
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+</div>
