@@ -86,7 +86,7 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: 'mvn spring-boot:run',
+      command: 'mvn spring-boot:run -e',
       cwd: './backend',
       env: {
         ...process.env,
@@ -99,6 +99,8 @@ export default defineConfig({
       url: 'http://localhost:8080/actuator/health',
       reuseExistingServer: !process.env.CI,
       timeout: 300_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
     },
   ],
 });
