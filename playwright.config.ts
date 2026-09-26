@@ -86,7 +86,7 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: 'mvn spring-boot:run -e',
+      command: 'mvn spring-boot:run',
       cwd: './backend',
       env: {
         ...process.env,

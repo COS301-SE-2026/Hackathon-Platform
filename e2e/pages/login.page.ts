@@ -11,7 +11,7 @@ export class LoginPage{
         this.page = page;
         this.emailInput = page.locator('#email');
         this.passwordInput = page.locator('#password');
-        this.signinButton = page.getByRole('button', { name: "Sign in" });
+        this.signinButton = page.getByRole('button', { name: "Log in" });
         this.signupLink = page.getByRole('link', { name: 'Register'});
     }
 
@@ -19,7 +19,7 @@ export class LoginPage{
         await this.page.goto('/login');
     }
 
-    async ligin(email: string, password: string) {
+    async login(email: string, password: string) {
         await this.emailInput.fill(email);
         await this.passwordInput.fill(password);
         await this.signinButton.click();

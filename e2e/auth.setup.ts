@@ -16,7 +16,7 @@ setup('login as admin', async ({ page }) => {
 
     const login = new LoginPage(page);
     await login.goto();
-    await login.ligin(email, password);
+    await login.login(email, password);
     await expect(page).toHaveURL(/\/admin\/dashboard/);
     await page.context().storageState({ path: adminFile });
 });
@@ -30,7 +30,7 @@ setup('login as user', async ({ page }) => {
 
     const login = new LoginPage(page);
     await login.goto();
-    await login.ligin(email, password);
+    await login.login(email, password);
     await expect(page).toHaveURL(/\/participant\/home/);
     await page.context().storageState({ path: partFile });
 });
