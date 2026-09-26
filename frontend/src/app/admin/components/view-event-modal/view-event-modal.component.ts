@@ -9,8 +9,9 @@ import { ForumComponent} from "../forum/forum.component";
 import { TeamsComponent } from "../teams/teams.component";
 import { ManageEventComponent } from "../manage-event/manage-event.component";
 import { DietaryRequirementsComponent } from "../dietary-requirements/dietary-requirements.component";
+import { PlagiarismComponent } from "../plagiarism/plagiarism.component";
 
-type ViewEventTab = | 'dashboard' | 'live-control' | 'announcements' | 'forum' |'teams' |'dietary'|'manage';
+type ViewEventTab = | 'dashboard' | 'live-control' | 'announcements' | 'forum' |'teams' |'dietary'|'manage'|'plagiarism';
 
 @Component({
     selector: 'app-view-event-modal',
@@ -23,7 +24,8 @@ type ViewEventTab = | 'dashboard' | 'live-control' | 'announcements' | 'forum' |
         ForumComponent,
         TeamsComponent,
         DietaryRequirementsComponent,
-        ManageEventComponent
+        ManageEventComponent,
+        PlagiarismComponent
     ],
     templateUrl: './view-event-modal.component.html',
     styleUrl: './view-event-modal.component.scss'

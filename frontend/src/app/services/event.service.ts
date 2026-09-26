@@ -163,7 +163,7 @@ export class EventService {
   }
 
   getEvent(eventId: string): Observable<EventResponse> {
-    return this.http.get<EventResponse>(`${this.baseUrl}/admin/events/${eventId}`)
+    return this.getEventById(eventId);
   }
 
   getEventsForHackathon(hackathonId: string): Observable<EventResponse[]> {

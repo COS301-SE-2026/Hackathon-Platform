@@ -70,6 +70,10 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
           },
            {
+        path: 'plagiarism',
+        loadComponent: () => import('./admin/components/plagiarism/plagiarism.component').then(m => m.PlagiarismComponent),
+          },
+           {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
