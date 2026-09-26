@@ -1,0 +1,109 @@
+<app-modal title="Matched Code Fragments" size="large" (closed)="close()">
+    <div modal-body>
+        @if (loading()) {
+            <app-loader message="Loading diff..." />
+
+        } @else if (error()) {
+            <p class="diff-error">{{ error() }}</p>
+        } @else if (diff(); as d) {
+            <p class="diff-score">
+                Structural similarity: <strong>{{ (d.structuralScore * 100) | number: '1.1-1' }}%</strong>
+            </p>
+
+            <div class="diff-legend">
+                <span class="diff-legend-item"><span class="diff-swatch diff-match"></span> Structural match (shared code shape)</span>
+                <span class="diff-legend-item"><span class="diff-swatch diff-semantic"></span> Semantic match (same meaning, different code)</span>
+            </div>
+
+            @if (functionMatches().length > 0) {
+                <div class="diff-function-matches">
+                    <div class="diff-function-matches-header">
+                        Semantic function matches
+                        @if (selectedFunctionMatch()) {
+                            <button type="button" class="diff-clear-btn" (click)="clearFunctionMatch()">Clear selection</button>
+
+                        }
+                    </div>
+                    <div class="diff-function-list">
+                        @for (match of functionMatches(); track match.functionNameA + match.functionNameB) {
+                            <button
+                                type="button"
+                                class="diff-function-chip"
+                                [class.active]="match === selectedFunctionMatch()"
+                                (click)="selectFunctionMatch(match)"
+                            >
+
+                                <span class="diff-function-names">
+                                    <code>{{ match.functionNameA }}</code>
+                                    <span class="diff-function-arrow">&harr;</span>
+                                    <code>{{ match.functionNameB }}</code>
+                                </span>
+                                <span class="diff-function-score">{{ (match.similarity * 100) | number: '1.0-0' }}%</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            } @else {
+                <p class="diff-no-semantic" [class.diff-no-semantic-warning]="semanticStatus() !== 'NO_MATCHES_ABOVE_THRESHOLD'">
+                    {{ semanticStatusMessage() }}
+                </p>
+            }
+
+            <div class="diff-panes">
+                <div class="diff-pane">
+                    <div class="diff-pane-header">{{ teamNameA }}</div>
+
+                    @if (tabsA().length > 1) {
+                        <div class="diff-file-tabs">
+                            @for (tab of tabsA(); track tab.fileName) {
+                                <button
+                                    type="button"
+                                    class="diff-file-tab"
+                                    [class.active]="tab.fileName === selectedFileA()"
+                                    (click)="selectFileA(tab.fileName)"
+                                >
+                                    {{ tab.fileName }}
+                                    @if (tab.matchCount > 0) {
+                                        <span class="diff-match-badge">{{ tab.matchCount }}</span>
+                                    }
+                                
+                                </button>
+                            }
+                        </div>
+                    }
+
+                    <pre class="diff-code" [innerHTML]="highlightedA()"></pre>
+                </div>
+
+                <div class="diff-pane">
+                    <div class="diff-pane-header">{{ teamNameB }}</div>
+
+                    @if (tabsB().length > 1) {
+                        <div class="diff-file-tabs">
+                            @for (tab of tabsB(); track tab.fileName) {
+                                <button
+                                    type="button"
+                                    class="diff-file-tab"
+                                    [class.active]="tab.fileName === selectedFileB()"
+                                    (click)="selectFileB(tab.fileName)"
+                                >
+                                    {{ tab.fileName }}
+                                    @if(tab.matchCount > 0) {
+                                        <span class="diff-match-badge">{{ tab.matchCount }}</span>
+                                    }
+                                
+                                </button>
+                            }
+                        </div>
+                    }
+
+                    <pre class="diff-code" [innerHTML]="highlightedB()"></pre>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div modal-footer-right>
+        <app-button variant="secondary" (click)="close()">Close</app-button>
+    </div>
+</app-modal>
