@@ -1,0 +1,64 @@
+<div class="heatmap-widget">
+    @if (loading()) {
+        <div class="empty-state">Loading plagiarism results...</div>
+    } @else if (error()) {
+        <div class="empty-state">{{ error() }}</div>
+    } @else if (teams().length === 0) {
+        <div class="empty-state">No plagiarism check has been run for this event yet.</div>
+    } @else {
+        <div class="heatmap-legend">
+            <span class="heatmap-legend-label">Less similar</span>
+            <span class="heatmap-gradient"></span>
+            <span class="heatmap-legend-label">More similar</span>
+        </div>
+
+        <div class="heatmap-scroll">
+            <table class="heatmap-table">
+                <thead>
+                    <tr>
+                        <th class="heatmap-corner"></th>
+                        @for (col of teams(); track col.id) {
+                            <th class="heatmap-col-header" [title]="col.name">{{ col.name }}</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of teams(); track row.id) {
+                        <tr>
+                            <th class="heatmap-row-header" [title]="row.name">{{ row.name }}</th>
+                            @for (col of teams(); track col.id) {
+                                @if (row.id === col.id) {
+                                    <td class="heatmap-cell heatmap-cell-diagonal"></td>
+
+                                } @else if (cellFor(row.id, col.id); as pair) {
+                                    <td
+                                        class="heatmap-cell heatmap-cell-filled"
+                                        [class.heatmap-cell-flagged]="pair.flagged"
+                                        [style.background]="cellBackground(pair.combinedScore)"
+                                        [title]="cellTooltip(row.name, col.name, pair)"
+                                        (click)="openDiff(pair)"
+                                    >
+                                        {{ (pair.combinedScore * 100) | number: '1.0-0' }}
+                                    </td>
+
+                                } @else {
+                                    <td class="heatmap-cell heatmap-cell-empty"></td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@if (selectedPair(); as pair) {
+    <app-plagiarism-diff
+        [submissionIdA]="pair.submissionIdA"
+        [submissionIdB]="pair.submissionIdB"
+        [teamNameA]="pair.teamNameA"
+        [teamNameB]="pair.teamNameB"
+        (closed)="closeDiff()"
+    ></app-plagiarism-diff>
+}
