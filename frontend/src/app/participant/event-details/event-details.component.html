@@ -1,159 +1,173 @@
+<section class="event-banner">
+   <img [src]="event.bannerUrl" [alt]="event.name" class="event-img"/>
+</section>
+
+
 <div class="page-container">
 
-<section class="event-banner">
+  <button type="button" class="go-home-button" (click)="goHome()" (keydown)="null" (keyup)="null">
+    <i class="pi pi-arrow-left" aria-hidden="true"></i>
+    <span>Go Home</span>
+  </button>
 
-  <app-card>
-
-    <div class="event-banner-header">
-      <button type="button" class="go-home-button" (click)="goHome()" (keydown)="null" (keyup)="null">
-        <i class="pi pi-arrow-left" aria-hidden="true"></i>
-        <span>Go Home</span>
-      </button>
+  <div class="event-info">
+    <div class="event-info-left">
+      <h1 class="event-name">{{ event.name }}</h1>
+      <p class="event-tagline">{{ event.tagline }}</p>
     </div>
 
-    <div class="event-banner-body">
+    <div class="event-info-right">
 
-      <div class="event-main">
+      @if (getEventStatus() !== 'COMPLETED'){
+      <div class="timer-section">
 
-        <div class="event-banner-image">
-          <img [src]="event.bannerUrl || 'assets/images/hackathon-image.png'" [alt]="event.name" class="event-img"/>
-        </div>
+        <span class="timer-label">
+          <i class="pi pi-clock" aria-hidden="true"></i>
+          {{ event.timer.label }}
+        </span>
 
+        <div class="timer-display">
 
-        <div class="event-banner-details">
-
-          <div class="event-details-top">
-
-            <div class="event-tag">
-              <span class="event-status-tag" [class.tag-live]="getEventTag() === 'Live Now'" [class.tag-starting]="getEventTag() === 'Starts Soon'">
-                <span class="status-dot"></span>   {{ getEventTag() }}
-              </span>
-            </div>
-
-            <div class="timer-section">
-
-              <span class="timer-label">
-                <i class="pi pi-clock" aria-hidden="true"> </i>
-                {{ event.timer.label }}
-              </span>
-
-              <div class="timer-display">
-
-                <div class="timer-block">
-                  <span class="timer-number">
-                    {{ event.timer.days }}
-                  </span>
-                  <span class="timer-unit">d</span>
-                </div>
-
-                <span class="timer-separator">:</span>
-
-                <div class="timer-block">
-                  <span class="timer-number">
-                    {{ event.timer.hours }}
-                  </span>
-                  <span class="timer-unit">h</span>
-                </div>
-
-                <span class="timer-separator">:</span>
-
-                <div class="timer-block">
-                  <span class="timer-number">
-                    {{ event.timer.minutes }}
-                  </span>
-                  <span class="timer-unit">m</span>
-                </div>
-
-                <span class="timer-separator">:</span>
-
-                <div class="timer-block">
-                  <span class="timer-number">
-                    {{ event.timer.seconds }}
-                  </span>
-                  <span class="timer-unit">s</span>
-                </div>
-
-              </div>
-
-            </div>
-
+          <div class="timer-block">
+            <span class="timer-number">{{ event.timer.days }}</span>
+            <span class="timer-unit">days</span>
           </div>
 
-          <div class="event-details-middle">
+          <span class="timer-separator">:</span>
 
-            <div class="event-name">
-              <h1 class="event-title"> {{ event.name }} </h1>
-            </div>
+          <div class="timer-block">
+            <span class="timer-number">{{ event.timer.hours }}</span>
+            <span class="timer-unit">hours</span>
+          </div>
 
-            <div class="event-description-wrapper">
-              <p class="event-description">{{event.tagline}}</p>
-            </div>
+          <span class="timer-separator">:</span>
 
+          <div class="timer-block">
+            <span class="timer-number">{{ event.timer.minutes }}</span>
+            <span class="timer-unit">minutes</span>
+          </div>
+
+          <span class="timer-separator">:</span>
+
+          <div class="timer-block">
+            <span class="timer-number">{{ event.timer.seconds }}</span>
+            <span class="timer-unit">seconds</span>
           </div>
 
         </div>
 
       </div>
+    }
 
-      <div class="event-banner-bottom">
-        <div class="event-meta">
+      <div class="event-action-register">
+        @if (getEventStatus() === 'COMPLETED') {
+          <app-button variant="primary" width="100%" [disabled]="generatingCertificate" (click)="generateCertificate()" (keydown)="null" (keyup)="null">
+            {{ generatingCertificate ? 'Downloading Certificate...' : 'Download Certificate' }}
+          </app-button>
 
-          <span class="event-meta-item event-meta-date">
-            <i class="pi pi-calendar" aria-hidden="true"> </i>
-            {{ event.startDate }} – {{ event.endDate }}
-          </span>
-
-          <span class="event-meta-item event-meta-members">
-            <i class="pi pi-users" aria-hidden="true"> </i>
-           1 – {{ event.teamSize }} Members
-          </span>
-
-          <span class="event-meta-item event-meta-visibility">
-            <i class="pi pi-globe" aria-hidden="true"> </i>
-            {{ event.visibility | titlecase }}
-          </span>
-
-          <span class="event-meta-item event-meta-prize">
-            <i class="pi pi-trophy" aria-hidden="true"></i>
-             Prize Pool: R {{ event.prizePool | number }}
-          </span>
-
-          <span class="event-meta-item event-meta-levels">
-            <i class="pi pi-bars" aria-hidden="true"> </i>
-            {{ numberOfLevels }} Levels
-          </span>
-
-           <div class="event-meta-item event-meta-location">
-              <i class="pi pi-map-marker"></i>
-                <span> {{ event.inPerson ? 'In Person' : 'Virtual' }}</span>
-            </div>
-
-        </div>
-
-        <div class="event-banner-actions">
-
-          <div class="event-action-download">
-            <app-button variant="secondary"  width="100%" (click)="downloadProblemStatement()"(keydown)="null" (keyup)="null">
-              <i class="pi pi-download" aria-hidden="true"></i>
-              {{ downloadingProblemStatement  ? 'Downloading Specs...' : 'Download Specs' }}
-            </app-button>
-          </div>
-
-          <div class="event-action-register">
-            <app-button variant="primary" width="100%" [disabled]="isCheckingRegistration || isRegistered" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
-             {{ isRegistered ? 'Registered' : 'Register' }}
-            </app-button>
-          </div>
-
-        </div>
-
+        } 
+        @else {
+          <app-button variant="primary" width="100%" [disabled]="isCheckingRegistration || isRegistered" (click)="registerForEvent()" (keydown)="null" (keyup)="null">
+            {{ isRegistered ? 'Registered' : 'Register' }}
+          </app-button>
+        }
       </div>
+
+      <div class="event-action-download">
+        <app-button variant="secondary" width="100%" (click)="downloadProblemStatement()" (keydown)="null" (keyup)="null">
+          {{ downloadingProblemStatement ? 'Downloading Specifications...' : 'Download Specifications' }}
+        </app-button>
+      </div>
+
 
     </div>
 
-  </app-card>
+  </div>
 
-</section>
+
+  <div class="event-meta" [class.event-meta-completed]="getEventStatus() === 'COMPLETED'">
+
+    <div class="event-meta-item">
+      <span class="event-meta-label">Status</span>
+
+      <span class="event-status" [class.event-status-completed]="getEventStatus() === 'COMPLETED'">{{ getEventStatus() | titlecase }}</span>
+
+    </div>
+
+    <div class="event-meta-item">
+      <span class="event-meta-label">Prize Pool</span>
+      <strong class="event-meta-value">R {{ event.prizePool | number }}</strong>
+    </div>
+
+    <div class="event-meta-item">
+      <span class="event-meta-label">Visibility</span>
+      <strong class="event-meta-value">{{ event.visibility | titlecase }}</strong>
+    </div>
+
+    <div class="event-meta-item">
+       <span class="event-meta-label">Format</span>
+      <strong class="event-meta-value">{{ event.inPerson ? 'In Person' : 'Virtual' }}</strong>
+    </div>
+
+
+
+    @if (getEventStatus() === 'UPCOMING') {
+      <div class="event-meta-item event-meta-start">
+        <span class="event-meta-label">Submissions Open</span>
+        <strong class="event-meta-value">{{ formatDateTime(event.startDateTime) }}</strong>
+        <span class="event-meta-timezone">{{ getTimeZone() }}</span>
+      </div>
+    }
+
+    @if (getEventStatus() === 'ACTIVE') {
+      <div class="event-meta-item event-meta-start">
+        <span class="event-meta-label">Submissions Close</span>
+        <strong class="event-meta-value">{{ formatDateTime(event.endDateTime) }}</strong>
+        <span class="event-meta-timezone">{{ getTimeZone() }}</span>
+      </div>
+    }
+
+
+  </div>
+
+
+  <section class="event-tabs"><app-tabs [tabs]="tabs" [activeTab]="activeTab"></app-tabs> </section>
+
+
+  <div class="event-content">
+
+    @if (activeTab === 'overview' && eventId) { <app-overview [eventId]="eventId"></app-overview> }
+
+    @if (activeTab === 'rules') {
+        <app-rules [eventId]="eventId" />
+        }
+
+    @if (activeTab === 'forum') { <app-forum />}
+
+    @if (activeTab === 'submissions' && eventId && hackathonId) {
+      <app-submissions [eventId]="eventId" [hackathonId]="hackathonId" [useIde]="event.useIde"></app-submissions>
+    }
+
+    @if (activeTab === 'submission-history' && eventId && hackathonId) {
+      <app-submission-history  [eventId]="eventId" [hackathonId]="hackathonId"></app-submission-history>
+    }
+
+    @if (activeTab === 'team' && eventId) {
+      <app-my-team [eventId]="eventId"></app-my-team>
+    }
+
+    @if (activeTab === 'leaderboard' && eventId && hackathonId) {
+      <app-leaderboard [eventId]="eventId" [hackathonId]="hackathonId"></app-leaderboard>
+    }
+
+    @if (activeTab === 'announcements' && eventId) {
+    <app-announcements [eventId]="eventId"></app-announcements>
+    }
+
+  </div>
+
+</div>
+
 
 
 @if (registrationModal) {
@@ -235,40 +249,3 @@
   </app-modal>
 
 }
-
-  <section class="event-tabs"><app-tabs [tabs]="tabs" [activeTab]="activeTab"></app-tabs> </section>
-
-
-  <div class="event-content">
-
-    @if (activeTab === 'overview' && eventId) { <app-overview [eventId]="eventId"></app-overview> }
-
-    @if (activeTab === 'rules') {
-        <app-rules [eventId]="eventId" />
-        }
-
-    @if (activeTab === 'forum') { <app-forum />}
-
-    @if (activeTab === 'submissions' && eventId && hackathonId) {
-      <app-submissions [eventId]="eventId" [hackathonId]="hackathonId"></app-submissions>
-    }
-
-    @if (activeTab === 'submission-history' && eventId && hackathonId) {
-      <app-submission-history  [eventId]="eventId" [hackathonId]="hackathonId"></app-submission-history>
-    }
-
-    @if (activeTab === 'team' && eventId) {
-      <app-my-team [eventId]="eventId"></app-my-team>
-    }
-
-    @if (activeTab === 'leaderboard' && eventId) {
-      <app-leaderboard [eventId]="eventId"> </app-leaderboard>
-    }
-
-    @if (activeTab === 'announcements' && eventId) {
-    <app-announcements [eventId]="eventId"></app-announcements>
-    }
-
-  </div>
-
-</div>

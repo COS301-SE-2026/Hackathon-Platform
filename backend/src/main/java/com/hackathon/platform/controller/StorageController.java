@@ -1,12 +1,9 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.config.AzureBlobConfig;
-import com.hackathon.platform.model.Event;
-import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
-import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
@@ -20,14 +17,22 @@ import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
+import com.hackathon.platform.service.SubmissionCreationService;
 import com.hackathon.platform.storage.BlobPath;
 import com.hackathon.platform.storage.StorageException;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,6 +58,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class StorageController {
 
+  private static final Logger LOG = LoggerFactory.getLogger(StorageController.class);
+
   private final StorageService storageService;
   private final AzureBlobConfig config;
   private final FileMetadataService fileMetadataService;
@@ -66,6 +73,7 @@ public class StorageController {
   private final TeamMemberRepository teamMemberRepo;
   private final LevelRepository levelRepo;
   private final SubmissionRepository subRepo;
+  private final SubmissionCreationService createService;
 
   // Event Resources
 
@@ -443,90 +451,9 @@ public class StorageController {
       @RequestParam("levelId") short levelId,
       @AuthenticationPrincipal User currUser) {
 
-    if (outputFile == null || outputFile.isEmpty()) {
-      throw new StorageException("Output file is missing");
-    }
-    if (sourceFile == null || sourceFile.isEmpty()) {
-      throw new StorageException("Source file is missing");
-    }
-    String fileName =
-        sourceFile.getOriginalFilename() == null
-            ? ""
-            : sourceFile.getOriginalFilename().toLowerCase();
-    if (!fileName.endsWith(".zip")) {
-      throw new StorageException("Source code archive needs to be .zip");
-    }
-    UUID eventUUID = UUID.fromString(eventId);
-    UUID teamUUID = UUID.fromString(teamId);
-    Event event = eventService.getEventById(eventUUID);
-    eventService.refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
-    if (!"ACTIVE".equals(event.getStatus())) {
-      throw new StorageException("You cant submit before the event starts");
-    }
-    Team team =
-        teamRepo.findById(teamUUID).orElseThrow(() -> new StorageException("Team not found"));
-    if (!eventUUID.equals(team.getEventId())) {
-      throw new StorageException("Team doesnt exist");
-    }
-    if (!teamMemberRepo
-        .findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", eventUUID)
-        .stream()
-        .anyMatch(m -> teamUUID.equals(m.getTeamId()))) {
-      throw new StorageException("You are not part of this team");
-    }
-    Level lvl =
-        levelRepo.findById(levelId).orElseThrow(() -> new StorageException("Level not found"));
-    if (!hackathonIdMatchesEvent(lvl.getHackathonId(), event.getHackathon())) {
-      throw new StorageException("Level doesnt exist");
-    }
-
-    UUID hackathonId =
-        eventRepository
-            .findHackathonIdByEventId(UUID.fromString(eventId))
-            .orElseThrow(
-                () ->
-                    new StorageException("Hackathon could not be resolved for event: " + eventId));
-
-    SolverVersion latestSolver =
-        solverVersionRepository
-            .findByHackathonIdAndIsActiveTrue(hackathonId)
-            .orElseThrow(
-                () ->
-                    new StorageException(
-                        "No active solver has been uploaded for this hackathon yet"));
-
-    Submission saved =
-        fileMetadataService.saveSubmission(
-            eventId,
-            UUID.fromString(teamId),
-            levelId,
-            latestSolver.getId(),
-            outputFile.getOriginalFilename(),
-            outputFile.getSize(),
-            outputFile.getContentType(),
-            sourceFile.getOriginalFilename(),
-            sourceFile.getSize(),
-            sourceFile.getContentType());
-
-    storageService.upload(
-        config.getSubmissionsContainer(), saved.getOutputStorageKey(), outputFile);
-    storageService.upload(
-        config.getSubmissionsContainer(), saved.getSourceCodeStorageKey(), sourceFile);
-
-    String record = producer.enqueue(saved.getId());
-
-    return ResponseEntity.ok(
-        Map.of(
-            "submissionId",
-            String.valueOf(saved.getId()),
-            "outputStorageKey",
-            saved.getOutputStorageKey(),
-            "sourceStorageKey",
-            saved.getSourceCodeStorageKey(),
-            "status",
-            "QUEUED",
-            "scoringRecordId",
-            record != null ? record : ""));
+    Map<String, String> res =
+        createService.createSubmission(eventId, teamId, outputFile, sourceFile, levelId, currUser);
+    return ResponseEntity.ok(res);
   }
 
   /**
@@ -579,6 +506,85 @@ public class StorageController {
         storageService.generatePresignedUrl(
             config.getSubmissionsContainer(), storageKey, config.getSasExpiryMinutes());
     return ResponseEntity.ok(Map.of("url", url));
+  }
+
+  /**
+   * Downloads a ZIP archive containing a single submission's output file and source code archive
+   * together.
+   *
+   * @param eventId the event UUID
+   * @param teamId the team UUID
+   * @param levelId the level ID
+   * @param submissionId the submission ID
+   * @param response the HTTP response the ZIP is streamed to directly
+   */
+  @GetMapping(
+      "/events/{eventId}/teams/{teamId}/levels/{levelId}/submissions/{submissionId}/archive")
+  @PreAuthorize("hasRole('ADMIN')")
+  public void downloadSubmissionArchive(
+      @PathVariable String eventId,
+      @PathVariable String teamId,
+      @PathVariable String levelId,
+      @PathVariable Long submissionId,
+      @AuthenticationPrincipal User currUser,
+      HttpServletResponse response)
+      throws IOException {
+
+    assertSubmissionAccess(eventId, teamId, submissionId, currUser);
+    Submission submission =
+        subRepo
+            .findById(submissionId)
+            .orElseThrow(() -> new StorageException("Submission not found"));
+
+    String zipFileName = String.format("submission-%d-archive.zip", submission.getId());
+    response.setContentType("application/zip");
+    response.setHeader("Content-Disposition", "attachment; filename=\"" + zipFileName + "\"");
+
+    try (ZipOutputStream zipOut = new ZipOutputStream(response.getOutputStream())) {
+      addBlobToZip(
+          zipOut,
+          config.getSubmissionsContainer(),
+          submission.getOutputStorageKey(),
+          "output/"
+              + resolveFileName(submission.getOutputFileName(), submission.getOutputStorageKey()));
+
+      addBlobToZip(
+          zipOut,
+          config.getSubmissionsContainer(),
+          submission.getSourceCodeStorageKey(),
+          "source/"
+              + resolveFileName(
+                  submission.getSourceFileName(), submission.getSourceCodeStorageKey()));
+      zipOut.finish();
+    }
+  }
+
+  /** Streams a single blob into the given ZIP output stream as a new entry. */
+  private void addBlobToZip(
+      ZipOutputStream zipOut, String containerName, String storageKey, String entryName)
+      throws IOException {
+
+    if (storageKey == null || !storageService.exists(containerName, storageKey)) {
+      LOG.warn(
+          "Skipping missing blob while building submission archive: container={} storageKey={}",
+          containerName,
+          storageKey);
+      return;
+    }
+
+    zipOut.putNextEntry(new ZipEntry(entryName));
+    try (InputStream in = storageService.download(containerName, storageKey)) {
+      in.transferTo(zipOut);
+    }
+    zipOut.closeEntry();
+  }
+
+  private static String resolveFileName(String fileName, String storageKey) {
+    if (fileName != null && !fileName.isBlank()) {
+      return fileName;
+    }
+    int idx = storageKey.lastIndexOf('/');
+    return idx >= 0 ? storageKey.substring(idx + 1) : storageKey;
   }
 
   // Scoring Logs
@@ -666,9 +672,5 @@ public class StorageController {
     if (!member) {
       throw new AccessDeniedException("You dont have access to this event");
     }
-  }
-
-  private boolean hackathonIdMatchesEvent(UUID levelHackathonId, UUID eventHackathonId) {
-    return levelHackathonId != null && levelHackathonId.equals(eventHackathonId);
   }
 }

@@ -1,15 +1,8 @@
 <div class="announcements-page">
 
- <div class="announcements-header">
-  <h2>Announcements</h2>
-  <p>Stay up to date with the latest event updates and important notices.</p>
- </div>
 
   @if (loading) {
-   <div class="announcements-state">
-     <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-      <p>Loading announcements...</p>
-    </div>
+    <app-loader message="Loading announcements..." />
   } 
   
   @else if (errorMsg) {
@@ -18,13 +11,15 @@
   
   @else if (announcements.length === 0) {
 
- <div class="announcements-state">
-  
-      <h3>No Announcements</h3>
-       <p>There are no announcements for this event yet.</p>
-  </div>
+<app-empty-state icon="pi-megaphone" title="No Announcements" description="There are no announcements for this event yet."></app-empty-state>
 
   } @else {
+
+
+  <div class="announcements-header">
+    <h2>Announcements</h2>
+    <p>Stay up to date with the latest event updates and important notices.</p>
+  </div>
 
   <div class="announcements-list">
 

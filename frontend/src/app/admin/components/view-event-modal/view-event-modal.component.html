@@ -1,0 +1,100 @@
+<div 
+class = "modal-backdrop" 
+(click) = "onBackdropClick($event)"
+(keydown.escape) = "close()"
+    tabindex="0"
+    role ="button"
+    aria-label="Close dialog">
+    <div class = "modal-panel" role = "dialog" aria-modal = "true" aria-labelledby="modal-title">
+
+        <div class = "modal-header">
+            <div class = "modal-header-left">
+                <button type = "button" class = "modal-back-btn" (click) = "close()">
+                    <i class = "pi pi-arrow-left"></i> Back to Events
+                </button>
+
+                <div class = "modal-header-title-row">
+                    <h2 id = "modal-title">{{event?.name || eventName || 'Event'}}</h2>
+
+
+                    <div class = "modal-header-stats">
+                        <div class = "stat">
+                            <i class = "pi pi-calendar"></i>
+                        <div>
+                        <p class = "stat-value">{{teamsCount}}</p>
+                        <p class = "stat-label">Teams</p>
+                      </div>
+                      </div>
+                <div class = "stat">
+                            <i class = "pi pi-user"></i>
+                        <div>
+                        <p class = "stat-value">{{participantsCount}}</p>
+                        <p class = "stat-label">Participants</p>
+                        </div>
+                         </div>
+                         <div class = "stat">
+                            <i class = "pi pi-code"></i>
+                        <div>
+                        <p class = "stat-value">{{submissionsCount}}</p>
+                        <p class = "stat-label">Submissions</p>
+                     </div>
+                </div>
+        </div>
+    </div>
+    <p class = "modal-event-description">{{event?.description || ''}}</p>
+   </div>
+<button type ="button" class = "modal-close-btn" (click) = "close()" aria-label = "Close">
+    <i class = "pi pi-times"></i>
+</button>
+</div>
+
+<div class = "modal-tabs">
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'dashboard'" (click)="setActiveTab('dashboard')">
+        <i class = "pi pi-th-large"></i> Dashboard
+    </button>
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'live-control'" (click)="setActiveTab('live-control')">
+        <i class = "pi pi-bolt"></i> Live Control
+    </button>
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'announcements'" (click)="setActiveTab('announcements')">
+        <i class = "pi pi-megaphone"></i> Announcements
+    </button>
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'forum'" (click)="setActiveTab('forum')">
+        <i class = "pi pi-comments"></i> Forum
+    </button>
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'teams'" (click)="setActiveTab('teams')">
+        <i class = "pi pi-users"></i> Teams
+    </button>
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'dietary'" (click)="setActiveTab('dietary')">
+        <i class = "pi pi-heart"></i> Dietary Requirements
+    </button>
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'manage'" (click)="setActiveTab('manage')">
+        <i class = "pi pi-cog"></i> Manage Event
+    </button>
+</div>
+
+<div class = "modal-body">
+    @if (activeTab === 'dashboard'){
+        <app-event-dashboard [eventId] = "eventId || ''"></app-event-dashboard>
+
+    } @else if (activeTab === 'live-control'){
+        <app-live-control [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-live-control>
+
+    } @else if (activeTab === 'announcements'){
+        <app-announcements [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-announcements>
+
+        } @else if (activeTab === 'forum'){
+        <app-forum [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-forum>
+        
+    }@else if (activeTab === 'teams'){
+        <app-teams [eventId] = "eventId || ''"></app-teams>
+
+    }@else if (activeTab === 'dietary'){
+        <app-dietary-requirements [eventId] = "eventId || ''"></app-dietary-requirements>
+
+    } @else if (activeTab === 'manage'){
+        <app-manage-event [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-manage-event>
+    }
+</div>
+</div>
+
+</div>

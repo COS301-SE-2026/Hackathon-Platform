@@ -25,10 +25,6 @@ export class ParticipantShellComponent implements OnInit {
       route: '/participant/home'
     },
     {
-      label: 'Upcoming Events',
-      route: ''
-    },
-    {
       label: 'Help',
       route: '/participant/help'
     }

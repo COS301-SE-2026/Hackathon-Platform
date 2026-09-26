@@ -306,6 +306,9 @@ public class EventService {
     if (req.getName() != null) {
       event.setName(req.getName());
     }
+    if (req.getUseIde() != null) {
+      event.setUseIde(req.getUseIde());
+    }
     if (req.getTeamSizeLimit() > 0) {
       event.setTeamSizeLimit(req.getTeamSizeLimit());
     }

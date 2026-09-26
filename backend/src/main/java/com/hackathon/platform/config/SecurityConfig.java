@@ -58,6 +58,8 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers(HttpMethod.POST, "/api/auth/register")
                     .permitAll()
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                    .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/auth/verify-email")
@@ -77,6 +79,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/storage/events/*/logo")
                     .permitAll()
                     .requestMatchers("/actuator/health")
+                    .permitAll()
+                    .requestMatchers("/ws", "/ws/..")
                     .permitAll()
                     .requestMatchers("/api/admin/**")
                     .hasRole("ADMIN")
