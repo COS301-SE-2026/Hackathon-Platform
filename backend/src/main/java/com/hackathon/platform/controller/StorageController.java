@@ -1,9 +1,12 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.config.AzureBlobConfig;
+import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.Level;
 import com.hackathon.platform.model.LevelFile;
 import com.hackathon.platform.model.SolverVersion;
 import com.hackathon.platform.model.Submission;
+import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.User;
 import com.hackathon.platform.repository.EventRegistrationRepository;
 import com.hackathon.platform.repository.EventRepository;
@@ -17,7 +20,6 @@ import com.hackathon.platform.service.EventService;
 import com.hackathon.platform.service.FileMetadataService;
 import com.hackathon.platform.service.HackathonService;
 import com.hackathon.platform.service.StorageService;
-import com.hackathon.platform.service.SubmissionCreationService;
 import com.hackathon.platform.storage.BlobPath;
 import com.hackathon.platform.storage.StorageException;
 import jakarta.servlet.http.HttpServletResponse;
@@ -73,7 +75,6 @@ public class StorageController {
   private final TeamMemberRepository teamMemberRepo;
   private final LevelRepository levelRepo;
   private final SubmissionRepository subRepo;
-  private final SubmissionCreationService createService;
 
   // Event Resources
 
@@ -451,9 +452,90 @@ public class StorageController {
       @RequestParam("levelId") short levelId,
       @AuthenticationPrincipal User currUser) {
 
-    Map<String, String> res =
-        createService.createSubmission(eventId, teamId, outputFile, sourceFile, levelId, currUser);
-    return ResponseEntity.ok(res);
+    if (outputFile == null || outputFile.isEmpty()) {
+      throw new StorageException("Output file is missing");
+    }
+    if (sourceFile == null || sourceFile.isEmpty()) {
+      throw new StorageException("Source file is missing");
+    }
+    String fileName =
+        sourceFile.getOriginalFilename() == null
+            ? ""
+            : sourceFile.getOriginalFilename().toLowerCase();
+    if (!fileName.endsWith(".zip")) {
+      throw new StorageException("Source code archive needs to be .zip");
+    }
+    UUID eventUUID = UUID.fromString(eventId);
+    UUID teamUUID = UUID.fromString(teamId);
+    Event event = eventService.getEventById(eventUUID);
+    eventService.refreshLifecycleStatus(event, OffsetDateTime.now(ZoneOffset.UTC));
+    if (!"ACTIVE".equals(event.getStatus())) {
+      throw new StorageException("You cant submit before the event starts");
+    }
+    Team team =
+        teamRepo.findById(teamUUID).orElseThrow(() -> new StorageException("Team not found"));
+    if (!eventUUID.equals(team.getEventId())) {
+      throw new StorageException("Team doesnt exist");
+    }
+    if (!teamMemberRepo
+        .findByUserIdAndStatusAndEventId(currUser.getUserId(), "APPROVED", eventUUID)
+        .stream()
+        .anyMatch(m -> teamUUID.equals(m.getTeamId()))) {
+      throw new StorageException("You are not part of this team");
+    }
+    Level lvl =
+        levelRepo.findById(levelId).orElseThrow(() -> new StorageException("Level not found"));
+    if (!hackathonIdMatchesEvent(lvl.getHackathonId(), event.getHackathon())) {
+      throw new StorageException("Level doesnt exist");
+    }
+
+    UUID hackathonId =
+        eventRepository
+            .findHackathonIdByEventId(UUID.fromString(eventId))
+            .orElseThrow(
+                () ->
+                    new StorageException("Hackathon could not be resolved for event: " + eventId));
+
+    SolverVersion latestSolver =
+        solverVersionRepository
+            .findByHackathonIdAndIsActiveTrue(hackathonId)
+            .orElseThrow(
+                () ->
+                    new StorageException(
+                        "No active solver has been uploaded for this hackathon yet"));
+
+    Submission saved =
+        fileMetadataService.saveSubmission(
+            eventId,
+            UUID.fromString(teamId),
+            levelId,
+            latestSolver.getId(),
+            outputFile.getOriginalFilename(),
+            outputFile.getSize(),
+            outputFile.getContentType(),
+            sourceFile.getOriginalFilename(),
+            sourceFile.getSize(),
+            sourceFile.getContentType());
+
+    storageService.upload(
+        config.getSubmissionsContainer(), saved.getOutputStorageKey(), outputFile);
+    storageService.upload(
+        config.getSubmissionsContainer(), saved.getSourceCodeStorageKey(), sourceFile);
+
+    String record = producer.enqueue(saved.getId());
+
+    return ResponseEntity.ok(
+        Map.of(
+            "submissionId",
+            String.valueOf(saved.getId()),
+            "outputStorageKey",
+            saved.getOutputStorageKey(),
+            "sourceStorageKey",
+            saved.getSourceCodeStorageKey(),
+            "status",
+            "QUEUED",
+            "scoringRecordId",
+            record != null ? record : ""));
   }
 
   /**
@@ -672,5 +754,9 @@ public class StorageController {
     if (!member) {
       throw new AccessDeniedException("You dont have access to this event");
     }
+  }
+
+  private boolean hackathonIdMatchesEvent(UUID levelHackathonId, UUID eventHackathonId) {
+    return levelHackathonId != null && levelHackathonId.equals(eventHackathonId);
   }
 }

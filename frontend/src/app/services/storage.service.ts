@@ -165,12 +165,4 @@ uploadHackathonProblemStatement(hackathonId: string, file: File): Observable<{st
     );
   }
 
-  uploadStarterZip(hackathonId: string, levelId: number, file: File): Observable<{ id: string; storageKey: string; blobUrl: string; }> {
-    const formData = new FormData();
-
-    formData.append('file', file);
-    formData.append('fileType', 'STARTER_ZIP');
-    return this.http.post<{ id: string; storageKey: string; blobUrl: string }>(`${this.baseUrl}/hackathons/${hackathonId}/levels/${levelId}/files`, formData);
-  }
-
 }
