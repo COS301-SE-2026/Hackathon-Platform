@@ -17,7 +17,7 @@ setup('login as admin', async ({ page }) => {
     const login = new LoginPage(page);
     await login.goto();
     await login.login(email, password);
-    await expect(page).toHaveURL(/\/admin\/dashboard/);
+    await expect(page).toHaveURL(/\/admin\/events/);
     await page.context().storageState({ path: adminFile });
 });
 
