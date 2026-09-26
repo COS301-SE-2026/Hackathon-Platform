@@ -37,6 +37,9 @@ public class EventRegistration {
   @Column(name = "allergies", columnDefinition = "TEXT")
   private String allergies;
 
+  @Column(name = "banned", nullable = false)
+  private boolean banned = false;
+
   @PrePersist
   protected void onCreate() {
     if (registeredAt == null) {
