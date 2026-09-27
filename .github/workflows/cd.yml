@@ -68,3 +68,18 @@ jobs:
         run: |
           IMAGE="${ECR_REGISTRY}/${BACKEND_REPOSITORY}:${GITHUB_SHA}"
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Setup BuildX
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./docker/backend.Dockerfile
+          push: true
+          tags: |
+            ${{ steps.image.outputs.image }}
+            ${{ env.ECR_REGISTRY }}/${{ env.BACKEND_REPOSITORY }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
