@@ -245,7 +245,7 @@ public class TeamService {
     }
   }
 
-  /** Ban a participant from an event, mark them as LEFT, and deactivate an empty team. */
+/** Ban a participant from an event, mark them as LEFT, and deactivate an empty team. */
 @Transactional
 public void banParticipant(UUID eventId, UUID userId) {
     EventRegistration registration =
@@ -253,17 +253,23 @@ public void banParticipant(UUID eventId, UUID userId) {
             .findByEventIdAndUserId(eventId, userId)
             .orElseThrow(() -> new RuntimeException("Event registration not found"));
 
-    registration.setBanned(true);
-    eventRegistrationRepository.save(registration);
-
     Optional<TeamMember> membership =
         teamMemberRepository
             .findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId)
             .stream()
             .findFirst();
+            
+    if (membership.isPresent()) {
+        registration.setBannedFromTeamId(membership.get().getTeamId());
+    } else {
+        registration.setBannedFromTeamId(null);
+    }
+
+    registration.setBanned(true);
+    eventRegistrationRepository.save(registration);
 
     if (membership.isEmpty()) {
-      return;
+        return;
     }
 
     TeamMember teamMember = membership.get();
@@ -271,17 +277,61 @@ public void banParticipant(UUID eventId, UUID userId) {
     teamMemberRepository.save(teamMember);
 
     long approvedCount =
-        teamMemberRepository.countByTeamIdAndStatus(teamMember.getTeamId(), "APPROVED");
+        teamMemberRepository.countByTeamIdAndStatus(
+            teamMember.getTeamId(), "APPROVED");
 
     if (approvedCount == 0) {
-      Team team =
-          teamRepository
-              .findById(teamMember.getTeamId())
-              .orElseThrow(() -> new RuntimeException("Team not found"));
+        Team team =
+            teamRepository
+                .findById(teamMember.getTeamId())
+                .orElseThrow(() -> new RuntimeException("Team not found"));
 
-      team.setStatus("INACTIVE");
-      teamRepository.save(team);
+        team.setStatus("INACTIVE");
+        teamRepository.save(team);
     }
+}
+
+/** Unban a participant from an event and restore the team they were banned from, if any. */
+@Transactional
+public void unbanParticipant(UUID eventId, UUID userId) {
+    EventRegistration registration =
+        eventRegistrationRepository
+            .findByEventIdAndUserId(eventId, userId)
+            .orElseThrow(() -> new RuntimeException("Event registration not found"));
+
+    if (!registration.isBanned()) {
+        throw new RuntimeException("Participant is not banned");
+    }
+
+    UUID bannedFromTeamId = registration.getBannedFromTeamId();
+
+    registration.setBanned(false);
+    registration.setBannedFromTeamId(null);
+    eventRegistrationRepository.save(registration);
+
+    if (bannedFromTeamId == null) {
+        return;
+    }
+
+    Optional<TeamMember> membership =
+        teamMemberRepository.findByTeamIdAndUserId(
+            bannedFromTeamId, userId);
+
+    if (membership.isEmpty()) {
+        throw new RuntimeException("Previous team membership not found");
+    }
+
+    TeamMember teamMember = membership.get();
+    teamMember.setStatus("APPROVED");
+    teamMemberRepository.save(teamMember);
+
+    Team team =
+        teamRepository
+            .findById(bannedFromTeamId)
+            .orElseThrow(() -> new RuntimeException("Team not found"));
+
+    team.setStatus("ACTIVE");
+    teamRepository.save(team);
 }
 
   public List<TeamMemberResponse> viewTeamMembers(UUID teamId) {
