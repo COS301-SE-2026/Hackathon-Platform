@@ -52,16 +52,21 @@ export const test = base.extend<Fixtures>({
     },
 
     eventId: async ({ api, adminToken, uniqueSuffix }, use) => {
-        const hackathonRes = await api.post('/api/hackathons',{
+        const hackathonRes = await api.post('/api/hackathon',{
             headers: { Authorization: `Bearer ${adminToken}`},
             data: { name: `E2E Hackathon ${uniqueSuffix}`},
         });
         if (!hackathonRes.ok()){
-            throw new Error(`Create hackathon failed: ${hackathonRes.status()}`);
+            throw new Error(`Create hackathon failed: ${hackathonRes.status()} ${await hackathonRes.text()}`);
+        }
+        const hackathonBody = await hackathonRes.json()
+        const hackathonId = hackathonBody.hackathonId ?? hackathonBody.id;
+        if (!hackathonId){
+            throw new Error('Hackathon response did not contain an id: ' + JSON.stringify(hackathonBody));
         }
 
-        const {hackathonId} = await hackathonRes.json();
-        const eventRes = await api.post(`/api/hackathons/${hackathonId}/events`, {
+
+        const eventRes = await api.post(`/api/hackathon/${hackathonId}/events`, {
             headers: { Authorization: `Bearer ${adminToken}`},
             data: {
                 name: `E2E Event ${uniqueSuffix}`,
@@ -71,14 +76,18 @@ export const test = base.extend<Fixtures>({
         });
 
          if (!eventRes.ok()){
-            throw new Error(`Create event failed: ${eventRes.status()}`);
+            throw new Error(`Create event failed: ${eventRes.status()} ${await eventRes.text()}`);
         }
 
-        const {eventId} = await eventRes.json();
+        const eventBody = await eventRes.json();
+        const eventId = eventBody.eventId ?? eventBody.id;
+        if (!eventId){
+            throw new Error('Event response did not contain an id: ' + JSON.stringify(eventBody));
+        }
         await use(eventId);
 
         await api 
-        .delete(`/api/events/${eventId}`,{
+        .delete(`/api/hackathon/${hackathonId}`,{
             headers: {Authorization: `Bearer ${adminToken}`},
         })
         .catch(() => {});

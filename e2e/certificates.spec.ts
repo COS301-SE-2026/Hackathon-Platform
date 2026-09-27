@@ -12,11 +12,11 @@ async function seedTeams(
     count = 3,
 ) {
     for (let i =1; i<= count; i++){
-        const res = await api.post(`/api/events/${eventId}/teams`,{
+        const res = await api.post(`/api/teams`,{
             headers: {Authorization: `Bearer ${adminToken}`},
             data:{
-                name: `Team ${i}`,
-                members: [{name: `Member ${i}`, email: `m${i}@e2e.test`}],
+                teamName: `E2E Team ${i}`,
+                eventId,
             },
         });
         if (!res.ok()){
