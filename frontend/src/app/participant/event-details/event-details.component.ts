@@ -89,6 +89,7 @@ export class EventDetailsComponent implements OnDestroy {
     teamSize: 0,
     visibility: '',
     inPerson: false,
+    useIde: false,
     startDateTime: '',
     duration: 0,
     timer: {
@@ -396,6 +397,7 @@ confirmRegistration(): void {
       teamSize: event.teamSizeLimit,
       visibility: event.visibility,
       inPerson: event.inPerson ?? false,
+      useIde: event.useIde,
       startDateTime: event.startDateTime,
       duration: event.duration,
       timer: { label: '', days: '00', hours: '00',  minutes: '00', seconds: '00'} as EventTimer

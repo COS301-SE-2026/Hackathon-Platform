@@ -13,6 +13,7 @@ export interface EventRequest {
   visibility: 'PUBLIC' | 'PRIVATE';
   status?: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
   inPerson?: boolean;
+  useIde?: boolean;
   leaderboardFreezeDateTime?: string;
   freezeTime?: string;
   rules?: string;
@@ -38,6 +39,7 @@ export interface EventResponse {
   description?: string;
   visibility: string;
   status: string;
+  useIde: boolean;
   inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
   scoringPaused: boolean;
@@ -163,7 +165,7 @@ export class EventService {
   }
 
   getEvent(eventId: string): Observable<EventResponse> {
-    return this.http.get<EventResponse>(`${this.baseUrl}/admin/events/${eventId}`)
+    return this.getEventById(eventId);
   }
 
   getEventsForHackathon(hackathonId: string): Observable<EventResponse[]> {
