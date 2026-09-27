@@ -71,7 +71,7 @@ export const test = base.extend<Fixtures>({
             data: {
                 name: `E2E Event ${uniqueSuffix}`,
                 description: 'Playwright E2E',
-                status: 'PUBLISHED',
+                status: 'UPCOMING',
                 teamSizeLimit: 4,
                 startDateTime: new Date().toISOString(),
                 visibility: 'PUBLIC',
