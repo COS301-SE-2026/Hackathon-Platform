@@ -36,6 +36,7 @@
       <section
       class = "block"
       [class.block-wide] = "id === 'trend'"
+      [class.block-full] = "id === 'plagiarismHeatmap'"
       [class.editing] = "editing"
       cdkDrag
       [cdkDragDisabled] = "!editing">
@@ -161,6 +162,10 @@
                 }
               </div>
             }
+          }
+
+          @case ('plagiarismHeatmap') {
+            <app-plagiarism-heatmap [eventId]="eventId"></app-plagiarism-heatmap>
           }
 
           @case ('participants'){
