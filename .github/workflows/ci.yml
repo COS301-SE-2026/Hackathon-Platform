@@ -181,11 +181,41 @@ jobs:
             frontend/package-lock.json
             package-lock.json
 
-      - name: Install Playwright
+      - name: Build backend
+        working-directory: backend
+        run: mvn clean package -DskipTests -e
+
+      - name: Start backend
+        working-directory: backend
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hackathon_test
+          SPRING_DATASOURCE_USERNAME: testuser
+          SPRING_DATASOURCE_PASSWORD: testpassword
+          SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+          SPRING_FLYWAY_ENABLED: true
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+        run: |
+          nohup java -jar target/*.jar --server.port=8080 > backend.log 2>&1 &
+          npx --yes wait-on -t 60000 http://localhost:8080/actuator/health
+
+      - name: Install frontend dependencies
+        working-directory: frontend
         run: npm ci
 
-      - name: Install dependancies
+      - name: Build frontend
         working-directory: frontend
+        run: npm run build
+
+      - name: Serve frontend
+        working-directory: frontend
+        run: |
+          npx --yes http-server dist -p 4200 --silent &
+          npx --yes wait-on -t 60000 http://localhost:4200
+
+      - name: Install Playwright
         run: npm ci
 
       - name: Install browser
@@ -194,19 +224,10 @@ jobs:
       - name: Run e2e tests
         env:
           CI: true
-
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hackathon_test
-          SPRING_DATASOURCE_USERNAME: testuser
-          SPRING_DATASOURCE_PASSWORD: testpassword
-          SPRING_JPA_HIBERNATE_DDL_AUTO: validate
-          SPRING_FLYWAY_ENABLED: true
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          BASE_URL: http://localhost:4200
+          API_URL: http://localhost:8080/api
           E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
           E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
           E2E_PARTICIPANT_EMAIL: ${{ secrets.E2E_PARTICIPANT_EMAIL }}
           E2E_PARTICIPANT_PASSWORD: ${{ secrets.E2E_PARTICIPANT_PASSWORD }}
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-
         run: npm run test:e2e
