@@ -153,7 +153,7 @@ export class HomeComponent implements OnInit {
       this.isLoadingUpcomingEvents = false;
 
       this.upcomingEvents = events
-      .filter(event => event.status === 'UPCOMING' || event.status === 'ACTIVE')
+      .filter(event => event.status === 'UPCOMING')
         .map((event) => this.toOpenEventView(event))
         .sort( (a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
 
