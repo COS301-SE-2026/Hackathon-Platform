@@ -502,4 +502,232 @@ class EventServiceTest {
 
     verify(eventRepository, never()).save(any(Event.class));
   }
+
+  @Test
+  void getEventsByCurrentAdmin_returnsEventsForCurrentUser() {
+    when(eventRepository.fetchAllByAdmin(creatorUserId))
+        .thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getEventsByCurrentAdmin();
+
+    assertThat(results).hasSize(1);
+    assertThat(results.get(0).getCreatedByUserId()).isEqualTo(creatorUserId);
+    verify(eventRepository).fetchAllByAdmin(creatorUserId);
+  }
+
+  @Test
+  void getOpenEventsForParticipants_returnsPublicAndPrivateOpenEvents() {
+    when(eventRepository.findByVisibilityInAndStatusIn(
+            List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE")))
+        .thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getOpenEventsForParticipants();
+
+    assertThat(results).hasSize(1);
+    verify(eventRepository)
+        .findByVisibilityInAndStatusIn(List.of("PUBLIC", "PRIVATE"), List.of("UPCOMING", "ACTIVE"));
+  }
+
+  @Test
+  void getPrivateEvents_returnsOpenPrivateEVents() {
+    when(eventRepository.findByVisibilityAndStatusIn("PRIVATE", List.of("UPCOMING", "ACTIVE")))
+        .thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getPrivateEvents();
+
+    assertThat(results).hasSize(1);
+    verify(eventRepository).findByVisibilityAndStatusIn("PRIVATE", List.of("UPCOMING", "ACTIVE"));
+  }
+
+  @Test
+  void getUserActiveEvents_returnsActiveEventsForCurrentUser() {
+    when(eventRepository.findUserActiveEvents(creatorUserId))
+        .thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getUserActiveEvents();
+
+    assertThat(results).hasSize(1);
+    verify(eventRepository).findUserActiveEvents(creatorUserId);
+  }
+
+  @Test
+  void getUserCompletedEvents_returnsCompletedEventsForCurrentUser() {
+    when(eventRepository.findUserCompletedEvents(creatorUserId))
+        .thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getUserCompletedEvents();
+
+    assertThat(results).hasSize(1);
+    verify(eventRepository).findUserCompletedEvents(creatorUserId);
+  }
+
+  @Test
+  void getEventsByHackathonId_withValidId_returnsEvents() {
+    UUID hackathonId = UUID.randomUUID();
+    when(hackathonRepository.existsById(hackathonId)).thenReturn(true);
+    when(eventRepository.findByHackathon(hackathonId)).thenReturn(Collections.singletonList(event));
+
+    List<Event> results = eventService.getEventsByHackathonId(hackathonId);
+
+    assertThat(results).hasSize(1);
+    verify(eventRepository).findByHackathon(hackathonId);
+  }
+
+  @Test
+  void getEventsByHackathonId_withInvalidId_throwsIllegalArgumentException() {
+
+    UUID hackathonId = UUID.randomUUID();
+    when(hackathonRepository.existsById(hackathonId)).thenReturn(false);
+
+    assertThatThrownBy(() -> eventService.getEventsByHackathonId(hackathonId))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Hackathon not found");
+
+    verify(eventRepository, never()).findByHackathon(any());
+  }
+
+  @Test
+  void setScoringPaused_withValidId_updatesAndReturnResponse() {
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    var response = eventService.setScoringPaused(eventId, true);
+
+    assertThat(response).isNotNull();
+    assertThat(response.getEventId()).isEqualTo(eventId);
+    assertThat(response.isScoringPaused()).isTrue();
+    assertThat(event.getScoringPaused()).isTrue();
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void setScoringPaused_withInvalidId_throwsRuntimeException() {
+
+    UUID randomEventId = UUID.randomUUID();
+    when(eventRepository.findById(randomEventId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> eventService.setScoringPaused(randomEventId, true))
+        .isInstanceOf(RuntimeException.class)
+        .hasMessageContaining("Event could not be found");
+
+    verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void extendEvent_withValidSeconds_increasesDuration() {
+    int originalDuration = event.getDuration();
+
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.extendEvent(eventId, 3600);
+
+    assertThat(result.getDuration()).isEqualTo(originalDuration + 3600);
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void extendEvent_withNonPositiveSeconds_throwsIllegalArgumentException() {
+    assertThatThrownBy(() -> eventService.extendEvent(eventId, 0))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Invalid time");
+
+    verify(eventRepository, never()).findById(any());
+  }
+
+  @Test
+  void extendEvent_onCanceledEvent_throwsIllegalArgumentException() {
+
+    event.setStatus("CANCELED");
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    assertThatThrownBy(() -> eventService.extendEvent(eventId, 3600))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Event was canceled");
+
+    verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void putUpdateEvent_withInvalidStatusTransition_throwsIllegalArgumentException() {
+
+    event.setStartDateTime(OffsetDateTime.now().minusDays(10));
+    event.setDuration(3600);
+    event.setStatus("COMPLETED");
+    EventRequest req = new EventRequest();
+    req.setStatus("ACTIVE");
+
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    assertThatThrownBy(() -> eventService.putUpdateEvent(eventId, req))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("it cant change to");
+
+    verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void putUpdateEvent_withInvalidHackathonId_throwsIllegalArgumentException() {
+    UUID hackathonId = UUID.randomUUID();
+    EventRequest req = new EventRequest();
+    req.setHackathonId(hackathonId);
+
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(hackathonRepository.existsById(hackathonId)).thenReturn(false);
+
+    assertThatThrownBy(() -> eventService.putUpdateEvent(eventId, req))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Hackathon not found");
+
+    verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void createEvent_withInvalidHackathonId_throwsIllegalArgumentException() {
+    EventRequest req = new EventRequest();
+    req.setHackathonId(UUID.randomUUID());
+    req.setName("My new name");
+    req.setVisibility("PUBLIC");
+    req.setStatus("ACTIVE");
+    req.setTeamSizeLimit((short) 4);
+    req.setStartDateTime(OffsetDateTime.now().minusHours(1));
+    req.setDuration(48 * 3600);
+
+    when(hackathonRepository.existsById(any())).thenReturn(false);
+
+    assertThatThrownBy(() -> eventService.createEvent(req))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("Hackathon not found");
+
+    verify(eventRepository, never()).save(any(Event.class));
+  }
+
+  @Test
+  void getEventById_refreshesLifecycleStatusWhenEventHasEnded() {
+    event.setStatus("ACTIVE");
+    event.setStartDateTime(OffsetDateTime.now().minusHours(3));
+    event.setDuration(3600);
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    Event result = eventService.getEventById(eventId);
+
+    assertThat(result.getStatus()).isEqualTo("COMPLETED");
+    verify(eventRepository).save(event);
+  }
+
+  @Test
+  void getEventById_doesNotRefreshCanceledEvent() {
+
+    event.setStatus("CANCELED");
+    when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+    Event result = eventService.getEventById(eventId);
+
+    assertThat(result.getStatus()).isEqualTo("CANCELED");
+    verify(eventRepository, never()).save(any(Event.class));
+  }
 }

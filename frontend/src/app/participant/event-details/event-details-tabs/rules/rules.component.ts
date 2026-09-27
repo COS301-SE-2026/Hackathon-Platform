@@ -1,11 +1,13 @@
 import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventResponse, EventService } from '../../../../services/event.service';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+
 
 @Component({
   selector: 'app-rules',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, EmptyStateComponent],
   templateUrl: './rules.component.html',
   styleUrl: './rules.component.scss'
 })

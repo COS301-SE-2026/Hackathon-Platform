@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 export interface TabItem {
@@ -7,6 +7,7 @@ export interface TabItem {
   queryParams?: Record<string, string>;
   icon?: string;
   type?: 'tab' | 'label';
+  value?: string;
 }
 
 @Component({
@@ -23,5 +24,14 @@ export class TabsComponent {
   @Input() activeTab = '';
   @Input() activeQueryParam = 'tab';
   @Input() variant: 'default' | 'subtabs' = 'default';
+  @Input() local = false;
+  @Input() activeLocalTab = '';
+  @Output() localTabChange = new EventEmitter<string>();
+
+  onLocalTabClick(tab: TabItem): void {
+    if (tab.value) {
+      this.localTabChange.emit(tab.value);
+    }
+  }
 
 }

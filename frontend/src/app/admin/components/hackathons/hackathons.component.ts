@@ -58,6 +58,7 @@ export class HackathonsComponent implements OnInit {
  showDialog = false;
  editingHackathon : HackathonVm | null = null;
  searchTerm = '';
+ viewMode: 'grid' | 'list' = 'grid';
 
  problemStatementFile: File | null = null;
  problemStatementFileName = '';
@@ -75,6 +76,25 @@ export class HackathonsComponent implements OnInit {
 
  };
 
+ get filteredHackathons(): HackathonVm[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term){
+        return this.hackathons;
+
+    }
+    return this.hackathons.filter((h) =>
+        h.name.toLowerCase().includes(term) || 
+    (h.description || '').toLowerCase().includes(term)
+    );
+ }
+
+ get totalEvents(): number{
+    return this.hackathons.reduce((sum,h)=> sum + h.eventCount,0);
+ }
+ get totalLevels(): number{
+    return this.hackathons.reduce((sum,h)=> sum + h.levelCount,0);
+ }
+
  ngOnInit(): void {
     this.loadHackathons();
  }
@@ -85,7 +105,7 @@ export class HackathonsComponent implements OnInit {
 
     this.hackathonService.getAllHackathons().subscribe({
         next: (hackathons) => {
-            this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0, levelCount: 0}));
+            this.hackathons = hackathons.map((h) => ({ ...h, eventCount: 0, levelCount: 0})).sort((a,b) => a.name.localeCompare(b.name));
             this.isLoading = false;
             this.change.markForCheck();
             this.loadEventCounts();
@@ -295,6 +315,7 @@ export class HackathonsComponent implements OnInit {
             } else {
                 this.hackathons.unshift({ ...saved, eventCount: 0, levelCount:0 });
             }
+            this.hackathons.sort((a,b) => a.name.localeCompare(b.name));
             this.change.markForCheck();
 
             this.handlePostSaveUploads(saved.hackathonId);

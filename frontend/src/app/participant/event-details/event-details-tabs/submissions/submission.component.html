@@ -1,27 +1,29 @@
 <div class="submissions-page">
 
+    @if (teamLoading || levelsLoading) {
+
+        <app-loader message="Loading submissions..." />
+
+    } @else if (!teamId) {
+
+     <app-empty-state icon="pi-users" title="You need to join a team" description="Join or create a team before submitting a solution."></app-empty-state>
+
+    } @else if (levelsError) {
+
+        <div class="empty-history">{{ levelsError }}</div>
+
+    } @else if (levels.length === 0) {
+
+        <app-empty-state icon="pi-list" title="No levels available" description="No levels have been published for this event yet."></app-empty-state>
+
+    } @else {
+
     <section class="level-navigation">
 
       <app-tabs [tabs]="levelTabs" [activeTab]="activeLevel"  activeQueryParam="subtab" ariaLabel="Submission levels" variant="subtabs"></app-tabs>
 
     </section>
 
-
-     @if (teamError) {
-        <div class="empty-history">{{ teamError }}</div>
-    }
-
-    @if (levelsLoading) {
-        <div class="empty-history">
-            <i class="pi pi-spin pi-spinner"></i> Loading levels...
-        </div>
-    } @else if (levelsError) {
-        <div class="empty-history">{{ levelsError }}</div>
-    } @else if (levels.length === 0) {
-        <div class="empty-history">No levels have been published for this event yet.</div>
-    }
-
-   @else{
 
     @for (level of levels; track level.id) {
 
@@ -47,7 +49,9 @@
         </div>
 
         <ul>
-         <li>Download the level resources before getting started.</li>
+         @if (!useIde) {
+          <li>Download the level resources before getting started.</li>
+         }
          <li>You may submit multiple times before the deadline.</li>
          <li>Your highest score will count.</li>
           <li>Ensure your solution follows the submission requirements.</li>
@@ -69,15 +73,19 @@
         <div class="resource-action">
 
         <app-button variant="secondary" width= "100%" (click)="downloadLevelFiles(level.id)" (keydown)="null" (keyup)="null">
-         <i class="pi pi-download"></i>
          Download Resources
         </app-button>
-
+        @if (useIde) {
+            <app-button variant="primary" width= "100%" (click)="openIde(level.id)" (keydown)="null" (keyup)="null">
+            <i class="pi pi-code"></i>
+            Open IDE
+            </app-button>
+        }
         </div>
 
     </section>
 
-
+    @if (!useIde) {
     <section class="submission-section solution-section">
 
     <div class="section-header"><h2>Submission</h2></div>
@@ -109,13 +117,13 @@
 
 
         <app-button  variant="primary"  width= "100%"  [disabled]="!canSubmit"  (click)="submitSolution()" (keydown)="null" (keyup)="null">
-         <i class="pi pi-send"></i>
          {{ submitting ? 'Submitting...' : 'Submit Solution' }}
         </app-button>
 
     </div>
 
     </section>
+}
 
 
     </div>
@@ -125,6 +133,7 @@
     }
 
   }
+
 }
 
 </div>

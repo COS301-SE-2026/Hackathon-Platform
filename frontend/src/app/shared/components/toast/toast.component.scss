@@ -14,3 +14,5 @@
   --p-toast-error-border-color: var(--red);
   --p-toast-error-color: var(--red);
 }
+
+:host ::ng-deep .p-toast-message-icon { display: none; }
