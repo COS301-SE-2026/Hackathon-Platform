@@ -246,8 +246,8 @@ public class TeamService {
   }
 
   /** Ban a participant from an event, mark them as LEFT, and deactivate an empty team. */
-  @Transactional
-  public void banParticipant(UUID eventId, UUID userId) {
+@Transactional
+public void banParticipant(UUID eventId, UUID userId) {
     EventRegistration registration =
         eventRegistrationRepository
             .findByEventIdAndUserId(eventId, userId)
@@ -256,23 +256,27 @@ public class TeamService {
     registration.setBanned(true);
     eventRegistrationRepository.save(registration);
 
-    TeamMember membership =
+    Optional<TeamMember> membership =
         teamMemberRepository
             .findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId)
             .stream()
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Approved team membership not found"));
+            .findFirst();
 
-     membership.setStatus("LEFT");
-     teamMemberRepository.save(membership);
+    if (membership.isEmpty()) {
+      return;
+    }
+
+    TeamMember teamMember = membership.get();
+    teamMember.setStatus("LEFT");
+    teamMemberRepository.save(teamMember);
 
     long approvedCount =
-        teamMemberRepository.countByTeamIdAndStatus(membership.getTeamId(), "APPROVED");
+        teamMemberRepository.countByTeamIdAndStatus(teamMember.getTeamId(), "APPROVED");
 
     if (approvedCount == 0) {
       Team team =
           teamRepository
-              .findById(membership.getTeamId())
+              .findById(teamMember.getTeamId())
               .orElseThrow(() -> new RuntimeException("Team not found"));
 
       team.setStatus("INACTIVE");
@@ -285,53 +289,96 @@ public class TeamService {
     return toMemberResponses(teamId, "APPROVED");
   }
 
-  public List<EventParticipantResponse> listEventParticipants(UUID eventId) {
-    List<Team> teams = teamRepository.findByEventId(eventId);
-    if (teams.isEmpty()) {
+public List<EventParticipantResponse> listEventParticipants(UUID eventId) {
+    List<EventRegistration> registrations =
+        eventRegistrationRepository.findByEventId(eventId);
+
+    if (registrations.isEmpty()) {
       return List.of();
     }
 
-    List<UUID> teamIds = teams.stream().map(Team::getTeamId).collect(Collectors.toList());
-    Map<UUID, Team> teamsById =
-        teams.stream().collect(Collectors.toMap(Team::getTeamId, team -> team));
+    List<UUID> userIds =
+        registrations.stream()
+            .map(EventRegistration::getUserId)
+            .distinct()
+            .collect(Collectors.toList());
 
-    List<TeamMember> members = teamMemberRepository.findByTeamIdInAndStatus(teamIds, "APPROVED");
-
-    List<UUID> userIds = members.stream().map(TeamMember::getUserId).collect(Collectors.toList());
     Map<UUID, User> usersById =
         userRepository.findAllById(userIds).stream()
             .collect(Collectors.toMap(User::getUserId, user -> user));
 
-    return members.stream()
+    List<Team> teams = teamRepository.findByEventId(eventId);
+
+    Map<UUID, Team> teamsById =
+        teams.stream()
+            .collect(Collectors.toMap(Team::getTeamId, team -> team));
+
+    List<UUID> teamIds =
+        teams.stream()
+            .map(Team::getTeamId)
+            .collect(Collectors.toList());
+
+    List<TeamMember> members =
+        teamIds.isEmpty()
+            ? List.of()
+            : teamMemberRepository.findByTeamIdInAndStatus(teamIds, "APPROVED");
+
+    Map<UUID, TeamMember> membershipByUserId =
+        members.stream()
+            .collect(
+                Collectors.toMap(
+                    TeamMember::getUserId,
+                    member -> member,
+                    (existing, replacement) -> existing));
+
+    return registrations.stream()
         .map(
-            member -> {
-              Team team = teamsById.get(member.getTeamId());
-              User user = usersById.get(member.getUserId());
-              if (team == null || user == null) {
+            registration -> {
+              User user = usersById.get(registration.getUserId());
+
+              if (user == null) {
                 return null;
               }
-              String role =
-                  member.getUserId().equals(team.getCreatedByUserId()) ? "LEADER" : "MEMBER";
 
-                EventRegistration registration = 
-                  eventRegistrationRepository
-                    .findByEventIdAndUserId(eventId, member.getUserId())
-                    .orElseThrow(() -> new RuntimeException("Event registration not found"));
+              TeamMember member =
+                  registration.isBanned()
+                      ? null
+                      : membershipByUserId.get(registration.getUserId());
+
+              UUID teamId = null;
+              String teamName = null;
+              String teamRole = null;
+              java.time.Instant joinedAt = null;
+
+              if (member != null) {
+                Team team = teamsById.get(member.getTeamId());
+
+                if (team != null) {
+                  teamId = team.getTeamId();
+                  teamName = team.getTeamName();
+
+                  teamRole =
+                      member.getUserId().equals(team.getCreatedByUserId())
+                          ? "LEADER"
+                          : "MEMBER";
+
+                  joinedAt = member.getJoinedAt();
+                }
+              }
 
               return new EventParticipantResponse(
                   user.getUserId(),
                   user.getFirstName() + " " + user.getLastName(),
                   user.getEmail(),
-                  team.getTeamId(),
-                  team.getTeamName(),
-                  role,
-                  member.getJoinedAt(),
-                  registration.isBanned()
-                  );
+                  teamId,
+                  teamName,
+                  teamRole,
+                  joinedAt,
+                  registration.isBanned());
             })
         .filter(response -> response != null)
         .collect(Collectors.toList());
-  }
+}
 
   /** View pending join requests. Only the team creator may view them. */
   public List<TeamMemberResponse> viewPendingJoinRequests(UUID teamId, UUID currentUserId) {

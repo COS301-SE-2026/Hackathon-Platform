@@ -64,11 +64,11 @@
                   </div>
                 </td>
                 <td>{{ p.email }}</td>
-                <td>{{ p.teamName }}</td>
+                <td>{{ p.teamName || 'N/A' }}</td>
                 <td>
-                  <span class="role-badge" [class.role-leader]="p.teamRole === 'LEADER'">{{ p.teamRole }}</span>
+                  <span class="role-badge" [class.role-leader]="p.teamRole === 'LEADER'">{{ p.teamRole || 'N/A' }}</span>
                 </td>
-                <td>{{ p.joinedAt | date: 'mediumDate' }}</td>
+                <td>{{ p.joinedAt ? (p.joinedAt | date: 'mediumDate') : 'N/A' }}</td>
                 <td>
 
           @if (confirmingBanId === p.userId) {
