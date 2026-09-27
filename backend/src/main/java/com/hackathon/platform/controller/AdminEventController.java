@@ -109,6 +109,15 @@ public class AdminEventController {
     return ResponseEntity.noContent().build();
   }
 
+  @PostMapping("/{id}/participants/{userId}/unban")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> unbanParticipant(
+      @PathVariable("id") UUID eventId, @PathVariable("userId") UUID userId) {
+
+      teamService.unbanParticipant(eventId, userId);
+      return ResponseEntity.noContent().build();
+  }
+  
   @PatchMapping("/{id}/extend")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ExtendTimerResponse> extendTimer(
