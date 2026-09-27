@@ -16,7 +16,7 @@ test.describe('Admin > Teams', () =>{
 
         await teams.createTeamBtn.click();
         await teams.fillTeamName(teamName);
-        await teams.addPendingMember(firstMember, 'alice@ee2e.test');
+        await teams.addPendingMember(firstMember, 'alice@e2e.test');
         await teams.confirmCreateTeam();
 
         const card = teams.teamCardByName(teamName);
@@ -24,7 +24,7 @@ test.describe('Admin > Teams', () =>{
         await expect(card.locator('.team-subline')).toContainText(/1 member/);
 
         await teams.expandTeam(teamName);
-        await teams.addMemberToTeam(teamName, secondMember, 'bob@e2e,test');
+        await teams.addMemberToTeam(teamName, secondMember, 'bob@e2e.test');
         await expect(card.locator('.member-card')).toHaveCount(2);
         await expect(card.locator('.team-subline')).toContainText(/2 members/);
 
@@ -34,8 +34,8 @@ test.describe('Admin > Teams', () =>{
 
         await teams.searchInput.fill(teamName);
         await teams.removeMemberFromTeam(teamName, secondMember);
-        await expect(card.locator('member-card')).toHaveCount(1);
-        await expect(card.locator('member-card',{hasText: secondMember})).toHaveCount(0);
+        await expect(card.locator('.member-card')).toHaveCount(1);
+        await expect(card.locator('.member-card',{hasText: secondMember})).toHaveCount(0);
 
         await teams.deleteTeam(teamName);
         await expect(teams.teamCardByName(teamName)).toHaveCount(0);
@@ -78,6 +78,6 @@ test.describe('Admin > Teams', () =>{
         await expect(teams.teamCardByName(teamName)).toBeVisible();
 
         await teams.deleteTeam(teamName);
-        await expect(teams.teamCardByName(teamName)).toHaveCounty(0);
+        await expect(teams.teamCardByName(teamName)).toHaveCount(0);
     });
 });

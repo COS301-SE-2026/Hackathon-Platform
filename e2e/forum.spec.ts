@@ -39,7 +39,7 @@ test.describe('Forum', () => {
         await adminThread
         .locator('.reply-card')
         .first()
-        .getRoleBy('button', {name: 'Delete message'})
+        .getByRole('button', {name: 'Delete message'})
         .click();
 
         await expect(adminThread.locator('.reply-card')).toHaveCount(0);
@@ -70,7 +70,7 @@ test.describe('Forum', () => {
         uniqueSuffix,
 
     }) =>{
-        const title = `MulitiReply ${uniqueSuffix}`;
+        const title = `MultiReply ${uniqueSuffix}`;
         const admin = new ForumPage(adminPage, eventId, true);
 
         await admin.goto();
@@ -94,7 +94,7 @@ test.describe('Forum', () => {
         uniqueSuffix,
 
     }) =>{
-        const title = `MulitiReply ${uniqueSuffix}`;
+        const title = `MultiReply ${uniqueSuffix}`;
         const admin = new ForumPage(adminPage, eventId, true);
 
         await admin.goto();

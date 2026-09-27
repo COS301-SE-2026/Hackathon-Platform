@@ -43,7 +43,6 @@ test.describe('admin > Announcements', () => {
         await expect(
             adminPage.locator('.modal-card .error-banner')
         ).toContainText(/title is required/i,
-
         );
     });
 
@@ -60,7 +59,6 @@ test.describe('admin > Announcements', () => {
         await expect(
             adminPage.locator('.modal-card .error-banner')
         ).toContainText(/message is required/i,
-
         );        
     });
 
@@ -75,7 +73,6 @@ test.describe('admin > Announcements', () => {
        
         await expect(
             admin.cardByTitle(title).locator('.severity-badge'),
-
         ).toContainText(/urgent/i);
 
     });
@@ -88,8 +85,7 @@ test.describe('admin > Announcements', () => {
      const participant = new AnnouncementsPage(participantPage, eventId);
         await participant.gotoParticipant();
         await expect(
-            participantPage.locator('.empty-state')).toContainText(/no announcements yet/i,
-                
+            participantPage.locator('.empty-state')).toContainText(/no announcements yet/i,     
             );
     });
 

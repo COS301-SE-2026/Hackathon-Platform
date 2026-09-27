@@ -14,7 +14,7 @@ async function seedTeams(
     for (let i =1; i<= count; i++){
         const res = await api.post(`/api/events/${eventId}/teams`,{
             headers: {Authorization: `Bearer ${adminToken}`},
-            date:{
+            data:{
                 name: `Team ${i}`,
                 members: [{name: `Member ${i}`, email: `m${i}@e2e.test`}],
             },
@@ -114,7 +114,7 @@ test('generate is disabled until a template is saved', async ({
      await certs.goto();
 
      await expect(
-        adminPage.getRoleBy('button', {name: /generate certificates/i}),
+        adminPage.getByRole('button', {name: /generate certificates/i}),
 
      ).toBeDisabled();
 });
