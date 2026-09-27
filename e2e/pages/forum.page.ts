@@ -46,7 +46,9 @@ async expandThread(title: string){
 async replyToThread(title: string, body: string){
     const card = this.threadByTitle(title);
     await card.locator('.reply-compose textarea').fill(body);
-    await card.getByRole('button', {name: /post reply/i}).click();
+    const postBtn = card.getByRole('button', {name: /post reply/i});
+    await expect(postBtn).toBeEnabled({ timeout: 5_000});
+    await postBtn.click();
 
 }
 
