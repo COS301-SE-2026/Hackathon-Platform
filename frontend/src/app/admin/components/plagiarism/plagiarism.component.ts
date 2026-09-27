@@ -39,7 +39,7 @@ export class PlagiarismComponent implements OnInit, OnDestroy {
 
     readonly selectedLevelId = signal<string | null>(null);
 
-    
+
     readonly allPairs = signal<SubmissionSimilarity[]>([]);
     readonly flaggedFilteredPairs = computed(() =>
         this.onlyFlagged() ? this.allPairs().filter((p) => p.flagged) : this.allPairs(),
@@ -77,7 +77,7 @@ export class PlagiarismComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        
+
         this.pollSub?.unsubscribe();
     }
 
@@ -147,8 +147,8 @@ export class PlagiarismComponent implements OnInit, OnDestroy {
                 }
 
             },
-            error: () => {
-
+            error: (error) => {
+              console.log(error);
             },
         });
     }
@@ -179,7 +179,7 @@ export class PlagiarismComponent implements OnInit, OnDestroy {
             }
 
         });
-   } 
+   }
 
    runCheck(): void {
     this.running.set(true);
