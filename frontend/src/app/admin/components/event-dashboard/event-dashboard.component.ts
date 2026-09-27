@@ -214,7 +214,7 @@ export class EventDashboardComponent implements OnInit{
         initials: this.getInitials(p.fullName),
         name: p.fullName,
         email: p.email,
-        team: p.teamName,
+        team: p.teamName ?? 'N/A',
       };
     }
   

@@ -143,10 +143,10 @@ export interface EventParticipantResponse {
   userId: string;
   fullName: string;
   email: string;
-  teamId: string;
-  teamName: string;
-  teamRole: 'LEADER' | 'MEMBER';
-  joinedAt: string;
+   teamId: string | null;
+  teamName: string | null;
+  teamRole: 'LEADER' | 'MEMBER' | null;
+  joinedAt: string | null;
   banned: boolean;
 }
 
