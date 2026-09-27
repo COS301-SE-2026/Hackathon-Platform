@@ -21,6 +21,18 @@
     gap: 0.5rem;
 }
 
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .team-search {
     padding: 0.45rem 0.7rem;
     border: 1.5px solid var(--light-gray, #dfe3ea);
@@ -64,7 +76,7 @@
 .run-status-active{
     background: rgba(93, 95, 239, 0.1);
     border: 1px solid rgba(93, 95, 239, 0.4);
-    color: #4b4de0;
+    color: #33339e;
 
 }
 
@@ -118,7 +130,7 @@
 }
 
 .ok-badge{
-    background: var(--green, #2e8b57);
+    background: var(--green, #1f6b42);
     color: #fff;
     font-size: 0.75rem;
     padding: 0.2rem 0.55rem;

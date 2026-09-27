@@ -1,7 +1,6 @@
 import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PlagiarismDiffComponent } from '../plagiarism-diff/plagiarism-diff.component';
 import { PlagiarismService, SubmissionSimilarity } from '../../../../services/plagiarism.service';
 
@@ -117,6 +116,13 @@ export class PlagiarismHeatmapComponent implements OnInit {
 
     openDiff(pair: SubmissionSimilarity): void {
         this.selectedPair.set(pair);
+    }
+
+    onCellKeydown(event: KeyboardEvent, pair: SubmissionSimilarity): void {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            this.openDiff(pair);
+        }
     }
 
     closeDiff(): void {

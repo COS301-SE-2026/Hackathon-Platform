@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Subject, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
@@ -26,6 +25,11 @@ interface TaggedRange {
     cls: string;
 }
 
+interface CodeSegment {
+    text: string;
+    cls: string;
+}
+
 
 @Component({
     selector: 'app-plagiarism-diff',
@@ -36,7 +40,6 @@ interface TaggedRange {
 })
 export class PlagiarismDiffComponent implements OnChanges, OnDestroy {
     private readonly plagiarismService = inject(PlagiarismService);
-    private readonly sanitizer = inject(DomSanitizer);
 
     @Input({ required: true }) submissionIdA!: number;
     @Input({ required: true }) submissionIdB!: number;
@@ -53,8 +56,8 @@ export class PlagiarismDiffComponent implements OnChanges, OnDestroy {
     readonly selectedFileA = signal('');
     readonly selectedFileB = signal('');
 
-    readonly highlightedA = signal<SafeHtml>('');
-    readonly highlightedB = signal<SafeHtml>('');
+    readonly highlightedA = signal<CodeSegment[]>([]);
+    readonly highlightedB = signal<CodeSegment[]>([]);
 
     readonly functionMatches = signal<FunctionMatch[]>([]);
     readonly selectedFunctionMatch = signal<FunctionMatch | null>(null);
@@ -212,11 +215,11 @@ export class PlagiarismDiffComponent implements OnChanges, OnDestroy {
         structuralRanges: MatchedRange[],
         fileName: string,
         semanticRange: { fileName: string; start: number; end: number } | null,
-    ): SafeHtml {
+    ): CodeSegment[] {
 
         const file = files.find((f) => f.fileName === fileName);
         if (!file) {
-            return '';
+            return [];
         }
 
         const length = file.content.length;
@@ -225,7 +228,7 @@ export class PlagiarismDiffComponent implements OnChanges, OnDestroy {
             .filter((r) => r.fileName === fileName)
             .map((r) => ({ start: Math.max(0, r.start), end: Math.min(length, r.end), cls: 'diff-match' }));
 
-        if (semanticRange && semanticRange.fileName === fileName) {
+        if (semanticRange?.fileName === fileName) {
             tagged.push({
                 start: Math.max(0, semanticRange.start),
                 end: Math.min(length, semanticRange.end),
@@ -234,7 +237,7 @@ export class PlagiarismDiffComponent implements OnChanges, OnDestroy {
         }
 
         if (tagged.length === 0) {
-            return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(file.content));
+            return [{ text: file.content, cls: ''}];
 
         }
 
@@ -248,7 +251,7 @@ export class PlagiarismDiffComponent implements OnChanges, OnDestroy {
 
         const sorted = [...points].sort((a, b) => a - b);
 
-        let html = '';
+        const segments: CodeSegment[] = [];
         for (let i = 0; i < sorted.length - 1; i++) {
 
             const segStart = sorted[i];
@@ -258,20 +261,11 @@ export class PlagiarismDiffComponent implements OnChanges, OnDestroy {
             }
 
             const classes = [...new Set(tagged.filter((r) => r.start <= segStart && r.end >= segEnd).map((r) => r.cls))];
-            const text = this.escapeHtml(file.content.slice(segStart, segEnd));
-            html += classes.length > 0 ? `<mark class="${classes.join(' ')}">${text}</mark>` : text;
+            segments.push({ text: file.content.slice(segStart, segEnd), cls: classes.join(' ') });
 
         }
 
-        return this.sanitizer.bypassSecurityTrustHtml(html);
-    }
-
-    private escapeHtml(text: string): string {
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
+        return segments;
     }
 
 }

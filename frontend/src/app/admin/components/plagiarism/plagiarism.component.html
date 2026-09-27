@@ -2,14 +2,17 @@
     <div class="plagiarism-header">
         <h1>Plagiarism Check</h1>
         <div class="plagiarism-actions">
+            <label for="team-search" class="visually-hidden">Search by team name</label>
             <input
+                id="team-search"
                 type="search"
                 class="team-search"
                 placeholder="Search by team name..."
                 [value]="searchQuery()"
                 (input)="onSearchInput($any($event.target).value)"
             />
-            <select class="level-select" [value]="selectedLevelId() ?? ''" (change)="onLevelSelectChange($any($event.target).value)">
+            <label for="level-select" class="visually-hidden">Filter by level</label>
+            <select id="level-select" class="level-select" [value]="selectedLevelId() ?? ''" (change)="onLevelSelectChange($any($event.target).value)">
                 <option value="">All levels</option>
                 @for (level of levels(); track level.id) {
                     <option [value]="level.id.toString()">{{ level.name }}</option>

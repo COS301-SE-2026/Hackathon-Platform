@@ -72,7 +72,7 @@
                         </div>
                     }
 
-                    <pre class="diff-code" [innerHTML]="highlightedA()"></pre>
+                    <pre class="diff-code"><ng-container>@for (seg of highlightedA(); track $index) {@if (seg.cls) {<mark [class]="seg.cls">{{ seg.text }}</mark>} @else {<ng-container>{{ seg.text }}</ng-container>}}</ng-container></pre>
                 </div>
 
                 <div class="diff-pane">
@@ -97,7 +97,7 @@
                         </div>
                     }
 
-                    <pre class="diff-code" [innerHTML]="highlightedB()"></pre>
+                    <pre class="diff-code"><ng-container>@for (seg of highlightedB(); track $index) {@if (seg.cls) {<mark [class]="seg.cls">{{ seg.text }}</mark>} @else {<ng-container>{{ seg.text }}</ng-container>}}</ng-container></pre>
                 </div>
             </div>
         }

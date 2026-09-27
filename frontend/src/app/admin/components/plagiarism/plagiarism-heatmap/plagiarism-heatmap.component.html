@@ -36,7 +36,11 @@
                                         [class.heatmap-cell-flagged]="pair.flagged"
                                         [style.background]="cellBackground(pair.combinedScore)"
                                         [title]="cellTooltip(row.name, col.name, pair)"
+                                        [attr.aria-label]="cellTooltip(row.name, col.name, pair)"
+                                        role="button"
+                                        tabindex="0"
                                         (click)="openDiff(pair)"
+                                        (keydown)="onCellKeydown($event, pair)"
                                     >
                                         {{ (pair.combinedScore * 100) | number: '1.0-0' }}
                                     </td>

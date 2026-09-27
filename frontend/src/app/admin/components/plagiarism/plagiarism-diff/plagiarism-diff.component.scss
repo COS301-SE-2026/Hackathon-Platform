@@ -119,7 +119,7 @@
     font-style: italic;
 
     &.diff-no-semantic-warning {
-        color: #9a6b00;
+        color: #6b4a00;
         background: rgba(255, 196, 0, 0.12);
         border: 1px solid rgba(255, 196, 0, 0.4);
         border-radius: 6px;
@@ -216,7 +216,7 @@
     font-size: 0.8rem;
     line-height: 1.5;
     white-space: pre-wrap;
-    word-break: break-word;
+    overflow-wrap: anywhere;
     overflow-y: auto;
     max-height: 55vh;
     background: var(--white, #fff);
