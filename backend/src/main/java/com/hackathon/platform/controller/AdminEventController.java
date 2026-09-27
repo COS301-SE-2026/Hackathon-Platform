@@ -51,6 +51,13 @@ public class AdminEventController {
     return ResponseEntity.ok(events);
   }
 
+    /** Get a single event by ID /api/admin/events/{id} */
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Event> getEvent(@PathVariable("id") UUID eventId) {
+    return ResponseEntity.ok(eventService.getEventById(eventId));
+  }
+
   /** Update existing event /api/admin/events/{id} */
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
