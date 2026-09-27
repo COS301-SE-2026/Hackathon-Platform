@@ -2,14 +2,12 @@ import { Component, OnInit, inject, ChangeDetectorRef,Input } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { EventService,EventResponse,EventRequest} from '../../../services/event.service';
+import { EventService,EventResponse} from '../../../services/event.service';
 import { StorageService } from '../../../services/storage.service';
 
 
  type Visibility = 'PUBLIC' | 'PRIVATE';
- type EventStatus = 'UPCOMING' | 'ONGOING'|'COMPLETED'| 'CANCELED'|'ACTIVE'|'INACTIVE';
-
-
+ 
 
 
 @Component({
@@ -37,11 +35,10 @@ export class ManageEventComponent implements OnInit {
  @Input() eventId = '';
   isLoading = true;
   isSaving = false;
-  isDeleting = false;
   errorMessage = '';
   successMessage = '';
 
-  showDeleteConfirm = false;
+
 
   form = {
     name: '',
@@ -51,12 +48,9 @@ export class ManageEventComponent implements OnInit {
     visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
     registrationKey: '',
     teamSizeLimit: 1,
-    status: 'UPCOMING' as EventStatus,
-    leaderboardFrozen: false,
+   
    
   };
-
-   statusOptions: EventStatus[] =['UPCOMING','ONGOING', 'COMPLETED','CANCELED', 'ACTIVE', 'INACTIVE'];
 
   ngOnInit(): void {
     this.hackathonId = this.hackathonId || this.route.snapshot.paramMap.get('hackathonId') || '';
@@ -95,9 +89,7 @@ export class ManageEventComponent implements OnInit {
     this.form.visibility = (data.visibility as Visibility) || 'PUBLIC';
     this.form.registrationKey = data.registrationKey || '';
     this.form.teamSizeLimit = Number(data.teamSizeLimit ?? 1);
-    this.form.status = (data.status as EventStatus) || 'UPCOMING';
-    this.form.leaderboardFrozen = !!data.leaderboardFreezeDateTime;
-
+  
   }
 
 
@@ -125,8 +117,7 @@ export class ManageEventComponent implements OnInit {
       visibility: this.form.visibility,
       registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined,
       teamSizeLimit:this.form.teamSizeLimit,
-      status: this.form.status,
-      leaderboardFreezeDateTime: this.form.leaderboardFrozen ? new Date().toISOString() : undefined,
+
     };
     this.eventService.updateEvent(this.eventId, payload).subscribe({
       next: () => {
@@ -144,89 +135,7 @@ export class ManageEventComponent implements OnInit {
 
   }
 
-  patchStatusOnly(): void {
-    this.isSaving = true;
-    this.errorMessage = '';
-    this.successMessage = '';
   
-    this.eventService.patchEventStatus(this.eventId, undefined, this.form.status).subscribe({
-      next: () => {
-       this.isSaving = false;
-        this.successMessage = 'Event updated successfully';
-        this.cdr.detectChanges();
-        setTimeout(() => (this.successMessage = ''), 30000); 
-      },
-      error: (err) => {
-        this.isSaving = false;
-        this.errorMessage = err?.error?.message || 'Failed to update event.';
-        this.cdr.detectChanges();
-      }
-
-    });   
-  }
-
-  toggleLeaderboardFreeze(): void {
-    const nextValue = !this.form.leaderboardFrozen;
-    this.isSaving = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    const payload: EventRequest = {
-      name: this.form.name,
-      startDateTime: this.form.startDate,
-      duration: this.form.duration,
-      visibility: this.form.visibility,
-      teamSizeLimit: this.form.teamSizeLimit,
-      status: this.form.status,
-      leaderboardFreezeDateTime: nextValue? new Date().toISOString() : undefined,
-
-    };
-    this.eventService.updateEvent(this.eventId, payload).subscribe({
-      next: () => {
-        this.form.leaderboardFrozen = nextValue;
-       this.isSaving = false;
-        this.successMessage = nextValue? 'Leaderboard frozen' : 'Leaderboard unfrozen';
-        this.cdr.detectChanges();
-        setTimeout(() => (this.successMessage = ''), 30000); 
-      },
-      error: (err) => {
-        this.isSaving = false;
-        this.errorMessage = err?.error?.message || 'Failed to update leaderboard state.';
-        this.cdr.detectChanges();
-      }
-
-    }); 
-  }
-
-  openDeleteConfirm(): void {
-    this.showDeleteConfirm = true;
-  }
-
-   cancelDelete(): void {
-    this.showDeleteConfirm = false;
-  }
-  
-  confirmDeleteEvent(): void {
-    this.isDeleting = true;
-    this.errorMessage = '';
-
-    this.eventService.deleteEvent(this.eventId).subscribe({
-      next: () => {
-        this.isDeleting = false;
-        this.showDeleteConfirm = false;
-        this.router.navigate(['/admin/hackathons',this.hackathonId,'events']);
-        setTimeout(() => (this.successMessage = ''), 30000); 
-      },
-      error: (err) => {
-        this.isDeleting = false;
-        this.showDeleteConfirm = false;
-        this.errorMessage = err?.error?.message || 'Failed to delete event.';
-        this.cdr.detectChanges();
-      }
-
-    }); 
-
-  }
   goBack(): void {
      if (this.hackathonId){
          this.router.navigate(['/admin/hackathons', this.hackathonId, 'events']);

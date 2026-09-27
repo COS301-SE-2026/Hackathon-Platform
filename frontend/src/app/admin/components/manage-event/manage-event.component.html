@@ -5,9 +5,6 @@
       <h1>Manage Event</h1>
       <p class="page-subtitle">Edit event details and manage resources</p>
     </div>
-    <div class="header-actions">
-      <button class="btn-danger" (click)="openDeleteConfirm()" [disabled]="isDeleting">Delete Event</button>
-    </div>
   </div>
 
   @if (isLoading) {
@@ -75,23 +72,6 @@
       </div>
 
 
-      <div class = "form-section">
-        <h2 class = "section-heading">Leaderboard</h2>
-        <div class = "toggle-group" role = "group">
-          <button type ="button" class = "toggle-option" [class.selected]="!form.leaderboardFrozen" (click) = "form.leaderboardFrozen = false">
-            <span class = "toggle-title">Live</span>
-            <span class = "toggle-desc">Rankings update in real time</span>
-          </button>
-          <button type ="button" class = "toggle-option toggle-option-freeze" [class.selected]="form.leaderboardFrozen" (click) = "form.leaderboardFrozen = true">
-          <span class = "toggle-title">
-            @if (form.leaderboardFrozen) {<i class = "pi pi-lock"></i>}
-            Frozen
-          </span>
-          <span class = "toggle-desc">Rankings are locked and hidden from updates</span>
-          </button>
-        </div>
-      </div>
-
       <div class="form-actions">
         <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>
         <button type="submit" class="btn-primary" [disabled]="isSaving">
@@ -105,32 +85,5 @@
     </form>
   }
   </main>
-  @if (showDeleteConfirm){
-    <div 
-    class = "modal-overlay" 
-    (click)="cancelDelete()"
-    (keydown.escape) = "cancelDelete()"
-    tabindex="0"
-    role ="button"
-    aria-label="Close dialog">
 
-      <div 
-      class = "modal-card" 
-      (click)="$event.stopPropagation()"
-      (keydown) = "$event.stopPropagation()"
-      tabindex="-1"
-      role ="dialog"
-      aria-modal="true"
-      aria-labelledby="delete-modal-title">
-        <h3 id = "delete-modal-title" class = "modal-title">Delete this event?</h3>
-        <p class = "modal-body">
-          This will permanently delete <strong>{{form.name || 'this event'}}</strong>, including its registrations, teams, submissions, and uploaded resources. This action cannot be undone. 
-        </p>
-        <div class = "modal-actions">
-          <button type="button" class = "btn-secondary" (click)="cancelDelete()" [disabled]="isDeleting">Cancel</button>
-          <button type="button" class = "btn-danger" (click)="confirmDeleteEvent()" [disabled]="isDeleting">{{isDeleting ? 'Deleting...' : 'Yes, Delete Event'}}</button>
-        </div>
-      </div>
-    </div>
-  }
 </div>
