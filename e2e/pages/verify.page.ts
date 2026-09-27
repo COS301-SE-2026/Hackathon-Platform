@@ -1,7 +1,7 @@
-import {Page, Locator,expect} from '@playwright/test'
+import {Page,expect} from '@playwright/test'
 
 export class VerifyPage{
-    constructor(private page: Page){}
+    constructor(private readonly page: Page){}
 
 async goto(code:string){
     await this.page.goto(`/verify/${code}`);

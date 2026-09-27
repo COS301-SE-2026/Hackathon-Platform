@@ -1,7 +1,7 @@
 import {Page, Locator,expect} from '@playwright/test'
 
 export class AnnouncementsPage{
-    constructor(private page: Page, private eventId:string){}
+    constructor(private readonly page: Page, private readonly eventId:string){}
 
 async goto(){
     await this.page.goto(`/admin/events/${this.eventId}/announcements`);

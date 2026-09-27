@@ -1,7 +1,7 @@
 import {Page, Locator,expect} from '@playwright/test'
 
 export class ForumPage{
-    constructor(private page: Page, private eventId: string, private isAdmin = true){}
+    constructor(private readonly page: Page, private readonly eventId: string, private readonly isAdmin = true){}
         
     
     

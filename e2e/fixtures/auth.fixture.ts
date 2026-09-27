@@ -1,6 +1,6 @@
 import {test as base, request, APIRequestContext, Page} from '@playwright/test';
 import * as dotenv from 'dotenv';
-import * as path from 'path';
+import * as path from 'node:path';
 
 dotenv.config({path: path.resolve(__dirname, '../.env')}) ;
 
@@ -19,7 +19,7 @@ type Fixtures = {
 
 export const test = base.extend<Fixtures>({
     uniqueSuffix: async({}, use) =>{
-        await use(`${Date.now()}-${Math.floor(Math.random() * 1e6)}`);
+        await use(`${Date.now()}-${crypto.randomUUID().slice(0,8)}`);
 
     },
 
