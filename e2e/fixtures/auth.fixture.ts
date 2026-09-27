@@ -72,6 +72,7 @@ export const test = base.extend<Fixtures>({
                 name: `E2E Event ${uniqueSuffix}`,
                 description: 'Playwright E2E',
                 status: 'PUBLISHED',
+                teamSizeLimit: 4,
             },
         });
 
