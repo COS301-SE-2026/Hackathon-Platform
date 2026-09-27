@@ -1,0 +1,80 @@
+<div class = "live-control-page">
+    <main class = "content">
+        <div class = "page-header">
+            <div>
+            <h2>Live Controls</h2>
+            <p class = "page-subtitle">Extend the timer and manage live scoring for this event.</p>
+        </div>
+    </div>
+
+    @if (errorMessage){
+        <div class = "error-banner">{{errorMessage}}</div>
+    }
+    @if (actionMessage){
+        <div class = "success-banner">{{actionMessage}}</div>
+    }
+
+    <div class = "control-grid">
+        <div class = "control-card">
+            <div class = "control-card-header">
+                <div class = "control-card-title-row">
+                    <i class = "pi pi-clock"></i>
+                    <h3>Event Timer</h3>
+                </div>
+                <span class = "status-pill" [ngClass] = "isEventLive ? 'live' : 'ended'">{{isEventLive? 'Live' : 'Ended'}}</span> 
+            </div>
+
+            <p class = "timer-display">{{remainingLabel}}</p>
+            <p class = "control-card-subtext">Time remaining until the event closes.</p>
+
+            <div class = "quick-extend-row">
+                <button type ="button" class = "btn-quick-extend" [disabled] = "isExtending" (click) = "extendTimer(5)">+5 min</button>
+                <button type ="button" class = "btn-quick-extend" [disabled] = "isExtending" (click) = "extendTimer(10)">+10 min</button>
+                <button type ="button" class = "btn-quick-extend" [disabled] = "isExtending" (click) = "extendTimer(15)">+15 min</button>
+            </div>
+
+            <div class = "custom-extend-row">
+                <input
+                type = "number"
+                min ="1"
+                placeholder = "Custom minutes"
+                aria-label = "Custom minutes to extend"
+                [(ngModel)] = "customMinutes"
+                name = "customMinutes"/>
+                <button type = "button" class = "btn-extend" [disabled] = "isExtending" (click) = "extendByCustomAmount()">
+                    {{isExtending ? 'Extending...' : 'Extend timer'}}
+                </button>
+            </div>
+            @if (extendError){
+                <p class = "field-error">{{extendError}}</p>
+            }
+
+        </div>
+        <div class = "control-card">
+            <div class = "control-card-header">
+                <div class = "control-card-title-row">
+                    <i class = "pi pi-chart-bar"></i>
+                    <h3>Scoring</h3>
+                </div>
+                <span class = "status-pill" [ngClass] = "scoringStatus === 'OPEN' ? 'live' : 'paused'">{{scoringStatus === 'OPEN' ? 'Open' : 'Paused'}}</span> 
+            </div>
+            <p class = "control-card-subtext">
+                {{scoringStatus === 'OPEN'
+            ? 'Teams can submit and the leaderboard updates live.'
+            : 'Submissions and leaderboard updates are on hold for every team.'}}
+            </p>
+
+            <button
+            type = "button"
+            class = "btn-toggle-scoring"
+            [class.btn-toggle-scoring-paused] = "scoringStatus === 'PAUSED'"
+            [disabled] = "isTogglingScoring"
+            (click) = "toggleScoring()">
+            <i class = "pi" [ngClass] = "scoringStatus === 'OPEN' ? 'pi-pause' : 'pi-play'"></i>
+            {{isTogglingScoring ? 'Updating...' : (scoringStatus === 'OPEN' ? 'Pause scoring' : 'Resume scoring')}}
+        </button>
+
+        </div>
+    </div>
+    </main>
+</div>

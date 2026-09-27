@@ -17,4 +17,6 @@ public class AuthResponse {
   private String lastName;
   private String email;
   private String role;
+  private boolean emailVerified;
+  private String msg;
 }

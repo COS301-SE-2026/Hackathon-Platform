@@ -1,77 +1,80 @@
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="brand">
-      <span class="brand-hackathon">Hackathon</span>
-      <span class="brand-platform">Platform</span>
+<div class="register-page">
+
+  <section class="register-hero">
+    <img src="assets/images/robots.jpg" alt="Robots Coding" class="register-hero-image"/>
+  </section>
+
+  <section class="register-section">
+
+    <div class="register-container">
+
+      <h1 class="register-title">Create an account</h1>
+
+      <p class="register-subtitle"> Join the Hackathon Platform and start building great solutions.</p>
+
+      <form #registerForm="ngForm" (ngSubmit)="onCreateAccount()">
+
+        <div class="register-input">
+          <app-input id="firstName" label="First name" type="text" placeholder="Enter your first name" [(value)]="firstName" (touched)="firstNameTouched = true"/>
+          @if (firstNameTouched && !firstName.trim()) { <p class="input-error">First name is required.</p> }
+        </div>
+
+        <div class="register-input">
+         <app-input id="lastName" label="Last name" type="text" placeholder="Enter your last name" [(value)]="lastName" (touched)="lastNameTouched = true"/>
+          @if (lastNameTouched && !lastName.trim()) { <p class="input-error">Last name is required.</p> }
+        </div>
+
+        <div class="register-input">
+         <app-input id="email" label="Email" type="email" placeholder="Enter your email" [(value)]="email" (touched)="emailTouched = true"/>
+         @if (emailTouched && !email.trim()) { <p class="input-error">Email is required.</p> }
+         @if (emailTouched && email.trim() && !isValidEmail(email.trim())) { <p class="input-error">Please enter a valid email address.</p> }
+        </div>
+
+        <div class="register-input">
+          <app-input id="password" label="Password" type="password" placeholder="Enter your password" [(value)]="password" (touched)="passwordTouched = true"/>
+          @if (passwordTouched && !password) { <p class="input-error">Password is required.</p> }
+        </div>
+
+        <div class="register-input">
+         <app-input id="confirmPassword" label="Confirm password" type="password" placeholder="Re-enter your password" [(value)]="confirmPassword" (touched)="confirmPasswordTouched = true"/>
+          @if (confirmPasswordTouched && !confirmPassword) { <p class="input-error">Please confirm your password.</p> }
+          @if (confirmPasswordTouched && confirmPassword && password !== confirmPassword) { <p class="password-error">Passwords do not match.</p> }
+        </div>
+
+        <div class="password-requirements">
+
+            <p>Password must contain:</p>
+
+            <ul>
+             <li [class.valid]="password.length >= 8"> At least 8 characters</li>
+              <li [class.valid]="/[A-Z]/.test(password)">One uppercase letter</li>
+              <li [class.valid]="/[a-z]/.test(password)">One lowercase letter</li>
+              <li [class.valid]="/[0-9]/.test(password)">One number</li>
+              <li [class.valid]="/[^A-Za-z0-9]/.test(password)">One special character</li>
+            </ul>
+
+        </div>
+
+        <app-button variant="primary" type="submit" width="100%" [disabled]="isLoading || !isFormValid()"> {{ isLoading ? 'Creating account...' : 'Create account' }}</app-button>
+
+        <div class="divider">
+         <span></span><p>or</p><span></span>
+        </div>
+
+        <button type="button" class="google-button" (click)="continueWithGoogle()">
+          <img src="assets/images/google_icon.svg" alt="Google Icon" class="google-icon"/>
+          <span>Continue with Google</span>
+        </button>
+
+        <p class="login-text">
+          Already have an account?
+          <a routerLink="/login"> Log in</a>
+        </p>
+
+      </form>
+
     </div>
-    <p class="auth-subtitle">Create a new account</p>
 
-    <form #registerForm="ngForm" (ngSubmit)="onCreateAccount(registerForm)">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="firstName">First name</label>
-          <input id="firstName" type="text" [(ngModel)]="firstName" name="firstName" required #firstNameField="ngModel" />
+  </section>
 
-          @if (firstNameField.invalid && firstNameField.touched) {
-            <span class="field-error">First name is required</span>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="lastName">Last name</label>
-          <input id="lastName" type="text" [(ngModel)]="lastName" name="lastName" required #lastNameField="ngModel" />
-
-          @if (lastNameField.invalid && lastNameField.touched) {
-            <span class="field-error">Last name is required</span>
-          }
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email address</label>
-        <input id="email" type="email" [(ngModel)]="email" name="email" placeholder="you@example.com" autocomplete="email" required email #emailField="ngModel" />
-
-        @if (emailField.invalid && emailField.touched) {
-          <span class="field-error">Please enter a valid email address</span>
-        }
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input id="password" type="password" [(ngModel)]="password" name="password" placeholder="••••••••" autocomplete="new-password" required minlength="8" #passwordField="ngModel" />
-
-          @if (passwordField.invalid && passwordField.touched) {
-            <span class="field-error">Password must be at least 8 characters</span>
-          }
-        </div>
-
-        <div class="form-group">
-          <label for="confirmPassword">Confirm Password</label>
-          <input id="confirmPassword" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="••••••••" autocomplete="new-password" required #confirmPasswordField="ngModel" />
-
-          @if (confirmPasswordField.touched && password !== confirmPassword) {
-            <span class="field-error">Passwords do not match</span>
-          }
-        </div>
-      </div>
-
-      @if (errorMessage) {
-        <div class="error-banner">{{ errorMessage }}</div>
-      }
-
-      <button type="submit" class="btn-primary btn-full" [disabled]="isLoading">
-        @if (!isLoading) {
-          <span>Create account</span>
-        } @else {
-          <span>Creating account...</span>
-        }
-      </button>
-    </form>
-
-    <p class="auth-footer">
-      Already have an account?
-      <a routerLink="/login">Sign in</a>
-    </p>
-  </div>
 </div>

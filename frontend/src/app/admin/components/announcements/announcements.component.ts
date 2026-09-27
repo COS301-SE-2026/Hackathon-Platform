@@ -1,9 +1,8 @@
-import { ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, Input} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router, ActivatedRoute  } from '@angular/router';
-import { ButtonModule} from 'primeng/button'
-
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import { ButtonModule } from 'primeng/button'
 import { EventService, EventResponse } from '../../../services/event.service';
 import { AnnouncementService, AnnouncementResponse, AnnouncementSeverity } from '../../../services/announcement.service';
 
@@ -26,7 +25,8 @@ export class AnnouncementsComponent implements OnInit{
      private readonly eventService = inject(EventService);
      private readonly announcementService = inject(AnnouncementService);
 
-    eventId = '';
+    @Input() hackathonId = '';
+    @Input() eventId = '';
     eventName ='';
     eventDescription ='';
 
@@ -64,8 +64,21 @@ export class AnnouncementsComponent implements OnInit{
         return this.announcements.length;
     }
 
+    private findRouteParam(name: string): string {
+        let current: ActivatedRoute | null = this.route;
+        while(current) {
+            const value = current.snapshot.paramMap.get(name);
+            if(value){
+                return value;
+            }
+            current = current.parent;
+        }
+        return '';
+    }
+
     ngOnInit(): void {
-        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
+        this.hackathonId = this.hackathonId || this.findRouteParam('hackathonId');
+        this.eventId = this.eventId || this.findRouteParam('eventId');
 
         if (!this.eventId){
             this.errorMessage = 'There was no event ID provided';

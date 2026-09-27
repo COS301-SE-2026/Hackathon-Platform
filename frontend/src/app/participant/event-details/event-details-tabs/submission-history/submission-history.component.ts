@@ -7,11 +7,14 @@ import { DropdownComponent } from '../../../../shared/components/dropdown/dropdo
 import { TableComponent, TableColumn, TableRow} from '../../../../shared/components/table/table.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+
 
 @Component({
   selector: 'app-submission-history',
   standalone: true,
-  imports: [CommonModule , DropdownComponent, TableComponent, ButtonComponent, PaginationComponent],
+  imports: [CommonModule , DropdownComponent, TableComponent, ButtonComponent, PaginationComponent, EmptyStateComponent, LoaderComponent],
   templateUrl: './submission-history.component.html',
   styleUrl: './submission-history.component.scss',
 })
@@ -33,6 +36,7 @@ teamLoading = false;
 historyLoading = true;
 submissionHistory: SubmissionResponse[] = [];
 levelNumberByLevelId: Record<number, number> = {};
+downloadingLogId: number | null = null;
 
 levelOptions: string[] = ['All Levels'];
 statusOptions: string[] = ['All Status', 'Scored', 'Failed'];
@@ -245,28 +249,45 @@ get hackathonId(): string {
 
 
   downloadLog(submission: SubmissionResponse): void {
-    if (!this.teamId) return;
 
-    this.submissionService.getSubmissionLog(this.teamId, submission.submissionId).subscribe({
-      next: logResponse => {
-        const content = logResponse?.logContent ?? "No log found";
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `submission-${submission.submissionId}-log.txt`;
-        link.click();
-        URL.revokeObjectURL(url);
-      },
-      error: (err) => {
-        if(err.status === 404){
-          alert('No log found');
-        } else {
-          alert('Cant download log');
-        }
+  if (!this.teamId || this.downloadingLogId) return;
+
+    this.downloadingLogId = submission.submissionId;
+    this.change.detectChanges();
+
+  this.submissionService.getSubmissionLog(this.teamId, submission.submissionId).subscribe({
+    next: logResponse => {
+      const content = logResponse?.logContent ?? 'No log found';
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = `submission-${submission.submissionId}-log.txt`;
+      link.click();
+
+      URL.revokeObjectURL(url);
+
+      this.downloadingLogId = null;
+      this.change.detectChanges();
+    },
+
+    error: (err) => {
+      this.downloadingLogId = null;
+
+      if (err.status === 404) {
+
+        alert('No log found');
+      } 
+      else {
+        
+        alert('Cant download log');
       }
-    });
-  }
+
+      this.change.detectChanges();
+     }
+   });
+ }
 
 
    statusLabel(status: string): string {

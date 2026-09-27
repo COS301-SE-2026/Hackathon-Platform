@@ -7,18 +7,32 @@
   line-height: var(--line-height-small);
 }
 
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 .input {
   width: 100%;
   padding: var(--space-3) var(--space-4);
+  padding-right: 48px;
   background-color: var(--white);
   border: 1px solid var(--mid-gray);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   font-family: var(--font-family-base);
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-body);
   color: var(--black);
   outline: none;
+
+  &::-ms-reveal, &::-ms-clear { 
+    display: none; 
+  } 
+  &::-webkit-credentials-auto-fill-button { 
+    visibility: hidden; 
+    pointer-events: none; 
+  }
 }
 
 .input::placeholder {
@@ -32,5 +46,36 @@
 
 .input:disabled {
   background-color: var(--light-gray);
+  cursor: not-allowed;
+}
+
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--mid-gray);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.password-toggle:hover {
+  color: var(--dark-gray);
+}
+
+.password-toggle:focus {
+  outline: none;
+}
+
+.password-toggle:disabled {
   cursor: not-allowed;
 }
