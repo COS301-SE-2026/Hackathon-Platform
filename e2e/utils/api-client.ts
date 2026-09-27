@@ -54,7 +54,7 @@ export class ApiClient {
         throw new Error(`Admin login failed for API seeding: ${res.status()} ${await res.text()}`);
     }
 
-    const body = await res.join();
+    const body = await res.json();
     return new ApiClient(context, body.token);
 
   }
@@ -74,7 +74,7 @@ export class ApiClient {
         throw new Error(`Seed: failed to create hackathon "${name}": ${res.status()} ${await res.text()}`);
 
     }
-    const body = await res.join();
+    const body = await res.json();
     return { hackathonId: body.hackathonId, name: body.name, description: body.description };
   }
 
@@ -101,7 +101,7 @@ export class ApiClient {
   async deleteHackathons(hackathonIds: string[]): Promise<void> {
 
     for(const id of hackathonIds) {
-        await this.deleteHackathons(id);
+        await this.deleteHackathon(id);
     }
   }
 
@@ -142,7 +142,72 @@ export class ApiClient {
 
     const body = await res.json();
     return { eventId: body.eventId, name: body.name, hackathonId };
-    
+
   }
 
+  async createLevel(
+    hackathonId: string,
+    name: string,
+    levelNumber: number,
+    description = ''
+  ): Promise<LevelSeed> {
+    const res = await this.context.post(`/api/hackathons/${hackathonId}/levels`, {
+        headers: this.authHeaders(),
+        data: { name, levelNumber, description },
+    });
+
+    if(!res.ok()) {
+        throw new Error(`Seed: failed to create level "${name}": ${res.status()} ${await res.text()}`);
+    }
+    const body = await res.json();
+    return { id: body.id, name: body.name, levelNumber: body.levelNumber, hackathonId };
+
+  }
+
+  async listLevels(hackathonId: string): Promise<LevelSeed[]> {
+
+    const res = await this.context.get(`/api/hackathons/${hackathonId}/levels`, {
+        headers: this.authHeaders(),
+    });
+
+    if(!res.ok()) return [];
+    return await res.json();
+  }
+
+  async deleteLevel(levelId: number): Promise<void> {
+
+    const res = await this.context.delete(`/api/levels/${levelId}`, {
+        headers: this.authHeaders(),
+    });
+
+    if (!res.ok() && res.status() !== 404) {
+        console.warn(`Teardown: failed to delete level ${levelId}: ${res.status()} ${await res.text()}`);
+
+    }
+  }
+
+  async deleteLevels(levelIds: number[]): Promise<void> {
+    for(const id of levelIds) {
+        await this.deleteLevel(id);
+
+    }
+  }
+
+  async findLevelIdByName(hackathonId: string, name: string): Promise<number | undefined> {
+
+    const all = await this.listLevels(hackathonId);
+    return all.find((l) => l.name === name)?.id;
+
+  }
+
+  async dispose(): Promise<void> {
+    await this.context.dispose();
+  }
+
+}
+
+  export function uniqueName(prefix: string) {
+    const stamp = Date.now();
+    const rand = Math.floor(Math.random() * 100000);
+    return `${prefix} ${stamp}-${rand}`;
 }
