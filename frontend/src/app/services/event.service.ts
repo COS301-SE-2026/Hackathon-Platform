@@ -254,6 +254,11 @@ export class EventService {
     );
   }
 
+  unbanParticipant(eventId: string, userId: string): Observable<void> {
+    return this.http.post<void>( `${this.baseUrl}/admin/events/${eventId}/participants/${userId}/unban`,{}
+    );
+  }
+
   registerForEvent( eventId: string, registrationData: EventRegistrationRequest): Observable<EventRegistrationResponse> {
   return this.http.post<EventRegistrationResponse>( `${this.baseUrl}/events/${eventId}/registered`, registrationData);
 }
