@@ -1,0 +1,41 @@
+import {Page, Locator,expect} from '@playwright/test'
+
+export class AnnouncementsPage{
+    constructor(private page: Page, private eventId:string){}
+
+async goto(){
+    await this.page.goto(`/admin/events/${this.eventId}/announcements`);
+    await this.page.waitForSelector('.announcement-page');
+}
+
+async gotoParticipant(){
+    await this.page.goto(`/events/${this.eventId}/announcements`);
+    await this.page.waitForSelector('.announcement-page');
+}
+
+get cards():Locator{
+    return this.page.locator('.announcement-card');
+}
+
+cardByTitle(title:string): Locator{
+    return this.cards.filter({has: this.page.locator('.announcement-title',{hasText:title})});
+}
+async openCreateModal(){
+    await this.page.getByRole('button', {name: /new announcement/i}).click();
+    await expect(this.page.locator('.modal-card')).toBeVisible();
+}
+
+async fillForm(title: string, message: string, severity: 'Info'| 'Important' | 'Urgent' = 'Info'){
+    await this.page.locator('#announcementTitle').fill(title);
+    await this.page.locator('#announcementMessage').fill(message);
+    await this.page.locator('.severity-option',{hasText: severity}).click();
+}
+
+async submit(){
+    await this.page.getByRole('button',{name:/post announcement/i}).click();
+}
+
+async expectCardVisible(title: string){
+    await expect(this.cardByTitle(title)).toBeVisible();
+}
+}
