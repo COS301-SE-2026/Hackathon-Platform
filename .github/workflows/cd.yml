@@ -202,3 +202,176 @@ jobs:
           name: frontend-dist
           path: frontend/dist/frontend/browser
           if-no-files-found: error
+
+  deploy-backend:
+    name: Deploy backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-backend
+    environment: production
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-Deploy-Backend
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$ECS_TASK_FAMILY" \
+            --query taskDefinition \
+            --output json > task-definition.json
+
+      - name: Render task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.BACKEND_CONTAINER_NAME }}
+          image: ${{ needs.build-backend.outputs.image }}
+
+      - name: Deploy ECS service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.BACKEND_ECS_SERVICE }}
+          cluster: ${{ env.BACKEND_ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-ai:
+    name: Deploy AI ML
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-ai
+    environment: production
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GithubActions-Deploy-AI
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$AI_TASK_FAMILY" \
+            --query taskDefinition \
+            -- output json > task-definition.json
+
+      - name: Render task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ai-model
+          image: ${{ needs.build-ai.outputs.image }}
+
+      - name: Deploy ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition:  ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.AI_ECS_SERVICE }}
+          cluster: ${{ env.AI_ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-ast:
+    name: Deploy AST service
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-ast
+    environment: production
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-Deploy-AST
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$AST_TASK_FAMILY" \
+            --query taskDefinition \
+            --output json > task-definition.json
+
+      - name: Render task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ast
+          image: ${{ needs.build-ast.outputs.image }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.AST_ECS_SERVICE }}
+          cluster: ${{ env.AST_ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-frontend:
+    name: Deploy frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build-frontend
+    environment: production
+
+    steps:
+      - name: Setup AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-Deploy-Frontend
+
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend-dist
+
+      - name: Sync to S3
+        run: |
+          aws s3 sync frontend-dist "s3://${S3_BUCKET}" \
+            --delete \
+            --region "$AWS_REGION"
+
+      - name: Invalidate Cloudfront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths "/*"
+
+  production-health-check:
+    name: Production health check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - deploy-backend
+      - deploy-ai
+      - deploy-ast
+      - deploy-frontend
+
+    steps:
+      - name: Check backend health
+        run: |
+          curl --fail --silent --show-error \
+            --retry 10 \
+            --retry-delay 5 \
+            --retry-connrefused \
+            https://api.hackathonplatform.co.za/actuator/health
+
+      - name: Check frontend
+        run: |
+          curl -- fail --silent --show-error \
+            --retry 10 \
+            --retry-delay 5 \
+            https://hackathonplatform.co.za/
