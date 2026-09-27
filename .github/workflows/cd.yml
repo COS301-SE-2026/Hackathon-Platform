@@ -110,7 +110,7 @@ jobs:
         id: image
         shell: bash
         run: |
-          IMAGE="${ECR_REGISTRY}/${AI_REPOSITORY}:${GITHUB_SHA}
+          IMAGE="${ECR_REGISTRY}/${AI_REPOSITORY}:${GITHUB_SHA}"
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
       - name: Setup BuildX
@@ -168,7 +168,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.image.outputs.image }}
-            ${{ env.ECR_REGISTRY }}/${{ env.AST_REPOSITORY }}:lastest
+            ${{ env.ECR_REGISTRY }}/${{ env.AST_REPOSITORY }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -207,7 +207,10 @@ jobs:
     name: Deploy backend
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: build-backend
+    needs:
+      - build-backend
+      - deploy-ai
+      - deploy-ast
     environment: production
 
     steps:
@@ -261,7 +264,7 @@ jobs:
           aws ecs describe-task-definition \
             --task-definition "$AI_TASK_FAMILY" \
             --query taskDefinition \
-            -- output json > task-definition.json
+            --output json > task-definition.json
 
       - name: Render task definition
         id: task-def
@@ -306,7 +309,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
-          container-name: ast
+          container-name: ast-service
           image: ${{ needs.build-ast.outputs.image }}
 
       - name: Deploy to ECS
@@ -371,7 +374,7 @@ jobs:
 
       - name: Check frontend
         run: |
-          curl -- fail --silent --show-error \
+          curl --fail --silent --show-error \
             --retry 10 \
             --retry-delay 5 \
             https://hackathonplatform.co.za/
