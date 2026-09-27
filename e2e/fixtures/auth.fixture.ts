@@ -73,6 +73,9 @@ export const test = base.extend<Fixtures>({
                 description: 'Playwright E2E',
                 status: 'PUBLISHED',
                 teamSizeLimit: 4,
+                startDateTime: new Date().toISOString(),
+                visibility: 'PUBLIC',
+                duration: 60,
             },
         });
 
