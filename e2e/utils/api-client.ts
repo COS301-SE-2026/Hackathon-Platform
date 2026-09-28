@@ -1,6 +1,7 @@
 import { APIRequestContext, request } from '@playwright/test';
 import * as dotenv from 'dotenv';
-import * as path from 'path';
+import * as path from 'node:path';
+import { randomInt } from 'node:crypto';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -126,7 +127,7 @@ export class ApiClient {
     const data = {
         name: overrides.name ?? `E2E Seed Event ${Date.now()}`,
         teamSizeLimit: overrides.teamSizeLimit ?? 4,
-        startDateTime: overrides.startDateTime ?? new Date(Date.now() + 3600_000).toISOString(),
+        startDateTime: overrides.startDateTime ?? new Date(Date.now() + 3_600_000).toISOString(),
         duration: overrides.duration ?? 48 * 3600,
         description: overrides.description ?? 'Seeded via API for e2e test',
         visibility: overrides.visibility ?? 'PUBLIC',
@@ -233,6 +234,6 @@ export class ApiClient {
 
   export function uniqueName(prefix: string) {
     const stamp = Date.now();
-    const rand = Math.floor(Math.random() * 100000);
+    const rand = randomInt(100000)
     return `${prefix} ${stamp}-${rand}`;
 }

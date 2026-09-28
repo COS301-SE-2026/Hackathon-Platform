@@ -1,4 +1,5 @@
 import {Page,Locator,expect} from '@playwright/test';
+import { escapeRegExp } from '../utils/regex';
 
 export class AdminLevelsPage {
     readonly page: Page;
@@ -49,9 +50,9 @@ export class AdminLevelsPage {
         await this.backButton.click();
     }
     levelRow(name:string): Locator {
-        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escaped = escapeRegExp(name);
         return this.page.locator('.level-row').filter({
-            has: this.page.locator('.level-name', { hasText: new RegExp(`^Level\\s+\\d+\\s*:\\s*${escaped}\\s*$`)}),
+            has: this.page.locator('.level-name', { hasText: new RegExp(String.raw`^Level\s+\d+\s*:\s*${escaped}\s*$`)}),
         });
     }
 

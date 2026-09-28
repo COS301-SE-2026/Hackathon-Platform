@@ -1,4 +1,5 @@
 import {Page,Locator,expect} from '@playwright/test';
+import { escapeRegExp } from '../utils/regex';
 
 export class AdminHackathonsPage {
     readonly page: Page;
@@ -42,9 +43,9 @@ export class AdminHackathonsPage {
     }
 
     card(name:string): Locator{
-        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escaped = escapeRegExp(name);
         return this.page.locator('.hackathon-card, .hackathon-row').filter({
-            has: this.page.locator('.hackathon-name', { hasText: new RegExp(`^${escaped}\\s*$`) }),
+            has: this.page.locator('.hackathon-name', { hasText: new RegExp(String.raw`^${escaped}\s*$`) }),
         });
     }
 

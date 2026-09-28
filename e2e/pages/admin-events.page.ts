@@ -1,4 +1,5 @@
 import {Page,Locator,expect} from '@playwright/test';
+import { escapeRegExp } from '../utils/regex';
 
 export interface CreateEventOptions {
 
@@ -71,8 +72,8 @@ export class AdminEventsPage {
 
     eventRow(name: string): Locator {
 
-        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        return this.page.locator('.event-row').filter({has: this.page.locator('.event-name', { hasText: new RegExp(`^${escaped}\\s*$`)}),});
+        const escaped = escapeRegExp(name);
+        return this.page.locator('.event-row').filter({has: this.page.locator('.event-name', { hasText: new RegExp(String.raw`^${escaped}\s*$`)}),});
     }
 
     async gotoCreateForm() {
