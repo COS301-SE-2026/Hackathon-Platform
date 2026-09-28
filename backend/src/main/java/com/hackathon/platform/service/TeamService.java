@@ -15,6 +15,8 @@ import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.TeamMemberRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.repository.UserRepository;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -306,6 +308,92 @@ public class TeamService {
       }
   }
 
+    /** Add a member to a team as an event administrator. */
+    @Transactional
+    public void addTeamMemberAsAdmin( UUID eventId, UUID teamId, String email) {
+
+      Team team = teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+
+      if (!team.getEventId().equals(eventId)) {
+        throw new RuntimeException("Team does not belong to this event");
+      }
+
+      String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
+
+      if (normalizedEmail.isBlank()) {
+        throw new RuntimeException("Email is required");
+      }
+
+      User user =
+          userRepository.findByEmail(normalizedEmail).orElseThrow(() -> new RuntimeException("No user found with this email"));
+
+      EventRegistration registration =
+          eventRegistrationRepository.findByEventIdAndUserId(eventId, user.getUserId()).orElseThrow(() -> new RuntimeException( "User is not registered for this event"));
+
+      if (registration.isBanned()) {
+        throw new RuntimeException("This user is banned from the event");
+      }
+
+    
+      if (!teamMemberRepository
+          .findByUserIdAndStatusAndEventId(user.getUserId(), "APPROVED", eventId).isEmpty()) {
+
+        throw new RuntimeException( "User is already a member of a team for this event");
+      }
+
+      Event event = eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+
+      long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
+
+      if (approvedCount >= event.getTeamSizeLimit()) {
+        throw new RuntimeException("Team is full");
+      }
+
+      
+      Optional<TeamMember> existingMembership = teamMemberRepository.findByTeamIdAndUserId(teamId, user.getUserId());
+
+      TeamMember member;
+
+      if (existingMembership.isPresent()) {
+        member = existingMembership.get();
+
+      
+        if ("LEFT".equals(member.getStatus())) {
+          member.setStatus("APPROVED");
+        } else if ("PENDING".equals(member.getStatus())) {
+          member.setStatus("APPROVED");
+        } else if ("APPROVED".equals(member.getStatus())) {
+          throw new RuntimeException(
+              "User is already a member of this team");
+        } else {
+          throw new RuntimeException(
+              "User cannot be added to this team");
+        }
+
+        member.setJoinedAt(Instant.now());
+        teamMemberRepository.save(member);
+
+      } else {
+        member = new TeamMember();
+        member.setTeamId(teamId);
+        member.setUserId(user.getUserId());
+        member.setStatus("APPROVED");
+
+        teamMemberRepository.save(member);
+      }
+
+
+      if (team.getCreatedByUserId() == null) {
+        team.setCreatedByUserId(user.getUserId());
+      }
+
+
+      if ("INACTIVE".equals(team.getStatus())) {
+        team.setStatus("ACTIVE");
+      }
+
+      teamRepository.save(team);
+    }
 
 /** Ban a participant from an event, mark them as LEFT, and deactivate an empty team. */
 @Transactional
