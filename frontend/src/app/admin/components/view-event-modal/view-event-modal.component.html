@@ -70,6 +70,9 @@ class = "modal-backdrop"
     <button type="button" class = "tab-btn" [class.active] = "activeTab === 'manage'" (click)="setActiveTab('manage')">
         <i class = "pi pi-cog"></i> Manage Event
     </button>
+    <button type="button" class = "tab-btn" [class.active] = "activeTab === 'plagiarism'" (click)="setActiveTab('plagiarism')">
+        <i class = "pi pi-shield"></i> Plagiarism
+    </button>
 </div>
 
 <div class = "modal-body">
@@ -93,6 +96,9 @@ class = "modal-backdrop"
 
     } @else if (activeTab === 'manage'){
         <app-manage-event [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-manage-event>
+    } @else if (activeTab === 'plagiarism'){
+        <app-plagiarism [hackathonId] = "hackathonId" [eventId] = "eventId || ''"></app-plagiarism>
+
     }
 </div>
 </div>

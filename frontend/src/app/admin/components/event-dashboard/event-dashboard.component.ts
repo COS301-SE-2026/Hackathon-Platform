@@ -5,6 +5,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray } from "@angular/cdk/drag-
 import { EventParticipantResponse,EventService } from "../../../services/event.service";
 import { EventInsightsResponse,InsightsService } from "../../../services/insights.service";
 import { LeaderboardEntry, LeaderboardService } from "../../../services/leaderboard.service";
+import { PlagiarismHeatmapComponent } from "../plagiarism/plagiarism-heatmap/plagiarism-heatmap.component";
 
 
 interface ParticipantRow {
@@ -54,14 +55,14 @@ interface ScoreLevelStat{
   avgPct: number;
 }
 
-export type DashboardBlockId = 'trend' | 'topTeams' | 'status' | 'scores' | 'participants';
+export type DashboardBlockId = 'trend' | 'topTeams' | 'status' | 'scores' | 'participants' | 'plagiarismHeatmap';
 
-const DEFAULT_BLOCKS: DashboardBlockId[] = ['trend','topTeams', 'status','scores','participants'];
+const DEFAULT_BLOCKS: DashboardBlockId[] = ['trend','topTeams', 'status','scores','participants','plagiarismHeatmap'];
 const LAYOUT_STORAGE_KEY = 'hackathon.eventDashboard.layout.v1';
 @Component({
   selector: 'app-event-dashboard',
   standalone: true,
-  imports: [CommonModule, DragDropModule],
+  imports: [CommonModule, DragDropModule, PlagiarismHeatmapComponent],
   templateUrl: './event-dashboard.component.html',
   styleUrls: ['./event-dashboard.component.scss']
 })
@@ -84,6 +85,7 @@ export class EventDashboardComponent implements OnInit{
   status: 'Submission status',
   scores: 'Score by level',
   participants: 'Active participants',
+  plagiarismHeatmap: 'Plagiarism similarity',
  };
 
   insightsLoading = false;
