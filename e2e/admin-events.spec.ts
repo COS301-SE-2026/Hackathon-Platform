@@ -1,55 +1,61 @@
-// import {test, expect} from '@playwright/test'
-// import * as path from 'path';
-// import {AdminHackathonsPage} from './pages/admin-hackathons.page';
-// import {AdminEventsPage } from './pages/admin-events.page';
-//
-// test.use ({storageState: path.resolve(__dirname,'../playwright/.auth/admin.json')});
-//
-// test.describe('Admin: Events', () => {
-//     let hackathonId: string;
-//
-//     test.beforeEach(async ({page})=>{
-//         const hackathons = new AdminHackathonsPage(page);
-//         const name = `E2E Event Test ${Date.now()}`;
-//
-//         await hackathons.goto();
-//         await hackathons.createHackathon(name);
-//         await hackathons.expectHackathonVisible(name);
-//         await hackathons.navigateToEvents(name);
-//         hackathonId = page.url().match(/\/admin\/hackathons\/([^\/]+)\/events/)?.[1] || '';
-//     });
-//
-//     test('creates a new event for a hackathon',async ({page})=>{
-//         const events = new AdminEventsPage(page);
-//         const eventName = `E2E Event ${Date.now()}`;
-//         const startDate = '2025-01-15T09:00';
-//
-//         await events.goto(hackathonId);
-//         await events.createEvent(eventName, startDate, 48, 4, 'Test event description');
-//         await events.expectEventVisible(eventName);
-//     });
-//
-//     test('filters event by search',async ({page})=>{
-//         const events = new AdminEventsPage(page);
-//         const event1 = `E2E Alpha ${Date.now()}`;
-//         const event2 = `E2E Beta ${Date.now()}`;
-//
-//         await events.goto(hackathonId);
-//         await events.createEvent(event1, '2025-01-15T09:00',48,4);
-//         await events.createEvent(event2, '2025-01-15T09:00',24,3);
-//
-//         await events.searchEvents('Alpha');
-//         await events.expectEventVisible(event1);
-//         await events.expectEventNotVisible(event2);
-//
-//         await events.searchEvents('');
-//         await events.expectEventVisible(event1);
-//         await events.expectEventVisible(event2);
-//
-//
-//
-//     });
-//
-//
-//
-// });
+import { test, expect } from '@playwright/test';
+import * as path from 'path';
+import { AdminEventsPage } from './pages/admin-events.page';
+import { ApiClient, uniqueName } from './utils/api-client';
+
+test.use({ storageState: path.resolve(__dirname, '../playwright/.auth/admin.json') });
+
+
+test.describe('Admin: Event creation', () => {
+
+    let api: ApiClient;
+    let hackathonId: string;
+
+    test.beforeAll(async () => {
+        api = await ApiClient.loginAsAdmin();
+
+
+    });
+
+    test.afterAll(async () => {
+        await api.dispose();
+    });
+
+    test.beforeEach(async () => {
+
+        const seeded = await api.createHackathon(uniqueName('E2E Event Parent'));
+        hackathonId = seeded.hackathonId;
+
+    });
+
+    test.afterEach(async () => {
+        
+        await api.deleteHackathon(hackathonId);
+    });
+
+    test('creates a minimal public event', async ({ page }) => {
+
+        const events = new AdminEventsPage(page);
+        const name = uniqueName('E2E Public Event');
+
+        await events.goto(hackathonId);
+        await events.createEvent({
+            name,
+            startDate: '2027-01-15',
+            startTime: '09:00',
+            duration: 48,
+            teamSizeLimit: 4,
+            description: 'Minimal public event',
+
+        });
+
+        await expect(page).toHaveURL(new RegExp(`/admin/hackathons/${hackathonId}/events$`));
+        await events.expectEventVisible(name);
+        expect((await events.getEventVisibility(name)).toUpperCase()).toContain('PUBLIC');
+
+        
+    });
+
+
+
+});
