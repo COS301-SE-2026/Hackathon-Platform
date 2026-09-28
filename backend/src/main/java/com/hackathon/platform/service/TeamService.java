@@ -246,6 +246,53 @@ public class TeamService {
     }
   }
 
+  /** Remove an approved member from a team as an event administrator. */
+  @Transactional
+  public void removeTeamMember(UUID teamId, UUID userId) {
+
+    Team team = teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+
+      TeamMember membership = teamMemberRepository.findByTeamIdAndUserId(teamId, userId).orElseThrow(() -> new RuntimeException("Team member not found"));
+
+      if (!"APPROVED".equals(membership.getStatus())) {
+          throw new RuntimeException("Only an approved team member can be removed");
+      }
+
+      boolean removingLeader = userId.equals(team.getCreatedByUserId());
+
+      membership.setStatus("LEFT");
+      teamMemberRepository.save(membership);
+
+      if (removingLeader) {
+
+       List<TeamMember> remainingMembers = teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED");
+
+        if (!remainingMembers.isEmpty()) {
+
+          TeamMember newLeader = remainingMembers.stream().min((first, second) ->first.getJoinedAt().compareTo(second.getJoinedAt())).orElseThrow();
+          team.setCreatedByUserId(newLeader.getUserId());
+          teamRepository.save(team);
+
+          } 
+          else {
+              team.setStatus("INACTIVE");
+              teamRepository.save(team);
+          }
+
+      } else {
+
+          long approvedCount =
+              teamMemberRepository.countByTeamIdAndStatus(
+              teamId, "APPROVED");
+
+          if (approvedCount == 0) {
+              team.setStatus("INACTIVE");
+              teamRepository.save(team);
+          }
+      }
+  }
+
+
 /** Ban a participant from an event, mark them as LEFT, and deactivate an empty team. */
 @Transactional
 public void banParticipant(UUID eventId, UUID userId) {
