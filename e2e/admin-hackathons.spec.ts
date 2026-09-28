@@ -104,7 +104,86 @@ test.describe('Admin: Hackathons CRUD', () => {
         await expect(hackathons.nameInput).toBeVisible();
         await hackathons.expectHackathonVisible(seeded.name);
 
-        
+
+    });
+
+    test('deletes a hackathon', async ({ page }) => {
+
+        const seeded = await api.createHackathon(uniqueName('E2E Delete Seed'));
+
+        const hackathons = new AdminHackathonsPage(page);
+        await hackathons.goto();
+        await hackathons.expectHackathonVisible(seeded.name);
+
+        await hackathons.deleteHackathon(seeded.name);
+        await hackathons.expectHackathonNotVisible(seeded.name);
+
+    });
+
+    test('cancels deleting a hackathon when the confirm dialog is dismissed', async ({ page }) => {
+
+        const seeded = await api.createHackathon(uniqueName('E2E Cancel Delete Seed'));
+        createdHackathonIds.push(seeded.hackathonId);
+
+        const hackathons = new AdminHackathonsPage(page);
+        await hackathons.goto();
+        await hackathons.expectHackathonVisible(seeded.name);
+
+        await hackathons.cancelDeleteHackathon(seeded.name);
+        await hackathons.expectHackathonVisible(seeded.name);
+
+    });
+
+    test('filters hackathons by search term', async ({ page }) => {
+
+        const alpha = await api.createHackathon(uniqueName('E2E Alpha Search'));
+        const beta = await api.createHackathon(uniqueName('E2E Beta Search'));
+        createdHackathonIds.push(alpha.hackathonId, beta.hackathonId);
+
+        const hackathons = new AdminHackathonsPage(page);
+        await hackathons.goto();
+
+        await hackathons.expectHackathonVisible(alpha.name);
+        await hackathons.expectHackathonVisible(beta.name);
+
+        await hackathons.search('Alpha');
+        await hackathons.expectHackathonVisible(alpha.name);
+        await hackathons.expectHackathonNotVisible(beta.name);
+
+        await hackathons.search('');
+        await hackathons.expectHackathonVisible(alpha.name);
+        await hackathons.expectHackathonVisible(beta.name);
+
+    });
+
+    test('shows the no-match empty state for a search with no results', async ({ page }) => {
+
+        const hackathons = new AdminHackathonsPage(page);
+        await hackathons.goto();
+
+        await hackathons.search(`nonexistent-${Date.now()}`);
+        await hackathons.expectEmptyState(/No hackathons match your search/);
+
+
+    });
+
+    test('toggles between grid and list view, keeping the same hackathon visible', async ({ page }) => {
+
+        const seeded = await api.createHackathon(uniqueName('E2E View Toggle'));
+        createdHackathonIds.push(seeded.hackathonId);
+
+        const hackathons = new AdminHackathonsPage(page);
+        await hackathons.goto();
+
+        await hackathons.setViewMode('list');
+        await expect(page.locator('.hackathon-list')).toBeVisible();
+        await hackathons.expectHackathonVisible(seeded.name);
+
+        await hackathons.setViewMode('grid');
+        await expect(page.locator('.hackathons-grid')).toBeVisible();
+        await hackathons.expectHackathonVisible(seeded.name);
+
+
     });
 
 });
