@@ -13,6 +13,8 @@ public class EventParticipantResponse {
   private String teamRole;
   private Instant joinedAt;
   private boolean banned;
+  private String dietaryReq;
+  private String allergies; 
 
   public EventParticipantResponse() {}
 
@@ -24,7 +26,9 @@ public class EventParticipantResponse {
       String teamName,
       String teamRole,
       Instant joinedAt,
-      boolean banned) {
+      boolean banned,
+      String dietaryReq,
+      String allergies) {
     this.userId = userId;
     this.fullName = fullName;
     this.email = email;
@@ -33,6 +37,8 @@ public class EventParticipantResponse {
     this.teamRole = teamRole;
     this.joinedAt = joinedAt;
     this.banned = banned;
+    this.dietaryReq = dietaryReq;
+    this.allergies = allergies;
   }
 
   public UUID getUserId() {
@@ -98,4 +104,20 @@ public class EventParticipantResponse {
   public void setBanned(boolean banned) {
   this.banned = banned;
   }
+
+  public String getDietaryReq() {
+  return dietaryReq;
+}
+
+public void setDietaryReq(String dietaryReq) {
+  this.dietaryReq = dietaryReq;
+}
+
+public String getAllergies() {
+  return allergies;
+}
+
+public void setAllergies(String allergies) {
+  this.allergies = allergies;
+}
 }

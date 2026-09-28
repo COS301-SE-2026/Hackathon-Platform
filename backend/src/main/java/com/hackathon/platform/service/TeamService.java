@@ -424,7 +424,9 @@ public List<EventParticipantResponse> listEventParticipants(UUID eventId) {
                   teamName,
                   teamRole,
                   joinedAt,
-                  registration.isBanned());
+                  registration.isBanned(),
+                  registration.getDietaryReq(),
+                  registration.getAllergies());     
             })
         .filter(response -> response != null)
         .collect(Collectors.toList());
