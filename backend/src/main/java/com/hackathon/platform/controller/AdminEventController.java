@@ -2,6 +2,7 @@ package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.EventParticipantResponse;
 import com.hackathon.platform.dto.AdminTeamResponse;
+import com.hackathon.platform.dto.AddTeamMemberRequest;
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.dto.ExtendTimerRequest;
@@ -147,12 +148,23 @@ public class AdminEventController {
   @DeleteMapping("/{id}/teams/{teamId}/members/{userId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Void> removeTeamMember(
-    
+
     @PathVariable("id") UUID eventId, @PathVariable UUID teamId, @PathVariable UUID userId) {
 
     teamService.removeTeamMember(teamId, userId);
 
     return ResponseEntity.noContent().build();
   }
+
+    /** Add a member to a team as an event administrator. */
+    @PostMapping("/{id}/teams/{teamId}/members")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> addTeamMember(
+        @PathVariable("id") UUID eventId, @PathVariable UUID teamId, @RequestBody AddTeamMemberRequest request) {
+
+      teamService.addTeamMemberAsAdmin(eventId,teamId,request.getEmail());
+
+      return ResponseEntity.noContent().build();
+    }
 
 }
