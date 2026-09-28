@@ -148,6 +148,8 @@ export interface EventParticipantResponse {
   teamRole: 'LEADER' | 'MEMBER' | null;
   joinedAt: string | null;
   banned: boolean;
+  dietaryReq?: string | null;
+  allergies?: string | null;
 }
 
 @Injectable({
