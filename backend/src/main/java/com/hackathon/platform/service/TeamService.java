@@ -325,39 +325,35 @@ public class TeamService {
   /** Leave a team. Approved members are marked LEFT; pending requests are deleted. */
   @Transactional
   public void leaveTeam(UUID teamId, UUID currentUserId) {
-    Team team =
-        teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
 
-    TeamMember membership =
-        teamMemberRepository
-            .findByTeamIdAndUserId(teamId, currentUserId)
-            .orElseThrow(() -> new RuntimeException("User not in team"));
+    TeamMember membership = teamMemberRepository.findByTeamIdAndUserId(teamId, currentUserId).orElseThrow(() -> new RuntimeException("User not in team"));
 
-    if ("APPROVED".equals(membership.getStatus())) {
-
-      boolean leavingLeader = currentUserId.equals(team.getCreatedByUserId());
-
-      membership.setStatus("LEFT");
-      teamMemberRepository.save(membership);
-
-      if (leavingLeader) {
-        List<TeamMember> remainingMembers =
-            teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED");
-
-        if (!remainingMembers.isEmpty()) {
-          TeamMember newLeader =
-              remainingMembers.stream()
-                  .min((first, second) -> first.getJoinedAt().compareTo(second.getJoinedAt()))
-                  .orElseThrow();
-          team.setCreatedByUserId(newLeader.getUserId());
-          teamRepository.save(team);
-        }
-      }
-    } else if ("PENDING".equals(membership.getStatus())) {
+    if ("PENDING".equals(membership.getStatus())) {
       teamMemberRepository.delete(membership);
       return;
-    } else {
-      throw new RuntimeException("Cannot leave with current status: " + membership.getStatus());
+    }
+
+    if (!"APPROVED".equals(membership.getStatus())) {
+      throw new RuntimeException(
+          "Cannot leave with current status: " + membership.getStatus());
+    }
+
+    Team team = teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+
+    boolean leavingLeader = currentUserId.equals(team.getCreatedByUserId());
+
+    membership.setStatus("LEFT");
+    teamMemberRepository.save(membership);
+
+    if (leavingLeader) {
+      List<TeamMember> remainingMembers = teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED");
+
+      if (!remainingMembers.isEmpty()) {
+        TeamMember newLeader =
+        remainingMembers.stream().min((first, second) -> first.getJoinedAt().compareTo(second.getJoinedAt())).orElseThrow();
+        team.setCreatedByUserId(newLeader.getUserId());
+        teamRepository.save(team);
+      }
     }
 
     long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
