@@ -14,6 +14,7 @@ import com.hackathon.platform.service.TeamService;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -140,6 +141,18 @@ public class AdminEventController {
   public ResponseEntity<List<AdminTeamResponse>> getEventTeams(
       @PathVariable("id") UUID eventId) {
     return ResponseEntity.ok(teamService.listEventTeams(eventId));
+  }
+
+    /** Remove a member from a team as an administrator. */
+  @DeleteMapping("/{id}/teams/{teamId}/members/{userId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> removeTeamMember(
+    
+    @PathVariable("id") UUID eventId, @PathVariable UUID teamId, @PathVariable UUID userId) {
+
+    teamService.removeTeamMember(teamId, userId);
+
+    return ResponseEntity.noContent().build();
   }
 
 }
