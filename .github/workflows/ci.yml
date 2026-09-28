@@ -161,6 +161,12 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      mailpit:
+        image: axllent/mailpit
+        ports:
+          - 1025:1025
+          - 8025:8025
+
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -209,5 +215,6 @@ jobs:
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           E2E_API_BASE_URL: ${{ secrets.E2E_API_BASE_URL }}
+          MAILPIT_URL: ${{ secrets.MAILPIT_URL }}
 
         run: npm run test:e2e
