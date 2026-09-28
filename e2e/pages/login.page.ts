@@ -8,6 +8,7 @@ export class LoginPage{
     readonly signupLink: Locator;
     readonly googleButton: Locator;
     readonly resendVerification: Locator;
+    readonly toast: Locator;
 
     constructor(page: Page){
         this.page = page;
@@ -17,6 +18,7 @@ export class LoginPage{
         this.signupLink = page.getByRole('link', { name: 'Register'});
         this.googleButton = page.getByRole('button', { name: /continue with google/i });
         this.resendVerification = page.getByRole('button', { name: /resend verification email/i });
+        this.toast = page.locator('.p-toast-message');
     }
 
     async goto() {
@@ -24,9 +26,13 @@ export class LoginPage{
         await expect(this.emailInput).toBeVisible();
     }
 
-    async login(email: string, password: string) {
+    async fill(email: string, password: string){
         await this.emailInput.fill(email);
         await this.passwordInput.fill(password);
+    }
+
+    async login(email: string, password: string) {
+        await this.fill(email, password);
         await this.signinButton.click();
     }
 

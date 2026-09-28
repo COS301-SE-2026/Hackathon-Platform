@@ -9,6 +9,7 @@ export class RegisterPage {
     readonly confirmPassword: Locator;
     readonly createAccBtn: Locator;
     readonly signinLink: Locator;
+    readonly toast: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -23,7 +24,7 @@ export class RegisterPage {
         this.signinLink = page.getByRole('link', {
             name: /sign in/i,
         })
-
+        this.toast = page.locator('.p-toast-message');
     }
 
     async goto() {
@@ -31,18 +32,29 @@ export class RegisterPage {
         await expect(this.firstName).toBeVisible();
     }
 
-    async register(opts:{
-        firstName: string;
-        lastName: string;
-        email: string;
-        password: string;
-        confirmPassword: string;
-    }){
+    async fillForm(opts:{ firstName: string, lastName: string, email: string, password: string, confirmPassword?: string }) {
         await this.firstName.fill(opts.firstName);
         await this.lastName.fill(opts.lastName);
         await this.email.fill(opts.email);
         await this.password.fill(opts.password);
         await this.confirmPassword.fill(opts.confirmPassword ?? opts.password);
-        await this.createAccBtn.click();
+    }
+
+    async register(opts:{
+        firstName: string;
+        lastName: string;
+        email: string;
+        password: string;
+        confirmPassword?: string;
+    }){
+        await this.fillForm(opts);
+        this.createAccBtn.click();
+    }
+
+    async touchAll() {
+        for(const f of [this.firstName, this.lastName, this.email, this.password, this.confirmPassword]) {
+            await f.focus();
+            await f.blur();
+        }
     }
 }
