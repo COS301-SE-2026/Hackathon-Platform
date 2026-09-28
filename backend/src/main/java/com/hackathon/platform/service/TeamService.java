@@ -1,6 +1,7 @@
 package com.hackathon.platform.service;
 
 import com.hackathon.platform.dto.CreateTeamRequest;
+import com.hackathon.platform.dto.AdminCreateTeamRequest;
 import com.hackathon.platform.dto.EventParticipantResponse;
 import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
@@ -96,6 +97,104 @@ public class TeamService {
     teamMemberRepository.save(member);
     return toTeamResponse(svdName);
   }
+
+
+    @Transactional
+    public void createTeamAsAdmin( UUID eventId, AdminCreateTeamRequest request) {
+
+      String teamName = request.getTeamName() == null ? "" : request.getTeamName().trim();
+
+      if (teamName.isBlank()) {
+        throw new RuntimeException("Team name is required");
+      }
+
+      List<String> memberEmails = request.getMemberEmails();
+
+      if (memberEmails == null || memberEmails.isEmpty()) {
+        throw new RuntimeException( "At least one team member is required");
+      }
+
+      Event event =
+          eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+
+      if (teamRepository.existsByEventIdAndTeamName(
+          eventId, teamName)) {
+        throw new RuntimeException("Team name is in use, please choose a new team name");
+      }
+
+      if (memberEmails.size() > event.getTeamSizeLimit()) {
+        throw new RuntimeException( "Team cannot have more than " + event.getTeamSizeLimit() + " members");
+      }
+
+      Team team = new Team();
+      team.setTeamName(teamName);
+      team.setEventId(eventId);
+      team.setStatus("ACTIVE");
+
+      User firstMemberUser = null;
+
+      for (String email : memberEmails) {
+
+        String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
+
+        if (normalizedEmail.isBlank()) {
+          throw new RuntimeException("Member email is required");
+        }
+
+        User user = userRepository.findByEmail(normalizedEmail).orElseThrow(() ->
+           new RuntimeException( "No user found with email: "+ normalizedEmail));
+
+        EventRegistration registration =
+            eventRegistrationRepository
+                .findByEventIdAndUserId( eventId, user.getUserId()).orElseThrow(() ->
+                    new RuntimeException( "User is not registered for this event: " + normalizedEmail));
+
+        if (registration.isBanned()) {
+          throw new RuntimeException(
+              "User is banned from the event: " + normalizedEmail);
+        }
+
+        if (!teamMemberRepository
+            .findByUserIdAndStatusAndEventId(user.getUserId(),"APPROVED",eventId).isEmpty()) {
+
+          throw new RuntimeException(
+              "User is already a member of a team for this event: "+ normalizedEmail);
+        }
+
+        if (firstMemberUser == null) {
+          firstMemberUser = user;
+        }
+      }
+
+      if (firstMemberUser == null) {
+        throw new RuntimeException(
+            "At least one valid team member is required");
+      }
+
+      team.setCreatedByUserId(firstMemberUser.getUserId());
+
+      Team savedTeam = saveTeamRetryingJoinCodeCollissions(team);
+
+      for (String email : memberEmails) {
+
+        String normalizedEmail =
+            email.trim().toLowerCase();
+
+        User user =
+            userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() ->
+                    new RuntimeException(
+                        "No user found with email: "
+                            + normalizedEmail));
+
+        TeamMember member = new TeamMember();
+        member.setTeamId(savedTeam.getTeamId());
+        member.setUserId(user.getUserId());
+        member.setStatus("APPROVED");
+
+        teamMemberRepository.save(member);
+      }
+    }
 
   /** Get the authenticated user's approved team, if they have one. */
   public List<TeamResponse> getMyTeams(UUID currentUserId) {
