@@ -174,7 +174,32 @@ export class ApiClient {
     return await res.json();
   }
 
-  async deleteLevel(levelId: number): Promise<void> {
+  async deleteLevelFiles(hackathonId: string, levelId: number): Promise<void> {
+
+    const listRes = await this.context.get(`/api/storage/hackathons/${hackathonId}/levels/${levelId}/files`, {
+        headers: this.authHeaders(),
+    });
+
+    if (!listRes.ok()) {
+        console.warn(`Teardown: failed to list files of level ${levelId}: ${listRes.status()} ${await listRes.text()}`);
+        return;
+    }
+    const files: Array<{ id: number }> = await listRes.json();
+
+    for (const file of files) {
+        const res = await this.context.delete(
+            `/api/storage/hackathons/${hackathonId}/levels/${levelId}/files/${file.id}`,
+            { headers: this.authHeaders() }
+        );
+        if (!res.ok() && res.status() !== 404) {
+            console.warn(`Teardown: failed to delete file ${file.id} of level ${levelId}: ${res.status()} ${await res.text()}`);
+        }
+    }
+  }
+
+  async deleteLevel(hackathonId: string, levelId: number): Promise<void> {
+
+    await this.deleteLevelFiles(hackathonId, levelId);
 
     const res = await this.context.delete(`/api/levels/${levelId}`, {
         headers: this.authHeaders(),
@@ -186,9 +211,9 @@ export class ApiClient {
     }
   }
 
-  async deleteLevels(levelIds: number[]): Promise<void> {
+  async deleteLevels(hackathonId: string, levelIds: number[]): Promise<void> {
     for(const id of levelIds) {
-        await this.deleteLevel(id);
+        await this.deleteLevel(hackathonId, id);
 
     }
   }

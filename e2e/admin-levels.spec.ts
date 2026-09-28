@@ -28,10 +28,9 @@ test.describe('Admin: Levels', () => {
     });
 
     test.afterEach(async () => {
-        await api.deleteLevels(createdLevelIds);
+        await api.deleteLevels(hackathonId, createdLevelIds);
         createdLevelIds = [];
         await api.deleteHackathon(hackathonId);
-
     });
 
     test('creates a new level', async ({ page }) => {

@@ -17,7 +17,7 @@ async function main() {
 
         // Clear levels first for the hackathon delete
         const levels = await api.listLevels(h.hackathonId);
-        await api.deleteLevels(levels.map((l) => l.id));
+        await api.deleteLevels(h.hackathonId, levels.map((l) => l.id));
 
         const before = (await api.listHackathons()).some((x) => x.hackathonId === h.hackathonId);
         await api.deleteHackathon(h.hackathonId);
