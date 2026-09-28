@@ -1,11 +1,23 @@
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+dotenv.config({ path: path.resolve(__dirname, '../.env'), quiet: true } as dotenv.DotenvConfigOptions);
+
+function need(name: string): string {
+    const v = process.env[name];
+    if(!v){
+        throw new Error(`Missing env var ${name}`);
+    }
+}
+
 export const users = {
     admin: {
-        email: process.env.E2E_ADMIN_EMAIl,
-        password: process.env.E2E_ADMIN_PASSWORD,
+        get email(){ return need('E2E_ADMIN_EMAIl'); },
+        get password() { return need('E2E_ADMIN_PASSWORD');},
     },
     participant: {
-        email: process.env.E2E_PARTICIPANT_EMAIL,
-        password: process.env.E2E_PARTICIPANT_PASSWORD,
+        get email(){ return need('E2E_PARTICIPANT_EMAIl'); },
+        get password() { return need('E2E_PARTICIPANT_PASSWORD');},
     },
 };
 
