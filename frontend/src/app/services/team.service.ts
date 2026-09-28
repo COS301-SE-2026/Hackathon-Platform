@@ -87,6 +87,9 @@ getEventTeams(eventId: string): Observable<AdminTeamResponse[]> {
   );
 }
 
+  removeTeamMember( eventId: string, teamId: string, userId: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/api/admin/events/${eventId}/teams/${teamId}/members/${userId}`);
+  }
 
 
 }
