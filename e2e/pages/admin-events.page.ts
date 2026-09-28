@@ -1,5 +1,17 @@
 import {Page,Locator,expect} from '@playwright/test';
 
+export interface CreateEventOptions {
+
+    name: string;
+    startDate: string;
+    startTime: string;
+    duration: number;
+    teamSizeLimit: number;
+    description?: string;
+    visibility?: 'PUBLIC' | 'PRIVATE';
+    registrationKey?: string;
+}
+
 export class AdminEventsPage {
     readonly page: Page;
     private hackathonId?: string;
@@ -8,42 +20,50 @@ export class AdminEventsPage {
     readonly statusFilter: Locator;
     readonly visibilityFilter: Locator;
     readonly loadingIndicator: Locator;
+    readonly errorBanner: Locator;
+
     readonly eventNameInput: Locator;
     readonly startDateInput: Locator;
+    readonly startTimeInput: Locator;
     readonly durationInput: Locator;
     readonly teamSizeInput: Locator;
     readonly descriptionInput: Locator;
-    readonly saveButton: Locator;
-    readonly cancelButton: Locator;
-    readonly backButton: Locator;
+    readonly publicOption: Locator;
+    readonly privateOption: Locator;
+    readonly registrationKeyInput: Locator;
+    readonly createSaveButton: Locator;
+    readonly createCancelButton: Locator;
+    readonly createErrorMessage: Locator;
 
     constructor(page: Page){
         this.page = page;
-        this.newEventButton = page.getByRole('button',{name: '+ New Event'});
-        this.searchInput = page.locator('.search-input');
-        this.statusFilter = page.locator('p-select[placeholder ="All statuses"]');
-        this.visibilityFilter = page.locator('p-select[placeholder ="All visibility"]');
-        this.loadingIndicator = page.locator('.loading');
+        this.newEventButton = page.getByRole('button',{name: '+ Create Event'});
+        this.searchInput = page.getByLabel('Search events');
+        this.statusFilter = page.getByLabel('Filter by status');
+        this.loadingIndicator = page.locator('.empty-state', { hasText: 'Loading events...' });
+        this.errorBanner = page.locator('.error-banner');
+
         this.eventNameInput = page.locator('#eventName');
         this.startDateInput = page.locator('#startDate');
+        this.startTimeInput = page.locator('#startTime');
         this.durationInput = page.locator('#duration');
         this.teamSizeInput = page.locator('#teamSizeLimit');
-        this.descriptionInput  = page.locator('textarea[name = "description"]');
-        this.saveButton = page.getByRole('button',{name: 'Create Event'});
-        this.cancelButton = page.getByRole('button',{name: 'Cancel'});
-        this.backButton = page.locator('.btn-secondary').filter({hasText: 'Back to Events'});
+        this.descriptionInput  = page.locator('#description');
+
+        this.publicOption = page.locator('.access-option').filter({ hasText: 'Public' });
+        this.privateOption = page.locator('.access-option').filter({ hasText: 'Private' });
+
+        this.registrationKeyInput = page.locator('#registrationKey');
+        this.createSaveButton = page.getByRole('button',{name: 'Create Event'});
+        this.createCancelButton = page.locator('.create-event-page').getByRole('button', { name: 'Cancel' });
+        this.createErrorMessage = page.locator('.error-message');
         
         
     }
-    async goto(hackathonId?: string){
+    async goto(hackathonId: string){
         this.hackathonId = hackathonId;
-        if (hackathonId){
             await this.page.goto(`/admin/hackathons/${hackathonId}/events`);   
-        }else {
-            await this.page.goto('/admin/events');
-
-        }
-        await this.waitForLoad();
+            await this.waitForLoad();
     }
 
     async waitForLoad(){
@@ -51,7 +71,9 @@ export class AdminEventsPage {
     }
 
     eventRow(name: string): Locator {
-        return this.page.locator('.p-datatable-tbody tr').filter({hasText: name});
+
+        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return this.page.locator('.event-row').filter({has: this.page.locator('.event-name', { hasText: new RegExp(`^${escaped}\\s*S`)}),});
     }
 
     async createEvent(name:string, startDate: string, duration:number, teamSize: number, description = ''){
