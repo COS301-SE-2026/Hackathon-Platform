@@ -1,15 +1,22 @@
 import {Page, Locator,expect} from '@playwright/test'
 
 export class AnnouncementsPage{
-    constructor(private readonly page: Page, private readonly eventId:string){}
+    constructor(private readonly page: Page, private readonly eventId:string , private readonly eventName:string ){}
 
-async goto(){
-    await this.page.goto(`/admin/events/${this.eventId}/announcements`);
-    await this.page.waitForSelector('.announcement-page');
+async goto(): Promise<void>{
+    await this.page.goto(`/admin/events`);
+    await this.page.waitForSelector('.event-item, [class*="event"]', {
+    timeout: 10_000});
+
+    await this.page.getByText(this.eventName, {exact: true}).first().click();
+
+    await this.page.waitForSelector('.modal-panel');
+    await this.page.getByRole('button', {name:/^\s*Announcements\s*$/i }).click();
+    await this.page.waitForSelector('.announcement-page', {timeout: 10_000});
 }
 
 async gotoParticipant(){
-    await this.page.goto(`/events/${this.eventId}/announcements`);
+    await this.page.goto(`/participant/events/${this.eventId}/announcements`);
     await this.page.waitForSelector('.announcement-page');
 }
 

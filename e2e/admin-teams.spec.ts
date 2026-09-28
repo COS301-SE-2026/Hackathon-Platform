@@ -7,7 +7,8 @@ test.describe('Admin > Teams', () =>{
         eventId,
         uniqueSuffix,
     }) => {
-        const teams = new AdminTeamPage(adminPage,eventId);
+        const eventName = `E2E Event ${uniqueSuffix}`;
+        const teams = new AdminTeamPage(adminPage,eventId,eventName);
         const teamName = `Alpha ${uniqueSuffix}`;
         const firstMember = 'Alice';
         const secondMember = 'Bob';
@@ -41,16 +42,18 @@ test.describe('Admin > Teams', () =>{
         await expect(teams.teamCardByName(teamName)).toHaveCount(0);
     });
 
-    test('search with no match shows empty state', async ({ adminPage, eventId})=>{
-        const teams = new AdminTeamPage(adminPage,eventId);
+    test('search with no match shows empty state', async ({ adminPage, eventId,uniqueSuffix})=>{
+        const eventName = `E2E Event ${uniqueSuffix}`
+        const teams = new AdminTeamPage(adminPage,eventId,eventName);
         await teams.goto();
 
         await teams.searchInput.fill('zzz-no-suc-team-xyz');
         await expect(adminPage.locator('.empty-state')).toContainText(/no teams found/i);
     });
 
-    test('create modal validation blocks empty team name',async({adminPage, eventId}) =>{
-        const teams = new AdminTeamPage(adminPage,eventId);
+    test('create modal validation blocks empty team name',async({adminPage, eventId,uniqueSuffix}) =>{
+        const eventName = `E2E Event ${uniqueSuffix}`
+        const teams = new AdminTeamPage(adminPage,eventId,eventName);
         await teams.goto();
 
         await teams.createTeamBtn.click();
@@ -68,7 +71,8 @@ test.describe('Admin > Teams', () =>{
     });
 
     test('deleting a tea,, removes it from the list', async({adminPage,eventId,uniqueSuffix})=>{
-        const teams = new AdminTeamPage(adminPage, eventId);
+        const eventName = `E2E Event ${uniqueSuffix}`
+        const teams = new AdminTeamPage(adminPage, eventId,eventName);
         const teamName = `DeleteMe ${uniqueSuffix}`;
 
         await teams.goto();

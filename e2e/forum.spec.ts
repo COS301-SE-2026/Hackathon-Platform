@@ -10,9 +10,9 @@ test.describe('Forum', () => {
     }) => {
         const title = `Thread ${uniqueSuffix}`;
         const replyBody = 'Angular + NestJS';
-
-        const admin = new ForumPage(adminPage,eventId,true);
-        const participant = new ForumPage(participantPage,eventId,false);
+        const eventName = `E2E Event ${uniqueSuffix}`
+        const admin = new ForumPage(adminPage,eventId,eventName,true);
+        const participant = new ForumPage(participantPage,eventId,eventName,false);
 
         await admin.goto();
         await admin.openCreatePost();
@@ -50,8 +50,9 @@ test.describe('Forum', () => {
     test('admin deletes the entire post', async ({ adminPage, eventId, uniqueSuffix
 
     }) =>{
+        const eventName = `E2E Event ${uniqueSuffix}`
         const title = `DeleteMe ${uniqueSuffix}`;
-        const admin = new ForumPage(adminPage, eventId,true);
+        const admin = new ForumPage(adminPage, eventId,eventName,true);
 
         await admin.goto();
         await admin.openCreatePost();
@@ -70,8 +71,9 @@ test.describe('Forum', () => {
         uniqueSuffix,
 
     }) =>{
+        const eventName = `E2E Event ${uniqueSuffix}`
         const title = `MultiReply ${uniqueSuffix}`;
-        const admin = new ForumPage(adminPage, eventId, true);
+        const admin = new ForumPage(adminPage, eventId,eventName, true);
 
         await admin.goto();
         await admin.openCreatePost();
@@ -94,8 +96,9 @@ test.describe('Forum', () => {
         uniqueSuffix,
 
     }) =>{
+        const eventName = `E2E Event ${uniqueSuffix}`
         const title = `MultiReply ${uniqueSuffix}`;
-        const admin = new ForumPage(adminPage, eventId, true);
+        const admin = new ForumPage(adminPage, eventId,eventName,true);
 
         await admin.goto();
         await admin.openCreatePost();
@@ -112,8 +115,10 @@ test.describe('Forum', () => {
     test('participant cannot see Create Post when perms deny it',async ({
         participantPage,
         eventId,
+        uniqueSuffix,
     }) => {
-        const participant = new ForumPage(participantPage,eventId,false);
+        const eventName = `E2E Event ${uniqueSuffix}`
+        const participant = new ForumPage(participantPage,eventId,eventName,false);
         await participant.goto();
 
         const btn = participantPage.getByRole('button',{name: /create post/i});

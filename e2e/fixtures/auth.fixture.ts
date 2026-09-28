@@ -65,11 +65,11 @@ export const test = base.extend<Fixtures>({
             throw new Error('Hackathon response did not contain an id: ' + JSON.stringify(hackathonBody));
         }
 
-
+        const eventName = `E2E Event ${uniqueSuffix}`;
         const eventRes = await api.post(`/api/hackathon/${hackathonId}/events`, {
             headers: { Authorization: `Bearer ${adminToken}`},
             data: {
-                name: `E2E Event ${uniqueSuffix}`,
+                name: eventName,
                 description: 'Playwright E2E',
                 status: 'UPCOMING',
                 teamSizeLimit: 4,

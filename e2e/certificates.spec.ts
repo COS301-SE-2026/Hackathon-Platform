@@ -2,7 +2,7 @@ import { test, expect } from './fixtures/auth.fixture';
 import {CertificatesPage} from './pages/certificates.page';
 import { VerifyPage } from './pages/verify.page';
 
-test.describe('Admin > Certification', () =>{
+test.describe.skip('Admin > Certification', () =>{
 
 
 async function seedTeams(

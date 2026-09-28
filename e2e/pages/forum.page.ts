@@ -1,16 +1,25 @@
 import {Page, Locator,expect} from '@playwright/test'
 
 export class ForumPage{
-    constructor(private readonly page: Page, private readonly eventId: string, private readonly isAdmin = true){}
+    constructor(private readonly page: Page, private readonly eventId: string, private readonly eventName: string, private readonly isAdmin = true){}
         
     
     
-async goto(){
-    const url = this.isAdmin
-        ? `/admin/events/${this.eventId}/forum`
-        : `/events/${this.eventId}/forum`;
-        await this.page.goto(url);
-        await this.page.waitForSelector('.forum-page');
+async goto(): Promise<void>{
+    if (this.isAdmin){
+    await this.page.goto(`/admin/events`);
+    await this.page.waitForSelector('.event-item, [class*="event"]', {
+    timeout: 10_000});
+
+    await this.page.getByText(this.eventName, {exact: true}).first().click();
+
+    await this.page.waitForSelector('.modal-panel');
+    await this.page.getByRole('button', {name:/^\s*Forum\s*$/i }).click();
+    await this.page.waitForSelector('.forum-page', {timeout: 10_000});
+    } else {
+        await this.page.goto(`/participant/events/${this.eventId}/forum`);
+        await this.page.waitForSelector('.forum-page', {timeout: 10_000});
+    }
 } 
 
 get threads():Locator {

@@ -1,11 +1,18 @@
 import {Page, Locator,expect} from '@playwright/test'
 
 export class AdminTeamPage{
-    constructor(private readonly page: Page, private readonly eventId:string){}
+    constructor(private readonly page: Page, private readonly eventId:string , private readonly eventName:string){}
 
-async goto(){
-    await this.page.goto(`/admin/events/${this.eventId}/teams`);
-    await this.page.waitForSelector('.teams-page');
+async goto(): Promise<void>{
+    await this.page.goto(`/admin/events`);
+    await this.page.waitForSelector('.event-item, app-eventlist, [class*="event"]', {
+    timeout: 10_000});
+
+    await this.page.getByText(this.eventName, {exact: true}).first().click();
+
+    await this.page.waitForSelector('.modal-panel');
+    await this.page.getByRole('button', {name:/^\s*Teams\s*$/i }).click();
+    await this.page.waitForSelector('.teams-page', {timeout: 10_000});
 }
 
 get teamCards(): Locator{
