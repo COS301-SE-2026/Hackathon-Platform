@@ -4,6 +4,7 @@ import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.EventParticipantResponse;
 import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
+import com.hackathon.platform.dto.AdminTeamResponse;
 import com.hackathon.platform.model.Event;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.TeamMember;
@@ -332,6 +333,72 @@ public void unbanParticipant(UUID eventId, UUID userId) {
 
     team.setStatus("ACTIVE");
     teamRepository.save(team);
+}
+
+public List<AdminTeamResponse> listEventTeams(UUID eventId) {
+  eventRepo
+    .findById(eventId)
+    .orElseThrow(() -> new RuntimeException("Event not found"));
+
+  List<Team> teams = teamRepository.findByEventId(eventId);
+
+  if (teams.isEmpty()) {
+    return List.of();
+  }
+
+  List<UUID> teamIds =
+    teams.stream()
+    .map(Team::getTeamId)
+    .collect(Collectors.toList());
+
+  List<TeamMember> members =
+    teamMemberRepository.findByTeamIdInAndStatus(teamIds, "APPROVED");
+
+  Map<UUID, List<TeamMember>> membersByTeam =
+    members.stream().collect(Collectors.groupingBy(TeamMember::getTeamId));
+
+  Map<UUID, User> usersById =
+  userRepository.findAllById(
+     members.stream().map(TeamMember::getUserId).distinct().collect(Collectors.toList())).stream().collect(Collectors.toMap(User::getUserId, user -> user));
+
+  return teams.stream()
+   .map(
+      team -> {
+      AdminTeamResponse response = new AdminTeamResponse();
+
+      response.setTeamId(team.getTeamId());
+      response.setTeamName(team.getTeamName());
+      response.setEventId(team.getEventId());
+      response.setCreatedByUserId(team.getCreatedByUserId());
+      response.setCreatedAt(team.getCreatedAt());
+      response.setStatus(team.getStatus());
+
+     List<TeamMemberResponse> teamMembers =
+        membersByTeam.getOrDefault(team.getTeamId(), List.of()).stream()
+          .map(
+            member -> {
+              User user = usersById.get(member.getUserId());
+            if (user == null) {throw new RuntimeException("User not found");}
+
+           TeamMemberResponse memberResponse = new TeamMemberResponse();
+
+         memberResponse.setUserId(member.getUserId());
+           memberResponse.setFullName(
+            user.getFirstName() + " " + user.getLastName());
+             memberResponse.setEmail(user.getEmail());
+             memberResponse.setJoinedAt(member.getJoinedAt());
+              memberResponse.setRole(
+              member.getUserId().equals(team.getCreatedByUserId()) ? "LEADER": "MEMBER");
+
+              return memberResponse;
+                          })
+                      .collect(Collectors.toList());
+
+              response.setMembers(teamMembers);
+
+              return response;
+            })
+        .collect(Collectors.toList());
 }
 
   public List<TeamMemberResponse> viewTeamMembers(UUID teamId) {
