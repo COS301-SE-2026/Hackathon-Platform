@@ -628,3 +628,13 @@
     color: #146a9d !important;
     font-weight: 600;
 }
+
+.form-group-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-small);
+  color: var(--dark-gray);
+}
