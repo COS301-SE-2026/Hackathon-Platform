@@ -39,12 +39,12 @@ async addPendingMember(name: string, email = ''){
     await this.page.getByRole('button',{name: /add participant/i}).click();
 }
 
-async confirmCreateTeam() {
+async confirmCreateTeam(): Promise<void> {
     await this.page
-    .getByRole('dialog')
+    .locator('.create-team-panel')
     .getByRole('button',{name: /^create team$/i})
     .click();
-    await expect(this.page.getByRole('dialog')).toBeHidden();
+    await expect(this.page.locator('.create-team-panel')).toBeHidden();
 }
 
 teamCardByName(name: string): Locator{

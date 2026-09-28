@@ -24,6 +24,7 @@ async goto(): Promise<void>{
     } else {
         await this.page.goto(`/participant/events/${this.eventId}/forum`);
         await this.page.waitForSelector('.forum-page', {timeout: 10_000});
+        await this.page.waitForLoadState('networkidle');
     }
 } 
 

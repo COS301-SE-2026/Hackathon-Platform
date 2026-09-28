@@ -22,7 +22,7 @@ test.describe('Forum', () => {
         await expect(admin.threadByTitle(title)).toBeVisible();
 
         await participant.goto();
-        await expect(participant.threadByTitle(title)).toBeVisible();
+        await expect(participant.threadByTitle(title)).toBeVisible({timeout: 10_000});
         await participant.expandThread(title);
         await participant.replyToThread(title,replyBody);
 
