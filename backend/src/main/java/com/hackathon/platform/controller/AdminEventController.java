@@ -1,6 +1,7 @@
 package com.hackathon.platform.controller;
 
 import com.hackathon.platform.dto.EventParticipantResponse;
+import com.hackathon.platform.dto.AdminCreateTeamRequest;
 import com.hackathon.platform.dto.AdminTeamResponse;
 import com.hackathon.platform.dto.AddTeamMemberRequest;
 import com.hackathon.platform.dto.EventRequest;
@@ -163,6 +164,17 @@ public class AdminEventController {
         @PathVariable("id") UUID eventId, @PathVariable UUID teamId, @RequestBody AddTeamMemberRequest request) {
 
       teamService.addTeamMemberAsAdmin(eventId,teamId,request.getEmail());
+
+      return ResponseEntity.noContent().build();
+    }
+
+    /** Create a team as an event administrator. */
+    @PostMapping("/{id}/teams")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> createTeam(
+        @PathVariable("id") UUID eventId, @RequestBody AdminCreateTeamRequest request) {
+
+      teamService.createTeamAsAdmin(eventId, request);
 
       return ResponseEntity.noContent().build();
     }
