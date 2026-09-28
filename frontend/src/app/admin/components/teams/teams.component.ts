@@ -2,6 +2,7 @@ import { ChangeDetectorRef,Component,inject,OnInit,Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
+import { TeamService } from '../../../services/team.service';
 
 interface TeamMember {
     memberId: string;
@@ -37,6 +38,7 @@ interface DraftMember {
 export class TeamsComponent implements OnInit {
     private readonly change = inject(ChangeDetectorRef);
     private readonly route = inject(ActivatedRoute);
+    private readonly teamService = inject(TeamService);
 
     @Input() hackathonId = '';
     @Input() eventId = '';
@@ -58,17 +60,61 @@ export class TeamsComponent implements OnInit {
     teams: Team[] = [];
     
 
-    ngOnInit(): void {
-        this.hackathonId = this.hackathonId ||  this.route.snapshot.paramMap.get('hackathonId') || '';
-        this.eventId = this.eventId ||  this.route.snapshot.paramMap.get('eventId') || '';
+  ngOnInit(): void {
+    this.hackathonId = this.hackathonId || this.route.snapshot.paramMap.get('hackathonId') || '';
+    this.eventId = this.eventId || this.route.snapshot.paramMap.get('eventId') || '';
 
-        if (!this.eventId){
-            
-            this.errorMessage = 'No event ID provided.';
-            return;
-        }
-        this.isLoading = false;
+    if (!this.eventId) {
+        this.errorMessage = 'No event ID provided.';
+        return;
     }
+
+    this.loadTeams();
+}
+
+
+    loadTeams(): void {
+     this.isLoading = true;
+     this.errorMessage = '';
+
+     this.teamService.getEventTeams(this.eventId).subscribe({
+        next: (teams) => {
+            this.teams = teams.map(team => ({
+                teamId: team.teamId,
+                 name: team.teamName,
+                 members: team.members.map(member => ({
+                    memberId: member.userId,
+                    name: member.fullName,
+                    initial: member.fullName.charAt(0).toUpperCase() || '?',
+                    email: member.email,
+                    isLeader: member.role === 'LEADER',
+                    isBanned: false,
+                    joinedAtLabel: this.formatJoinedAt(member.joinedAt)
+                })),
+                status: team.status === 'ACTIVE' ? 'active' : 'banned',
+                createdAtLabel: this.formatCreatedAt(team.createdAt)
+                }));
+
+            this.isLoading = false;
+            this.change.markForCheck();
+            },
+            error: () => {
+                this.errorMessage = 'Failed to load teams.';
+                this.isLoading = false;
+                this.change.markForCheck();
+            }
+        });
+    }
+
+
+    private formatJoinedAt(date: string): string {
+        return new Date(date).toLocaleDateString();
+    }
+
+    private formatCreatedAt(date: string): string {
+        return new Date(date).toLocaleDateString();
+    }
+
 
     get filteredTeams(): Team[] {
         const term = this.searchTerm.trim().toLowerCase();
