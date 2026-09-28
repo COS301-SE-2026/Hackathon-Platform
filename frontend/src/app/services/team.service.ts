@@ -9,6 +9,11 @@ export interface CreateTeamRequest {
   eventId?: string | null;
 }
 
+export interface AdminCreateTeamRequest {
+  teamName: string;
+  memberEmails: string[];
+}
+
 export interface AdminTeamResponse {
   teamId: string;
   teamName: string;
@@ -94,4 +99,10 @@ getEventTeams(eventId: string): Observable<AdminTeamResponse[]> {
     addTeamMember( eventId: string, teamId: string, email: string): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/api/admin/events/${eventId}/teams/${teamId}/members`,{ email });
   }
+
+
+  createTeamAsAdmin( eventId: string, request: AdminCreateTeamRequest): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/admin/events/${eventId}/teams`,request);
+  }
+
 }
