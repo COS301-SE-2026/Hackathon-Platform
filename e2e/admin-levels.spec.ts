@@ -125,4 +125,83 @@ test.describe('Admin: Levels', () => {
 
     });
 
+    test('reorders levels by dragging, and the new order persists after reload', async ({ page }) => {
+
+        const first = await api.createLevel(hackathonId, uniqueName('E2E Order First'), 1);
+        const second = await api.createLevel(hackathonId, uniqueName('E2E Order Second'), 2);
+        createdLevelIds.push(first.id, second.id);
+
+        const levels = new AdminLevelsPage(page);
+        await levels.goto(hackathonId);
+
+        expect(await levels.getOrderedLevelNames()).toEqual([first.name, second.name]);
+
+        await levels.dragLevelTo(second.name, first.name);
+
+        await expect(page.locator('.info-banner', { hasText: 'Saving new order...'})).toHaveCount(0, { timeout: 10000 });
+        expect(await levels.getOrderedLevelNames()).toEqual([second.name, first.name]);
+
+        await page.reload();
+        await levels.waitForLoad();
+        expect(await levels.getOrderedLevelNames()).toEqual([second.name, first.name]);
+
+    });
+
+    test('uploads a starter ZIP for a level directly from the levels list', async ({ page }) => {
+
+        const seeded = await api.createLevel(hackathonId, uniqueName('E2E Starter Zip Level'), 1);
+        createdLevelIds.push(seeded.id);
+        const zipPath = path.resolve(__dirname, 'fixtures/sample-starter.zip');
+
+        const levels = new AdminLevelsPage(page);
+        await levels.goto(hackathonId);
+
+        await levels.uploadStarterZip(seeded.name, zipPath);
+
+        await expect(levels.levelRow(seeded.name).getByText('Uploading...')).toHaveCount(0, { timeout: 10000 });
+
+        await levels.openManageFiles(seeded.name);
+        await expect(page.locator('.file-row')).toHaveCount(1);
+        await levels.closeManageFiles();
+
+    });
+
+    test('rejects a non-zip file for the starter upload', async ({ page }) => {
+
+        const seeded = await api.createLevel(hackathonId, uniqueName('E2E Bad Starter File'), 1);
+        createdLevelIds.push(seeded.id);
+        const pdfPath = path.resolve(__dirname, 'fixtures/sample.pdf');
+
+        const levels = new AdminLevelsPage(page);
+        await levels.goto(hackathonId);
+
+        await levels.uploadStarterZip(seeded.name, pdfPath);
+
+        await expect(levels.errorBanner).toBeVisible();
+        await levels.openManageFiles(seeded.name);
+        await expect(page.locator('.file-row')).toHaveCount(0);
+        await levels.closeManageFiles();
+
+
+    });
+
+    test('shows empty state when no levels exist', async ({ page }) => {
+
+        const levels = new AdminLevelsPage(page);
+        await levels.goto(hackathonId);
+
+        await expect(page.getByText('No levels created yet')).toBeVisible();
+    });
+
+    test('navigates back to the hackathons list', async ({ page }) => {
+
+        const levels = new AdminLevelsPage(page);
+        await levels.goto(hackathonId);
+
+        await levels.goBack();
+        await expect(page).toHaveURL(/\/admin\/hackathons$/);
+
+
+    });
+
 });
