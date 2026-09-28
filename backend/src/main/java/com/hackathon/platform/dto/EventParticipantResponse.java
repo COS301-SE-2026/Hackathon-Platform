@@ -14,7 +14,7 @@ public class EventParticipantResponse {
   private Instant joinedAt;
   private boolean banned;
   private String dietaryReq;
-  private String allergies; 
+  private String allergies;
 
   public EventParticipantResponse() {}
 
@@ -98,26 +98,26 @@ public class EventParticipantResponse {
   }
 
   public boolean isBanned() {
-  return banned;
+    return banned;
   }
 
   public void setBanned(boolean banned) {
-  this.banned = banned;
+    this.banned = banned;
   }
 
   public String getDietaryReq() {
-  return dietaryReq;
-}
+    return dietaryReq;
+  }
 
-public void setDietaryReq(String dietaryReq) {
-  this.dietaryReq = dietaryReq;
-}
+  public void setDietaryReq(String dietaryReq) {
+    this.dietaryReq = dietaryReq;
+  }
 
-public String getAllergies() {
-  return allergies;
-}
+  public String getAllergies() {
+    return allergies;
+  }
 
-public void setAllergies(String allergies) {
-  this.allergies = allergies;
-}
+  public void setAllergies(String allergies) {
+    this.allergies = allergies;
+  }
 }

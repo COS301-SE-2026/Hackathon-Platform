@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public class AdminTeamResponse {
 
-
   private UUID teamId;
   private String teamName;
   private UUID eventId;
@@ -50,12 +49,12 @@ public class AdminTeamResponse {
   }
 
   public Instant getCreatedAt() {
-     return createdAt;
+    return createdAt;
   }
 
   public void setCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
- }
+  }
 
   public String getStatus() {
     return status;
@@ -66,7 +65,7 @@ public class AdminTeamResponse {
   }
 
   public List<TeamMemberResponse> getMembers() {
-   return members;
+    return members;
   }
 
   public void setMembers(List<TeamMemberResponse> members) {

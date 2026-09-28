@@ -1,9 +1,9 @@
 package com.hackathon.platform.controller;
 
-import com.hackathon.platform.dto.EventParticipantResponse;
+import com.hackathon.platform.dto.AddTeamMemberRequest;
 import com.hackathon.platform.dto.AdminCreateTeamRequest;
 import com.hackathon.platform.dto.AdminTeamResponse;
-import com.hackathon.platform.dto.AddTeamMemberRequest;
+import com.hackathon.platform.dto.EventParticipantResponse;
 import com.hackathon.platform.dto.EventRequest;
 import com.hackathon.platform.dto.EventStatusResponse;
 import com.hackathon.platform.dto.ExtendTimerRequest;
@@ -16,9 +16,9 @@ import com.hackathon.platform.service.TeamService;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,7 +55,7 @@ public class AdminEventController {
     return ResponseEntity.ok(events);
   }
 
-    /** Get a single event by ID /api/admin/events/{id} */
+  /** Get a single event by ID /api/admin/events/{id} */
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Event> getEvent(@PathVariable("id") UUID eventId) {
@@ -109,12 +109,12 @@ public class AdminEventController {
       @PathVariable("id") UUID eventId) {
     return ResponseEntity.ok(teamService.listEventParticipants(eventId));
   }
-  
+
   /** Ban a participant from the event /api/admin/events/{id}/participants/{userId}/ban */
   @PostMapping("/{id}/participants/{userId}/ban")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Void> banParticipant(
-    @PathVariable("id") UUID eventId, @PathVariable("userId") UUID userId) {
+      @PathVariable("id") UUID eventId, @PathVariable("userId") UUID userId) {
 
     teamService.banParticipant(eventId, userId);
     return ResponseEntity.noContent().build();
@@ -125,10 +125,10 @@ public class AdminEventController {
   public ResponseEntity<Void> unbanParticipant(
       @PathVariable("id") UUID eventId, @PathVariable("userId") UUID userId) {
 
-      teamService.unbanParticipant(eventId, userId);
-      return ResponseEntity.noContent().build();
+    teamService.unbanParticipant(eventId, userId);
+    return ResponseEntity.noContent().build();
   }
-  
+
   @PatchMapping("/{id}/extend")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ExtendTimerResponse> extendTimer(
@@ -140,43 +140,42 @@ public class AdminEventController {
 
   @GetMapping("/{id}/teams")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<List<AdminTeamResponse>> getEventTeams(
-      @PathVariable("id") UUID eventId) {
+  public ResponseEntity<List<AdminTeamResponse>> getEventTeams(@PathVariable("id") UUID eventId) {
     return ResponseEntity.ok(teamService.listEventTeams(eventId));
   }
 
-    /** Remove a member from a team as an administrator. */
+  /** Remove a member from a team as an administrator. */
   @DeleteMapping("/{id}/teams/{teamId}/members/{userId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<Void> removeTeamMember(
-
-    @PathVariable("id") UUID eventId, @PathVariable UUID teamId, @PathVariable UUID userId) {
+      @PathVariable("id") UUID eventId, @PathVariable UUID teamId, @PathVariable UUID userId) {
 
     teamService.removeTeamMember(teamId, userId);
 
     return ResponseEntity.noContent().build();
   }
 
-    /** Add a member to a team as an event administrator. */
-    @PostMapping("/{id}/teams/{teamId}/members")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> addTeamMember(
-        @PathVariable("id") UUID eventId, @PathVariable UUID teamId, @RequestBody AddTeamMemberRequest request) {
+  /** Add a member to a team as an event administrator. */
+  @PostMapping("/{id}/teams/{teamId}/members")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> addTeamMember(
+      @PathVariable("id") UUID eventId,
+      @PathVariable UUID teamId,
+      @RequestBody AddTeamMemberRequest request) {
 
-      teamService.addTeamMemberAsAdmin(eventId,teamId,request.getEmail());
+    teamService.addTeamMemberAsAdmin(eventId, teamId, request.getEmail());
 
-      return ResponseEntity.noContent().build();
-    }
+    return ResponseEntity.noContent().build();
+  }
 
-    /** Create a team as an event administrator. */
-    @PostMapping("/{id}/teams")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> createTeam(
-        @PathVariable("id") UUID eventId, @RequestBody AdminCreateTeamRequest request) {
+  /** Create a team as an event administrator. */
+  @PostMapping("/{id}/teams")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> createTeam(
+      @PathVariable("id") UUID eventId, @RequestBody AdminCreateTeamRequest request) {
 
-      teamService.createTeamAsAdmin(eventId, request);
+    teamService.createTeamAsAdmin(eventId, request);
 
-      return ResponseEntity.noContent().build();
-    }
-
+    return ResponseEntity.noContent().build();
+  }
 }
