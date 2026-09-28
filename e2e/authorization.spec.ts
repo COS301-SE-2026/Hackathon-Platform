@@ -7,6 +7,7 @@ test.describe('API auth boundaries', () => {
         const admin = await apiLogin(users.admin.email, users.admin.password);
         const api = await apiContext(admin.token);
         const res = await api.get('/api/admin/events');
+        expect(res.status()).toBe(200);
         await api.dispose();
     });
 
@@ -19,7 +20,7 @@ test.describe('API auth boundaries', () => {
     });
 
     test('participant token cant create an event', async() => {
-        const participant = await await apiLogin(users.participant.email, users.participant.password);
+        const participant = await apiLogin(users.participant.email, users.participant.password);
         const api = await apiContext(participant.token);
         const res = await api.post('/api/hackathon/00000000-0000-0000-0000-000000000000/events', {
             data:{ name: 'Dont create', teamSizeLimit: 4, description: 'shouldnt create'},

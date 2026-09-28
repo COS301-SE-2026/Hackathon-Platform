@@ -11,7 +11,7 @@ test.describe('Registration', () =>{
         const register = new RegisterPage(page);
         await register.goto();
         const email = randomEmail('reg_ok');
-        await register.fillForm({ fistName: 'John', lastName: 'Cena', email, password: VALID_PASSWORD });
+        await register.fillForm({ firstName: 'John', lastName: 'Cena', email, password: VALID_PASSWORD });
         await expect(register.createAccBtn).toBeEnabled();
         await register.createAccBtn.click();
         await expect(page).toHaveURL(/\/verify-email\?email=/, {timeout: 15_000});
@@ -25,7 +25,7 @@ test.describe('Registration', () =>{
         await register.goto();
         await expect(register.createAccBtn).toBeDisabled();
         await register.fillForm({ firstName: 'Avinash', lastName: 'Singh', email: randomEmail('reg_weak'), password: 'weak' });
-        await expect(register.createAccBtn).toBeEnabled();
+        await expect(register.createAccBtn).toBeDisabled();
         await register.password.fill(VALID_PASSWORD);
         await register.confirmPassword.fill(VALID_PASSWORD);
         await expect(register.createAccBtn).toBeEnabled();

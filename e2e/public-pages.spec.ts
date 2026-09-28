@@ -5,18 +5,19 @@ import { RegisterPage } from './pages/register.page';
 import { LoginPage } from './pages/login.page';
 
 test.use({ storageState: { cookies: [], origins: [] }});
+const STUB_TOKEN = 'stub.jwt.token';
 
 test.describe('Landing page', () => {
     test('login button works', async ({ page }) => {
         await page.goto('/');
-        await page.getByRole('link', { name: /explore hackathons/i }).click();
+        await page.locator('#home').getByRole('link', { name: /explore hackathons/i }).click();
         await expect(page).toHaveURL(/\/login$/);
     });
 
     test('unkown URL goes back to landing page', async({ page }) => {
         await page.goto('/cos-301-takes-holiday');
         await expect(page).toHaveURL(/localhost:4200\/?$/);
-        await expect(page.getByRole('link', {name: /explore hackathons/i})).toBeVisible();
+        await expect(page.locator('#home').getByRole('link', { name: /explore hackathons/i })).toBeVisible();
     });
 });
 
@@ -45,7 +46,9 @@ test.describe('Email verification page', () => {
     });
 
     test('an invalid token shows verification failed', async ({ page }) => {
+        const verifyCall = page.waitForResponse((r) => r.url().includes('/api/auth/verify-email'));
         await page.goto('/verify-email?token=this-token-does-not-exist');
+        expect((await verifyCall).status(), 'API should reject an unknown token').toBeGreaterThanOrEqual(400);
         await expect(page.getByRole('heading', { name: /verification failed/i })).toBeVisible({ timeout: 10_000 });
         await page.getByRole('link', { name: /back to login/i }).click();
         await expect(page).toHaveURL(/\/login$/);
@@ -57,7 +60,7 @@ test.describe('Email verification page', () => {
                 status: 200,
                 contentType: 'application/json',
                 body: JSON.stringify({
-                    token: 'ahhh.jwt.token', userId: 'u-1', firstName: 'Stub', lastName: 'User',
+                    token: STUB_TOKEN, userId: 'u-1', firstName: 'Stub', lastName: 'User',
                     email: 'plzwork@e2e-test.com', role: 'PARTICIPANT', emailVerified: true, message: 'Verified',
                 }),
             }),
@@ -65,7 +68,7 @@ test.describe('Email verification page', () => {
         await page.goto('/verify-email?token=stub-token');
         await expect(page.getByRole('heading', { name: /email verification complete/i })).toBeVisible();
         await expect(page).toHaveURL(/\/participant\/home/, { timeout: 10_000 }); // redirect after ~800ms
-        expect(await page.evaluate(() => localStorage.getItem('token'))).toBe('stub.jwt.token');
+        expect(await page.evaluate(() => localStorage.getItem('token'))).toBe(STUB_TOKEN);
     });
 });
 

@@ -13,16 +13,16 @@ export class RegisterPage {
 
     constructor(page: Page) {
         this.page = page;
-        this.firstName = page.locator('#firstName');
-        this.lastName = page.locator('#lastName');
-        this.email = page.locator('#email');
-        this.password = page.locator('#password');
-        this.confirmPassword = page.locator('#confirmPassword');
+        this.firstName = page.locator('input#firstName');
+        this.lastName = page.locator('input#lastName');
+        this.email = page.locator('input#email');
+        this.password = page.locator('input#password');
+        this.confirmPassword = page.locator('input#confirmPassword');
         this.createAccBtn = page.getByRole('button', {
             name: /create account/i,
     });
         this.signinLink = page.getByRole('link', {
-            name: /sign in/i,
+            name: /log in/i,
         })
         this.toast = page.locator('.p-toast-message');
     }
@@ -48,7 +48,7 @@ export class RegisterPage {
         confirmPassword?: string;
     }){
         await this.fillForm(opts);
-        this.createAccBtn.click();
+        await this.createAccBtn.click();
     }
 
     async touchAll() {

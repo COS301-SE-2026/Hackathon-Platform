@@ -6,7 +6,7 @@ export async function waitForVerificationToken(email: string, timeoutMs = 20_000
     if(!MAILPIT_URL) {
         throw new Error('MAILPIT_URL is not set');
     }
-    const ctx = await pwRequest.newContext({ baseUrl: MAILPIT_URL });
+    const ctx = await pwRequest.newContext({ baseURL: MAILPIT_URL });
     try{
         const timeout = Date.now()+timeoutMs;
         while(Date.now()< timeout ){

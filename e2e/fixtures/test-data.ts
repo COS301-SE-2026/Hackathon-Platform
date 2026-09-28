@@ -8,15 +8,16 @@ function need(name: string): string {
     if(!v){
         throw new Error(`Missing env var ${name}`);
     }
+    return v;
 }
 
 export const users = {
     admin: {
-        get email(){ return need('E2E_ADMIN_EMAIl'); },
+        get email(){ return need('E2E_ADMIN_EMAIL'); },
         get password() { return need('E2E_ADMIN_PASSWORD');},
     },
     participant: {
-        get email(){ return need('E2E_PARTICIPANT_EMAIl'); },
+        get email(){ return need('E2E_PARTICIPANT_EMAIL'); },
         get password() { return need('E2E_PARTICIPANT_PASSWORD');},
     },
 };
@@ -30,7 +31,7 @@ export function randomEmail(prefix = 'e2e_user'): string {
 }
 
 export function randomTeamName(): string {
-    return `E2E Team ${uniqueSuffix()};`
+    return `E2E Team ${uniqueSuffix()}`;
 }
 
 export function randomHackathonName(): string{
