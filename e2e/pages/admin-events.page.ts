@@ -76,39 +76,69 @@ export class AdminEventsPage {
         return this.page.locator('.event-row').filter({has: this.page.locator('.event-name', { hasText: new RegExp(`^${escaped}\\s*S`)}),});
     }
 
-    async createEvent(name:string, startDate: string, duration:number, teamSize: number, description = ''){
-        if (!this.hackathonId) {
-            throw new Error('AdminEventsPage.createEvent() requires goto(hackathonId) to have been called first.');
+    async gotoCreateForm() {
+        if(!this.hackathonId) {
+            throw new Error('AdminEventsPage.gotoCreateForm() requires goto(hackathonId) to have been called first.');
+
         }
-        await this.page.goto(`/admin/hackathons/${this.hackathonId}/events/create`);
-        await this.eventNameInput.fill(name);
-        await this.startDateInput.fill(startDate);
-        await this.durationInput.fill(duration.toString());
-        await this.teamSizeInput.fill(teamSize.toString());
-        if (description) await this.descriptionInput.fill(description);
-        await this.saveButton.click();
-        await this.page.waitForURL(/\/admin\/hackathons\/.+\/events$/);
+
+        await this.newEventButton.click();
+        await this.page.waitForURL(/\/admin\/hackathons\/.+\/events\/create$/);
+    }
+
+    async fillCreateForm(opts: CreateEventOptions){
+
+        await this.eventNameInput.fill(opts.name);
+        await this.startDateInput.fill(opts.startDate);
+        await this.startTimeInput.fill(opts.startTime);
+        await this.durationInput.fill(opts.duration.toString());
+        await this.teamSizeInput.fill(opts.teamSizeLimit.toString());
+
+        if (opts.description) await this.descriptionInput.fill(opts.description);
+        if (opts.visibility === 'PRIVATE') {
+            await this.privateOption.click();
+            await expect(this.registrationKeyInput).toBeVisible();
+            if (opts.registrationKey) await this.registrationKeyInput.fill(opts.registrationKey);
+
+        }
+    }
+
+    async submitCreateForm(){
+        await this.createSaveButton.click();
+    }
+
+    async createEvent(opts: CreateEventOptions){
+        
+        await this.gotoCreateForm();
+        await this.fillCreateForm(opts);
+        await this.submitCreateForm();
+        await this.page.waitForURL(/\/admin\/hackathons\/.+\/events$/ , { timeout: 15000 });
         await this.waitForLoad();
     }
+
+    async cancelCreateForm(){
+        await this.createCancelButton.click();
+
+    }
+
     async searchEvents(query:string){
         await this.searchInput.fill(query);
-        await this.searchInput.press('Enter');
+    }
+
+    async filterByStatus(status: 'ALL' | 'LIVE' | 'UPCOMING' | 'COMPLETED' | 'CANCELED'){
+        await this.statusFilter.selectOption(status);
+
     }
 
     async navigateToManage(name:string){
-        await this.eventRow(name).getByRole('button',{name:'Manage & Edit'}).click();
+
+        await this.eventRow(name).getByRole('button',{name:'Go to Event'}).click();
+        await this.page.waitForURL(/\/admin\/hackathons\/.+\/events\/.+\/dashboard$/);
+        const eventId = this.page.url().match(/\/events\/([^/]+)\/dashboard$/)?.[1] || '';
+        await this.page.goto(`/admin/hackathons/${this.hackathonId}/events/${eventId}/manage`);
 
     }
-    async navigateToLevels(name:string){
-        await this.eventRow(name).getByRole('button',{name:'Levels'}).click();
-        
-    }
-    async navigateToSolver(name:string){
-        await this.eventRow(name).getByRole('button',{name:'Solver'}).click();
-    }
-    async goBack(){
-        await this.backButton.click();
-    }
+
 
     async expectEventVisible(name:string){
         await expect(this.eventRow(name)).toBeVisible();
@@ -118,8 +148,20 @@ export class AdminEventsPage {
         await expect(this.eventRow(name)).toHaveCount(0);
         
     }
+
     async getEventStatus(name: string): Promise<string>{
         const row = this.eventRow(name);
-        return await row.locator('.p-tag').textContent() || '';
+        return await row.locator('.status-pill').textContent() || '';
     }
+
+    async getEventVisibility(name: string): Promise<string>{
+        const row = this.eventRow(name);
+        return await row.locator('.type-pill').textContent() || '';
+    }
+
+    async expectEmptyState(text: string | RegExp){
+        await expect(this.page.locator('.empty-state')).toContainText(text);
+    }
+
+
 }
