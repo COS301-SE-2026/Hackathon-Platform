@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 
 export class RegisterPage {
     readonly page: Page;
@@ -9,8 +9,6 @@ export class RegisterPage {
     readonly confirmPassword: Locator;
     readonly createAccBtn: Locator;
     readonly signinLink: Locator;
-    readonly errBanner: Locator;
-    readonly fieldErr: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -22,8 +20,6 @@ export class RegisterPage {
         this.createAccBtn = page.getByRole('button', {
             name: /create account/i,
     });
-        this.errBanner = page.locator('.error-banner');
-        this.fieldErr = page.locator('.field-error');
         this.signinLink = page.getByRole('link', {
             name: /sign in/i,
         })
@@ -32,6 +28,7 @@ export class RegisterPage {
 
     async goto() {
         await this.page.goto('/register');
+        await expect(this.firstName).toBeVisible();
     }
 
     async register(opts:{
