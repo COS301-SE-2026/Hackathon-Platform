@@ -5,13 +5,30 @@ export class AdminTeamPage{
 
 async goto(): Promise<void>{
     await this.page.goto(`/admin/events`);
-    await this.page.waitForSelector('.event-item, app-eventlist, [class*="event"]', {
-    timeout: 10_000});
+    
+    await this.page.waitForLoadState('networkidle');
+    const url = this.page.url();
+    const bodyText = await this.page.locator('body').innerText();
+    console.log('=== E2E DEBUG ===');
+    console.log('URL after navigation:',url);
+    console.log('Body Text (first 3000 charts):');
+    console.log(bodyText.slice(0,3000));
+    console.log('---event-rows---');
+    console.log('count of .event-item',await this.page.locator('.event-item').count());
+    console.log('count of .event-card',await this.page.locator('.event-card').count());
+    console.log('count of .event-row',await this.page.locator('.event-row').count());
+    console.log('count of [class*="event"]:',await this.page.locator('[class*="event"]').count());
+    console.log('count of a[href*="events/"]:',await this.page.locator('a[href*="events/"]').count());
+    console.log('count of getByText(eventName):',await this.page.getByText(this.eventName, {exact: false}).count());
+    console.log('===END E2E DEBUG===')
 
-    await this.page.getByText(this.eventName, {exact: true}).first().click();
 
-    await this.page.waitForSelector('.modal-panel');
-    await this.page.getByRole('button', {name:/^\s*Teams\s*$/i }).click();
+    const eventLink = this.page.getByText(this.eventName, { exact: false}).first();
+    await eventLink.waitFor({ state: 'visible',timeout:5000});
+    await eventLink.click();
+
+    await this.page.waitForSelector('.modal-panel', {timeout: 10_000});
+    await this.page.locator('.modal-tabs .tab-btn', {hasText: 'Teams'}).click();
     await this.page.waitForSelector('.teams-page', {timeout: 10_000});
 }
 
