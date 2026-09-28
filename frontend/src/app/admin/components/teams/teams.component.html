@@ -127,7 +127,7 @@
                         <button
                         type ="button"
                         class = "btn-add-member"
-                        [disabled] = "!memberNameDrafts[team.teamId]?.trim()"
+                        [disabled] = "!memberEmailDrafts[team.teamId]?.trim()"
                         (click) = "addMember(team.teamId)">
                         Add Member
                     </button>

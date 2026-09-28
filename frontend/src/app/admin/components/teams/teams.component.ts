@@ -185,27 +185,33 @@ export class TeamsComponent implements OnInit {
     }
 
     addMember(teamId: string): void {
-        const name = this.memberNameDrafts[teamId]?.trim();
-        if (!name){
+        const email = this.memberEmailDrafts[teamId]?.trim();
+
+        if (!email) {
             return;
         }
+
         const team = this.teams.find(t => t.teamId === teamId);
-        if (!team){
+
+        if (!team) {
             return;
         }
 
-        team.members.push ({
-            memberId:`m-${Date.now()}`,
-            name,
-            initial: name.charAt(0).toUpperCase() || '?',
-            email: this.memberEmailDrafts[teamId]?.trim() || '',
-            isLeader: team.members.length === 0,
-            joinedAtLabel: 'Just now'
-        });
+        this.errorMessage = '';
 
-        this.memberNameDrafts[teamId] = '';
-        this.memberEmailDrafts[teamId] = '';
-        this.change.markForCheck();
+        this.teamService.addTeamMember( this.eventId, teamId, email).subscribe({
+            next: () => {
+                this.memberNameDrafts[teamId] = '';
+                this.memberEmailDrafts[teamId] = '';
+                this.loadTeams();
+            },
+            error: (error) => {
+                this.errorMessage =
+                    error?.error?.message || 'Failed to add team member.';
+
+                this.change.markForCheck();
+            }
+        });
     }
 
    removeMember(teamId: string, memberId: string): void {
