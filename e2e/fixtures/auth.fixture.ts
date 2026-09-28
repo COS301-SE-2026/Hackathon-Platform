@@ -90,11 +90,9 @@ export const test = base.extend<Fixtures>({
         }
         await use(eventId);
 
-        await api 
-        .delete(`/api/hackathon/${hackathonId}`,{
-            headers: {Authorization: `Bearer ${adminToken}`},
-        })
-        .catch(() => {});
+        
+        //Teardown skipped: no event-delete endpoint exists.
+
 
     },
 
