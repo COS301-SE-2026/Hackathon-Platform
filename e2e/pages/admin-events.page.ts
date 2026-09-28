@@ -18,7 +18,6 @@ export class AdminEventsPage {
     readonly newEventButton: Locator;
     readonly searchInput: Locator;
     readonly statusFilter: Locator;
-    readonly visibilityFilter: Locator;
     readonly loadingIndicator: Locator;
     readonly errorBanner: Locator;
 
@@ -73,7 +72,7 @@ export class AdminEventsPage {
     eventRow(name: string): Locator {
 
         const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        return this.page.locator('.event-row').filter({has: this.page.locator('.event-name', { hasText: new RegExp(`^${escaped}\\s*S`)}),});
+        return this.page.locator('.event-row').filter({has: this.page.locator('.event-name', { hasText: new RegExp(`^${escaped}\\s*$`)}),});
     }
 
     async gotoCreateForm() {
