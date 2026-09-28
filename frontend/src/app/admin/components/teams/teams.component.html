@@ -175,7 +175,7 @@
             placeholder="e.g. Byte Busters"
             autocomplete="off"/>
 
-            <p class = "create-team-label create-team-label-spaced">Add participants (optional)</p>
+            <p class = "create-team-label create-team-label-spaced">Add participants</p>
 
             <div class = "member-entry-row">
                 <label 
@@ -204,7 +204,7 @@
                         <button
                         type ="button"
                         class = "btn-add-pending"
-                        [disabled] = "!newMemberName.trim()"
+                        [disabled] = "!newMemberName.trim() || !newMemberEmail.trim()"
                         (click) = "addPendingMember()"
                         aria-label = "Add participant">
                         <i class = "pi pi-plus"></i>
@@ -230,7 +230,7 @@
             }
             <div class = "create-team-actions">
                 <button type ="button" class = "btn-cancel" (click) = "closeCreateTeamModal()">Cancel</button>
-                <button type ="button" class = "btn-confirm-create" [disabled] = "!newTeamName.trim()" (click) = "createTeam()">Create Team</button>
+                <button type ="button" class = "btn-confirm-create" [disabled] = "!newTeamName.trim() || pendingMembers.length === 0" (click) = "createTeam()">Create Team</button>
             </div>
         </div>
     </div>

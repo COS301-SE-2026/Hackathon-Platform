@@ -2,7 +2,7 @@ import { ChangeDetectorRef,Component,inject,OnInit,Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
-import { TeamService } from '../../../services/team.service';
+import { TeamService, AdminCreateTeamRequest } from '../../../services/team.service';
 
 interface TeamMember {
     memberId: string;
@@ -138,45 +138,68 @@ export class TeamsComponent implements OnInit {
         this.showCreateTeamModal = false;
     }
 
-    addPendingMember(): void {
-        const name = this.newMemberName.trim();
-        if(!name){
-            return;
-        }
-        this.pendingMembers.push({name, email: this.newMemberEmail.trim()});
-        this.newMemberName = '';
-        this.newMemberEmail = '';
+   addPendingMember(): void {
+    const name = this.newMemberName.trim();
+    const email = this.newMemberEmail.trim();
+
+    if (!name || !email) {
+        return;
     }
 
+    this.pendingMembers.push({
+        name,
+        email
+    });
+
+    this.newMemberName = '';
+    this.newMemberEmail = '';
+}
     removePendingMember(index: number): void {
         this.pendingMembers.splice(index,1);
     }
 
+   
+
     createTeam(): void {
         const name = this.newTeamName.trim();
-        if(!name){
+
+        if (!name || this.pendingMembers.length === 0) {
             return;
         }
 
-        const members: TeamMember[] = this.pendingMembers.map((draft,index) => ({
-            memberId: `m-${Date.now()}-${index}`,
-            name: draft.name,
-            initial: draft.name.charAt(0).toUpperCase() || '?',
-            email: draft.email,
-            isLeader: index ===0,
-            joinedAtLabel: 'Just now'
+        const memberEmails = this.pendingMembers
+            .map(member => member.email.trim())
+            .filter(email => email);
 
-        }));
-        this.teams.push({
-            teamId: `t-${Date.now()}`,
-            name,
-            members,
-            status: 'active',
-            createdAtLabel:'Just now'
+        if (memberEmails.length !== this.pendingMembers.length) {
+            this.errorMessage = 'Every team member must have an email address.';
+            return;
+        }
+
+        const request: AdminCreateTeamRequest = {
+            teamName: name,
+            memberEmails
+        };
+
+        this.errorMessage = '';
+
+        this.teamService.createTeamAsAdmin(this.eventId, request).subscribe({
+            next: () => {
+                this.showCreateTeamModal = false;
+                this.newTeamName = '';
+                this.newMemberName = '';
+                this.newMemberEmail = '';
+                this.pendingMembers = [];
+
+                this.loadTeams();
+            },
+            error: (error) => {
+                this.errorMessage =
+                    error?.error?.message || 'Failed to create team.';
+
+                this.change.markForCheck();
+            }
         });
-
-        this.showCreateTeamModal = false;
-        this.change.markForCheck();
     }
 
 
