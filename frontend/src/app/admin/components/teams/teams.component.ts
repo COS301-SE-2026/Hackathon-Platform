@@ -10,7 +10,6 @@ interface TeamMember {
     initial: string;
     email: string;
     isLeader: boolean;
-    isBanned: boolean;
     joinedAtLabel: string;
 }
 
@@ -18,7 +17,7 @@ interface Team {
     teamId: string;
     name: string;
     members: TeamMember[];
-    status: 'active' | 'banned';
+    status: 'active' | 'inactive';
     createdAtLabel: string;
 }
 
@@ -88,10 +87,10 @@ export class TeamsComponent implements OnInit {
                     initial: member.fullName.charAt(0).toUpperCase() || '?',
                     email: member.email,
                     isLeader: member.role === 'LEADER',
-                    isBanned: false,
                     joinedAtLabel: this.formatJoinedAt(member.joinedAt)
                 })),
-                status: team.status === 'ACTIVE' ? 'active' : 'banned',
+                
+                status: team.status === 'ACTIVE' ? 'active' : 'inactive',
                 createdAtLabel: this.formatCreatedAt(team.createdAt)
                 }));
 
@@ -165,7 +164,6 @@ export class TeamsComponent implements OnInit {
             initial: draft.name.charAt(0).toUpperCase() || '?',
             email: draft.email,
             isLeader: index ===0,
-            isBanned: false,
             joinedAtLabel: 'Just now'
 
         }));
@@ -181,13 +179,6 @@ export class TeamsComponent implements OnInit {
         this.change.markForCheck();
     }
 
-    deleteTeam(teamId: string): void {
-        this.teams = this.teams.filter(team => team.teamId !== teamId);
-        if (this.expandedTeamId === teamId){
-            this.expandedTeamId = null;
-        }
-        this.change.markForCheck();
-    }
 
     toggleTeam(teamId: string): void {
         this.expandedTeamId = this.expandedTeamId === teamId ? null : teamId;
@@ -209,7 +200,6 @@ export class TeamsComponent implements OnInit {
             initial: name.charAt(0).toUpperCase() || '?',
             email: this.memberEmailDrafts[teamId]?.trim() || '',
             isLeader: team.members.length === 0,
-            isBanned: false,
             joinedAtLabel: 'Just now'
         });
 
@@ -218,27 +208,24 @@ export class TeamsComponent implements OnInit {
         this.change.markForCheck();
     }
 
-    removeMember(teamId: string, memberId: string): void {
-        const team = this.teams.find(t => t.teamId === teamId);
-       if (!team){
-            return;
-        }
-        team.members = team.members.filter(member => member.memberId !== memberId);
-        this.change.markForCheck();
+   removeMember(teamId: string, memberId: string): void {
+    const team = this.teams.find(t => t.teamId === teamId);
+
+    if (!team) {
+        return;
     }
 
-    toggleBan(teamId: string, memberId: string): void {
-        const team = this.teams.find(t => t.teamId === teamId);
-       if (!team){
-            return;
-        }
-        const member = team.members.find(m => m.memberId === memberId);
-       if (!member ){
-            return;
-        }
-        member.isBanned = !member.isBanned;
-        this.change.markForCheck();
+    this.teamService.removeTeamMember(this.eventId, teamId, memberId).subscribe({
 
-    }
+        next: () => {
+            team.members = team.members.filter(member => member.memberId !== memberId );
+            this.change.markForCheck();
+        },
+        error: () => {
+            this.errorMessage = 'Failed to remove team member.';
+            this.change.markForCheck();
+        }
+    });
+}
 
 }    

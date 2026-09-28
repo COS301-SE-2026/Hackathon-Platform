@@ -43,7 +43,7 @@
                                 <div class = "team-meta">
                                     <div class = "team-title-row">
                                         <span class = "team-title">{{team.name}}</span>
-                                        <span class = "status-tag" [ngClass] = "team.status === 'banned' ? 'status-tag-banned' : 'status-tag-active'">{{team.status === 'banned' ? 'Banned' : 'Active'}}</span>
+                                       <span class="status-tag" [ngClass]="team.status === 'inactive' ? 'status-tag-inactive' : 'status-tag-active'"> {{team.status === 'inactive' ? 'Inactive' : 'Active'}}</span>
                                     </div>
                                     <p class = "team-subline">
                                         {{team.members.length}} member{{team.members.length === 1 ? '' : 's'}} &middot; Created {{team.createdAtLabel}}
@@ -52,13 +52,7 @@
                             </div>
 
             <div class  = "team-row-actions">
-                <button
-                type ="button"
-                class = "btn-delete-team"
-                (click) = "deleteTeam(team.teamId)"
-                aria-label = "Delete team">
-                <i class = "pi pi-trash"></i>
-            </button>
+               
             <button
             type="button"
             class = "btn-view-team"
@@ -77,34 +71,24 @@
                         <div class = "member-list-wrap">
                             <div class = "member-list">
                                 @for (member of team.members; track member.memberId){
-                                    <div class = "member-card" [class.member-card-banned] = "member.isBanned">
+                                    <div class = "member-card">
                                         <div class = "member-header">
                                             <div class = "member-author">
                                                 <span class = "member-avatar">{{member.initial}}</span>
                                                 <div>
                                                     <span class = "member-name">{{member.name}}</span>
                                                     <span class = "role-tag" [ngClass] = "member.isLeader ? 'role-tag-admin' : 'role-tag-participant'">{{member.isLeader ? 'Leader' : 'Member'}}</span>
-                                                    @if (member.isBanned){
-                                                        <span class = "role-tag role-tag-banned">Banned</span>
-                                                    }
                                                 </div>
                                             </div>
                                             <div class = "member-header-right">
                                                 <span class = "member-timestamp">Joined {{member.joinedAtLabel}}</span>
                                                 <button
-                                                type ="button"
-                                                class = "btn-ban"
-                                                [class.btn-unban] = "member.isBanned"
-                                                (click) = "toggleBan(team.teamId, member.memberId)"> 
-                                                {{member.isBanned ? 'Unban' : 'Ban'}}
-                                            </button>
-                                             <button
-                                                type ="button"
-                                                class = "member-delete-btn"
-                                                (click) = "removeMember(team.teamId, member.memberId)"
-                                                aria-label = "Remove member">
-                                                <i class = "pi pi-times"></i>
-                                            </button>
+                                                    type="button"
+                                                    class="member-delete-btn"
+                                                    (click)="removeMember(team.teamId, member.memberId)"
+                                                    aria-label="Remove member">
+                                                    <i class="pi pi-times"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
