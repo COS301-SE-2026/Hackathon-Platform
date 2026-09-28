@@ -91,5 +91,7 @@ getEventTeams(eventId: string): Observable<AdminTeamResponse[]> {
     return this.http.delete<void>(`${environment.apiUrl}/api/admin/events/${eventId}/teams/${teamId}/members/${userId}`);
   }
 
-
+    addTeamMember( eventId: string, teamId: string, email: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/admin/events/${eventId}/teams/${teamId}/members`,{ email });
+  }
 }
