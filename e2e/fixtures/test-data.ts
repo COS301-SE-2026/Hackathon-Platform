@@ -1,5 +1,6 @@
+import { randomInt } from 'node:crypto';
 import * as dotenv from 'dotenv';
-import * as path from 'path';
+import * as path from 'node:path';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env'), quiet: true } as dotenv.DotenvConfigOptions);
 
@@ -23,7 +24,7 @@ export const users = {
 };
 
 export function uniqueSuffix(): string {
-    return `${Date.now()}_${Math.floor(Math.random()*10000)}`;
+    return `${Date.now()}_${randomInt(10000)}`;
 }
 
 export function randomEmail(prefix = 'e2e_user'): string {

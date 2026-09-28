@@ -16,7 +16,7 @@ export async function waitForVerificationToken(email: string, timeoutMs = 20_000
                 if(messages?.length){
                     const msg = await (await ctx.get(`/api/v1/message/${messages[0].ID}`)).json();
                     const body: string = `${msg.Text ?? ''} ${msg.HTML ?? ''}`;
-                    const m = body.match(/verify-email\?token=([A-Za-z0-9_\-%.]+)/);
+                    const m = /verify-email\?token=([A-Za-z0-9_\-%.]+)/.exec(body);
                     if(m){
                         return decodeURIComponent(m[1]);
                     }
