@@ -9,6 +9,16 @@ export interface CreateTeamRequest {
   eventId?: string | null;
 }
 
+export interface AdminTeamResponse {
+  teamId: string;
+  teamName: string;
+  eventId: string;
+  createdByUserId: string;
+  createdAt: string;
+  status: string;
+  members: TeamMemberResponse[];
+}
+
 export interface TeamResponse {
   teamId: string;
   teamName: string;
@@ -70,4 +80,13 @@ export class TeamService {
   getTeamMembers(teamId: string): Observable<TeamMemberResponse[]> {
     return this.http.get<TeamMemberResponse[]>(`${this.baseUrl}/${teamId}/members`);
   }
+
+getEventTeams(eventId: string): Observable<AdminTeamResponse[]> {
+  return this.http.get<AdminTeamResponse[]>(
+    `${environment.apiUrl}/api/admin/events/${eventId}/teams`
+  );
+}
+
+
+
 }
