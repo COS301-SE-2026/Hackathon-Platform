@@ -24,7 +24,6 @@ async goto(): Promise<void>{
     } else {
         await this.page.goto(`/participant/events/${this.eventId}/forum`);
         await this.page.waitForSelector('.forum-page', {timeout: 10_000});
-        await this.page.waitForLoadState('networkidle');
     }
 } 
 
@@ -60,8 +59,20 @@ async expandThread(title: string){
 
 async replyToThread(title: string, body: string){
     const card = this.threadByTitle(title);
-    await card.locator('.reply-compose textarea').fill(body);
+    const textarea = card.locator('.reply-compose textarea');
     const postBtn = card.getByRole('button', {name: /post reply/i});
+
+    for (let attempt = 0; attempt<3; attempt++){
+        await textarea.fill(body);
+        try{
+            await expect(postBtn).toBeEnabled({timeout: 3_000});
+            await postBtn.click({timeout: 3_000});
+            return;
+        }catch{
+            //retry
+        }
+    }
+    await textarea.fill(body);
     await expect(postBtn).toBeEnabled({ timeout: 5_000});
     await postBtn.click();
 

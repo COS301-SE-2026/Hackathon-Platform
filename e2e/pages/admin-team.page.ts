@@ -6,7 +6,6 @@ export class AdminTeamPage{
 async goto(): Promise<void>{
     await this.page.goto(`/admin/events`);
     
-    await this.page.waitForLoadState('networkidle');
 
     const eventRow = this.page.locator('.event-card', {hasText: this.eventName}).first();
     await eventRow.waitFor({state: 'visible', timeout: 5000});
