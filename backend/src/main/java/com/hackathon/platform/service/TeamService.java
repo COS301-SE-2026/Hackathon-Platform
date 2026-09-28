@@ -223,15 +223,30 @@ public class TeamService {
   /** Leave a team. Approved members are marked LEFT; pending requests are deleted. */
   @Transactional
   public void leaveTeam(UUID teamId, UUID currentUserId) {
-    TeamMember membership =
-        teamMemberRepository
-            .findByTeamIdAndUserId(teamId, currentUserId)
-            .orElseThrow(() -> new RuntimeException("User not in team"));
+    Team team = teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+          
+    TeamMember membership = teamMemberRepository.findByTeamIdAndUserId(teamId, currentUserId).orElseThrow(() -> new RuntimeException("User not in team"));
 
-    if ("APPROVED".equals(membership.getStatus())) {
-      membership.setStatus("LEFT");
-      teamMemberRepository.save(membership);
-    } else if ("PENDING".equals(membership.getStatus())) {
+        if ("APPROVED".equals(membership.getStatus())) {
+
+        boolean leavingLeader = currentUserId.equals(team.getCreatedByUserId());
+
+        membership.setStatus("LEFT");
+        teamMemberRepository.save(membership);
+
+        if (leavingLeader) {
+          List<TeamMember> remainingMembers =
+              teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED");
+
+          if (!remainingMembers.isEmpty()) {
+            TeamMember newLeader = remainingMembers.stream().min((first, second) -> first.getJoinedAt().compareTo(second.getJoinedAt())).orElseThrow();
+            team.setCreatedByUserId(newLeader.getUserId());
+            teamRepository.save(team);
+          }
+        }
+      }
+          
+    else if ("PENDING".equals(membership.getStatus())) {
       teamMemberRepository.delete(membership);
       return;
     } else {
@@ -240,7 +255,6 @@ public class TeamService {
 
     long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
     if (approvedCount == 0) {
-      Team team = teamRepository.findById(teamId).orElseThrow();
       team.setStatus("INACTIVE");
       teamRepository.save(team);
     }
