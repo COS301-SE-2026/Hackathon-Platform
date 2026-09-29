@@ -2,6 +2,7 @@ import { ChangeDetectorRef,Component,inject,OnInit,Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
+import { EventService, EventParticipantResponse } from '../../../services/event.service';
 
 type DietaryTagKind = 'allergy' | 'intolerance' | 'preference';
 
@@ -34,6 +35,7 @@ interface TeamDietaryGroup{
 export class DietaryRequirementsComponent implements OnInit {
     private readonly change = inject(ChangeDetectorRef);
     private readonly route = inject(ActivatedRoute);
+    private readonly eventService = inject(EventService);
 
     @Input() hackathonId = '';
     @Input() eventId = '';
@@ -46,16 +48,20 @@ export class DietaryRequirementsComponent implements OnInit {
 
     
     ngOnInit(): void {
-        this.hackathonId = this.hackathonId ||  this.route.snapshot.paramMap.get('hackathonId') || '';
-        this.eventId = this.eventId ||  this.route.snapshot.paramMap.get('eventId') || '';
+    this.hackathonId =
+        this.hackathonId || this.route.snapshot.paramMap.get('hackathonId') || '';
 
-        if (!this.eventId){
-            
-            this.errorMessage = 'No event ID provided.';
-            return;
-        }
-        this.isLoading = false;
+    this.eventId =
+        this.eventId || this.route.snapshot.paramMap.get('eventId') || '';
+
+    if (!this.eventId) {
+        this.errorMessage = 'No event ID provided.';
+        return;
     }
+
+    this.loadParticipants();
+}
+
     get totalParticipants(): number{
         return this.teamGroups.reduce((sum, group) => sum + group.members.length,0);
     }
@@ -90,5 +96,71 @@ export class DietaryRequirementsComponent implements OnInit {
         })
         .filter(group => group.members.length > 0);
     }
+
+
+private loadParticipants(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.eventService.getEventParticipants(this.eventId).subscribe({
+        next: (participants) => {
+            this.teamGroups = this.buildTeamGroups(participants);
+            this.isLoading = false;
+            this.change.markForCheck();
+        },
+        error: (error) => {
+            console.error('Failed to load participants:', error);
+            this.errorMessage = 'Failed to load participant dietary requirements.';
+            this.isLoading = false;
+            this.change.markForCheck();
+        }
+    });
+}
+
+private buildTeamGroups(
+    participants: EventParticipantResponse[]
+): TeamDietaryGroup[] {
+
+    const groups = new Map<string, TeamDietaryGroup>();
+
+    participants.forEach(participant => {
+
+        const teamId = participant.teamId ?? 'no-team';
+        const teamName = participant.teamName ?? 'No Team';
+
+        if (!groups.has(teamId)) {
+            groups.set(teamId, {
+                teamId,
+                teamName,
+                members: []
+            });
+        }
+
+        const tags: DietaryTag[] = [];
+
+        if (participant.allergies?.trim()) {
+            tags.push({
+                label: participant.allergies.trim(),
+                kind: 'allergy'
+            });
+        }
+
+        if (participant.dietaryReq?.trim()) {
+            tags.push({
+                label: participant.dietaryReq.trim(),
+                kind: 'preference'
+            });
+        }
+
+        groups.get(teamId)!.members.push({
+            participantId: participant.userId,
+            name: participant.fullName,
+            initial: participant.fullName.charAt(0).toUpperCase(),
+            tags
+        });
+    });
+
+    return Array.from(groups.values());
+}
 
 }

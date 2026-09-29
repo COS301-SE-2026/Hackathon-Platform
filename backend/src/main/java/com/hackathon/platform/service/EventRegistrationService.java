@@ -68,6 +68,7 @@ public class EventRegistrationService {
 
   public List<EventRegistrationResponse> getMyRegistrations(UUID user) {
     return eventRegistrationRepo.findByUserId(user).stream()
+        .filter(reg -> !reg.isBanned())
         .map(this::toResponse)
         .collect(Collectors.toList());
   }

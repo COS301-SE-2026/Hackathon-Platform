@@ -143,10 +143,13 @@ export interface EventParticipantResponse {
   userId: string;
   fullName: string;
   email: string;
-  teamId: string;
-  teamName: string;
-  teamRole: 'LEADER' | 'MEMBER';
-  joinedAt: string;
+   teamId: string | null;
+  teamName: string | null;
+  teamRole: 'LEADER' | 'MEMBER' | null;
+  joinedAt: string | null;
+  banned: boolean;
+  dietaryReq?: string | null;
+  allergies?: string | null;
 }
 
 @Injectable({
@@ -248,12 +251,13 @@ export class EventService {
     );
   }
 
-  removeParticipant(
-    eventId: string,
-    userId: string
-  ): Observable<void> {
-    return this.http.delete<void>(
-      `${this.baseUrl}/admin/events/${eventId}/participants/${userId}`
+  banParticipant( eventId: string, userId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/admin/events/${eventId}/participants/${userId}/ban`,{}
+    );
+  }
+
+  unbanParticipant(eventId: string, userId: string): Observable<void> {
+    return this.http.post<void>( `${this.baseUrl}/admin/events/${eventId}/participants/${userId}/unban`,{}
     );
   }
 

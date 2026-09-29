@@ -1,68 +1,15 @@
-<div class = "admin-shell">
-    <nav class = "navbar">
-        <div class = "navbar-container">
-            <div class = "navbar-brand">
-                <a routerLink = "/admin/events">
-                <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform" class = "brand-logo" />
-                </a>
-            </div>
+<div class="admin-shell">
 
-      
+    <app-navbar
+        [links]= "adminLinks"
+        [firstName] ="firstName"
+        [lastName]="lastName "
+        [profileSubtitle]="profileSubtitle"
+        (logout)="logout()">
+    </app-navbar>
 
-        <div class = "navbar-links" [class.navbar-links-open] = "isMenuOpen">
-            <ul>
-                <li>
-                    <a routerLink = "/admin/events" routerLinkActive = "active" (click)="closeMenu()">
-                        <span>Events</span>
-                    </a>
-                </li>
-                <li>
-                    <a routerLink = "/admin/hackathons" routerLinkActive = "active" (click)="closeMenu()">
-                    <span>Hackathons</span>
-                 </a>
-                </li>
-    
-            </ul>  
-        </div>
-
-
-            <div class = "navbar-right">
-                <button class = "navbar-profile" (click) = "toggleProfileMenu()" aria-haspopup="true" [attr.aria-expanded]="isProfileMenuOpen">
-                    <div class = "avatar-circle">{{ getInitials() }}</div>
-                <div class = "user-info">
-                    <span class = "user-name">{{ userName }}</span>
-                    <span class = "user-role">{{ userRole }}</span>
-                </div>
-                <i class = "pi pi-chevron-down profile-chevron"></i>
-                </button>
-                <button class = "navbar-toggle" aria-label = "Toggle navigation" (click) = "toggleMenu()">
-                    <i class = "pi" [ngClass] ="isMenuOpen ? 'pi-times' : 'pi-bars'"></i>
-                   
-                </button>
+    <div class="admin-content">
+      <router-outlet></router-outlet>
     </div>
+  
 </div>
-        @if(isProfileMenuOpen){
-            <div class = "profile-dropdown">
-                <div class = "dropdown-divider"></div>
-                <button class = "dropdown-item" (click) = "logout()">
-                    <i class = "pi pi-sign-out"></i>
-                    Logout
-                </button>
-            </div>
-        }
-        @if (isNotificationsOpen){
-            <div class = "notifications-dropdown">
-                <div class = "dropdown-header">Notifications</div>
-                @if (notificationCount === 0){
-                    <div class = "dropdown-empty">No new notifications</div>
-                }
-            </div>
-        }
-    </nav>
-    <main class = "admin-main">
-        <div class = "admin-content">
-            <router-outlet></router-outlet>
-        </div>
-    </main>
-</div>
-
