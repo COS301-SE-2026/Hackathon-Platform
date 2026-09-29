@@ -30,9 +30,18 @@ export function inferLevelFileType(fileName: string): string {
   }
 }
 
+export interface TeamSubmission{
+  submissionId: number;
+  teamId: string;
+  levelId: number;
+  score: number | null;
+  status: string;
+  submittedAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class StorageService {
-    
+
   uploadHackathonImage(hackathonId : string, file: File): Observable<{storageKey: string; blobUrl : string}>{
     const formData = new FormData();
     formData.append('file',file);
@@ -118,6 +127,14 @@ export class StorageService {
     return this.http.get<{ url: string }>(
       `${this.baseUrl}/events/${eventId}/teams/${teamId}/submissions/${submissionId}/output/${filename}`
     );
+  }
+
+  getTeamSubmissions(teamId: string): Observable<TeamSubmission[]> {
+    return this.http.get<TeamSubmission[]>(`${environment.apiUrl}/api/scoring/teams/${teamId}/submissions`);
+  }
+
+  downloadSubmissionArchive(eventId: string, teamId: string, levelId: string | number, submissionId: string | number): Observable<Blob>{
+    return this.http.get(`${this.baseUrl}/events/${eventId}/teams/${teamId}/levels/${levelId}/submissions/${submissionId}/archive`, { responseType: 'blob'});
   }
 
   uploadLevelFile(
