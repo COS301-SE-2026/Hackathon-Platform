@@ -56,6 +56,13 @@ jobs:
           distribution: "temurin"
           cache: maven
 
+      - name: Cache data
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repositoryorg/owasp/dependency-check-data
+          key: dependency-check-data-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: dependency-check-data-${{ runner.os }}-
+
       - name: Run OWASP
         working-directory: backend
         run: mvn org.owasp:dependency-check-maven:check -DnvdApiKey="${{ secrets.NVD_API_KEY }}" -DfailBuildOnCVSS=7 -DskipTestScope=false
