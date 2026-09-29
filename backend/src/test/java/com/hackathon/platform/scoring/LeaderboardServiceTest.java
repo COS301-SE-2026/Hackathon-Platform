@@ -34,6 +34,9 @@ class LeaderboardServiceTest {
   @BeforeEach
   void setUp() {
     leaderService = new LeaderboardService(submissionRepo, eventRepo);
+  }
+
+  private void mockNonFrozenEvent() {
     when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
     when(event.getLeaderboardFreezeDateTime()).thenReturn(null);
   }
@@ -64,35 +67,42 @@ class LeaderboardServiceTest {
   }
 
   @Test
-  void getEventLeaderboard_assignRanksInRepositoryOrder() {
-    when(submissionRepo.findLeaderboardByEventId(EVENT_ID))
-        .thenReturn(
-            List.of(
-                entry(FIRST_TEAM, "Debug Thugs", "97.00", SCORED_AT),
-                entry(SECOND_TEAM, "Byte Busters", "85.00", SCORED_AT)));
+void getEventLeaderboard_assignRanksInRepositoryOrder() {
+  mockNonFrozenEvent();
 
-    List<LeaderboardEntryResponse> res = leaderService.getEventLeaderboard(EVENT_ID);
+  when(submissionRepo.findLeaderboardByEventId(EVENT_ID))
+      .thenReturn(
+          List.of(
+              entry(FIRST_TEAM, "Debug Thugs", "97.00", SCORED_AT),
+              entry(SECOND_TEAM, "Byte Busters", "85.00", SCORED_AT)));
 
-    assertThat(res).hasSize(2);
+  List<LeaderboardEntryResponse> res =
+      leaderService.getEventLeaderboard(EVENT_ID);
 
-    assertThat(res.get(0).getRank()).isEqualTo(1);
-    assertThat(res.get(0).getTeamId()).isEqualTo(FIRST_TEAM);
-    assertThat(res.get(0).getTeamName()).isEqualTo("Debug Thugs");
-    assertThat(res.get(0).getBestScore()).isEqualByComparingTo("97.00");
-    assertThat(res.get(0).getLastScoredAt()).isEqualTo(SCORED_AT);
+  assertThat(res).hasSize(2);
 
-    assertThat(res.get(1).getRank()).isEqualTo(2);
-    assertThat(res.get(1).getTeamId()).isEqualTo(SECOND_TEAM);
-    assertThat(res.get(1).getTeamName()).isEqualTo("Byte Busters");
-    assertThat(res.get(1).getBestScore()).isEqualByComparingTo("85.00");
-    assertThat(res.get(1).getLastScoredAt()).isEqualTo(SCORED_AT);
-  }
+  assertThat(res.get(0).getRank()).isEqualTo(1);
+  assertThat(res.get(0).getTeamId()).isEqualTo(FIRST_TEAM);
+  assertThat(res.get(0).getTeamName()).isEqualTo("Debug Thugs");
+  assertThat(res.get(0).getBestScore()).isEqualByComparingTo("97.00");
+  assertThat(res.get(0).getLastScoredAt()).isEqualTo(SCORED_AT);
+
+  assertThat(res.get(1).getRank()).isEqualTo(2);
+  assertThat(res.get(1).getTeamId()).isEqualTo(SECOND_TEAM);
+  assertThat(res.get(1).getTeamName()).isEqualTo("Byte Busters");
+  assertThat(res.get(1).getBestScore()).isEqualByComparingTo("85.00");
+  assertThat(res.get(1).getLastScoredAt()).isEqualTo(SCORED_AT);
+}
 
   @Test
   void getEventLeaderboard_returnsEmptyListWhenThereAreNoEntries() {
-    when(submissionRepo.findLeaderboardByEventId(EVENT_ID)).thenReturn(List.of());
+    mockNonFrozenEvent();
 
-    List<LeaderboardEntryResponse> res = leaderService.getEventLeaderboard(EVENT_ID);
+    when(submissionRepo.findLeaderboardByEventId(EVENT_ID))
+        .thenReturn(List.of());
+
+    List<LeaderboardEntryResponse> res =
+        leaderService.getEventLeaderboard(EVENT_ID);
 
     assertThat(res).isEmpty();
   }
