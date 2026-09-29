@@ -8,7 +8,7 @@ import com.hackathon.platform.dto.CertificateTemplateRequest;
 import com.hackathon.platform.dto.CertificateVerificationResponse;
 import com.hackathon.platform.model.*;
 import com.hackathon.platform.repository.*;
-
+import com.hackathon.platform.storage.BlobPath;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import com.hackathon.platform.storage.BlobPath;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -61,11 +59,17 @@ public class CertificateService {
   private final CertificateGenerator certificateGenerator;
 
   public CertificateService(
-          EventRepository eventRepo,
-          HackathonRepository hackRepo,
-          EventRegistrationRepository eventRegRepo,
-          StorageService storageService,
-          AzureBlobConfig blobConfig, CertificateTemplateRepository templateRepo, CertificateGenerationRunRepository runRepo, CertificateIssuedRepository issuedRepo, CertificateRecipientResolver recipientResolver, CertificateGenerator certificateGenerator, TeamRepository teamRepository) {
+      EventRepository eventRepo,
+      HackathonRepository hackRepo,
+      EventRegistrationRepository eventRegRepo,
+      StorageService storageService,
+      AzureBlobConfig blobConfig,
+      CertificateTemplateRepository templateRepo,
+      CertificateGenerationRunRepository runRepo,
+      CertificateIssuedRepository issuedRepo,
+      CertificateRecipientResolver recipientResolver,
+      CertificateGenerator certificateGenerator,
+      TeamRepository teamRepository) {
     this.eventRepo = eventRepo;
     this.hackRepo = hackRepo;
     this.eventRegRepo = eventRegRepo;
@@ -270,7 +274,7 @@ public class CertificateService {
   }
 
   @Transactional
-  public CertificateTemplate createTemplate(CertificateTemplateRequest req, UUID createdByUserId){
+  public CertificateTemplate createTemplate(CertificateTemplateRequest req, UUID createdByUserId) {
     CertificateTemplate template = new CertificateTemplate();
     template.setName(req.getName());
     template.setEventId(req.getEventId());
@@ -281,7 +285,7 @@ public class CertificateService {
   }
 
   @Transactional
-  public CertificateTemplate updateTemplate(UUID templateId, CertificateTemplateRequest req){
+  public CertificateTemplate updateTemplate(UUID templateId, CertificateTemplateRequest req) {
     CertificateTemplate template = getTemplate(templateId);
     template.setName(req.getName());
     template.setLayout(req.getLayout());
@@ -290,9 +294,10 @@ public class CertificateService {
   }
 
   @Transactional
-  public String uploadBackground(UUID templateId, MultipartFile file){
+  public String uploadBackground(UUID templateId, MultipartFile file) {
     CertificateTemplate template = getTemplate(templateId);
-    String storageKey = BlobPath.certificateBackground(templateId.toString(), file.getOriginalFilename());
+    String storageKey =
+        BlobPath.certificateBackground(templateId.toString(), file.getOriginalFilename());
     storageService.upload(blob.getEventResourcesContainer(), storageKey, file);
     template.setBackgroundStorageKey(storageKey);
     template.setUpdatedAt(OffsetDateTime.now());
@@ -301,21 +306,22 @@ public class CertificateService {
   }
 
   @Transactional(readOnly = true)
-  public String uploadTemplateAsset(UUID templateId, MultipartFile file){
+  public String uploadTemplateAsset(UUID templateId, MultipartFile file) {
     getTemplate(templateId);
-    String storageKey = BlobPath.certificateAsset(templateId.toString(), file.getOriginalFilename());
+    String storageKey =
+        BlobPath.certificateAsset(templateId.toString(), file.getOriginalFilename());
     storageService.upload(blob.getEventResourcesContainer(), storageKey, file);
     return storageKey;
   }
 
-  public String resolveAssetUrl(String storageKey){
+  public String resolveAssetUrl(String storageKey) {
     return storageService.generatePresignedUrl(blob.getEventResourcesContainer(), storageKey, 60);
   }
 
-  public Map<String, String> resolveTemplateAssetUrls(CertificateTemplate template){
+  public Map<String, String> resolveTemplateAssetUrls(CertificateTemplate template) {
     Map<String, String> urls = new HashMap<>();
-    for(var el : template.getLayout().getElements()){
-      if("IMAGE".equals(el.getType()) && el.getImageStorageKey() != null){
+    for (var el : template.getLayout().getElements()) {
+      if ("IMAGE".equals(el.getType()) && el.getImageStorageKey() != null) {
         urls.computeIfAbsent(el.getImageStorageKey(), this::resolveAssetUrl);
       }
     }
@@ -323,34 +329,38 @@ public class CertificateService {
   }
 
   @Transactional(readOnly = true)
-  public CertificateTemplate getTemplate(UUID templateId){
-    return templateRepo.findById(templateId).orElseThrow(() -> new IllegalArgumentException("Certificate template not found"));
+  public CertificateTemplate getTemplate(UUID templateId) {
+    return templateRepo
+        .findById(templateId)
+        .orElseThrow(() -> new IllegalArgumentException("Certificate template not found"));
   }
 
   @Transactional(readOnly = true)
-  public List<CertificateTemplate> getTemplatesForEvent(UUID eventId, UUID hackathonId){
+  public List<CertificateTemplate> getTemplatesForEvent(UUID eventId, UUID hackathonId) {
     List<CertificateTemplate> templates = templateRepo.findByEventId(eventId);
-    if(hackathonId != null){
+    if (hackathonId != null) {
       templates.addAll(templateRepo.findByHackathonIdAndEventIdIsNull(hackathonId));
     }
     return templates;
   }
 
   @Transactional
-  public void deleteTemplate(UUID templateId){
+  public void deleteTemplate(UUID templateId) {
     templateRepo.deleteById(templateId);
   }
 
-  public String resolveBackgroundUrl(CertificateTemplate template){
-    if(template.getBackgroundStorageKey() == null){
+  public String resolveBackgroundUrl(CertificateTemplate template) {
+    if (template.getBackgroundStorageKey() == null) {
       return null;
     }
-    return storageService.generatePresignedUrl(blob.getEventResourcesContainer(), template.getBackgroundStorageKey(), 60);
+    return storageService.generatePresignedUrl(
+        blob.getEventResourcesContainer(), template.getBackgroundStorageKey(), 60);
   }
 
   @Transactional
-  public CertificateGenerationRun startGeneration(UUID eventId, UUID templateId, String scope, Integer topN, UUID requestedByUserId){
-    if(!eventRepo.existsById(eventId)){
+  public CertificateGenerationRun startGeneration(
+      UUID eventId, UUID templateId, String scope, Integer topN, UUID requestedByUserId) {
+    if (!eventRepo.existsById(eventId)) {
       throw new IllegalArgumentException("Event not found");
     }
     getTemplate(templateId);
@@ -370,37 +380,48 @@ public class CertificateService {
   @Transactional
   public void runGeneration(UUID runId) {
     CertificateGenerationRun run = runRepo.findById(runId).orElse(null);
-    if(run == null){
+    if (run == null) {
       return;
     }
-    try{
+    try {
       run.setStatus("RUNNING");
       runRepo.save(run);
-      Event event = eventRepo.findById(run.getEventId()).orElseThrow(() -> new IllegalArgumentException("Event not found"));
+      Event event =
+          eventRepo
+              .findById(run.getEventId())
+              .orElseThrow(() -> new IllegalArgumentException("Event not found"));
       CertificateTemplate template = getTemplate(run.getTemplateId());
       byte[] backgroundBytes = null;
-      if(template.getBackgroundStorageKey() != null){
-        backgroundBytes = storageService.download(blob.getEventResourcesContainer(), template.getBackgroundStorageKey()).readAllBytes();
+      if (template.getBackgroundStorageKey() != null) {
+        backgroundBytes =
+            storageService
+                .download(blob.getEventResourcesContainer(), template.getBackgroundStorageKey())
+                .readAllBytes();
       }
       Map<String, byte[]> imageAssetBytes = new HashMap<>();
-      for(var el : template.getLayout().getElements()){
-        if("IMAGE".equals(el.getType()) && el.getImageStorageKey() != null){
-          imageAssetBytes.computeIfAbsent(el.getImageStorageKey(), key -> {
-            try {
-              return storageService.download(blob.getEventResourcesContainer(), key).readAllBytes();
-            } catch (IOException e) {
-              return null;
-            }
-          });
+      for (var el : template.getLayout().getElements()) {
+        if ("IMAGE".equals(el.getType()) && el.getImageStorageKey() != null) {
+          imageAssetBytes.computeIfAbsent(
+              el.getImageStorageKey(),
+              key -> {
+                try {
+                  return storageService
+                      .download(blob.getEventResourcesContainer(), key)
+                      .readAllBytes();
+                } catch (IOException e) {
+                  return null;
+                }
+              });
         }
       }
 
-      List<CertificateRecipient> recipients = recipientResolver.resolve(event, run.getScope(), run.getTopN());
+      List<CertificateRecipient> recipients =
+          recipientResolver.resolve(event, run.getScope(), run.getTopN());
       run.setTotalCount(recipients.size());
       runRepo.save(run);
 
       int completed = 0;
-      for (CertificateRecipient recipient : recipients){
+      for (CertificateRecipient recipient : recipients) {
         issueOne(run, template, backgroundBytes, imageAssetBytes, recipient, event);
         completed++;
         run.setCompletedCount(completed);
@@ -418,14 +439,31 @@ public class CertificateService {
     }
   }
 
-  private void issueOne(CertificateGenerationRun run, CertificateTemplate template, byte[] backgroundBytes, Map<String, byte[]> imageAssetBytes, CertificateRecipient recipient, Event event) throws Exception {
+  private void issueOne(
+      CertificateGenerationRun run,
+      CertificateTemplate template,
+      byte[] backgroundBytes,
+      Map<String, byte[]> imageAssetBytes,
+      CertificateRecipient recipient,
+      Event event)
+      throws Exception {
     UUID certificateId = UUID.randomUUID();
     String verificationCode = generateVerificationCode();
     String verificationUrl = VERIFICATION_BASE_URL + verificationCode;
 
-    byte[] pdfBytes = certificateGenerator.generate(template.getLayout(), backgroundBytes, imageAssetBytes, recipient.getFieldValues(), verificationUrl, recipient.getCertificateType());
-    String storageKey = BlobPath.certificatePdf(event.getEventId().toString(), run.getRunId().toString(), certificateId.toString());
-    storageService.uploadBytes(blob.getEventResourcesContainer(), storageKey, pdfBytes, "application/pdf");
+    byte[] pdfBytes =
+        certificateGenerator.generate(
+            template.getLayout(),
+            backgroundBytes,
+            imageAssetBytes,
+            recipient.getFieldValues(),
+            verificationUrl,
+            recipient.getCertificateType());
+    String storageKey =
+        BlobPath.certificatePdf(
+            event.getEventId().toString(), run.getRunId().toString(), certificateId.toString());
+    storageService.uploadBytes(
+        blob.getEventResourcesContainer(), storageKey, pdfBytes, "application/pdf");
 
     CertificateIssued issued = new CertificateIssued();
     issued.setCertificateId(certificateId);
@@ -442,11 +480,11 @@ public class CertificateService {
     issuedRepo.save(issued);
   }
 
-  private String generateVerificationCode(){
+  private String generateVerificationCode() {
     String code;
-    do{
+    do {
       StringBuilder sb = new StringBuilder(10);
-      for (int i=0; i<10;i++){
+      for (int i = 0; i < 10; i++) {
         sb.append(VERIFICATION_ALPHABET.charAt(RANDOM.nextInt(VERIFICATION_ALPHABET.length())));
       }
       code = sb.toString();
@@ -455,40 +493,57 @@ public class CertificateService {
   }
 
   @Transactional(readOnly = true)
-  public List<CertificateIssued> getIssuedForEvent(UUID eventId){
+  public List<CertificateIssued> getIssuedForEvent(UUID eventId) {
     return issuedRepo.findByEventIdOrderByIssuedAtDesc(eventId);
   }
 
   @Transactional(readOnly = true)
-  public CertificateGenerationRun getRun(UUID runId){
-    return runRepo.findById(runId).orElseThrow(() -> new IllegalArgumentException("Generation run not found"));
+  public CertificateGenerationRun getRun(UUID runId) {
+    return runRepo
+        .findById(runId)
+        .orElseThrow(() -> new IllegalArgumentException("Generation run not found"));
   }
 
   @Transactional(readOnly = true)
-  public List<CertificateGenerationRun> getRunsForEvent(UUID eventId){
+  public List<CertificateGenerationRun> getRunsForEvent(UUID eventId) {
     return runRepo.findByEventIdOrderByRequestedAtDesc(eventId);
   }
 
   @Transactional(readOnly = true)
-  public List<CertificateIssued> getIssuedForUser(UUID userId, List<UUID> teamIds){
+  public List<CertificateIssued> getIssuedForUser(UUID userId, List<UUID> teamIds) {
     return issuedRepo.findByUserIdOrTeamIdInOrderByIssuedAtDesc(userId, teamIds);
   }
 
   @Transactional(readOnly = true)
-  public CertificateIssued getIssued(UUID certificateId){
-    return issuedRepo.findById(certificateId).orElseThrow(() -> new IllegalArgumentException("Certificate not found"));
+  public CertificateIssued getIssued(UUID certificateId) {
+    return issuedRepo
+        .findById(certificateId)
+        .orElseThrow(() -> new IllegalArgumentException("Certificate not found"));
   }
 
-  public String resolveDownloadUrl(CertificateIssued cert){
-    return storageService.generatePresignedUrl(blob.getEventResourcesContainer(), cert.getStorageKey(), 60, "certificate-"+cert.getRecipientName().replace(" ", "-")+".pdf");
+  public String resolveDownloadUrl(CertificateIssued cert) {
+    return storageService.generatePresignedUrl(
+        blob.getEventResourcesContainer(),
+        cert.getStorageKey(),
+        60,
+        "certificate-" + cert.getRecipientName().replace(" ", "-") + ".pdf");
   }
 
   @Transactional(readOnly = true)
-  public CertificateVerificationResponse verify(String verificationCode){
-    return issuedRepo.findByVerificationCode(verificationCode).map(
+  public CertificateVerificationResponse verify(String verificationCode) {
+    return issuedRepo
+        .findByVerificationCode(verificationCode)
+        .map(
             cert -> {
               Event event = eventRepo.findById(cert.getEventId()).orElse(null);
-              return new CertificateVerificationResponse(true, cert.getRecipientName(), event == null ? "Unknown event" : event.getName(), cert.getCertificateType(), cert.getRankAtIssue(), cert.getIssuedAt());
-            }).orElse(CertificateVerificationResponse.invalid());
+              return new CertificateVerificationResponse(
+                  true,
+                  cert.getRecipientName(),
+                  event == null ? "Unknown event" : event.getName(),
+                  cert.getCertificateType(),
+                  cert.getRankAtIssue(),
+                  cert.getIssuedAt());
+            })
+        .orElse(CertificateVerificationResponse.invalid());
   }
 }

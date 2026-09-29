@@ -130,7 +130,8 @@ public class AdminCertificateController {
         certificateService.getIssuedForEvent(eventId).stream()
             .map(
                 cert ->
-                    new CertificateIssuedResponse(cert, certificateService.resolveDownloadUrl(cert)))
+                    new CertificateIssuedResponse(
+                        cert, certificateService.resolveDownloadUrl(cert)))
             .toList();
     return ResponseEntity.ok(resp);
   }

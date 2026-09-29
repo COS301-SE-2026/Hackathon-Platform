@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { EventService, EventResponse } from '../../../services/event.service';
-import { CertificateService, CertificateTemplateResponse, CertificateLayout, CertificateElement, CertificateElementType, CertificateField, CertificateGenerationRunResponse, CertificateIssuedResponse, GenerationScope } from '../../../services/certificate.service';
+import { CertificateService, CertificateTemplateResponse, CertificateLayout, CertificateElement, CertificateField, CertificateGenerationRunResponse, CertificateIssuedResponse, GenerationScope } from '../../../services/certificate.service';
 
 const CANVAS_WIDTH = 842;
 const CANVAS_HEIGHT = 595;

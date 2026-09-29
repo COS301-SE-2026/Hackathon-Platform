@@ -29,7 +29,7 @@ public class CertificateVerificationResponse {
     this.issuedAt = issuedAt;
   }
 
-  public static CertificateVerificationResponse invalid(){
+  public static CertificateVerificationResponse invalid() {
     return new CertificateVerificationResponse(false, null, null, null, null, null);
   }
 }

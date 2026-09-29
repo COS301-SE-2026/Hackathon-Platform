@@ -83,16 +83,16 @@
         <div class="designer-body">
           <div class="designer-canvas" [style.width.px]="canvasWidth" [style.height.px]="canvasHeight" [style.backgroundImage]="backgroundUrl ? 'url(' + backgroundUrl + ')': 'none'" (mousemove)="onCanvasMouseMove($event)" (mouseup)="onCanvasMouseUp()" (mouseleave)="onCanvasMouseUp()">
             @for (el of layout.elements; track $index) {
-              <div class="canvas-element" [class.selected]="selectedElementIndex == $index" [class.qr-element]="el.type === 'QR'" [class.text-element]="el.type === 'TEXT'" [class.image-element]="el.type === 'IMAGE'" [style.left.px]="el.x" [style.top.px]="el.y" [style.fontFamily]="el.font || 'Helvetica'" [style.fontSize.px]="el.type == 'TEXT' ? (el.fontSize || 16) : 0" [style.color]="el.color || '#000'" [style.textAlign]="el.align || 'left'" (mousedown)="onElementMouseDown($event, $index)">
+              <div class="canvas-element" [class.selected]="selectedElementIndex === $index" [class.qr-element]="el.type === 'QR'" [class.text-element]="el.type === 'TEXT'" [class.image-element]="el.type === 'IMAGE'" [style.left.px]="el.x" [style.top.px]="el.y" [style.fontFamily]="el.font || 'Helvetica'" [style.fontSize.px]="el.type === 'TEXT' ? (el.fontSize || 16) : 0" [style.color]="el.color || '#000'" [style.textAlign]="el.align || 'left'" (mousedown)="onElementMouseDown($event, $index)">
                 @if (el.type === 'TEXT') {
                   {{ previewText(el) }}
-                } @else if (el.type == 'QR') {
+                } @else if (el.type === 'QR') {
                   <div class="qr-placeholder" [style.width.px]="(el.fontSize || 18) * 5" [style.height.px]="(el.fontSize || 18) * 5">
                     <i class="pi pi-qrcode"></i>
                   </div>
                 } @else {
                   @if (el.imageStorageKey && assetUrlByKey[el.imageStorageKey]) {
-                    <img [src]="assetUrlByKey[el.imageStorageKey]" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80" draggable="false"/>
+                    <img alt="image" [src]="assetUrlByKey[el.imageStorageKey]" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80" draggable="false"/>
                   } @else {
                     <div class="image-placeholder" [style.width.px]="el.width || 150" [style.height.px]="el.height || 80">
                       <i class="pi pi-image"></i>
@@ -109,7 +109,7 @@
 
               @if (el.type === 'TEXT') {
                 <div class="form-group">
-                  <label>Content</label>
+                  <span>Content</span>
                   <select [(ngModel)]="el.field" (ngModelChange)="el.field ? (el.staticText = undefined) : null">
                     <option [ngValue]="null">Static text</option>
                     @for (f of fieldOptions; track f.value) {
@@ -120,14 +120,14 @@
 
                 @if (!el.field) {
                   <div class="form-group">
-                    <label>Static text</label>
+                    <span>Static text</span>
                     <input type="text" [(ngModel)]="el.staticText"/>
                   </div>
                 }
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label>Font</label>
+                    <span>Font</span>
                     <select [(ngModel)]="el.font">
                       <option value="helvetica">Helvetica</option>
                       <option value="helvetica-bold">Helvetica bold</option>
@@ -138,18 +138,18 @@
                     </select>
                   </div>
                   <div class="form-group">
-                    <label>Size</label>
+                    <span>Size</span>
                     <input type="number" [(ngModel)]="el.fontSize" min="6" max="80" />
                   </div>
                 </div>
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label>Colour</label>
+                    <span>Colour</span>
                     <input type="color" [(ngModel)]="el.color" />
                   </div>
                   <div class="form-group">
-                    <label>Align</label>
+                    <span>Align</span>
                     <select [(ngModel)]="el.align">
                       <option value="left">Left</option>
                       <option value="center">Centre</option>
@@ -157,9 +157,9 @@
                     </select>
                   </div>
                 </div>
-              } @else if (el.type =='QR') {
+              } @else if (el.type ==='QR') {
                 <div class="form-group">
-                  <label>Size</label>
+                  <span>Size</span>
                   <input type="number" [(ngModel)]="el.fontSize" min="10" max="60" />
                 </div>
                 <p class="hint">Encodes this certificate with a unique verification link</p>
@@ -172,11 +172,11 @@
                 </div>
                 <div class="form-row">
                   <div class="form-group">
-                    <label>Width</label>
+                    <span>Width</span>
                     <input type="number" [(ngModel)]="el.width" min="10" max="800" />
                   </div>
                   <div class="form-group">
-                    <label>Height</label>
+                    <span>Height</span>
                     <input type="number" [(ngModel)]="el.height" min="10" max="800" />
                   </div>
                 </div>
@@ -184,17 +184,17 @@
 
               <div class="form-row">
                 <div class="form-group">
-                  <label>X</label>
+                  <span>X</span>
                   <input type="number" [(ngModel)]="el.x" />
                 </div>
                 <div class="form-group">
-                  <label>Y</label>
+                  <span>Y</span>
                   <input type="number" [(ngModel)]="el.y" />
                 </div>
               </div>
 
               <div class="form-group">
-                <label>SHow certificate types</label>
+                <span>SHow certificate types</span>
                 <div class="cert-type-checkboxes">
                   @for (type of certTypes; track type) {
                     <label class="checkbox-label">
@@ -231,7 +231,7 @@
 
         @if (generationScope === 'TOP_N') {
           <div class="form-group top-n-input">
-            <label>Top N</label>
+            <span>Top N</span>
             <input type="number" [(ngModel)]="topN" min="1" max="100" />
           </div>
         }
