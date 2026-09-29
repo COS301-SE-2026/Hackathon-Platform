@@ -309,4 +309,8 @@ getEventLeaderboard(eventId: string): Observable<LeaderboardEntryResponse[]> {
   downloadCertificate(eventId: string): Observable<Blob>{
     return this.http.get(`${this.baseUrl}/events/${eventId}/certificate`, {responseType: 'blob'});
   }
+
+  downloadTeamSubmissionPackage(eventId: string, teamId: string): Observable<Blob>{
+  return this.http.get(`${this.baseUrl}/admin/events/${eventId}/teams/${teamId}/submission/download`,{responseType: 'blob'});
+}
 }

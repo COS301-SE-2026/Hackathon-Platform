@@ -255,6 +255,45 @@ font-size: 0.9rem;
   color:#13192d;
 }
 
+.row-download{
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid #d9dee8;
+  border-radius: 7px;
+  background-color: #ffffff;
+  color: #3a4357;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+
+  .pi{
+    font-size: 0.75rem;
+  }
+
+  &:hover:not(:disabled){
+    border-color: #1983c2;
+    color: #1983c2;
+    background-color: #f2f8fc;
+  }
+
+  &:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.download-error{
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: #c0392b;
+}
+
 .rank{
   width: 22px;
   height: 22px;
