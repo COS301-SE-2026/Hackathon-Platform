@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.ecs.EcsClient;
 import software.amazon.awssdk.services.ecs.model.AssignPublicIp;
@@ -22,7 +21,6 @@ import software.amazon.awssdk.services.ecs.model.Task;
 import software.amazon.awssdk.services.ecs.model.TaskOverride;
 
 @Component
-@Profile("prod")
 @RequiredArgsConstructor
 public class EcsJavaWorkspaceRunner implements WorkspaceCodeRunner {
   private static final long PROVISION_TIMEOUT_SECONDS = 120;
