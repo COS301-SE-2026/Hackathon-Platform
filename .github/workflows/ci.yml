@@ -214,12 +214,12 @@ jobs:
           E2E_PARTICIPANT_PASSWORD: ${{ secrets.E2E_PARTICIPANT_PASSWORD }}
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          E2E_API_BASE_URL: http://localhost:8025
+          E2E_API_BASE_URL: http://localhost:8080
           SPRING_MAIL_HOST: localhost
           SPRING_MAIL_PORT: 1025
           SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: 'false'
           SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: 'false'
-          MAILPIT_URL: http://localhost:4200
+          MAILPIT_URL: http://localhost:8025
           E2E_PARTICIPANT_2_EMAIL: e2e.participant@e2e-test.com
           E2E_PARTICIPANT_2_PASSWORD: E2eTestPass!2026
 
