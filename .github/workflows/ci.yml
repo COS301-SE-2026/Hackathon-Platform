@@ -220,7 +220,7 @@ jobs:
           SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: 'false'
           SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: 'false'
           MAILPIT_URL: ${{ secrets.MAILPIT_URL }}
-          E2E_PARTICIPANT_2_EMAIL: ${{ secrets.E2E_PARTICIPANT_2_EMAIL }}
-          E2E_PARTICIPANT_2_PASSWORD: ${{ secrets.E2E_PARTICIPANT_2_PASSWORD }}
+          E2E_PARTICIPANT_EMAIL: e2e.participant@e2e-test.com
+          E2E_PARTICIPANT_PASSWORD: E2eTestPass!2026
 
         run: npm run test:e2e
