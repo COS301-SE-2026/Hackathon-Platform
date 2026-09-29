@@ -208,5 +208,6 @@ jobs:
           E2E_PARTICIPANT_PASSWORD: ${{ secrets.E2E_PARTICIPANT_PASSWORD }}
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          E2E_API_BASE_URL: ${{ secrets.E2E_API_BASE_URL }}
 
         run: npm run test:e2e

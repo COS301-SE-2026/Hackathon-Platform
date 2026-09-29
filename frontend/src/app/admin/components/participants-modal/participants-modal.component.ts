@@ -29,8 +29,10 @@ export class ParticipantsModalComponent implements OnChanges {
   searchTerm = '';
   isLoading = false;
   errorMessage = '';
-  confirmingRemoveId: string | null = null;
-  removingUserId: string | null = null;
+  confirmingBanId: string | null = null;
+  banningUserId: string | null = null;
+  confirmingUnbanId: string | null = null;
+  unbanningUserId: string | null = null;
 
   showAddForm = false;
   addEmail= '';
@@ -42,7 +44,7 @@ export class ParticipantsModalComponent implements OnChanges {
     
     if (changes['eventId'] && this.eventId) {
       this.searchTerm = '';
-      this.confirmingRemoveId = null;
+      this.confirmingBanId = null;
       this.showAddForm = false;
       this.addError = '';
       this.loadParticipants(this.eventId);
@@ -50,13 +52,14 @@ export class ParticipantsModalComponent implements OnChanges {
   }
 
   get availableTeams(): TeamOption[]{
+
     const seen = new Map<string, string>();
     for (const p of this.participants){
-      if (!seen.has(p.teamId)){
+      if (p.teamId && p.teamName && !seen.has(p.teamId)){
         seen.set(p.teamId, p.teamName);
       }
     }
-    return Array.from(seen,([teamId,teamName ])=> ({teamId, teamName}));
+     return Array.from(seen,([teamId,teamName ])=> ({teamId, teamName}));
   }
 
   private loadParticipants(eventId: string): void {
@@ -88,9 +91,7 @@ export class ParticipantsModalComponent implements OnChanges {
       : this.participants.filter(p =>
           p.fullName.toLowerCase().includes(term) ||
           p.email.toLowerCase().includes(term) ||
-          p.teamName.toLowerCase().includes(term)
-
-
+          (p.teamName?.toLowerCase().includes(term) ?? false)
         );
   }
 
@@ -151,38 +152,85 @@ export class ParticipantsModalComponent implements OnChanges {
       });
     }
 
-    requestRemove(userId: string): void{
-      this.confirmingRemoveId = userId;
+  
+  requestBan(userId: string): void {
+    this.confirmingBanId = userId;
+  }
+
+  cancelBan(): void {
+    this.confirmingBanId = null;
+  }
+
+  requestUnban(userId: string): void {
+  this.confirmingUnbanId = userId;
+}
+
+cancelUnban(): void {
+  this.confirmingUnbanId = null;
+}
+
+confirmUnban(participant: EventParticipantResponse): void {
+  if (!this.eventId) {
+    return;
+  }
+
+  this.unbanningUserId = participant.userId;
+
+  this.eventService.unbanParticipant(this.eventId, participant.userId).subscribe({
+
+    next: () => {
+  this.unbanningUserId = null;
+  this.confirmingUnbanId = null;
+
+  this.loadParticipants(this.eventId!);
+},
+
+    error: () => {
+      this.errorMessage = 'Could not unban this participant. Please try again.';
+      this.unbanningUserId = null;
+      this.confirmingUnbanId = null;
+      this.change.markForCheck();
+    }
+  });
+}
+
+  confirmBan(participant: EventParticipantResponse): void {
+    if (!this.eventId) {
+      return;
     }
 
-    cancelRemove(): void {
-      this.confirmingRemoveId = null;
-    }
+    this.banningUserId = participant.userId;
 
-    confirmRemove(participant: EventParticipantResponse): void {
-      if (!this.eventId){
-        return;
+    this.eventService.banParticipant(this.eventId, participant.userId).subscribe({
+      next: () => {
+
+
+this.participants = this.participants.map(p =>
+  p.userId === participant.userId
+    ? {
+        ...p,
+        banned: true,
+        teamId: null,
+        teamName: null,
+        teamRole: null,
+        joinedAt: null
       }
+    : p
+);
 
-      this.removingUserId = participant.userId;
-
-      this.eventService.removeParticipant(this.eventId, participant.userId).subscribe({
-        next: () => {
-          this.participants = this.participants.filter(p => p.userId !== participant.userId);
-
-          this.applyFilter();
-          this.removingUserId = null;
-          this.confirmingRemoveId = null;
-          this.change.markForCheck();
-        },
-        error: () =>{
-          this.errorMessage = 'Could not remove this participant. Please try again.';
-          this.removingUserId = null;
-          this.confirmingRemoveId = null;
-          this.change.markForCheck();
-        }
-      });
-    }
+        this.applyFilter();
+        this.banningUserId = null;
+        this.confirmingBanId = null;
+        this.change.markForCheck();
+      },
+      error: () => {
+        this.errorMessage = 'Could not ban this participant. Please try again.';
+        this.banningUserId = null;
+        this.confirmingBanId = null;
+        this.change.markForCheck();
+      }
+    });
+}
 
     openTelemetryReport(p: EventParticipantResponse): void {
       if (!this.eventId) {

@@ -21,27 +21,33 @@
                     <i class = "pi pi-clock"></i>
                     <h3>Event Timer</h3>
                 </div>
-                <span class = "status-pill" [ngClass] = "isEventLive ? 'live' : 'ended'">{{isEventLive? 'Live' : 'Ended'}}</span> 
+                <span class = "status-pill" [ngClass] = "isEventLive ? 'live' : 'ended'">{{eventPhase}}</span> 
             </div>
 
             <p class = "timer-display">{{remainingLabel}}</p>
-            <p class = "control-card-subtext">Time remaining until the event closes.</p>
+            <p class = "control-card-subtext">{{eventPhase === 'Upcoming'? 'Time until the event starts.': eventPhase === 'Live'? 'Time remaining until the event closes.': 'The event has ended.'}}</p>
 
             <div class = "quick-extend-row">
-                <button type ="button" class = "btn-quick-extend" [disabled] = "isExtending" (click) = "extendTimer(5)">+5 min</button>
-                <button type ="button" class = "btn-quick-extend" [disabled] = "isExtending" (click) = "extendTimer(10)">+10 min</button>
-                <button type ="button" class = "btn-quick-extend" [disabled] = "isExtending" (click) = "extendTimer(15)">+15 min</button>
+                <button type ="button" class = "btn-quick-extend" [disabled] = "isExtending || eventPhase !== 'Live'" (click) = "extendTimer(5)">+5 min</button>
+                <button type ="button" class = "btn-quick-extend" [disabled] = "isExtending || eventPhase !== 'Live'" (click) = "extendTimer(10)">+10 min</button>
+                <button type ="button" class = "btn-quick-extend" [disabled] = "isExtending || eventPhase !== 'Live'" (click) = "extendTimer(15)">+15 min</button>
             </div>
 
             <div class = "custom-extend-row">
+
                 <input
-                type = "number"
-                min ="1"
-                placeholder = "Custom minutes"
-                aria-label = "Custom minutes to extend"
-                [(ngModel)] = "customMinutes"
-                name = "customMinutes"/>
-                <button type = "button" class = "btn-extend" [disabled] = "isExtending" (click) = "extendByCustomAmount()">
+                    type = "number"
+                    min ="1"
+                    placeholder = "Custom minutes"
+                    aria-label = "Custom minutes to extend"
+                    [(ngModel)] = "customMinutes"
+                    name = "customMinutes"
+                    [disabled] = "eventPhase !== 'Live'"/>
+                <button
+                    type = "button"
+                    class = "btn-extend"
+                    [disabled] = "isExtending || eventPhase !== 'Live'"
+                    (click) = "extendByCustomAmount()">
                     {{isExtending ? 'Extending...' : 'Extend timer'}}
                 </button>
             </div>
