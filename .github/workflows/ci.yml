@@ -161,6 +161,12 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      mailpit:
+        image: axllent/mailpit
+        ports:
+          - 1025:1025
+          - 8025:8025
+
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -208,5 +214,11 @@ jobs:
           E2E_PARTICIPANT_PASSWORD: ${{ secrets.E2E_PARTICIPANT_PASSWORD }}
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          E2E_API_BASE_URL: ${{ secrets.E2E_API_BASE_URL }}
+          SPRING_MAIL_HOST: localhost
+          SPRING_MAIL_PORT: 1025
+          SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: 'false'
+          SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: 'false'
+          MAILPIT_URL: ${{ secrets.MAILPIT_URL }}
 
         run: npm run test:e2e

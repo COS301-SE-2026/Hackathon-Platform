@@ -81,6 +81,13 @@
                         <td>{{ pair.teamNameA }}</td>
                         <td>{{ pair.teamNameB }}</td>
                         <td>{{ (pair.structuralScore * 100) | number: '1.1-1' }}%</td>
+                        <td>
+                          @if (pair.embeddingScore !== null && pair.embeddingScore !== undefined) {
+                            {{ (pair.embeddingScore * 100) | number: '1.1-1' }}%
+                          } @else {
+                            <span class="score-na" title="No function embeddings available for one or both submissions">N/A</span>
+                          }
+                        </td>
                         <td>{{ pair.matchedKgramCount }}</td>
                         <td>
                             @if (pair.flagged) {
