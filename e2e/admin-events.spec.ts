@@ -28,11 +28,6 @@ test.describe('Admin: Event creation', () => {
 
     });
 
-    test.afterEach(async () => {
-        
-        await api.deleteHackathon(hackathonId);
-    });
-
     test('creates a minimal public event', async ({ page }) => {
 
         const events = new AdminEventsPage(page);

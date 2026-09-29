@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -23,6 +23,7 @@ export class VerifyEmailComponent implements OnInit{
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly toast = inject(ToastService);
+  private readonly change = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     this.email = this.route.snapshot.queryParamMap.get('email') || '';
@@ -37,7 +38,7 @@ export class VerifyEmailComponent implements OnInit{
       next: (response) => {
         this.isVerifying = false;
         this.verified = true;
-
+        this.change.markForCheck();
         this.toast.success(
           'Email verified',
           response.message || 'Your email has been verified'
@@ -56,6 +57,7 @@ export class VerifyEmailComponent implements OnInit{
     error: (error) => {
         this.isVerifying = false;
         this.errorMessage = error.error?.message || error.error?.error || "This verification link is invalid";
+        this.change.markForCheck();
     }
     });
   }
