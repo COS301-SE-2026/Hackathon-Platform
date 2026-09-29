@@ -81,8 +81,6 @@ test.describe('Google OAuth return page', () => {
 });
 
 test.describe('Full registration flow', () => {
-    test.skip(!MAILPIT_URL, 'Set MAILPIT_URL to run the real email verification flow');
-
     test('a new user registers, clicks the emailed link, is logged in, and can log in again', async ({ page }) => {
         const email = randomEmail('journey');
         const register = new RegisterPage(page);
