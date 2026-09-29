@@ -45,13 +45,13 @@ export class HomeComponent implements OnInit {
 
 
   activeEventTab = 'your-events';
-  
+
   eventTabs: TabItem[] = [
   { label: 'Registered', value: 'your-events' },
   { label: 'Upcoming', value: 'upcoming' },
   { label: 'Completed', value: 'completed' }
   ];
-  
+
 
 
   filteredRegisteredEvents: OpenEventView[] = [];
@@ -78,7 +78,7 @@ export class HomeComponent implements OnInit {
   onEventTabChange(tab: string): void {
     this.activeEventTab = tab;
     this.currentPage = 1;
-    if (tab === 'your-events') { this.loadRegisteredEvents();} 
+    if (tab === 'your-events') { this.loadRegisteredEvents();}
     else if (tab === 'upcoming') { this.loadUpcomingEvents();}
     else if (tab === 'completed') {this.loadCompletedEvents();}
   }
@@ -105,7 +105,7 @@ export class HomeComponent implements OnInit {
     this.registeredEvents = [];
 
     this.eventService.getMyRegistrations().subscribe({
-      
+
       next: (registrations) => {
         if (registrations.length === 0) {
           this.isLoadingRegisteredEvents = false;
@@ -152,10 +152,7 @@ export class HomeComponent implements OnInit {
     next: (events) => {
       this.isLoadingUpcomingEvents = false;
 
-      this.upcomingEvents = events
-      .filter(event => event.status === 'UPCOMING')
-        .map((event) => this.toOpenEventView(event))
-        .sort( (a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
+      this.upcomingEvents = events.map((event) => this.toOpenEventView(event));
 
         this.loadEventLogos(this.upcomingEvents);
         this.applyFilters();
