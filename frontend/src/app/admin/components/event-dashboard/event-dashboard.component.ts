@@ -167,7 +167,7 @@ export class EventDashboardComponent implements OnInit{
         }
         return concat(...best.map(sub =>
         this.storageService.downloadSubmissionArchive(this.eventId, team.teamId, sub.levelId, sub.submissionId)
-          .pipe(map(blob => ({ blob, fileName: `${safeName}-rank${team.rank}-level${sub.lvelId}.zip`})))
+          .pipe(map(blob => ({ blob, fileName: `${safeName}-rank${team.rank}-level${sub.levelId}.zip`})))
         ));
       })
     ).subscribe({
