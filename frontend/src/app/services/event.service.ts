@@ -13,6 +13,7 @@ export interface EventRequest {
   visibility: 'PUBLIC' | 'PRIVATE';
   status?: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELED' | 'ACTIVE' | 'INACTIVE';
   inPerson?: boolean;
+  useIde?: boolean;
   leaderboardFreezeDateTime?: string;
   freezeTime?: string;
   rules?: string;
@@ -38,6 +39,7 @@ export interface EventResponse {
   description?: string;
   visibility: string;
   status: string;
+  useIde: boolean;
   inPerson?: boolean;
   leaderboardFreezeDateTime?: string;
   scoringPaused: boolean;
@@ -141,10 +143,13 @@ export interface EventParticipantResponse {
   userId: string;
   fullName: string;
   email: string;
-  teamId: string;
-  teamName: string;
-  teamRole: 'LEADER' | 'MEMBER';
-  joinedAt: string;
+   teamId: string | null;
+  teamName: string | null;
+  teamRole: 'LEADER' | 'MEMBER' | null;
+  joinedAt: string | null;
+  banned: boolean;
+  dietaryReq?: string | null;
+  allergies?: string | null;
 }
 
 @Injectable({
@@ -163,7 +168,7 @@ export class EventService {
   }
 
   getEvent(eventId: string): Observable<EventResponse> {
-    return this.http.get<EventResponse>(`${this.baseUrl}/admin/events/${eventId}`)
+    return this.getEventById(eventId);
   }
 
   getEventsForHackathon(hackathonId: string): Observable<EventResponse[]> {
@@ -246,12 +251,13 @@ export class EventService {
     );
   }
 
-  removeParticipant(
-    eventId: string,
-    userId: string
-  ): Observable<void> {
-    return this.http.delete<void>(
-      `${this.baseUrl}/admin/events/${eventId}/participants/${userId}`
+  banParticipant( eventId: string, userId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/admin/events/${eventId}/participants/${userId}/ban`,{}
+    );
+  }
+
+  unbanParticipant(eventId: string, userId: string): Observable<void> {
+    return this.http.post<void>( `${this.baseUrl}/admin/events/${eventId}/participants/${userId}/unban`,{}
     );
   }
 
@@ -303,4 +309,8 @@ getEventLeaderboard(eventId: string): Observable<LeaderboardEntryResponse[]> {
   downloadCertificate(eventId: string): Observable<Blob>{
     return this.http.get(`${this.baseUrl}/events/${eventId}/certificate`, {responseType: 'blob'});
   }
+
+  downloadTeamSubmissionPackage(eventId: string, teamId: string): Observable<Blob>{
+  return this.http.get(`${this.baseUrl}/admin/events/${eventId}/teams/${teamId}/submission/download`,{responseType: 'blob'});
+}
 }

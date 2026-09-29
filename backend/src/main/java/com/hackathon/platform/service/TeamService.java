@@ -1,10 +1,13 @@
 package com.hackathon.platform.service;
 
+import com.hackathon.platform.dto.AdminCreateTeamRequest;
+import com.hackathon.platform.dto.AdminTeamResponse;
 import com.hackathon.platform.dto.CreateTeamRequest;
 import com.hackathon.platform.dto.EventParticipantResponse;
 import com.hackathon.platform.dto.TeamMemberResponse;
 import com.hackathon.platform.dto.TeamResponse;
 import com.hackathon.platform.model.Event;
+import com.hackathon.platform.model.EventRegistration;
 import com.hackathon.platform.model.Team;
 import com.hackathon.platform.model.TeamMember;
 import com.hackathon.platform.model.User;
@@ -13,6 +16,7 @@ import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.TeamMemberRepository;
 import com.hackathon.platform.repository.TeamRepository;
 import com.hackathon.platform.repository.UserRepository;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,6 +95,106 @@ public class TeamService {
     member.setStatus("APPROVED");
     teamMemberRepository.save(member);
     return toTeamResponse(svdName);
+  }
+
+  @Transactional
+  public void createTeamAsAdmin(UUID eventId, AdminCreateTeamRequest request) {
+
+    String teamName = request.getTeamName() == null ? "" : request.getTeamName().trim();
+
+    if (teamName.isBlank()) {
+      throw new RuntimeException("Team name is required");
+    }
+
+    List<String> memberEmails = request.getMemberEmails();
+
+    if (memberEmails == null || memberEmails.isEmpty()) {
+      throw new RuntimeException("At least one team member is required");
+    }
+
+    Event event =
+        eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+
+    if (teamRepository.existsByEventIdAndTeamName(eventId, teamName)) {
+      throw new RuntimeException("Team name is in use, please choose a new team name");
+    }
+
+    if (memberEmails.size() > event.getTeamSizeLimit()) {
+      throw new RuntimeException(
+          "Team cannot have more than " + event.getTeamSizeLimit() + " members");
+    }
+
+    Team team = new Team();
+    team.setTeamName(teamName);
+    team.setEventId(eventId);
+    team.setStatus("ACTIVE");
+
+    User firstMemberUser = null;
+
+    for (String email : memberEmails) {
+
+      String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
+
+      if (normalizedEmail.isBlank()) {
+        throw new RuntimeException("Member email is required");
+      }
+
+      User user =
+          userRepository
+              .findByEmail(normalizedEmail)
+              .orElseThrow(
+                  () -> new RuntimeException("No user found with email: " + normalizedEmail));
+
+      EventRegistration registration =
+          eventRegistrationRepository
+              .findByEventIdAndUserId(eventId, user.getUserId())
+              .orElseThrow(
+                  () ->
+                      new RuntimeException(
+                          "User is not registered for this event: " + normalizedEmail));
+
+      if (registration.isBanned()) {
+        throw new RuntimeException("User is banned from the event: " + normalizedEmail);
+      }
+
+      if (!teamMemberRepository
+          .findByUserIdAndStatusAndEventId(user.getUserId(), "APPROVED", eventId)
+          .isEmpty()) {
+
+        throw new RuntimeException(
+            "User is already a member of a team for this event: " + normalizedEmail);
+      }
+
+      if (firstMemberUser == null) {
+        firstMemberUser = user;
+      }
+    }
+
+    if (firstMemberUser == null) {
+      throw new RuntimeException("At least one valid team member is required");
+    }
+
+    team.setCreatedByUserId(firstMemberUser.getUserId());
+
+    Team savedTeam = saveTeamRetryingJoinCodeCollissions(team);
+
+    for (String email : memberEmails) {
+
+      String normalizedEmail = email.trim().toLowerCase();
+
+      User user =
+          userRepository
+              .findByEmail(normalizedEmail)
+              .orElseThrow(
+                  () -> new RuntimeException("No user found with email: " + normalizedEmail));
+
+      TeamMember member = new TeamMember();
+      member.setTeamId(savedTeam.getTeamId());
+      member.setUserId(user.getUserId());
+      member.setStatus("APPROVED");
+
+      teamMemberRepository.save(member);
+    }
   }
 
   /** Get the authenticated user's approved team, if they have one. */
@@ -221,72 +325,423 @@ public class TeamService {
   /** Leave a team. Approved members are marked LEFT; pending requests are deleted. */
   @Transactional
   public void leaveTeam(UUID teamId, UUID currentUserId) {
+
     TeamMember membership =
         teamMemberRepository
             .findByTeamIdAndUserId(teamId, currentUserId)
             .orElseThrow(() -> new RuntimeException("User not in team"));
 
-    if ("APPROVED".equals(membership.getStatus())) {
-      membership.setStatus("LEFT");
-      teamMemberRepository.save(membership);
-    } else if ("PENDING".equals(membership.getStatus())) {
+    if ("PENDING".equals(membership.getStatus())) {
       teamMemberRepository.delete(membership);
       return;
-    } else {
+    }
+
+    if (!"APPROVED".equals(membership.getStatus())) {
       throw new RuntimeException("Cannot leave with current status: " + membership.getStatus());
+    }
+
+    Team team =
+        teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+
+    boolean leavingLeader = currentUserId.equals(team.getCreatedByUserId());
+
+    membership.setStatus("LEFT");
+    teamMemberRepository.save(membership);
+
+    if (leavingLeader) {
+      List<TeamMember> remainingMembers =
+          teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED");
+
+      if (!remainingMembers.isEmpty()) {
+        TeamMember newLeader =
+            remainingMembers.stream()
+                .min((first, second) -> first.getJoinedAt().compareTo(second.getJoinedAt()))
+                .orElseThrow();
+        team.setCreatedByUserId(newLeader.getUserId());
+        teamRepository.save(team);
+      }
     }
 
     long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
     if (approvedCount == 0) {
-      Team team = teamRepository.findById(teamId).orElseThrow();
       team.setStatus("INACTIVE");
       teamRepository.save(team);
     }
   }
 
-  /** View all approved members of a team. */
-  public List<TeamMemberResponse> viewTeamMembers(UUID teamId) {
-    teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
-    return toMemberResponses(teamId, "APPROVED");
+  /** Remove an approved member from a team as an event administrator. */
+  @Transactional
+  public void removeTeamMember(UUID teamId, UUID userId) {
+
+    Team team =
+        teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+
+    TeamMember membership =
+        teamMemberRepository
+            .findByTeamIdAndUserId(teamId, userId)
+            .orElseThrow(() -> new RuntimeException("Team member not found"));
+
+    if (!"APPROVED".equals(membership.getStatus())) {
+      throw new RuntimeException("Only an approved team member can be removed");
+    }
+
+    boolean removingLeader = userId.equals(team.getCreatedByUserId());
+
+    membership.setStatus("LEFT");
+    teamMemberRepository.save(membership);
+
+    if (removingLeader) {
+
+      List<TeamMember> remainingMembers =
+          teamMemberRepository.findByTeamIdAndStatus(teamId, "APPROVED");
+
+      if (!remainingMembers.isEmpty()) {
+
+        TeamMember newLeader =
+            remainingMembers.stream()
+                .min((first, second) -> first.getJoinedAt().compareTo(second.getJoinedAt()))
+                .orElseThrow();
+        team.setCreatedByUserId(newLeader.getUserId());
+        teamRepository.save(team);
+
+      } else {
+        team.setStatus("INACTIVE");
+        teamRepository.save(team);
+      }
+
+    } else {
+
+      long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
+
+      if (approvedCount == 0) {
+        team.setStatus("INACTIVE");
+        teamRepository.save(team);
+      }
+    }
   }
 
-  /** List every approved participant across all teams for an event for admin use */
-  public List<EventParticipantResponse> listEventParticipants(UUID eventId) {
+  /** Add a member to a team as an event administrator. */
+  @Transactional
+  public void addTeamMemberAsAdmin(UUID eventId, UUID teamId, String email) {
+
+    Team team =
+        teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+
+    if (!team.getEventId().equals(eventId)) {
+      throw new RuntimeException("Team does not belong to this event");
+    }
+
+    String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
+
+    if (normalizedEmail.isBlank()) {
+      throw new RuntimeException("Email is required");
+    }
+
+    User user =
+        userRepository
+            .findByEmail(normalizedEmail)
+            .orElseThrow(() -> new RuntimeException("No user found with this email"));
+
+    EventRegistration registration =
+        eventRegistrationRepository
+            .findByEventIdAndUserId(eventId, user.getUserId())
+            .orElseThrow(() -> new RuntimeException("User is not registered for this event"));
+
+    if (registration.isBanned()) {
+      throw new RuntimeException("This user is banned from the event");
+    }
+
+    if (!teamMemberRepository
+        .findByUserIdAndStatusAndEventId(user.getUserId(), "APPROVED", eventId)
+        .isEmpty()) {
+
+      throw new RuntimeException("User is already a member of a team for this event");
+    }
+
+    Event event =
+        eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+
+    long approvedCount = teamMemberRepository.countByTeamIdAndStatus(teamId, "APPROVED");
+
+    if (approvedCount >= event.getTeamSizeLimit()) {
+      throw new RuntimeException("Team is full");
+    }
+
+    Optional<TeamMember> existingMembership =
+        teamMemberRepository.findByTeamIdAndUserId(teamId, user.getUserId());
+
+    TeamMember member;
+
+    if (existingMembership.isPresent()) {
+      member = existingMembership.get();
+
+      if ("LEFT".equals(member.getStatus())) {
+        member.setStatus("APPROVED");
+      } else if ("PENDING".equals(member.getStatus())) {
+        member.setStatus("APPROVED");
+      } else if ("APPROVED".equals(member.getStatus())) {
+        throw new RuntimeException("User is already a member of this team");
+      } else {
+        throw new RuntimeException("User cannot be added to this team");
+      }
+
+      member.setJoinedAt(Instant.now());
+      teamMemberRepository.save(member);
+
+    } else {
+      member = new TeamMember();
+      member.setTeamId(teamId);
+      member.setUserId(user.getUserId());
+      member.setStatus("APPROVED");
+
+      teamMemberRepository.save(member);
+    }
+
+    if (team.getCreatedByUserId() == null) {
+      team.setCreatedByUserId(user.getUserId());
+    }
+
+    if ("INACTIVE".equals(team.getStatus())) {
+      team.setStatus("ACTIVE");
+    }
+
+    teamRepository.save(team);
+  }
+
+  /** Ban a participant from an event, mark them as LEFT, and deactivate an empty team. */
+  @Transactional
+  public void banParticipant(UUID eventId, UUID userId) {
+    EventRegistration registration =
+        eventRegistrationRepository
+            .findByEventIdAndUserId(eventId, userId)
+            .orElseThrow(() -> new RuntimeException("Event registration not found"));
+
+    Optional<TeamMember> membership =
+        teamMemberRepository.findByUserIdAndStatusAndEventId(userId, "APPROVED", eventId).stream()
+            .findFirst();
+
+    if (membership.isPresent()) {
+      registration.setBannedFromTeamId(membership.get().getTeamId());
+    } else {
+      registration.setBannedFromTeamId(null);
+    }
+
+    registration.setBanned(true);
+    eventRegistrationRepository.save(registration);
+
+    if (membership.isEmpty()) {
+      return;
+    }
+
+    TeamMember teamMember = membership.get();
+    teamMember.setStatus("LEFT");
+    teamMemberRepository.save(teamMember);
+
+    long approvedCount =
+        teamMemberRepository.countByTeamIdAndStatus(teamMember.getTeamId(), "APPROVED");
+
+    if (approvedCount == 0) {
+      Team team =
+          teamRepository
+              .findById(teamMember.getTeamId())
+              .orElseThrow(() -> new RuntimeException("Team not found"));
+
+      team.setStatus("INACTIVE");
+      teamRepository.save(team);
+    }
+  }
+
+  /** Unban a participant from an event and restore the team they were banned from, if any. */
+  @Transactional
+  public void unbanParticipant(UUID eventId, UUID userId) {
+    EventRegistration registration =
+        eventRegistrationRepository
+            .findByEventIdAndUserId(eventId, userId)
+            .orElseThrow(() -> new RuntimeException("Event registration not found"));
+
+    if (!registration.isBanned()) {
+      throw new RuntimeException("Participant is not banned");
+    }
+
+    UUID bannedFromTeamId = registration.getBannedFromTeamId();
+
+    registration.setBanned(false);
+    registration.setBannedFromTeamId(null);
+    eventRegistrationRepository.save(registration);
+
+    if (bannedFromTeamId == null) {
+      return;
+    }
+
+    Optional<TeamMember> membership =
+        teamMemberRepository.findByTeamIdAndUserId(bannedFromTeamId, userId);
+
+    if (membership.isEmpty()) {
+      throw new RuntimeException("Previous team membership not found");
+    }
+
+    TeamMember teamMember = membership.get();
+    teamMember.setStatus("APPROVED");
+    teamMemberRepository.save(teamMember);
+
+    Team team =
+        teamRepository
+            .findById(bannedFromTeamId)
+            .orElseThrow(() -> new RuntimeException("Team not found"));
+
+    team.setStatus("ACTIVE");
+    teamRepository.save(team);
+  }
+
+  public List<AdminTeamResponse> listEventTeams(UUID eventId) {
+    eventRepo.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+
     List<Team> teams = teamRepository.findByEventId(eventId);
+
     if (teams.isEmpty()) {
       return List.of();
     }
 
     List<UUID> teamIds = teams.stream().map(Team::getTeamId).collect(Collectors.toList());
-    Map<UUID, Team> teamsById =
-        teams.stream().collect(Collectors.toMap(Team::getTeamId, team -> team));
 
     List<TeamMember> members = teamMemberRepository.findByTeamIdInAndStatus(teamIds, "APPROVED");
 
-    List<UUID> userIds = members.stream().map(TeamMember::getUserId).collect(Collectors.toList());
+    Map<UUID, List<TeamMember>> membersByTeam =
+        members.stream().collect(Collectors.groupingBy(TeamMember::getTeamId));
+
+    Map<UUID, User> usersById =
+        userRepository
+            .findAllById(
+                members.stream().map(TeamMember::getUserId).distinct().collect(Collectors.toList()))
+            .stream()
+            .collect(Collectors.toMap(User::getUserId, user -> user));
+
+    return teams.stream()
+        .map(
+            team -> {
+              AdminTeamResponse response = new AdminTeamResponse();
+
+              response.setTeamId(team.getTeamId());
+              response.setTeamName(team.getTeamName());
+              response.setEventId(team.getEventId());
+              response.setCreatedByUserId(team.getCreatedByUserId());
+              response.setCreatedAt(team.getCreatedAt());
+              response.setStatus(team.getStatus());
+
+              List<TeamMemberResponse> teamMembers =
+                  membersByTeam.getOrDefault(team.getTeamId(), List.of()).stream()
+                      .map(
+                          member -> {
+                            User user = usersById.get(member.getUserId());
+                            if (user == null) {
+                              throw new RuntimeException("User not found");
+                            }
+
+                            TeamMemberResponse memberResponse = new TeamMemberResponse();
+
+                            memberResponse.setUserId(member.getUserId());
+                            memberResponse.setFullName(
+                                user.getFirstName() + " " + user.getLastName());
+                            memberResponse.setEmail(user.getEmail());
+                            memberResponse.setJoinedAt(member.getJoinedAt());
+                            memberResponse.setRole(
+                                member.getUserId().equals(team.getCreatedByUserId())
+                                    ? "LEADER"
+                                    : "MEMBER");
+
+                            return memberResponse;
+                          })
+                      .collect(Collectors.toList());
+
+              response.setMembers(teamMembers);
+
+              return response;
+            })
+        .collect(Collectors.toList());
+  }
+
+  public List<TeamMemberResponse> viewTeamMembers(UUID teamId) {
+    teamRepository.findById(teamId).orElseThrow(() -> new RuntimeException("Team not found"));
+    return toMemberResponses(teamId, "APPROVED");
+  }
+
+  public List<EventParticipantResponse> listEventParticipants(UUID eventId) {
+    List<EventRegistration> registrations = eventRegistrationRepository.findByEventId(eventId);
+
+    if (registrations.isEmpty()) {
+      return List.of();
+    }
+
+    List<UUID> userIds =
+        registrations.stream()
+            .map(EventRegistration::getUserId)
+            .distinct()
+            .collect(Collectors.toList());
+
     Map<UUID, User> usersById =
         userRepository.findAllById(userIds).stream()
             .collect(Collectors.toMap(User::getUserId, user -> user));
 
-    return members.stream()
+    List<Team> teams = teamRepository.findByEventId(eventId);
+
+    Map<UUID, Team> teamsById =
+        teams.stream().collect(Collectors.toMap(Team::getTeamId, team -> team));
+
+    List<UUID> teamIds = teams.stream().map(Team::getTeamId).collect(Collectors.toList());
+
+    List<TeamMember> members =
+        teamIds.isEmpty()
+            ? List.of()
+            : teamMemberRepository.findByTeamIdInAndStatus(teamIds, "APPROVED");
+
+    Map<UUID, TeamMember> membershipByUserId =
+        members.stream()
+            .collect(
+                Collectors.toMap(
+                    TeamMember::getUserId, member -> member, (existing, replacement) -> existing));
+
+    return registrations.stream()
         .map(
-            member -> {
-              Team team = teamsById.get(member.getTeamId());
-              User user = usersById.get(member.getUserId());
-              if (team == null || user == null) {
+            registration -> {
+              User user = usersById.get(registration.getUserId());
+
+              if (user == null) {
                 return null;
               }
-              String role =
-                  member.getUserId().equals(team.getCreatedByUserId()) ? "LEADER" : "MEMBER";
+
+              TeamMember member =
+                  registration.isBanned() ? null : membershipByUserId.get(registration.getUserId());
+
+              UUID teamId = null;
+              String teamName = null;
+              String teamRole = null;
+              java.time.Instant joinedAt = null;
+
+              if (member != null) {
+                Team team = teamsById.get(member.getTeamId());
+
+                if (team != null) {
+                  teamId = team.getTeamId();
+                  teamName = team.getTeamName();
+
+                  teamRole =
+                      member.getUserId().equals(team.getCreatedByUserId()) ? "LEADER" : "MEMBER";
+
+                  joinedAt = member.getJoinedAt();
+                }
+              }
 
               return new EventParticipantResponse(
                   user.getUserId(),
                   user.getFirstName() + " " + user.getLastName(),
                   user.getEmail(),
-                  team.getTeamId(),
-                  team.getTeamName(),
-                  role,
-                  member.getJoinedAt());
+                  teamId,
+                  teamName,
+                  teamRole,
+                  joinedAt,
+                  registration.isBanned(),
+                  registration.getDietaryReq(),
+                  registration.getAllergies());
             })
         .filter(response -> response != null)
         .collect(Collectors.toList());

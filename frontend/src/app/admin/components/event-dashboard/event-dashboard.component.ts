@@ -5,6 +5,7 @@ import { CdkDragDrop, DragDropModule, moveItemInArray } from "@angular/cdk/drag-
 import { EventParticipantResponse,EventService } from "../../../services/event.service";
 import { EventInsightsResponse,InsightsService } from "../../../services/insights.service";
 import { LeaderboardEntry, LeaderboardService } from "../../../services/leaderboard.service";
+import { PlagiarismHeatmapComponent } from "../plagiarism/plagiarism-heatmap/plagiarism-heatmap.component";
 
 
 interface ParticipantRow {
@@ -54,14 +55,14 @@ interface ScoreLevelStat{
   avgPct: number;
 }
 
-export type DashboardBlockId = 'trend' | 'topTeams' | 'status' | 'scores' | 'participants';
+export type DashboardBlockId = 'trend' | 'topTeams' | 'status' | 'scores' | 'participants' | 'plagiarismHeatmap';
 
-const DEFAULT_BLOCKS: DashboardBlockId[] = ['trend','topTeams', 'status','scores','participants'];
+const DEFAULT_BLOCKS: DashboardBlockId[] = ['trend','topTeams', 'status','scores','participants','plagiarismHeatmap'];
 const LAYOUT_STORAGE_KEY = 'hackathon.eventDashboard.layout.v1';
 @Component({
   selector: 'app-event-dashboard',
   standalone: true,
-  imports: [CommonModule, DragDropModule],
+  imports: [CommonModule, DragDropModule, PlagiarismHeatmapComponent],
   templateUrl: './event-dashboard.component.html',
   styleUrls: ['./event-dashboard.component.scss']
 })
@@ -84,6 +85,7 @@ export class EventDashboardComponent implements OnInit{
   status: 'Submission status',
   scores: 'Score by level',
   participants: 'Active participants',
+  plagiarismHeatmap: 'Plagiarism similarity',
  };
 
   insightsLoading = false;
@@ -94,6 +96,8 @@ export class EventDashboardComponent implements OnInit{
     topTeams: LeaderboardEntry[] = [];
     topTeamsLoading = false;
     topTeamsError = '';
+    downloadingTeamId: string | null = null;
+    downloadError ='';
   
     submissionStatusSegments: SubmissionStatusSegment[]=[];
     submissionsCount = 0;
@@ -143,6 +147,31 @@ export class EventDashboardComponent implements OnInit{
     this.saveLayout();
   }
 
+  downloadTeamPackage(team:LeaderboardEntry):void {
+    if (this.downloadingTeamId !== null) return;
+    this.downloadingTeamId = team.teamId;
+    this.downloadError = '';
+
+    this.eventService.downloadTeamSubmissionPackage(this.eventId, team.teamId).subscribe({
+      next: blob =>{
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const safeName = team.teamName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+        a.href = url;
+        a.download = `${safeName}-rank${team.rank}.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.downloadingTeamId = null;
+        this.change.markForCheck();
+      },
+      error: () =>{
+        this.downloadError = `Couldn't download ${team.teamName}'s files. Try again.`;
+        this.downloadingTeamId = null;
+        this.change.markForCheck();
+      }
+    });
+  }
+
   private loadLayout(): void {
     try{
       const raw = localStorage.getItem(LAYOUT_STORAGE_KEY);
@@ -186,6 +215,7 @@ export class EventDashboardComponent implements OnInit{
       error: () => {
         this.topTeamsError = 'Could not load the leaderboard for this event.';
         this.topTeamsLoading = false;
+        this.change.markForCheck();
       }
 
     });
@@ -214,7 +244,7 @@ export class EventDashboardComponent implements OnInit{
         initials: this.getInitials(p.fullName),
         name: p.fullName,
         email: p.email,
-        team: p.teamName,
+        team: p.teamName ?? 'N/A',
       };
     }
   

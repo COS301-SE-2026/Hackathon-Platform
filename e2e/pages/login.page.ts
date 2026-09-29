@@ -6,22 +6,33 @@ export class LoginPage{
     readonly passwordInput: Locator;
     readonly signinButton: Locator;
     readonly signupLink: Locator;
+    readonly googleButton: Locator;
+    readonly resendVerification: Locator;
+    readonly toast: Locator;
 
     constructor(page: Page){
         this.page = page;
-        this.emailInput = page.locator('#email');
-        this.passwordInput = page.locator('#password');
-        this.signinButton = page.getByRole('button', { name: "Sign in" });
+        this.emailInput = page.locator('input#email');
+        this.passwordInput = page.locator('input#password');
+        this.signinButton = page.getByRole('button', { name: "Log in" });
         this.signupLink = page.getByRole('link', { name: 'Register'});
+        this.googleButton = page.getByRole('button', { name: /continue with google/i });
+        this.resendVerification = page.getByRole('button', { name: /resend verification email/i });
+        this.toast = page.locator('.p-toast-message');
     }
 
     async goto() {
         await this.page.goto('/login');
+        await expect(this.emailInput).toBeVisible();
     }
 
-    async ligin(email: string, password: string) {
+    async fill(email: string, password: string){
         await this.emailInput.fill(email);
         await this.passwordInput.fill(password);
+    }
+
+    async login(email: string, password: string) {
+        await this.fill(email, password);
         await this.signinButton.click();
     }
 

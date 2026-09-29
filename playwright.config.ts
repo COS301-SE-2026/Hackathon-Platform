@@ -99,6 +99,8 @@ export default defineConfig({
       url: 'http://localhost:8080/actuator/health',
       reuseExistingServer: !process.env.CI,
       timeout: 300_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
     },
   ],
 });

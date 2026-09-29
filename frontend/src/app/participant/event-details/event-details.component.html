@@ -134,7 +134,7 @@
   <section class="event-tabs"><app-tabs [tabs]="tabs" [activeTab]="activeTab"></app-tabs> </section>
 
 
-  <div class="event-content">
+  <div class="event-content" style="min-height: 500px;">
 
     @if (activeTab === 'overview' && eventId) { <app-overview [eventId]="eventId"></app-overview> }
 
@@ -145,7 +145,7 @@
     @if (activeTab === 'forum') { <app-forum />}
 
     @if (activeTab === 'submissions' && eventId && hackathonId) {
-      <app-submissions [eventId]="eventId" [hackathonId]="hackathonId"></app-submissions>
+      <app-submissions [eventId]="eventId" [hackathonId]="hackathonId" [useIde]="event.useIde"></app-submissions>
     }
 
     @if (activeTab === 'submission-history' && eventId && hackathonId) {

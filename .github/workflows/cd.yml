@@ -1,4 +1,3 @@
-#this auto deploys to azure
 name: CD
 
 on:
@@ -10,96 +9,475 @@ concurrency:
   group: cd-production
   cancel-in-progress: false
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
-  REGISTRY: hackathonplatformacr.azurecr.io
-  RESOURCE_GROUP: hackathon-platform-rg
+  AWS_REGION: af-south-1
+  AWS_ROLE_ARN: arn:aws:iam::810876576740:role/GitHubActions-HackathonPlatform-Deploy
+  AWS_ACCOUNT_ID: "810876576740"
+  ECR_REGISTRY: 810876576740.dkr.ecr.af-south-1.amazonaws.com
+  BACKEND_REPOSITORY: hackathon-backend
+  BACKEND_ECS_CLUSTER: hackathon-platform-cluster
+  BACKEND_ECS_SERVICE: hackathon-backend-service
+  BACKEND_TASK_FAMILY: hackathon-backend
+  BACKEND_CONTAINER_NAME: backend
+
+  AI_REPOSITORY: hackathon-ai-model
+  AI_ECS_CLUSTER: hackathon-platform-cluster
+  AI_ECS_SERVICE: hackathon-ai-model-service
+  AI_TASK_FAMILY: hackathon-ai-model
+
+  AST_REPOSITORY: hackathon-ast-service
+  AST_ECS_CLUSTER: hackathon-platform-cluster
+  AST_ECS_SERVICE: hackathon-ast-service
+  AST_TASK_FAMILY: hackathon-ast-service
+
+  S3_BUCKET: hackathon-platform-frontend-810876576740
+  CLOUDFRONT_DISTRIBUTION_ID: E1XXY169KIIHU7
 
 jobs:
-  build-and-push:
-    name: Build and Push
+
+  build-backend:
+    name: Build and Push Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-CD-Backend
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set image
+        id: image
+        shell: bash
+        run: |
+          IMAGE="${ECR_REGISTRY}/${BACKEND_REPOSITORY}:${GITHUB_SHA}"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Setup BuildX
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./docker/backend.Dockerfile
+          push: true
+          tags: |
+            ${{ steps.image.outputs.image }}
+            ${{ env.ECR_REGISTRY }}/${{ env.BACKEND_REPOSITORY }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-ai:
+    name: Build and push AI
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-CD-AI
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set image
+        id: image
+        shell: bash
+        run: |
+          IMAGE="${ECR_REGISTRY}/${AI_REPOSITORY}:${GITHUB_SHA}"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Setup BuildX
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build AI container
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ML-AI
+          file: ./ML-AI/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.image.outputs.image }}
+            ${{ env.ECR_REGISTRY }}/${{ env.AI_REPOSITORY }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-ast:
+    name: Build and push AST service
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-CD-AST
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set image
+        id: image
+        shell: bash
+        run: |
+          IMAGE="${ECR_REGISTRY}/${AST_REPOSITORY}:${GITHUB_SHA}"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Setup BuildX
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build AST service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ast-service
+          file: ./ast-service/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.image.outputs.image }}
+            ${{ env.ECR_REGISTRY }}/${{ env.AST_REPOSITORY }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-frontend:
+    name: Build UI
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    outputs:
-      image-tag: ${{ steps.tag.outputs.tag }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Log In
-        uses: azure/docker-login@v2
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          login-server: ${{ env.REGISTRY }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build -- --configuration production
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
         with:
-          driver: docker-container
-          driver-opts: network=host
-          use: true
+          name: frontend-dist
+          path: frontend/dist/frontend/browser
+          if-no-files-found: error
 
-      - name: Compute image tag
-        id: tag
-        run: echo "tag=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+  deploy-backend:
+    name: Deploy backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs:
+      - build-backend
+      - deploy-ai
+      - deploy-ast
+    environment: production
 
-      - name: Build and push(backend)
-        uses: docker/build-push-action@v6
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
         with:
-          context: backend
-          file: docker/backend.Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/backend:${{ steps.tag.outputs.tag }}
-            ${{ env.REGISTRY }}/backend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-Deploy-Backend
 
-      - name: Build and push(frontend)
-        uses: docker/build-push-action@v6
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$ECS_TASK_FAMILY" \
+            --query taskDefinition \
+            --output json > task-definition.json
+
+      - name: Verify EFS
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          with open("task-definition.json") as f:
+              td = json.load(f)
+
+          volumes = td.get("volumes", [])
+
+          backend = None
+
+          for container in td.get("containerDefinitions", []):
+              if container.get("name") == "backend":
+                  backend = container
+                  break
+
+          if backend is None:
+              print("backend container not found")
+              sys.exit(1)
+
+          efs_volumes = [
+              v for v in volumes
+              if v.get("efsVolumeConfiguration")
+          ]
+
+          if not efs_volumes:
+              print("No EFS volume found in backend task definition")
+              sys.exit(1)
+
+          workspace_mount = any(
+              m.get("containerPath") == "/workspace"
+              for m in backend.get("mountPoints", [])
+          )
+
+          if not workspace_mount:
+              print("/workspace EFS mount not found")
+              sys.exit(1)
+          print("EFS VERIFIED")
+
+          for volume in efs_volumes:
+              efs = volume["efsVolumeConfiguration"]
+
+              print("Filesystem:",
+                    efs.get("fileSystemId"))
+
+              print("Access Point:",
+                    efs.get("authorizationConfig", {}).get("accessPointId"))
+
+              print("Mount:",
+                    "/workspace")
+          PY
+
+      - name: Render task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          context: frontend
-          file: docker/frontend.Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/frontend:${{ steps.tag.outputs.tag }}
-            ${{ env.REGISTRY }}/frontend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          task-definition: task-definition.json
+          container-name: ${{ env.BACKEND_CONTAINER_NAME }}
+          image: ${{ needs.build-backend.outputs.image }}
 
-  deploy:
-    name: Deploy to Azure container
+      - name: Deploy ECS service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.BACKEND_ECS_SERVICE }}
+          cluster: ${{ env.BACKEND_ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: Verify deployed backend EFS
+        shell: bash
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$BACKEND_TASK_FAMILY" \
+            --query 'taskDefinition.{revision:revision,volumes:volumes,containers:containerDefinitions[*].{name:name,mountPoints:mountPoints}}' \
+            --output json > deployed-task-definition.json
+
+          python - <<'PY'
+          import json
+          import sys
+
+          with open("deployed-task-definition.json") as f:
+              td = json.load(f)
+
+          efs_volumes = [
+              v for v in td.get("volumes", [])
+              if v.get("efsVolumeConfiguration")
+          ]
+
+          backend = next(
+              (
+                  c for c in td.get("containers", [])
+                  if c.get("name") == "backend"
+              ),
+              None
+          )
+
+          if not efs_volumes:
+              print("Deployed task definition has no EFS volume")
+              sys.exit(1)
+
+          if backend is None:
+              print("Deployed backend container not found")
+              sys.exit(1)
+
+          if not any(
+              m.get("containerPath") == "/workspace"
+              for m in backend.get("mountPoints", [])
+          ):
+              print("/workspace EFS mount missing")
+              sys.exit(1)
+
+          print(
+              f"Backend revision {td['revision']} "
+              "verified with EFS mounted at /workspace."
+          )
+          PY
+
+  deploy-ai:
+    name: Deploy AI ML
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-ai
+    environment: production
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GithubActions-Deploy-AI
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$AI_TASK_FAMILY" \
+            --query taskDefinition \
+            --output json > task-definition.json
+
+      - name: Render task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ai-model
+          image: ${{ needs.build-ai.outputs.image }}
+
+      - name: Deploy ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition:  ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.AI_ECS_SERVICE }}
+          cluster: ${{ env.AI_ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-ast:
+    name: Deploy AST service
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-ast
+    environment: production
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-Deploy-AST
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$AST_TASK_FAMILY" \
+            --query taskDefinition \
+            --output json > task-definition.json
+
+      - name: Render task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ast-service
+          image: ${{ needs.build-ast.outputs.image }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.AST_ECS_SERVICE }}
+          cluster: ${{ env.AST_ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-frontend:
+    name: Deploy frontend
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: build-and-push
+    needs: build-frontend
     environment: production
-    permissions:
-      id-token: write
-      contents: read
+
     steps:
-      - uses: azure/login@v2
+      - name: Setup AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-Deploy-Frontend
 
-      - name: Deploy backend
-        uses: azure/container-apps-deploy-action@v2
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
         with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: hackathon-backend
-          imageToDeploy: ${{ env.REGISTRY }}/backend:${{ needs.build-and-push.outputs.image-tag }}
+          name: frontend-dist
+          path: frontend-dist
 
-      - name: Deploy frontend
-        uses: azure/container-apps-deploy-action@v2
-        with:
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          containerAppName: hackathon-frontend
-          imageToDeploy: ${{ env.REGISTRY }}/frontend:${{ needs.build-and-push.outputs.image-tag }}
-
-      - name: Check health after deploy
+      - name: Sync to S3
         run: |
-          sleep 20
-          BACKEND_URL=$(az containerapp show --name hackathon-backend \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query properties.configuration.ingress.fqdn -o tsv)
-          curl -f "https://${BACKEND_URL}/actuator/health" || exit 1
+          aws s3 sync frontend-dist "s3://${S3_BUCKET}" \
+            --delete \
+            --region "$AWS_REGION"
+
+      - name: Invalidate Cloudfront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths "/*"
+
+  production-health-check:
+    name: Production health check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - deploy-backend
+      - deploy-ai
+      - deploy-ast
+      - deploy-frontend
+
+    steps:
+      - name: Check backend health
+        run: |
+          curl --fail --silent --show-error \
+            --retry 10 \
+            --retry-delay 5 \
+            --retry-connrefused \
+            https://api.hackathonplatform.co.za/actuator/health
+
+      - name: Check frontend
+        run: |
+          curl --fail --silent --show-error \
+            --retry 10 \
+            --retry-delay 5 \
+            https://hackathonplatform.co.za/

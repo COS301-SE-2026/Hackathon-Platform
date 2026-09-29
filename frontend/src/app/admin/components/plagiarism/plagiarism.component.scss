@@ -1,0 +1,138 @@
+:host {
+    color-scheme: light;
+}
+
+.plagiarism-page {
+    padding: 1rem;
+}
+
+.plagiarism-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.plagiarism-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.team-search {
+    padding: 0.45rem 0.7rem;
+    border: 1.5px solid var(--light-gray, #dfe3ea);
+    border-radius: 9px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    background-color: var(--white, #ffffff);
+    color: var(--dark-navy, #13192d);
+    width: 14rem;
+    max-width: 100%;
+    color-scheme: light;
+
+    &::placeholder {
+        color: var(--mid-gray, #8089a0);
+    }
+
+}
+
+.level-select {
+
+    appearance: none;
+    padding: 0.45rem 2rem 0.45rem 0.6rem;
+    border: 1.5px solid var(--light-gray, #dfe3ea);
+    border-radius: 9px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    background-color: var(--white, #ffffff);
+    color: var(--dark-navy, #13192d);
+    color-scheme: light;
+
+}
+
+.run-status {
+
+    margin: 0 0 1rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.run-status-active{
+    background: rgba(93, 95, 239, 0.1);
+    border: 1px solid rgba(93, 95, 239, 0.4);
+    color: #33339e;
+
+}
+
+.run-status-failed {
+
+    background: rgba(192, 57, 43, 0.08);
+    border: 1px solid rgba(192, 57, 43, 0.35);
+    color: var(--red, #c0392b);
+}
+
+.plagiarism-empty {
+    color: var(--mid-gray, #666);
+}
+
+.plagiarism-result-count {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    color: var(--mid-gray, #666);
+}
+
+.plagiarism-table {
+    width: 100%;
+    border-collapse: collapse;
+
+        th,
+        td {
+            text-align: left;
+            padding: 0.6rem 0.75rem;
+            border-bottom: 1px solid var(--light-gray, #e0e0e0);
+
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--mid-gray, #555);
+        }
+}
+
+.flagged-row {
+    background: rgba(192, 57, 43, 0.05);
+}
+
+.flagged-badge {
+
+    background: var(--red, #c0392b);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+
+}
+
+.ok-badge{
+    background: var(--green, #1f6b42);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+}

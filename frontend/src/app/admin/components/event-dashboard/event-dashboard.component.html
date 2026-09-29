@@ -36,6 +36,7 @@
       <section
       class = "block"
       [class.block-wide] = "id === 'trend'"
+      [class.block-full] = "id === 'plagiarismHeatmap'"
       [class.editing] = "editing"
       cdkDrag
       [cdkDragDisabled] = "!editing">
@@ -94,9 +95,19 @@
                     <span class = "rank" [class.rank-1] = "team.rank === 1" [class.rank-2]="team.rank === 2" [class.rank-3]="team.rank === 3">{{ team.rank }}</span>
                     <p class = "row-name">{{team.teamName}}</p>
                     <p class = "row-value" title = "Best score">{{team.bestScore}}</p>
+                    <button type = "button" class = "row-download"
+                    [disabled] = "editing || downloadingTeamId !== null"
+                    [attr.aria-label] = "'Download code and output for ' + team.teamName"
+                    title = "Download code + output (.zip)"
+                    (click)="downloadTeamPackage(team)">
+                    <i class = "pi" [ngClass]="downloadingTeamId === team.teamId ? 'pi-spin pi-spinner' : 'pi-download'"></i> ZIP
+                  </button>
                   </div>
                 }
               </div>
+              @if (downloadError){
+                <p class = "download-error">{{ downloadError }}</p>
+              }
             }
           }
 
@@ -161,6 +172,10 @@
                 }
               </div>
             }
+          }
+
+          @case ('plagiarismHeatmap') {
+            <app-plagiarism-heatmap [eventId]="eventId"></app-plagiarism-heatmap>
           }
 
           @case ('participants'){
