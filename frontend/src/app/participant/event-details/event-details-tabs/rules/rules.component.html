@@ -1,10 +1,7 @@
 <div class="rules-page">
 
   @if (loading) {
-  <div class="rules-message">
-     <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
-     <p>Loading rules...</p>
-   </div>
+       <app-loader message="Loading rules..." />
   }
 
   @else if (errorMsg) {

@@ -5,7 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-
 concurrency:
   group: cd-production
   cancel-in-progress: false
@@ -228,6 +227,61 @@ jobs:
             --query taskDefinition \
             --output json > task-definition.json
 
+      - name: Verify EFS
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          with open("task-definition.json") as f:
+              td = json.load(f)
+
+          volumes = td.get("volumes", [])
+
+          backend = None
+
+          for container in td.get("containerDefinitions", []):
+              if container.get("name") == "backend":
+                  backend = container
+                  break
+
+          if backend is None:
+              print("backend container not found")
+              sys.exit(1)
+
+          efs_volumes = [
+              v for v in volumes
+              if v.get("efsVolumeConfiguration")
+          ]
+
+          if not efs_volumes:
+              print("No EFS volume found in backend task definition")
+              sys.exit(1)
+
+          workspace_mount = any(
+              m.get("containerPath") == "/workspace"
+              for m in backend.get("mountPoints", [])
+          )
+
+          if not workspace_mount:
+              print("/workspace EFS mount not found")
+              sys.exit(1)
+          print("EFS VERIFIED")
+
+          for volume in efs_volumes:
+              efs = volume["efsVolumeConfiguration"]
+
+              print("Filesystem:",
+                    efs.get("fileSystemId"))
+
+              print("Access Point:",
+                    efs.get("authorizationConfig", {}).get("accessPointId"))
+
+              print("Mount:",
+                    "/workspace")
+          PY
+
       - name: Render task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -243,6 +297,55 @@ jobs:
           service: ${{ env.BACKEND_ECS_SERVICE }}
           cluster: ${{ env.BACKEND_ECS_CLUSTER }}
           wait-for-service-stability: true
+
+      - name: Verify deployed backend EFS
+        shell: bash
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$BACKEND_TASK_FAMILY" \
+            --query 'taskDefinition.{revision:revision,volumes:volumes,containers:containerDefinitions[*].{name:name,mountPoints:mountPoints}}' \
+            --output json > deployed-task-definition.json
+
+          python - <<'PY'
+          import json
+          import sys
+
+          with open("deployed-task-definition.json") as f:
+              td = json.load(f)
+
+          efs_volumes = [
+              v for v in td.get("volumes", [])
+              if v.get("efsVolumeConfiguration")
+          ]
+
+          backend = next(
+              (
+                  c for c in td.get("containers", [])
+                  if c.get("name") == "backend"
+              ),
+              None
+          )
+
+          if not efs_volumes:
+              print("Deployed task definition has no EFS volume")
+              sys.exit(1)
+
+          if backend is None:
+              print("Deployed backend container not found")
+              sys.exit(1)
+
+          if not any(
+              m.get("containerPath") == "/workspace"
+              for m in backend.get("mountPoints", [])
+          ):
+              print("/workspace EFS mount missing")
+              sys.exit(1)
+
+          print(
+              f"Backend revision {td['revision']} "
+              "verified with EFS mounted at /workspace."
+          )
+          PY
 
   deploy-ai:
     name: Deploy AI ML

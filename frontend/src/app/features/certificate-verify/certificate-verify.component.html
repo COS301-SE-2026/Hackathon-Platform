@@ -1,0 +1,32 @@
+<div class="verify-page">
+  <div class="verify-card">
+    @if (isLoading) {
+      <p class="status">Checking this certificate. Please wait</p>
+    } @else if (result?.valid) {
+      <div class="valid">
+        <i class="pi pi-check-circle icon"></i>
+        <h1>Certificate Verified</h1>
+        <dl>
+          <dt>Recipient</dt>
+          <dd>{{ result?.recipientName }}</dd>
+          <dt>Event</dt>
+          <dd>{{ result?.eventName }}</dd>
+          <dt>Type</dt>
+          <dd>{{ result?.certificateType}}</dd>
+          @if (result?.rankAtIssue) {
+            <dt>Rank</dt>
+            <dd>{{ result?.rankAtIssue }}</dd>
+          }
+          <dt>Issued</dt>
+          <dd>{{ result?.issuedAt | date: 'mediumDate' }}</dd>
+        </dl>
+      </div>
+    } @else {
+      <div>
+        <i class="pi pi-times-circle-icon"></i>
+        <h1>Certificate Not Found</h1>
+        <p>This certificate could not be verified. This certificate is not authentic.</p>
+      </div>
+    }
+  </div>
+</div>

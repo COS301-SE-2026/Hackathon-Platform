@@ -4,6 +4,7 @@ import { FormsModule} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ForumService, ForumPermissionResponse } from '../../../services/forum.service';
 import { AuthService } from '../../../services/auth.service';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 
 type ForumRole = 'ADMIN' | 'PARTICIPANT';
 
@@ -29,7 +30,7 @@ interface ForumThread{
 @Component({
     selector: 'app-forum',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, ButtonComponent],
     templateUrl: './forum.component.html',
     styleUrls: ['./forum.component.scss']
 })

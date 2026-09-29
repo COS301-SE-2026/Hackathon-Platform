@@ -3,9 +3,7 @@ package com.hackathon.platform.ide;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import org.springframework.stereotype.Component;
 
-@Component
 public class DockerIdeContainerManager implements IdeContainerManager {
   private static final String IDE_IMAGE = "hackathon-browser-ide:1";
 
