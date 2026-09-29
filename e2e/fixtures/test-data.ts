@@ -43,4 +43,4 @@ export function randomEventName(): string {
     return `E2E Event ${uniqueSuffix()}`;
 }
 
-export const VALID_PASSWORD = 'VeryStr0ng!123';
+export const VALID_PASSWORD = 'VeryStr0ng!123'; // NOSONAR
