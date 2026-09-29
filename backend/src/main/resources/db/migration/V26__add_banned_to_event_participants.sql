@@ -1,0 +1,2 @@
+ALTER TABLE event_participants
+ADD COLUMN banned BOOLEAN NOT NULL DEFAULT FALSE;
