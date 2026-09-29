@@ -7,6 +7,27 @@
     </div>
   </div>
 
+  <div class="certificate-manager-section">
+    <div class="certificate-manager-info">
+      <div class="certificate-manager-icon">
+        <i class="pi pi-id-card"></i>
+      </div>
+
+      <div>
+        <h2>Certificate Manager</h2>
+        <p>Create, customise and manage certificates for this event.</p>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="btn-certificate-manager"
+      (click)="goToCertificateManager()">
+      <i class="pi pi-arrow-right"></i>
+      Certificate Manager
+    </button>
+  </div>
+
   @if (isLoading) {
     <div class="loading">Loading event details...</div>
   } @else {
@@ -32,7 +53,7 @@
 
   <div class="form-row image-upload-row">
 
-   
+
     <div class="form-group">
       <span class="form-group-label">Event banner</span>
 
@@ -208,7 +229,7 @@
 
 <div class="form-section">
 
-  
+
   <div class="form-group">
     <label for="technologyInput">Allowed Technology</label>
 

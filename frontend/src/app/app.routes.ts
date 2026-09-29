@@ -5,14 +5,55 @@ import { AuthGuard } from './guards/auth.guard';
 
 
 export const routes: Routes = [
- { path: '', loadComponent: () => import('./features/landing/landing.component').then(m => m.LandingComponent)},
-  { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
-  { path: 'super-admin', loadComponent: () => import('./admin/super-admin/super-admin.component').then(m => m.SuperAdminComponent), canActivate: [AuthGuard] },
-  { path: 'register', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
-  { path: 'verify-email', loadComponent: () => import('./features/auth/verify-email/verify-email.component').then(m=>m.VerifyEmailComponent)},
-  { path: 'auth/oauth-success', loadComponent: () => import('./features/auth/oauth-success/oauth-success.component').then(m=>m.OAuthSuccessComponent)},
-  {path: 'style-guide', loadComponent: () => import('./components/brand-style-guide/brand-style-guide.component').then( m => m.BrandStyleGuideComponent),},
-  { path: 'verify/:code', loadComponent: () => import('./features/certificate-verify/certificate-verify.component').then(m => m.CertificateVerifyComponent) },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./features/landing/landing.component').then((m) => m.LandingComponent),
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'super-admin',
+    loadComponent: () =>
+      import('./admin/super-admin/super-admin.component').then((m) => m.SuperAdminComponent),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/register/register.component').then((m) => m.RegisterComponent),
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./features/auth/verify-email/verify-email.component').then(
+        (m) => m.VerifyEmailComponent,
+      ),
+  },
+  {
+    path: 'auth/oauth-success',
+    loadComponent: () =>
+      import('./features/auth/oauth-success/oauth-success.component').then(
+        (m) => m.OAuthSuccessComponent,
+      ),
+  },
+  {
+    path: 'style-guide',
+    loadComponent: () =>
+      import('./components/brand-style-guide/brand-style-guide.component').then(
+        (m) => m.BrandStyleGuideComponent,
+      ),
+  },
+  {
+    path: 'verify/:code',
+    loadComponent: () =>
+      import('./features/certificate-verify/certificate-verify.component').then(
+        (m) => m.CertificateVerifyComponent,
+      ),
+  },
 
   {
     path: 'admin',
@@ -21,115 +62,192 @@ export const routes: Routes = [
     children: [
       {
         path: 'events/:eventId/participants/:userId/telemetry',
-        loadComponent: () => import('./admin/components/telemetry/telemetry-report.component').then(m => m.TelemetryReportComponent),
+        loadComponent: () =>
+          import('./admin/components/telemetry/telemetry-report.component').then(
+            (m) => m.TelemetryReportComponent,
+          ),
       },
       {
         path: 'dashboard',
-        loadComponent: () => import('./admin/components/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        loadComponent: () =>
+          import('./admin/components/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent,
+          ),
       },
       {
         path: 'hackathons',
-        loadComponent: () => import('./admin/components/hackathons/hackathons.component').then(m => m.HackathonsComponent),
+        loadComponent: () =>
+          import('./admin/components/hackathons/hackathons.component').then(
+            (m) => m.HackathonsComponent,
+          ),
       },
-       {
+      {
         path: 'events',
-        loadComponent: () => import('./admin/components/event-list/eventlist.component').then(m => m.EventlistComponent),
+        loadComponent: () =>
+          import('./admin/components/event-list/eventlist.component').then(
+            (m) => m.EventlistComponent,
+          ),
       },
       {
         path: 'events/:eventId/announcements',
-        loadComponent: () => import('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
+        loadComponent: () =>
+          import('./admin/components/announcements/announcements.component').then(
+            (m) => m.AnnouncementsComponent,
+          ),
       },
-      { path: 'events/:eventId/forum',
-        loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent),
+      {
+        path: 'events/:eventId/forum',
+        loadComponent: () =>
+          import('./admin/components/forum/forum.component').then((m) => m.ForumComponent),
       },
       {
         path: 'events/:eventId/certificates',
-        loadComponent: () => import('./admin/components/certificates/certificates.component').then(m => m.CertificatesComponent),
+        loadComponent: () =>
+          import('./admin/components/certificates/certificates.component').then(
+            (m) => m.CertificatesComponent,
+          ),
       },
       {
         path: 'hackathons/:hackathonId/events/create',
-        loadComponent: () => import('./admin/components/create-event/createEvent.component').then(m => m.CreateEventComponent),
+        loadComponent: () =>
+          import('./admin/components/create-event/createEvent.component').then(
+            (m) => m.CreateEventComponent,
+          ),
       },
       {
         path: 'hackathons/:hackathonId/events/:eventId',
-        loadComponent: () => import ('./admin/components/event-shell/event-shell.component').then(m=> m.EventShellComponent),
+        loadComponent: () =>
+          import('./admin/components/event-shell/event-shell.component').then(
+            (m) => m.EventShellComponent,
+          ),
         children: [
           {
-        path: 'dashboard',
-        loadComponent: () => import('./admin/components/event-dashboard/event-dashboard.component').then(m => m.EventDashboardComponent),
+            path: 'dashboard',
+            loadComponent: () =>
+              import('./admin/components/event-dashboard/event-dashboard.component').then(
+                (m) => m.EventDashboardComponent,
+              ),
           },
-        //    {
-        // path: 'live-control',
-        // loadComponent: () => import('./admin/components/live-control/live-control.component').then(m => m.LiveControlComponent),
-        //   },
-           {
-        path: 'announcements',
-        loadComponent: () => import('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
+          //    {
+          // path: 'live-control',
+          // loadComponent: () => import('./admin/components/live-control/live-control.component').then(m => m.LiveControlComponent),
+          //   },
+          {
+            path: 'announcements',
+            loadComponent: () =>
+              import('./admin/components/announcements/announcements.component').then(
+                (m) => m.AnnouncementsComponent,
+              ),
           },
-           {
-        path: 'forum',
-        loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent),
+          {
+            path: 'forum',
+            loadComponent: () =>
+              import('./admin/components/forum/forum.component').then((m) => m.ForumComponent),
           },
-           {
-        path: 'teams',
-        loadComponent: () => import('./admin/components/teams/teams.component').then(m => m.TeamsComponent),
+          {
+            path: 'teams',
+            loadComponent: () =>
+              import('./admin/components/teams/teams.component').then((m) => m.TeamsComponent),
           },
-           {
-        path: 'manage',
-        loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
+          {
+            path: 'manage',
+            loadComponent: () =>
+              import('./admin/components/manage-event/manage-event.component').then(
+                (m) => m.ManageEventComponent,
+              ),
           },
-           {
-        path: 'plagiarism',
-        loadComponent: () => import('./admin/components/plagiarism/plagiarism.component').then(m => m.PlagiarismComponent),
+          {
+            path: 'plagiarism',
+            loadComponent: () =>
+              import('./admin/components/plagiarism/plagiarism.component').then(
+                (m) => m.PlagiarismComponent,
+              ),
           },
-           {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-      }
-
-        ]
-
+          {
+            path: '',
+            redirectTo: 'dashboard',
+            pathMatch: 'full',
+          },
+        ],
       },
-        {
+      {
         path: 'hackathons/:hackathonId/events',
-        loadComponent: () => import('./admin/components/events/events.component').then(m => m.EventsComponent),
+        loadComponent: () =>
+          import('./admin/components/events/events.component').then((m) => m.EventsComponent),
       },
-       {
+      {
+        path: 'certificates',
+        loadComponent: () =>
+          import('./admin/components/certificates/certificates.component').then(
+            (m) => m.CertificatesComponent,
+          ),
+      },
+      {
         path: 'hackathons/:hackathonId/manage',
-        loadComponent: () => import('./admin/components/manage-event/manage-event.component').then(m => m.ManageEventComponent),
+        loadComponent: () =>
+          import('./admin/components/manage-event/manage-event.component').then(
+            (m) => m.ManageEventComponent,
+          ),
       },
       {
         path: 'hackathons/:hackathonId/levels',
-        loadComponent: () => import('./admin/components/levels/levels.component').then(m => m.LevelsComponent),
+        loadComponent: () =>
+          import('./admin/components/levels/levels.component').then((m) => m.LevelsComponent),
       },
       {
         path: 'hackathons/:hackathonId/solver',
-        loadComponent: () => import('./admin/components/solver/solver.component').then(m => m.SolverComponent),
+        loadComponent: () =>
+          import('./admin/components/solver/solver.component').then((m) => m.SolverComponent),
       },
       {
-        path: "hackathons/:hackathonId/announcements",
-        loadComponent: () => import ('./admin/components/announcements/announcements.component').then(m => m.AnnouncementsComponent),
+        path: 'hackathons/:hackathonId/announcements',
+        loadComponent: () =>
+          import('./admin/components/announcements/announcements.component').then(
+            (m) => m.AnnouncementsComponent,
+          ),
       },
       {
-        path: "settings",
-        loadComponent: () => import ('./admin/components/profile/admin-profile.component').then(m => m.AdminProfileComponent),
+        path: 'settings',
+        loadComponent: () =>
+          import('./admin/components/profile/admin-profile.component').then(
+            (m) => m.AdminProfileComponent,
+          ),
       },
-
-    ]
+    ],
   },
 
   {
     path: 'participant',
     component: ParticipantShellComponent,
     children: [
-      { path: 'home', loadComponent: () => import('./participant/home/home.component').then(m => m.HomeComponent) },
-      { path: 'help',loadComponent: () =>import('./participant/help/help.component').then(m => m.HelpComponent) },
-      { path: 'events/:eventId/forum', loadComponent: () => import('./admin/components/forum/forum.component').then(m => m.ForumComponent) },
-      { path: 'events/:eventId', loadComponent: () => import('./participant/event-details/event-details.component').then(m => m.EventDetailsComponent)},
-      { path: 'events/:eventId/levels/:levelId/workspaces/:workspaceId/ide', loadComponent: () => import('./participant/ide/ide.component').then(m => m.IdeComponent) },
-      { path: '', redirectTo: 'home', pathMatch: 'full' }
-    ]
+      {
+        path: 'home',
+        loadComponent: () =>
+          import('./participant/home/home.component').then((m) => m.HomeComponent),
+      },
+      {
+        path: 'help',
+        loadComponent: () =>
+          import('./participant/help/help.component').then((m) => m.HelpComponent),
+      },
+      {
+        path: 'events/:eventId/forum',
+        loadComponent: () =>
+          import('./admin/components/forum/forum.component').then((m) => m.ForumComponent),
+      },
+      {
+        path: 'events/:eventId',
+        loadComponent: () =>
+          import('./participant/event-details/event-details.component').then(
+            (m) => m.EventDetailsComponent,
+          ),
+      },
+      {
+        path: 'events/:eventId/levels/:levelId/workspaces/:workspaceId/ide',
+        loadComponent: () => import('./participant/ide/ide.component').then((m) => m.IdeComponent),
+      },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+    ],
   },
- { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: '' },
 ];
