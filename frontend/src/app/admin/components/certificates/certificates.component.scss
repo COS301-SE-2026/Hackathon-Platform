@@ -39,7 +39,7 @@
 .error-message {
   background: #fdecea;
   color: #b3261e;
-  padding: 10x;
+  padding: 10px 14px;
   border-radius: 6px;
   margin-bottom: 16px;
   font-size: 14px;
@@ -207,12 +207,12 @@
     outline-offset: 3px;
   }
 
-  &.qr-placeholder {
+  &.qr-element {
     padding: 0;
   }
 }
 
-.qr-element {
+.qr-placeholder {
   border: 1.5px dashed #9ca3af;
   border-radius: 4px;
   display: flex;
@@ -308,6 +308,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 20px;
+  margin-top:32px;
 }
 
 .generation-controls {

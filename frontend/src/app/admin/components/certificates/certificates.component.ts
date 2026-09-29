@@ -144,7 +144,7 @@ export class CertificatesComponent implements OnInit, OnDestroy {
     this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
     if (!this.eventId) {
       this.errorMessage = 'No event id provided';
-      this.isLoading = true;
+      this.isLoading = false;
       return;
     }
     this.loadEvent();

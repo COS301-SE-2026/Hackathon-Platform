@@ -440,7 +440,7 @@ confirmRegistration(): void {
             this.generatingCertificate = false;
             this.change.markForCheck();
           } else{
-           this.downloadCertificate();
+           this.downloadOldCertificate();
           }
         },
 
