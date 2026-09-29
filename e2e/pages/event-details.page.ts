@@ -1,61 +1,72 @@
-import { expect, Locator, Page } from '@playwright/test'
+import { expect, Locator, Page } from '@playwright/test';
 
 export class EventDetailsPage {
-    readonly page: Page;
-    readonly regButton: Locator;
-    readonly regModal: Locator;
-    readonly regKeyInput: Locator;
-    readonly modelConfirmButton: Locator;
-    readonly modelCancelButton: Locator;
-    readonly toast: Locator;
+  readonly page: Page;
+  readonly registerButton: Locator;
+  readonly registrationDialog: Locator;
+  readonly registrationKeyInput: Locator;
+  readonly confirmRegisterButton: Locator;
+  readonly toast: Locator;
 
-    constructor(page: Page) {
-        this.page = page;
-        this.regButton = page.getByRole('button', { name: /^Register(ed)>$/ });
-        this.regModal = page.locator('app-model').filter({ hasText: 'Registered for Event '});
-        this.regKeyInput = page.getByLabel('Registration Key');
-        this.modelConfirmButton = this.regModal.getByRole('button', { name: /^Register(ing\.\.\.)?$/ });
-        this.modelCancelButton = this.regModal.getByRole('button', { name: 'Cancel' });
-        this.toast = page.locator('.p-toast-message');
-    }
+  constructor(page: Page) {
+    this.page = page;
+    this.registerButton = page.getByRole('button', { name: /^(Register|Registered)$/ });
 
-    async goto(eventId: string, tab = 'overview'): Promise<void> {
-        await this.page.goto(`/participant/events/${eventId}?tab=${tab}`);
-    }
+    // Do not assert visibility on <app-modal> itself. The custom-element host has
+    // no rendered box, while its fixed .modal-overlay/dialog children are visible.
+    this.registrationDialog = page
+      .locator('.modal-overlay')
+      .filter({ hasText: 'Register for Event' });
 
-    tab(label: string): Locator {
-        return this.page.locator('section.event-tabs: a.tab', {hasText: label });
-    }
+    this.registrationKeyInput = page.locator('input#registration-key');
+    this.confirmRegisterButton = this.registrationDialog.getByRole('button', {
+      name: /^(Register|Registering\.\.\.)$/,
+    });
+    this.toast = page.locator('.p-toast-message').last();
+  }
 
-    async goToTab(label: string): Promise<void> {
-        await this.tab(label).click();
-    }
+  async goto(eventId: string, tab = 'overview'): Promise<void> {
+    await this.page.goto(`/participant/events/${eventId}?tab=${tab}`, {
+      waitUntil: 'domcontentloaded',
+    });
+    await expect(this.page).toHaveURL(new RegExp(`/participant/events/${eventId}`));
+    await expect(this.registerButton).toBeVisible();
+  }
 
-    async expectOnOverview(): Promise<void> {
-        await expect(this.page).toHaveURL(/tab=overview/);
-    }
+  async openRegistrationDialog(): Promise<void> {
+    await expect(this.registerButton).toBeEnabled();
+    await this.registerButton.click();
+    await expect(this.registrationDialog).toBeVisible();
+    await expect(
+      this.registrationDialog.getByRole('heading', {
+        name: 'Register for Event',
+        exact: true,
+      }),
+    ).toBeVisible();
+  }
 
-    async openRegistrationModel(): Promise<void> {
-        await this.regButton.click();
-        await expect(this.regModal).toBeVisible();
-    }
+  async registerPublic(): Promise<void> {
+    await this.openRegistrationDialog();
+    await this.confirmRegisterButton.click();
+  }
 
-    async registerPublic(): Promise<void> {
-        await this.openRegistrationModel();
-        await this.modelConfirmButton.click();
-    }
+  async registerPrivate(key: string): Promise<void> {
+    await this.openRegistrationDialog();
+    await expect(this.registrationKeyInput).toBeVisible();
+    await this.registrationKeyInput.fill(key);
+    await this.confirmRegisterButton.click();
+  }
 
-    async registerPrivate(key: string): Promise<void> {
-        await this.openRegistrationModel();
-        await this.regKeyInput.fill(key);
-        await this.modelConfirmButton.click();
-    }
+  async submitPrivateKey(key: string): Promise<void> {
+    await expect(this.registrationDialog).toBeVisible();
+    await expect(this.registrationKeyInput).toBeVisible();
+    await this.registrationKeyInput.fill(key);
+    await this.confirmRegisterButton.click();
+  }
 
-    async expectRegistered(): Promise<void> {
-        await expect(this.regButton).toBeDisabled();
-    }
-
-    async expectNotRegistered(): Promise<void> {
-        await expect(this.regButton).toBeEnabled();
-    }
+  async expectRegistered(): Promise<void> {
+    await expect(this.registrationDialog).toBeHidden();
+    await expect(this.registerButton).toBeDisabled();
+    await expect(this.registerButton).toHaveText('Registered');
+  }
 }
