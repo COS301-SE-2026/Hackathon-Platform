@@ -7,7 +7,7 @@ import { StorageService } from '../../../services/storage.service';
 
 
  type Visibility = 'PUBLIC' | 'PRIVATE';
- 
+
 
 
 @Component({
@@ -15,11 +15,10 @@ import { StorageService } from '../../../services/storage.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './manage-event.component.html',
-  styleUrls: ['./manage-event.component.scss']
+  styleUrls: ['./manage-event.component.scss'],
 })
 export class ManageEventComponent implements OnInit {
-
-    @ViewChild('fileInput')
+  @ViewChild('fileInput')
   fileInput!: ElementRef<HTMLInputElement>;
 
   @ViewChild('logoFileInput')
@@ -31,23 +30,19 @@ export class ManageEventComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly storageService = inject(StorageService);
 
-  
   technologyInput = '';
 
-  @Input() hackathonId  ='';
+  @Input() hackathonId = '';
 
- @Input() eventId = '';
+  @Input() eventId = '';
   isLoading = true;
   isSaving = false;
   errorMessage = '';
   successMessage = '';
 
-
-
   form = {
     name: '',
-    
-    
+
     bannerFile: null as File | null,
     bannerFileName: '',
     bannerUrl: '',
@@ -55,15 +50,12 @@ export class ManageEventComponent implements OnInit {
     logoFileName: '',
     logoUrl: '',
 
-    
     description: '',
     rules: '',
 
-  
     tagline: '',
     allowedTechnologies: [] as string[],
 
-  
     startDate: '',
     startTime: '',
     duration: 1,
@@ -72,16 +64,15 @@ export class ManageEventComponent implements OnInit {
     isInPerson: false,
     useIde: false,
 
-    
     visibility: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
     registrationKey: '',
 
-    prizes: [] as { title: string; description: string }[]
-   };
+    prizes: [] as { title: string; description: string }[],
+  };
 
   ngOnInit(): void {
     this.hackathonId = this.hackathonId || this.route.snapshot.paramMap.get('hackathonId') || '';
-    this.eventId = this.eventId|| this.route.snapshot.paramMap.get('eventId') || '';
+    this.eventId = this.eventId || this.route.snapshot.paramMap.get('eventId') || '';
     if (!this.eventId) {
       this.errorMessage = 'No event ID provided';
       this.isLoading = false;
@@ -95,41 +86,38 @@ export class ManageEventComponent implements OnInit {
     this.errorMessage = '';
 
     this.eventService.getEvent(this.eventId).subscribe({
-
-
       next: (data: EventResponse) => {
-      this.populateForm(data);
+        this.populateForm(data);
 
-      this.eventService.getEventBannerUrl(this.eventId).subscribe({
-        next: (banner) => {
-          this.form.bannerUrl = banner?.url || '';
-      this.cdr.detectChanges();
-        },
-        error: () => {
-          this.form.bannerUrl = '';
-        }
-      });
+        this.eventService.getEventBannerUrl(this.eventId).subscribe({
+          next: (banner) => {
+            this.form.bannerUrl = banner?.url || '';
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.form.bannerUrl = '';
+          },
+        });
 
         this.eventService.getEventLogoUrl(this.eventId).subscribe({
           next: (logo) => {
             this.form.logoUrl = logo?.url || '';
-        this.cdr.detectChanges();
+            this.cdr.detectChanges();
           },
           error: () => {
             this.form.logoUrl = '';
-          }
+          },
         });
 
         this.isLoading = false;
         this.cdr.detectChanges();
       },
 
-
       error: (err) => {
         this.errorMessage = err?.error?.message || 'Failed to load event details.';
         this.isLoading = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -140,26 +128,23 @@ export class ManageEventComponent implements OnInit {
     this.form.rules = data.rules || '';
 
     this.form.tagline = data.tagline || '';
-    this.form.allowedTechnologies = data.allowedTech
-      ? [...data.allowedTech]
-      : [];
+    this.form.allowedTechnologies = data.allowedTech ? [...data.allowedTech] : [];
 
-  this.form.duration = Number(data.duration ?? 3600) / 3600;
+    this.form.duration = Number(data.duration ?? 3600) / 3600;
 
     if (data.startDateTime) {
-    const date = new Date(data.startDateTime);
+      const date = new Date(data.startDateTime);
 
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
 
-    this.form.startDate =
-      `${year}-${month}-${day}T${hours}:${minutes}`;
-  } else {
-    this.form.startDate = '';
-  }
+      this.form.startDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+    } else {
+      this.form.startDate = '';
+    }
 
     this.form.teamSizeLimit = Number(data.teamSizeLimit ?? 1);
 
@@ -171,79 +156,70 @@ export class ManageEventComponent implements OnInit {
 
     this.form.prizes = [];
 
-  if (data.firstPlacePrize != null) {
-    this.form.prizes.push({
-      title: '1st Place',
-      description: `R${data.firstPlacePrize}`
-    });
+    if (data.firstPlacePrize != null) {
+      this.form.prizes.push({
+        title: '1st Place',
+        description: `R${data.firstPlacePrize}`,
+      });
+    }
+
+    if (data.secondPlacePrize != null) {
+      this.form.prizes.push({
+        title: '2nd Place',
+        description: `R${data.secondPlacePrize}`,
+      });
+    }
+
+    if (data.thirdPlacePrize != null) {
+      this.form.prizes.push({
+        title: '3rd Place',
+        description: `R${data.thirdPlacePrize}`,
+      });
+    }
   }
 
-  if (data.secondPlacePrize != null) {
-    this.form.prizes.push({
-      title: '2nd Place',
-      description: `R${data.secondPlacePrize}`
-    });
-  }
+  updateEvent(): void {
+    if (!this.form.name.trim()) {
+      this.errorMessage = 'Event name is required';
+      return;
+    }
 
-  if (data.thirdPlacePrize != null) {
-    this.form.prizes.push({
-      title: '3rd Place',
-      description: `R${data.thirdPlacePrize}`
-    });
-  }
-  }
+    if (!this.form.startDate) {
+      this.errorMessage = 'Start date is required';
+      return;
+    }
 
+    this.isSaving = true;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-updateEvent(): void {
-  if (!this.form.name.trim()) {
-    this.errorMessage = 'Event name is required';
-    return;
-  }
+    const payload = {
+      name: this.form.name.trim(),
+      description: this.form.description,
+      startDateTime: new Date(this.form.startDate).toISOString(),
+      duration: this.form.duration * 3600,
+      visibility: this.form.visibility,
 
-  if (!this.form.startDate) {
-    this.errorMessage = 'Start date is required';
-    return;
-  }
+      registrationKey: this.form.visibility === 'PRIVATE' ? this.form.registrationKey : undefined,
 
-  this.isSaving = true;
-  this.errorMessage = '';
-  this.successMessage = '';
+      teamSizeLimit: this.form.teamSizeLimit,
 
-  const payload = {
-    name: this.form.name.trim(),
-    description: this.form.description,
-    startDateTime: new Date(this.form.startDate).toISOString(),
-    duration: this.form.duration * 3600,
-    visibility: this.form.visibility,
+      inPerson: this.form.isInPerson,
+      useIde: this.form.useIde,
 
-    registrationKey:
-      this.form.visibility === 'PRIVATE'
-        ? this.form.registrationKey
-        : undefined,
+      rules: this.form.rules,
+      allowedTech: this.form.allowedTechnologies,
+      tagline: this.form.tagline,
 
-    teamSizeLimit: this.form.teamSizeLimit,
+      firstPlacePrize: this.getPrizeAmount('1st Place'),
+      secondPlacePrize: this.getPrizeAmount('2nd Place'),
+      thirdPlacePrize: this.getPrizeAmount('3rd Place'),
+    };
 
-    inPerson: this.form.isInPerson,
-    useIde: this.form.useIde,
-
-    rules: this.form.rules,
-    allowedTech: this.form.allowedTechnologies,
-    tagline: this.form.tagline,
-
-    firstPlacePrize: this.getPrizeAmount('1st Place'),
-    secondPlacePrize: this.getPrizeAmount('2nd Place'),
-    thirdPlacePrize: this.getPrizeAmount('3rd Place')
-  };
-
-
-  this.eventService.updateEvent(this.eventId, payload).subscribe({
-    next: () => {
-
-      if (this.form.bannerFile) {
-
-        this.storageService
-          .uploadEventBanner(this.eventId, this.form.bannerFile)
-          .subscribe({
+    this.eventService.updateEvent(this.eventId, payload).subscribe({
+      next: () => {
+        if (this.form.bannerFile) {
+          this.storageService.uploadEventBanner(this.eventId, this.form.bannerFile).subscribe({
             next: () => {
               this.form.bannerFile = null;
               this.form.bannerFileName = '';
@@ -253,40 +229,30 @@ updateEvent(): void {
 
             error: (err) => {
               this.isSaving = false;
-              this.errorMessage =
-                err?.error?.message ||
-                'Event updated, but banner upload failed.';
+              this.errorMessage = err?.error?.message || 'Event updated, but banner upload failed.';
               this.cdr.detectChanges();
-            }
+            },
           });
+        } else {
+          this.uploadLogo();
+        }
+      },
 
-      } else {
-
-        this.uploadLogo();
-      }
-    },
-
-    error: (err) => {
-      this.isSaving = false;
-      this.errorMessage =
-        err?.error?.message || 'Failed to update event.';
-      this.cdr.detectChanges();
-    }
-  });
-}
-
-private uploadLogo(): void {
-
-
-  if (!this.form.logoFile) {
-    this.finishSave();
-    return;
+      error: (err) => {
+        this.isSaving = false;
+        this.errorMessage = err?.error?.message || 'Failed to update event.';
+        this.cdr.detectChanges();
+      },
+    });
   }
 
-  this.storageService
-    .uploadEventLogo(this.eventId, this.form.logoFile)
-    .subscribe({
+  private uploadLogo(): void {
+    if (!this.form.logoFile) {
+      this.finishSave();
+      return;
+    }
 
+    this.storageService.uploadEventLogo(this.eventId, this.form.logoFile).subscribe({
       next: () => {
         this.form.logoFile = null;
         this.form.logoFileName = '';
@@ -296,126 +262,115 @@ private uploadLogo(): void {
 
       error: (err) => {
         this.isSaving = false;
-        this.errorMessage =
-          err?.error?.message ||
-          'Event updated, but logo upload failed.';
+        this.errorMessage = err?.error?.message || 'Event updated, but logo upload failed.';
         this.cdr.detectChanges();
-      }
+      },
     });
-}
-
-private finishSave(): void {
-  this.isSaving = false;
-  this.successMessage = 'Event updated successfully';
-  this.cdr.detectChanges();
-
-  setTimeout(() => {
-    this.successMessage = '';
-    this.cdr.detectChanges();
-  }, 30000);
-}
-
-private getPrizeAmount(title: string): number | undefined {
-  const prize = this.form.prizes.find(p => p.title === title);
-
-  if (!prize || !prize.description) {
-    return undefined;
   }
 
-  const amount = Number(
-    prize.description.replace(/[^0-9.]/g, '')
-  );
+  private finishSave(): void {
+    this.isSaving = false;
+    this.successMessage = 'Event updated successfully';
+    this.cdr.detectChanges();
 
-  return Number.isFinite(amount) ? amount : undefined;
-}
-  
+    setTimeout(() => {
+      this.successMessage = '';
+      this.cdr.detectChanges();
+    }, 30000);
+  }
+
+  private getPrizeAmount(title: string): number | undefined {
+    const prize = this.form.prizes.find((p) => p.title === title);
+
+    if (!prize || !prize.description) {
+      return undefined;
+    }
+
+    const amount = Number(prize.description.replace(/[^0-9.]/g, ''));
+
+    return Number.isFinite(amount) ? amount : undefined;
+  }
+
   goBack(): void {
-     if (this.hackathonId){
-         this.router.navigate(['/admin/hackathons', this.hackathonId, 'events']);
-
-    }else {
-        this.router.navigate(['/admin/events']);
+    if (this.hackathonId) {
+      this.router.navigate(['/admin/hackathons', this.hackathonId, 'events']);
+    } else {
+      this.router.navigate(['/admin/events']);
     }
   }
 
   addTechnology(event: Event): void {
-  event.preventDefault();
+    event.preventDefault();
 
-  const input = this.technologyInput.trim();
+    const input = this.technologyInput.trim();
 
-  if (!input) {
-    return;
+    if (!input) {
+      return;
+    }
+
+    if (!this.form.allowedTechnologies.includes(input)) {
+      this.form.allowedTechnologies.push(input);
+    }
+
+    this.technologyInput = '';
   }
 
-  if (!this.form.allowedTechnologies.includes(input)) {
-    this.form.allowedTechnologies.push(input);
+  removeTechnology(index: number): void {
+    this.form.allowedTechnologies.splice(index, 1);
   }
 
-  this.technologyInput = '';
-}
-
-removeTechnology(index: number): void {
-  this.form.allowedTechnologies.splice(index, 1);
-}
-
-addPrize(): void {
-  this.form.prizes.push({
-    title: '',
-    description: ''
-  });
-}
-
-removePrize(index: number): void {
-  this.form.prizes.splice(index, 1);
-}
-
-triggerFileInput(target: 'banner' | 'logo' = 'banner'): void {
-  if (target === 'logo') {
-    this.logoFileInput.nativeElement.click();
-  } else {
-    this.fileInput.nativeElement.click();
+  addPrize(): void {
+    this.form.prizes.push({
+      title: '',
+      description: '',
+    });
   }
-}
 
-onFileSelected(
-  event: Event,
-  target: 'banner' | 'logo' = 'banner'
-): void {
-  const input = event.target as HTMLInputElement;
-
-  if (input.files && input.files.length > 0) {
-    this.setFile(input.files[0], target);
+  removePrize(index: number): void {
+    this.form.prizes.splice(index, 1);
   }
-}
 
-onDrop(
-  event: DragEvent,
-  target: 'banner' | 'logo'
-): void {
-  event.preventDefault();
-
-  const file = event.dataTransfer?.files?.[0];
-
-  if (file) {
-    this.setFile(file, target);
+  triggerFileInput(target: 'banner' | 'logo' = 'banner'): void {
+    if (target === 'logo') {
+      this.logoFileInput.nativeElement.click();
+    } else {
+      this.fileInput.nativeElement.click();
+    }
   }
-}
 
-onDragOver(event: DragEvent): void {
-  event.preventDefault();
-}
+  onFileSelected(event: Event, target: 'banner' | 'logo' = 'banner'): void {
+    const input = event.target as HTMLInputElement;
 
-private setFile(
-  file: File,
-  target: 'banner' | 'logo'
-): void {
-  if (target === 'logo') {
-    this.form.logoFile = file;
-    this.form.logoFileName = file.name;
-  } else {
-    this.form.bannerFile = file;
-    this.form.bannerFileName = file.name;
+    if (input.files && input.files.length > 0) {
+      this.setFile(input.files[0], target);
+    }
   }
-}
-  
+
+  onDrop(event: DragEvent, target: 'banner' | 'logo'): void {
+    event.preventDefault();
+
+    const file = event.dataTransfer?.files?.[0];
+
+    if (file) {
+      this.setFile(file, target);
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  private setFile(file: File, target: 'banner' | 'logo'): void {
+    if (target === 'logo') {
+      this.form.logoFile = file;
+      this.form.logoFileName = file.name;
+    } else {
+      this.form.bannerFile = file;
+      this.form.bannerFileName = file.name;
+    }
+  }
+
+  goToCertificateManager(): void {
+    this.router.navigate(['/admin/events', this.eventId, 'certificates']);
+  }
 }
