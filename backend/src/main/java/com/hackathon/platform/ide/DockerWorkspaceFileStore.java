@@ -6,9 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import org.springframework.stereotype.Component;
 
-@Component
 public class DockerWorkspaceFileStore implements WorkspaceFileStore {
   private static final int MAX_SIZE = 1_000_000;
 

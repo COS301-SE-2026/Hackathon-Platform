@@ -2,9 +2,7 @@ package com.hackathon.platform.ide;
 
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-@Component
 public class DockerIdeAccessManager implements IdeAccessManager {
   private final String urlTemplate;
 
