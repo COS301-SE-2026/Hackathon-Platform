@@ -1,12 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DataPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { CertificateService, CertificateVerificationResponse } from '../../services/certificate.service';
 
 @Component({
   selector: 'app-certificate-verify',
   standalone: true,
-  imports: [DataPipe],
+  imports: [DatePipe],
   templateUrl: './certificate-verify.component.html',
   styleUrl: './certificate-verify.component.scss',
 })
