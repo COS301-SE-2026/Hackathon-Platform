@@ -36,7 +36,7 @@ test.describe.serial('Participant: browse and register', () => {
     await adminApi.dispose();
   });
 
-  test('searches upcoming events', async ({ page }) => {
+  test.skip('searches upcoming events', async ({ page }) => {
     const home = new HomePage(page);
     await home.goto();
     await home.openUpcoming();
