@@ -8,8 +8,11 @@ import software.amazon.awssdk.services.ecs.EcsClient;
 
 @Configuration
 public class AwsEcsConfig {
-    @Bean
-    EcsClient ecsClient(){
-        return EcsClient.builder().region(Region.of(System.getenv().getOrDefault("AWS_REGION", "af-south-1"))).credentialsProvider(DefaultCredentialsProvider.create()).build();
-    }
+  @Bean
+  EcsClient ecsClient() {
+    return EcsClient.builder()
+        .region(Region.of(System.getenv().getOrDefault("AWS_REGION", "af-south-1")))
+        .credentialsProvider(DefaultCredentialsProvider.create())
+        .build();
+  }
 }
