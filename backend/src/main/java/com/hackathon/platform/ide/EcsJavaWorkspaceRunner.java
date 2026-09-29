@@ -19,8 +19,10 @@ import software.amazon.awssdk.services.ecs.model.RunTaskResponse;
 import software.amazon.awssdk.services.ecs.model.StopTaskRequest;
 import software.amazon.awssdk.services.ecs.model.Task;
 import software.amazon.awssdk.services.ecs.model.TaskOverride;
+import org.springframework.context.annotation.Profile;
 
 @Component
+@Profile("prod")
 @RequiredArgsConstructor
 public class EcsJavaWorkspaceRunner implements WorkspaceCodeRunner {
   private static final long PROVISION_TIMEOUT_SECONDS = 120;
