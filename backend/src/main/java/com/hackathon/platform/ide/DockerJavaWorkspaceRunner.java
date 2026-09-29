@@ -13,9 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.springframework.stereotype.Component;
 
-@Component
 public class DockerJavaWorkspaceRunner implements WorkspaceCodeRunner {
   private static final String RUNNER_IMAGE = "hackathon-java-runner:1";
   private static final long TIMEOUT_SECONDS = 10;

@@ -375,8 +375,8 @@ export class ForumComponent implements OnInit, OnDestroy {
         this.eventSource = this.forumService.connectToForumUpdates(this.eventId);
         this.eventSource.addEventListener('forum-update', () => {
             this.zone.run(() => {
-                const openThreadId = this.expandedThreadId;
-                this.loadForum(false, openThreadId);
+                if (this.expandedThreadId) return;
+                this.loadForum(false, null);
             });
         });
 

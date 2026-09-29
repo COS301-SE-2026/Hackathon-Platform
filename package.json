@@ -10,6 +10,8 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
-    "dotenv": "^17.4.2"
+    "@stomp/stompjs": "^7.3.0",
+    "dotenv": "^17.4.2",
+    "monaco-editor": "^0.57.0"
   }
 }

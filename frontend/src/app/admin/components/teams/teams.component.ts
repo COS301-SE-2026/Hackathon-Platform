@@ -2,6 +2,7 @@ import { ChangeDetectorRef,Component,inject,OnInit,Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
+import { TeamService, AdminCreateTeamRequest } from '../../../services/team.service';
 
 interface TeamMember {
     memberId: string;
@@ -9,7 +10,6 @@ interface TeamMember {
     initial: string;
     email: string;
     isLeader: boolean;
-    isBanned: boolean;
     joinedAtLabel: string;
 }
 
@@ -17,7 +17,7 @@ interface Team {
     teamId: string;
     name: string;
     members: TeamMember[];
-    status: 'active' | 'banned';
+    status: 'active' | 'inactive';
     createdAtLabel: string;
 }
 
@@ -37,6 +37,7 @@ interface DraftMember {
 export class TeamsComponent implements OnInit {
     private readonly change = inject(ChangeDetectorRef);
     private readonly route = inject(ActivatedRoute);
+    private readonly teamService = inject(TeamService);
 
     @Input() hackathonId = '';
     @Input() eventId = '';
@@ -58,17 +59,61 @@ export class TeamsComponent implements OnInit {
     teams: Team[] = [];
     
 
-    ngOnInit(): void {
-        this.hackathonId = this.hackathonId ||  this.route.snapshot.paramMap.get('hackathonId') || '';
-        this.eventId = this.eventId ||  this.route.snapshot.paramMap.get('eventId') || '';
+  ngOnInit(): void {
+    this.hackathonId = this.hackathonId || this.route.snapshot.paramMap.get('hackathonId') || '';
+    this.eventId = this.eventId || this.route.snapshot.paramMap.get('eventId') || '';
 
-        if (!this.eventId){
-            
-            this.errorMessage = 'No event ID provided.';
-            return;
-        }
-        this.isLoading = false;
+    if (!this.eventId) {
+        this.errorMessage = 'No event ID provided.';
+        return;
     }
+
+    this.loadTeams();
+}
+
+
+    loadTeams(): void {
+     this.isLoading = true;
+     this.errorMessage = '';
+
+     this.teamService.getEventTeams(this.eventId).subscribe({
+        next: (teams) => {
+            this.teams = teams.map(team => ({
+                teamId: team.teamId,
+                 name: team.teamName,
+                 members: team.members.map(member => ({
+                    memberId: member.userId,
+                    name: member.fullName,
+                    initial: member.fullName.charAt(0).toUpperCase() || '?',
+                    email: member.email,
+                    isLeader: member.role === 'LEADER',
+                    joinedAtLabel: this.formatJoinedAt(member.joinedAt)
+                })),
+                
+                status: team.status === 'ACTIVE' ? 'active' : 'inactive',
+                createdAtLabel: this.formatCreatedAt(team.createdAt)
+                }));
+
+            this.isLoading = false;
+            this.change.markForCheck();
+            },
+            error: () => {
+                this.errorMessage = 'Failed to load teams.';
+                this.isLoading = false;
+                this.change.markForCheck();
+            }
+        });
+    }
+
+
+    private formatJoinedAt(date: string): string {
+        return new Date(date).toLocaleDateString();
+    }
+
+    private formatCreatedAt(date: string): string {
+        return new Date(date).toLocaleDateString();
+    }
+
 
     get filteredTeams(): Team[] {
         const term = this.searchTerm.trim().toLowerCase();
@@ -93,106 +138,123 @@ export class TeamsComponent implements OnInit {
         this.showCreateTeamModal = false;
     }
 
-    addPendingMember(): void {
-        const name = this.newMemberName.trim();
-        if(!name){
-            return;
-        }
-        this.pendingMembers.push({name, email: this.newMemberEmail.trim()});
-        this.newMemberName = '';
-        this.newMemberEmail = '';
+   addPendingMember(): void {
+    const name = this.newMemberName.trim();
+    const email = this.newMemberEmail.trim();
+
+    if (!name || !email) {
+        return;
     }
 
+    this.pendingMembers.push({
+        name,
+        email
+    });
+
+    this.newMemberName = '';
+    this.newMemberEmail = '';
+}
     removePendingMember(index: number): void {
         this.pendingMembers.splice(index,1);
     }
 
+   
+
     createTeam(): void {
         const name = this.newTeamName.trim();
-        if(!name){
+
+        if (!name || this.pendingMembers.length === 0) {
             return;
         }
 
-        const members: TeamMember[] = this.pendingMembers.map((draft,index) => ({
-            memberId: `m-${Date.now()}-${index}`,
-            name: draft.name,
-            initial: draft.name.charAt(0).toUpperCase() || '?',
-            email: draft.email,
-            isLeader: index ===0,
-            isBanned: false,
-            joinedAtLabel: 'Just now'
+        const memberEmails = this.pendingMembers
+            .map(member => member.email.trim())
+            .filter(email => email);
 
-        }));
-        this.teams.push({
-            teamId: `t-${Date.now()}`,
-            name,
-            members,
-            status: 'active',
-            createdAtLabel:'Just now'
-        });
-
-        this.showCreateTeamModal = false;
-        this.change.markForCheck();
-    }
-
-    deleteTeam(teamId: string): void {
-        this.teams = this.teams.filter(team => team.teamId !== teamId);
-        if (this.expandedTeamId === teamId){
-            this.expandedTeamId = null;
+        if (memberEmails.length !== this.pendingMembers.length) {
+            this.errorMessage = 'Every team member must have an email address.';
+            return;
         }
-        this.change.markForCheck();
+
+        const request: AdminCreateTeamRequest = {
+            teamName: name,
+            memberEmails
+        };
+
+        this.errorMessage = '';
+
+        this.teamService.createTeamAsAdmin(this.eventId, request).subscribe({
+            next: () => {
+                this.showCreateTeamModal = false;
+                this.newTeamName = '';
+                this.newMemberName = '';
+                this.newMemberEmail = '';
+                this.pendingMembers = [];
+
+                this.loadTeams();
+            },
+            error: (error) => {
+                this.errorMessage =
+                    error?.error?.message || 'Failed to create team.';
+
+                this.change.markForCheck();
+            }
+        });
     }
+
 
     toggleTeam(teamId: string): void {
         this.expandedTeamId = this.expandedTeamId === teamId ? null : teamId;
     }
 
     addMember(teamId: string): void {
-        const name = this.memberNameDrafts[teamId]?.trim();
-        if (!name){
-            return;
-        }
-        const team = this.teams.find(t => t.teamId === teamId);
-        if (!team){
+        const email = this.memberEmailDrafts[teamId]?.trim();
+
+        if (!email) {
             return;
         }
 
-        team.members.push ({
-            memberId:`m-${Date.now()}`,
-            name,
-            initial: name.charAt(0).toUpperCase() || '?',
-            email: this.memberEmailDrafts[teamId]?.trim() || '',
-            isLeader: team.members.length === 0,
-            isBanned: false,
-            joinedAtLabel: 'Just now'
+        const team = this.teams.find(t => t.teamId === teamId);
+
+        if (!team) {
+            return;
+        }
+
+        this.errorMessage = '';
+
+        this.teamService.addTeamMember( this.eventId, teamId, email).subscribe({
+            next: () => {
+                this.memberNameDrafts[teamId] = '';
+                this.memberEmailDrafts[teamId] = '';
+                this.loadTeams();
+            },
+            error: (error) => {
+                this.errorMessage =
+                    error?.error?.message || 'Failed to add team member.';
+
+                this.change.markForCheck();
+            }
         });
-
-        this.memberNameDrafts[teamId] = '';
-        this.memberEmailDrafts[teamId] = '';
-        this.change.markForCheck();
     }
 
-    removeMember(teamId: string, memberId: string): void {
-        const team = this.teams.find(t => t.teamId === teamId);
-       if (!team){
-            return;
-        }
-        team.members = team.members.filter(member => member.memberId !== memberId);
-        this.change.markForCheck();
+   removeMember(teamId: string, memberId: string): void {
+    const team = this.teams.find(t => t.teamId === teamId);
+
+    if (!team) {
+        return;
     }
 
-    toggleBan(teamId: string, memberId: string): void {
-        const team = this.teams.find(t => t.teamId === teamId);
-       if (!team){
-            return;
-        }
-        const member = team.members.find(m => m.memberId === memberId);
-       if (!member ){
-            return;
-        }
-        member.isBanned = !member.isBanned;
-        this.change.markForCheck();
+    this.teamService.removeTeamMember(this.eventId, teamId, memberId).subscribe({
 
-    }
+        next: () => {
+            team.members = team.members.filter(member => member.memberId !== memberId );
+            this.change.markForCheck();
+        },
+        error: () => {
+            this.errorMessage = 'Failed to remove team member.';
+            this.change.markForCheck();
+        }
+    });
+}
 
 }    

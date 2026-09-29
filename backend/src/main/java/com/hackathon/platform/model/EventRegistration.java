@@ -37,6 +37,12 @@ public class EventRegistration {
   @Column(name = "allergies", columnDefinition = "TEXT")
   private String allergies;
 
+  @Column(name = "banned", nullable = false)
+  private boolean banned = false;
+
+  @Column(name = "banned_from_team_id")
+  private UUID bannedFromTeamId;
+
   @PrePersist
   protected void onCreate() {
     if (registeredAt == null) {
