@@ -5,10 +5,7 @@
             <h2>Forum</h2>
             </div>
             @if (perms?.canCreatePost) {
-                <button type="button" class="btn-create-post" (click)="openCreatePost()">
-                    <i class="pi pi-plus"></i>
-                    Create Post
-                </button>
+                <app-button variant="secondary" type="button" (click)="openCreatePost()"> Create Post</app-button>
             }
          </div>
 
