@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:4200",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyZWNkN2M3NS1mZWE2LTRjODUtYTQ2NC1hNGJlODA5YWRiOTYiLCJlbWFpbCI6ImhlaW5yaWNod2lsbGVtcm9tZXIxMDFAZ21haWwuY29tIiwicm9sZSI6IlBBUlRJQ0lQQU5UIiwiaWF0IjoxNzkwNjcyODg1LCJleHAiOjE3OTA3NTkyODV9.mSBZhKPf1FUiIvFhWWrvEmiNmi3H2N2jNf5_e_oj7Ec"
+        },
+        {
+          "name": "user",
+          "value": "{\"token\":\"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyZWNkN2M3NS1mZWE2LTRjODUtYTQ2NC1hNGJlODA5YWRiOTYiLCJlbWFpbCI6ImhlaW5yaWNod2lsbGVtcm9tZXIxMDFAZ21haWwuY29tIiwicm9sZSI6IlBBUlRJQ0lQQU5UIiwiaWF0IjoxNzkwNjcyODg1LCJleHAiOjE3OTA3NTkyODV9.mSBZhKPf1FUiIvFhWWrvEmiNmi3H2N2jNf5_e_oj7Ec\",\"userId\":\"2ecd7c75-fea6-4c85-a464-a4be809adb96\",\"firstName\":\"heinrich\",\"lastName\":\"romer\",\"email\":\"heinrichwillemromer101@gmail.com\",\"role\":\"PARTICIPANT\",\"emailVerified\":true,\"msg\":null}"
+        }
+      ]
+    }
+  ]
+}

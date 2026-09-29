@@ -6,7 +6,7 @@ import { LoginPage } from './pages/login.page';
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-const authDir = path.resolve(__dirname, 'playwright/.auth');
+const authDir = path.resolve(__dirname, '../playwright/.auth');
 fs.mkdirSync(authDir, { recursive: true });
 
 const adminFile = path.join(authDir, 'admin.json');
