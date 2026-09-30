@@ -1,18 +1,31 @@
 <div class="manage-event-page">
-
-   <div class = "back-navigation" >
-      <button class = "back-btn" (click) = "goBack()">
-      </button>
-    </div>
+<main class = "content">
   <div class="page-header">
     <div>
-      <h1>Manage Hackathon</h1>
-      <p class="page-subtitle">Edit hackathon details and upload resources</p>
+      <h1>Manage Event</h1>
+      <p class="page-subtitle">Edit event details and manage resources</p>
     </div>
-    <div class="header-actions">
-      <button class="btn-secondary" (click)="goBack()">Back to Hackathons</button>
-      <button class="btn-danger" (click)="deleteHackathon()">Delete Hackathon</button>
+  </div>
+
+  <div class="certificate-manager-section">
+    <div class="certificate-manager-info">
+      <div class="certificate-manager-icon">
+        <i class="pi pi-id-card"></i>
+      </div>
+
+      <div>
+        <h2>Certificate Manager</h2>
+        <p>Create, customise and manage certificates for this event.</p>
+      </div>
     </div>
+
+    <button
+      type="button"
+      class="btn-certificate-manager"
+      (click)="goToCertificateManager()">
+      <i class="pi pi-arrow-right"></i>
+      Certificate Manager
+    </button>
   </div>
 
   @if (isLoading) {
@@ -25,7 +38,7 @@
       <div class="success-message">{{ successMessage }}</div>
     }
 
-    <form (ngSubmit)="updateHackathon()" class="event-form">
+    <form (ngSubmit)="updateEvent()" class="event-form">
       <div class="form-section">
         <h2 class="section-heading">Basic Information</h2>
 
@@ -34,6 +47,130 @@
           <input id="eventName" type="text" [(ngModel)]="form.name" name="eventName" required />
         </div>
 
+
+<div class="form-section">
+  <h2 class="section-heading">Event Branding</h2>
+
+  <div class="form-row image-upload-row">
+
+
+    <div class="form-group">
+      <span class="form-group-label">Event banner</span>
+
+      <label for="bannerFileInput" class="sr-only">
+        Upload event banner
+      </label>
+
+      <button
+        class="drop-zone image-drop-zone"
+        (click)="triggerFileInput('banner')"
+        (keyup.enter)="triggerFileInput('banner')"
+        (keyup.space)="triggerFileInput('banner')"
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($event, 'banner')"
+        type="button">
+
+        <input
+          #fileInput
+          id="bannerFileInput"
+          type="file"
+          style="display:none"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="onFileSelected($event, 'banner')"
+        />
+
+        <span class="drop-zone-icon-lg">
+          <i class="pi pi-image"></i>
+        </span>
+
+        <p>
+          <span class="drop-zone-cta">Click to upload</span>
+          or drag and drop
+        </p>
+
+        <p class="drop-zone-hint">
+          PNG, JPG, JPEG or Webp
+        </p>
+
+        <p class="drop-zone-spec">
+          <strong>5:1</strong> aspect ratio · 2000 x 400 px recommended
+        </p>
+
+        @if (form.bannerFileName) {
+          <p class="drop-zone-filename">
+            {{ form.bannerFileName }}
+          </p>
+        }
+
+        @if (form.bannerUrl && !form.bannerFileName) {
+          <p class="drop-zone-current">
+            Current banner available
+          </p>
+        }
+
+      </button>
+    </div>
+
+    <div class="form-group">
+      <span class="form-group-label">Event logo</span>
+
+      <label for="logoFileInput" class="sr-only">
+        Upload event logo
+      </label>
+
+      <button
+        class="drop-zone image-drop-zone"
+        (click)="triggerFileInput('logo')"
+        (keyup.enter)="triggerFileInput('logo')"
+        (keyup.space)="triggerFileInput('logo')"
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($event, 'logo')"
+        type="button">
+
+        <input
+          #logoFileInput
+          id="logoFileInput"
+          type="file"
+          style="display:none"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="onFileSelected($event, 'logo')"
+        />
+
+        <span class="drop-zone-icon-lg">
+          <i class="pi pi-image"></i>
+        </span>
+
+        <p>
+          <span class="drop-zone-cta">Click to upload</span>
+          or drag and drop
+        </p>
+
+        <p class="drop-zone-hint">
+          PNG, JPG, JPEG or Webp
+        </p>
+
+        <p class="drop-zone-spec">
+          <strong>2:1</strong> aspect ratio · 1600 x 800 px recommended
+        </p>
+
+        @if (form.logoFileName) {
+          <p class="drop-zone-filename">
+            {{ form.logoFileName }}
+          </p>
+        }
+
+        @if (form.logoUrl && !form.logoFileName) {
+          <p class="drop-zone-current">
+            Current logo available
+          </p>
+        }
+
+      </button>
+    </div>
+
+  </div>
+</div>
+
         <div class="form-row">
           <div class="form-group">
             <label for="startDate">Start date & time *</label>
@@ -41,8 +178,8 @@
           </div>
 
             <div class="form-group">
-            <label for="endDate">End date & time *</label>
-            <input id="endDate" type="datetime-local" [(ngModel)]="form.endDate" name="endDate" required />
+            <label for="duration">Duration (hours)*</label>
+            <input id="duration" type="number" min ="1" [(ngModel)]="form.duration" name="duration" required />
           </div>
 
         </div>
@@ -53,6 +190,16 @@
           <textarea id="description" [(ngModel)]="form.description" name="description" rows="3" placeholder="Event rules and description..."></textarea>
         </div>
       </div>
+
+        <div class="form-group">
+          <label for="tagline">Tagline</label>
+          <input id="tagline" type="text" [(ngModel)]="form.tagline" name="tagline" placeholder="A short, catchy description of your event"/>
+        </div>
+
+        <div class="form-group">
+          <label for="rules">Rules</label>
+          <textarea id="rules" [(ngModel)]="form.rules" name="rules" rows="5" placeholder="Enter the rules and guidelines for this event..."></textarea>
+        </div>
 
       <div class="form-section">
         <h2 class="section-heading">Visibility & Access</h2>
@@ -66,71 +213,167 @@
             <span class="toggle-desc">Registration key required</span>
           </button>
         </div>
-      </div>
 
-      <div class="form-section">
-        <h2 class="section-heading">Hackathon Status</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" [(ngModel)]="form.status" name="status">
-              @for (opt of statusOptions; track opt) {
-                <option [value]="opt">{{ opt }}</option>
-              }
-            </select>
-          </div>
-          <div class="form-group">
-            <span class="field-label-spacer" aria-hidden="true">&nbsp;</span>
-            <button type="button" class="btn-patch" (click)="patchStatusOnly()" [disabled]="isSaving">
-              Update Status Only
-            </button>
-          </div>
+      @if (form.visibility === 'PRIVATE'){
+      <div class="form-group">
+          <label for="registrationKey">Registration key</label>
+          <input id="registrationKey" type ="text" [(ngModel)]="form.registrationKey" name="registrationKey" placeholder="Enter a key teams must provide to register"/>
         </div>
-        <p class="field-hint">Status determines if event is active, upcoming, etc.</p>
+      }
+      <div class="form-group">
+          <label for="teamSizeLimit">Team size limit *</label>
+          <input id="teamSizeLimit" type ="number"  [(ngModel)]="form.teamSizeLimit" name="teamSizeLimit" required />
+        </div>
       </div>
 
-      <div class="form-section">
-        <h2 class="section-heading">Hackathon Resources</h2>
-        <div class="form-group">
-          <label for="problemStatementFile">Problem Statement PDF</label>
-          <div
-            class="file-upload-area"
-            role="button"
-            tabindex="0"
-            (click)="fileInput.click()"
-            (keydown.enter)="fileInput.click()"
-            (keydown.space)="fileInput.click(); $event.preventDefault()"
-            (dragover)="$event.preventDefault()"
-            (drop)="onDropFile($event)"
-          >
-            <input
-              id="problemStatementFile"
-              #fileInput
-              type="file"
-              accept=".pdf"
-              style="display:none"
-              (change)="onFileSelected($event)"
-            />
 
-            <span>{{ uploadFileName || 'Click or drag PDF here' }}</span>
-          </div>
+<div class="form-section">
+
+
+  <div class="form-group">
+    <label for="technologyInput">Allowed Technology</label>
+
+    <div class="chip-input-wrapper">
+
+      @for (tech of form.allowedTechnologies; track $index) {
+        <span class="chip chip-tech">
+          {{ tech }}
 
           <button
             type="button"
-            class="btn-upload"
-            (click)="uploadResource()"
-            [disabled]="!uploadFile || isUploading"
-          >
-            {{ isUploading ? 'Uploading...' : 'Upload to Azure' }}
+            class="chip-remove"
+            (click)="removeTechnology($index)"
+            aria-label="Remove technology">
+            <i class="pi pi-times"></i>
           </button>
-          @if (uploadSuccess) {
-            <p class="success-message" style="margin-top: 8px;">File uploaded successfully</p>
-          }
-          @if (uploadError) {
-            <p class="error-message" style="margin-top: 8px;">{{ uploadError }}</p>
-          }
+        </span>
+      }
+
+      <input
+        type="text"
+        id="technologyInput"
+        name="technologyInput"
+        [(ngModel)]="technologyInput"
+        (keydown.enter)="addTechnology($event)"
+        (keydown.,)="addTechnology($event)"
+        placeholder="e.g. React, Python, Java"
+        class="chip-input"
+      />
+
+    </div>
+
+    <p class="field-hint">
+      Leave empty to allow any technology, or add specific stacks to restrict submissions.
+    </p>
+  </div>
+</div>
+
+<div class="form-section">
+  <h2 class="section-heading">Prizes</h2>
+  <p class="section-hint">Add the prizes participants can win.</p>
+
+  <div class="prize-list">
+    @for (prize of form.prizes; track $index) {
+      <div class="prize-row">
+
+        <span class="prize-row-index">
+          {{$index + 1}}
+        </span>
+
+        <div class="prize-row-fields">
+
+          <input
+            id="prizeTitle{{$index}}"
+            type="text"
+            [(ngModel)]="prize.title"
+            name="prizeTitle{{$index}}"
+            placeholder="e.g. 1st Place"
+            class="prize-title-input"
+          />
+
+          <input
+            id="prizeDescription{{$index}}"
+            type="text"
+            [(ngModel)]="prize.description"
+            name="prizeDescription{{$index}}"
+            placeholder="e.g. R10,000 cash + mentorship"
+            class="prize-description-input"
+          />
+
         </div>
+
+        <button
+          type="button"
+          class="prize-remove-btn"
+          (click)="removePrize($index)"
+          aria-label="Remove prize">
+          <i class="pi pi-trash"></i>
+        </button>
+
       </div>
+    }
+
+    <button
+      type="button"
+      class="btn-add-prize"
+      (click)="addPrize()">
+      <i class="pi pi-plus"></i>
+      Add prize
+    </button>
+  </div>
+</div>
+
+<div class="form-section">
+  <h2 class="section-heading">Event Configuration</h2>
+
+  <div class="form-group">
+    <span class="form-group-label">Event format</span>
+
+    <div class="toggle-group" role="group">
+      <button
+        type="button"
+        class="toggle-option"
+        [class.selected]="!form.isInPerson"
+        (click)="form.isInPerson = false">
+        <span class="toggle-title">Online</span>
+        <span class="toggle-desc">Participants can join remotely</span>
+      </button>
+
+      <button
+        type="button"
+        class="toggle-option"
+        [class.selected]="form.isInPerson"
+        (click)="form.isInPerson = true">
+        <span class="toggle-title">In Person</span>
+        <span class="toggle-desc">Participants attend at a physical location</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <span class="form-group-label">IDE</span>
+
+    <div class="toggle-group" role="group">
+      <button
+        type="button"
+        class="toggle-option"
+        [class.selected]="form.useIde"
+        (click)="form.useIde = true">
+        <span class="toggle-title">IDE Required</span>
+        <span class="toggle-desc">Participants use the platform IDE</span>
+      </button>
+
+      <button
+        type="button"
+        class="toggle-option"
+        [class.selected]="!form.useIde"
+        (click)="form.useIde = false">
+        <span class="toggle-title">External IDE</span>
+        <span class="toggle-desc">Participants can use their own tools</span>
+      </button>
+    </div>
+  </div>
+</div>
 
       <div class="form-actions">
         <button type="button" class="btn-secondary" (click)="goBack()">Cancel</button>
@@ -144,4 +387,6 @@
       </div>
     </form>
   }
+  </main>
+
 </div>

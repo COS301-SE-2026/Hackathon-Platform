@@ -5,10 +5,7 @@
             <h2>Forum</h2>
             </div>
             @if (perms?.canCreatePost) {
-                <button type="button" class="btn-create-post" (click)="openCreatePost()">
-                    <i class="pi pi-plus"></i>
-                    Create Post
-                </button>
+                <app-button variant="secondary" type="button" (click)="openCreatePost()"> Create Post</app-button>
             }
          </div>
 
@@ -122,11 +119,15 @@
                                     <div class = "reply-compose">
                                         <label for = "replyDraft{{thread.threadId}}" class = "sr-only">Reply</label>
                                         <textarea
+                                        #replyInput
                                         id = "replyDraft{{thread.threadId}}"
-                                            [(ngModel)] = "replyDrafts[thread.threadId]"
                                             name = "replyDraft{{thread.threadId}}"
                                             placeholder = "Reply..."
-                                            rows = "2"></textarea>
+                                            rows = "2"
+                                        [value] = "replyDrafts[thread.threadId] || ''"
+                                        (input) = "replyDrafts[thread.threadId] = replyInput.value"
+                                        >
+                                    </textarea>
                                         <button
                                             type = "button"
                                             class = "btn-post-reply"

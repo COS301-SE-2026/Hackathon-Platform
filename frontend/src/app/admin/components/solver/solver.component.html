@@ -37,6 +37,8 @@
             <a routerLink = "/admin/hackathons/{{ hackathonId }}/solver" routerLinkActive = "active"><i class = "pi pi-cog"></i>Solver</a>
             <a routerLink = "/admin/hackathons/{{ hackathonId }}/events" routerLinkActive = "active"><i class = "pi pi-calendar"></i>Events</a>
             
+
+            </div>
         </div>
     </div>
 
@@ -84,6 +86,10 @@
     </div>
     <span class = "drop-zone-filename">{{ selectedFileName || 'No file selected' }}</span>
     </button>
+
+    @if(uploadSuccessMessage){
+        <p class = "upload-success">{{uploadSuccessMessage}}</p>
+    }
 
     @if(uploadError){
         <p class = "upload-error">{{uploadError}}</p>

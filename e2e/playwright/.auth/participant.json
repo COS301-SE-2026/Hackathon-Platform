@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:4200",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmY2NhZGZmZS0wMWYzLTQyNzUtYjcyMC0zNWViOTI2YmNkNjAiLCJlbWFpbCI6InBhcnRAZGVtby5jb20iLCJyb2xlIjoiUEFSVElDSVBBTlQiLCJpYXQiOjE3OTA2NzI4ODMsImV4cCI6MTc5MDc1OTI4M30.LFdt_jT-BLdKMx7J7T4AZZuWw2ZBN7RA_FW0xfjXsxE"
+        },
+        {
+          "name": "user",
+          "value": "{\"token\":\"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmY2NhZGZmZS0wMWYzLTQyNzUtYjcyMC0zNWViOTI2YmNkNjAiLCJlbWFpbCI6InBhcnRAZGVtby5jb20iLCJyb2xlIjoiUEFSVElDSVBBTlQiLCJpYXQiOjE3OTA2NzI4ODMsImV4cCI6MTc5MDc1OTI4M30.LFdt_jT-BLdKMx7J7T4AZZuWw2ZBN7RA_FW0xfjXsxE\",\"userId\":\"fccadffe-01f3-4275-b720-35eb926bcd60\",\"firstName\":\"Demo\",\"lastName\":\"Part\",\"email\":\"part@demo.com\",\"role\":\"PARTICIPANT\",\"emailVerified\":true,\"msg\":null}"
+        }
+      ]
+    }
+  ]
+}

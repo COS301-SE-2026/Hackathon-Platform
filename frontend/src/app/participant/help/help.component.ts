@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonModule } from 'primeng/button'; 
 import { AccordionModule } from 'primeng/accordion';
+import { ButtonComponent } from '../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-help',
   standalone: true,
-  imports: [ CommonModule,ButtonModule,AccordionModule],
+  imports: [ CommonModule,ButtonComponent,AccordionModule],
   templateUrl: './help.component.html',
   styleUrls: ['./help.component.scss']
 })

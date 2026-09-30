@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, inject, OnInit, NgZone, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, NgZone, OnDestroy, Input } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import { FormsModule} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ForumService, ForumPermissionResponse } from '../../../services/forum.service';
 import { AuthService } from '../../../services/auth.service';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 
 type ForumRole = 'ADMIN' | 'PARTICIPANT';
 
@@ -29,7 +30,7 @@ interface ForumThread{
 @Component({
     selector: 'app-forum',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, ButtonComponent],
     templateUrl: './forum.component.html',
     styleUrls: ['./forum.component.scss']
 })
@@ -45,7 +46,8 @@ export class ForumComponent implements OnInit, OnDestroy {
     isLoading = false;
     errorMessage = '';
     searchTerm = '';
-    eventId ='';
+    @Input() hackathonId = '';
+    @Input() eventId = '';
     currUserId = this.authService.getUser()?.userId ?? '';
     showCreatePost = false;
 
@@ -59,11 +61,20 @@ export class ForumComponent implements OnInit, OnDestroy {
 
     threads: ForumThread[] = [];
 
-    ngOnInit(): void {
-        this.eventId = this.route.snapshot.paramMap.get('eventId') || '';
+    private findRouteParam(name: string): string {
+      let current: ActivatedRoute | null = this.route;
+      while (current) {
+        const value = current.snapshot.paramMap.get(name);
+        if (value) return value;
+        current = current.parent;
+      }
+      return '';
+    }
 
+    ngOnInit(): void {
+      this.hackathonId = this.hackathonId || this.findRouteParam('hackathonId');
+      this.eventId = this.eventId || this.findRouteParam('eventId');
         if (!this.eventId){
-            
             this.errorMessage = 'No event ID provided.';
             return;
         }
@@ -204,7 +215,7 @@ export class ForumComponent implements OnInit, OnDestroy {
         if (!thread) {
             return;
         }
-        
+
         this.errorMessage = '';
         this.forumService.createComment(this.eventId, threadId, {
             body: content
@@ -365,8 +376,8 @@ export class ForumComponent implements OnInit, OnDestroy {
         this.eventSource = this.forumService.connectToForumUpdates(this.eventId);
         this.eventSource.addEventListener('forum-update', () => {
             this.zone.run(() => {
-                const openThreadId = this.expandedThreadId;
-                this.loadForum(false, openThreadId);
+                if (this.expandedThreadId) return;
+                this.loadForum(false, null);
             });
         });
 

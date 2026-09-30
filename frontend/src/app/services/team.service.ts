@@ -9,6 +9,21 @@ export interface CreateTeamRequest {
   eventId?: string | null;
 }
 
+export interface AdminCreateTeamRequest {
+  teamName: string;
+  memberEmails: string[];
+}
+
+export interface AdminTeamResponse {
+  teamId: string;
+  teamName: string;
+  eventId: string;
+  createdByUserId: string;
+  createdAt: string;
+  status: string;
+  members: TeamMemberResponse[];
+}
+
 export interface TeamResponse {
   teamId: string;
   teamName: string;
@@ -16,6 +31,7 @@ export interface TeamResponse {
   createdByUserId: string;
   createdAt: string;
   status: string;
+  joinCode: string;
 }
 
 export interface TeamMemberResponse {
@@ -50,6 +66,10 @@ export class TeamService {
     return this.http.post<void>(`${this.baseUrl}/${teamId}/join-requests`, {});
   }
 
+   requestToJoinTeamByCode(joinCode: string): Observable<void> {
+     return this.http.post<void>( `${this.baseUrl}/join/${joinCode}`, {} );
+  }
+
   getJoinRequests(teamId: string): Observable<TeamMemberResponse[]> {
     return this.http.get<TeamMemberResponse[]>(`${this.baseUrl}/${teamId}/join-requests`);
   }
@@ -65,4 +85,24 @@ export class TeamService {
   getTeamMembers(teamId: string): Observable<TeamMemberResponse[]> {
     return this.http.get<TeamMemberResponse[]>(`${this.baseUrl}/${teamId}/members`);
   }
+
+getEventTeams(eventId: string): Observable<AdminTeamResponse[]> {
+  return this.http.get<AdminTeamResponse[]>(
+    `${environment.apiUrl}/api/admin/events/${eventId}/teams`
+  );
+}
+
+  removeTeamMember( eventId: string, teamId: string, userId: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/api/admin/events/${eventId}/teams/${teamId}/members/${userId}`);
+  }
+
+    addTeamMember( eventId: string, teamId: string, email: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/admin/events/${eventId}/teams/${teamId}/members`,{ email });
+  }
+
+
+  createTeamAsAdmin( eventId: string, request: AdminCreateTeamRequest): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/admin/events/${eventId}/teams`,request);
+  }
+
 }

@@ -1,7 +1,24 @@
 
  <div class="submission-history">
 
- <div class="history-header">
+ 
+ @if (historyLoading) {
+
+   <app-loader message="Loading submission history..." />
+
+} @else if (historyError) {
+
+  <div class="empty-history">
+    {{ historyError }}
+  </div>
+
+} 
+ @else if (tableData.length === 0) {
+  <app-empty-state icon="pi-history" title="No Submission History" description="You have not made any submissions for this event yet."></app-empty-state>
+}
+@else {
+
+  <div class="history-header">
 
   <div class="history-header-content">
     <h2 class="history-title">Submission History</h2>
@@ -11,29 +28,17 @@
 
   <div class="history-filters">
 
-    <app-dropdown  id="level-filter"  label="Filter by level"  [options]="levelOptions" [value]="selectedLevel" (selectionChange)="selectedLevel = $event"> </app-dropdown>
+    <app-dropdown  id="level-filter"  label="Filter by level"  [options]="levelOptions" [value]="selectedLevel" (selectionChange)="onLevelChange($event)"> </app-dropdown>
 
-     <app-dropdown  id="status-filter" label="Filter by status"  [options]="statusOptions"  [value]="selectedStatus"  (selectionChange)="selectedStatus = $event"> </app-dropdown>
+    <app-dropdown  id="status-filter" label="Filter by status"  [options]="statusOptions"  [value]="selectedStatus"  (selectionChange)="onStatusChange($event)"> </app-dropdown>
 
      </div>
 
  </div>
 
-
- @if (historyLoading) {
-
-  <div class="empty-history">
-    <i class="pi pi-spin pi-spinner"></i>
-    Loading submission history...
-  </div>
-
-} @else if (historyError) {
-
-  <div class="empty-history">
-    {{ historyError }}
-  </div>
-
-} @else {
+ <div class="history-actions">
+  <app-button class="refresh-button" variant="ghost" type="button" (click)="refreshHistory()" [disabled]="historyLoading"> <i class="pi pi-refresh"></i> Refresh</app-button>
+</div>
 
 <app-table  [columns]="tableColumns" [data]="paginatedTableData" [loading]="false" emptyMessage="No submissions found."></app-table>
 
@@ -48,12 +53,11 @@
 
 
  <ng-template #logTemplate let-row>
- <app-button variant="secondary" width="100%" (click)="downloadLog(row.log)" (keydown)="null" (keyup)="null">  <i class="pi pi-download"></i>
-  Log
+
+  <app-button variant="secondary" width="100%" [disabled]="downloadingLogId === row.log.submissionId" (click)="downloadLog(row.log)" (keydown)="null" (keyup)="null">
+   {{ downloadingLogId === row.log.submissionId ? 'Downloading...' : 'Download Log' }}
   </app-button>
 
   </ng-template>
-
-
 
 </div>

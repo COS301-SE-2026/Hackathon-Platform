@@ -1,0 +1,92 @@
+<div class = "dietary-page">
+    <main class = "content">
+        <div class = "page-header">
+            <div>
+                <h2>Dietary Requirements</h2>
+                <p class = "page-subtitle">Review allergies and dietary needs across every team in this event.</p>
+            </div>
+        </div>
+
+        <div class = "stat-grid">
+            <div class = "stat-card">
+                <p class = "stat-label">Participants</p>
+                <p class = "stat-value">{{totalParticipants}}</p>
+            </div>
+            <div class = "stat-card">
+                <p class = "stat-label">With requirements</p>
+                <p class = "stat-value stat-value-flag">{{participantsWithRequirements}}</p>
+            </div>
+            <div class = "stat-card">
+                <p class = "stat-label">Teams</p>
+                <p class = "stat-value">{{teamCount}}</p>
+            </div>
+        </div>
+
+           <div class = "toolbar">
+            <div class = "search-box">
+                <i class = "pi pi-search search-icon"></i>
+                <input type = "text"
+                placeholder="Search participants or teams..."
+                aria-label="Search participants or teams"
+                [(ngModel)] = "searchTerm"
+                name = "searchTerm"/>
+            </div>
+        
+            <label class = "toggle-field" for = "onlyShowRequirements">
+                <span>Only show requirements</span>
+                <span class = "toggle-switch" [class.toggle-switch-on] = "onlyShowRequirements">
+                    <input 
+                    type = "checkbox"
+                    id = "onlyShowRequirements"
+                    [checked] = "onlyShowRequirements"
+                    (change) = "toggleOnlyShowRequirements()"/>
+                    <span class = "toggle-knob"></span>
+                </span>
+            </label>
+           </div>
+
+            @if (errorMessage){
+            <div class = "error-banner">{{ errorMessage }}</div>
+         }
+
+         <div class = "group-list">
+            @if (isLoading){
+                <div class = "empty-state">Loading...</div>
+
+            }@else if (filteredGroups.length === 0){
+                <div class = "empty-state">No participants match your search.</div>
+            }@else{
+                @for (group of filteredGroups; track group.teamId){
+                    <div class = "team-group-card">
+                        <div class = "team-group-header">
+                            <span class = "team-avatar">{{group.teamName.charAt(0)}}</span>
+                            <span class = "team-group-name">{{group.teamName}}</span>
+                            <span class = "team-group-count">{{group.members.length}} member{{group.members.length === 1 ? '' : 's'}}</span>
+                        </div>
+                        <div class = "member-rows">
+                            @for (member of group.members; track member.participantId){
+                                <div class = "member-row">
+                                    <div class = "member-row-name">
+                                        <span class = "member-avatar">{{member.initial}}</span>
+                                        <span>{{member.name}}</span>
+                                    </div>
+                                    <div class = "member-row-tags">
+                                        @if (member.tags.length === 0){
+                                            <span class = "tag tag-none">None specified</span>
+                                        }@else {
+                                            @for (tag of member.tags; track tag.label){
+                                                <span class = "tag" [ngClass] = "'tag-' + tag.kind">{{tag.label}}</span>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+         </div>
+    </main>
+</div>
+
+

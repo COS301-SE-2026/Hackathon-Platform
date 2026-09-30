@@ -22,7 +22,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_DB: hackathon_test
           POSTGRES_USER: testuser
@@ -70,6 +70,8 @@ jobs:
           SPRING_FLYWAY_ENABLED: true
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
         run: mvn clean verify -e
 
       - name: Upload surefire reports
@@ -83,7 +85,7 @@ jobs:
   #Install Angular dependancies, runs Karma/Jasmine unit tests and builds the app
 
   frontend:
-    name: Frontend - Build & test
+    name: Frontend - Build
     runs-on: ubuntu-latest
 
     steps:
@@ -107,10 +109,6 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
-      - name: Run unit tests (headless)
-        working-directory: frontend
-        run: npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
-
       - name: Build Angular app
         working-directory: frontend
         run: npm run build -- --configuration=production
@@ -120,7 +118,6 @@ jobs:
         with:
           name: frontend-build
           path: frontend/dist/
-
 
   performance:
     name: k6 load test
@@ -134,3 +131,96 @@ jobs:
       - name: Run load test
         run: |
           k6 run -e EMAIL=${{ secrets.E2E_PARTICIPANT_EMAIL }} -e PASSWORD=${{ secrets.E2E_PARTICIPANT_PASSWORD }} -e BASE_URL=https://api.hackathonplatform.co.za k6/load-test.js
+
+  e2e:
+    name: e2e tests
+    runs-on: ubuntu-latest
+    needs: [ backend, frontend ]
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: hackathon_test
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mailpit:
+        image: axllent/mailpit
+        ports:
+          - 1025:1025
+          - 8025:8025
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            package-lock.json
+
+      - name: Install Playwright
+        run: npm ci
+
+      - name: Install dependancies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run e2e tests
+        env:
+          CI: true
+
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/hackathon_test
+          SPRING_DATASOURCE_USERNAME: testuser
+          SPRING_DATASOURCE_PASSWORD: testpassword
+          SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+          SPRING_FLYWAY_ENABLED: true
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+          E2E_PARTICIPANT_EMAIL: ${{ secrets.E2E_PARTICIPANT_EMAIL }}
+          E2E_PARTICIPANT_PASSWORD: ${{ secrets.E2E_PARTICIPANT_PASSWORD }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          E2E_API_BASE_URL: http://localhost:8080
+          SPRING_MAIL_HOST: localhost
+          SPRING_MAIL_PORT: 1025
+          SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: 'false'
+          SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: 'false'
+          MAILPIT_URL: http://localhost:8025
+          E2E_PARTICIPANT_2_EMAIL: e2e.participant@e2e-test.com
+          E2E_PARTICIPANT_2_PASSWORD: E2eTestPass!2026
+
+        run: npm run test:e2e

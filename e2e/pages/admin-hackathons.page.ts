@@ -1,4 +1,5 @@
 import {Page,Locator,expect} from '@playwright/test';
+import { escapeRegExp } from '../utils/regex';
 
 export class AdminHackathonsPage {
     readonly page: Page;
@@ -10,17 +11,26 @@ export class AdminHackathonsPage {
     readonly cancelButton: Locator;
     readonly loadingIndicator: Locator;
     readonly errorBanner: Locator;
+    readonly searchInput: Locator;
+    readonly gridViewButton: Locator;
+    readonly listViewButton: Locator;
+
 
     constructor(page: Page){
         this.page = page;
-        this.newHackathonButton = page.getByRole('button',{name: '+ New Hackathon'});
+        this.newHackathonButton = page.getByRole('button',{name: '+ Create Hackathon'});
         this.nameInput = page.locator('#hackathonName');
         this.descriptionInput = page.locator('#hackathonDescription');
         this.problemStatementInput = page.locator('#problemStatementFile');
-        this.saveButton = page.getByRole('button',{name: /Save/});
+        this.saveButton = page.getByRole('button',{name: /^Create Hackathon$|^Save Changes$/});
         this.cancelButton = page.getByRole('button',{name: 'Cancel'});
         this.loadingIndicator = page.locator('.loading');
         this.errorBanner = page.locator('.error-banner');
+        this.searchInput = page.getByLabel('Search hackathons');
+        this.gridViewButton = page.getByLabel('Grid view');
+        this.listViewButton = page.getByLabel('List view');
+
+     
         
     }
     async goto(){
@@ -33,9 +43,9 @@ export class AdminHackathonsPage {
     }
 
     card(name:string): Locator{
-        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        return this.page.locator('.hackathon-card').filter({
-            has: this.page.locator('.hackathon-name', { hasText: new RegExp(`^${escaped}$`) }),
+        const escaped = escapeRegExp(name);
+        return this.page.locator('.hackathon-card, .hackathon-row').filter({
+            has: this.page.locator('.hackathon-name', { hasText: new RegExp(String.raw`^${escaped}\s*$`) }),
         });
     }
 
@@ -52,7 +62,7 @@ export class AdminHackathonsPage {
     }
 
     async editHackathon(oldName:string, newName:string, description = ''){
-        await  this.card(oldName).getByRole('button',{name: 'Edit'}).click();
+        await  this.card(oldName).getByRole('button',{name: 'Edit hackathon'}).click();
         await this.nameInput.fill(newName);
         if (description) await this.descriptionInput.fill(description);
         await this.saveButton.click();
@@ -60,39 +70,45 @@ export class AdminHackathonsPage {
     }
 
     async deleteHackathon (name: string) {
-        await this.card(name).getByRole('button',{name:'Delete'}).click();
+        this.page.once('dialog', dialog => dialog.accept());
+        await this.card(name).getByRole('button',{name:'Delete hackathon'}).click();
         
     }
 
-    async navigateToEvents (name: string) {
-        await this.card(name).getByRole('button',{name:'View Events'}).click();
-        await this.page.waitForURL(/\/admin\/hackathons\/.+\/events$/);
-    }
-    async navigateToCreateEvent (name: string) {
-        await this.card(name).getByRole('button',{name:'+ Create Event'}).click();
-        await this.page.waitForURL(/\/admin\/hackathons\/.+\/events\/create$/);
-    }
-    async navigateToLevels (name: string) {
-        await this.card(name).getByRole('button',{name:'Levels'}).click();
-        await this.page.waitForURL(/\/admin\/hackathons\/.+\/levels$/);
-    }
-    async navigateToSolver (name: string) {
-        await this.card(name).getByRole('button',{name:'Solver'}).click();
-        await this.page.waitForURL(/\/admin\/hackathons\/.+\/solver$/);
+    async cancelDeleteHackathon(name: string) {
+        this.page.once('dialog', dialog => dialog.dismiss());
+        await this.card(name).getByRole('button',{name: 'Delete hackathon'}).click();
     }
 
+    async search(term: string){
+        await this.searchInput.fill(term);
+    }
+
+    async setViewMode(mode: 'grid' | 'list') {
+        if (mode === 'grid'){
+            await this.gridViewButton.click();
+        } else {
+            await this.listViewButton.click();
+        }
+    }
+
+
     async expectHackathonVisible (name: string) {
-        await expect(this.card(name)).toBeVisible();
+        await expect(this.card(name)).toBeVisible({ timeout: 10000 });
         
     }
      async expectHackathonNotVisible (name: string) {
-        await expect(this.card(name)).toHaveCount(0); 
+        await expect(this.card(name)).toHaveCount(0, {timeout: 10000 }); 
     }
     async getHackathonCount(): Promise<number> {
-        return await this.page.locator('.hackathon-card').count();
+        return await this.page.locator('.hackathon-card, .hackathon-row').count();
     }
     async getHackathonNames(): Promise<string[]> {
         return await this.page.locator('.hackathon-name').allTextContents();
+    }
+
+    async expectEmptyState(text: string | RegExp){
+        await expect(this.page.locator('.empty-state')).toContainText(text);
     }
 
 }

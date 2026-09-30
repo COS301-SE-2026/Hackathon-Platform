@@ -3,7 +3,7 @@
     <div class="modal-header">
       <div>
         <h2>{{ eventName || 'Event' }} - Participants</h2>
-        <p class="modal-subtitle">Everyone approved into a team for this event.</p>
+        <p class="modal-subtitle">Everyone registered for this event.</p>
       </div>
       <button type="button" class="modal-close-btn" (click)="close()" aria-label="Close">
         <i class="pi pi-times"></i>
@@ -21,12 +21,16 @@
           (ngModelChange)="applyFilter()"
         />
       </div>
+      <div class = "toolbar-actions">
       <span class="participants-count-pill">
         <i class="pi pi-users"></i>
         {{ filteredParticipants.length }} of {{ participants.length }}
       </span>
+
+    </div>
     </div>
 
+  
     @if (errorMessage) {
       <div class="error-banner">{{ errorMessage }}</div>
     }
@@ -40,14 +44,15 @@
             <th>Team</th>
             <th>Role</th>
             <th>Joined</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           @if (isLoading) {
-            <tr><td colspan="5" class="empty-state">Loading participants...</td></tr>
+            <tr><td colspan="6" class="empty-state">Loading participants...</td></tr>
           } @else if (filteredParticipants.length === 0 && !errorMessage) {
-            <tr><td colspan="5" class="empty-state">
-              {{ participants.length === 0 ? 'No approved participants yet for this event.' : 'No participants match your search.' }}
+            <tr><td colspan="6" class="empty-state">
+             {{ participants.length === 0 ? 'No registered participants yet for this event.' : 'No participants match your search.' }}
             </td></tr>
           } @else {
             @for (p of filteredParticipants; track p.userId) {
@@ -59,11 +64,91 @@
                   </div>
                 </td>
                 <td>{{ p.email }}</td>
-                <td>{{ p.teamName }}</td>
+                <td>{{ p.teamName || 'N/A' }}</td>
                 <td>
-                  <span class="role-badge" [class.role-leader]="p.teamRole === 'LEADER'">{{ p.teamRole }}</span>
+                  <span class="role-badge" [class.role-leader]="p.teamRole === 'LEADER'">{{ p.teamRole || 'N/A' }}</span>
                 </td>
-                <td>{{ p.joinedAt | date: 'mediumDate' }}</td>
+                <td>{{ p.joinedAt ? (p.joinedAt | date: 'mediumDate') : 'N/A' }}</td>
+                <td>
+
+            @if (p.banned) {
+              @if (confirmingUnbanId === p.userId) {
+                <div class="confirm-remove">
+                  <span>Unban?</span>
+
+                  <button
+                    type="button"
+                    class="btn-confirm-yes"
+                    [disabled]="unbanningUserId === p.userId"
+                    (click)="confirmUnban(p)"
+                  >
+                    {{ unbanningUserId === p.userId ? '...' : 'Yes' }}
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-confirm-no"
+                    (click)="cancelUnban()"
+                  >
+                    No
+                  </button>
+                </div>
+              } 
+              @else {
+                <div class="participant-actions">
+                  <button
+                    type="button"
+                    class="btn-remove-participant"
+                    (click)="requestUnban(p.userId)"
+                  >
+                    <i class="pi pi-check"></i>
+                    Unban
+                  </button>
+                </div>
+              }
+            } @else if (confirmingBanId === p.userId) {
+              <div class="confirm-remove">
+                <span>Ban?</span>
+
+                <button
+                  type="button"
+                  class="btn-confirm-yes"
+                  [disabled]="banningUserId === p.userId"
+                  (click)="confirmBan(p)"
+                >
+                  {{ banningUserId === p.userId ? '...' : 'Yes' }}
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-confirm-no"
+                  (click)="cancelBan()"
+                >
+                  No
+                </button>
+              </div>
+            } @else {
+              <div class="participant-actions">
+                <button
+                  type="button"
+                  class="btn-view-report"
+                  (click)="openTelemetryReport(p)"
+                >
+                  <i class="pi pi-chart-bar"></i>
+                  Report
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-remove-participant"
+                  (click)="requestBan(p.userId)"
+                >
+                  <i class="pi pi-ban"></i>
+                  Ban
+                </button>
+              </div>
+            }
+                </td>
               </tr>
             }
           }

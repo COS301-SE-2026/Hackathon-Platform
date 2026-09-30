@@ -1,11 +1,12 @@
 import { Component, Input, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventResponse, EventService } from '../../../../services/event.service';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 
 @Component({
   selector: 'app-overview',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoaderComponent],
   templateUrl: './overview.component.html',
   styleUrl: './overview.component.scss'
 })
