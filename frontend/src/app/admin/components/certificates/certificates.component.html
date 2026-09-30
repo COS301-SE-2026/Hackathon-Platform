@@ -280,7 +280,7 @@
             @for (cert of issued; track cert.certificateId) {
               <tr>
                 <td>{{ cert.recipientName }}</td>
-                <td><span class="type-pill" [ngClass]="cert.certificateType.toLowerCase()">{{ cert.certificateType }}</span></td>
+                <td><span class="type-pill" [ngClass]="cert.certificateType.toLowerCase()">{{ certTypeDisplayLabel(cert.certificateType) }}</span></td>
                 <td>{{ cert.rankAtIssue || '-' }}</td>
                 <td>{{ cert.issuedAt | date: 'medium' }}</td>
                 <td class="code-cell">{{ cert.verificationCode }}</td>
