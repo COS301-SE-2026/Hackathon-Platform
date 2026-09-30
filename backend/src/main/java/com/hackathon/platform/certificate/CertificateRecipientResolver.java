@@ -72,7 +72,8 @@ public class CertificateRecipientResolver {
         fields.put("participantName", fullName);
         fields.put("teamName", team.getTeamName());
         fields.put("eventName", event.getName());
-        fields.put("rank", rank == null ? "Unranked" : ordinal(rank)+" out of "+totalTeams+" teams");
+        fields.put(
+            "rank", rank == null ? "Unranked" : ordinal(rank) + " out of " + totalTeams + " teams");
         fields.put("certificateType", certificateType);
         fields.put("date", today);
 
