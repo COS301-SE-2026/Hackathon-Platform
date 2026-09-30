@@ -4,11 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.hackathon.platform.dto.LeaderboardEntryResponse;
+import com.hackathon.platform.model.Event;
+import com.hackathon.platform.repository.EventRepository;
 import com.hackathon.platform.repository.LeaderboardEntry;
 import com.hackathon.platform.repository.SubmissionRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class LeaderboardServiceTest {
   @Mock private SubmissionRepository submissionRepo;
+  @Mock private EventRepository eventRepo;
+  @Mock private Event event;
   private LeaderboardService leaderService;
   private static final UUID EVENT_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
   private static final UUID FIRST_TEAM = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
@@ -28,7 +33,12 @@ class LeaderboardServiceTest {
 
   @BeforeEach
   void setUp() {
-    leaderService = new LeaderboardService(submissionRepo);
+    leaderService = new LeaderboardService(submissionRepo, eventRepo);
+  }
+
+  private void mockNonFrozenEvent() {
+    when(eventRepo.findById(EVENT_ID)).thenReturn(Optional.of(event));
+    when(event.getLeaderboardFreezeDateTime()).thenReturn(null);
   }
 
   @Test
@@ -58,6 +68,8 @@ class LeaderboardServiceTest {
 
   @Test
   void getEventLeaderboard_assignRanksInRepositoryOrder() {
+    mockNonFrozenEvent();
+
     when(submissionRepo.findLeaderboardByEventId(EVENT_ID))
         .thenReturn(
             List.of(
@@ -83,6 +95,8 @@ class LeaderboardServiceTest {
 
   @Test
   void getEventLeaderboard_returnsEmptyListWhenThereAreNoEntries() {
+    mockNonFrozenEvent();
+
     when(submissionRepo.findLeaderboardByEventId(EVENT_ID)).thenReturn(List.of());
 
     List<LeaderboardEntryResponse> res = leaderService.getEventLeaderboard(EVENT_ID);

@@ -83,6 +83,29 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Scan backend image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.image }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"
+          format: table
+
+      - name: Generate backend SBOM
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.image }}
+          format: cyclonedx
+          output: backend-sbom.json
+
+      - name: Upload backend SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-sbom-${{ github.sha }}
+          path: backend-sbom.json
+          if-no-files-found: error
+
   build-ai:
     name: Build and push AI
     runs-on: ubuntu-latest
@@ -127,6 +150,29 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Scan AI image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.image }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"
+          format: table
+
+      - name: Generate AI SBOM
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.image }}
+          format: cyclonedx
+          output: ai-sbom.json
+
+      - name: Upload AI SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-sbom-${{ github.sha }}
+          path: ai-sbom.json
+          if-no-files-found: error
+
   build-ast:
     name: Build and push AST service
     runs-on: ubuntu-latest
@@ -170,6 +216,29 @@ jobs:
             ${{ env.ECR_REGISTRY }}/${{ env.AST_REPOSITORY }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Scan AST image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.image }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"
+          format: table
+
+      - name: Generate AST SBOM
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.image.outputs.image }}
+          format: cyclonedx
+          output: ast-sbom.json
+
+      - name: Upload AST SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: ast-sbom-${{ github.sha }}
+          path: ast-sbom.json
+          if-no-files-found: error
 
   build-frontend:
     name: Build UI

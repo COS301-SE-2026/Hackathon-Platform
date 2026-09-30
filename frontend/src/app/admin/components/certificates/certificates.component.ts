@@ -562,4 +562,13 @@ export class CertificatesComponent implements OnInit, OnDestroy {
   goBack(): void {
     this.router.navigate(['/admin/events']);
   }
+
+  certTypeDisplayLabel(type: string): string {
+    switch(type){
+      case 'WINNER': return 'First';
+      case 'RUNNER_UP': return 'Second';
+      case 'THIRD_PLACE': return 'Third';
+      default: return 'Participation';
+    }
+  }
 }

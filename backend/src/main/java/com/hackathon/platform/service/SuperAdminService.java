@@ -55,6 +55,7 @@ public class SuperAdminService {
             .passwordHash(pswrdEnc.encode(req.getPassword()))
             .role(admin)
             .status("ACTIVE")
+            .emailVerified(true)
             .build();
 
     User save = userRepo.save(usr);

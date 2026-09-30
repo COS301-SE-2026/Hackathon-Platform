@@ -38,6 +38,7 @@
 ## Documentation
 
 - [API Service Contract](./docs/API%20Service%20Contract.pdf)
+- [Swagger Documentation](https://api.hackathonplatform.co.za/swagger-ui/index.html)
 - [Brand Style Guide](./docs/_Brand%20Style%20Guide-%20Version%202.pdf)
 - [Wireframes](./docs/Wireframes/Wire%20frames.pdf)
 - [Coding Standards](./docs/Coding%20Standards/Coding%20Standards.pdf)

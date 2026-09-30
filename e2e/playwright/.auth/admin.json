@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:4200",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4ZWZlNTYzYi03ZGNlLTRlYjctOWY4Ny1hNTczNzFlZDM3MDYiLCJlbWFpbCI6ImRlbW9AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzkwNjcyODgwLCJleHAiOjE3OTA3NTkyODB9.HuNFkDbUdrMPrl1MJKDiLgiFQZSiRNLJ7nt5OBEsoCU"
+        },
+        {
+          "name": "user",
+          "value": "{\"token\":\"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4ZWZlNTYzYi03ZGNlLTRlYjctOWY4Ny1hNTczNzFlZDM3MDYiLCJlbWFpbCI6ImRlbW9AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzkwNjcyODgwLCJleHAiOjE3OTA3NTkyODB9.HuNFkDbUdrMPrl1MJKDiLgiFQZSiRNLJ7nt5OBEsoCU\",\"userId\":\"8efe563b-7dce-4eb7-9f87-a57371ed3706\",\"firstName\":\"Demo\",\"lastName\":\"Admin\",\"email\":\"demo@admin.com\",\"role\":\"ADMIN\",\"emailVerified\":true,\"msg\":null}"
+        }
+      ]
+    }
+  ]
+}
