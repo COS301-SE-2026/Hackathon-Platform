@@ -100,7 +100,7 @@ jobs:
           output: backend-sbom.json
 
       - name: Upload backend SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-sbom-${{ github.sha }}
           path: backend-sbom.json
@@ -167,7 +167,7 @@ jobs:
           output: ai-sbom.json
 
       - name: Upload AI SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ai-sbom-${{ github.sha }}
           path: ai-sbom.json
@@ -234,7 +234,7 @@ jobs:
           output: ast-sbom.json
 
       - name: Upload AST SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ast-sbom-${{ github.sha }}
           path: ast-sbom.json
@@ -265,7 +265,7 @@ jobs:
         run: npm run build -- --configuration production
 
       - name: Upload build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-dist
           path: frontend/dist/frontend/browser

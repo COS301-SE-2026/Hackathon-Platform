@@ -75,7 +75,7 @@ jobs:
         run: mvn clean verify -e
 
       - name: Upload surefire reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: backend-surefire-reports
@@ -114,7 +114,7 @@ jobs:
         run: npm run build -- --configuration=production
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-build
           path: frontend/dist/
