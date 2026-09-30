@@ -103,7 +103,7 @@ class CertificateRecipientResolverTest {
     CertificateRecipient r = result.get(0);
     assertThat(r.getRank()).isEqualTo(rank);
     assertThat(r.getCertificateType()).isEqualTo(type);
-    assertThat(r.getFieldValues()).containsEntry("rank", ordinal);
+    assertThat(r.getFieldValues()).containsEntry("rank", ordinal + " out of 1 teams");
     assertThat(r.getFieldValues()).containsEntry("certificateType", type);
   }
 

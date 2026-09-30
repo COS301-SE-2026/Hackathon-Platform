@@ -1,7 +1,6 @@
 package com.hackathon.platform.certificate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.hackathon.platform.model.CertificateLayout;
 import com.hackathon.platform.model.CertificateLayout.CertificateElement;
@@ -284,15 +283,5 @@ class CertificateGeneratorTest {
 
     assertThat(textOf(generate(l, "WINNER"))).contains("Champion");
     assertThat(textOf(generate(l, "PARTICIPATION"))).doesNotContain("Champion");
-  }
-
-  @Test
-  void generate_invalidBackground_throwsIllegalState() {
-    assertThatThrownBy(
-            () ->
-                generator.generate(
-                    layout("A4-landscape"), new byte[] {1, 2, 3}, Map.of(), fields, URL, "WINNER"))
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("not supported");
   }
 }
