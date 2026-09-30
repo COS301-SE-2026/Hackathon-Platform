@@ -6,6 +6,9 @@ import { EventParticipantResponse,EventService } from "../../../services/event.s
 import { EventInsightsResponse,InsightsService } from "../../../services/insights.service";
 import { LeaderboardEntry, LeaderboardService } from "../../../services/leaderboard.service";
 import { PlagiarismHeatmapComponent } from "../plagiarism/plagiarism-heatmap/plagiarism-heatmap.component";
+import { concat, throwError } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { StorageService, TeamSubmission } from "../../../services/storage.service";
 
 
 interface ParticipantRow {
@@ -73,6 +76,7 @@ export class EventDashboardComponent implements OnInit{
   private readonly leaderboardService = inject(LeaderboardService);
   private readonly route = inject(ActivatedRoute);
   private readonly change = inject(ChangeDetectorRef);
+  private readonly storageService = inject(StorageService);
 
  @Input() eventId = '';
 
@@ -92,13 +96,13 @@ export class EventDashboardComponent implements OnInit{
   insightsError = '';
    activeParticipantRows: ParticipantRow[] = [];
     participantsPreviewLoading = false;
-  
+
     topTeams: LeaderboardEntry[] = [];
     topTeamsLoading = false;
     topTeamsError = '';
     downloadingTeamId: string | null = null;
     downloadError ='';
-  
+
     submissionStatusSegments: SubmissionStatusSegment[]=[];
     submissionsCount = 0;
 
@@ -116,7 +120,7 @@ export class EventDashboardComponent implements OnInit{
 
   trendTicks: TrendTick[] = [];
   trendYAxisTicks: TrendYAxisTick[] = [];
-  trendMaxCount = 0; 
+  trendMaxCount = 0;
 
   scoreByLevel: ScoreLevelStat[]=[];
 
@@ -148,28 +152,58 @@ export class EventDashboardComponent implements OnInit{
   }
 
   downloadTeamPackage(team:LeaderboardEntry):void {
-    if (this.downloadingTeamId !== null) return;
+    if(this.downloadingTeamId !== null){
+      return;
+    }
     this.downloadingTeamId = team.teamId;
     this.downloadError = '';
+    const safeName = team.teamName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
 
-    this.eventService.downloadTeamSubmissionPackage(this.eventId, team.teamId).subscribe({
-      next: blob =>{
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const safeName = team.teamName.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
-        a.href = url;
-        a.download = `${safeName}-rank${team.rank}.zip`;
-        a.click();
-        URL.revokeObjectURL(url);
+    this.storageService.getTeamSubmissions(team.teamId).pipe(
+      map(subs => this.pickBestPerLevel(subs)),
+      switchMap(best => {
+        if(best.length === 0){
+          return throwError(() => new Error('No submission yet'));
+        }
+        return concat(...best.map(sub =>
+        this.storageService.downloadSubmissionArchive(this.eventId, team.teamId, sub.levelId, sub.submissionId)
+          .pipe(map(blob => ({ blob, fileName: `${safeName}-rank${team.rank}-level${sub.levelId}.zip`})))
+        ));
+      })
+    ).subscribe({
+      next: ({ blob, fileName }) => this.saveBlob(blob, fileName),
+      error: (err: Error) => {
+        this.downloadError = err?.message === 'No submission yet' ? `${team.teamName} has no submission yet` : `Coudlnt download the submission`;
         this.downloadingTeamId = null;
         this.change.markForCheck();
       },
-      error: () =>{
-        this.downloadError = `Couldn't download ${team.teamName}'s files. Try again.`;
+      complete: () => {
         this.downloadingTeamId = null;
         this.change.markForCheck();
       }
     });
+  }
+
+  private pickBestPerLevel(subs: TeamSubmission[]): TeamSubmission[] {
+    const best = new Map<number, TeamSubmission>();
+    for (const sub of subs) {
+      if (sub.status?.toUpperCase() !== 'SCORED' || sub.score === null || sub.score === undefined) continue;
+      const current = best.get(sub.levelId);
+      const better = !current || sub.score > current.score! || (sub.score === current.score && new Date(sub.submittedAt) < new Date(current.submittedAt));
+      if (better) best.set(sub.levelId, sub);
+    }
+    return [...best.values()].sort((a, b) => a.levelId - b.levelId);
+  }
+
+  private saveBlob(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   private loadLayout(): void {
@@ -247,19 +281,19 @@ export class EventDashboardComponent implements OnInit{
         team: p.teamName ?? 'N/A',
       };
     }
-  
+
     private getInitials(fullName: string): string {
-  
+
       return (fullName || '')
         .split(' ')
         .filter(Boolean)
         .slice(0, 2)
         .map(part => part[0]?.toUpperCase())
         .join('');
-  
+
     }
 
-    
+
   private loadEventInsights(eventId: string): void {
     this.insightsLoading = true;
     this.insightsError = '';
