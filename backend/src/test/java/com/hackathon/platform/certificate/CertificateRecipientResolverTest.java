@@ -42,7 +42,8 @@ class CertificateRecipientResolverTest {
 
   @BeforeEach
   void setUp() {
-    resolver = new CertificateRecipientResolver(teamRepo, teamMemRepo, userRepo, leaderboardService);
+    resolver =
+        new CertificateRecipientResolver(teamRepo, teamMemRepo, userRepo, leaderboardService);
     event = new Event();
     event.setEventId(UUID.randomUUID());
     event.setName("Hack 2026");
@@ -59,7 +60,8 @@ class CertificateRecipientResolverTest {
   }
 
   private LeaderboardEntryResponse entry(Team t, int rank) {
-    return new LeaderboardEntryResponse(rank, t.getTeamId(), t.getTeamName(), BigDecimal.TEN, Instant.now());
+    return new LeaderboardEntryResponse(
+        rank, t.getTeamId(), t.getTeamName(), BigDecimal.TEN, Instant.now());
   }
 
   private void stubMember(Team t, User u) {
@@ -245,7 +247,8 @@ class CertificateRecipientResolverTest {
     UUID userId = UUID.randomUUID();
     UUID teamId = UUID.randomUUID();
     CertificateRecipient r =
-        new CertificateRecipient(userId, teamId, "Lewis", 2, "RUNNER_UP", java.util.Map.of("a", "b"));
+        new CertificateRecipient(
+            userId, teamId, "Lewis", 2, "RUNNER_UP", java.util.Map.of("a", "b"));
     assertThat(r.getUserId()).isEqualTo(userId);
     assertThat(r.getTeamId()).isEqualTo(teamId);
     assertThat(r.getRecipientName()).isEqualTo("Lewis");

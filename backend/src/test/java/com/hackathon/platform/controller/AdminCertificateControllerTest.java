@@ -87,7 +87,8 @@ class AdminCertificateControllerTest {
     when(certificateService.getTemplatesForEvent(eventId, hackId)).thenReturn(List.of(template));
     stubResponseParts();
 
-    ResponseEntity<List<CertificateTemplateResponse>> resp = controller.getTemplates(eventId, hackId);
+    ResponseEntity<List<CertificateTemplateResponse>> resp =
+        controller.getTemplates(eventId, hackId);
 
     assertThat(resp.getBody()).hasSize(1);
     assertTemplateResponse(resp.getBody().get(0));
@@ -131,7 +132,8 @@ class AdminCertificateControllerTest {
     when(certificateService.getTemplate(templateId)).thenReturn(template);
     stubResponseParts();
 
-    ResponseEntity<CertificateTemplateResponse> resp = controller.uploadBackground(templateId, file);
+    ResponseEntity<CertificateTemplateResponse> resp =
+        controller.uploadBackground(templateId, file);
 
     verify(certificateService).uploadBackground(templateId, file);
     assertTemplateResponse(resp.getBody());
@@ -159,7 +161,8 @@ class AdminCertificateControllerTest {
     when(certificateService.startGeneration(eventId, templateId, "TOP_N", 3, admin.getUserId()))
         .thenReturn(run);
 
-    ResponseEntity<CertificateGenerationRunResponse> resp = controller.generate(eventId, req, admin);
+    ResponseEntity<CertificateGenerationRunResponse> resp =
+        controller.generate(eventId, req, admin);
 
     assertThat(resp.getStatusCode().value()).isEqualTo(200);
     assertThat(resp.getBody().getRunId()).isEqualTo(run.getRunId());

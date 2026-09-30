@@ -116,7 +116,11 @@ class CertificateServiceTest {
   }
 
   private User user() {
-    return User.builder().userId(UUID.randomUUID()).firstName("Charles").lastName("Leclerc").build();
+    return User.builder()
+        .userId(UUID.randomUUID())
+        .firstName("Charles")
+        .lastName("Leclerc")
+        .build();
   }
 
   private static CertificateElement el(String type, String imageKey) {
@@ -148,12 +152,7 @@ class CertificateServiceTest {
 
   private CertificateRecipient recipient(String name, int rank, String type) {
     return new CertificateRecipient(
-        UUID.randomUUID(),
-        UUID.randomUUID(),
-        name,
-        rank,
-        type,
-        Map.of("participantName", name));
+        UUID.randomUUID(), UUID.randomUUID(), name, rank, type, Map.of("participantName", name));
   }
 
   private void stubRunLookup(CertificateGenerationRun run) {
@@ -302,7 +301,8 @@ class CertificateServiceTest {
   @Test
   void uploadBackground_uploadsSanitisedKey_andStoresIt() {
     CertificateTemplate t = template(null);
-    MockMultipartFile file = new MockMultipartFile("file", "../bg.png", "image/png", new byte[] {1});
+    MockMultipartFile file =
+        new MockMultipartFile("file", "../bg.png", "image/png", new byte[] {1});
     when(templateRepo.findById(templateId)).thenReturn(Optional.of(t));
 
     String key = service.uploadBackground(templateId, file);
@@ -351,8 +351,13 @@ class CertificateServiceTest {
   @Test
   void resolveTemplateAssetUrls_onlyImageElementsWithKeys_deduplicated() {
     CertificateTemplate t =
-        template(null, el("IMAGE", "a.png"), el("IMAGE", "a.png"), el("IMAGE", null),
-            el("TEXT", "ignored.png"), el("IMAGE", "b.png"));
+        template(
+            null,
+            el("IMAGE", "a.png"),
+            el("IMAGE", "a.png"),
+            el("IMAGE", null),
+            el("TEXT", "ignored.png"),
+            el("IMAGE", "b.png"));
     when(storageService.generatePresignedUrl(CONTAINER, "a.png", 60)).thenReturn("http://a");
     when(storageService.generatePresignedUrl(CONTAINER, "b.png", 60)).thenReturn("http://b");
 
@@ -415,7 +420,8 @@ class CertificateServiceTest {
   @Test
   void startGeneration_throws_whenEventMissing() {
     when(eventRepo.existsById(eventId)).thenReturn(false);
-    assertThatThrownBy(() -> service.startGeneration(eventId, templateId, "TOP_N", 3, UUID.randomUUID()))
+    assertThatThrownBy(
+            () -> service.startGeneration(eventId, templateId, "TOP_N", 3, UUID.randomUUID()))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Event not found");
     verify(runRepo, never()).save(any());
@@ -425,7 +431,8 @@ class CertificateServiceTest {
   void startGeneration_throws_whenTemplateMissing() {
     when(eventRepo.existsById(eventId)).thenReturn(true);
     when(templateRepo.findById(templateId)).thenReturn(Optional.empty());
-    assertThatThrownBy(() -> service.startGeneration(eventId, templateId, null, null, UUID.randomUUID()))
+    assertThatThrownBy(
+            () -> service.startGeneration(eventId, templateId, null, null, UUID.randomUUID()))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Certificate template not found");
   }
@@ -437,7 +444,8 @@ class CertificateServiceTest {
     when(templateRepo.findById(templateId)).thenReturn(Optional.of(template(null)));
     when(runRepo.save(any(CertificateGenerationRun.class))).then(returnsFirstArg());
 
-    CertificateGenerationRun run = service.startGeneration(eventId, templateId, null, null, requester);
+    CertificateGenerationRun run =
+        service.startGeneration(eventId, templateId, null, null, requester);
 
     assertThat(run.getScope()).isEqualTo("ALL_PARTICIPANTS");
     assertThat(run.getStatus()).isEqualTo("PENDING");
@@ -473,7 +481,11 @@ class CertificateServiceTest {
   void runGeneration_issuesCertificateForEveryRecipient() throws Exception {
     CertificateGenerationRun run = run("TOP_N", 3);
     CertificateTemplate t =
-        template("bg.png", el("IMAGE", "logo.png"), el("IMAGE", "logo.png"), el("IMAGE", null),
+        template(
+            "bg.png",
+            el("IMAGE", "logo.png"),
+            el("IMAGE", "logo.png"),
+            el("IMAGE", null),
             el("TEXT", null));
     CertificateRecipient r1 = recipient("Charles Leclerc", 1, "WINNER");
     CertificateRecipient r2 = recipient("Harry Lewis", 4, "PARTICIPATION");
@@ -481,8 +493,10 @@ class CertificateServiceTest {
     stubRunLookup(run);
     when(eventRepo.findById(eventId)).thenReturn(Optional.of(event));
     when(templateRepo.findById(templateId)).thenReturn(Optional.of(t));
-    when(storageService.download(CONTAINER, "bg.png")).thenReturn(new ByteArrayInputStream(new byte[] {1}));
-    when(storageService.download(CONTAINER, "logo.png")).thenReturn(new ByteArrayInputStream(new byte[] {2}));
+    when(storageService.download(CONTAINER, "bg.png"))
+        .thenReturn(new ByteArrayInputStream(new byte[] {1}));
+    when(storageService.download(CONTAINER, "logo.png"))
+        .thenReturn(new ByteArrayInputStream(new byte[] {2}));
     when(recipientResolver.resolve(event, "TOP_N", 3)).thenReturn(List.of(r1, r2));
     when(certificateGenerator.generate(any(), any(), any(), any(), anyString(), anyString()))
         .thenReturn(pdf);
@@ -504,7 +518,8 @@ class CertificateServiceTest {
         .allSatisfy(u -> assertThat(u).startsWith("https://hackathonplatform.co.za/verify/"));
     assertThat(typeCaptor.getAllValues()).containsExactly("WINNER", "PARTICIPATION");
 
-    ArgumentCaptor<CertificateIssued> issuedCaptor = ArgumentCaptor.forClass(CertificateIssued.class);
+    ArgumentCaptor<CertificateIssued> issuedCaptor =
+        ArgumentCaptor.forClass(CertificateIssued.class);
     verify(issuedRepo, times(2)).save(issuedCaptor.capture());
     CertificateIssued first = issuedCaptor.getAllValues().get(0);
     assertThat(first.getRunId()).isEqualTo(run.getRunId());
@@ -520,7 +535,8 @@ class CertificateServiceTest {
         .startsWith("certificates/events/" + eventId + "/runs/" + run.getRunId() + "/")
         .endsWith(".pdf");
     verify(storageService, times(2))
-        .uploadBytes(eq(CONTAINER), startsWith("certificates/events/"), eq(pdf), eq("application/pdf"));
+        .uploadBytes(
+            eq(CONTAINER), startsWith("certificates/events/"), eq(pdf), eq("application/pdf"));
     // first code collided, so the generator asked again: 2 checks for r1 + 1 for r2
     verify(issuedRepo, times(3)).existsByVerificationCode(anyString());
   }

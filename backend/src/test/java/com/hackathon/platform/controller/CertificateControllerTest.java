@@ -43,7 +43,8 @@ class CertificateControllerTest {
   @Test
   void downloadCertificate_propagatesNotFound() {
     UUID id = UUID.randomUUID();
-    when(certificateService.getIssued(id)).thenThrow(new IllegalArgumentException("Certificate not found"));
+    when(certificateService.getIssued(id))
+        .thenThrow(new IllegalArgumentException("Certificate not found"));
     assertThatThrownBy(() -> controller.downloadCertificate(id))
         .isInstanceOf(IllegalArgumentException.class);
   }
