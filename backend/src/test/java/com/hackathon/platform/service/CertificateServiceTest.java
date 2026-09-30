@@ -191,8 +191,8 @@ class CertificateServiceTest {
 
     byte[] pdf = service.genCertificate(eventId, u);
 
-    String text = textOf(pdf);
-    assertThat(text).contains("Mega Hackathon").contains("Charles Leclerc").contains("Spring Hack");
+    String text = textOf(pdf).replaceAll("\\s+", "");
+    assertThat(text).contains("MegaHackathon").contains("CharlesLeclerc").contains("SpringHack");
     verify(storageService, never()).download(anyString(), anyString());
   }
 

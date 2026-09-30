@@ -40,6 +40,7 @@ public class CertificateRecipientResolver {
   public List<CertificateRecipient> resolve(Event event, String scope, Integer topN) {
     List<LeaderboardEntryResponse> leaderboard =
         leaderboardService.getEventLeaderboard(event.getEventId());
+    int totalTeams = leaderboard.size();
     Map<UUID, Integer> rankByTeam = new HashMap<>();
     for (LeaderboardEntryResponse entry : leaderboard) {
       rankByTeam.put(entry.getTeamId(), entry.getRank());
@@ -71,7 +72,7 @@ public class CertificateRecipientResolver {
         fields.put("participantName", fullName);
         fields.put("teamName", team.getTeamName());
         fields.put("eventName", event.getName());
-        fields.put("rank", rank == null ? "Unranked" : ordinal(rank));
+        fields.put("rank", rank == null ? "Unranked" : ordinal(rank)+" out of "+totalTeams+" teams");
         fields.put("certificateType", certificateType);
         fields.put("date", today);
 

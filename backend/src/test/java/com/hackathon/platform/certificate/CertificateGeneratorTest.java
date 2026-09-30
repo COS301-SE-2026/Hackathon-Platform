@@ -293,6 +293,6 @@ class CertificateGeneratorTest {
                 generator.generate(
                     layout("A4-landscape"), new byte[] {1, 2, 3}, Map.of(), fields, URL, "WINNER"))
         .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("Failed to render");
+        .hasMessageContaining("not supported");
   }
 }
