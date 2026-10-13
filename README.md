@@ -419,6 +419,22 @@ Please run the relevant tests and formatting checks before opening a pull reques
 
 ---
 
+## 📬 Get in Touch
+
+Have questions, feedback, or interested in collaborating?
+
+We'd love to hear from you!
+
+**Team Keyboard Gremlins**
+
+📧 **Email:** [keyboardgremlins@gmail.com](mailto:keyboardgremlins@gmail.com)
+
+🌐 **Website:** [hackathonplatform.co.za](https://hackathonplatform.co.za)
+
+💻 **GitHub:** [Keyboard Gremlins](https://github.com/COS301-SE-2026/Hackathon-Platform)
+
+---
+
 <p align="center">
   <strong>Build. Compete. Prove it.</strong><br />
   Made by <a href="https://github.com/COS301-SE-2026/Hackathon-Platform">Keyboard Gremlins</a> for COS 301, 2026.
