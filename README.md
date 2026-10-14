@@ -418,7 +418,7 @@ Please run the relevant tests and formatting checks before opening a pull reques
 | **Jasveer Ramdhaw** | Full-stack Developer, Database | [LinkedIn](https://www.linkedin.com/in/jasveer-ramdhaw-166a373a7) |
 
 <p align="center">
-  <img src="docs/Images/20261002_13272111.jpg" width="178" alt="Keyboard Gremlins team" />
+  <img src="docs/Images/20261002_13272111.jpg" width="600" alt="Keyboard Gremlins team" />
 </p>
 
 
