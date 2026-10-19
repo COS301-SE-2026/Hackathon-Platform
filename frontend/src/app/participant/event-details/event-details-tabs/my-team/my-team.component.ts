@@ -10,6 +10,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { ToastService } from '../../../../shared/components/toast/toast.service';
 import { LeaderboardService } from '../../../../services/leaderboard.service';
 import { SubmissionService } from '../../../../services/submission.service';
+import { LoaderComponent } from '../../../../shared/components/loader/loader.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
 
@@ -25,7 +26,7 @@ interface DisplayTeamMember {
 @Component({
   selector: 'app-my-team',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ButtonComponent, ModalComponent,InputComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ButtonComponent, ModalComponent,InputComponent, EmptyStateComponent, LoaderComponent],
   templateUrl: './my-team.component.html',
   styleUrl: './my-team.component.scss',
 })

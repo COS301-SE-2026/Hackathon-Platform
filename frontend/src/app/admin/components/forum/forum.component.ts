@@ -5,6 +5,13 @@ import { ActivatedRoute } from '@angular/router';
 import { ForumService, ForumPermissionResponse } from '../../../services/forum.service';
 import { AuthService } from '../../../services/auth.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { InputComponent } from '../../../shared/components/input/input.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
+import { SearchBarComponent } from '../../../shared/components/search-bar/search-bar.component';
+import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { DropdownComponent } from '../../../shared/components/dropdown/dropdown.component';
+import { LoaderComponent } from '../.../../../../shared/components/loader/loader.component';
 
 type ForumRole = 'ADMIN' | 'PARTICIPANT';
 
@@ -25,12 +32,14 @@ interface ForumThread{
     replies: ForumMessage[];
     lastActivityLabel: string;
     replyCount: number;
+    createdAt: string;
+    
 }
 
 @Component({
     selector: 'app-forum',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonComponent],
+    imports: [CommonModule, FormsModule, ButtonComponent, InputComponent, ModalComponent, TextareaComponent, SearchBarComponent, PaginationComponent, DropdownComponent, LoaderComponent],
     templateUrl: './forum.component.html',
     styleUrls: ['./forum.component.scss']
 })
@@ -50,6 +59,19 @@ export class ForumComponent implements OnInit, OnDestroy {
     @Input() eventId = '';
     currUserId = this.authService.getUser()?.userId ?? '';
     showCreatePost = false;
+    showDeleteConfirm = false;
+    currentPage = 1;
+    itemsPerPage = 10;
+    sortOrder = 'Newest First';
+    replyFilter = 'All Threads';
+    sortOptions = ['Newest First', 'Oldest First'];
+    replyOptions = ['All Threads', 'Has Replies', 'No Replies'];
+
+    pendingDelete: {
+        threadId: string;
+        messageId: string;
+        isPost: boolean;
+    } | null = null;
 
     perms: ForumPermissionResponse | null = null;
 
@@ -96,17 +118,31 @@ export class ForumComponent implements OnInit, OnDestroy {
         });
     }
 
-    get filteredThreads(): ForumThread[] {
-        const term = this.searchTerm.trim().toLowerCase();
-        if (!term) {
-            return this.threads;
-        }
-        return this.threads.filter(thread =>
-            thread.title.toLowerCase().includes(term) ||
-            thread.rootMessage.content.toLowerCase().includes(term)
-        );
-    }
+  get filteredThreads(): ForumThread[] {
+    const term = this.searchTerm.trim().toLowerCase();
 
+    return this.threads
+        .filter(thread => {
+            const matchesSearch =
+                thread.title.toLowerCase().includes(term) ||
+                thread.rootMessage.content.toLowerCase().includes(term);
+
+            const matchesReplies =
+                this.replyFilter === 'All Threads' ||
+                (this.replyFilter === 'Has Replies' && thread.replyCount > 0) ||
+                (this.replyFilter === 'No Replies' && thread.replyCount === 0);
+
+            return matchesSearch && matchesReplies;
+        })
+        .sort((a, b) => {
+            const dateA = new Date(a.createdAt).getTime();
+            const dateB = new Date(b.createdAt).getTime();
+
+            return this.sortOrder === 'Newest First'
+                ? dateB - dateA
+                : dateA - dateB;
+        });
+}
     toggleThread(threadId: string): void {
         if (this.expandedThreadId === threadId) {
             this.expandedThreadId = null;
@@ -159,51 +195,88 @@ export class ForumComponent implements OnInit, OnDestroy {
         });
     }
 
-    deleteMessage(threadId: string, messageId: string): void {
-        const thread = this.threads.find(t => t.threadId === threadId);
-        if (!thread) {
-            return;
-        }
 
-        const isPost = thread.rootMessage.messageId === messageId;
-        const confirm = window.confirm(isPost ? 'Confirm deletion of this post?' : 'Confirm deletion of this comment?')
+deleteMessage(threadId: string, messageId: string): void {
+    const thread = this.threads.find(t => t.threadId === threadId);
 
-        if (!confirm) {
-            return;
-        }
+    if (!thread) {
+        return;
+    }
 
-        this.errorMessage = '';
+    this.pendingDelete = {
+        threadId,
+        messageId,
+        isPost: thread.rootMessage.messageId === messageId
+    };
 
-        if(isPost) {
-            this.forumService.deletePost(this.eventId, threadId).subscribe({
-                next: () => {
-                    this.threads = this.threads.filter(t => t.threadId !== threadId);
-                    if (this.expandedThreadId === threadId) {
-                        this.expandedThreadId = null;
-                    }
+    this.showDeleteConfirm = true;
+}
 
-                    this.change.markForCheck();
-                },
+cancelDelete(): void {
+    this.showDeleteConfirm = false;
+    this.pendingDelete = null;
+}
 
-                error: () => {
-                    this.errorMessage = "The post failed to be deleted";
-                    this.change.markForCheck();
-                }
-            });
-            return;
-        }
+confirmDelete(): void {
+    const pending = this.pendingDelete;
 
-        this.forumService.deleteComment(this.eventId, messageId).subscribe({
+    if (!pending) {
+        return;
+    }
+
+    this.showDeleteConfirm = false;
+    this.pendingDelete = null;
+    this.errorMessage = '';
+
+    if (pending.isPost) {
+        this.forumService.deletePost(
+            this.eventId,
+            pending.threadId
+        ).subscribe({
             next: () => {
-                thread.replies = thread.replies.filter(reply => reply.messageId !== messageId);
-                thread.replyCount--;
+                this.threads = this.threads.filter(
+                    thread => thread.threadId !== pending.threadId
+                );
+
+                if (this.expandedThreadId === pending.threadId) {
+                    this.expandedThreadId = null;
+                }
+
                 this.change.markForCheck();
             },
             error: () => {
-                this.errorMessage = 'The comment failed to be deleted';
+                this.errorMessage = 'The post failed to be deleted';
                 this.change.markForCheck();
             }
         });
+
+        return;
+    }
+
+    const thread = this.threads.find(
+        item => item.threadId === pending.threadId
+    );
+
+    this.forumService.deleteComment(
+        this.eventId,
+        pending.messageId
+    ).subscribe({
+        next: () => {
+            if (thread) {
+                thread.replies = thread.replies.filter(
+                    reply => reply.messageId !== pending.messageId
+                );
+
+                thread.replyCount--;
+            }
+
+            this.change.markForCheck();
+        },
+        error: () => {
+            this.errorMessage = 'The comment failed to be deleted';
+            this.change.markForCheck();
+        }
+    });
 }
 
     postReply(threadId: string): void {
@@ -273,7 +346,8 @@ export class ForumComponent implements OnInit, OnDestroy {
                     },
                     replies: [],
                     lastActivityLabel: 'Just now',
-                    replyCount: 0
+                    replyCount: 0,
+                    createdAt: post.createdAt
                 });
 
                 this.closeCreatePost();
@@ -315,7 +389,8 @@ export class ForumComponent implements OnInit, OnDestroy {
 
                     replies: [],
                     lastActivityLabel: this.formatDate(p.createdAt),
-                    replyCount: p.replyCount
+                    replyCount: p.replyCount,
+                    createdAt: p.createdAt
                 }));
 
                 this.isLoading = false;
@@ -395,4 +470,38 @@ export class ForumComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.eventSource?.close();
     }
+
+
+    autoResizeReply(textarea: HTMLTextAreaElement): void {
+    textarea.style.height = '42px';
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 140)}px`;
+    }
+
+    get isAdmin(): boolean {
+        const role = this.authService.getUser()?.role;
+        return role === 'ADMIN' || role === 'SUPERADMIN';
+    }
+
+    get paginatedThreads(): ForumThread[] {
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+
+        return this.filteredThreads.slice(
+            startIndex,
+            startIndex + this.itemsPerPage
+        );
+    }
+
+    onPageChange(page: number): void {
+        this.currentPage = page;
+    }
+
+    onSearchChange(term: string): void {
+        this.searchTerm = term;
+        this.currentPage = 1;
+    }
+
+    onFilterChange(): void {
+        this.currentPage = 1;
+    }
+
 }

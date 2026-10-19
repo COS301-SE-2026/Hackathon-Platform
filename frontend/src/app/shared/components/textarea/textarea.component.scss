@@ -3,6 +3,14 @@
   width: 100%;
 }
 
+.input-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--black);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-small);
+}
 
 .textarea {
   width: 100%;

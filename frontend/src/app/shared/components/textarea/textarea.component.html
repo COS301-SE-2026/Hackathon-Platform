@@ -1,9 +1,19 @@
 <div class="textarea-wrapper">
 
-<label [for]="id" class="sr-only">{{ label }}</label>
+  <label [for]="id" class="input-label">{{ label }}</label>
 
-<textarea class="textarea" [id]="id" [(ngModel)]="value" [attr.placeholder]="placeholder" [attr.maxlength]="maxLength" [attr.rows]="rows"></textarea>
+  <textarea
+    class="textarea"
+    [id]="id"
+    [ngModel]="value"
+    (ngModelChange)="onValueChange($event)"
+    [attr.placeholder]="placeholder"
+    [attr.maxlength]="maxLength"
+    [attr.rows]="rows"
+  ></textarea>
 
-<div class="textarea-counter">{{ characterCount }} / {{ maxLength }}</div>
+  <div class="textarea-counter">
+    {{ characterCount }} / {{ maxLength }}
+  </div>
 
 </div>

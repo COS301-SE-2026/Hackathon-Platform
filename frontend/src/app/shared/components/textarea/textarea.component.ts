@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -14,9 +14,16 @@ export class TextareaComponent {
   @Input() rows = 6;
   @Input() id = 'textarea';
   @Input() label = 'Text area';
-  value = '';
+  @Input() value = '';
+
+  @Output() valueChange = new EventEmitter<string>();
 
   get characterCount(): number {
     return this.value.length;
+  }
+
+  onValueChange(value: string): void {
+    this.value = value;
+    this.valueChange.emit(value);
   }
 }
