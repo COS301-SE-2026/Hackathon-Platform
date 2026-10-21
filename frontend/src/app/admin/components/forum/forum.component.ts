@@ -451,8 +451,14 @@ confirmDelete(): void {
         this.eventSource = this.forumService.connectToForumUpdates(this.eventId);
         this.eventSource.addEventListener('forum-update', () => {
             this.zone.run(() => {
-                if (this.expandedThreadId) return;
-                this.loadForum(false, null);
+
+                if (this.expandedThreadId) {
+            this.refreshThread(this.expandedThreadId);
+        } else {
+            this.loadForum(false, null);
+        }
+
+
             });
         });
 
@@ -504,4 +510,38 @@ confirmDelete(): void {
         this.currentPage = 1;
     }
 
+
+    private refreshThread(threadId: string): void {
+    this.forumService.getPost(this.eventId, threadId).subscribe({
+        next: post => {
+            const thread = this.threads.find(t => t.threadId === threadId);
+            if (!thread) return;
+
+            thread.title = post.title;
+            thread.rootMessage = {
+                messageId: post.postId,
+                authorId: post.author.userId,
+                authorName: `${post.author.firstName} ${post.author.lastName}`,
+                authorInitial: post.author.firstName.charAt(0).toUpperCase(),
+                authorRole: post.author.role === 'ADMIN' || post.author.role === 'SUPERADMIN' ? 'ADMIN' : 'PARTICIPANT',
+                content: post.body,
+                postedAtLabel: this.formatDate(post.createdAt)
+            };
+            thread.replies = post.comments.map(c => ({
+                messageId: c.commentId,
+                authorId: c.author.userId,
+                authorName: `${c.author.firstName} ${c.author.lastName}`,
+                authorInitial: c.author.firstName.charAt(0).toUpperCase(),
+                authorRole: c.author.role === 'ADMIN' || c.author.role === 'SUPERADMIN' ? 'ADMIN' : 'PARTICIPANT',
+                content: c.body,
+                postedAtLabel: this.formatDate(c.createdAt),
+            }));
+            thread.replyCount = post.comments.length;
+            thread.lastActivityLabel = this.formatDate(post.createdAt);
+
+            this.change.markForCheck();
+        },
+        error: () => {  }
+    });
+}
 }
