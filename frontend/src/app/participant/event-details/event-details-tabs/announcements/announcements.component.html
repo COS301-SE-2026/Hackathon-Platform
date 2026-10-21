@@ -21,9 +21,22 @@
     <p>Stay up to date with the latest event updates and important notices.</p>
   </div>
 
+  <div class="announcements-toolbar">
+
+    <app-search-bar placeholder="Search announcements..." (searchChange)="onSearchChange($event)" />
+
+    <app-dropdown id="messageType" label="Message type" [options]="messageTypeOptions" [value]="messageType" (selectionChange)="onMessageTypeChange($event)" />
+
+  </div>
+
+
+  @if (filteredAnnouncements.length === 0) {
+    <div class="empty-state"> No announcements found.</div>
+  } @else {
+
   <div class="announcements-list">
 
-   @for (announcement of announcements; track announcement.messageId) {
+   @for (announcement of paginatedAnnouncements; track announcement.messageId) {
 
     <article class="announcement-card">
 
@@ -31,7 +44,7 @@
 
        <h3>{{ announcement.title }}</h3>
 
-         <span class="severity-badge" [class.severity-info]="announcement.severity === 'INFO'"
+        <span class="severity-badge" [class.severity-info]="announcement.severity === 'INFO'"
               [class.severity-important]="announcement.severity === 'IMPORTANT'"
               [class.severity-urgent]="announcement.severity === 'URGENT'">
 
@@ -54,10 +67,20 @@
 
           <p class="announcement-body">{{ announcement.body }}</p>
 
-          <div class="announcement-date">
+          <div class="announcement-card-footer">
+
+             <div class="announcement-date">
             <i class="pi pi-clock" aria-hidden="true"></i>
             <span> Posted {{ announcement.createdAt | date:'d MMM yyyy, HH:mm' }}</span>
           </div>
+
+
+          @if (needsViewMore(announcement)) {
+            <app-button variant="ghost" width="100%" type="button" (click)="viewAnnouncement(announcement)">View more</app-button>
+          }
+
+        </div>
+         
 
     </article>
 
@@ -65,6 +88,62 @@
 
  </div>
 
+  <app-pagination
+    [currentPage]="currentPage"
+    [totalItems]="filteredAnnouncements.length"
+    [itemsPerPage]="itemsPerPage"
+    itemLabel="announcements"
+    (pageChange)="onPageChange($event)" />
+
+}
   }
 
 </div>
+
+
+@if (selectedAnnouncement; as announcement) {
+  <app-modal
+    [title]="announcement.title"
+    size="medium"
+    footerLayout="center"
+    (closed)="closeAnnouncement()">
+
+    <div modal-body>
+      <div
+        class="severity-badge"
+        [class.severity-info]="announcement.severity === 'INFO'"
+        [class.severity-important]="announcement.severity === 'IMPORTANT'"
+        [class.severity-urgent]="announcement.severity === 'URGENT'">
+
+        @if (announcement.severity === 'INFO') {
+          <i class="pi pi-info-circle" aria-hidden="true"></i>
+        } @else if (announcement.severity === 'IMPORTANT') {
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+        } @else {
+          <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+        }
+
+        <span>{{ announcement.severity | titlecase }}</span>
+      </div>
+
+      <p class="announcement-full-body">{{ announcement.body }}</p>
+
+      <div class="announcement-date">
+        <i class="pi pi-clock" aria-hidden="true"></i>
+        <span>
+          Posted {{ announcement.createdAt | date:'d MMM yyyy, HH:mm' }}
+        </span>
+      </div>
+    </div>
+
+    <div modal-footer-right>
+      <app-button variant="secondary"
+        width="120px"
+        type="button"
+        (click)="closeAnnouncement()">
+        Close
+      </app-button>
+    </div>
+
+  </app-modal>
+}

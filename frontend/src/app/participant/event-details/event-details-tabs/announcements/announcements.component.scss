@@ -147,3 +147,70 @@
   font-size: var(--font-size-body);
   line-height: var(--line-height-body);
 }
+
+.announcements-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.announcements-toolbar app-search-bar {
+  flex: 1;
+  min-width: 0;
+}
+
+.announcements-toolbar app-dropdown {
+  flex: 0 0 200px;
+}
+
+@media (max-width: 600px) {
+  .announcements-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .announcements-toolbar app-search-bar,
+  .announcements-toolbar app-dropdown {
+    width: 100%;
+    flex: auto;
+  }
+}
+
+.empty-state {
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--dark-gray);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  border: none;
+}
+
+
+.announcement-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.announcement-full-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  margin: var(--space-4) 0;
+}
+
+
+@media (max-width: 600px) {
+  .announcement-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .announcement-card-footer app-button {
+    width: 100%;
+  }
+}
