@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 
 interface UserRow {
     username: string;
@@ -15,7 +16,7 @@ interface UserRow {
 @Component({
     selector: 'app-super-admin',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, NavbarComponent],
     templateUrl: './super-admin.component.html',
     styleUrls:['./super-admin.component.scss']
 })
@@ -37,8 +38,13 @@ export class SuperAdminComponent implements OnInit{
     isCreatingAdmin = false;
     createAdminError = '';
     createAdminSuccess = '';
+    firstName = 'Admin';
+    lastName = '';
 
     ngOnInit(): void {
+        const user = this.authService.getUser();
+        this.firstName = user?.firstName ?? 'Admin';
+        this.lastName = user?.lastName ?? '';
         this.loadAdmins();
     }
 
