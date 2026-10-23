@@ -31,7 +31,8 @@ export class NavbarComponent {
   @Input() lastName = '';
 
   @Input() profileSubtitle = '';
-  
+
+  isScrolled = false;
 
   @Input() profileMenuItems: NavbarProfileMenuItem[] = [];
 
@@ -127,9 +128,17 @@ const target = event.target as HTMLElement;
  }
 
  scrollTo(sectionId: string): void {
-  document.getElementById(sectionId)?.scrollIntoView({
-    behavior: 'smooth'
-  });
+  if (sectionId === 'home') {
+    window.scrollTo({ top: 0, behavior: 'smooth'});
+    return;
+  }
+
+  document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start'});
 }
+
+  @HostListener('window:scroll')
+    onWindowScroll(): void {
+      this.isScrolled = window.scrollY > 50;
+    }
 
 }
