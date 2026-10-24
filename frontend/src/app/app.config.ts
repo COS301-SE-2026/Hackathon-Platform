@@ -10,7 +10,10 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes, withInMemoryScrolling()),
+    provideRouter(routes, withInMemoryScrolling({
+      scrollPositionRestoration: 'disabled',
+    anchorScrolling: 'enabled'
+      })),
     provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     MessageService,
