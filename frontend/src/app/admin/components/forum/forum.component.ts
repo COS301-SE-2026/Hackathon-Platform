@@ -541,7 +541,7 @@ confirmDelete(): void {
 
             this.change.markForCheck();
         },
-        error: () => {  }
+        error: () => {  console.warn('Failed to refresh forum thread.'); }
     });
 }
 }

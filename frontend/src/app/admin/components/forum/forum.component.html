@@ -9,10 +9,13 @@
                 <div class="page-heading">
                     <h2>Forum</h2>
 
-                    <p *ngIf="!isAdmin"> Ask questions, share ideas, and discuss challenges with other participants.</p>
+                    @if (!isAdmin) {
+                        <p>Ask questions, share ideas, and discuss challenges with other participants.</p>
+                    }
 
-                    <p *ngIf="isAdmin"> Engage with participants, answer questions, share guidance, and discuss challenges.</p>
-
+                    @if (isAdmin) {
+                        <p>Engage with participants, answer questions, share guidance, and discuss challenges.</p>
+                    }
                 </div>
 
                 @if (perms?.canCreatePost) {
