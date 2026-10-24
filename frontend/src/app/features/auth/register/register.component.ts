@@ -7,11 +7,12 @@ import { InputComponent } from '../../../shared/components/input/input.component
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ToastService } from '../../../shared/components/toast/toast.service';
 import { environment } from '../../../../environments/environment';
+import { AuthHeroComponent } from '../../../shared/components/auth-hero/auth-hero.component';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, InputComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, RouterModule, InputComponent, ButtonComponent, AuthHeroComponent],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })

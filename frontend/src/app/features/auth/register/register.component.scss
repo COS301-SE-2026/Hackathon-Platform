@@ -6,21 +6,10 @@
   overflow: hidden;
 }
 
-.register-hero {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-}
-
-
-.register-hero-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+.register-page app-auth-hero {
   display: block;
-  object-fit: cover;
+  min-width: 0;
+  height: 100%;
 }
 
 .register-section {
@@ -44,7 +33,8 @@
   margin: 0 0 var(--space-2);
   color: var(--black);
   font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
   line-height: var(--line-height-h1);
 }
 
@@ -200,7 +190,7 @@
     grid-template-columns: 1fr;
   }
 
-  .register-hero {
+  .register-page app-auth-hero {
     display: none;
   }
 
