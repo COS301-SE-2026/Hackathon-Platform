@@ -53,7 +53,7 @@
   <a href="#competition-lifecycle">How It Works</a> &nbsp;•&nbsp;
   <a href="#architecture">Architecture</a> &nbsp;•&nbsp;
   <a href="#getting-started">Get Started</a> &nbsp;•&nbsp;
-  <a href="#documentation">Docs</a>
+  <a href="#documentation">Docs</a> &nbsp;•&nbsp;
   <a href="https://github.com/COS301-SE-2026/Hackathon-Platform">Demo video</a>
 </p>
 
