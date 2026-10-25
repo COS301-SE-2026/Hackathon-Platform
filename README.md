@@ -54,7 +54,7 @@
   <a href="#architecture">Architecture</a> &nbsp;•&nbsp;
   <a href="#getting-started">Get Started</a> &nbsp;•&nbsp;
   <a href="#documentation">Docs</a> &nbsp;•&nbsp;
-  <a href="https://github.com/COS301-SE-2026/Hackathon-Platform">Demo video</a>
+  <a href="https://drive.google.com/file/d/1zHMJehY4dhjC8elPe9lPc3ccpMPNkUfd/view?usp=sharing">Demo video</a>
 </p>
 
 ---
