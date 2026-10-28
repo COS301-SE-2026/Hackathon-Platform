@@ -21,7 +21,7 @@ text-align: center;
 .banner-label {
 display: inline-block;
 margin-bottom: var(--space-4);
-color: var(--lime-green);
+color: var(--teal);
 font-size: var(--font-size-body);
 font-weight: var(--font-weight-semibold);
 line-height: var(--line-height-body);
@@ -30,9 +30,9 @@ line-height: var(--line-height-body);
 .banner-content h1 {
 margin: 0;
 color: var(--white);
-font-size: var(--font-size-display);
+font-size: var(--font-size-h1);
 font-weight: var(--font-weight-bold);
-line-height: var(--line-height-display);
+line-height: var(--line-height-h1);
 }
 
 .banner-description {
@@ -119,37 +119,55 @@ line-height: var(--line-height-body-lg);
 }
 
 :host ::ng-deep .p-accordionpanel {
-margin-bottom: var(--space-3);
-overflow: hidden;
-background-color: var(--white);
-border: 1px solid var(--light-gray);
-border-radius: var(--radius-md);
-box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-4);
+  background: var(--white);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
-:host ::ng-deep .p-accordionheader-toggle {
-min-height: 64px;
-padding: var(--space-4) var(--space-6);
-background-color: var(--white) !important;
-color: var(--dark-navy) !important;
-font-family: var(--font-family-base);
-font-size: var(--font-size-body);
-font-weight: var(--font-weight-semibold);
-line-height: var(--line-height-body);
+:host ::ng-deep .p-accordionpanel:last-child {
+  margin-bottom: 0;
+}
+
+:host ::ng-deep .p-accordionheader {
+  min-height: 72px;
+  padding: var(--space-6);
+  background: var(--white);
+  color: var(--dark-navy);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-body);
+}
+
+:host ::ng-deep .p-accordionheader:hover {
+  background: var(--white);
+  color: var(--dark-navy);
+}
+
+:host ::ng-deep .p-accordionheader:focus-visible {
+  outline: 2px solid var(--bright-blue);
+  outline-offset: -2px;
+}
+
+:host ::ng-deep .p-accordionheader-toggle-icon {
+  color: var(--bright-blue);
 }
 
 :host ::ng-deep .p-accordioncontent-content {
-padding: 0 var(--space-6) var(--space-6);
-background-color: var(--white);
+  padding: 0 var(--space-6) var(--space-6);
+  background: var(--white);
+  color: var(--dark-gray);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body-lg);
 }
 
 :host ::ng-deep .p-accordioncontent-content p {
-margin: 0;
-color: var(--dark-gray);
-font-family: var(--font-family-base);
-font-size: var(--font-size-body);
-font-weight: var(--font-weight-regular);
-line-height: var(--line-height-body-lg);
+  margin: 0;
+  color: var(--dark-gray);
 }
 
 @media (max-width: 767px) {
