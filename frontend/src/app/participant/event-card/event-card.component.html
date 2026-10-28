@@ -39,22 +39,15 @@
       </div>
 
     </div>
-
-    @if (type === 'upcoming' && getDaysUntilStart(event) !== null) {
+    
+    @if (event.status === 'UPCOMING' && getDaysUntilStart(event) !== null) {
       <div class="event-start-tag">
         <i class="pi pi-clock"></i>
         <span>{{ getDaysUntilStart(event) }}</span>
       </div>
     }
 
-    @if (type === 'registered' && event.status === 'UPCOMING' && getDaysUntilStart(event) !== null) {
-      <div class="event-start-tag">
-        <i class="pi pi-clock"></i>
-        <span>{{ getDaysUntilStart(event) }}</span>
-      </div>
-    }
-
-    @if (type === 'registered' && event.status === 'ACTIVE') {
+    @if (event.status === 'ACTIVE') {
       <div class="event-live-tag">
         <span class="live-dot"></span>
         <span>Live</span>

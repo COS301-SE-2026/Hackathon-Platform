@@ -11,7 +11,7 @@ import { OpenEventView } from '../home/home.component';
 })
 export class EventCardComponent {
   @Input() event!: OpenEventView;
-  @Input() type: 'registered' | 'upcoming' | 'completed' = 'upcoming';
+  @Input() type: 'registered' | 'upcoming' | 'ongoing' | 'completed' = 'upcoming';
   @Output() goToEvent = new EventEmitter<OpenEventView>();
   
   getDaysUntilStart(event: OpenEventView): string | null {

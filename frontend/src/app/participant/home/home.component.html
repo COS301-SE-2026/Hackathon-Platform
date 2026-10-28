@@ -82,7 +82,42 @@
  
     </section> 
  
-  }  
+  }@else if (activeEventTab === 'ongoing') {
+
+    <section class="events-section">
+
+      <div class="events-count">{{ filteredOngoingEvents.length }} hackathons found</div>
+
+      @if (isLoadingOngoingEvents) {
+        <app-loader message="Loading events..."></app-loader>
+      }
+
+      @else if (paginatedOngoingEvents.length > 0) {
+
+        <div class="events-grid">
+          @for (event of paginatedOngoingEvents; track event.eventId) {
+            <app-event-card [event]="event" type="ongoing" (goToEvent)="goToEvent($event)"></app-event-card>
+          }
+        </div>
+
+        <app-pagination [currentPage]="currentPage" [totalItems]="filteredOngoingEvents.length" [itemsPerPage]="itemsPerPage" itemLabel="hackathons" (pageChange)="onPageChange($event)"></app-pagination>
+
+      } @else {
+
+        <div class="empty-state">
+          @if (searchTerm) {
+            <app-empty-state icon="pi-search" title="Nothing found" description="Try adjusting your search or filters."></app-empty-state>
+          } @else {
+            <app-empty-state icon="pi-calendar" title="No ongoing events" description="There are no live hackathons right now. Check back soon!"></app-empty-state>
+          }
+        </div>
+
+      }
+
+    </section>
+
+  }
+
   @else if (activeEventTab === 'completed') { 
  
     <section class="events-section"> 
