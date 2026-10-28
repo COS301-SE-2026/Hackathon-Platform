@@ -61,7 +61,7 @@
 
 /* Font sizes */
 --font-size-display: 56px;
---font-size-h1: 40px;
+--font-size-h1: 48px;
 --font-size-h2: 28px;
 --font-size-h3: 20px;
 --font-size-body-lg: 18px;
@@ -131,6 +131,29 @@
 }
 
 
+/* ---------- SCROLL ANIMATIONS ---------- */
+
+@keyframes scrollFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scroll-fade-up {
+  animation: scrollFadeUp 600ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-fade-up {
+    animation: none;
+  }
+}
 
 /* ---------- GLOBAL RESET ---------- */
 * {
