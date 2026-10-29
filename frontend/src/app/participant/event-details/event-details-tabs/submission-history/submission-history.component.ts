@@ -26,7 +26,7 @@ private readonly levelService = inject(LevelService);
  private readonly change = inject(ChangeDetectorRef);
 
 currentPage = 1;
-itemsPerPage = 5;
+itemsPerPage = 10;
 private eventID = '';
 private hackathonID = '';
 teamError = '';

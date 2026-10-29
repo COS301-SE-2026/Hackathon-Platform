@@ -1,9 +1,9 @@
 @if (variant === 'landing') {
 
-  <nav class="navbar landing-navbar" aria-label="Landing navigation">
+  <nav class="navbar landing-navbar" [class.navbar-scrolled]="isScrolled" aria-label="Landing navigation">
 
     <div class="navbar-logo">
-     <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform"/>
+     <img src="assets/images/logo.png" alt="Hackathon Platform Logo"/>
     </div>
 
     <div class="navbar-links">
@@ -80,10 +80,10 @@
 @else {
 
 
-<nav class="navbar" aria-label="Main navigation">
+  <nav class="navbar" [class.navbar-scrolled]="isScrolled" aria-label="Main navigation">
 
  <div class="navbar-logo">
- <img src="assets/images/hackathon_logo_navbar.png" alt="Hackathon Platform" />
+ <img src="assets/images/logo.png" alt="Hackathon Platform Logo" />
  </div>
 
 

@@ -1,171 +1,320 @@
-<div class = "forum-page">
-    <main class = "content">
-        <div class = "page-header">
-            <div>
-            <h2>Forum</h2>
+<div class="forum-page">
+    <main class="content">
+        @if (isLoading) {
+            <div class="page-loader">
+                <app-loader message="Loading forum..." />
             </div>
-            @if (perms?.canCreatePost) {
-                <app-button variant="secondary" type="button" (click)="openCreatePost()"> Create Post</app-button>
+        } @else {
+            <div class="page-header">
+                <div class="page-heading">
+                    <h2>Forum</h2>
+
+                    @if (!isAdmin) {
+                        <p>Ask questions, share ideas, and discuss challenges with other participants.</p>
+                    }
+
+                    @if (isAdmin) {
+                        <p>Engage with participants, answer questions, share guidance, and discuss challenges.</p>
+                    }
+                </div>
+
+                @if (perms?.canCreatePost) {
+                    <app-button variant="secondary" width="100%" (click)="openCreatePost()" (keydown)="null" (keyup)="null">Create Post</app-button>
+                }
+            </div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <app-search-bar placeholder="Search threads..." (searchChange)="onSearchChange($event)" />
+                </div>
+
+                <div class="toolbar-filters">
+                    <app-dropdown
+                        id="sortOrder"
+                        label="Sort by"
+                        [options]="sortOptions"
+                        [value]="sortOrder"
+                        (selectionChange)="sortOrder = $event; onFilterChange()" />
+
+                    <app-dropdown
+                        id="replyFilter"
+                        label="Replies"
+                        [options]="replyOptions"
+                        [value]="replyFilter"
+                        (selectionChange)="replyFilter = $event; onFilterChange()" />
+                </div>
+            </div>
+
+            @if (errorMessage) {
+                <div class="error-banner">{{ errorMessage }}</div>
             }
-         </div>
 
-         <div class = "toolbar">
-            <div class = "search-box">
-                <i class = "pi pi-search search-icon"></i>
-                <input type = "text" 
-                placeholder = "Search threads..." 
-                aria-label = "Search threads"
-                [(ngModel)] = "searchTerm"
-                name = "searchTerm" />                
-            </div>
-         </div>
+            <div class="thread-list">
+                @if (filteredThreads.length === 0) {
+                    <div class="empty-state">
+                        No threads found.
+                    </div>
+                } @else {
+                    @for (thread of paginatedThreads; track thread.threadId) {
+                        <div class="thread-card">
+                            <div class="thread-row">
+                                <div class="thread-name-cell">
+                                    <span class="thread-avatar">
+                                        {{ thread.rootMessage.authorInitial }}
+                                    </span>
 
-         @if (errorMessage){
-            <div class = "error-banner">{{ errorMessage }}</div>
-         }
-         <div class = "thread-list">
-            @if (isLoading){
-                <div class = "empty-state">Loading...</div>
-            }@else if (filteredThreads.length === 0){
-                <div class = "empty-state">No threads found.</div>
-            }@else{
-                @for (thread of filteredThreads; track thread.threadId){
-                    <div class = "thread-card">
-                        <div class = "thread-row">
-                            <div class = "thread-name-cell">
-                                <span class = "thread-avatar">{{thread.rootMessage.authorInitial}}</span>
-                                <div class = "thread-meta">
-                                    <div class = "thread-title-row">
-                                        <span class = "thread-title">{{thread.title}}</span>
-                                        <span class = "role-tag" [ngClass] = "thread.rootMessage.authorRole === 'ADMIN' ? 'role-tag-admin' : 'role-tag-participant'">{{thread.rootMessage.authorRole === 'ADMIN' ? 'Admin' : 'Participant'}}</span>
+                                    <div class="thread-meta">
+                                        <div class="thread-title-row">
+                                            <span class="thread-title">
+                                                {{ thread.title }}
+                                            </span>
 
+                                            <span
+                                                class="role-tag"
+                                                [ngClass]="thread.rootMessage.authorRole === 'ADMIN' ? 'role-tag-admin' : 'role-tag-participant'">
+                                                {{ thread.rootMessage.authorRole === 'ADMIN' ? 'Admin' : 'Participant' }}
+                                            </span>
+                                        </div>
+
+                                        <p class="thread-subline">
+                                            Started by {{ thread.rootMessage.authorName }}
+                                            &middot;
+                                            {{ thread.replyCount }}
+                                            repl{{ thread.replyCount === 1 ? 'y' : 'ies' }}
+                                        </p>
                                     </div>
-                                    <p class = "thread-subline">
-                                        Started by {{thread.rootMessage.authorName}} &middot; {{thread.replyCount}} repl{{thread.replyCount === 1 ? 'y' : 'ies'}} 
-                                    </p>
                                 </div>
+
+                                <span class="thread-timestamp">
+                                    {{ thread.lastActivityLabel }}
+                                </span>
+
+                                <app-button variant="secondary" width="100%" (click)="toggleThread(thread.threadId)" (keydown)="null" (keyup)="null">{{ expandedThreadId === thread.threadId ? 'Hide Thread' : 'View Thread' }}</app-button>
                             </div>
-                            <span class = "thread-timestamp">{{thread.lastActivityLabel}}</span>
-                            <button
-                            type ="button"
-                            class = "btn-view-thread"
-                            [class.btn-view-thread-active] = "expandedThreadId === thread.threadId"
-                            [attr.aria-expanded] = "expandedThreadId === thread.threadId"
-                            (click) = "toggleThread(thread.threadId)">
-                                {{expandedThreadId === thread.threadId ? 'Hide Thread' : 'View Thread'}}
-                                <i class = "pi" [ngClass] = "expandedThreadId === thread.threadId ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
-                            </button>
-                        </div>
-                        @if (expandedThreadId === thread.threadId){
-                            <div class = "thread-panel">
-                                <div class = "message-card">
-                                    <div class = "message-header">
-                                        <div class = "message-author">
-                                            <span class = "message-avatar">{{thread.rootMessage.authorInitial}}</span>
-                                            <div>
-                                                <span class = "message-author-name">{{thread.rootMessage.authorName}}</span>
-                                                <span class = "role-tag" [ngClass] = "thread.rootMessage.authorRole === 'ADMIN' ? 'role-tag-admin' : 'role-tag-participant'">{{thread.rootMessage.authorRole === 'ADMIN' ? 'Admin' : 'Participant'}}</span>
+
+                            @if (expandedThreadId === thread.threadId) {
+                                <div class="thread-panel">
+                                    <div class="message-card">
+                                        <div class="message-header">
+                                            <div class="message-author">
+                                                <span class="message-avatar">
+                                                    {{ thread.rootMessage.authorInitial }}
+                                                </span>
+
+                                                <div>
+                                                    <span class="message-author-name">
+                                                        {{ thread.rootMessage.authorName }}
+                                                    </span>
+
+                                                    <span
+                                                        class="role-tag"
+                                                        [ngClass]="thread.rootMessage.authorRole === 'ADMIN' ? 'role-tag-admin' : 'role-tag-participant'">
+                                                        {{ thread.rootMessage.authorRole === 'ADMIN' ? 'Admin' : 'Participant' }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="message-header-right">
+                                                <span class="message-timestamp">
+                                                    {{ thread.rootMessage.postedAtLabel }}
+                                                </span>
+
+                                                @if (perms?.canModerate || thread.rootMessage.authorId === currUserId) {
+                                                    <button
+                                                        type="button"
+                                                        class="message-delete-btn"
+                                                        (click)="deleteMessage(thread.threadId, thread.rootMessage.messageId)"
+                                                        aria-label="Delete message">
+                                                        <i class="pi pi-times"></i>
+                                                    </button>
+                                                }
                                             </div>
                                         </div>
-                                        <div class = "message-header-right">
-                                            <span class = "message-timestamp">{{thread.rootMessage.postedAtLabel}}</span>
-                                            @if (perms?.canModerate || thread.rootMessage.authorId === currUserId) {
-                                                <button
-                                                    type = "button"
-                                                    class = "message-delete-btn"
-                                                    (click) = "deleteMessage(thread.threadId, thread.rootMessage.messageId)"
-                                                    aria-label = "Delete message">
-                                                    <i class = "pi pi-times"></i>    
-                                                </button>
-                                            }
-                                        </div>
-                                    </div>
-                                    <p class = "message-content">{{thread.rootMessage.content}}</p>
-                                </div>
 
-                                @if (thread.replies.length > 0){
-                                    <div class = "reply-list">
-                                        @for(reply of thread.replies; track reply.messageId){
-                                            <div class = "message-card reply-card">
-                                                <div class = "message-header">
-                                                    <div class = "message-author">
-                                                        <span class = "message-avatar">{{reply.authorInitial}}</span>
-                                                        <div>
-                                                            <span class = "message-author-name">{{reply.authorName}}</span>
-                                                            <span class ="role-tag" [ngClass] = "reply.authorRole === 'ADMIN' ? 'role-tag-admin' : 'role-tag-participant'">{{reply.authorRole === 'ADMIN' ? 'Admin' : 'Participant'}}</span>
+                                        <p class="message-content">
+                                            {{ thread.rootMessage.content }}
+                                        </p>
+                                    </div>
+
+                                    @if (thread.replies.length > 0) {
+                                        <div class="reply-list">
+                                            @for (reply of thread.replies; track reply.messageId) {
+                                                <div class="message-card reply-card">
+                                                    <div class="message-header">
+                                                        <div class="message-author">
+                                                            <span class="message-avatar">
+                                                                {{ reply.authorInitial }}
+                                                            </span>
+
+                                                            <div>
+                                                                <span class="message-author-name">
+                                                                    {{ reply.authorName }}
+                                                                </span>
+
+                                                                <span
+                                                                    class="role-tag"
+                                                                    [ngClass]="reply.authorRole === 'ADMIN' ? 'role-tag-admin' : 'role-tag-participant'">
+                                                                    {{ reply.authorRole === 'ADMIN' ? 'Admin' : 'Participant' }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="message-header-right">
+                                                            <span class="message-timestamp">
+                                                                {{ reply.postedAtLabel }}
+                                                            </span>
+
+                                                            @if (perms?.canModerate || reply.authorId === currUserId) {
+                                                                <button
+                                                                    type="button"
+                                                                    class="message-delete-btn"
+                                                                    (click)="deleteMessage(thread.threadId, reply.messageId)"
+                                                                    aria-label="Delete message">
+                                                                    <i class="pi pi-times"></i>
+                                                                </button>
+                                                            }
                                                         </div>
                                                     </div>
-                                                    <div class = "message-header-right">
-                                                        <span class = "message-timestamp">{{reply.postedAtLabel}}</span>
-                                                        @if (perms?.canModerate || reply.authorId === currUserId) {
-                                                            <button
-                                                                type = "button"
-                                                                class = "message-delete-btn"
-                                                                (click) = "deleteMessage(thread.threadId, reply.messageId)"
-                                                                aria-label = "Delete message">
-                                                                <i class = "pi pi-times"></i>    
-                                                            </button>
-                                                        }
-                                                    </div>
+
+                                                    <p class="message-content">
+                                                        {{ reply.content }}
+                                                    </p>
                                                 </div>
-                                                <p class = "message-content">{{reply.content}}</p>
-                                            </div>
-                                        }
-                                    </div>
-                                }@else {
-                                    <p class = "reply-empty">No replies yet.</p>
-                                }
-                                @if (perms?.canComment) {
-                                    <div class = "reply-compose">
-                                        <label for = "replyDraft{{thread.threadId}}" class = "sr-only">Reply</label>
-                                        <textarea
-                                        #replyInput
-                                        id = "replyDraft{{thread.threadId}}"
-                                            name = "replyDraft{{thread.threadId}}"
-                                            placeholder = "Reply..."
-                                            rows = "2"
-                                        [value] = "replyDrafts[thread.threadId] || ''"
-                                        (input) = "replyDrafts[thread.threadId] = replyInput.value"
-                                        >
-                                    </textarea>
-                                        <button
-                                            type = "button"
-                                            class = "btn-post-reply"
-                                            [disabled] = "!replyDrafts[thread.threadId]?.trim()"
-                                            (click) = "postReply(thread.threadId)">
-                                            Post Reply
-                                        </button>
-                                    </div>
-                                }
-                            </div>
-                        }
-                    </div>
+                                            }
+                                        </div>
+                                    } @else {
+                                        <p class="reply-empty">
+                                            No replies yet.
+                                        </p>
+                                    }
+
+                                    @if (perms?.canComment) {
+                                        <div class="reply-compose">
+                                            <label
+                                                for="replyDraft{{ thread.threadId }}"
+                                                class="sr-only">
+                                                Reply
+                                            </label>
+
+                                            <textarea
+                                                #replyInput
+                                                id="replyDraft{{ thread.threadId }}"
+                                                name="replyDraft{{ thread.threadId }}"
+                                                placeholder="Write a reply..."
+                                                rows="1"
+                                                [value]="replyDrafts[thread.threadId] || ''"
+                                                (input)="replyDrafts[thread.threadId] = replyInput.value; autoResizeReply(replyInput)">
+                                            </textarea>
+
+                                            <app-button
+                                                variant="primary"
+                                                width="100%"
+                                                [disabled]="!replyDrafts[thread.threadId]?.trim()"
+                                                (click)="postReply(thread.threadId)"
+                                                (keydown)="null"
+                                                (keyup)="null">
+                                                Post Reply
+                                            </app-button>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
                 }
+            </div>
+
+            @if (filteredThreads.length > 0) {
+                <app-pagination
+                    [currentPage]="currentPage"
+                    [totalItems]="filteredThreads.length"
+                    [itemsPerPage]="itemsPerPage"
+                    itemLabel="threads"
+                    (pageChange)="onPageChange($event)" />
             }
-            </div>
-         
+        }
     </main>
-
-    @if (showCreatePost) {
-        <div
-            class="modal-overlay" (click)="onOverlayClick($event)" (keydown.escape)="closeCreatePost()" tabindex="-1">
-            <div class="modal-card">
-                <h2 class="modal-title">Create Post</h2>
-                <div class="form-group">
-                    <label for="postTitle">Title</label>
-                    <input id="postTitle" type="text" [(ngModel)]="newPostTitle" placeholder="Enter title" maxlength="255"/>
-                </div>
-
-                <div class="form-group">
-                    <label for="postBody">Body</label>
-                    <textarea id="postBody" rows="5" [(ngModel)]="newPostBody" placeholder="Explain your post"></textarea>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" (click)="closeCreatePost()">Cancel</button>
-                    <button type="button" class="btn-save" [disabled]="!newPostTitle.trim() || !newPostBody.trim()" (click)="createPost()">Create Post</button>
-                </div>
-            </div>
-        </div>
-    }
 </div>
+
+@if (showCreatePost) {
+    <app-modal
+        title="Create Post"
+        size="medium"
+        footerLayout="center"
+        (closed)="closeCreatePost()">
+
+        <div modal-body>
+            <div class="form-group">
+                <app-input
+                    id="postTitle"
+                    label="Title"
+                    placeholder="Enter title"
+                    [(value)]="newPostTitle" />
+            </div>
+
+            <app-textarea
+                id="postBody"
+                label="Body"
+                placeholder="Explain your post"
+                [rows]="5"
+                [maxLength]="1000"
+                [(value)]="newPostBody" />
+        </div>
+
+        <div modal-footer-right>
+            <app-button
+                variant="secondary"
+                width="135px"
+                (click)="closeCreatePost()">
+                Cancel
+            </app-button>
+
+            <app-button
+                variant="primary"
+                width="135px"
+                [disabled]="!newPostTitle.trim() || !newPostBody.trim()"
+                (click)="createPost()">
+                Create Post
+            </app-button>
+        </div>
+    </app-modal>
+}
+
+@if (showDeleteConfirm && pendingDelete) {
+    <app-modal
+        [title]="pendingDelete.isPost ? 'Delete Post?' : 'Delete Comment?'"
+        size="medium"
+        footerLayout="center"
+        (closed)="cancelDelete()">
+
+        <div modal-body>
+            <p>
+                @if (pendingDelete.isPost) {
+                    Are you sure you want to delete this post? This will also remove
+                    its comments. This action cannot be undone.
+                } @else {
+                    Are you sure you want to delete this comment?
+                    This action cannot be undone.
+                }
+            </p>
+        </div>
+
+        <div modal-footer-right>
+            <app-button
+                variant="secondary"
+                width="135px"
+                type="button"
+                (click)="cancelDelete()">
+                Cancel
+            </app-button>
+
+            <app-button
+                variant="danger"
+                width="135px"
+                type="button"
+                (click)="confirmDelete()">
+                Delete
+            </app-button>
+        </div>
+    </app-modal>
+}

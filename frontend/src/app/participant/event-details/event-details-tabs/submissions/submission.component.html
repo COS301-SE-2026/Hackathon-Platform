@@ -37,7 +37,7 @@
 
         <div class="description-section">
 
-        <p> This introductory level is designed to get you familiar with the challenge environment and basic problem-solving.</p>
+         <p>{{ level.description || 'No description available for this level.' }}</p>
 
         </div>
 
@@ -77,7 +77,6 @@
         </app-button>
         @if (useIde) {
             <app-button variant="primary" width= "100%" (click)="openIde(level.id)" (keydown)="null" (keyup)="null">
-            <i class="pi pi-code"></i>
             Open IDE
             </app-button>
         }

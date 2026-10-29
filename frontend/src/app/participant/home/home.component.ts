@@ -49,6 +49,7 @@ export class HomeComponent implements OnInit {
   eventTabs: TabItem[] = [
   { label: 'Registered', value: 'your-events' },
   { label: 'Upcoming', value: 'upcoming' },
+  { label: 'Ongoing', value: 'ongoing' },
   { label: 'Completed', value: 'completed' }
   ];
 
@@ -60,6 +61,9 @@ export class HomeComponent implements OnInit {
   registeredEvents: OpenEventView[] = [];
   upcomingEvents: OpenEventView[] = [];
   completedEvents: OpenEventView[] = [];
+  filteredOngoingEvents: OpenEventView[] = [];
+  ongoingEvents: OpenEventView[] = [];
+  isLoadingOngoingEvents = false;
   isLoadingUpcomingEvents = false;
   isLoadingCompletedEvents = false;
   isLoadingRegisteredEvents = false;
@@ -79,7 +83,7 @@ export class HomeComponent implements OnInit {
     this.activeEventTab = tab;
     this.currentPage = 1;
     if (tab === 'your-events') { this.loadRegisteredEvents();}
-    else if (tab === 'upcoming') { this.loadUpcomingEvents();}
+    else if (tab === 'upcoming' || tab === 'ongoing' ) { this.loadOpenEvents();}
     else if (tab === 'completed') {this.loadCompletedEvents();}
   }
 
@@ -108,6 +112,7 @@ export class HomeComponent implements OnInit {
 
       next: (registrations) => {
         if (registrations.length === 0) {
+          this.applyFilters();
           this.isLoadingRegisteredEvents = false;
           this.change.markForCheck();
           return;
@@ -145,29 +150,50 @@ export class HomeComponent implements OnInit {
     });
   }
 
- loadUpcomingEvents(): void {
-  this.isLoadingUpcomingEvents = true;
+  loadOpenEvents(): void {
+    this.isLoadingUpcomingEvents = true;
+    this.isLoadingOngoingEvents = true;
 
-  this.eventService.getOpenEvents().subscribe({
-    next: (events) => {
-      this.isLoadingUpcomingEvents = false;
+    this.eventService.getOpenEvents().subscribe({
+      next: (events) => {
+        this.upcomingEvents = events
+          .filter(event => event.status === 'UPCOMING')
+          .map(event => this.toOpenEventView(event));
 
-      this.upcomingEvents = events.map((event) => this.toOpenEventView(event));
+        this.ongoingEvents = events
+          .filter(event => event.status === 'ACTIVE')
+          .map(event => this.toOpenEventView(event));
 
-        this.loadEventLogos(this.upcomingEvents);
+        this.loadEventLogos([
+          ...this.upcomingEvents,
+          ...this.ongoingEvents
+        ]);
+
         this.applyFilters();
 
-      this.change.markForCheck();
-    },
+        this.isLoadingUpcomingEvents = false;
+        this.isLoadingOngoingEvents = false;
+        this.change.markForCheck();
+      },
 
-    error: (error) => {
-      this.isLoadingUpcomingEvents = false;
-      console.error('Error loading upcoming events:', error);
-       this.toast.error('Unable to Load Events','We couldn’t load the upcoming events. Please try again.' );
-      this.change.markForCheck();
-    }
-  });
-}
+      error: (error) => {
+        console.error('Error loading open events:', error);
+
+        this.upcomingEvents = [];
+        this.ongoingEvents = [];
+        this.applyFilters();
+
+        this.isLoadingUpcomingEvents = false;
+        this.isLoadingOngoingEvents = false;
+
+        this.toast.error(
+          'Unable to Load Events', 'We couldn’t load the events. Please try again.'
+        );
+
+        this.change.markForCheck();
+      }
+    });
+  }
 
 
   goToEvent(event: OpenEventView): void {
@@ -244,6 +270,7 @@ export class HomeComponent implements OnInit {
 private applyFilters(): void {
   this.filteredRegisteredEvents = this.filterAndSortEvents(this.registeredEvents);
   this.filteredUpcomingEvents = this.filterAndSortEvents(this.upcomingEvents);
+  this.filteredOngoingEvents = this.filterAndSortEvents(this.ongoingEvents);
   this.filteredCompletedEvents = this.filterAndSortEvents(this.completedEvents);
 }
 
@@ -277,6 +304,12 @@ get paginatedCompletedEvents(): OpenEventView[] {
   const start = (this.currentPage - 1) * this.itemsPerPage;
 
   return this.filteredCompletedEvents.slice(start, start + this.itemsPerPage);
+}
+
+get paginatedOngoingEvents(): OpenEventView[] {
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+
+  return this.filteredOngoingEvents.slice(start, start + this.itemsPerPage);
 }
 
 onPageChange(page: number): void {

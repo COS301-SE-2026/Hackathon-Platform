@@ -27,12 +27,24 @@ test.describe('Forum', () => {
         await expect(adminThread.locator('.reply-card')).toHaveCount(1);
         await expect(adminThread.locator('.thread-subline')).toContainText(/1 reply/);
 
-        adminPage.once('dialog', (d)=> d.accept());
-        await adminThread
-        .locator('.reply-card')
-        .first()
-        .getByRole('button', {name: 'Delete message'})
-        .click();
+     await adminThread
+    .locator('.reply-card')
+    .first()
+    .getByRole('button', { name: 'Delete message' })
+    .click();
+
+        const deleteModal = adminPage.locator('app-modal').filter({
+            has: adminPage.locator('h2', {
+                hasText: 'Delete Comment?'
+            })
+        });
+
+        await expect(deleteModal.locator('dialog.modal')).toBeVisible();
+
+        await deleteModal.getByRole('button', {
+            name: 'Delete',
+            exact: true
+        }).click();
 
         await expect(adminThread.locator('.reply-card')).toHaveCount(0);
         await expect(adminThread.locator('.reply-empty')).toBeVisible();
@@ -107,10 +119,10 @@ test.describe('Forum', () => {
         await admin.fillPost(title, 'UniqueBodyToken-' + uniqueSuffix);
         await admin.submitPost();
 
-        await adminPage.getByPlaceholder(/search threads/i).fill(title);
+        await adminPage.getByRole('searchbox', { name: 'Search threads...'}).fill(title);
         await expect(admin.threads).toHaveCount(1);
 
-        await adminPage.getByPlaceholder(/search threads/i).fill('zzz-no-such-thread-xyz');
+        await adminPage.getByRole('searchbox', { name: 'Search threads...'}).fill('zzz-no-such-thread-xyz');
         await expect(adminPage.locator('.empty-state')).toContainText(/no threads found/i);
     });
 

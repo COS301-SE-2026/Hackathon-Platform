@@ -10,17 +10,23 @@
     </div>
 
     <div class="ide-actions">
-      <app-button variant="secondary" [disabled]="!selectedFile || savingFiles" (click)="saveCurrentFile()">
+      
+      <button
+        type="button"
+        class="ide-save-button"
+        [disabled]="!selectedFile || savingFiles"
+        (click)="saveCurrentFile()"
+      >
         <i class="pi pi-save"></i>
 
         @if (savingFiles) {
           Saving...
         } @else {
-          save
+          Save
         }
-      </app-button>
+      </button>
 
-      <app-button variant="secondary" [disabled]="startingIde || runningCode || submittingCode" (click)="runCode()">
+      <app-button variant="success" [disabled]="startingIde || runningCode || submittingCode" (click)="runCode()">
         <i class="pi" [ngClass]="runningCode ? 'pi-spin pi-spinner' : 'pi-play'"></i>
         @if (runningCode) {
           Running...
@@ -29,7 +35,7 @@
         }
       </app-button>
 
-      <app-button variant="secondary" [disabled]="startingIde || runningCode || submittingCode" (click)="submitCode()">
+      <app-button variant="primary" [disabled]="startingIde || runningCode || submittingCode" (click)="submitCode()">
         <i class="pi" [ngClass]="submittingCode ? 'pi-spin pi-spinner' : 'pi-send'"></i>
         @if (submittingCode) {
           Submitting...

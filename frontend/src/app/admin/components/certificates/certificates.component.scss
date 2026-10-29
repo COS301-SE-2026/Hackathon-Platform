@@ -1,4 +1,8 @@
 .certificates-page {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 24px 32px 60px;
 }
 
@@ -72,9 +76,11 @@
 
 .certificates-layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .template-sidebar {
@@ -130,6 +136,9 @@
 }
 
 .designer-section {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -176,9 +185,10 @@
   display: flex;
   gap: 20px;
   align-items: flex-start;
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
 }
-
 .designer-canvas {
   position: relative;
   background-color: #f4f1e8;
@@ -494,12 +504,10 @@
 
 @media (max-width: 900px) {
   .certificates-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
+
   .designer-body {
-    flex-direction: column;
-  }
-  .property-panel {
-    width: 100%;
+    flex-direction: row;
   }
 }

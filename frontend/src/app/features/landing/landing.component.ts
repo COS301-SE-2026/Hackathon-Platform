@@ -7,11 +7,12 @@ import { LandingHowItWorksComponent } from './components/landing-how-it-works/la
 import { LandingBuiltForComponent } from './components/landing-built-for/landing-built-for.component';
 import { LandingFaqComponent } from './components/landing-faq/landing-faq.component';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { AnimateOnScrollModule } from 'primeng/animateonscroll';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, LandingHomeComponent, LandingFeaturesComponent, LandingHowItWorksComponent, LandingBuiltForComponent, LandingFaqComponent, NavbarComponent],
+  imports: [CommonModule, RouterModule, LandingHomeComponent, LandingFeaturesComponent, LandingHowItWorksComponent, LandingBuiltForComponent, LandingFaqComponent, NavbarComponent, AnimateOnScrollModule],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss'
 })
