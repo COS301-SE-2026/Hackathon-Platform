@@ -1,18 +1,23 @@
 
 <app-navbar variant="landing"></app-navbar>
 <app-landing-home></app-landing-home>
+<app-landing-built-for></app-landing-built-for>
 <app-landing-features></app-landing-features>
 <app-landing-how-it-works></app-landing-how-it-works>
-<app-landing-built-for></app-landing-built-for>
 <app-landing-faq></app-landing-faq>
 
 <section class="landing-cta">
 
-  <div class="landing-cta-content">
+  <div class="landing-cta-content"
+       pAnimateOnScroll
+       enterClass="scroll-fade-up"
+       [once]="true"
+       [threshold]="0.15">
 
-    <h2>Are you Ready?</h2>
+    <h2>Big ideas start here</h2>
 
-    <p>Join our growing community of builders, compete for prizes and showcase your skills.</p>
+    <p>Ready to take on a challenge or bring your own to life?
+      Your next hackathon starts with a single step.</p>
 
     <a routerLink="/login" class="landing-cta-button">Explore Hackathons</a>
 

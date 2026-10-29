@@ -1,56 +1,133 @@
 <section id="faq" class="faq-section">
+  <div class="faq-container">
 
- <div class="faq-container">
+    <div class="faq-header"
+         pAnimateOnScroll
+         enterClass="scroll-fade-up"
+         [once]="true"
+         [threshold]="0.15">
 
- <div class="faq-header">
+      <p class="faq-tag">Frequently Asked Questions</p>
 
-  <p class="faq-tag">Frequently Asked Questions</p>
+      <h2>Questions? We've got answers.</h2>
 
-   <h2>Questions? We've got answers</h2>
-
-    <p class="section-description">Everything you need to know before joining or hosting your next hackathon.</p>
-
+      <p class="section-description">
+        Everything you need to know before joining or hosting
+        your next hackathon.
+      </p>
     </div>
 
-    <p-accordion>
-        
+    <p-accordion
+      pAnimateOnScroll
+      enterClass="scroll-fade-up"
+      [once]="true"
+      [threshold]="0.15">
+
       <p-accordion-panel value="0">
-        <p-accordion-header>Do I need to be an expert to participate?</p-accordion-header>
+        <p-accordion-header>
+          Do I need coding experience to participate?
+        </p-accordion-header>
         <p-accordion-content>
-        <p>No. Hackathons are open to all skill levels, from beginners to experienced developers.</p>
+          <p>
+            Not necessarily. Experience requirements depend on the hackathon. Check the event details to see whether it's suitable for your skill level.
+          </p>
         </p-accordion-content>
       </p-accordion-panel>
 
       <p-accordion-panel value="1">
-        <p-accordion-header> Can I participate without a team?</p-accordion-header>
+        <p-accordion-header>
+          Can I participate without a team?
+        </p-accordion-header>
         <p-accordion-content>
-        <p> Yes. You can compete solo, create your own team, or request to join an existing team.</p>
+          <p>
+            You can create your own team or request to join an existing one. Whether solo participation is allowed depends on the event's rules.
+          </p>
         </p-accordion-content>
-
       </p-accordion-panel>
+
       <p-accordion-panel value="2">
-        <p-accordion-header>How are submissions scored?</p-accordion-header>
+        <p-accordion-header>
+          Can I join a hackathon after it has started?
+        </p-accordion-header>
         <p-accordion-content>
-          <p>Submissions are evaluated using the official solver supplied by the event organizer.</p>
+          <p>
+            Yes. You can still register and participate after the event has started, as long as it hasn't ended.
+          </p>
         </p-accordion-content>
       </p-accordion-panel>
 
       <p-accordion-panel value="3">
-        <p-accordion-header>Can I join private hackathons?</p-accordion-header>
+        <p-accordion-header>
+          Do I have to use the built-in IDE?
+        </p-accordion-header>
         <p-accordion-content>
-          <p>Yes. Private hackathons require an invitation or registration key provided by the organizer.</p>
+          <p>No. The built-in IDE is optional and only available when enabled by the organiser. You can develop your solution using external tools and submit it through the platform.</p>
         </p-accordion-content>
       </p-accordion-panel>
 
       <p-accordion-panel value="4">
-        <p-accordion-header>Can organizations host hackathons?</p-accordion-header>
+        <p-accordion-header>
+          Can I submit my solution more than once?
+        </p-accordion-header>
         <p-accordion-content>
-          <p>Absolutely. Organizers can create events, manage teams, upload resources, and monitor submissions from the admin portal.</p>
+          <p>
+            Yes. You can submit your solution as many times as you like before the event ends, allowing you to improve your solution and achieve a higher score.
+          </p>
+        </p-accordion-content>
+      </p-accordion-panel>
+
+      <p-accordion-panel value="5">
+        <p-accordion-header>
+          How are submissions scored?
+        </p-accordion-header>
+        <p-accordion-content>
+          <p>
+            Submissions are automatically evaluated using the solver configured by the organiser. Each submission receives a numerical score based on how well the solution meets the
+            challenge's evaluation criteria.
+          </p>
+        </p-accordion-content>
+      </p-accordion-panel>
+
+      <p-accordion-panel value="6">
+        <p-accordion-header>
+          How are teams ranked on the leaderboard?
+        </p-accordion-header>
+        <p-accordion-content>
+          <p>
+            Teams are ranked by their scores, with higher scores appearing first. If two teams have the same score, the team whose
+            qualifying submission was received first ranks higher.
+          </p>
+        </p-accordion-content>
+      </p-accordion-panel>
+
+      <p-accordion-panel value="7">
+        <p-accordion-header>
+          Will I receive a certificate after participating?
+        </p-accordion-header>
+        <p-accordion-content>
+          <p>Yes. certificates are issued by organisers and can include a QR code for verification.</p>
+        </p-accordion-content>
+      </p-accordion-panel>
+
+      <p-accordion-panel value="8">
+        <p-accordion-header>
+          Can I organise multiple events under one hackathon?
+        </p-accordion-header>
+        <p-accordion-content>
+          <p>Yes. You can create multiple events under a single hackathon, with the same problem statement, levels, starter resources and solver shared across those events.</p>
+        </p-accordion-content>
+      </p-accordion-panel>
+
+      <p-accordion-panel value="9">
+        <p-accordion-header>
+          Can organisers manage events after they've started?
+        </p-accordion-header>
+        <p-accordion-content>
+          <p>Yes. Organisers can update event details, extend timers, manage teams, publish announcements and monitor event activity while an event is running.</p>
         </p-accordion-content>
       </p-accordion-panel>
 
     </p-accordion>
 
   </div>
-
 </section>

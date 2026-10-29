@@ -2,48 +2,200 @@
 
   <div class="features-container">
 
- <div class="features-header">
-    <p class="features-tagline">Why you'll love it</p>
-    <h2>Everything you need to build, compete, and win</h2>
-    <p class="section-description">A platform built for the thrill of the build. From forming your team to claiming the crown.</p>
-</div>
+    <div class="features-header"
 
-    <div class="features-grid">
+         pAnimateOnScroll
+         enterClass="scroll-fade-up"
+         [once]="true"
+         [threshold]="0.15">
 
-      <div class="feature-card">
-        <div class="feature-icon team-icon">
-          <i class="pi pi-users"></i>
-        </div>
-        <h3>Team Up</h3>
-        <p>Join or make the perfect squad and collab with developers who share your ambition.</p>
-      </div>
+      <p class="features-tagline">Built for simplicity</p>
 
-      <div class="feature-card">
-        <div class="feature-icon score-icon">
-           <i class="pi pi-bolt"></i>
-        </div>
-         <h3>Fast Scoring</h3>
-        <p>Submit your solution and get automated scoring and feedback as soon as it’s processed.</p>
-      </div>
+      <h2>Everything you need, all in one place.</h2>
 
-      <div class="feature-card">
-        <div class="feature-icon leaderboard-icon">
-          <i class="pi pi-chart-line"></i>
-        </div>
-         <h3>Live Leaderboards</h3>
-        <p>Watch rankings update in real time and see every submission move you closer to first place.</p>
-      </div>
-
-      <div class="feature-card">
-
-        <div class="feature-icon code-icon">
-          <i class="pi pi-code"></i>
-        </div>
-        <h3>Real Coding Challenges</h3>
-        <p>Solve unique problems that test your creativity, strategy, and problem-solving skills.</p>
-      </div>
-
+      <p class="section-description">Whether you're competing or organising, we've got the tools to make your hackathon experience simple.</p>
     </div>
+
+    <div class="features-switcher"
+
+         role="group"
+         aria-label="Feature audience"
+         pAnimateOnScroll
+         enterClass="scroll-fade-up"
+         [once]="true"
+         [threshold]="0.15">
+
+      <button type="button" class="features-switch-button" [class.active]="activeFeatureTab === 'participants'" [attr.aria-pressed]="activeFeatureTab === 'participants'"
+        (click)="activeFeatureTab = 'participants'">For Participants</button>
+
+      <button type="button" class="features-switch-button" [class.active]="activeFeatureTab === 'organisers'"
+        [attr.aria-pressed]="activeFeatureTab === 'organisers'"
+        (click)="activeFeatureTab = 'organisers'">
+        For Organisers
+      </button>
+    </div>
+
+    @if (activeFeatureTab === 'participants') {
+
+      <div class="features-grid"
+           pAnimateOnScroll
+           enterClass="scroll-fade-up"
+           [once]="true"
+           [threshold]="0.15">
+
+        <div class="feature-card">
+
+          <div class="feature-icon team-icon">
+            <i class="pi pi-users"></i>
+          </div>
+
+          <h3>Team Up</h3>
+
+          <p>Join or make the perfect squad and collaborate with developers who share your ambition.</p>
+
+        </div>
+
+        <div class="feature-card">
+
+          <div class="feature-icon code-icon">
+            <i class="pi pi-code"></i>
+          </div>
+
+          <h3>Built-in IDE</h3>
+
+          <p>Write and work on your code directly on the platform when the event organiser enables the IDE.</p>
+
+        </div>
+
+        <div class="feature-card">
+
+          <div class="feature-icon score-icon">
+            <i class="pi pi-bolt"></i>
+          </div>
+
+          <h3>Fast Scoring</h3>
+
+          <p>Submit your solution and get automated scoring and feedback as soon as it's processed.</p>
+
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon leaderboard-icon">
+            <i class="pi pi-chart-line"></i>
+          </div>
+
+          <h3>Live Leaderboards</h3>
+
+          <p>Watch rankings update in real time and see how your team stacks up against the competition.</p>
+
+        </div>
+
+        <div class="feature-card">
+
+          <div class="feature-icon forum-icon">
+            <i class="pi pi-comments"></i>
+          </div>
+
+          <h3>Stay Connected</h3>
+
+          <p>Discuss challenges in the event forum and stay informed with official announcements.</p>
+
+        </div>
+
+        <div class="feature-card">
+
+          <div class="feature-icon certificate-icon">
+            <i class="pi pi-verified"></i>
+          </div>
+
+          <h3>Certificates & Recognition</h3>
+
+          <p>Receive organiser-issued certificates recognising your participation and achievements.</p>
+
+        </div>
+
+      </div>
+
+    } @else {
+
+      <div class="features-grid"
+           pAnimateOnScroll
+           enterClass="scroll-fade-up"
+           [once]="true"
+           [threshold]="0.15">
+
+        <div class="feature-card">
+          <div class="feature-icon configure-icon">
+            <i class="pi pi-cog"></i>
+          </div>
+
+          <h3>Create & Configure</h3>
+
+          <p>Create hackathons with problem statements, starter resources, solvers, and levels shared across events.</p>
+
+        </div>
+
+        <div class="feature-card">
+
+          <div class="feature-icon control-icon">
+            <i class="pi pi-sliders-h"></i>
+          </div>
+
+          <h3>Live Event Control</h3>
+
+          <p>Track event statistics, extend timers, update event details, and freeze the leaderboard to build suspense.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon hotfix-icon">
+            <i class="pi pi-refresh"></i>
+          </div>
+
+          <h3>Solver Hotfixes</h3>
+
+          <p>
+            Upload updated solvers and automatically regrade previous submissions to keep scoring accurate.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon community-icon">
+            <i class="pi pi-users"></i>
+          </div>
+
+          <h3>Team & Community Management</h3>
+
+          <p>
+            Create teams, manage participants, share announcements, and engage with everyone through event forums.
+          </p>
+        </div>
+
+        <div class="feature-card">
+
+          <div class="feature-icon integrity-icon">
+            <i class="pi pi-shield"></i>
+          </div>
+
+          <h3>Integrity Monitoring</h3>
+          <p>
+            Use built-in AI-assistance and plagiarism detection to identify potential integrity concerns.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon studio-icon">
+            <i class="pi pi-id-card"></i>
+          </div>
+          <h3>Certificate Studio</h3>
+          <p>
+            Design and issue custom certificates for each event, with QR codes for authenticity verification.
+          </p>
+        </div>
+
+      </div>
+
+    }
 
   </div>
 
