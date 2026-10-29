@@ -7,7 +7,7 @@ import { LoaderComponent } from '../../../../shared/components/loader/loader.com
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LevelService } from '../../../../services/level.service';
 import { DropdownComponent } from '../../../../shared/components/dropdown/dropdown.component';
-
+import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 
 interface LeaderboardInfo extends LeaderboardEntry {
   name: string;
@@ -16,7 +16,7 @@ interface LeaderboardInfo extends LeaderboardEntry {
 
 @Component({
   selector: 'app-leaderboard',
-  imports: [CommonModule, TableComponent, EmptyStateComponent, LoaderComponent, DropdownComponent],
+  imports: [CommonModule, TableComponent, EmptyStateComponent, LoaderComponent, DropdownComponent, PaginationComponent],
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',
 })
@@ -32,6 +32,9 @@ export class LeaderboardComponent implements AfterViewInit, OnDestroy {
   levelOptions: string[] = ['Overall'];
   selectedLevel = 'Overall';
   levelIdByOption: Record<string, number> = {};
+  private leaderboardRequestId = 0;
+  currentPage = 1;
+  itemsPerPage = 10;
 
   ngAfterViewInit(): void {
     this.tableColumns = [
@@ -101,6 +104,7 @@ loadLevels(): void {
 
 onLevelChange(value: string): void {
   this.selectedLevel = value;
+  this.currentPage = 1;
   this.loadLeaderboard(false);
 }
 
@@ -139,6 +143,7 @@ onLevelChange(value: string): void {
 
 
 loadLeaderboard(showSpinner = true): void {
+  const requestId = ++this.leaderboardRequestId;
   if (!this.eventID) {
     this.errorMsg = "The event ID is missing";
     this.loading = false;
@@ -164,7 +169,10 @@ loadLeaderboard(showSpinner = true): void {
         );
 
   leaderboardRequest.subscribe({
-    next: entries => {
+      next: entries => {
+        if (requestId !== this.leaderboardRequestId) {
+      return;
+    }
 
       this.leaderboard = entries.map(entry => ({
         ...entry,
@@ -179,12 +187,21 @@ loadLeaderboard(showSpinner = true): void {
         teamId: team.teamId
       }));
 
+      const totalPages = Math.max(1, Math.ceil(this.tableData.length / this.itemsPerPage));
+
+      if (this.currentPage > totalPages) {
+        this.currentPage = totalPages;
+      }
+
       this.loading = false;
 
       this.leaderboardAvailable = this.leaderboard.length > 0;
       this.change.detectChanges();
     },
     error: () => {
+          if (requestId !== this.leaderboardRequestId) {
+        return;
+      }
       this.errorMsg = "The leaderboard could not be loaded.";
       this.loading = false;
       this.leaderboardAvailable = false;
@@ -253,5 +270,16 @@ getInitials(name: string): string {
   }
 
   getRowClass = (row: TableRow): string => { return row['teamId'] === this.currTeamId ? 'my-team-row' : ''; };
+
+
+  get paginatedTableData(): TableRow[] {
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+  return this.tableData.slice(start, start + this.itemsPerPage);
+}
+
+
+onPageChange(page: number): void {
+  this.currentPage = page;
+}
 
 }

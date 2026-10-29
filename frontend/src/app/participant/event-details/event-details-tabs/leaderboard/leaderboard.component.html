@@ -80,7 +80,13 @@
     
     </div>
 
-        <app-table [columns]="tableColumns" [data]="tableData" [loading]="false" [rowClass]="getRowClass" emptyMessage="No teams found."></app-table>
+  <app-table [columns]="tableColumns" [data]="paginatedTableData" [loading]="false" [rowClass]="getRowClass" emptyMessage="No teams found."></app-table>
+
+  @if (tableData.length > itemsPerPage) {
+
+      <app-pagination [currentPage]="currentPage" [totalItems]="tableData.length" [itemsPerPage]="itemsPerPage" itemLabel="teams" (pageChange)="onPageChange($event)"></app-pagination>
+
+  }
 
     </div>
 
